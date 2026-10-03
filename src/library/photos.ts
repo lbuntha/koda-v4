@@ -254,8 +254,12 @@ async function smallestOf(canvas: HTMLCanvasElement): Promise<Blob> {
   return best;
 }
 
-/** Shrink and upload a photo. Authors only; the server checks. Resolves to its picture key. */
-export async function uploadPhoto(file: Blob): Promise<string> {
+/**
+ * Shrink and upload a photo. Authors only; the server checks. Resolves to its
+ * picture key. `route` is who is asking: Trace creators upload through
+ * `/trace/studio/images`, into the same store.
+ */
+export async function uploadPhoto(file: Blob, route = "library/images"): Promise<string> {
   let blob: Blob;
   try {
     blob = await shrinkPhoto(file);
@@ -266,7 +270,7 @@ export async function uploadPhoto(file: Blob): Promise<string> {
   let bin = "";
   for (let i = 0; i < buf.length; i += 0x8000) bin += String.fromCharCode(...buf.subarray(i, i + 0x8000));
   const token = await accessToken();
-  const res = await fetch(`${API_BASE}/library/images`, {
+  const res = await fetch(`${API_BASE}/${route}`, {
     method: "POST",
     headers: { "Content-Type": "application/json", ...(token ? { Authorization: `Bearer ${token}` } : {}) },
     body: JSON.stringify({ mime: blob.type || "image/jpeg", data: btoa(bin) }),

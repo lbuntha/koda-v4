@@ -456,13 +456,13 @@ export const LearnPage: React.FC<LearnPageProps> = ({
         footnote={
           registered ? (
             next ? (
-              tNodes("learn.upNext", { lesson: <span className="font-bold text-ink">{next.title}</span> })
+              tNodes("learn.upNext", { lesson: <span className="font-bold text-white">{next.title}</span> })
             ) : blockedBy ? (
               /* The wall, and the way through it. Named rather than described:
                  "finish the prerequisites" is not something a seven-year-old
                  can act on, and the lesson that opens this one is. */
               tNodes(blockedBy.skillId !== skillId ? "learn.lockedUntilOther" : "learn.lockedUntil", {
-                lesson: <span className="font-bold text-ink">{blockedBy.title}</span>,
+                lesson: <span className="font-bold text-white">{blockedBy.title}</span>,
               })
             ) : practice.length > practiceDone ? (
               /* The teaching is done and practice is not. Said as an invitation

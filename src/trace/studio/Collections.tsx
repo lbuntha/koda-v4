@@ -5,7 +5,7 @@
  */
 
 import { useCallback, useEffect, useMemo, useRef, useState, useSyncExternalStore } from "react";
-import { AlertCircle, ArrowLeft, Check, ChevronLeft, ChevronRight, Flag, GripVertical, ImagePlus, ListPlus, MoreHorizontal, Pencil, Plus, Rocket, Search, Settings2, Star, Trash2, Undo2, Wand2, X } from "lucide-react";
+import { AlertCircle, ArrowLeft, Check, ChevronLeft, ChevronRight, Download, Flag, GripVertical, ImagePlus, Loader2, ListPlus, MoreHorizontal, Pencil, Plus, Rocket, Search, Settings2, Star, Trash2, Undo2, Upload, Wand2, X } from "lucide-react";
 import { ScoringAPI } from "../../lib/scoring";
 import { useT } from "../../lib/i18n";
 import { themeSystem } from "../../lib/themeSystem";
@@ -37,6 +37,8 @@ import { Field, IconButton, Section, inputCls, panelCls } from "./ui";
 import { AutoStrokesForSet } from "./AutoStrokesPanel";
 import { PicturePanel } from "../../library/studio/PicturePanel";
 import { Picture } from "../../library/Picture";
+import { isPhoto, photoUrl, uploadPhoto } from "../../library/photos";
+import { svgMarkupFor } from "../../assets/svg";
 
 const uid = (p: string) => `${p}${Date.now().toString(36)}${Math.random().toString(36).slice(2, 6)}`;
 const GRIDS: TraceItem["grid"][] = ["4x3-moeys", "3x3", "baseline-4-lines", "dots", "none"];
@@ -697,7 +699,7 @@ export function CollectionBoard({ id, onBack, onOpenItem }: { id: string; onBack
         {/* About the collection */}
         <div className="flex min-w-0 flex-col gap-3">
           <Section title={t("traceStudio.col.about")}>
-            <CoverPicture picture={col.picture ?? null} onPick={() => setPicking(true)} onRemove={() => update({ picture: null })} />
+            <CoverPicture picture={col.picture ?? null} name={col.title} onPick={() => setPicking(true)} onPicture={(picture) => update({ picture })} />
             <Field label={t("traceStudio.col.description")}>
               <textarea className={`${inputCls} min-h-20`} maxLength={400} value={col.description} onChange={(e) => update({ description: e.target.value })} />
             </Field>
@@ -756,9 +758,64 @@ const coverPrompt = (title: string, description: string) => {
   return name ? `A cover illustration for a children's tracing collection called “${name}”.${about}` : "A cover illustration for a children's tracing collection";
 };
 
-/** The collection's cover picture: made with AI like a book's, or the cover item drawn when there is none. */
-function CoverPicture({ picture, onPick, onRemove }: { picture: string | null; onPick(): void; onRemove(): void }) {
+/** Save a cover to the device: a photo as itself, a drawing as its SVG. */
+async function downloadCover(picture: string, name: string): Promise<void> {
+  const base = (name.trim() || "cover").replace(/[\\/:*?"<>|]+/g, "-");
+  let blob: Blob;
+  let ext: string;
+  if (isPhoto(picture)) {
+    const url = await photoUrl(picture);
+    if (!url) throw new Error();
+    blob = await (await fetch(url)).blob();
+    ext = blob.type === "image/png" ? "png" : blob.type === "image/webp" ? "webp" : "jpg";
+  } else {
+    const markup = svgMarkupFor(picture);
+    if (!markup) throw new Error();
+    blob = new Blob([markup], { type: "image/svg+xml" });
+    ext = "svg";
+  }
+  const href = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = href;
+  a.download = `${base}.${ext}`;
+  a.click();
+  setTimeout(() => URL.revokeObjectURL(href), 1000);
+}
+
+/**
+ * The collection's cover picture: made with AI like a book's, a photo uploaded
+ * from the device, or the cover item drawn when there is none. Whatever it is
+ * can be saved back to the device.
+ */
+function CoverPicture({ picture, name, onPick, onPicture }: { picture: string | null; name: string; onPick(): void; onPicture(picture: string | null): void }) {
   const { t } = useT();
+  const [busy, setBusy] = useState(false);
+  const [err, setErr] = useState("");
+  const upload = async (file: File) => {
+    setBusy(true);
+    setErr("");
+    try {
+      onPicture(await uploadPhoto(file, "trace/studio/images"));
+    } catch (e) {
+      setErr((e instanceof Error && e.message) || t("studio.picture.uploadFailed"));
+    } finally {
+      setBusy(false);
+    }
+  };
+  const download = () => {
+    if (!picture) return;
+    setErr("");
+    downloadCover(picture, name).catch(() => setErr(t("traceStudio.col.downloadFailed")));
+  };
+  const uploadButton = (
+    // A label, not a button, so the file picker opens; styled as the ghost buttons beside it.
+    <label className={themeSystem.button("ghost", "sm", `focus-within:ring-2 focus-within:ring-indigo-500 ${busy ? "pointer-events-none opacity-50" : ""}`)}>
+      {busy ? <Loader2 className="animate-spin" aria-hidden="true" /> : <Upload aria-hidden="true" />}
+      {busy ? t("studio.picture.saving") : t("traceStudio.col.uploadCover")}
+      <input type="file" accept="image/jpeg,image/png,image/webp" className="sr-only" disabled={busy}
+        onChange={(e) => { const f = e.target.files?.[0]; e.target.value = ""; if (f) void upload(f); }} />
+    </label>
+  );
   return (
     <div className="flex min-w-0 flex-col gap-1 text-sm">
       <span className="text-[11px] font-semibold uppercase tracking-wider text-muted">{t("traceStudio.col.coverPicture")}</span>
@@ -768,19 +825,25 @@ function CoverPicture({ picture, onPick, onRemove }: { picture: string | null; o
             className="relative block aspect-[16/9] w-full overflow-hidden rounded-xl border border-line bg-play-sky hover:border-indigo-400">
             <Picture name={picture} cover fill />
           </button>
-          <div className="flex flex-wrap gap-2">
+          <div className="flex flex-wrap items-center gap-x-1 gap-y-2">
             <UIButton type="button" size="sm" variant="secondary" icon={<Wand2 aria-hidden="true" />} onClick={onPick}>{t("traceStudio.col.changeCover")}</UIButton>
-            <UIButton type="button" size="sm" variant="ghost" icon={<X aria-hidden="true" />} onClick={onRemove}>{t("traceStudio.col.removeCover")}</UIButton>
+            {uploadButton}
+            <UIButton type="button" size="sm" variant="ghost" icon={<Download aria-hidden="true" />} onClick={download}>{t("traceStudio.col.downloadCover")}</UIButton>
+            <UIButton type="button" size="sm" variant="ghost" icon={<X aria-hidden="true" />} onClick={() => onPicture(null)}>{t("traceStudio.col.removeCover")}</UIButton>
           </div>
         </div>
       ) : (
-        <button type="button" onClick={onPick}
-          className="flex aspect-[16/9] w-full flex-col items-center justify-center gap-1.5 rounded-xl border-2 border-dashed border-line text-sm font-semibold text-muted transition hover:border-indigo-400 hover:text-indigo-700 dark:hover:text-indigo-300">
-          <ImagePlus className="h-6 w-6" aria-hidden="true" />
-          {t("traceStudio.col.makeCover")}
-          <span className="px-4 text-center text-xs font-normal">{t("traceStudio.col.coverNote")}</span>
-        </button>
+        <div className="flex flex-col gap-2">
+          <button type="button" onClick={onPick}
+            className="flex aspect-[16/9] w-full flex-col items-center justify-center gap-1.5 rounded-xl border-2 border-dashed border-line text-sm font-semibold text-muted transition hover:border-indigo-400 hover:text-indigo-700 dark:hover:text-indigo-300">
+            <ImagePlus className="h-6 w-6" aria-hidden="true" />
+            {t("traceStudio.col.makeCover")}
+            <span className="px-4 text-center text-xs font-normal">{t("traceStudio.col.coverNote")}</span>
+          </button>
+          <div>{uploadButton}</div>
+        </div>
       )}
+      {err && <p role="alert" className="text-xs font-semibold text-rose-600 dark:text-rose-300">{err}</p>}
     </div>
   );
 }

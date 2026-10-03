@@ -21,7 +21,16 @@ describe("quizOf", () => {
   });
 
   it("names each part's task kind so they never average together", () => {
-    expect(new Set(["understand", "words", "spell"].map((p) => taskKindOf(p as Outcome["part"]))).size).toBe(3);
+    expect(new Set(["understand", "match", "words", "spell"].map((p) => taskKindOf(p as Outcome["part"]))).size).toBe(4);
+  });
+
+  it("plays an optional matching set after understand, and counts it once in the tally", () => {
+    const book = structuredClone(MARKET);
+    book.questions.push({ id: "m1", kind: "match", prompt: "Match.", pairs: [{ left: "a", right: "1" }, { left: "b", right: "2" }, { left: "c", right: "3" }] });
+    const quiz = quizOf(book);
+    expect(quiz.map((q) => q.part)).toEqual(["understand", "understand", "match", "words", "words", "spell", "spell", "spell"]);
+    const match = tally([clean("match", "m1")], quiz).find((t) => t.part === "match")!;
+    expect(match).toEqual({ part: "match", firstTry: 1, total: 1 });
   });
 });
 
@@ -49,6 +58,8 @@ describe("tally and words to practise", () => {
   it("counts first tries per part against the part's size", () => {
     expect(tally(outcomes, quiz)).toEqual([
       { part: "understand", firstTry: 1, total: 2 },
+      // Matching is optional; a book without it tallies none.
+      { part: "match", firstTry: 0, total: 0 },
       { part: "words", firstTry: 1, total: 2 },
       { part: "spell", firstTry: 2, total: 3 },
     ]);

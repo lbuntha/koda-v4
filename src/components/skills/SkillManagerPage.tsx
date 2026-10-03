@@ -16,6 +16,8 @@ import {
   RotateCcw,
   SlidersHorizontal,
   Trash2,
+  Upload,
+  Wand2,
   X,
 } from "lucide-react";
 import {
@@ -61,6 +63,8 @@ import {
 import { usePermissions, useSession } from "../../lib/sync";
 
 import { translate } from "../../lib/i18n";
+import { PicturePanel } from "../../library/studio/PicturePanel";
+import { isPhoto } from "../../library/photos";
 const STATUS_TONE: Record<string, "success" | "warning" | "neutral"> = {
   published: "success",
   draft: "neutral",
@@ -361,6 +365,7 @@ const describeThumbnail = (value: string, isArt: boolean, shipped?: string): str
   const trimmed = value.trim();
   if (!trimmed) return `Empty — the tile the skill shipped${shipped ? ` (${shipped})` : ""}.`;
   if (/^(https?:|\/|data:)/.test(trimmed)) return "An image, loaded from that address.";
+  if (isPhoto(trimmed)) return "A picture uploaded or made with AI here, kept on each device for offline.";
   if (isArt) return `Artwork "${trimmed}" from the Art page.`;
   if (!/[a-zA-Z0-9]/.test(trimmed)) return "Drawn as typed — an emoji tile.";
   if (trimmed in lessonIcons) return `The "${trimmed}" icon from the shared set.`;
@@ -388,6 +393,8 @@ const ListingEditor: React.FC<{
 
   const firstLessonIcon = skill.lessons[0]?.iconName;
   const [artOpen, setArtOpen] = useState(false);
+  /** The picture drawer the Library and Trace use, opened on the tab the button named. */
+  const [drawer, setDrawer] = useState<"ai" | "upload" | null>(null);
   const artIds = useArtCategory(THUMBNAIL_ART_CATEGORY);
   const isArt = useHasArt((draftThumb ?? thumbnail).trim());
 
@@ -517,6 +524,17 @@ const ListingEditor: React.FC<{
         </span>
       </label>
 
+      <div className="flex flex-wrap gap-2">
+        <button type="button" onClick={() => setDrawer("ai")} className={themeSystem.button("secondary", "sm")}>
+          <Wand2 />
+          {translate("admin.skillManagerPage.makeThumbnailAi")}
+        </button>
+        <button type="button" onClick={() => setDrawer("upload")} className={themeSystem.button("secondary", "sm")}>
+          <Upload />
+          {translate("admin.skillManagerPage.uploadThumbnail")}
+        </button>
+      </div>
+
       <ArtPicker
         ids={artIds}
         selected={(draftThumb ?? thumbnail).trim()}
@@ -527,9 +545,30 @@ const ListingEditor: React.FC<{
         }}
         onPick={setThumbnail}
       />
+
+      {drawer && (
+        <PicturePanel
+          title={translate("admin.skillManagerPage.thumbnail")}
+          chosen={thumbnail.trim() || null}
+          how="chosen"
+          startOn={drawer}
+          promptSeed={thumbnailPrompt((draftName ?? title).trim() || manifest.name, (draftTag ?? tagline) || manifest.description)}
+          suggested={[]}
+          photos={isPhoto(thumbnail.trim()) ? [thumbnail.trim()] : []}
+          allowNone={false}
+          at={null}
+          onPlace={() => {}}
+          onChoose={(key) => key && setThumbnail(key)}
+          onClose={() => setDrawer(null)}
+        />
+      )}
     </div>
   );
 };
+
+/** What "Make with AI" opens with for a skill's thumbnail: its name, and what it teaches. */
+const thumbnailPrompt = (name: string, about: string) =>
+  `A thumbnail illustration for a children's learning activity called “${name}”.${about.trim() ? ` ${about.trim()}` : ""} Bright, simple and readable at a small size, with no words or letters in the picture.`;
 
 /**
  * The Art page's `thumbnail` collection, offered as tiles.

@@ -361,6 +361,8 @@ export function joinSentences<T extends Pick<Passage, "sentences" | "questions" 
     questions: book.questions.map((q) =>
       q.kind === "comprehension" && q.evidence === gone.id ? { ...q, evidence: prev.id }
       : q.kind === "spell" && q.sentence === gone.id ? { ...q, sentence: prev.id }
+      : q.kind === "match" && q.pairs.some((pr) => pr.evidence === gone.id)
+        ? { ...q, pairs: q.pairs.map((pr) => (pr.evidence === gone.id ? { ...pr, evidence: prev.id } : pr)) }
       : q),
   };
 }

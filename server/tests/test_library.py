@@ -536,3 +536,65 @@ def test_khmer_marks_do_not_make_a_choice_look_longer():
     assert [_looks_long(o) for o in ["ប៊ូប៊ូ", "ម៉ូក", "បូបូ"]] == [2, 2, 2]
     assert _looks_long("ក្បាល") == _looks_long("កាល") == 2  # the subscript rides on its letter
     assert _looks_long("The mango") == 9
+
+
+# ----------------------------------------------------------------- matching (optional)
+
+MATCH_SET = {
+    "id": "m1",
+    "kind": "match",
+    "prompt": "Match each question to its answer.",
+    "pairs": [
+        {"left": "Where does Sokha go?", "right": "the market", "evidence": "s1"},
+        {"left": "What is sweet?", "right": "the mango", "evidence": "s3"},
+        {"left": "How do they get home?", "right": "walk", "evidence": "s4"},
+    ],
+}
+
+
+def _with_set(s=MATCH_SET):
+    p = copy.deepcopy(MARKET)
+    p["questions"] = [*p["questions"], copy.deepcopy(s)]
+    return p
+
+
+def test_matching_is_optional_and_counted_apart_from_the_required_parts():
+    plain = verify_passage(copy.deepcopy(MARKET), confirmed_split=True)
+    assert plain.counts["match"] == 0 and plain.failures == []
+    v = verify_passage(_with_set(), confirmed_split=True)
+    assert v.failures == []
+    assert v.counts["match"] == 1
+    assert v.counts_match_band == plain.counts_match_band
+
+
+def test_a_matching_answer_must_be_in_the_story_or_its_sentence():
+    bad = copy.deepcopy(MATCH_SET)
+    bad["pairs"][1] = {"left": "What is sweet?", "right": "a pineapple"}
+    assert failing(_with_set(bad)) == [1]
+    bad = copy.deepcopy(MATCH_SET)
+    bad["pairs"][1]["evidence"] = "s4"
+    assert failing(_with_set(bad)) == [1]
+
+
+def test_a_matching_set_needs_three_to_five_distinct_full_pairs():
+    few = copy.deepcopy(MATCH_SET)
+    few["pairs"] = few["pairs"][:2]
+    assert failing(_with_set(few)) == [0]
+    empty = copy.deepcopy(MATCH_SET)
+    empty["pairs"][0] = {"left": "", "right": "the market"}
+    assert failing(_with_set(empty)) == [0]
+    twice = copy.deepcopy(MATCH_SET)
+    twice["pairs"][2] = dict(twice["pairs"][0])
+    assert 0 in failing(_with_set(twice))
+
+
+def test_two_matching_sets_cannot_ask_the_same_question():
+    p = _with_set()
+    p["questions"].append({**copy.deepcopy(MATCH_SET), "id": "m2"})
+    assert failing(p) == [6]
+
+
+def test_a_blank_matching_set_is_reported_as_empty_not_as_repeated():
+    p = _with_set({**MATCH_SET, "pairs": [{"left": "", "right": ""}] * 3})
+    messages = [c.message for c in verify_passage(p, confirmed_split=True).failures if c.question == "m1"]
+    assert messages == ["every pair needs both sides filled in"]

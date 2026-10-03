@@ -611,28 +611,32 @@ const TRACE_ORDER_RULES: Record<string, string> = {
     "Drawing a picture: the big outline first, then the inner details; top to bottom, left to right; one continuous stroke wherever a child would not lift the pen.",
 };
 
+/** Whether this creator may use Trace's paid AI (`trace.ai`). Answers the refusal itself when not. */
+async function traceAiAllowed(authorization: string, res: express.Response, what: string): Promise<boolean> {
+  try {
+    const gate = await fetch(`${API_URL}/v1/trace/studio/ai`, { headers: { Authorization: authorization } });
+    if (gate.status === 401 || gate.status === 403) {
+      res.status(403).json({ error: { code: "not_a_trace_creator", message: `${what} are for Trace Studio creators.` } });
+      return false;
+    }
+    const verdict = (await gate.json()) as { allowed?: boolean };
+    if (!verdict.allowed) {
+      res.status(402).json({ error: "plan_required", code: "plan_required", feature: "trace.ai", message: `${what} are part of a paid plan.` });
+      return false;
+    }
+    return true;
+  } catch {
+    res.status(503).json({ error: { code: "unavailable", message: "Could not check your plan. Try again in a moment." } });
+    return false;
+  }
+}
+
 app.post("/api/trace/stroke-order", async (req, res) => {
   const authorization = req.headers.authorization;
   if (!authorization) {
     return res.status(401).json({ error: { code: "sign_in", message: "Sign in to use AI strokes." } });
   }
-  try {
-    const gate = await fetch(`${API_URL}/v1/trace/studio/ai`, { headers: { Authorization: authorization } });
-    if (gate.status === 401 || gate.status === 403) {
-      return res.status(403).json({ error: { code: "not_a_trace_creator", message: "AI strokes are for Trace Studio creators." } });
-    }
-    const verdict = (await gate.json()) as { allowed?: boolean };
-    if (!verdict.allowed) {
-      return res.status(402).json({
-        error: "plan_required",
-        code: "plan_required",
-        feature: "trace.ai",
-        message: "AI starter strokes are part of a paid plan.",
-      });
-    }
-  } catch {
-    return res.status(503).json({ error: { code: "unavailable", message: "Could not check your plan. Try again in a moment." } });
-  }
+  if (!(await traceAiAllowed(authorization, res, "AI starter strokes"))) return;
 
   const { image, pieces, title, kind, script } = (req.body ?? {}) as {
     image?: string;
@@ -1481,6 +1485,117 @@ app.post("/api/library/voice/openai", async (req, res) => {
   }
 });
 
+/**
+ * Koda Trace: an item said aloud by an AI voice, for creators who would rather
+ * not record their own. The creator picks the model — ChatGPT, Gemini or Vox,
+ * the same three the library uses — and may say more than the title ("ក —
+ * ក្អែក"). Same paid gate as AI strokes. The Studio stores the result as an
+ * ordinary clip, so the learner's device never calls this.
+ */
+app.post("/api/trace/voice", async (req, res) => {
+  const authorization = req.headers.authorization;
+  if (!authorization) return res.status(401).json({ error: { code: "sign_in", message: "Sign in to use the AI voice." } });
+  const text = String(req.body?.text ?? "").trim().slice(0, 200);
+  const title = String(req.body?.title ?? "").trim();
+  const language = req.body?.language === "km" ? "km" : "en";
+  const kind = String(req.body?.kind ?? "letter").slice(0, 20);
+  const provider = ["openai", "gemini", "vox"].includes(req.body?.provider) ? (req.body.provider as "openai" | "gemini" | "vox") : "openai";
+  const voice = String(req.body?.voice ?? "");
+  if (!text) return res.status(400).json({ error: { code: "no_text", message: "Write what to say first." } });
+  if (!(await traceAiAllowed(authorization, res, "AI voices"))) return;
+
+  const lang = language === "km" ? "Khmer" : "English";
+  // The title alone is a name to say; anything the creator wrote is read as written.
+  const how =
+    text !== title
+      ? `Read this ${lang} text aloud the way a primary-school teacher says it to a young child.`
+      : kind === "letter" || kind === "mark" || kind === "numeral"
+        ? `This is a ${lang} ${kind === "numeral" ? "number" : "letter"}. Say its name the way a primary-school teacher names it to a young child${language === "km" ? " (a Khmer consonant with its inherent vowel, as in the alphabet chant)" : ""}.`
+        : `Say this ${lang} ${kind === "word" ? "word" : "name"} the way a primary-school teacher says it to a young child.`;
+  const instructions = `${how} Warmly, slowly and clearly, once. Do not translate, spell out or add anything.`;
+
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), provider === "vox" ? VOX_TIMEOUT_MS : OPENAI_LIBRARY_TIMEOUT_MS);
+  const name = { openai: "ChatGPT", gemini: "Gemini", vox: "Vox" }[provider];
+  try {
+    let audio: Buffer;
+    let type = "audio/wav";
+    if (provider === "gemini") {
+      const ai = getGeminiClient(await systemApiKey(authorization));
+      if (!ai) return res.status(503).json(noKey("Gemini"));
+      const character = LIBRARY_VOICE_CHARACTERS[voice as keyof typeof LIBRARY_VOICE_CHARACTERS] ?? LIBRARY_VOICE_CHARACTERS.lila;
+      const response = await ai.models.generateContent({
+        model: process.env.GEMINI_TTS_MODEL ?? "gemini-3.1-flash-tts-preview",
+        contents: [{ parts: [{ text: `${instructions} ${character.direction}: ${text}` }] }],
+        config: { responseModalities: ["AUDIO"], speechConfig: { voiceConfig: { prebuiltVoiceConfig: { voiceName: character.voice } } }, abortSignal: controller.signal },
+      });
+      const pcm = response.candidates?.[0]?.content?.parts?.[0]?.inlineData?.data;
+      audio = pcm ? pcmWav(pcm) : Buffer.alloc(0);
+    } else if (provider === "vox") {
+      if (!VOX_VOICE_ID.test(voice)) return res.status(400).json({ error: { code: "bad_voice", message: "Choose a Vox voice." } });
+      const vox = await voxConfig(req, res);
+      if (!vox) return;
+      const reply = await fetch(`${vox.url}/v1/text-to-speech/${encodeURIComponent(voice)}`, {
+        method: "POST",
+        headers: { "X-API-Key": vox.key, "Content-Type": "application/json" },
+        body: JSON.stringify({ text }),
+        signal: controller.signal,
+      });
+      if (!reply.ok) return res.status(502).json({ error: { code: "vox_failed", message: `Vox answered ${reply.status}. Try again.` } });
+      audio = Buffer.from(await reply.arrayBuffer());
+      type = reply.headers.get("content-type") ?? type;
+    } else {
+      const key = (await providerKey("openai", authorization)).key;
+      if (!key) return res.status(503).json(noKey("ChatGPT"));
+      const reply = await fetch("https://api.openai.com/v1/audio/speech", {
+        method: "POST",
+        headers: { Authorization: `Bearer ${key}`, "Content-Type": "application/json" },
+        body: JSON.stringify({
+          model: process.env.KODA_OPENAI_TTS_MODEL || "gpt-4o-mini-tts",
+          voice: OPENAI_LIBRARY_VOICES.includes(voice) ? voice : "marin",
+          input: text,
+          instructions,
+          response_format: "wav",
+        }),
+        signal: controller.signal,
+      });
+      if (!reply.ok) {
+        const detail = (await reply.text()).slice(0, 200);
+        return res.status(502).json({ error: { code: "openai_failed", message: `ChatGPT answered ${reply.status}. ${detail}` } });
+      }
+      audio = Buffer.from(await reply.arrayBuffer());
+    }
+    if (!audio.length) return res.status(502).json({ error: { code: "no_audio", message: "The voice returned no audio. Try again." } });
+    res.type(type).send(audio);
+  } catch (error: any) {
+    console.error("Error in /api/trace/voice:", error);
+    res.status(502).json({ error: { code: "voice_unreachable", message: error?.name === "AbortError" ? `${name} took too long. Try again.` : `${name} could not be reached.` } });
+  } finally {
+    clearTimeout(timer);
+  }
+});
+
+/** Vox's voices, for a Trace creator choosing one. Same paid gate as the voice itself. */
+app.get("/api/trace/voices", async (req, res) => {
+  const authorization = req.headers.authorization;
+  if (!authorization) return res.status(401).json({ error: { code: "sign_in", message: "Sign in to use the AI voice." } });
+  if (!(await traceAiAllowed(authorization, res, "AI voices"))) return;
+  const vox = await voxConfig(req, res);
+  if (!vox) return;
+  try {
+    const reply = await fetch(`${vox.url}/v1/voices`, { headers: { "X-API-Key": vox.key }, signal: AbortSignal.timeout(20_000) });
+    if (!reply.ok) return res.status(502).json({ error: { code: "vox_failed", message: `Vox answered ${reply.status}.` } });
+    const body = (await reply.json()) as { voices?: Array<Record<string, unknown>> };
+    res.json({
+      voices: (body.voices ?? []).flatMap((v) =>
+        typeof v.voice_id === "string" && VOX_VOICE_ID.test(v.voice_id) ? [{ id: v.voice_id, name: String(v.name ?? v.voice_id).slice(0, 80) }] : [],
+      ),
+    });
+  } catch {
+    res.status(502).json({ error: { code: "vox_unreachable", message: "Vox could not be reached." } });
+  }
+});
+
 app.post("/api/library/story", async (req, res) => {
   const { provider: askedProvider, language, band, idea, category, story, takeawayOnly } = req.body ?? {};
   const authorization = req.headers.authorization;
@@ -1612,6 +1727,90 @@ app.post("/api/library/draft", async (req, res) => {
   }
 });
 
+/**
+ * One library request to whichever model the studio uses: the author's pick, or
+ * the admin's default. Answers the "no key" refusal itself and returns null then.
+ */
+async function askLibraryAi(authorization: string, askedProvider: unknown, instruction: string, story: string, res: express.Response): Promise<{ text: string; provider: string } | null> {
+  const settings = await systemSettings(authorization);
+  const provider = String(askedProvider ?? settings["ai.libraryProvider"] ?? settings["ai.artProvider"] ?? "gemini").toLowerCase();
+  if (provider === "chatgpt" || provider === "openai") {
+    const key = (await providerKey("openai", authorization)).key;
+    if (!key) {
+      res.status(503).json(noKey("ChatGPT"));
+      return null;
+    }
+    return { text: await drawWithChatGPT(key, instruction, story), provider };
+  }
+  if (provider === "claude" || provider === "anthropic") {
+    const key = (await providerKey("anthropic", authorization)).key;
+    if (!key) {
+      res.status(503).json(noKey("Claude"));
+      return null;
+    }
+    return { text: await drawWithClaude(key, instruction, story), provider };
+  }
+  const ai = getGeminiClient(await systemApiKey(authorization));
+  if (!ai) {
+    res.status(503).json(noKey("Gemini"));
+    return null;
+  }
+  const response = await ai.models.generateContent({ model: process.env.GEMINI_LIBRARY_MODEL ?? process.env.GEMINI_ART_MODEL ?? "gemini-3.7-flash", contents: story, config: { systemInstruction: instruction, responseMimeType: "application/json" } });
+  return { text: response.text ?? "", provider };
+}
+
+/**
+ * A matching set for a story: 3–5 questions a child pairs with their answers,
+ * each answer taken from one sentence. Optional in a book, and the Studio puts
+ * whatever comes back through the same checks as a set an author typed — so a
+ * model that invents an answer is caught there, not trusted here.
+ */
+const LIBRARY_MATCH_BRIEF = (lang: "en" | "km", level: "A" | "B", pairs: number, avoid: string[]) => `You write one "match each question to its answer" activity for a children's story, ages ${level === "A" ? "5–7" : "8–10"}.
+Write it in ${lang === "km" ? "Khmer" : "English"}, in short, easy words a child of that age reads.
+Make exactly ${pairs} pairs. Each pair is a short question about the story ("left") and its short answer ("right", 1–4 words).
+Every answer must be written in the story, using the story's own words, and come from one sentence: give that sentence's id as "evidence".
+No two questions alike; no two answers alike; answers must not give each other away.
+${avoid.length ? `Do not ask any of these questions again: ${avoid.slice(0, 20).join(" | ")}` : ""}
+Reply with JSON only: {"prompt":"${lang === "km" ? "ផ្គូផ្គងសំណួរនីមួយៗទៅនឹងចម្លើយរបស់វា។" : "Match each question to its answer."}","pairs":[{"left":"...","right":"...","evidence":"s1"}]}`;
+
+app.post("/api/library/match-question", async (req, res) => {
+  const { provider: askedProvider, language, band, sentences, pairs, avoid } = req.body ?? {};
+  const authorization = req.headers.authorization;
+  const lang = language === "km" ? "km" : "en";
+  const level = band === "B" ? "B" : "A";
+  const count = Math.min(5, Math.max(3, Number(pairs) || 4));
+  const lines: Array<{ id: string; text: string }> = Array.isArray(sentences)
+    ? sentences.slice(0, 40).map((x: any, i: number) => ({ id: String(x?.id ?? `s${i + 1}`).slice(0, 12), text: String(x?.text ?? "").slice(0, 400) }))
+    : [];
+  const asked: string[] = Array.isArray(avoid) ? avoid.map((x: unknown) => String(x).slice(0, 200)) : [];
+  if (!authorization) return res.status(401).json({ error: { code: "auth", message: "Sign in to make a matching question." } });
+  if (!lines.length) return res.status(400).json({ error: { code: "no_story", message: "Write the story first." } });
+  try {
+    const may = await fetch(`${API_URL}/v1/library/can-author`, { headers: { Authorization: authorization } });
+    if (may.status === 401) return res.status(401).json({ error: { code: "auth", message: "Your session has ended. Sign in again." } });
+    if (!may.ok) return res.status(403).json({ error: { code: "not_an_operator", message: "Only an operator can make library questions." } });
+    if (!(await systemAllows("ai.libraryDrafts", authorization))) return res.status(503).json({ error: { code: "feature_disabled", message: "AI library drafts are switched off." } });
+    const story = `<story>\n${lines.map((l) => `${l.id}: ${l.text}`).join("\n")}\n</story>`;
+    const answer = await askLibraryAi(authorization, askedProvider, LIBRARY_MATCH_BRIEF(lang, level, count, asked), story, res);
+    if (!answer) return;
+    const made = extractJson(answer.text) as { prompt?: unknown; pairs?: unknown } | null;
+    const ids = new Set(lines.map((l) => l.id));
+    const got = Array.isArray(made?.pairs)
+      ? (made.pairs as any[]).flatMap((pr) => {
+          const left = String(pr?.left ?? "").trim().slice(0, 200);
+          const right = String(pr?.right ?? "").trim().slice(0, 200);
+          const evidence = ids.has(String(pr?.evidence)) ? String(pr.evidence) : undefined;
+          return left && right ? [{ left, right, ...(evidence ? { evidence } : {}) }] : [];
+        }).slice(0, 5)
+      : [];
+    if (got.length < 3) return res.status(502).json({ error: { code: "not_json", message: "The AI did not return a usable matching set. Try again." } });
+    res.json({ prompt: typeof made?.prompt === "string" && made.prompt.trim() ? made.prompt.trim().slice(0, 200) : null, pairs: got, provider: answer.provider });
+  } catch (error: any) {
+    console.error("Error in /api/library/match-question:", error);
+    res.status(502).json({ error: { code: "match_failed", message: error?.message ?? "The matching question could not be made." } });
+  }
+});
+
 app.post("/api/library/correct-question", async (req, res) => {
   const { provider: askedProvider, language, band, sentences, question, checks, easyWords } = req.body ?? {};
   const authorization = req.headers.authorization;
@@ -1633,25 +1832,11 @@ app.post("/api/library/correct-question", async (req, res) => {
     if (may.status === 401) return res.status(401).json({ error: { code: "auth", message: "Your session has ended. Sign in again." } });
     if (!may.ok) return res.status(403).json({ error: { code: "not_an_operator", message: "Only an operator can correct library questions." } });
     if (!(await systemAllows("ai.libraryDrafts", authorization))) return res.status(503).json({ error: { code: "feature_disabled", message: "AI library corrections are switched off." } });
-    const settings = await systemSettings(authorization);
-    const provider = String(askedProvider ?? settings["ai.libraryProvider"] ?? settings["ai.artProvider"] ?? "gemini").toLowerCase();
     const instruction = LIBRARY_CORRECTION_BRIEF(lang, level, question, Array.isArray(checks) ? checks.map((x: any) => String(x?.message ?? x)).slice(0, 12) : [], allowedEasyWords);
     const story = `<story>\n${lines.map((l) => `${l.id}: ${l.text}`).join("\n")}\n</story>`;
-    let text = "";
-    if (provider === "chatgpt" || provider === "openai") {
-      const key = (await providerKey("openai", authorization)).key;
-      if (!key) return res.status(503).json(noKey("ChatGPT"));
-      text = await drawWithChatGPT(key, instruction, story);
-    } else if (provider === "claude" || provider === "anthropic") {
-      const key = (await providerKey("anthropic", authorization)).key;
-      if (!key) return res.status(503).json(noKey("Claude"));
-      text = await drawWithClaude(key, instruction, story);
-    } else {
-      const ai = getGeminiClient(await systemApiKey(authorization));
-      if (!ai) return res.status(503).json(noKey("Gemini"));
-      const response = await ai.models.generateContent({ model: process.env.GEMINI_LIBRARY_MODEL ?? process.env.GEMINI_ART_MODEL ?? "gemini-3.7-flash", contents: story, config: { systemInstruction: instruction, responseMimeType: "application/json" } });
-      text = response.text ?? "";
-    }
+    const asked = await askLibraryAi(authorization, askedProvider, instruction, story, res);
+    if (!asked) return;
+    const { text, provider } = asked;
     const correction = extractJson(text) as { question?: unknown; explanation?: unknown } | null;
     if (!correction?.question || typeof correction.question !== "object") return res.status(502).json({ error: { code: "not_json", message: "The AI did not return a usable correction. Try again." } });
     res.json({ question: correction.question, explanation: typeof correction.explanation === "string" ? correction.explanation : "The AI suggested a corrected question.", provider });

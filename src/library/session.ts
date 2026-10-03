@@ -9,21 +9,28 @@
  * and, later, in the admin's preview.
  */
 
-import { BANDS, type Band, type ComprehensionQuestion, type Passage, type VocabQuestion } from "./data/passage";
+import { BANDS, type Band, type ComprehensionQuestion, type MatchQuestion, type Passage, type VocabQuestion } from "./data/passage";
 import { buildSpellingDeck, type DeckWord } from "./data/spellingDeck";
 import { translate } from "../lib/i18n";
 
-export type Part = "understand" | "words" | "spell";
+export type Part = "understand" | "match" | "words" | "spell";
+/** Every part, in the order a book plays them. "match" is optional: a book may have none. */
+export const PARTS: readonly Part[] = ["understand", "match", "words", "spell"];
 
 export type QuizItem =
   | { part: "understand"; question: ComprehensionQuestion }
+  | { part: "match"; question: MatchQuestion }
   | { part: "words"; question: VocabQuestion }
   | { part: "spell"; word: DeckWord };
 
-/** The quiz in the order it is played: understand, then words, then spell. */
+/**
+ * The quiz in the order it is played: understand, then any matching (it is
+ * about the story's meaning too, so it follows on), then words, then spell.
+ */
 export function quizOf(p: Passage): QuizItem[] {
   return [
     ...p.questions.filter((q): q is ComprehensionQuestion => q.kind === "comprehension").map((question) => ({ part: "understand" as const, question })),
+    ...p.questions.filter((q): q is MatchQuestion => q.kind === "match").map((question) => ({ part: "match" as const, question })),
     ...p.questions.filter((q): q is VocabQuestion => q.kind === "vocab").map((question) => ({ part: "words" as const, question })),
     ...buildSpellingDeck(p).map((word) => ({ part: "spell" as const, word })),
   ];
@@ -33,7 +40,7 @@ export const itemId = (p: Passage, item: QuizItem): string =>
   item.part === "spell" ? item.word.id : `${p.id}/${item.question.id}`;
 
 export const taskKindOf = (part: Part): string =>
-  part === "understand" ? "comprehension_choice" : part === "words" ? "vocab_match" : "spell_word_in_sentence";
+  part === "understand" ? "comprehension_choice" : part === "match" ? "match_pairs" : part === "words" ? "vocab_match" : "spell_word_in_sentence";
 
 /** What is recorded about one question once it is answered. */
 export interface Outcome {
@@ -63,7 +70,7 @@ export interface PartTally {
 }
 
 export function tally(outcomes: readonly Outcome[], quiz: readonly QuizItem[]): PartTally[] {
-  return (["understand", "words", "spell"] as const).map((part) => ({
+  return PARTS.map((part) => ({
     part,
     firstTry: outcomes.filter((o) => o.part === part && isFirstTry(o)).length,
     total: quiz.filter((q) => q.part === part).length,
@@ -96,7 +103,9 @@ export function reward(outcomes: readonly Outcome[], questions: number, s: Scori
 
 /** The sentence a parent reads. Built from the same outcomes as the results screen. */
 export function parentSummary(p: Passage, outcomes: readonly Outcome[], quiz: readonly QuizItem[]): string {
-  const [u, w, s] = tally(outcomes, quiz);
+  const tallies = tally(outcomes, quiz);
+  const of = (part: Part) => tallies.find((x) => x.part === part)!;
+  const [u, w, s] = [of("understand"), of("words"), of("spell")];
   const need = wordsToPractise(outcomes);
   // In the app's language, for the parent reading it; the title and the words
   // to practise stay in the book's.

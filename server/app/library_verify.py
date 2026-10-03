@@ -34,6 +34,10 @@ QUESTION_MINIMUM_RATIO = 0.85
 MIN_TILES = 2
 MAX_TILES = 8
 CHOICES = 3
+# Matching questions are optional: none is fine, and each that exists is checked.
+MATCH_MIN_PAIRS = 3
+MATCH_MAX_PAIRS = 5
+MATCH_MAX_QUESTIONS = 5
 
 RULE_TITLES = {
     1: "The answer is in the story",
@@ -248,6 +252,13 @@ class Verdict:
         ]
 
 
+def _repeats(pairs: list[dict[str, Any]], side: str) -> bool:
+    """Whether two pairs say the same on one side. Empty sides are another check's problem."""
+    said = [str(pr.get(side) or "").strip().lower() for pr in pairs]
+    said = [x for x in said if x]
+    return len(set(said)) != len(said)
+
+
 def verify_passage(p: dict[str, Any], *, confirmed_split: bool = False) -> Verdict:
     v = Verdict()
 
@@ -289,8 +300,22 @@ def verify_passage(p: dict[str, Any], *, confirmed_split: bool = False) -> Verdi
             add(0, qid, False, "two questions share this id")
         seen_q.add(qid)
         kind = q.get("kind")
-        if kind not in ("comprehension", "vocab", "spell"):
+        if kind not in ("comprehension", "vocab", "spell", "match"):
             add(0, qid, False, "unknown question kind")
+            continue
+        if kind == "match":
+            pairs = q.get("pairs")
+            if not isinstance(pairs, list) or not all(isinstance(pr, dict) for pr in pairs):
+                add(0, qid, False, "the pairs are not readable")
+                continue
+            n = len(pairs)
+            if not MATCH_MIN_PAIRS <= n <= MATCH_MAX_PAIRS:
+                add(0, qid, False, f"needs {MATCH_MIN_PAIRS}–{MATCH_MAX_PAIRS} pairs, has {n}")
+            if any(not str(pr.get("left") or "").strip() or not str(pr.get("right") or "").strip() for pr in pairs):
+                add(0, qid, False, "every pair needs both sides filled in")
+            if _repeats(pairs, "left") or _repeats(pairs, "right"):
+                add(0, qid, False, "two pairs say the same thing — a child could not tell which goes where")
+            usable.append(q)
             continue
         if kind != "spell":
             opts = q.get("options") or []
@@ -333,6 +358,29 @@ def verify_passage(p: dict[str, Any], *, confirmed_split: bool = False) -> Verdi
             top = max(lens)
             longest = lens[q["answer"]] == top and lens.count(top) == 1
             add(3, qid, not longest, "the right answer is the longest" if longest else "the right answer is not the longest")
+        elif kind == "match":
+            missing: list[str] = []
+            bad_evidence: list[str] = []
+            for pr in q["pairs"]:
+                right = str(pr.get("right") or "")
+                if not right.strip():
+                    continue
+                evidence = pr.get("evidence")
+                if not evidence:
+                    if not _draws_on(right, story, story_split):
+                        missing.append(right)
+                    continue
+                ev = by_id.get(str(evidence))
+                if ev is None:
+                    bad_evidence.append(str(evidence))
+                elif not _draws_on(right, str(ev.get("text", "")).lower(), _split_words([ev])):
+                    missing.append(right)
+            if bad_evidence:
+                add(1, qid, False, f"a pair points at a sentence that does not exist ({', '.join(bad_evidence)})")
+            elif missing:
+                add(1, qid, False, "not in the story: " + ", ".join(f"“{m}”" for m in missing[:2]))
+            else:
+                add(1, qid, True, "every answer is in the story")
         elif kind == "vocab":
             word = str(q.get("word") or "")
             expected = pictures.get(word.lower()) or pictures.get(word)
@@ -384,6 +432,18 @@ def verify_passage(p: dict[str, Any], *, confirmed_split: bool = False) -> Verdi
             )
             add(6, str(q["id"]), not dup, "shares an answer or sentence" if dup else "unique")
 
+    # Matching: the same question asked in two sets is one question twice.
+    matches = [q for q in usable if q["kind"] == "match"]
+
+    def lefts_of(q: dict[str, Any]) -> set[str]:
+        return {str(pr.get("left") or "").strip().lower() for pr in q["pairs"]} - {""}
+
+    for q in matches:
+        shared = any(o is not q and lefts_of(o) & lefts_of(q) for o in matches)
+        add(6, str(q["id"]), not shared, "asks a question another matching set asks" if shared else "unique")
+    if sum(1 for q in questions if q.get("kind") == "match") > MATCH_MAX_QUESTIONS:
+        add(0, "story", False, f"at most {MATCH_MAX_QUESTIONS} matching questions")
+
     # ---- rule 7 (draft form until recordings exist) and rule 8
     recorded = sum(1 for s in sentences if s.get("audio"))
     add(7, "story", True, f"{recorded} of {len(sentences)} sentences recorded — the rest use the device voice (recordings are optional)")
@@ -397,7 +457,8 @@ def verify_passage(p: dict[str, Any], *, confirmed_split: bool = False) -> Verdi
     band = configured if configured_ok else BANDS.get(str(p.get("band")))
     if isinstance(band, dict) and any(not 1 <= int(band[k]) <= 10 for k in ("understand", "words", "spell")):
         band = None
-    v.counts = {k: sum(1 for q in questions if q.get("kind") == k) for k in ("comprehension", "vocab", "spell")}
+    # "match" is counted for the Studio and never part of the band: it is optional.
+    v.counts = {k: sum(1 for q in questions if q.get("kind") == k) for k in ("comprehension", "vocab", "spell", "match")}
     v.counts_match_band = bool(band) and all(
         int(band[k] * QUESTION_MINIMUM_RATIO + 0.999999) <= v.counts[count_key] <= band[k]
         for k, count_key in (("understand", "comprehension"), ("words", "vocab"), ("spell", "spell"))

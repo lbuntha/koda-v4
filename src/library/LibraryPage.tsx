@@ -16,7 +16,7 @@ import { BookRecorder } from "./learning";
 import { Picture } from "./Picture";
 import { isPhoto } from "./photos";
 import { LibraryProgress, type BookProgress } from "./progress";
-import { isFirstTry, minutesToRead, parentSummary, quizOf, reward, tally, wordsToPractise, type Outcome, type QuizItem } from "./session";
+import { PARTS, isFirstTry, minutesToRead, parentSummary, quizOf, reward, tally, wordsToPractise, type Outcome, type QuizItem } from "./session";
 import { canSpeak, say, sentenceSpeaks, stop } from "./voice";
 import { prefetchBook } from "./clips";
 import { prefetchPhotos } from "./photos";
@@ -73,9 +73,11 @@ export interface LibraryPageProps {
   onAwardXp?(amount: number): void;
   /** Lets the app shell give the reader the phone screen on mobile. */
   onReaderChange?(open: boolean): void;
+  /** Whether a book is open at all (its page, the reader, the quiz, the results) — the phone hides its tab bar then. */
+  onBookChange?(open: boolean): void;
 }
 
-export function LibraryPage({ onAwardXp, onReaderChange }: LibraryPageProps) {
+export function LibraryPage({ onAwardXp, onReaderChange, onBookChange }: LibraryPageProps) {
   const [screen, setScreen] = useState<Screen>("catalog");
   const [bookId, setBookId] = useState<string | null>(null);
   const [lang, setLangState] = useState<Language>(readLang);
@@ -106,14 +108,19 @@ export function LibraryPage({ onAwardXp, onReaderChange }: LibraryPageProps) {
   useEffect(() => {
     onReaderChange?.(screen === "read" || screen === "quiz");
   }, [onReaderChange, screen]);
+  useEffect(() => {
+    onBookChange?.(screen !== "catalog");
+  }, [onBookChange, screen]);
 
   const open = useCallback((id: string) => {
     setBookId(id);
     go("book");
   }, []); // eslint-disable-line react-hooks/exhaustive-deps -- go only touches refs and setters
 
+  // scroll-mt: a phone's toolbar is sticky, and scrolling to the top must land
+  // below it, or a book opens with its back link hidden under the bar.
   return (
-    <div ref={top} className={`mx-auto w-full max-w-5xl ${screen === "read" || screen === "quiz" ? "px-0 pb-4" : "px-2 pb-24"} pt-4 sm:px-6`} data-koda-library>
+    <div ref={top} className={`mx-auto w-full max-w-5xl ${screen === "read" || screen === "quiz" ? "px-0 pb-4" : "scroll-mt-14 px-2 pb-24 rail:scroll-mt-0"} pt-4 sm:px-6`} data-koda-library>
       {screen === "catalog" && <Catalog shelf={shelf} lang={lang} onLang={setLang} onOpen={open} />}
       {book && screen === "book" && (
         <BookPage book={book} onBack={() => go("catalog")} onRead={() => go("read")} />
@@ -136,8 +143,8 @@ export function LibraryPage({ onAwardXp, onReaderChange }: LibraryPageProps) {
           onFinish={(result) => {
             const quiz = quizOf(book);
             const r = reward(result, quiz.length, ScoringAPI.current(), book.xp);
-            const [u, w, s] = tally(result, quiz);
-            LibraryProgress.set(book.id, { stage: "done", rev: book.rev, firstTry: u.firstTry + w.firstTry + s.firstTry, total: quiz.length, stars: r.stars });
+            const firstTry = tally(result, quiz).reduce((n, part) => n + part.firstTry, 0);
+            LibraryProgress.set(book.id, { stage: "done", rev: book.rev, firstTry, total: quiz.length, stars: r.stars });
             if (r.xp > 0) onAwardXp?.(r.xp);
             setOutcomes(result);
             setEarned({ stars: r.stars, xp: r.xp });
@@ -511,6 +518,7 @@ function BookPage({ book, onBack, onRead }: { book: Passage; onBack(): void; onR
             {[
               [tr("library.step.read"), progress !== null],
               [tr("library.step.understand", { count: count("comprehension") }), progress?.stage === "done"],
+              ...(count("match") ? [[tr("library.step.match", { count: count("match") }), progress?.stage === "done"] as const] : []),
               [tr("library.step.words", { count: count("vocab") }), progress?.stage === "done"],
               [
                 tr("library.step.spell", { count: count("spell") }) +
@@ -663,14 +671,14 @@ function Quiz({ book, onLeave, onFinish, preview = false }: { book: Passage; onL
   };
 
   const doneIn = (part: QuizItem["part"]) => outcomes.filter((o) => o.part === part).length;
-  const parts = (["understand", "words", "spell"] as const).map((p) => ({ p, n: quiz.filter((q) => q.part === p).length }));
+  const parts = PARTS.map((p) => ({ p, n: quiz.filter((q) => q.part === p).length })).filter(({ p, n }) => n > 0 || p !== "match");
 
   return (
     <div>
       <div className="mb-4">
         <UIQuizToolbar onBack={onLeave} onReadAgain={() => readAgain()} hintHostRef={setHintHost} />
       </div>
-      <div className="mb-4 grid grid-cols-3 gap-2" aria-label={tr("library.progress")}>
+      <div className={`mb-4 grid gap-2 ${parts.length > 3 ? "grid-cols-4" : "grid-cols-3"}`} aria-label={tr("library.progress")}>
         {parts.map(({ p, n }) => (
           <div key={p}>
             <div className={`mb-1 flex justify-between gap-1.5 text-[11px] font-extrabold uppercase tracking-wide ${item?.part === p ? "text-ink" : "text-muted"}`}>
@@ -684,7 +692,22 @@ function Quiz({ book, onLeave, onFinish, preview = false }: { book: Passage; onL
         ))}
       </div>
 
-      {item && item.part !== "spell" && (
+      {item && item.part === "match" && (
+        <MatchQuestionView
+          key={i}
+          book={book}
+          item={item}
+          onWrong={(given) => { cur.current!.wrong++; recorder.answered(item, false, given); }}
+          onRight={(given) => { recorder.answered(item, true, given); setTimeout(correct, 900); }}
+          onHint={(level) => {
+            cur.current!.hints = Math.max(cur.current!.hints, level);
+            recorder.support("hint", level);
+            if (level === 2) readAgain();
+          }}
+          hintHost={hintHost}
+        />
+      )}
+      {item && (item.part === "understand" || item.part === "words") && (
         <ChoiceQuestion
           key={i}
           book={book}
@@ -836,6 +859,152 @@ function ChoiceQuestion({ book, item, onWrong, onRight, onHint, hintHost }: {
         })}
       </div>
       <p aria-live="polite" className={`mt-3 min-h-6 text-sm font-bold ${right ? "text-emerald-700 dark:text-emerald-400" : "text-rose-700 dark:text-rose-400"}`}>{fb}</p>
+      <HintBar text={hintText} level={hint} onHint={nextHint} host={hintHost} />
+    </div>
+  );
+}
+
+/** Each pair's colour once it is joined. No yellow — it is hard to read here. */
+const PAIR_TONES = [
+  "border-indigo-500 bg-indigo-50 text-indigo-900 dark:bg-indigo-950 dark:text-indigo-100",
+  "border-emerald-500 bg-emerald-50 text-emerald-900 dark:bg-emerald-950 dark:text-emerald-100",
+  "border-sky-500 bg-sky-50 text-sky-900 dark:bg-sky-950 dark:text-sky-100",
+  "border-rose-500 bg-rose-50 text-rose-900 dark:bg-rose-950 dark:text-rose-100",
+  "border-violet-500 bg-violet-50 text-violet-900 dark:bg-violet-950 dark:text-violet-100",
+];
+
+/**
+ * The answers' order on screen: shuffled the same way every time this question
+ * is shown, and never left in the order they were written — or the answer to
+ * the first question would always be the first answer.
+ */
+export function matchOrder(id: string, n: number): number[] {
+  let seed = [...id].reduce((h, c) => (h * 31 + c.charCodeAt(0)) >>> 0, 7) || 1;
+  const order = Array.from({ length: n }, (_, i) => i);
+  for (let i = n - 1; i > 0; i--) {
+    seed = (seed * 1103515245 + 12345) >>> 0;
+    const j = seed % (i + 1);
+    [order[i], order[j]] = [order[j], order[i]];
+  }
+  if (n > 1 && order.every((v, i) => v === i)) order.push(order.shift()!);
+  return order;
+}
+
+/** "Match each question to its answer": tap one on the left, then its answer on the right. */
+function MatchQuestionView({ book, item, onWrong, onRight, onHint, hintHost }: {
+  book: Passage;
+  item: Extract<QuizItem, { part: "match" }>;
+  onWrong(given: string): void;
+  onRight(given: string): void;
+  onHint(level: number): void;
+  hintHost: HTMLElement | null;
+}) {
+  const { t: tr } = useT();
+  const q = item.question;
+  const order = useMemo(() => matchOrder(q.id, q.pairs.length), [q.id, q.pairs.length]);
+  /** Left index → the order it was joined in, which picks its colour. */
+  const [joined, setJoined] = useState<Record<number, number>>({});
+  const [left, setLeft] = useState<number | null>(null);
+  const [right, setRight] = useState<number | null>(null);
+  const [miss, setMiss] = useState<{ left: number; right: number } | null>(null);
+  const [hint, setHint] = useState(0);
+  const [hintText, setHintText] = useState("");
+  const [fb, setFb] = useState("");
+  const done = Object.keys(joined).length === q.pairs.length;
+
+  const join = (l: number) => {
+    const next = { ...joined, [l]: Object.keys(joined).length };
+    setJoined(next);
+    setLeft(null);
+    setRight(null);
+    if (Object.keys(next).length === q.pairs.length) {
+      setFb(tr("library.feedback.right"));
+      playSound("success");
+      onRight(q.pairs.map((pr) => `${pr.left} → ${pr.right}`).join("; "));
+    } else playSound("pop");
+  };
+  /** A left and a right are both chosen: the same pair joins, anything else is a wrong try. */
+  const tryPair = (l: number, r: number) => {
+    if (l === r) {
+      setFb("");
+      join(l);
+      return;
+    }
+    setMiss({ left: l, right: r });
+    setFb(tr("library.feedback.wrong"));
+    playSound("error");
+    onWrong(`${q.pairs[l].left} → ${q.pairs[r].right}`);
+    setTimeout(() => {
+      setMiss(null);
+      setLeft(null);
+      setRight(null);
+    }, 650);
+  };
+  const pickLeft = (l: number) => {
+    if (done || l in joined || miss) return;
+    if (right !== null) tryPair(l, right);
+    else setLeft(l === left ? null : l);
+  };
+  const pickRight = (r: number) => {
+    if (done || r in joined || miss) return;
+    if (left !== null) tryPair(left, r);
+    else setRight(r === right ? null : r);
+  };
+  const nextHint = () => {
+    const level = hint + 1;
+    setHint(level);
+    onHint(level);
+    if (level === 1) setHintText(tr("library.hint.matchTap"));
+    if (level === 2) setHintText(tr("library.hint.inStory"));
+    if (level === 3) {
+      const open = q.pairs.findIndex((_, i) => !(i in joined));
+      if (open >= 0) join(open);
+      setHintText(tr("library.hint.matchJoined"));
+    }
+  };
+
+  const tile = (state: "joined" | "chosen" | "miss" | "open", tone: string) =>
+    `flex min-h-14 w-full items-center rounded-2xl border-2 px-3 py-2 text-left text-base font-bold transition-colors sm:text-lg ${kh(book)} ${
+      state === "joined" ? tone
+      : state === "miss" ? "border-rose-400 bg-rose-50 text-rose-800 dark:bg-rose-950 dark:text-rose-200"
+      : state === "chosen" ? "border-indigo-600 bg-indigo-600 text-white"
+      : "border-line bg-surface text-ink hover:border-indigo-400"
+    }`;
+
+  return (
+    <div>
+      <p className={`text-2xl font-extrabold leading-snug text-ink ${kh(book)}`}>{q.prompt}</p>
+      <p className="mt-1 text-sm text-muted">{tr("library.matchHow")}</p>
+      <div className="mt-4 grid grid-cols-2 gap-x-3 gap-y-2">
+        <ul className="grid content-start gap-2" aria-label={tr("library.matchQuestions")}>
+          {q.pairs.map((pr, l) => {
+            const state = l in joined ? "joined" : miss?.left === l ? "miss" : left === l ? "chosen" : "open";
+            return (
+              <li key={l}>
+                <button type="button" onClick={() => pickLeft(l)} disabled={l in joined || done} aria-pressed={left === l}
+                  className={tile(state, PAIR_TONES[(joined[l] ?? 0) % PAIR_TONES.length])}>
+                  {l in joined && <Check className="mr-2 h-4 w-4 shrink-0" aria-hidden="true" />}
+                  <span className="min-w-0 break-words">{pr.left}</span>
+                </button>
+              </li>
+            );
+          })}
+        </ul>
+        <ul className="grid content-start gap-2" aria-label={tr("library.matchAnswers")}>
+          {order.map((r) => {
+            const state = r in joined ? "joined" : miss?.right === r ? "miss" : right === r ? "chosen" : "open";
+            return (
+              <li key={r}>
+                <button type="button" onClick={() => pickRight(r)} disabled={r in joined || done} aria-pressed={right === r}
+                  className={tile(state, PAIR_TONES[(joined[r] ?? 0) % PAIR_TONES.length])}>
+                  <span className="min-w-0 break-words">{q.pairs[r].right}</span>
+                </button>
+              </li>
+            );
+          })}
+        </ul>
+      </div>
+      <p aria-live="polite" className={`mt-3 min-h-6 text-sm font-bold ${done ? "text-emerald-700 dark:text-emerald-400" : "text-rose-700 dark:text-rose-400"}`}>{fb}</p>
       <HintBar text={hintText} level={hint} onHint={nextHint} host={hintHost} />
     </div>
   );
@@ -1012,7 +1181,8 @@ function Results({ book, outcomes, earned, next, onNext, onShelf, onAgain }: {
   const { t: tr, tNodes } = useT();
   const reduce = useReducedMotion();
   const quiz = quizOf(book);
-  const parts = tally(outcomes, quiz);
+  // Matching is optional: a book without it shows the three parts it has.
+  const parts = tally(outcomes, quiz).filter((part) => part.total > 0 || part.part !== "match");
   const need = wordsToPractise(outcomes);
   const stars = earned?.stars ?? 0;
   const tone = COVER[book.category ?? ""] ?? "from-indigo-500 to-indigo-800";
@@ -1063,7 +1233,7 @@ function Results({ book, outcomes, earned, next, onNext, onShelf, onAgain }: {
           <h2 id="how-you-did" className="text-lg font-extrabold text-ink">{tr("library.results.howYouDid")}</h2>
           <span className="text-xs text-muted">{tr("library.results.legend")}</span>
         </div>
-        <div className="grid gap-3 sm:grid-cols-3">
+        <div className={`grid gap-3 ${parts.length > 3 ? "grid-cols-2 lg:grid-cols-4" : "sm:grid-cols-3"}`}>
           {parts.map((t) => {
             const all = t.total > 0 && t.firstTry === t.total;
             return (

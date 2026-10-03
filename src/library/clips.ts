@@ -192,12 +192,17 @@ export async function prefetchBook(p: Pick<Passage, "sentences" | "wordAudio">, 
 }
 
 /** Upload a recording. Authors only; the server checks. */
-export async function uploadClip(blob: Blob): Promise<{ id: string; bytes: number }> {
+/**
+ * Store a recording and return its clip id. `route` is who is asking: Trace
+ * creators upload through `/trace/audio` because they need not be library
+ * authors, but every clip lands in the same store and plays the same way.
+ */
+export async function uploadClip(blob: Blob, route = "library/audio"): Promise<{ id: string; bytes: number }> {
   const buf = new Uint8Array(await blob.arrayBuffer());
   let bin = "";
   for (let i = 0; i < buf.length; i += 0x8000) bin += String.fromCharCode(...buf.subarray(i, i + 0x8000));
   const token = await accessToken();
-  const res = await fetch(`${API_BASE}/library/audio`, {
+  const res = await fetch(`${API_BASE}/${route}`, {
     method: "POST",
     headers: { "Content-Type": "application/json", ...(token ? { Authorization: `Bearer ${token}` } : {}) },
     body: JSON.stringify({ mime: blob.type || "audio/wav", data: btoa(bin) }),

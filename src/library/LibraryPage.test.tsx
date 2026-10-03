@@ -290,3 +290,69 @@ describe("the reader is a book", () => {
     expect(screen.queryByText(/words come up in the quiz/)).toBeNull();
   });
 });
+
+describe("the matching question's answer order", () => {
+  it("is the same every time for one question, and never the order the answers were written in", async () => {
+    const { matchOrder } = await import("./LibraryPage");
+    for (const id of ["m1", "m2", "m3", "q-longer-id"]) {
+      for (const n of [3, 4, 5]) {
+        const order = matchOrder(id, n);
+        expect(matchOrder(id, n)).toEqual(order);
+        expect([...order].sort()).toEqual(Array.from({ length: n }, (_, i) => i));
+        expect(order).not.toEqual(Array.from({ length: n }, (_, i) => i));
+      }
+    }
+  });
+});
+
+describe("a matching set in the quiz", () => {
+  it("joins a question to its answer, marks a wrong pairing, and moves on when all are joined", async () => {
+    const set = {
+      id: "m1",
+      kind: "match" as const,
+      prompt: "Match each question to its answer.",
+      pairs: [
+        { left: "Where does Sokha go?", right: "the market" },
+        { left: "What is sweet?", right: "the mango" },
+        { left: "How do they get home?", right: "walk" },
+      ],
+    };
+    MARKET.questions.push(set);
+    try {
+      render(<LibraryPage />);
+      fireEvent.click(screen.getByRole("button", { name: /^At the Market\./ }));
+      expect(screen.getByText("Match — 1 set of questions and answers")).toBeTruthy();
+      fireEvent.click(screen.getByRole("button", { name: "Read" }));
+      fireEvent.click(screen.getByRole("button", { name: "Next page" }));
+      fireEvent.click(screen.getByRole("button", { name: "Next page" }));
+      fireEvent.click(screen.getByRole("button", { name: "Check My Learning" }));
+      fireEvent.click(screen.getByRole("button", { name: "Home" }));
+      await advance();
+      fireEvent.click(screen.getByRole("button", { name: "The mango" }));
+      await advance();
+
+      // The matching set comes after Understand.
+      expect(screen.getByText("Match each question to its answer.")).toBeTruthy();
+      // A wrong pairing: marked, then let go — nothing is joined.
+      fireEvent.click(screen.getByRole("button", { name: "Where does Sokha go?" }));
+      fireEvent.click(screen.getByRole("button", { name: "walk" }));
+      expect(playSound).toHaveBeenLastCalledWith("error");
+      await advance(700);
+      // Right pairings, starting from either side.
+      fireEvent.click(screen.getByRole("button", { name: "Where does Sokha go?" }));
+      fireEvent.click(screen.getByRole("button", { name: "the market" }));
+      expect((screen.getByRole("button", { name: /Where does Sokha go\?/ }) as HTMLButtonElement).disabled).toBe(true);
+      fireEvent.click(screen.getByRole("button", { name: "the mango" }));
+      fireEvent.click(screen.getByRole("button", { name: "What is sweet?" }));
+      fireEvent.click(screen.getByRole("button", { name: "How do they get home?" }));
+      fireEvent.click(screen.getByRole("button", { name: "walk" }));
+      expect(playSound).toHaveBeenLastCalledWith("success");
+      await advance();
+
+      // On to Words.
+      expect(screen.getByRole("button", { name: "banana" })).toBeTruthy();
+    } finally {
+      MARKET.questions.pop();
+    }
+  });
+});

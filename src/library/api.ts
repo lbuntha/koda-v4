@@ -185,6 +185,22 @@ export async function requestAiCorrection(input: {
   return { question: body.question, explanation: body.explanation ?? "The AI suggested a corrected question.", provider: body.provider ?? input.provider ?? "gemini" };
 }
 
+/** A matching set drafted by the studio's AI. The Studio checks it like any other set before it can publish. */
+export async function requestAiMatch(input: {
+  provider?: Provider;
+  language: Language;
+  band: Band;
+  sentences: Array<{ id: string; text: string }>;
+  pairs: number;
+  /** Questions already asked in other sets, so the AI does not repeat them. */
+  avoid: string[];
+}): Promise<{ prompt: string | null; pairs: Array<{ left: string; right: string; evidence?: string }> }> {
+  const res = await fetch("/api/library/match-question", { method: "POST", headers: await tutorHeaders(), body: JSON.stringify(input) });
+  const body = (await res.json().catch(() => null)) as { prompt?: string | null; pairs?: Array<{ left: string; right: string; evidence?: string }>; error?: { message?: string } } | null;
+  if (!res.ok || !body?.pairs?.length) throw new Error(body?.error?.message ?? translate("studio.error.matchFailed"));
+  return { prompt: body.prompt ?? null, pairs: body.pairs };
+}
+
 export type ReportReason = "wrong_in_story" | "wrong_question" | "not_for_children" | "other";
 export interface BookReport { id: string; bookId: string; rev: number; reason: ReportReason; note: string }
 

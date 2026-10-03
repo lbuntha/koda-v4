@@ -119,7 +119,36 @@ export interface SpellQuestion {
   word: string;
 }
 
-export type Question = ComprehensionQuestion | VocabQuestion | SpellQuestion;
+/** One pair a child joins: a question (or word) on the left, its answer on the right. */
+export interface MatchPair {
+  left: string;
+  right: string;
+  /** The sentence the answer comes from. Absent: the answer only has to be somewhere in the story. */
+  evidence?: string;
+}
+
+/**
+ * "Match each question to its answer" — an optional extra part. A book may have
+ * none at all; when it has some, each is checked as fully as any other part.
+ * The reader shuffles the right-hand side.
+ */
+export interface MatchQuestion {
+  id: string;
+  kind: "match";
+  prompt: string;
+  pairs: MatchPair[];
+}
+
+/** Pairs in one matching question: fewer is a guess, more does not fit a phone. */
+export const MATCH_MIN_PAIRS = 3;
+export const MATCH_MAX_PAIRS = 5;
+/** Matching questions in one book. Optional, so there is no minimum. */
+export const MATCH_MAX_QUESTIONS = 5;
+
+export type Question = ComprehensionQuestion | VocabQuestion | SpellQuestion | MatchQuestion;
+/** The question kinds that are answered by picking one of three choices. */
+export type ChoiceQuestion = ComprehensionQuestion | VocabQuestion;
+export const isChoice = (q: Question): q is ChoiceQuestion => q.kind === "comprehension" || q.kind === "vocab";
 
 export interface Passage {
   id: string;

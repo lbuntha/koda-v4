@@ -28,6 +28,7 @@ from app.errors import AppError, Forbidden, NotFound
 from app.models.auth import Principal
 from app.models.common import Model
 from app.repos import trace as trace_repo
+from app.routers.library import AudioSaved, AudioWrite, ImageWrite, store_audio, store_image
 from app.security import principal_can
 from app.services.entitlements import entitlements
 from app.trace_verify import for_children, item_problems
@@ -234,6 +235,18 @@ async def save_item(item_id: str, body: ItemWrite, db: Db, p: CanWrite) -> ItemO
     if existing is None:
         await _room_for(db, "trace_items", p, MAX_ITEMS_PER_CREATOR)
     return _item_out(await trace_repo.save_item(db, item_id, draft, p.subject_id))
+
+
+@router.post("/studio/audio")
+async def upload_audio(body: AudioWrite, p: CanWrite) -> AudioSaved:
+    """A recording of an item said aloud. Kept with the library's clips, so it plays through `/library/audio/{id}`."""
+    return await store_audio(body)
+
+
+@router.post("/studio/images")
+async def upload_image(body: ImageWrite, db: Db, p: CanWrite) -> AudioSaved:
+    """A photo for a collection's cover. Kept with the library's photos, so it shows through `/library/images/{id}`."""
+    return await store_image(body, db, p.subject_id)
 
 
 @router.delete("/studio/items/{item_id}", status_code=204)

@@ -29,6 +29,14 @@ describe("UISkillThumbnail resolving a thumbnail string", () => {
     expect(screen.queryByText("counting-quests")).toBeNull();
   });
 
+  it("draws a picture uploaded in the Skill Studio as a photo, not as its key", () => {
+    const key = `photo-${"a".repeat(64)}`;
+
+    render(<UISkillThumbnail thumbnail={key} fallbackIconName="hash" />);
+
+    expect(screen.queryByText(key)).toBeNull();
+  });
+
   it("never prints an unresolvable name as its own letters", async () => {
     await replaceSharedArt([SHARED_ART]);
 

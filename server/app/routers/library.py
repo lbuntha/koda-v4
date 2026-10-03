@@ -46,7 +46,7 @@ CanWrite = Annotated[Principal, Depends(_may_author)]
 ID_PATTERN = re.compile(r"^[a-z0-9]+(?:-[a-z0-9]+)*$")
 MAX_ID = 64
 MAX_SENTENCES = 40
-MAX_QUESTIONS = 30
+MAX_QUESTIONS = 35  # 10 understand + 10 words + 10 spell, and up to 5 optional matching sets
 MAX_TEXT = 400  # characters in any one sentence, prompt or option
 MAX_AUDIO_BYTES = 2 * 1024 * 1024  # a sentence read aloud is well under 1 MB
 AUDIO_TYPES = {"audio/wav", "audio/webm", "audio/ogg", "audio/mp4", "audio/mpeg"}
@@ -176,6 +176,13 @@ def _clean(passage: dict[str, Any]) -> dict[str, Any]:
     for q in questions:
         if not isinstance(q, dict) or too_long(q.get("prompt")) or any(too_long(o) for o in q.get("options") or []):
             raise AppError(400, "invalid_passage", "A question is malformed or too long.")
+        pairs = q.get("pairs")
+        if pairs is not None and (
+            not isinstance(pairs, list)
+            or len(pairs) > 10
+            or any(not isinstance(pr, dict) or too_long(pr.get("left")) or too_long(pr.get("right")) for pr in pairs)
+        ):
+            raise AppError(400, "invalid_passage", "A matching question is malformed or too long.")
     if passage.get("category") is not None and passage.get("category") not in CATEGORIES:
         raise AppError(400, "invalid_category", "Unknown category.")
     return passage
@@ -386,6 +393,11 @@ async def delete(book_id: str, db: Db, p: CanWrite) -> None:
 
 @router.post("/audio")
 async def upload_audio(body: AudioWrite, db: Db, p: CanWrite) -> AudioSaved:
+    return await store_audio(body)
+
+
+async def store_audio(body: AudioWrite) -> AudioSaved:
+    """Check and keep one recording. Shared with Trace, whose creators record letter names into the same store."""
     if body.mime.split(";")[0].strip() not in AUDIO_TYPES:
         raise AppError(415, "unsupported_audio", "Recordings must be WAV, WebM, Ogg, MP4 or MP3 audio.")
     try:
@@ -435,6 +447,11 @@ class ImageWrite(Model):
 
 @router.post("/images")
 async def upload_image(body: ImageWrite, db: Db, p: CanWrite) -> AudioSaved:
+    return await store_image(body, db, p.subject_id)
+
+
+async def store_image(body: ImageWrite, db: Any, owner: str) -> AudioSaved:
+    """Check and keep one photo. Shared with Trace, whose creators upload collection covers."""
     mime = body.mime.split(";")[0].strip().lower()
     if mime not in IMAGE_MAGIC:
         raise AppError(415, "unsupported_image", "Photos must be JPEG, PNG or WebP.")
@@ -448,7 +465,7 @@ async def upload_image(body: ImageWrite, db: Db, p: CanWrite) -> AudioSaved:
         raise AppError(413, "image_too_large", "A photo may be at most 3 MB.")
     if not IMAGE_MAGIC[mime](data):
         raise AppError(415, "unsupported_image", "That file is not the kind of photo it says it is.")
-    image_id = await library_repo.put_image(db, data, mime, p.subject_id)
+    image_id = await library_repo.put_image(db, data, mime, owner)
     return AudioSaved(id=image_id, bytes=len(data))
 
 

@@ -1,10 +1,10 @@
 import { useEffect, useMemo, useState, type ReactNode } from "react";
 import { ArrowLeft, BookOpen, Check, ChevronDown, ChevronRight, ChevronUp, CornerLeftUp, Download, Mic, Play, Pencil, Plus, RefreshCw, Sparkles, Square, Trash2, Upload } from "lucide-react";
-import { BANDS, CHOICES, minimumQuestions, type Band, type Language, type Question, type QuestionCounts, type WordCue } from "../data/passage";
+import { BANDS, CHOICES, MATCH_MAX_QUESTIONS, minimumQuestions, type Band, type Language, type Question, type QuestionCounts, type WordCue } from "../data/passage";
 import { readingLexiconFor, readingWordsFor } from "../data/readingLexicon";
 import { core } from "../data/text";
 import { RULES, verifyPassage, type Verdict } from "../data/verifyPassage";
-import { deleteBook, fetchDraft, fetchReports, fetchStudioMeta, publishBook, requestAiCorrection, requestAiDraft, requestAiStory, resolveReport, saveDraft, unpublishBook, type BookReport, type BookRow, type BookSummary, type Provider, type StudioMeta } from "../api";
+import { deleteBook, fetchDraft, fetchReports, fetchStudioMeta, publishBook, requestAiCorrection, requestAiDraft, requestAiMatch, requestAiStory, resolveReport, saveDraft, unpublishBook, type BookReport, type BookRow, type BookSummary, type Provider, type StudioMeta } from "../api";
 import { baseOf, draftLocally, fromModel, joinSentences, mergeWords, pictureFor, sentenceIdFor, withVocabWord, type StoryInput, type VocabEdit } from "../draft";
 import { BookPreview } from "../LibraryPage";
 import { PagesStep } from "./PagesStep";
@@ -14,6 +14,7 @@ import { useRecorder } from "./recorder";
 import { WordVoicePanel } from "./WordVoicePanel";
 import { KHMER, label, type Draft } from "./questions/shared";
 import { UnderstandFields } from "./questions/UnderstandFields";
+import { MatchFields, blankMatch, matchPrompt } from "./questions/MatchFields";
 import { NewWordFields, WordsFields } from "./questions/WordsFields";
 import { SpellFields } from "./questions/SpellFields";
 import { OPENAI_VOICES, fetchVoxVoices, openaiVoice, orderedFor, voxVoice, type VoxVoice } from "../voxApi";
@@ -564,10 +565,10 @@ function ReviewStep({ draft, verdict, confirmed, onConfirmed, onEdit, target }: 
   const { t } = useT();
   const km = draft.language === "km";
   const need = draft.questionCounts ?? BANDS[draft.band];
-  const [tab, setTab] = useState<"splits" | "understand" | "words" | "spell">("splits");
+  const [tab, setTab] = useState<"splits" | "understand" | "match" | "words" | "spell">("splits");
   useEffect(() => {
     const question = draft.questions.find((item) => item.id === target);
-    if (question) setTab(question.kind === "comprehension" ? "understand" : question.kind === "vocab" ? "words" : "spell");
+    if (question) setTab(question.kind === "comprehension" ? "understand" : question.kind === "vocab" ? "words" : question.kind === "match" ? "match" : "spell");
     else if (target === "story") setTab("splits");
   }, [target]);
   useEffect(() => {
@@ -593,6 +594,12 @@ function ReviewStep({ draft, verdict, confirmed, onConfirmed, onEdit, target }: 
 
   const add = (kind: Question["kind"]) => {
     setAddMessage("");
+    if (kind === "match") {
+      // Optional, so no target to reach — only a ceiling.
+      if (count("match") >= MATCH_MAX_QUESTIONS) setAddMessage(t("studio.review.matchFull", { max: MATCH_MAX_QUESTIONS }));
+      else onEdit({ ...draft, questions: [...draft.questions, blankMatch(nextId("m"), draft.language)] });
+      return;
+    }
     if (count(kind) >= need[kind === "comprehension" ? "understand" : kind === "vocab" ? "words" : "spell"]) {
       setAddMessage(t("studio.review.full"));
       return;
@@ -613,9 +620,26 @@ function ReviewStep({ draft, verdict, confirmed, onConfirmed, onEdit, target }: 
     }
   };
 
+  const [makingMatch, setMakingMatch] = useState(false);
+  /** A matching set drafted by AI, added like one typed by hand — the checks below judge it the same way. */
+  const makeMatch = async () => {
+    setAddMessage("");
+    if (count("match") >= MATCH_MAX_QUESTIONS) return setAddMessage(t("studio.review.matchFull", { max: MATCH_MAX_QUESTIONS }));
+    setMakingMatch(true);
+    try {
+      const avoid = draft.questions.flatMap((q) => (q.kind === "match" ? q.pairs.map((pr) => pr.left) : []));
+      const made = await requestAiMatch({ language: draft.language, band: draft.band, sentences: draft.sentences.map((s) => ({ id: s.id, text: s.text })), pairs: 4, avoid });
+      onEdit({ ...draft, questions: [...draft.questions, { id: nextId("m"), kind: "match", prompt: made.prompt ?? matchPrompt(draft.language), pairs: made.pairs }] });
+    } catch (error) {
+      setAddMessage(error instanceof Error ? error.message : t("studio.error.matchFailed"));
+    } finally {
+      setMakingMatch(false);
+    }
+  };
+
   const count = (k: Question["kind"]) => draft.questions.filter((q) => q.kind === k).length;
   const strip: Array<[string, number, number]> = [[t("library.part.understand"), count("comprehension"), need.understand], [t("library.part.words"), count("vocab"), need.words], [t("library.part.spell"), count("spell"), need.spell]];
-  const tabKind: Record<Exclude<typeof tab, "splits">, Question["kind"]> = { understand: "comprehension", words: "vocab", spell: "spell" };
+  const tabKind: Record<Exclude<typeof tab, "splits">, Question["kind"]> = { understand: "comprehension", match: "match", words: "vocab", spell: "spell" };
   const activeQuestions = tab === "splits" ? [] : draft.questions.filter((q) => q.kind === tabKind[tab]);
   const [splitTarget, setSplitTarget] = useState<{ sid: string; index: number } | null>(null);
   const [splitText, setSplitText] = useState("");
@@ -626,6 +650,8 @@ function ReviewStep({ draft, verdict, confirmed, onConfirmed, onEdit, target }: 
       const passing = have >= minimumQuestions(want) && have <= want;
       return { id: key, label: `${passing ? "✓" : "✕"} ${name}`, count: `${have}/${want}` };
     }),
+    // Optional: no ✓ or ✕ for how many — a book with none publishes. Its own checks still apply.
+    { id: "match" as const, label: `${t("library.part.match")} · ${t("studio.review.optional")}`, count: String(count("match")) },
   ];
   // One piece fixes the word, several split it, none deletes it.
   const applyWordEdit = (sid: string, index: number, pieces: string[]) => {
@@ -725,10 +751,17 @@ function ReviewStep({ draft, verdict, confirmed, onConfirmed, onEdit, target }: 
         <div key={q.id} id={`studio-question-${q.id}`}><QuestionCard q={q} draft={draft} checks={byQ(q.id)} onChange={(patch) => setQ(q.id, patch)} onVocab={(next) => setVocab(q.id, next)} onDelete={() => del(q.id)} /></div>
       ))}
 
+      {tab === "match" && <p className="text-sm text-muted">{t("studio.review.matchNote")}</p>}
+
       {tab !== "splits" && <div className="flex flex-wrap items-center gap-2">
         <UIButton type="button" variant="outline" size="sm" icon={<Plus className="h-4 w-4" aria-hidden="true" />} onClick={() => add(tabKind[tab])}>
           {t(`library.part.${tab}`)}
         </UIButton>
+        {tab === "match" && (
+          <UIButton type="button" variant="outline" size="sm" isLoading={makingMatch} icon={<Sparkles className="h-4 w-4" aria-hidden="true" />} onClick={() => void makeMatch()}>
+            {makingMatch ? t("studio.review.makingMatch") : t("studio.review.makeMatch")}
+          </UIButton>
+        )}
         {tab === "words" && addingWord && <div className="basis-full"><NewWordFields draft={draft} id={nextId("q")} onAdd={addVocab} onCancel={() => setAddingWord(false)} /></div>}
         {addMessage && <p role="status" className="basis-full text-sm font-semibold text-rose-700 dark:text-rose-300">{addMessage}</p>}
       </div>}
@@ -756,7 +789,7 @@ function QuestionCard({ q, draft, checks, onChange, onVocab, onDelete }: {
 }) {
   const { t } = useT();
   const failing = checks.some((c) => c.status === "fail");
-  const tag = t(`library.part.${q.kind === "comprehension" ? "understand" : q.kind === "vocab" ? "words" : "spell"}`);
+  const tag = t(`library.part.${q.kind === "comprehension" ? "understand" : q.kind === "vocab" ? "words" : q.kind === "match" ? "match" : "spell"}`);
   const collapsible = true;
   const [expanded, setExpanded] = useState(true);
   const [correcting, setCorrecting] = useState(false);
@@ -794,9 +827,10 @@ function QuestionCard({ q, draft, checks, onChange, onVocab, onDelete }: {
           <span>{q.id}</span>
         </div>
         <div className="flex items-center gap-2">
-          <button type="button" className="inline-flex h-9 w-9 items-center justify-center rounded-full border border-indigo-200 text-indigo-700 hover:bg-indigo-50 disabled:opacity-50 dark:border-indigo-800 dark:text-indigo-300 dark:hover:bg-indigo-950" onClick={() => void correctWithAi()} disabled={correcting} aria-label={correcting ? t("studio.ai.checking") : t("studio.ai.correct")} title={correcting ? t("studio.ai.checking") : t("studio.ai.correct")}>
+          {/* The AI corrector knows the three required parts; a matching set is the author's own. */}
+          {q.kind !== "match" && <button type="button" className="inline-flex h-9 w-9 items-center justify-center rounded-full border border-indigo-200 text-indigo-700 hover:bg-indigo-50 disabled:opacity-50 dark:border-indigo-800 dark:text-indigo-300 dark:hover:bg-indigo-950" onClick={() => void correctWithAi()} disabled={correcting} aria-label={correcting ? t("studio.ai.checking") : t("studio.ai.correct")} title={correcting ? t("studio.ai.checking") : t("studio.ai.correct")}>
             <Sparkles className={`h-4 w-4 ${correcting ? "animate-spin" : ""}`} aria-hidden="true" />
-          </button>
+          </button>}
           <button type="button" className="inline-flex h-9 w-9 items-center justify-center rounded-full text-rose-700 hover:bg-rose-50 dark:text-rose-300 dark:hover:bg-rose-950" onClick={onDelete} aria-label={t("studio.q.delete", { part: tag, id: q.id })} title={t("studio.q.delete", { part: tag, id: q.id })}>
             <Trash2 className="h-4 w-4" aria-hidden="true" />
           </button>
@@ -807,6 +841,7 @@ function QuestionCard({ q, draft, checks, onChange, onVocab, onDelete }: {
         {q.kind === "comprehension" && <UnderstandFields q={q} draft={draft} onChange={onChange} />}
         {q.kind === "vocab" && <WordsFields q={q} draft={draft} onChange={onVocab} />}
         {q.kind === "spell" && <SpellFields q={q} draft={draft} onChange={onChange} />}
+        {q.kind === "match" && <MatchFields q={q} draft={draft} onChange={onChange} />}
       {suggestion && (
         <div className="mt-3 rounded-xl border border-indigo-200 bg-indigo-50 p-3 text-sm text-indigo-950 dark:border-indigo-800 dark:bg-indigo-950/50 dark:text-indigo-100">
           <p><b>{t("studio.ai.says")}</b> {suggestion.explanation}</p>
@@ -1313,15 +1348,17 @@ function SummaryStep({ draft, verdict, confirmed, onEdit, onNavigate, onQuestion
           </label>
           <ul className="mt-3 grid gap-1.5 border-t border-line pt-2 text-sm text-ink">
             <li>{t("studio.summary.understandLearning", { count: verdict.counts.comprehension })}</li>
+            {verdict.counts.match > 0 && <li>{t("studio.summary.matchLearning", { count: verdict.counts.match })}</li>}
             <li>{t("studio.summary.vocabLearning", { words: vocabWords.join(", ") || "—" })}</li>
             <li>{t("studio.summary.spellLearning", { words: spellWords.join(", ") || "—" })}</li>
           </ul>
         </UICard>
         <UICard className="p-3">
           <h3 className="koda-admin-card-title">{t("studio.summary.publishCheck")}</h3>
-          <div className={`mt-2 rounded-xl px-3 py-2 text-sm font-semibold ${ready ? "bg-emerald-50 text-emerald-800" : "bg-amber-50 text-amber-900"}`}>
+          <div className={`mt-2 rounded-xl px-3 py-2 text-sm font-semibold ${ready ? "bg-emerald-50 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-200" : "bg-rose-50 text-rose-800 dark:bg-rose-950 dark:text-rose-200"}`}>
             {ready ? t("studio.summary.ready") : t("studio.summary.reviewNeeded")}
           </div>
+          <PublishChecklist verdict={verdict} need={need} draft={draft} confirmed={confirmed} />
           <p className="mt-2 text-sm text-muted">{draft.category ? t("studio.summary.shelf", { shelf: draft.category }) : t("studio.summary.noShelf")}</p>
           <div className="mt-2 flex flex-wrap gap-1.5 [&>button]:min-h-8 [&>button]:px-2.5 [&>button]:py-1 [&>button]:text-xs [&>button]:font-medium [&>button]:text-left [&>button]:whitespace-normal">
             {verdict.checks.filter((check) => check.status === "fail").map((check, index) => (
@@ -1344,6 +1381,41 @@ function SummaryStep({ draft, verdict, confirmed, onEdit, onNavigate, onQuestion
         </div>}
       </UICard>
     </div>
+  );
+}
+
+/**
+ * Everything publishing checks, in one list a teacher can read before pressing
+ * Publish: each part with how many it has against what it needs, the optional
+ * matching sets, and every rule. Matching never blocks for being absent — only
+ * a set that is there and fails its own checks does.
+ */
+function PublishChecklist({ verdict, need, draft, confirmed }: { verdict: Verdict; need: QuestionCounts; draft: Draft; confirmed: boolean }) {
+  const { t } = useT();
+  const part = (have: number, want: number) => have >= minimumQuestions(want) && have <= want;
+  const matchIds = new Set(draft.questions.filter((q) => q.kind === "match").map((q) => q.id));
+  const matchFails = verdict.checks.filter((c) => matchIds.has(c.question) && c.status === "fail").length;
+  const rows: Array<{ ok: boolean | "info"; text: string }> = [
+    { ok: part(verdict.counts.comprehension, need.understand), text: t("studio.checklist.part", { part: t("library.part.understand"), have: verdict.counts.comprehension, min: minimumQuestions(need.understand), max: need.understand }) },
+    { ok: part(verdict.counts.vocab, need.words), text: t("studio.checklist.part", { part: t("library.part.words"), have: verdict.counts.vocab, min: minimumQuestions(need.words), max: need.words }) },
+    { ok: part(verdict.counts.spell, need.spell), text: t("studio.checklist.part", { part: t("library.part.spell"), have: verdict.counts.spell, min: minimumQuestions(need.spell), max: need.spell }) },
+    verdict.counts.match === 0
+      ? { ok: "info", text: t("studio.checklist.noMatch") }
+      : { ok: matchFails === 0, text: t("studio.checklist.match", { count: verdict.counts.match }) },
+    ...verdict.rules.map((r) => ({ ok: r.status === "skipped" ? ("info" as const) : r.status === "pass" || r.rule === 4, text: `${r.title} — ${r.message}` })),
+    ...(draft.language === "km" ? [{ ok: confirmed, text: t("studio.review.confirmSplits") }] : []),
+  ];
+  return (
+    <details className="mt-2 rounded-xl border border-line px-3 py-2" open={!verdict.publishable}>
+      <summary className="cursor-pointer text-sm font-bold text-ink">{t("studio.checklist.title", { failing: rows.filter((r) => r.ok === false).length })}</summary>
+      <ul className="mt-2 grid gap-1 text-xs">
+        {rows.map((r, i) => (
+          <li key={i} className={r.ok === false ? "font-bold text-rose-700 dark:text-rose-400" : r.ok === "info" ? "text-muted" : "text-emerald-700 dark:text-emerald-400"}>
+            {r.ok === false ? "✕" : r.ok === "info" ? "ⓘ" : "✓"} {r.text}
+          </li>
+        ))}
+      </ul>
+    </details>
   );
 }
 

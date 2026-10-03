@@ -22,9 +22,13 @@
  *
  * Rule 4 says so when it could not run rather than passing quietly: a check
  * that was skipped and reported green is worse than no check.
+ *
+ * Matching questions are optional — a book needs none — but one that is there
+ * is held to the same rules: its pairs are well formed (0), every answer is in
+ * the story (1), its words are easy (4), and no two ask the same thing (6).
  */
 
-import { BANDS, CHOICES, minimumQuestions, type Passage, type Question, type Sentence } from "./passage";
+import { BANDS, CHOICES, MATCH_MAX_PAIRS, MATCH_MAX_QUESTIONS, MATCH_MIN_PAIRS, minimumQuestions, type Passage, type Question, type Sentence } from "./passage";
 import { core, gapOf, sentenceText } from "./text";
 import { SPELL_PROBLEM_TEXT, whyUnspellable } from "./tiles";
 
@@ -60,7 +64,7 @@ export interface RuleSummary {
 export interface Verdict {
   checks: Check[];
   rules: RuleSummary[];
-  counts: { comprehension: number; vocab: number; spell: number };
+  counts: { comprehension: number; vocab: number; spell: number; match: number };
   /** At least 85% and no more than the requested number for each kind. */
   countsMatchBand: boolean;
   /** Publish-blocking failures. Rule 4 is advisory when enabled. */
@@ -158,7 +162,17 @@ export function verifyPassage(p: Passage, opts: VerifyOptions = {}): Verdict {
   for (const q of p.questions) {
     if (qIds.has(q.id)) add(0, q.id, false, "two questions share this id");
     qIds.add(q.id);
-    if (q.kind !== "spell") {
+    if (q.kind === "match") {
+      const n = q.pairs.length;
+      if (n < MATCH_MIN_PAIRS || n > MATCH_MAX_PAIRS) add(0, q.id, false, `needs ${MATCH_MIN_PAIRS}–${MATCH_MAX_PAIRS} pairs, has ${n}`);
+      if (q.pairs.some((pr) => !pr.left.trim() || !pr.right.trim())) add(0, q.id, false, "every pair needs both sides filled in");
+      // Empty sides are the line above's problem; only what is written can repeat.
+      const alike = (side: "left" | "right") => {
+        const said = q.pairs.map((pr) => pr[side].trim().toLowerCase()).filter(Boolean);
+        return new Set(said).size !== said.length;
+      };
+      if (alike("left") || alike("right")) add(0, q.id, false, "two pairs say the same thing — a child could not tell which goes where");
+    } else if (q.kind !== "spell") {
       if (q.options.length !== CHOICES) add(0, q.id, false, `needs exactly ${CHOICES} choices`);
       if (!(q.answer >= 0 && q.answer < q.options.length)) add(0, q.id, false, "the answer index is outside the choices");
       const seen = new Set(q.options.map((o) => o.trim().toLowerCase()));
@@ -174,7 +188,7 @@ export function verifyPassage(p: Passage, opts: VerifyOptions = {}): Verdict {
   const storySplit = splitWords(p.sentences);
   const storyTokens = new Set(p.sentences.flatMap((s) => s.words.map((t) => core(t).toLowerCase())));
   const confirmed = p.confirmedPictures ?? {};
-  const usable = (q: Question) => q.kind === "spell" || (q.answer >= 0 && q.answer < q.options.length);
+  const usable = (q: Question) => q.kind === "spell" || q.kind === "match" || (q.answer >= 0 && q.answer < q.options.length);
 
   /* ---- rules 1, 2, 3, 4, 5 -------------------------------------------- */
   for (const q of p.questions.filter(usable)) {
@@ -213,6 +227,21 @@ export function verifyPassage(p: Passage, opts: VerifyOptions = {}): Verdict {
       else add(1, q.id, true, "the word is in the story and its picture matches");
     }
 
+    if (q.kind === "match") {
+      // Rule 1: each answer is in its sentence, or in the story when no sentence is named.
+      const missing = q.pairs.filter((pr) => {
+        if (!pr.right.trim()) return false;
+        if (!pr.evidence) return !drawsOn(pr.right, storyText, storySplit);
+        const ev = sentence(pr.evidence);
+        return !ev || !drawsOn(pr.right, ev.text.toLowerCase(), splitWords([ev]));
+      });
+      const badEvidence = q.pairs.filter((pr) => pr.evidence && !sentence(pr.evidence));
+      add(1, q.id, missing.length === 0,
+        badEvidence.length ? `a pair points at a sentence that does not exist (${badEvidence.map((pr) => pr.evidence).join(", ")})`
+        : missing.length ? `not in the story: ${missing.slice(0, 2).map((pr) => `“${pr.right}”`).join(", ")}`
+        : "every answer is in the story");
+    }
+
     if (q.kind === "spell") {
       const s = sentence(q.sentence);
       const gap = s && gapOf(s, q.word, p.language);
@@ -235,7 +264,8 @@ export function verifyPassage(p: Passage, opts: VerifyOptions = {}): Verdict {
     const lex = opts.lexicon;
     for (const q of p.questions) {
       if (q.kind === "spell") continue;
-      const text = q.kind === "comprehension" ? [q.prompt, ...q.options].join(" ") : q.prompt;
+      // A matching set's instruction is the same fixed sentence in every book, so only its pairs are read.
+      const text = q.kind === "comprehension" ? [q.prompt, ...q.options].join(" ") : q.kind === "match" ? q.pairs.flatMap((pr) => [pr.left, pr.right]).join(" ") : q.prompt;
       const hard = [...new Set(words(text).filter((w) => !lex.has(w) && !storyWords.has(w) && !stemsOf(w).some((stem) => storyStems.has(stem))))];
       add(4, q.id, hard.length === 0, hard.length ? `not in the story or reading list: ${hard.slice(0, 3).join(", ")}` : "every word is in the story or reading list");
     }
@@ -256,6 +286,15 @@ export function verifyPassage(p: Passage, opts: VerifyOptions = {}): Verdict {
       add(6, q.id, !dup, dup ? "shares its answer or sentence with another question in this part" : "unique answer and sentence in this part");
     }
   }
+  // Matching: the same question asked in two sets is one question twice.
+  const matches = p.questions.filter((q) => q.kind === "match");
+  const leftsOf = (q: Question) => (q.kind === "match" ? q.pairs.map((pr) => pr.left.trim().toLowerCase()).filter(Boolean) : []);
+  for (const q of matches) {
+    const mine = new Set(leftsOf(q));
+    const shared = matches.some((o) => o !== q && leftsOf(o).some((l) => mine.has(l)));
+    add(6, q.id, !shared, shared ? "asks a question another matching set already asks" : "no question repeated across matching sets");
+  }
+  if (matches.length > MATCH_MAX_QUESTIONS) add(0, "story", false, `at most ${MATCH_MAX_QUESTIONS} matching questions`);
 
   /* ---- rule 7: recordings — optional ----------------------------------- */
   // Never a failure: a book without recordings remains readable as text.
@@ -284,6 +323,8 @@ export function verifyPassage(p: Passage, opts: VerifyOptions = {}): Verdict {
     comprehension: p.questions.filter((q) => q.kind === "comprehension").length,
     vocab: p.questions.filter((q) => q.kind === "vocab").length,
     spell: p.questions.filter((q) => q.kind === "spell").length,
+    // Optional: counted so the Studio can show it, never part of `countsMatchBand`.
+    match: p.questions.filter((q) => q.kind === "match").length,
   };
   const band = p.questionCounts ?? BANDS[p.band];
   const countsMatchBand = !!band &&

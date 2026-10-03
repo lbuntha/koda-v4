@@ -101,6 +101,10 @@ export interface TraceItem {
   zone?: Zone;
   /** What the admin traced over in the Studio: a typed glyph and/or a picture (e.g. a book page crop). */
   guide?: TraceGuide;
+  /** A recording of the item said aloud (its name or sound): a library clip id, played by the learner's speaker button. */
+  voice?: string;
+  /** What the recording says when it is more than the title ("ក — ក្អែក"). Absent = the title. */
+  voiceText?: string;
 }
 
 export interface TraceGuide {

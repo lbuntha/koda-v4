@@ -483,7 +483,11 @@
         "one": "Spell — {count} word from the story",
         "other": "Spell — {count} words from the story"
       },
-      "spellLevel": "level {level}, {name}"
+      "spellLevel": "level {level}, {name}",
+      "match": {
+        "one": "Match — {count} set of questions and answers",
+        "other": "Match — {count} sets of questions and answers"
+      }
     },
     "wordsYouWillMeet": "Words you will meet",
     "voice": {
@@ -510,7 +514,8 @@
     "part": {
       "understand": "Understand",
       "words": "Words",
-      "spell": "Spell"
+      "spell": "Spell",
+      "match": "Match"
     },
     "readAgainTitle": "Read again: {title}",
     "lookHere": "Look here",
@@ -528,7 +533,9 @@
       "wordIsUnits": "The word is “{word}”: {units}. Now trace it.",
       "wordIs": "The word is “{word}”. Now trace it.",
       "listenSentence": "Listen to the sentence, then say the missing word slowly.",
-      "readSentence": "Read the sentence again, then say the missing word slowly."
+      "readSentence": "Read the sentence again, then say the missing word slowly.",
+      "matchTap": "Tap a question, then the answer that goes with it.",
+      "matchJoined": "I joined one pair for you."
     },
     "feedback": {
       "right": "Yes! That’s right.",
@@ -588,7 +595,10 @@
     },
     "noMatchFor": "No books match “{query}”",
     "noMatchNote": "Try a shorter word, or another spelling.",
-    "clearSearch": "Clear search"
+    "clearSearch": "Clear search",
+    "matchHow": "Tap a question, then its answer.",
+    "matchQuestions": "Questions",
+    "matchAnswers": "Answers"
   },
   "coach": {
     "comesBefore": "Nearly! {want} comes before {got}. Spell it in the order you say it.",
@@ -686,7 +696,8 @@
       "drafterUnreachable": "The drafter could not be reached.",
       "storyWriterFailed": "The AI story writer could not be reached.",
       "correctFailed": "The question could not be corrected.",
-      "recordingUpload": "The recording could not be uploaded."
+      "recordingUpload": "The recording could not be uploaded.",
+      "matchFailed": "The AI could not make a matching set. Try again, or write one yourself."
     },
     "offline": {
       "name": "Offline drafter",
@@ -774,7 +785,12 @@
       "joinInstead": "Join this line to the one above instead",
       "deleteWordTitle": "Delete this word",
       "deleteWord": "Delete word",
-      "confirmSplits": "A Khmer reader has checked the text and every split"
+      "confirmSplits": "A Khmer reader has checked the text and every split",
+      "matchFull": "A book can have at most {max} matching sets.",
+      "optional": "optional",
+      "matchNote": "Matching is optional: a book can be published without it. Each set you add must pass its own checks — every answer in the story, no pair repeated.",
+      "makeMatch": "Make a set with AI",
+      "makingMatch": "Making a set…"
     },
     "q": {
       "collapse": "Collapse question",
@@ -813,7 +829,17 @@
       "questionPictures": "This question’s pictures",
       "allWordsUsed": "Every story word already has a Words question.",
       "newWord": "New Words question — which story word?",
-      "choosePicture": "Choose its picture"
+      "choosePicture": "Choose its picture",
+      "matchPrompt": "Instruction",
+      "pairs": "Pairs ({min}–{max})",
+      "pairLeft": "Question or word",
+      "pairRight": "Answer",
+      "pairLeftN": "Pair {n}: question",
+      "pairRightN": "Pair {n}: answer",
+      "removePair": "Remove pair {n}",
+      "pairEvidenceN": "Pair {n}: where the answer is",
+      "anywhereInStory": "The answer is somewhere in the story",
+      "addPair": "Add a pair"
     },
     "ai": {
       "badFormat": "The AI returned a correction in the wrong format.",
@@ -1066,7 +1092,11 @@
       "shelf": "Shelf: {shelf}",
       "noShelf": "No shelf selected yet.",
       "xp": "XP for finishing",
-      "xpNote": "Paid at three stars, with the same star shares as a skill lesson. Leave empty to use the app’s {xp} XP per level."
+      "xpNote": "Paid at three stars, with the same star shares as a skill lesson. Leave empty to use the app’s {xp} XP per level.",
+      "matchLearning": {
+        "one": "Matches questions to their answers in {count} set",
+        "other": "Matches questions to their answers in {count} sets"
+      }
     },
     "publish": {
       "deleteN": "delete {count}",
@@ -1147,6 +1177,15 @@
       },
       "one": "“{title}” will be removed from the studio and from every child’s library. This cannot be undone here.",
       "many": "These {count} books will be removed from the studio and from every child’s library. This cannot be undone here."
+    },
+    "checklist": {
+      "title": "Every check before publishing · {failing} to fix",
+      "part": "{part}: {have} (needs {min}–{max})",
+      "noMatch": "Matching: none — optional, fine to publish without",
+      "match": {
+        "one": "Matching: {count} set — its checks",
+        "other": "Matching: {count} sets — their checks"
+      }
     }
   },
   "time": {
@@ -2000,7 +2039,9 @@
       "featuresOn": "Features on",
       "viewingAs": "Viewing as",
       "age": "Age",
-      "includeDrafts": "Include drafts"
+      "includeDrafts": "Include drafts",
+      "makeThumbnailAi": "Make with AI",
+      "uploadThumbnail": "Upload picture"
     },
     "skillSubjectEditor": {
       "thatSubjectWasRemovedReopenThe": "That subject was removed. Reopen the editor to choose another.",
@@ -3359,7 +3400,8 @@
       "next": "Next",
       "backToList": "All items",
       "continue": "Continue",
-      "notNow": "Not now"
+      "notNow": "Not now",
+      "listen": "Listen"
     },
     "remember": "Remember it… {s}",
     "checkUp": "Check-up",
@@ -3775,7 +3817,10 @@
       "deleteTitle": "Delete “{title}”?",
       "deleteFailed": "Could not delete the collection. Check the connection and try again.",
       "showMore": "Show more ({shown} of {total})",
-      "more": "More actions"
+      "more": "More actions",
+      "uploadCover": "Upload",
+      "downloadCover": "Download",
+      "downloadFailed": "The picture could not be saved. Try again when it has loaded."
     },
     "view": {
       "collections": "Collections",
@@ -3930,7 +3975,27 @@
       "pending": "Waiting for review",
       "rejected": "Sent back"
     },
-    "splitHere": "Split the stroke here"
+    "splitHere": "Split the stroke here",
+    "voice": {
+      "record": "Record how it sounds",
+      "stop": "Stop recording",
+      "play": "Play the recording",
+      "remove": "Delete the recording",
+      "saving": "Saving the recording…",
+      "failed": "The recording could not be saved.",
+      "noMic": "This browser cannot record.",
+      "ai": "Make with AI",
+      "aiFailed": "The AI voice could not be made. Record it instead.",
+      "title": "Voice",
+      "recorded": "Has a recording",
+      "text": "What to say",
+      "textPlaceholder": "The item's name",
+      "textNote": "Leave empty to say the title. Add more, e.g. a word that starts with it.",
+      "aiModel": "Or let AI say it",
+      "aiVoice": "Voice",
+      "loadingVoices": "Loading voices…",
+      "making": "Making the voice…"
+    }
   },
   "pager": {
     "label": "Pages",

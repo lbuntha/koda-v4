@@ -299,6 +299,88 @@ describe("the band's counts", () => {
   });
 
   it("hold band B to its own numbers", () => {
-    expect(verifyPassage(RAINY, { confirmedSplit: true }).counts).toEqual({ comprehension: 3, vocab: 2, spell: 5 });
+    expect(verifyPassage(RAINY, { confirmedSplit: true }).counts).toEqual({ comprehension: 3, vocab: 2, spell: 5, match: 0 });
+  });
+});
+
+/*
+ * Matching is optional: none at all leaves a book exactly as publishable as it
+ * was. A set that is there is held to its own checks. The same cases are in
+ * server/tests/test_library.py, so the Studio and the server cannot disagree.
+ */
+describe("matching questions", () => {
+  const SET: Question = {
+    id: "m1",
+    kind: "match",
+    prompt: "Match each question to its answer.",
+    pairs: [
+      { left: "Where does Sokha go?", right: "the market", evidence: "s1" },
+      { left: "What is sweet?", right: "the mango", evidence: "s3" },
+      { left: "How do they get home?", right: "walk", evidence: "s4" },
+    ],
+  };
+  const withSet = (set: Question = SET) => {
+    const p = clone(MARKET);
+    p.questions = [...p.questions, clone(set)];
+    return p;
+  };
+
+  it("are optional: a book with none is checked exactly as before", () => {
+    const v = verifyPassage(clone(MARKET), { confirmedSplit: true });
+    expect(v.counts.match).toBe(0);
+    expect(v.checks.filter((c) => c.status === "fail")).toEqual([]);
+  });
+
+  it("pass when every answer is in its sentence, and never count toward the required parts", () => {
+    const v = verifyPassage(withSet(), { confirmedSplit: true });
+    expect(v.checks.filter((c) => c.status === "fail")).toEqual([]);
+    expect(v.counts.match).toBe(1);
+    expect(v.countsMatchBand).toBe(verifyPassage(clone(MARKET), { confirmedSplit: true }).countsMatchBand);
+  });
+
+  it("fail rule 1 when an answer is not in the story", () => {
+    const bad = clone(SET) as Extract<Question, { kind: "match" }>;
+    bad.pairs[1] = { left: "What is sweet?", right: "a pineapple" };
+    expect(failingRules(withSet(bad))).toEqual([1]);
+  });
+
+  it("fail rule 1 when an answer is in the story but not in the sentence it names", () => {
+    const bad = clone(SET) as Extract<Question, { kind: "match" }>;
+    bad.pairs[1] = { ...bad.pairs[1], evidence: "s4" };
+    expect(failingRules(withSet(bad))).toEqual([1]);
+  });
+
+  it("fail rule 0 with too few pairs, an empty side, or two pairs alike", () => {
+    const few = clone(SET) as Extract<Question, { kind: "match" }>;
+    few.pairs = few.pairs.slice(0, 2);
+    expect(failingRules(withSet(few))).toEqual([0]);
+    const empty = clone(SET) as Extract<Question, { kind: "match" }>;
+    empty.pairs[0] = { left: "", right: "the market" };
+    expect(failingRules(withSet(empty))).toEqual([0]);
+    const twice = clone(SET) as Extract<Question, { kind: "match" }>;
+    twice.pairs[2] = { ...twice.pairs[0] };
+    expect(failingRules(withSet(twice))).toContain(0);
+  });
+
+  it("fail rule 6 when two sets ask the same question", () => {
+    const p = withSet();
+    p.questions.push({ ...clone(SET), id: "m2" });
+    expect(failingRules(p)).toEqual([6]);
+  });
+});
+
+describe("a matching set still being written", () => {
+  it("says the empty sides are empty, not that blank pairs repeat each other", () => {
+    const p = clone(MARKET);
+    p.questions.push({ id: "m1", kind: "match", prompt: "Match each question to its answer.", pairs: [{ left: "", right: "" }, { left: "", right: "" }, { left: "", right: "" }] });
+    const messages = verifyPassage(p, { confirmedSplit: true }).checks.filter((c) => c.question === "m1" && c.status === "fail").map((c) => c.message);
+    expect(messages).toEqual(["every pair needs both sides filled in"]);
+  });
+
+  it("does not hold the fixed instruction to the reading list", () => {
+    const p = clone(MARKET);
+    p.questions.push({ id: "m1", kind: "match", prompt: "Match each question to its answer.", pairs: [{ left: "market", right: "mango" }, { left: "sun", right: "hot" }, { left: "home", right: "walk" }] });
+    const rule4 = verifyPassage(p, { confirmedSplit: true, lexicon: new Set(["the"]) }).checks.find((c) => c.question === "m1" && c.rule === 4);
+    expect(rule4?.status).toBe("pass");
   });
 });

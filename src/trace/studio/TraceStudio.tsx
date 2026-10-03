@@ -65,6 +65,7 @@ import {
   RotateCw,
 } from "lucide-react";
 import { themeSystem } from "../../lib/themeSystem";
+import { VoiceRecord } from "./VoiceRecord";
 import { useT } from "../../lib/i18n";
 import { UIBadge, UIButton, UIPageHeader, UITabs } from "../../components/ui";
 import type { FitHow } from "../geometry/edit";
@@ -458,7 +459,7 @@ function DraftEditor({ id, onClose }: { id: string; onClose(): void }) {
       {tab === "shape" && (
         <div className="grid gap-4 lg:grid-cols-[auto_minmax(0,1fr)] xl:grid-cols-[auto_minmax(0,1fr)_360px]">
           {/* Tool rail */}
-          <nav aria-label={t("traceStudio.tools")} className="flex flex-row flex-wrap items-center gap-1 self-start rounded-2xl border border-line bg-surface p-1.5 lg:sticky lg:top-4 lg:flex-col">
+          <nav aria-label={t("traceStudio.tools")} className="flex flex-row items-center justify-between self-stretch rounded-2xl border border-line bg-surface p-1.5 sm:flex-wrap sm:justify-start sm:gap-1 lg:sticky lg:top-4 lg:flex-col lg:self-start">
             {TOOLS.map((tool) => (
               <IconButton key={tool.mode} label={t(`traceStudio.mode.${tool.mode}`)} shortcut={tool.key} active={mode === tool.mode} onClick={() => setMode(tool.mode)} tip="right">
                 {tool.icon}
@@ -483,48 +484,60 @@ function DraftEditor({ id, onClose }: { id: string; onClose(): void }) {
 
           {/* Canvas */}
           <div className="flex min-w-0 flex-col overflow-hidden rounded-2xl border border-line bg-surface">
-            <div className="flex flex-wrap items-center gap-1 border-b border-line px-2 py-1.5">
-              <IconButton size="sm" label={t("traceStudio.undo")} shortcut="⌘Z" onClick={undo} disabled={past.length === 0}>
-                <Undo2 className="h-4 w-4" />
-              </IconButton>
-              <IconButton size="sm" label={t("traceStudio.redo")} shortcut="⇧⌘Z" onClick={redo} disabled={future.length === 0}>
-                <Redo2 className="h-4 w-4" />
-              </IconButton>
+            {/* One row on a phone, scrolled sideways (wrapped, it would take rows off the canvas); the voice stays pinned at the end. */}
+            <div className="flex items-center gap-1 border-b border-line px-2 py-1.5">
+              <div className="flex min-w-0 flex-1 items-center gap-1 overflow-x-auto [mask-image:linear-gradient(to_right,black_85%,transparent)] [scrollbar-width:none] sm:flex-wrap sm:overflow-visible sm:[mask-image:none] [&>*]:shrink-0">
+                <IconButton size="sm" label={t("traceStudio.undo")} shortcut="⌘Z" onClick={undo} disabled={past.length === 0}>
+                  <Undo2 className="h-4 w-4" />
+                </IconButton>
+                <IconButton size="sm" label={t("traceStudio.redo")} shortcut="⇧⌘Z" onClick={redo} disabled={future.length === 0}>
+                  <Redo2 className="h-4 w-4" />
+                </IconButton>
+                <Divider vertical />
+                <IconButton size="sm" label={sel !== null ? t("traceStudio.copyStroke") : t("traceStudio.copyAll")} shortcut="⌘C" onClick={() => copy()} disabled={item.strokes.length === 0}>
+                  <CopyPlus className="h-4 w-4" />
+                </IconButton>
+                <IconButton size="sm" label={t("traceStudio.paste", { count: clipCount })} shortcut="⌘V" onClick={paste} disabled={clipCount === 0}>
+                  <ClipboardPaste className="h-4 w-4" />
+                </IconButton>
+                <Divider vertical />
+                <IconButton size="sm" label={t("traceStudio.zoomOut")} shortcut="−" onClick={() => setView((v) => zoomView(v, 0.8))} disabled={view.size >= 1000}>
+                  <ZoomOut className="h-4 w-4" />
+                </IconButton>
+                <span className="w-12 text-center font-mono text-xs tabular-nums text-muted">{Math.round((1000 / view.size) * 100)}%</span>
+                <IconButton size="sm" label={t("traceStudio.zoomIn")} shortcut="+" onClick={() => setView((v) => zoomView(v, 1.25))}>
+                  <ZoomIn className="h-4 w-4" />
+                </IconButton>
+                <IconButton size="sm" label={t("traceStudio.fit")} shortcut="0" onClick={() => setView(FULL_VIEW)} disabled={view.size >= 1000}>
+                  <Maximize2 className="h-4 w-4" />
+                </IconButton>
+                <Divider vertical />
+                <IconButton size="sm" label={t("traceStudio.snap")} active={magic.snap} onClick={() => setMagic((m) => ({ ...m, snap: !m.snap }))}>
+                  <Magnet className="h-4 w-4" />
+                </IconButton>
+                <IconButton size="sm" label={t("traceStudio.autoConnect")} active={magic.autoConnect} onClick={() => setMagic((m) => ({ ...m, autoConnect: !m.autoConnect }))}>
+                  <Link2 className="h-4 w-4" />
+                </IconButton>
+                <IconButton size="sm" label={t("traceStudio.gridOnly")} active={magic.gridOnly} onClick={() => setMagic((m) => ({ ...m, gridOnly: !m.gridOnly }))}>
+                  <Crosshair className="h-4 w-4" />
+                </IconButton>
+                <Divider vertical />
+                <IconButton size="sm" label={t("traceStudio.showGrid")} shortcut="G" active={showGrid} onClick={() => setShowGrid((v) => !v)}>
+                  <Grid3x3 className="h-4 w-4" />
+                </IconButton>
+                <IconButton size="sm" label={t("traceStudio.checkpoints")} active={showCps} onClick={() => setShowCps((v) => !v)}>
+                  <Target className="h-4 w-4" />
+                </IconButton>
+              </div>
               <Divider vertical />
-              <IconButton size="sm" label={sel !== null ? t("traceStudio.copyStroke") : t("traceStudio.copyAll")} shortcut="⌘C" onClick={() => copy()} disabled={item.strokes.length === 0}>
-                <CopyPlus className="h-4 w-4" />
-              </IconButton>
-              <IconButton size="sm" label={t("traceStudio.paste", { count: clipCount })} shortcut="⌘V" onClick={paste} disabled={clipCount === 0}>
-                <ClipboardPaste className="h-4 w-4" />
-              </IconButton>
-              <Divider vertical />
-              <IconButton size="sm" label={t("traceStudio.zoomOut")} shortcut="−" onClick={() => setView((v) => zoomView(v, 0.8))} disabled={view.size >= 1000}>
-                <ZoomOut className="h-4 w-4" />
-              </IconButton>
-              <span className="w-12 text-center font-mono text-xs tabular-nums text-muted">{Math.round((1000 / view.size) * 100)}%</span>
-              <IconButton size="sm" label={t("traceStudio.zoomIn")} shortcut="+" onClick={() => setView((v) => zoomView(v, 1.25))}>
-                <ZoomIn className="h-4 w-4" />
-              </IconButton>
-              <IconButton size="sm" label={t("traceStudio.fit")} shortcut="0" onClick={() => setView(FULL_VIEW)} disabled={view.size >= 1000}>
-                <Maximize2 className="h-4 w-4" />
-              </IconButton>
-              <Divider vertical />
-              <IconButton size="sm" label={t("traceStudio.snap")} active={magic.snap} onClick={() => setMagic((m) => ({ ...m, snap: !m.snap }))}>
-                <Magnet className="h-4 w-4" />
-              </IconButton>
-              <IconButton size="sm" label={t("traceStudio.autoConnect")} active={magic.autoConnect} onClick={() => setMagic((m) => ({ ...m, autoConnect: !m.autoConnect }))}>
-                <Link2 className="h-4 w-4" />
-              </IconButton>
-              <IconButton size="sm" label={t("traceStudio.gridOnly")} active={magic.gridOnly} onClick={() => setMagic((m) => ({ ...m, gridOnly: !m.gridOnly }))}>
-                <Crosshair className="h-4 w-4" />
-              </IconButton>
-              <Divider vertical />
-              <IconButton size="sm" label={t("traceStudio.showGrid")} shortcut="G" active={showGrid} onClick={() => setShowGrid((v) => !v)}>
-                <Grid3x3 className="h-4 w-4" />
-              </IconButton>
-              <IconButton size="sm" label={t("traceStudio.checkpoints")} active={showCps} onClick={() => setShowCps((v) => !v)}>
-                <Target className="h-4 w-4" />
-              </IconButton>
+              <VoiceRecord
+                item={item}
+                onVoice={(voice, voiceText) => {
+                  // Read now, not at render: an upload takes a while and the author may have edited since.
+                  const { voice: _v, voiceText: _w, ...rest } = itemRef.current;
+                  edit({ ...rest, ...(voice ? { voice } : {}), ...(voice && voiceText ? { voiceText } : {}) });
+                }}
+              />
             </div>
             <StrokeEditor
               item={item}

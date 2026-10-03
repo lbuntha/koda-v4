@@ -221,6 +221,7 @@
 @media (max-width: 44.999rem) {
   [data-mobile-chrome-hidden] > header,
   [data-mobile-chrome-hidden] > div:has(> nav[aria-label="Main"]),
+  [data-mobile-tabbar-hidden] > div:has(> nav[aria-label="Main"]),
   .mobile-reader-word-hint,
   .mobile-reader-swipe-hint {
     display: none;

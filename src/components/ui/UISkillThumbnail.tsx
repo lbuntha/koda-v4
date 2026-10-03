@@ -1,6 +1,8 @@
 import React from "react";
 import { SvgAsset, useHasArt } from "../../assets/svg";
 import { resolveLessonIcon, lessonIcons } from "./lessonIcons";
+import { isPhoto } from "../../library/photos";
+import { Picture } from "../../library/Picture";
 
 /**
  * Category artwork. Colour is decoration only — every tile sits beside the
@@ -57,7 +59,7 @@ const isEmoji = (v: string) => !/[a-zA-Z0-9]/.test(v) && [...v].length <= 4;
 export const useHasSkillArtwork = (thumbnail?: string): boolean => {
   const value = thumbnail?.trim() ?? "";
   const isArt = useHasArt(value);
-  return Boolean(value) && (isImage(value) || isArt);
+  return Boolean(value) && (isImage(value) || isPhoto(value) || isArt);
 };
 
 export interface UISkillThumbnailProps {
@@ -140,6 +142,15 @@ export const UISkillThumbnail: React.FC<UISkillThumbnailProps> = ({
   const art = skillArtFor(category).art;
   // A frame the parent sized owns the whole panel; otherwise the size bucket does.
   const box = `${fill ? FILL_BOX : SIZES[size]} bg-gradient-to-br ${art} flex items-center justify-center shrink-0 shadow-sm overflow-hidden ${className}`;
+
+  // A photo uploaded or painted with AI in the Skill Studio, kept like a book's: cached on the device, so offline too.
+  if (value && isPhoto(value)) {
+    return (
+      <div className={`${box} relative`}>
+        <Picture name={value} cover fill />
+      </div>
+    );
+  }
 
   if (value && isImage(value)) {
     return (

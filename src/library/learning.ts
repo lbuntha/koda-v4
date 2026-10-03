@@ -70,8 +70,11 @@ export class BookRecorder {
       index: this.index++,
       taskKind: taskKindOf(item.part),
       prompt: item.part === "spell" ? item.word.gapped : item.question.prompt,
-      expected: item.part === "understand" ? item.question.options[item.question.answer] : item.part === "words" ? item.question.options[item.question.answer] : item.word.word,
-      itemCount: item.part === "spell" ? item.word.tiles.length : item.question.options.length,
+      expected:
+        item.part === "spell" ? item.word.word
+        : item.part === "match" ? item.question.pairs.map((pr) => `${pr.left} → ${pr.right}`).join("; ")
+        : item.question.options[item.question.answer],
+      itemCount: item.part === "spell" ? item.word.tiles.length : item.part === "match" ? item.question.pairs.length : item.question.options.length,
     });
   }
 

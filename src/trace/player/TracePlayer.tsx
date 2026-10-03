@@ -9,12 +9,13 @@
  */
 
 import { useCallback, useEffect, useMemo, useRef, useState, useSyncExternalStore } from "react";
-import { ArrowLeft, ArrowRight, Check, CircleDot, Eraser, Eye, Flag, Ghost, Grid3x3, Hash, ListOrdered, MoveRight, Palette, RotateCcw, Route, SlidersHorizontal, Sparkles, Undo2, ChevronDown } from "lucide-react";
+import { ArrowLeft, ArrowRight, Check, CircleDot, Eraser, Eye, Flag, Ghost, Grid3x3, Hash, ListOrdered, MoveRight, Palette, RotateCcw, Route, SlidersHorizontal, Sparkles, Undo2, ChevronDown, Volume2 } from "lucide-react";
 import { useT } from "../../lib/i18n";
 import { UIBadge, UIButton, UIKidMessage, UIModal, UITextarea } from "../../components/ui";
 import { themeSystem } from "../../lib/themeSystem";
 import { PracticeRoundCompleteModal } from "../../skills/kit/chrome/RoundCompleteModal";
-import { playSound } from "../../utils/audio";
+import { isVoiceEnabled, playSound } from "../../utils/audio";
+import { say, stop as stopVoice } from "../../library/voice";
 import type { AgeBand, Sensitivity, StepId, TraceItem } from "../geometry/types";
 import { isGuidedStep, modeOf } from "../geometry/types";
 import type { InkPoint } from "../score/capture";
@@ -290,6 +291,16 @@ export function TracePlayer({ item, onExit, onAwardXp, ageBand = "B", plan: plan
     const id = window.setTimeout(resetAttempt, PRAISE_MS);
     return () => window.clearTimeout(id);
   }, [outcome, play, finished, resetAttempt]);
+
+  // The item says its name once when it opens, if it has a recording and Koda's voice is on.
+  const sayIt = useCallback(() => {
+    if (item.voice) void say(item.voiceText ?? item.title, item.script === "khmer" ? "km" : "en", item.voice);
+  }, [item.voice, item.voiceText, item.title, item.script]);
+  useEffect(() => {
+    if (sandbox || !item.voice || !isVoiceEnabled()) return;
+    sayIt();
+    return () => stopVoice();
+  }, [sandbox, item.id, item.voice, sayIt]);
 
   // From memory: show the item for 3 seconds, then hide it.
   useEffect(() => {
@@ -682,6 +693,17 @@ export function TracePlayer({ item, onExit, onAwardXp, ageBand = "B", plan: plan
               <h1 className="truncate text-xl font-bold leading-tight text-ink" lang={item.script === "khmer" ? "km" : undefined}>
                 {item.title}
               </h1>
+              {item.voice && (
+                <button
+                  type="button"
+                  aria-label={t("trace.action.listen")}
+                  title={t("trace.action.listen")}
+                  onClick={sayIt}
+                  className="grid h-9 w-9 shrink-0 place-items-center rounded-full border border-line bg-surface text-indigo-600 transition hover:border-indigo-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 dark:text-indigo-300"
+                >
+                  <Volume2 className="h-5 w-5" />
+                </button>
+              )}
               {status && (
                 <UIBadge variant="success" className="gap-1">
                   <Check className="h-3.5 w-3.5" />

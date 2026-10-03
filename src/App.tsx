@@ -185,6 +185,7 @@ export default function App() {
   useSkillRegistryVersion();
   const [skillNodes, setSkillNodes] = useState<SkillNode[]>(INITIAL_SKILL_NODES);
   const [libraryReaderOpen, setLibraryReaderOpen] = useState(false);
+  const [libraryBookOpen, setLibraryBookOpen] = useState(false);
   const session = useSession();
   const { can, known: permissionsKnown } = usePermissions();
   const canManageMenu = Boolean(session && can("menu:manage"));
@@ -935,6 +936,7 @@ export default function App() {
       // Only a running round wants the full width; the picker is a normal page.
       contained={!inLesson}
       hideMobileChrome={activeTab === "library" && libraryReaderOpen}
+      hideMobileTabBar={activeTab === "library" && libraryBookOpen}
       /* Two shells, each hiding itself at the width that is not its own — the
          rail from `rail:` up, the toolbar and tab bar below it. A round stands
          both of them down: what a rail shows a five-year-old counting crowns is
@@ -1077,6 +1079,7 @@ export default function App() {
               <LibraryPage
                 onAwardXp={(earnedXp) => setUserProgress((prev) => ({ ...prev, xp: prev.xp + earnedXp }))}
                 onReaderChange={setLibraryReaderOpen}
+                onBookChange={setLibraryBookOpen}
               />
             </Deferred>
           )}

@@ -134,6 +134,11 @@ interface SvgAssetProps extends Omit<SvgMarkupProps, "markup" | "raw"> {
   id: SvgAssetId | (string & {});
 }
 
+/** An asset's markup, from the same four sources `SvgAsset` draws from, in its order. For saving a copy. */
+export function svgMarkupFor(id: string): string | undefined {
+  return ArtStore.get(id)?.markup ?? SharedArtStore.get(id)?.markup ?? getSkillArt(id) ?? getSvgAsset(id as SvgAssetId);
+}
+
 /**
  * Draws one asset, by id.
  *

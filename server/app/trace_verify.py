@@ -11,6 +11,7 @@ leaves "tested on these exact strokes" to the Studio.
 from __future__ import annotations
 
 import math
+import re
 from typing import Any
 
 KINDS = {"line", "drawing", "letter", "mark", "numeral", "word"}
@@ -46,6 +47,12 @@ def item_problems(item: Any, plan: Any, tests: Any) -> list[str]:
         out.append("its kind is not one of " + ", ".join(sorted(KINDS)))
     if item.get("grid", "none") not in GRIDS:
         out.append("its grid is unknown")
+    voice = item.get("voice")
+    if voice is not None and (not isinstance(voice, str) or not re.fullmatch(r"[0-9a-f]{64}", voice)):
+        out.append("its recording is not readable; record it again")
+    voice_text = item.get("voiceText")
+    if voice_text is not None and (not isinstance(voice_text, str) or len(voice_text) > 200):
+        out.append("what the recording says is longer than 200 characters")
 
     strokes = item.get("strokes")
     if not isinstance(strokes, list) or not strokes:

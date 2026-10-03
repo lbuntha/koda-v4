@@ -21,16 +21,21 @@ interface IconButtonProps {
   disabled?: boolean;
   onClick(): void;
   children: ReactNode;
-  /** Where the tooltip appears. */
-  tip?: "right" | "bottom" | "top";
+  /**
+   * Where the tooltip appears; "none" while the button's own popover is open.
+   * "bottom-end" lines it up with the button's right edge, for a button at the
+   * right end of a panel that clips what spills out.
+   */
+  tip?: "right" | "bottom" | "bottom-end" | "top" | "none";
   size?: "sm" | "md";
   tone?: "default" | "danger";
 }
 
 export function IconButton({ label, shortcut, active, disabled, onClick, children, tip = "bottom", size = "md", tone = "default" }: IconButtonProps) {
-  const box = size === "sm" ? "h-8 w-8" : "h-10 w-10";
+  // A notch smaller on a phone, so the tool rail stays one row on a 360px screen.
+  const box = size === "sm" ? "h-8 w-8" : "h-9 w-9 sm:h-10 sm:w-10";
   const place =
-    tip === "right" ? "left-full top-1/2 ml-2 -translate-y-1/2" : tip === "top" ? "bottom-full left-1/2 mb-2 -translate-x-1/2" : "top-full left-1/2 mt-2 -translate-x-1/2";
+    tip === "right" ? "left-full top-1/2 ml-2 -translate-y-1/2" : tip === "bottom-end" ? "top-full right-0 mt-2" : tip === "top" ? "bottom-full left-1/2 mb-2 -translate-x-1/2" : "top-full left-1/2 mt-2 -translate-x-1/2";
   return (
     <button
       type="button"
@@ -47,13 +52,15 @@ export function IconButton({ label, shortcut, active, disabled, onClick, childre
       }`}
     >
       {children}
-      <span
-        role="tooltip"
-        className={`pointer-events-none absolute z-30 whitespace-nowrap rounded-lg bg-ink px-2.5 py-1.5 text-xs font-medium text-surface opacity-0 shadow-lg transition group-hover:opacity-100 group-focus-visible:opacity-100 ${place}`}
-      >
-        {label}
-        {shortcut && <kbd className="ml-2 rounded bg-surface/15 px-1.5 py-0.5 font-mono text-[11px]">{shortcut}</kbd>}
-      </span>
+      {tip !== "none" && (
+        <span
+          role="tooltip"
+          className={`pointer-events-none absolute z-30 whitespace-nowrap rounded-lg bg-ink px-2.5 py-1.5 text-xs font-medium text-surface opacity-0 shadow-lg transition group-hover:opacity-100 group-focus-visible:opacity-100 ${place}`}
+        >
+          {label}
+          {shortcut && <kbd className="ml-2 rounded bg-surface/15 px-1.5 py-0.5 font-mono text-[11px]">{shortcut}</kbd>}
+        </span>
+      )}
     </button>
   );
 }

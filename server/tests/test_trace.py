@@ -1,5 +1,6 @@
 """Koda Trace: who may make collections, the publish gate, and what children download."""
 
+import base64
 import copy
 
 from app.repos import users
@@ -335,3 +336,39 @@ async def test_ai_strokes_are_for_admins_and_paid_creators(client, db):
     assert (await client.get("/trace/studio/ai", headers=admin)).json() == {"allowed": True}
     ann = await _creator(client, db, "ann@example.com")
     assert (await client.get("/trace/studio/ai", headers=ann)).json() == {"allowed": False, "reason": "plan_required"}
+
+
+async def test_a_creator_records_an_item_aloud_without_being_a_library_author(client, db, tmp_path, monkeypatch):
+    from app import audio_store
+    from app.settings import settings
+
+    monkeypatch.setattr(settings(), "library_audio_dir", str(tmp_path / "library-audio"))
+    monkeypatch.setattr(settings(), "library_audio_bucket", None)
+    monkeypatch.setattr(audio_store, "_encode_m4a", lambda data, _mime: b"test-m4a:" + data)
+    ann = await _creator(client, db, "ann@example.com")
+    wav = base64.b64encode(b"RIFF" + b"\x00" * 40 + b"sound").decode()
+
+    assert (await client.post("/library/audio", json={"mime": "audio/wav", "data": wav}, headers=ann)).status_code == 403
+    saved = await client.post("/trace/studio/audio", json={"mime": "audio/wav", "data": wav}, headers=ann)
+    assert saved.status_code == 200
+    clip = saved.json()["id"]
+    assert (await client.get(f"/library/audio/{clip}", headers=ann)).status_code == 200
+
+    # The clip rides on the item; anything that is not a clip id stops publishing.
+    assert "recording" not in " ".join(item_problems({**LINE, "voice": clip}, PLAN, PASSED))
+    assert any("recording" in p for p in item_problems({**LINE, "voice": "x"}, PLAN, PASSED))
+    assert not item_problems({**LINE, "voice": clip, "voiceText": "ក — ក្អែក"}, PLAN, PASSED)
+    assert any("200 characters" in p for p in item_problems({**LINE, "voiceText": "ក" * 201}, PLAN, PASSED))
+
+
+async def test_a_creator_uploads_a_cover_photo_without_being_a_library_author(client, db):
+    ann = await _creator(client, db, "ann@example.com")
+    png = base64.b64encode(b"\x89PNG\r\n\x1a\n" + b"\x00" * 64).decode()
+
+    assert (await client.post("/library/images", json={"mime": "image/png", "data": png}, headers=ann)).status_code == 403
+    saved = await client.post("/trace/studio/images", json={"mime": "image/png", "data": png}, headers=ann)
+    assert saved.status_code == 200
+    assert (await client.get(f"/library/images/{saved.json()['id']}", headers=ann)).status_code == 200
+    # Not a photo at all: refused here as it is in the library.
+    fake = base64.b64encode(b"not a picture").decode()
+    assert (await client.post("/trace/studio/images", json={"mime": "image/png", "data": fake}, headers=ann)).status_code == 415

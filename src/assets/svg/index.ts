@@ -1,4 +1,4 @@
-export { SvgAsset, SvgMarkup } from "./SvgAsset";
+export { SvgAsset, SvgMarkup, svgMarkupFor } from "./SvgAsset";
 export {
   THUMBNAIL_ART_CATEGORY,
   UNCATEGORISED,
