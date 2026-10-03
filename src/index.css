@@ -777,6 +777,27 @@ html.theme-light,
   line-height: 1.7;
 }
 
+/* Khmer on a phone.
+   The 10–12px label sizes are tuned for Latin capitals. A Khmer word at that
+   size is a smudge: the subscripts and vowel signs stacked on each consonant
+   are what make it readable, and they vanish first. Raise every tiny label to
+   13px, and give `leading-none` lines room so the marks above and below a
+   consonant are not clipped by the line box (the tab bar's labels were). */
+@media (max-width: 44.999rem) {
+  :lang(km) .text-xs,
+  :lang(km) [class*="text-[9px]"],
+  :lang(km) [class*="text-[10px]"],
+  :lang(km) [class*="text-[10.5px]"],
+  :lang(km) [class*="text-[11px]"],
+  :lang(km) [class*="text-[11.5px]"],
+  :lang(km) [class*="text-[12px]"] {
+    font-size: 13px;
+  }
+  :lang(km) .leading-none {
+    line-height: 1.35;
+  }
+}
+
 /* Koda Trace: a coach tip popping onto the slate. */
 @keyframes trace-pop {
   from {
