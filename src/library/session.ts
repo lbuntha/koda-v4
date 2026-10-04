@@ -9,18 +9,24 @@
  * and, later, in the admin's preview.
  */
 
-import { BANDS, type Band, type ComprehensionQuestion, type MatchQuestion, type Passage, type VocabQuestion } from "./data/passage";
+import { BANDS, noteFor, type Band, type ComprehensionQuestion, type MatchPair, type MatchQuestion, type Passage, type VocabQuestion } from "./data/passage";
 import { buildSpellingDeck, type DeckWord } from "./data/spellingDeck";
 import { translate } from "../lib/i18n";
 
-export type Part = "understand" | "match" | "words" | "spell";
-/** Every part, in the order a book plays them. "match" is optional: a book may have none. */
-export const PARTS: readonly Part[] = ["understand", "match", "words", "spell"];
+export type Part = "understand" | "match" | "words" | "opposite" | "reading" | "spell";
+/**
+ * Every part, in the order a book plays them. "match", "opposite" and "reading"
+ * are optional: a book may have none.
+ */
+export const PARTS: readonly Part[] = ["understand", "match", "words", "opposite", "reading", "spell"];
+/** The parts a book may leave out; a progress strip or results card skips them when empty. */
+export const OPTIONAL_PARTS: ReadonlySet<Part> = new Set(["match", "opposite", "reading"]);
 
 export type QuizItem =
   | { part: "understand"; question: ComprehensionQuestion }
   | { part: "match"; question: MatchQuestion }
   | { part: "words"; question: VocabQuestion }
+  | { part: "opposite" | "reading"; question: MatchQuestion }
   | { part: "spell"; word: DeckWord };
 
 /**
@@ -32,15 +38,44 @@ export function quizOf(p: Passage): QuizItem[] {
     ...p.questions.filter((q): q is ComprehensionQuestion => q.kind === "comprehension").map((question) => ({ part: "understand" as const, question })),
     ...p.questions.filter((q): q is MatchQuestion => q.kind === "match").map((question) => ({ part: "match" as const, question })),
     ...p.questions.filter((q): q is VocabQuestion => q.kind === "vocab").map((question) => ({ part: "words" as const, question })),
+    ...notesQuiz(p, "opposite").map((question) => ({ part: "opposite" as const, question })),
+    ...notesQuiz(p, "reading").map((question) => ({ part: "reading" as const, question })),
     ...buildSpellingDeck(p).map((word) => ({ part: "spell" as const, word })),
   ];
+}
+
+/** Most pairs on one board: more than this crowds a phone. */
+const NOTE_PAIRS = 5;
+
+/**
+ * "Join each word to its opposite" and "join each word to how it is read",
+ * made from the author's Read & opposite notes once they tick it in. A
+ * board needs two pairs to be a choice, so a lone note is left out, and a last
+ * board of one joins the board before it.
+ */
+export function notesQuiz(p: Passage, kind: "opposite" | "reading"): MatchQuestion[] {
+  if (!p.notesInQuiz?.[kind]) return [];
+  const pairs: MatchPair[] = Object.keys(p.wordNotes ?? {}).flatMap((word) => {
+    const right = noteFor(p, word)?.[kind]?.trim();
+    return right ? [{ left: word, right }] : [];
+  });
+  // Two words with the same answer would make a board with two right joins.
+  const seen = new Set<string>();
+  const unique = pairs.filter((pr) => !seen.has(pr.right) && seen.add(pr.right));
+  if (unique.length < 2) return [];
+  const boards: MatchPair[][] = [];
+  for (let i = 0; i < unique.length; i += NOTE_PAIRS) boards.push(unique.slice(i, i + NOTE_PAIRS));
+  if (boards.length > 1 && boards[boards.length - 1].length < 2) boards[boards.length - 2].push(...boards.pop()!);
+  const prompt = translate(kind === "opposite" ? "library.notesQuiz.opposite" : "library.notesQuiz.reading");
+  return boards.map((board, i) => ({ id: `${kind}-${i + 1}`, kind: "match", prompt, pairs: board }));
 }
 
 export const itemId = (p: Passage, item: QuizItem): string =>
   item.part === "spell" ? item.word.id : `${p.id}/${item.question.id}`;
 
 export const taskKindOf = (part: Part): string =>
-  part === "understand" ? "comprehension_choice" : part === "match" ? "match_pairs" : part === "words" ? "vocab_match" : "spell_word_in_sentence";
+  part === "understand" ? "comprehension_choice" : part === "match" ? "match_pairs" : part === "words" ? "vocab_match"
+  : part === "opposite" ? "opposite_match" : part === "reading" ? "reading_match" : "spell_word_in_sentence";
 
 /** What is recorded about one question once it is answered. */
 export interface Outcome {

@@ -5,7 +5,7 @@ import { readingLexiconFor, readingWordsFor } from "../data/readingLexicon";
 import { core } from "../data/text";
 import { RULES, verifyPassage, type Verdict } from "../data/verifyPassage";
 import { deleteBook, fetchDraft, fetchReports, fetchStudioMeta, publishBook, requestAiCorrection, requestAiDraft, requestAiMatch, requestAiStory, resolveReport, saveDraft, unpublishBook, type BookReport, type BookRow, type BookSummary, type Provider, type StudioMeta } from "../api";
-import { baseOf, draftLocally, fromModel, joinSentences, mergeWords, pictureFor, sentenceIdFor, withVocabWord, type StoryInput, type VocabEdit } from "../draft";
+import { baseOf, draftLocally, fromModel, withStoryPictures, joinSentences, mergeWords, pictureFor, sentenceIdFor, withVocabWord, type StoryInput, type VocabEdit } from "../draft";
 import { BookPreview } from "../LibraryPage";
 import { PagesStep } from "./PagesStep";
 import { UnitNamesPanel } from "./UnitNamesPanel";
@@ -17,6 +17,8 @@ import { UnderstandFields } from "./questions/UnderstandFields";
 import { MatchFields, blankMatch, matchPrompt } from "./questions/MatchFields";
 import { NewWordFields, WordsFields } from "./questions/WordsFields";
 import { SpellFields } from "./questions/SpellFields";
+import { WordNotesFields } from "./questions/WordNotesFields";
+import { SectionEmpty, SectionHeader } from "./questions/SectionHeader";
 import { OPENAI_VOICES, fetchVoxVoices, openaiVoice, orderedFor, voxVoice, type VoxVoice } from "../voxApi";
 import { PICTURE_KEYS } from "../Picture";
 import { BookStore } from "../bookStore";
@@ -42,11 +44,11 @@ import { translate, useT } from "../../lib/i18n";
  * again on publish, so nothing the browser says can put a book on a child's shelf.
  */
 
-type Step = 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8;
+type Step = 1 | 2 | 3 | 4 | 5 | 6 | 7;
 type Source = Provider | "offline";
 
 /* Worded under `studio.step.<id>`. */
-const STEPS = ["source", "generate", "review", "pages", "voice", "preview", "summary", "publish"] as const;
+const STEPS = ["source", "review", "pages", "voice", "preview", "summary", "publish"] as const;
 /** The admin's default drafter, in this screen's names for the three companies. */
 const libraryDefault = (): Source => ({ gemini: "gemini", openai: "chatgpt", claude: "claude" } as const)[aiDefault("ai.libraryProvider")];
 const PROVIDERS: Array<{ id: Source; name: string; note: string }> = [
@@ -138,7 +140,7 @@ export function LibraryStudio() {
 function Editor({ row, categories, reports = [], onResolved, onClose }: { row: BookRow | null; categories: readonly string[]; reports?: BookReport[]; onResolved?(id: string): void; onClose(): void }) {
   const { t } = useT();
   const start = row?.draft;
-  const [step, setStep] = useState<Step>(start?.questions.length ? 3 : 1);
+  const [step, setStep] = useState<Step>(start ? 2 : 1);
   const [previewed, setPreviewed] = useState(false);
   const [reviewTarget, setReviewTarget] = useState("");
   const [undoStory, setUndoStory] = useState<{ input: StoryInput; draft: Draft | null; confirmed: boolean } | null>(null);
@@ -152,7 +154,7 @@ function Editor({ row, categories, reports = [], onResolved, onClose }: { row: B
   const [confirmed, setConfirmed] = useState(row?.confirmedSplit ?? false);
   const [status, setStatus] = useState<{ rev: number; published: boolean }>({ rev: row?.rev ?? 0, published: row?.status === "published" });
   const [dirty, setDirty] = useState(false);
-  const [busy, setBusy] = useState<"" | "generate" | "save" | "publish">("");
+  const [busy, setBusy] = useState<"" | "save" | "publish">("");
   const [note, setNote] = useState<{ kind: "ok" | "bad" | "info"; text: string } | null>(null);
   const isNew = !row;
   const id = row?.id ?? (input.id || draft?.id || slug(input.title));
@@ -186,59 +188,6 @@ function Editor({ row, categories, reports = [], onResolved, onClose }: { row: B
     setInput((current) => ({ ...current, title: next.title, category: next.category ?? "", language: next.language, band: next.band, text: next.sentences.map((sentence) => sentence.text).join("\n"), questionCounts: next.questionCounts }));
     setDirty(true);
     setPreviewed(false);
-  };
-
-  const generate = async (via: Source = source) => {
-    if (!input.text.trim()) return;
-    setBusy("generate");
-    setNote(null);
-    const base = baseOf({ ...input, id });
-    try {
-      let reply;
-      let usedAi = false;
-      if (via === "offline") reply = draftLocally(base, PICTURE_KEYS);
-      else {
-        const r = await requestAiDraft({ provider: via, language: base.language, band: base.band, questionCounts: base.questionCounts ?? BANDS[base.band], sentences: base.sentences.map((s) => s.text), pictures: [...PICTURE_KEYS], easyWords: readingWordsFor(base.band, base.language) });
-        reply = r.draft;
-        usedAi = true;
-      }
-      let next = fromModel(base, reply, PICTURE_KEYS);
-      // Matching sets come from their own AI call, one set at a time, each told
-      // what the earlier ones asked so none repeats. A failed set is skipped —
-      // Review shows the shortfall and the author can add one there.
-      const wantMatch = usedAi ? Math.min(base.questionCounts?.match ?? 0, MATCH_MAX_QUESTIONS) : 0;
-      for (let i = 0; i < wantMatch; i++) {
-        try {
-          const avoid = next.questions.flatMap((q) => (q.kind === "match" ? q.pairs.map((pr) => pr.left) : []));
-          const made = await requestAiMatch({ provider: via as Provider, language: next.language, band: next.band, sentences: next.sentences.map((x) => ({ id: x.id, text: x.text })), pairs: 4, avoid });
-          next = { ...next, questions: [...next.questions, { id: `m${i + 1}`, kind: "match", prompt: made.prompt ?? matchPrompt(next.language), pairs: made.pairs }] };
-        } catch {
-          break;
-        }
-      }
-      setDraft(next);
-      setConfirmed(base.language !== "km");
-      setDirty(true);
-      const need = base.questionCounts ?? BANDS[base.band];
-      setNote({
-        kind: "ok",
-        text: t("studio.drafted", {
-          who: usedAi ? (PROVIDERS.find((p) => p.id === via)?.name ?? via) : t("studio.offline.the"),
-          understand: next.questions.filter((q) => q.kind === "comprehension").length,
-          words: next.questions.filter((q) => q.kind === "vocab").length,
-          spell: next.questions.filter((q) => q.kind === "spell").length,
-          band: base.band,
-          needUnderstand: need.understand,
-          needWords: need.words,
-          needSpell: need.spell,
-        }),
-      });
-      setStep(3);
-    } catch (e) {
-      setNote({ kind: "bad", text: `${e instanceof Error ? e.message : t("studio.error.drafter")} ${t("studio.useOfflineInstead")}` });
-    } finally {
-      setBusy("");
-    }
   };
 
   const save = async (): Promise<boolean> => {
@@ -302,12 +251,11 @@ function Editor({ row, categories, reports = [], onResolved, onClose }: { row: B
         steps={STEPS.map((name, i) => {
           const n = (i + 1) as Step;
           const complete = n === 1 ? Boolean(input.title.trim() && input.text.trim())
-            : n === 2 ? Boolean(draft?.questions.length)
-            : n === 3 || n === 7 ? Boolean(verdict?.publishable)
-            : n === 4 ? Boolean(draft?.picture && layoutBook(draft).story.every((page) => pagePicture(page, draft).key))
-            : n === 5 ? Boolean(draft?.sentences.length && draft.sentences.every((sentence) => sentence.audio))
-            : n === 6 ? previewed : status.published && !dirty;
-          return { id: name, label: t(`studio.step.${name}`), complete, disabled: n > 2 && !draft };
+            : n === 2 || n === 6 ? Boolean(verdict?.publishable)
+            : n === 3 ? Boolean(draft?.picture && layoutBook(draft).story.every((page) => pagePicture(page, draft).key))
+            : n === 4 ? Boolean(draft?.sentences.length && draft.sentences.every((sentence) => sentence.audio))
+            : n === 5 ? previewed : status.published && !dirty;
+          return { id: name, label: t(`studio.step.${name}`), complete, disabled: n > 1 && !draft };
         })}
       />
 
@@ -327,13 +275,10 @@ function Editor({ row, categories, reports = [], onResolved, onClose }: { row: B
       {note && (
         <div role="status" className="mb-4 grid gap-2">
           <UIFlashMessage type={note.kind === "bad" ? "error" : note.kind === "ok" ? "success" : "info"} message={note.text} />
-          {note.kind === "bad" && source !== "offline" && (
-            <UIButton type="button" variant="secondary" size="sm" className="justify-self-start" onClick={() => { setSource("offline"); void generate("offline"); }}>{t("studio.useOffline")}</UIButton>
-          )}
         </div>
       )}
 
-      <StepFrame plain={step === 3}>
+      <StepFrame plain={step === 2}>
         {step === 1 && (
           <SourceStep
             input={input}
@@ -346,7 +291,7 @@ function Editor({ row, categories, reports = [], onResolved, onClose }: { row: B
               const storyChanged = next.text !== input.text || next.language !== input.language || next.band !== input.band;
               if (storyChanged && input.text.trim()) setUndoStory({ input, draft, confirmed });
               if (draft && storyChanged) {
-                setDraft({ ...baseOf({ ...next, id }), learningTakeaway: draft.learningTakeaway, xp: draft.xp });
+                setDraft({ ...withStoryPictures(baseOf({ ...next, id }), PICTURE_KEYS), learningTakeaway: draft.learningTakeaway, xp: draft.xp });
                 setConfirmed(false);
                 setNote({ kind: "info", text: t("studio.storyChanged") });
               }
@@ -366,36 +311,24 @@ function Editor({ row, categories, reports = [], onResolved, onClose }: { row: B
               }
               setInput(next);
             }}
-            onNext={() => setStep(2)}
+            onNext={() => {
+              // A new book starts with its story and nothing asked: every Review section is filled on its own, by hand or with AI.
+              if (!draft) {
+                setDraft(withStoryPictures(baseOf({ ...input, id }), PICTURE_KEYS));
+                setConfirmed(input.language !== "km");
+                setDirty(true);
+              }
+              setStep(2);
+            }}
           />
         )}
-        {step === 2 && (
-          <div className="grid gap-3">
-            <p className="text-sm text-muted">
-              {source === "offline"
-                ? t("studio.offline.explain")
-                : t("studio.aiAsked", {
-                    who: PROVIDERS.find((p) => p.id === source)?.name ?? source,
-                    understand: input.questionCounts?.understand ?? 10,
-                    words: input.questionCounts?.words ?? 10,
-                    spell: input.questionCounts?.spell ?? 10,
-                  })}
-            </p>
-            <div className="flex flex-wrap gap-2">
-              <UIButton type="button" icon={<Sparkles aria-hidden="true" />} isLoading={busy === "generate"} disabled={busy !== "" || !input.text.trim()} onClick={() => void generate()}>
-                {busy === "generate" ? t("studio.drafting") : draft ? t("studio.draftAgain") : t("studio.draftQuestions")}
-              </UIButton>
-              {draft && <UIButton type="button" variant="secondary" iconRight={<ChevronRight aria-hidden="true" />} onClick={() => setStep(3)}>{t("studio.reviewDraft")}</UIButton>}
-            </div>
-          </div>
-        )}
-        {step === 3 && draft && verdict && <ReviewStep target={reviewTarget} draft={draft} verdict={verdict} confirmed={confirmed} onConfirmed={(c) => { setConfirmed(c); setDirty(true); }} onEdit={edit} />}
-        {step === 4 && draft && <PagesStep draft={draft} onEdit={edit} />}
-        {step === 5 && draft && <VoiceStep draft={draft} onEdit={edit} />}
+        {step === 2 && draft && verdict && <ReviewStep source={source} target={reviewTarget} draft={draft} verdict={verdict} confirmed={confirmed} onConfirmed={(c) => { setConfirmed(c); setDirty(true); }} onEdit={edit} />}
+        {step === 3 && draft && <PagesStep draft={draft} onEdit={edit} />}
+        {step === 4 && draft && <VoiceStep draft={draft} onEdit={edit} />}
         {undoStory && <UIButton type="button" variant="secondary" onClick={() => { setInput(undoStory.input); setDraft(undoStory.draft); setConfirmed(undoStory.confirmed); setUndoStory(null); setDirty(true); }}>{t("studio.storyAi.undo")}</UIButton>}
-        {step === 6 && draft && <BookPreview book={{ ...draft, id, rev: status.rev || 1 }} onExit={() => { setPreviewed(true); setStep(7); }} />}
-        {step === 7 && draft && verdict && <SummaryStep source={source} draft={draft} verdict={verdict} confirmed={confirmed} onEdit={edit} onNavigate={setStep} onQuestion={(id) => { setReviewTarget(id); setStep(3); }} />}
-        {step === 8 && draft && verdict && (
+        {step === 5 && draft && <BookPreview book={{ ...draft, id, rev: status.rev || 1 }} onExit={() => { setPreviewed(true); setStep(6); }} />}
+        {step === 6 && draft && verdict && <SummaryStep source={source} draft={draft} verdict={verdict} confirmed={confirmed} onEdit={edit} onNavigate={setStep} onQuestion={(id) => { setReviewTarget(id); setStep(2); }} />}
+        {step === 7 && draft && verdict && (
           <PublishStep
             verdict={verdict}
             band={draft.band}
@@ -595,13 +528,13 @@ function SourceStep({ input, categories, isNew, source, onSource, onInput, onNex
 
 /* -------------------------------------------------------------------------- */
 
-function ReviewStep({ draft, verdict, confirmed, onConfirmed, onEdit, target }: {
-  draft: Draft; verdict: Verdict; confirmed: boolean; onConfirmed(c: boolean): void; onEdit(d: Draft): void; target?: string;
+function ReviewStep({ draft, verdict, confirmed, onConfirmed, onEdit, target, source }: {
+  source: Source; draft: Draft; verdict: Verdict; confirmed: boolean; onConfirmed(c: boolean): void; onEdit(d: Draft): void; target?: string;
 }) {
   const { t } = useT();
   const km = draft.language === "km";
   const need = draft.questionCounts ?? BANDS[draft.band];
-  const [tab, setTab] = useState<"splits" | "understand" | "match" | "words" | "spell">("splits");
+  const [tab, setTab] = useState<"splits" | "understand" | "match" | "words" | "spell" | "notes">("splits");
   useEffect(() => {
     const question = draft.questions.find((item) => item.id === target);
     if (question) setTab(question.kind === "comprehension" ? "understand" : question.kind === "vocab" ? "words" : question.kind === "match" ? "match" : "spell");
@@ -658,6 +591,87 @@ function ReviewStep({ draft, verdict, confirmed, onConfirmed, onEdit, target }: 
   };
 
   const [makingMatch, setMakingMatch] = useState(false);
+  const [making, setMaking] = useState<Question["kind"] | null>(null);
+  const [madeNote, setMadeNote] = useState("");
+  // "No AI" on the Source step still drafts these three offline; Match and notes need a model, so they use the default one.
+  const aiProvider = source === "offline" ? undefined : (source as Provider);
+  const partOf = (kind: "comprehension" | "vocab" | "spell") => (kind === "comprehension" ? "understand" : kind === "vocab" ? "words" : "spell");
+
+  /**
+   * Fills one section up to its target with AI (or the offline drafter), keeping
+   * what is there. The model sees the sentences numbered s1, s2… in order — the
+   * draft's own ids can differ once lines are joined — so its answers are mapped
+   * back, and anything repeating an existing item is dropped.
+   */
+  const makeWithAi = async (kind: "comprehension" | "vocab" | "spell") => {
+    setAddMessage("");
+    setMadeNote("");
+    const want = need[partOf(kind)] - count(kind);
+    if (want <= 0) return setAddMessage(t("studio.review.full"));
+    setMaking(kind);
+    try {
+      const ids = draft.sentences.map((x) => x.id);
+      const num = (sid: string) => `s${ids.indexOf(sid) + 1}`;
+      const back = (sid: string) => ids[Number(sid.slice(1)) - 1] ?? sid;
+      const counts = { ...need, understand: kind === "comprehension" ? want : 0, words: kind === "vocab" ? want : 0, spell: kind === "spell" ? want : 0 };
+      const numbered = { ...draft, questionCounts: counts, sentences: draft.sentences.map((x, i) => ({ ...x, id: `s${i + 1}` })) };
+      const have = draft.questions.filter((q) => q.kind === kind);
+      const avoid = have.map((q) =>
+        q.kind === "comprehension" ? `Understand: "${q.prompt}" → "${q.options[q.answer]}" (${num(q.evidence)})`
+        : q.kind === "vocab" ? `Words: "${q.word}"`
+        : q.kind === "spell" ? `Spell: "${q.word}" (${num(q.sentence)})` : "");
+      const reply = source === "offline"
+        ? draftLocally(numbered, PICTURE_KEYS, have.length + 1)
+        : (await requestAiDraft({ provider: aiProvider, language: draft.language, band: draft.band, questionCounts: counts, sentences: draft.sentences.map((x) => x.text), pictures: [...PICTURE_KEYS], easyWords: readingWordsFor(draft.band, draft.language), avoid })).draft;
+      const made = fromModel(numbered, reply, PICTURE_KEYS);
+      const usedWords = new Set(have.flatMap((q) => (q.kind === "vocab" || q.kind === "spell" ? [q.word] : [])));
+      const usedSentences = new Set(have.flatMap((q) => (q.kind === "comprehension" ? [q.evidence] : q.kind === "spell" ? [q.sentence] : [])));
+      const usedAnswers = new Set(have.flatMap((q) => (q.kind === "comprehension" ? [q.options[q.answer]] : [])));
+      const taken = new Set(draft.questions.map((q) => q.id));
+      const freshId = (prefix: string) => {
+        let n = 1;
+        while (taken.has(`${prefix}${n}`)) n++;
+        taken.add(`${prefix}${n}`);
+        return `${prefix}${n}`;
+      };
+      const fresh: Question[] = [];
+      for (const q of made.questions) {
+        if (q.kind !== kind || fresh.length >= want) continue;
+        if (q.kind === "comprehension") {
+          const evidence = back(q.evidence);
+          if (usedSentences.has(evidence) || usedAnswers.has(q.options[q.answer])) continue;
+          usedSentences.add(evidence);
+          usedAnswers.add(q.options[q.answer]);
+          fresh.push({ ...q, id: freshId("q"), evidence });
+        } else if (q.kind === "vocab") {
+          if (usedWords.has(q.word)) continue;
+          usedWords.add(q.word);
+          fresh.push({ ...q, id: freshId("q") });
+        } else if (q.kind === "spell") {
+          const sentence = back(q.sentence);
+          if (usedWords.has(q.word) || usedSentences.has(sentence)) continue;
+          usedWords.add(q.word);
+          usedSentences.add(sentence);
+          fresh.push({ ...q, id: freshId("sp"), sentence });
+        }
+      }
+      if (!fresh.length) return setAddMessage(t("studio.section.nothingNew"));
+      // A Words question brings its picture; only the curated list's pictures arrive confirmed.
+      const words = fresh.flatMap((q) => (q.kind === "vocab" ? [q.word] : []));
+      const pick = (m: Record<string, string> | undefined) => Object.fromEntries(words.filter((w) => m?.[w]).map((w) => [w, m![w]]));
+      onEdit({
+        ...draft,
+        pictures: { ...draft.pictures, ...pick(made.pictures) },
+        confirmedPictures: { ...(draft.confirmedPictures ?? {}), ...pick(made.confirmedPictures) },
+        questions: [...draft.questions, ...fresh],
+      });
+      setMadeNote(fresh.length < want ? t("studio.section.madeSome", { count: fresh.length, want }) : t("studio.section.made", { count: fresh.length }));
+    } catch (error) {
+      setAddMessage(error instanceof Error ? error.message : t("studio.error.drafter"));
+    } finally {
+      setMaking(null);
+    }
+  };
   /** A matching set drafted by AI, added like one typed by hand — the checks below judge it the same way. */
   const makeMatch = async () => {
     setAddMessage("");
@@ -666,8 +680,9 @@ function ReviewStep({ draft, verdict, confirmed, onConfirmed, onEdit, target }: 
     setMakingMatch(true);
     try {
       const avoid = draft.questions.flatMap((q) => (q.kind === "match" ? q.pairs.map((pr) => pr.left) : []));
-      const made = await requestAiMatch({ language: draft.language, band: draft.band, sentences: draft.sentences.map((s) => ({ id: s.id, text: s.text })), pairs: 4, avoid });
+      const made = await requestAiMatch({ provider: aiProvider, language: draft.language, band: draft.band, sentences: draft.sentences.map((s) => ({ id: s.id, text: s.text })), pairs: 4, avoid });
       onEdit({ ...draft, questions: [...draft.questions, { id: nextId("m"), kind: "match", prompt: made.prompt ?? matchPrompt(draft.language), pairs: made.pairs }] });
+      setMadeNote(t("studio.section.madeMatch", { count: made.pairs.length }));
     } catch (error) {
       setAddMessage(error instanceof Error ? error.message : t("studio.error.matchFailed"));
     } finally {
@@ -677,8 +692,8 @@ function ReviewStep({ draft, verdict, confirmed, onConfirmed, onEdit, target }: 
 
   const count = (k: Question["kind"]) => draft.questions.filter((q) => q.kind === k).length;
   const strip: Array<[string, number, number]> = [[t("library.part.understand"), count("comprehension"), need.understand], [t("library.part.words"), count("vocab"), need.words], [t("library.part.spell"), count("spell"), need.spell]];
-  const tabKind: Record<Exclude<typeof tab, "splits">, Question["kind"]> = { understand: "comprehension", match: "match", words: "vocab", spell: "spell" };
-  const activeQuestions = tab === "splits" ? [] : draft.questions.filter((q) => q.kind === tabKind[tab]);
+  const tabKind: Record<Exclude<typeof tab, "splits" | "notes">, Question["kind"]> = { understand: "comprehension", match: "match", words: "vocab", spell: "spell" };
+  const activeQuestions = tab === "splits" || tab === "notes" ? [] : draft.questions.filter((q) => q.kind === tabKind[tab]);
   const [splitTarget, setSplitTarget] = useState<{ sid: string; index: number } | null>(null);
   const [splitText, setSplitText] = useState("");
   const tabItems: UITabItem<typeof tab>[] = [
@@ -692,6 +707,7 @@ function ReviewStep({ draft, verdict, confirmed, onConfirmed, onEdit, target }: 
     need.match !== undefined
       ? { id: "match" as const, label: `${meetsTarget(count("match"), need.match) ? "✓" : "✕"} ${t("library.part.match")}`, count: `${count("match")}/${need.match}` }
       : { id: "match" as const, label: t("library.part.match"), count: String(count("match")) },
+    { id: "notes", label: t("studio.notes.tab"), count: String(Object.values(draft.wordNotes ?? {}).filter((n) => n.reading || n.opposite).length) },
   ];
   // One piece fixes the word, several split it, none deletes it.
   const applyWordEdit = (sid: string, index: number, pieces: string[]) => {
@@ -788,24 +804,41 @@ function ReviewStep({ draft, verdict, confirmed, onConfirmed, onEdit, target }: 
         )}
       </details>}
 
+      {tab !== "splits" && tab !== "notes" && (() => {
+        const kind = tabKind[tab];
+        const want = kind === "match" ? need.match : need[partOf(kind)];
+        const have = count(kind);
+        const full = want !== undefined && have >= want ? t("studio.section.full") : kind === "match" && have >= MATCH_MAX_QUESTIONS ? t("studio.review.matchFull", { max: MATCH_MAX_QUESTIONS }) : undefined;
+        const aiCount = kind === "match" || want === undefined ? 0 : Math.max(0, want - have);
+        return (
+          <SectionHeader
+            title={t(`library.part.${tab}`)}
+            help={t(`studio.section.help.${tab}`)}
+            have={have}
+            want={want}
+            manualLabel={t(kind === "match" ? "studio.section.writeSet" : "studio.section.write")}
+            onManual={() => { setMadeNote(""); add(kind); }}
+            aiLabel={aiCount > 1 ? t("studio.section.makeN", { count: aiCount }) : t("studio.section.make")}
+            onAi={() => void (kind === "match" ? makeMatch() : makeWithAi(kind))}
+            aiBusy={kind === "match" ? makingMatch : making === kind}
+            aiDisabled={full}
+          >
+            {tab === "words" && addingWord && <NewWordFields draft={draft} id={nextId("q")} onAdd={addVocab} onCancel={() => setAddingWord(false)} />}
+            {addMessage && <p role="status" className="text-sm font-semibold text-rose-700 dark:text-rose-300">{addMessage}</p>}
+            {madeNote && <p role="status" className="text-sm font-semibold text-emerald-700 dark:text-emerald-400">✓ {madeNote}</p>}
+          </SectionHeader>
+        );
+      })()}
+
+      {tab !== "splits" && tab !== "notes" && activeQuestions.length === 0 && !addingWord && (
+        <SectionEmpty text={t(tab === "match" ? "studio.section.emptyMatch" : "studio.section.empty", { part: t(`library.part.${tab}`) })} />
+      )}
+
       {activeQuestions.map((q) => (
         <div key={q.id} id={`studio-question-${q.id}`}><QuestionCard q={q} draft={draft} checks={byQ(q.id)} onChange={(patch) => setQ(q.id, patch)} onVocab={(next) => setVocab(q.id, next)} onDelete={() => del(q.id)} /></div>
       ))}
 
-      {tab === "match" && need.match === undefined && <p className="text-sm text-muted">{t("studio.review.matchNote")}</p>}
-
-      {tab !== "splits" && <div className="flex flex-wrap items-center gap-2">
-        <UIButton type="button" variant="outline" size="sm" icon={<Plus className="h-4 w-4" aria-hidden="true" />} onClick={() => add(tabKind[tab])}>
-          {t(`library.part.${tab}`)}
-        </UIButton>
-        {tab === "match" && (
-          <UIButton type="button" variant="outline" size="sm" isLoading={makingMatch} icon={<Sparkles className="h-4 w-4" aria-hidden="true" />} onClick={() => void makeMatch()}>
-            {makingMatch ? t("studio.review.makingMatch") : t("studio.review.makeMatch")}
-          </UIButton>
-        )}
-        {tab === "words" && addingWord && <div className="basis-full"><NewWordFields draft={draft} id={nextId("q")} onAdd={addVocab} onCancel={() => setAddingWord(false)} /></div>}
-        {addMessage && <p role="status" className="basis-full text-sm font-semibold text-rose-700 dark:text-rose-300">{addMessage}</p>}
-      </div>}
+      {tab === "notes" && <WordNotesFields draft={draft} provider={aiProvider} onChange={(wordNotes) => onEdit({ ...draft, wordNotes })} onInQuiz={(notesInQuiz) => onEdit({ ...draft, notesInQuiz })} />}
 
       <RuleList verdict={verdict} />
     </div>
@@ -1406,10 +1439,10 @@ function SummaryStep({ draft, verdict, confirmed, onEdit, onNavigate, onQuestion
             {verdict.checks.filter((check) => check.status === "fail").map((check, index) => (
               <UIButton key={index} type="button" variant="secondary" onClick={() => onQuestion(check.question)}>{check.question}: {check.message}</UIButton>
             ))}
-            {!countsReady && <UIButton type="button" variant="secondary" onClick={() => onNavigate(3)}>{t("studio.summary.fixCounts")}</UIButton>}
-            {draft.language === "km" && !confirmed && <UIButton type="button" variant="secondary" onClick={() => onNavigate(3)}>{t("studio.review.confirmSplits")}</UIButton>}
-            {sentenceAudio.length < draft.sentences.length && <UIButton type="button" variant="secondary" onClick={() => onNavigate(5)}>{t("studio.summary.fixVoices", { count: draft.sentences.length - sentenceAudio.length })}</UIButton>}
-            {pageImages.length < pages.length && <UIButton type="button" variant="secondary" onClick={() => onNavigate(4)}>{t("studio.summary.fixImages", { count: pages.length - pageImages.length })}</UIButton>}
+            {!countsReady && <UIButton type="button" variant="secondary" onClick={() => onNavigate(2)}>{t("studio.summary.fixCounts")}</UIButton>}
+            {draft.language === "km" && !confirmed && <UIButton type="button" variant="secondary" onClick={() => onNavigate(2)}>{t("studio.review.confirmSplits")}</UIButton>}
+            {sentenceAudio.length < draft.sentences.length && <UIButton type="button" variant="secondary" onClick={() => onNavigate(4)}>{t("studio.summary.fixVoices", { count: draft.sentences.length - sentenceAudio.length })}</UIButton>}
+            {pageImages.length < pages.length && <UIButton type="button" variant="secondary" onClick={() => onNavigate(3)}>{t("studio.summary.fixImages", { count: pages.length - pageImages.length })}</UIButton>}
           </div>
         </UICard>
       </div>

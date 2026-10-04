@@ -1,7 +1,7 @@
 import { memo, useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState, type CSSProperties, type PointerEvent as ReactPointerEvent, type ReactNode, type RefObject } from "react";
 import { animate, motion, useMotionValue, useReducedMotion, useTransform } from "motion/react";
 import { Volume2, X } from "lucide-react";
-import { BANDS, type Passage, type PicturePlace, type Sentence } from "./data/passage";
+import { BANDS, noteFor, type Passage, type PicturePlace, type Sentence } from "./data/passage";
 import { layoutBook, type SetSentence, type SetToken } from "./bookLayout";
 import { FIT_MAX, nextFit, wordsFit } from "./fitPage";
 import { FLAT, SPRING, TURNED, angularVelocity, castOf, completes, curlOf, dragAngle, shadeOf, type Dir } from "./pageTurn";
@@ -448,6 +448,7 @@ export function BookReader({ book, onBack, onReady, preview = false }: { book: P
     else if (reduce && Math.abs(dx) >= TURN_AT) turn(pageRef.current + (dx < 0 ? 1 : -1));
   };
 
+  const peekNote = peek ? noteFor(book, peek) : undefined;
   const peekPic = peek ? book.pictures[peek.toLowerCase()] ?? book.pictures[peek] : undefined;
   const scale = TEXT_STEPS[textStep];
   // One factor for the whole page: the words and the picture shrink together
@@ -555,6 +556,8 @@ export function BookReader({ book, onBack, onReady, preview = false }: { book: P
           <span className="min-w-0 flex-1">
             <span className="block text-[0.65rem] font-bold uppercase tracking-[0.16em] text-muted">{t("reader.wordHelper")}</span>
             <span className={`block text-xl font-bold leading-tight text-ink ${km ? KHMER : SERIF}`}>{peek}</span>
+            {peekNote?.reading && <span className={`block text-sm text-ink ${km ? KHMER : ""}`}>{t("library.word.readAs", { word: peek })} <b>{peekNote.reading}</b></span>}
+            {peekNote?.opposite && <span className={`block text-sm text-ink ${km ? KHMER : ""}`}>{t("library.word.opposite")} <b>{peekNote.opposite}</b></span>}
             <span className="text-xs text-muted">{peekPic ? t("reader.pictureWordHint") : t("reader.tapSpeaker")}</span>
           </span>
           {(canSpeak(book.language) || book.wordAudio?.[peek] || book.wordAudio?.[peek.toLowerCase()]) && (

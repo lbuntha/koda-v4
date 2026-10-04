@@ -487,6 +487,14 @@
       "match": {
         "one": "Match — {count} set of questions and answers",
         "other": "Match — {count} sets of questions and answers"
+      },
+      "opposite": {
+        "one": "Opposites — {count} word",
+        "other": "Opposites — {count} words"
+      },
+      "reading": {
+        "one": "How to read — {count} word",
+        "other": "How to read — {count} words"
       }
     },
     "wordsYouWillMeet": "Words you will meet",
@@ -515,7 +523,9 @@
       "understand": "Understand",
       "words": "Words",
       "spell": "Spell",
-      "match": "Match"
+      "match": "Match",
+      "opposite": "Opposites",
+      "reading": "How to read"
     },
     "readAgainTitle": "Read again: {title}",
     "lookHere": "Look here",
@@ -535,7 +545,8 @@
       "listenSentence": "Listen to the sentence, then say the missing word slowly.",
       "readSentence": "Read the sentence again, then say the missing word slowly.",
       "matchTap": "Tap a question, then the answer that goes with it.",
-      "matchJoined": "I joined one pair for you."
+      "matchJoined": "I joined one pair for you.",
+      "tapWord": "Say each word aloud, then think of its match."
     },
     "feedback": {
       "right": "Yes! That’s right.",
@@ -598,7 +609,19 @@
     "clearSearch": "Clear search",
     "matchHow": "Tap a question, then its answer.",
     "matchQuestions": "Questions",
-    "matchAnswers": "Answers"
+    "matchAnswers": "Answers",
+    "word": {
+      "readAs": "“{word}” is read",
+      "opposite": "Opposite:"
+    },
+    "notesQuiz": {
+      "opposite": "Join each word to its opposite.",
+      "reading": "Join each word to how it is read.",
+      "how": "Tap a word, then its match.",
+      "words": "Words",
+      "opposites": "Opposites",
+      "readings": "How to read"
+    }
   },
   "coach": {
     "comesBefore": "Nearly! {want} comes before {got}. Spell it in the order you say it.",
@@ -705,14 +728,6 @@
       "the": "The offline drafter",
       "explain": "The offline drafter builds “which word finishes this sentence?” questions from the story’s own words. No key, no network."
     },
-    "useOffline": "Use the offline drafter",
-    "useOfflineInstead": "You can use the offline drafter instead.",
-    "drafted": "{who} drafted {understand} understand, {words} words and {spell} spell (band {band} needs {needUnderstand} / {needWords} / {needSpell}). Anything the checks could not trust was left out.",
-    "aiAsked": "{who} is asked for {understand} Understand, {words} Words and {spell} Spell questions. At least 85% in each section is needed to publish. The key stays on the server; the reply is checked before you see it and again on publish.",
-    "drafting": "Drafting…",
-    "draftAgain": "Draft again",
-    "draftQuestions": "Draft the questions",
-    "reviewDraft": "Review the current draft",
     "saved": "Draft saved.",
     "saveDraft": "Save draft",
     "savedShort": "Saved",
@@ -722,7 +737,6 @@
     "steps": "Steps",
     "step": {
       "source": "Source",
-      "generate": "Generate",
       "review": "Review & modify",
       "pages": "Pages & pictures",
       "voice": "Voice (optional)",
@@ -790,10 +804,7 @@
       "deleteWord": "Delete word",
       "confirmSplits": "A Khmer reader has checked the text and every split",
       "matchFull": "A book can have at most {max} matching sets.",
-      "optional": "optional",
-      "matchNote": "Matching is optional: a book can be published without it. Each set you add must pass its own checks — every answer in the story, no pair repeated.",
-      "makeMatch": "Make a set with AI",
-      "makingMatch": "Making a set…"
+      "optional": "optional"
     },
     "q": {
       "collapse": "Collapse question",
@@ -1188,6 +1199,57 @@
       "match": {
         "one": "Matching: {count} set — its checks",
         "other": "Matching: {count} sets — their checks"
+      }
+    },
+    "notes": {
+      "tab": "Read & opposite",
+      "help": "Pick any story word and add how to read it, its opposite, or both. Children see them when they tap the word, in the book’s word list, after a Words question — and in the quiz, if you tick it below.",
+      "word": "Word",
+      "notInStory": "no longer in the story",
+      "reading": "How to read",
+      "opposite": "Opposite word",
+      "readingHintKm": "e.g. ប្រជា ប្រី",
+      "readingHintEn": "e.g. el·e·phant",
+      "oppositeHintKm": "e.g. for ធំ, write តូច",
+      "oppositeHintEn": "e.g. for big, write small",
+      "remove": "Remove “{word}”",
+      "addWord": "Add a story word",
+      "add": "Add word",
+      "allWords": "Every story word is already listed.",
+      "aiTitle": "AI suggestions",
+      "aiCheck": "Check each one — the AI can be wrong, especially about how Khmer is read. Only empty boxes are filled; nothing you wrote is changed.",
+      "aiUse": "Use selected",
+      "aiDismiss": "Dismiss",
+      "aiNothing": "The AI had nothing new to add.",
+      "aiFailed": "The AI could not make suggestions. Try again, or write them yourself.",
+      "empty": "No words yet. Add a story word yourself, or let AI suggest readings and opposites.",
+      "inQuiz": "Also put in the quiz",
+      "inQuizOpposite": "Opposites — join each word to its opposite",
+      "inQuizReading": "How to read — join each word to how it is read",
+      "inQuizBoards": "{words} words ready · up to 5 per board",
+      "inQuizNeedTwo": "Needs at least 2 words with this filled in."
+    },
+    "section": {
+      "making": "Making…",
+      "make": "Make with AI",
+      "makeN": "Make {count} with AI",
+      "write": "Add",
+      "writeSet": "Add a set",
+      "progress": "{have} of {want} — {want} needed to publish",
+      "ready": "{have} of {want} — ready",
+      "optional": "Optional · {have} so far",
+      "full": "This part already has all it needs.",
+      "empty": "No {part} questions yet. Add one yourself, or let AI draft them from the story — you can change anything it makes.",
+      "emptyMatch": "No matching sets yet. They are optional: add one yourself, or let AI draft one from the story.",
+      "made": "Added {count} — check each one below.",
+      "madeSome": "Added {count} of {want}. The story could not support more without repeating; add the rest yourself.",
+      "madeMatch": "Added a set of {count} pairs — check it below.",
+      "nothingNew": "The AI found nothing new that does not repeat what is already here. Add one yourself.",
+      "help": {
+        "understand": "Questions about what happens in the story. Each has three choices and points at the sentence that proves the answer.",
+        "words": "A story word and three pictures — the child picks the one the word names.",
+        "spell": "A story sentence with one word missing — the child spells it.",
+        "match": "Optional. Questions and answers the child joins in pairs."
       }
     }
   },

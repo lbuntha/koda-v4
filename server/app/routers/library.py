@@ -48,6 +48,7 @@ MAX_ID = 64
 MAX_SENTENCES = 40
 MAX_QUESTIONS = 35  # 10 understand + 10 words + 10 spell, and up to 5 optional matching sets
 MAX_TEXT = 400  # characters in any one sentence, prompt or option
+MAX_WORD_NOTES = 200  # words given a reading or an opposite
 MAX_AUDIO_BYTES = 2 * 1024 * 1024  # a sentence read aloud is well under 1 MB
 AUDIO_TYPES = {"audio/wav", "audio/webm", "audio/ogg", "audio/mp4", "audio/mpeg"}
 CLIP_ID = re.compile(r"^[0-9a-f]{64}$")
@@ -194,6 +195,23 @@ def _clean(passage: dict[str, Any]) -> dict[str, Any]:
             or any(not isinstance(pr, dict) or too_long(pr.get("left")) or too_long(pr.get("right")) for pr in pairs)
         ):
             raise AppError(400, "invalid_passage", "A matching question is malformed or too long.")
+    notes = passage.get("wordNotes")
+    if notes is not None and (
+        not isinstance(notes, dict)
+        or len(notes) > MAX_WORD_NOTES
+        or any(
+            too_long(word)
+            or not isinstance(note, dict)
+            or any(not (v is None or isinstance(v, str)) or too_long(v) for v in note.values())
+            for word, note in notes.items()
+        )
+    ):
+        raise AppError(400, "invalid_passage", "A word's reading or opposite is malformed or too long.")
+    in_quiz = passage.get("notesInQuiz")
+    if in_quiz is not None and (
+        not isinstance(in_quiz, dict) or any(k not in ("opposite", "reading") or not isinstance(v, bool) for k, v in in_quiz.items())
+    ):
+        raise AppError(400, "invalid_passage", "notesInQuiz takes true or false for opposite and reading.")
     if passage.get("category") is not None:
         name = clean_category(passage.get("category"))
         if name is None:

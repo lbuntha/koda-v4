@@ -97,6 +97,20 @@ export interface Sentence {
   pictureAt?: PicturePlace;
 }
 
+/** What an author adds about one story word. Either part may be missing. */
+export interface WordNote {
+  /** How to say it, split by beat: ប្រជាប្រិយ is read "ប្រជា ប្រី". */
+  reading?: string;
+  /** A word meaning the opposite: big → small. */
+  opposite?: string;
+}
+
+/** A word's note, found as written or in lower case (English is keyed lower case). */
+export function noteFor(book: Pick<Passage, "wordNotes">, word: string): WordNote | undefined {
+  const note = book.wordNotes?.[word] ?? book.wordNotes?.[word.toLowerCase()];
+  return note && (note.reading || note.opposite) ? note : undefined;
+}
+
 export type PicturePlace = "top" | "bottom" | "left" | "right";
 export const PICTURE_PLACES: readonly PicturePlace[] = ["top", "bottom", "left", "right"];
 
@@ -187,6 +201,10 @@ export interface Passage {
    * named for its word passes the check only while it is still this one.
    */
   confirmedPictures?: Record<string, string>;
+  /** Story word → how to read it and its opposite, for tap-a-word and the word list. */
+  wordNotes?: Record<string, WordNote>;
+  /** Which notes the author ticked to become quiz boards. Absent or false: not in the quiz. */
+  notesInQuiz?: { opposite?: boolean; reading?: boolean };
   /** Optional recordings of single words, word → clip id, for tap-a-word. */
   wordAudio?: Record<string, string>;
   /** Words with no recording, so tapping one shows text and no dead speaker. */

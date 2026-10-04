@@ -4,7 +4,7 @@ import { createPortal } from "react-dom";
 import { ArrowLeft, BookOpen, Check, ChevronDown, Globe, Lightbulb, RotateCcw, Search, Star, Volume2, X, Zap } from "lucide-react";
 import { LetterWheel } from "../components/wheel/LetterWheel";
 import { ScoringAPI } from "../lib/scoring";
-import type { Language, Passage } from "./data/passage";
+import { noteFor, type Language, type Passage } from "./data/passage";
 import { ringOf } from "./data/spellingDeck";
 import { useShelf } from "./bookStore";
 import { spellsWord, tilesOf } from "./data/tiles";
@@ -16,7 +16,7 @@ import { BookRecorder } from "./learning";
 import { Picture } from "./Picture";
 import { isPhoto } from "./photos";
 import { LibraryProgress, type BookProgress } from "./progress";
-import { PARTS, isFirstTry, minutesToRead, parentSummary, quizOf, reward, tally, wordsToPractise, type Outcome, type QuizItem } from "./session";
+import { OPTIONAL_PARTS, PARTS, notesQuiz, isFirstTry, minutesToRead, parentSummary, quizOf, reward, tally, wordsToPractise, type Outcome, type QuizItem } from "./session";
 import { canSpeak, say, sentenceSpeaks, stop } from "./voice";
 import { prefetchBook } from "./clips";
 import { prefetchPhotos } from "./photos";
@@ -485,7 +485,8 @@ function BookPage({ book, onBack, onRead }: { book: Passage; onBack(): void; onR
     void prefetchPhotos(book); // so its photos show on the bus too
     return () => { live = false; };
   }, [book]);
-  const vocab = book.questions.filter((q) => q.kind === "vocab").map((q) => (q.kind === "vocab" ? q.word : ""));
+  // The Words questions' words, then any other word the author gave a reading or opposite.
+  const vocab = [...new Set([...book.questions.flatMap((q) => (q.kind === "vocab" ? [q.word] : [])), ...Object.keys(book.wordNotes ?? {}).filter((w) => noteFor(book, w))])];
   const count = (k: string) => book.questions.filter((q) => q.kind === k).length;
   // A Khmer book's spelling level: its hardest spelling word.
   const levels = book.language === "km" ? book.questions.flatMap((q) => (q.kind === "spell" ? [spellingLevel(tilesOf(q.word, "km"))] : [])) : [];
@@ -521,6 +522,10 @@ function BookPage({ book, onBack, onRead }: { book: Passage; onBack(): void; onR
               [tr("library.step.understand", { count: count("comprehension") }), progress?.stage === "done"],
               ...(count("match") ? [[tr("library.step.match", { count: count("match") }), progress?.stage === "done"] as const] : []),
               [tr("library.step.words", { count: count("vocab") }), progress?.stage === "done"],
+              ...(["opposite", "reading"] as const).flatMap((kind) => {
+                const pairs = notesQuiz(book, kind).reduce((n, q) => n + q.pairs.length, 0);
+                return pairs ? [[tr(`library.step.${kind}`, { count: pairs }), progress?.stage === "done"] as const] : [];
+              }),
               [
                 tr("library.step.spell", { count: count("spell") }) +
                   (level ? ` · ${tr("library.step.spellLevel", { level, name: levelName(level) })}` : ""),
@@ -538,9 +543,16 @@ function BookPage({ book, onBack, onRead }: { book: Passage; onBack(): void; onR
             <div className="mt-4">
               <h2 className="text-xs font-extrabold uppercase tracking-wider text-muted">{tr("library.wordsYouWillMeet")}</h2>
               <div className="mt-2 flex flex-wrap gap-2">
-                {vocab.map((w) => (
-                  <span key={w} className={`rounded-full bg-indigo-50 px-3 py-1 font-bold text-indigo-800 dark:bg-indigo-950 dark:text-indigo-200 ${kh(book)}`}>{w}</span>
-                ))}
+                {vocab.map((w) => {
+                  const note = noteFor(book, w);
+                  return (
+                    <span key={w} className={`rounded-full bg-indigo-50 px-3 py-1 font-bold text-indigo-800 dark:bg-indigo-950 dark:text-indigo-200 ${kh(book)}`}>
+                      {w}
+                      {note?.reading && <span className="ml-1.5 font-semibold text-indigo-600 dark:text-indigo-300">({note.reading})</span>}
+                      {note?.opposite && <span className="ml-1.5 font-semibold text-indigo-600 dark:text-indigo-300">≠ {note.opposite}</span>}
+                    </span>
+                  );
+                })}
               </div>
             </div>
           )}
@@ -672,7 +684,7 @@ function Quiz({ book, onLeave, onFinish, preview = false }: { book: Passage; onL
   };
 
   const doneIn = (part: QuizItem["part"]) => outcomes.filter((o) => o.part === part).length;
-  const parts = PARTS.map((p) => ({ p, n: quiz.filter((q) => q.part === p).length })).filter(({ p, n }) => n > 0 || p !== "match");
+  const parts = PARTS.map((p) => ({ p, n: quiz.filter((q) => q.part === p).length })).filter(({ p, n }) => n > 0 || !OPTIONAL_PARTS.has(p));
 
   return (
     <div>
@@ -691,7 +703,7 @@ function Quiz({ book, onLeave, onFinish, preview = false }: { book: Passage; onL
         ))}
       </div>
 
-      {item && item.part === "match" && (
+      {item && (item.part === "match" || item.part === "opposite" || item.part === "reading") && (
         <MatchQuestionView
           key={i}
           book={book}
@@ -773,6 +785,29 @@ function HintBar({ text, level, onHint, host }: { text: string; level: number; o
       {host && createPortal(action, host)}
       {text && <UIGuideBubble compact title={tr("library.hint.title")} message={text} tail="up" />}
     </div>
+  );
+}
+
+/** Once the word is found: how to read it and its opposite, when the author gave them. */
+export function WordNotes({ book, word, className = "mt-2" }: { book: Passage; word: string; className?: string }) {
+  const { t: tr } = useT();
+  const note = noteFor(book, word);
+  if (!note) return null;
+  return (
+    <dl className={`${className} grid gap-1 rounded-2xl bg-indigo-50 px-4 py-3 text-ink dark:bg-indigo-950 ${kh(book)}`}>
+      {note.reading && (
+        <div className="flex flex-wrap items-baseline gap-x-2">
+          <dt className="text-sm font-bold text-muted">{tr("library.word.readAs", { word })}</dt>
+          <dd className="text-xl font-extrabold">{note.reading}</dd>
+        </div>
+      )}
+      {note.opposite && (
+        <div className="flex flex-wrap items-baseline gap-x-2">
+          <dt className="text-sm font-bold text-muted">{tr("library.word.opposite")}</dt>
+          <dd className="text-xl font-extrabold">{note.opposite}</dd>
+        </div>
+      )}
+    </dl>
   );
 }
 
@@ -858,6 +893,7 @@ function ChoiceQuestion({ book, item, onWrong, onRight, onHint, hintHost }: {
         })}
       </div>
       <p aria-live="polite" className={`mt-3 min-h-6 text-sm font-bold ${right ? "text-emerald-700 dark:text-emerald-400" : "text-rose-700 dark:text-rose-400"}`}>{fb}</p>
+      {right && q.kind === "vocab" && <WordNotes book={book} word={q.word} />}
       <HintBar text={hintText} level={hint} onHint={nextHint} host={hintHost} />
     </div>
   );
@@ -883,7 +919,7 @@ export function matchOrder(id: string, n: number): number[] {
 /** "Match each question to its answer": the shared board, with this quiz's sounds, hints and scoring. */
 function MatchQuestionView({ book, item, onWrong, onRight, onHint, hintHost }: {
   book: Passage;
-  item: Extract<QuizItem, { part: "match" }>;
+  item: Extract<QuizItem, { part: "match" | "opposite" | "reading" }>;
   onWrong(given: string): void;
   onRight(given: string): void;
   onHint(level: number): void;
@@ -918,7 +954,7 @@ function MatchQuestionView({ book, item, onWrong, onRight, onHint, hintHost }: {
     setHint(level);
     onHint(level);
     if (level === 1) setHintText(tr("library.hint.matchTap"));
-    if (level === 2) setHintText(tr("library.hint.inStory"));
+    if (level === 2) setHintText(tr(item.part === "match" ? "library.hint.inStory" : "library.hint.tapWord"));
     if (level === 3) {
       const open = q.pairs.findIndex((_, i) => !(i in joined));
       if (open >= 0) join(open);
@@ -929,7 +965,7 @@ function MatchQuestionView({ book, item, onWrong, onRight, onHint, hintHost }: {
   return (
     <div>
       <p className={`text-2xl font-extrabold leading-snug text-ink ${kh(book)}`}>{q.prompt}</p>
-      <p className="mt-1 text-sm text-muted">{tr("library.matchHow")}</p>
+      <p className="mt-1 text-sm text-muted">{tr(item.part === "match" ? "library.matchHow" : "library.notesQuiz.how")}</p>
       <div className="mt-4">
         <UIMatchPairs
           pairs={q.pairs}
@@ -937,8 +973,8 @@ function MatchQuestionView({ book, item, onWrong, onRight, onHint, hintHost }: {
           joined={joined}
           onJoin={join}
           onMiss={miss}
-          leftLabel={tr("library.matchQuestions")}
-          rightLabel={tr("library.matchAnswers")}
+          leftLabel={tr(item.part === "match" ? "library.matchQuestions" : "library.notesQuiz.words")}
+          rightLabel={tr(item.part === "opposite" ? "library.notesQuiz.opposites" : item.part === "reading" ? "library.notesQuiz.readings" : "library.matchAnswers")}
           textClassName={kh(book)}
           disabled={done}
         />
@@ -1120,8 +1156,8 @@ function Results({ book, outcomes, earned, next, onNext, onShelf, onAgain }: {
   const { t: tr, tNodes } = useT();
   const reduce = useReducedMotion();
   const quiz = quizOf(book);
-  // Matching is optional: a book without it shows the three parts it has.
-  const parts = tally(outcomes, quiz).filter((part) => part.total > 0 || part.part !== "match");
+  // Matching, opposites and reading are optional: a book shows only the parts it has.
+  const parts = tally(outcomes, quiz).filter((part) => part.total > 0 || !OPTIONAL_PARTS.has(part.part));
   const need = wordsToPractise(outcomes);
   const stars = earned?.stars ?? 0;
   const tone = COVER[book.category ?? ""] ?? "from-indigo-500 to-indigo-800";

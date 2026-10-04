@@ -938,7 +938,7 @@ app.post("/api/art/generate", async (req, res) => {
  *    and the data API runs the checks again before anything is published. The
  *    story text is data in the prompt, never instructions.
  */
-const LIBRARY_BRIEF = (language: string, band: string, counts: { u: number; w: number; s: number }, pictures: string[], easyWords: string[]) => `
+const LIBRARY_BRIEF = (language: string, band: string, counts: { u: number; w: number; s: number }, pictures: string[], easyWords: string[], avoid: string[] = []) => `
 You write reading-and-spelling quizzes for children aged ${band === "A" ? "5 to 7" : "8 to 10"}, in ${language === "km" ? "Khmer" : "English"}.
 
 The user message contains a STORY between <story> tags, with numbered sentences s1, s2, ...
@@ -966,6 +966,7 @@ Output requirements:
 - If the story cannot support full valid, non-repeated counts, return at least ${Math.ceil(counts.u * 0.85)} Understand, ${Math.ceil(counts.w * 0.85)} Words and ${Math.ceil(counts.s * 0.85)} Spell items. Never invent content just to reach a count.
 - "answer" is the zero-based index of the right Understand choice.
 - Every Words "picture" MUST be one of: ${pictures.join(", ")}. Skip the item instead of inventing a picture name.
+${avoid.length ? `- The book already has these items. Rule 6 counts them too: do not reuse their words, sentences or answers.\n${avoid.map((a) => `  - ${a}`).join("\n")}` : ""}
 `.trim();
 
 const LIBRARY_STORY_BRIEF = (language: string, band: string, revising: boolean) => `
@@ -1659,7 +1660,7 @@ app.post("/api/library/story", async (req, res) => {
 });
 
 app.post("/api/library/draft", async (req, res) => {
-  const { provider: askedProvider, language, band, questionCounts, sentences, pictures, easyWords } = req.body ?? {};
+  const { provider: askedProvider, language, band, questionCounts, sentences, pictures, easyWords, avoid } = req.body ?? {};
   const authorization = req.headers.authorization;
   const lang = language === "km" ? "km" : "en";
   const level = band === "B" ? "B" : "A";
@@ -1693,7 +1694,8 @@ app.post("/api/library/draft", async (req, res) => {
 
   const settings = await systemSettings(authorization);
   const provider = String(askedProvider ?? settings["ai.libraryProvider"] ?? settings["ai.artProvider"] ?? "gemini").toLowerCase();
-  const instruction = LIBRARY_BRIEF(lang, level, counts, allowedPictures.length ? allowedPictures : ["book"], allowedEasyWords);
+  const already: string[] = Array.isArray(avoid) ? avoid.slice(0, 40).map((x: unknown) => String(x).slice(0, 200)) : [];
+  const instruction = LIBRARY_BRIEF(lang, level, counts, allowedPictures.length ? allowedPictures : ["book"], allowedEasyWords, already);
   const story = `<story>\n${lines.map((l, i) => `s${i + 1}: ${l}`).join("\n")}\n</story>`;
 
   try {
@@ -1808,6 +1810,62 @@ app.post("/api/library/match-question", async (req, res) => {
   } catch (error: any) {
     console.error("Error in /api/library/match-question:", error);
     res.status(502).json({ error: { code: "match_failed", message: error?.message ?? "The matching question could not be made." } });
+  }
+});
+
+/**
+ * How to read some story words and their opposites. Only suggestions: the
+ * Studio shows them to the author, who keeps what is right. Words the model
+ * names that are not in the story are dropped here.
+ */
+const LIBRARY_WORD_NOTES_BRIEF = (lang: "en" | "km", level: "A" | "B", words: string[], have: string[]) => `You help a teacher prepare a children's story, ages ${level === "A" ? "5–7" : "8–10"}, written in ${lang === "km" ? "Khmer" : "English"}.
+${words.length ? `For each of these story words: ${words.join(" | ")}` : `Choose up to 8 story words a child would most benefit from — words read differently from how they are spelled, or with a clear opposite.${have.length ? ` Skip these, they are done: ${have.slice(0, 60).join(" | ")}` : ""}`}
+give:
+- "reading": how to read it aloud, ${lang === "km"
+  ? "written in Khmer as it is pronounced, syllables separated by a space. Example: ប្រជាប្រិយ → \"ប្រជា ប្រី\", សប្បាយ → \"សប់ បាយ\". Leave it out when the word reads just as it is spelled and has one syllable."
+  : "split into syllables with a middle dot. Example: elephant → \"el·e·phant\", because → \"be·cause\". Leave it out for one-syllable words."}
+- "opposite": one common ${lang === "km" ? "Khmer" : "English"} word meaning the opposite, easy for that age (ធំ → តូច, big → small). Leave it out when the word has no clear opposite — never force one.
+Use the word exactly as written in the story for "word". Leave out a word that gets neither.
+Reply with JSON only: {"notes":[{"word":"...","reading":"...","opposite":"..."}]}`;
+
+app.post("/api/library/word-notes", async (req, res) => {
+  const { provider: askedProvider, language, band, sentences, words, have } = req.body ?? {};
+  const authorization = req.headers.authorization;
+  const lang = language === "km" ? "km" : "en";
+  const level = band === "B" ? "B" : "A";
+  const lines: string[] = Array.isArray(sentences) ? sentences.slice(0, 40).map((x: unknown) => String(x ?? "").slice(0, 400)) : [];
+  const asked: string[] = Array.isArray(words) ? words.slice(0, 30).map((x: unknown) => String(x).slice(0, 60)) : [];
+  const done: string[] = Array.isArray(have) ? have.slice(0, 200).map((x: unknown) => String(x).slice(0, 60)) : [];
+  if (!authorization) return res.status(401).json({ error: { code: "auth", message: "Sign in to get suggestions." } });
+  if (!lines.length) return res.status(400).json({ error: { code: "no_story", message: "Write the story first." } });
+  try {
+    const may = await fetch(`${API_URL}/v1/library/can-author`, { headers: { Authorization: authorization } });
+    if (may.status === 401) return res.status(401).json({ error: { code: "auth", message: "Your session has ended. Sign in again." } });
+    if (!may.ok) return res.status(403).json({ error: { code: "not_an_operator", message: "Only an operator can make library suggestions." } });
+    if (!(await systemAllows("ai.libraryDrafts", authorization))) return res.status(503).json({ error: { code: "feature_disabled", message: "AI library drafts are switched off." } });
+    const story = `<story>\n${lines.join("\n")}\n</story>`;
+    const answer = await askLibraryAi(authorization, askedProvider, LIBRARY_WORD_NOTES_BRIEF(lang, level, asked, done), story, res);
+    if (!answer) return;
+    const made = extractJson(answer.text) as { notes?: unknown } | null;
+    const text = lines.join(" ");
+    const lower = text.toLowerCase();
+    const clean = (x: unknown) => String(x ?? "").trim().slice(0, 120);
+    const notes = Array.isArray(made?.notes)
+      ? (made.notes as any[]).flatMap((n) => {
+          const word = clean(n?.word);
+          const reading = clean(n?.reading);
+          const opposite = clean(n?.opposite);
+          const inStory = lang === "km" ? text.includes(word) : lower.includes(word.toLowerCase());
+          return word && inStory && (reading || opposite) && opposite !== word
+            ? [{ word, ...(reading && reading !== word ? { reading } : {}), ...(opposite ? { opposite } : {}) }]
+            : [];
+        }).slice(0, 30)
+      : [];
+    if (!notes.length) return res.status(502).json({ error: { code: "not_json", message: "The AI did not return usable suggestions. Try again." } });
+    res.json({ notes, provider: answer.provider });
+  } catch (error: any) {
+    console.error("Error in /api/library/word-notes:", error);
+    res.status(502).json({ error: { code: "word_notes_failed", message: error?.message ?? "The suggestions could not be made." } });
   }
 });
 

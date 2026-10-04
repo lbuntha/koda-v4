@@ -65,6 +65,18 @@ beforeEach(() => {
   localStorage.clear();
 });
 
+/**
+ * The story step leads straight to Review with every section empty; each is
+ * filled on its own. With "Offline drafter" chosen, Make with AI drafts locally.
+ */
+async function fillSections() {
+  await screen.findByRole("tab", { name: /Understand/ });
+  for (const part of [/Understand/, /Words/, /Spell/]) {
+    fireEvent.click(screen.getByRole("tab", { name: part }));
+    await act(async () => { fireEvent.click(screen.getByRole("button", { name: /with AI$/ })); });
+  }
+}
+
 async function startBook() {
   render(<LibraryStudio />);
   await screen.findByText(/No books yet/);
@@ -121,11 +133,10 @@ describe("Library Studio", () => {
     await startBook();
     fireEvent.click(screen.getByRole("radio", { name: /Offline drafter/ }));
     fireEvent.click(screen.getByRole("button", { name: "Continue" }));
-    fireEvent.click(screen.getByRole("button", { name: /Draft the questions/ }));
-    await screen.findByRole("tab", { name: /Understand/ });
+    await fillSections();
     fireEvent.click(screen.getByRole("button", { name: /^1\s*Source$/ }));
     fireEvent.change(screen.getByPlaceholderText("e.g. At the Market"), { target: { value: "Fruit Day" } });
-    fireEvent.click(screen.getByRole("button", { name: /^7\s*Summary$/ }));
+    fireEvent.click(screen.getByRole("button", { name: /^6\s*Summary$/ }));
     fireEvent.change(screen.getByPlaceholderText("What should students learn from this story?"), { target: { value: "Choose fresh fruit." } });
     fireEvent.click(screen.getByRole("button", { name: "Save draft" }));
     await waitFor(() => expect(api.saveDraft).toHaveBeenCalled());
@@ -154,9 +165,8 @@ describe("Library Studio", () => {
     await startBook();
     fireEvent.click(screen.getByRole("radio", { name: /Offline drafter/ }));
     fireEvent.click(screen.getByRole("button", { name: "Continue" }));
-    fireEvent.click(screen.getByRole("button", { name: /Draft the questions/ }));
-    await screen.findByRole("tab", { name: /Understand/ });
-    fireEvent.click(screen.getByRole("button", { name: /^4\s*Pages & pictures$/ }));
+    await fillSections();
+    fireEvent.click(screen.getByRole("button", { name: /^3\s*Pages & pictures$/ }));
     const pages = screen.getByRole("list", { name: "Pages" });
     fireEvent.click(within(pages).getByRole("button", { name: /^Page 2/ }));
     // Clicking the page card opens the drawer directly — no separate Attach step.
@@ -188,8 +198,7 @@ describe("Library Studio", () => {
     await startBook();
     fireEvent.click(screen.getByRole("radio", { name: /Offline drafter/ }));
     fireEvent.click(screen.getByRole("button", { name: "Continue" }));
-    fireEvent.click(screen.getByRole("button", { name: /Draft the questions/ }));
-    await screen.findByRole("tab", { name: /Understand/ });
+    await fillSections();
 
     // A Words question's right-hand picture is the word itself...
     fireEvent.click(screen.getByRole("tab", { name: /Words/ }));
@@ -223,7 +232,7 @@ describe("Library Studio", () => {
 
     // A page's "Make with AI" opens with a finished instruction, not a bare line
     // the model has to guess a subject out of.
-    fireEvent.click(screen.getByRole("button", { name: /^4\s*Pages & pictures$/ }));
+    fireEvent.click(screen.getByRole("button", { name: /^3\s*Pages & pictures$/ }));
     const pages = screen.getByRole("list", { name: "Pages" });
     fireEvent.click(within(pages).getByRole("button", { name: /^Page 1/ }));
     const picker = screen.getByRole("dialog", { name: "Picture for page 1" });
@@ -248,9 +257,8 @@ describe("Library Studio", () => {
     await startBook();
     fireEvent.click(screen.getByRole("radio", { name: /Offline drafter/ }));
     fireEvent.click(screen.getByRole("button", { name: "Continue" }));
-    fireEvent.click(screen.getByRole("button", { name: /Draft the questions/ }));
-    await screen.findByRole("tab", { name: /Understand/ });
-    fireEvent.click(screen.getByRole("button", { name: /^4\s*Pages & pictures$/ }));
+    await fillSections();
+    fireEvent.click(screen.getByRole("button", { name: /^3\s*Pages & pictures$/ }));
     fireEvent.click(screen.getByRole("button", { name: /^Cover/ }));
     const cover = screen.getByRole("dialog", { name: "Picture for the cover" });
     fireEvent.click(within(cover).getByRole("tab", { name: "Upload" }));
@@ -263,9 +271,8 @@ describe("Library Studio", () => {
     await startBook();
     fireEvent.click(screen.getByRole("radio", { name: /Offline drafter/ }));
     fireEvent.click(screen.getByRole("button", { name: "Continue" }));
-    fireEvent.click(screen.getByRole("button", { name: /Draft the questions/ }));
-    await screen.findByRole("tab", { name: /Understand/ });
-    fireEvent.click(screen.getByRole("button", { name: /^4\s*Pages & pictures$/ }));
+    await fillSections();
+    fireEvent.click(screen.getByRole("button", { name: /^3\s*Pages & pictures$/ }));
 
     // The book as the reader lays it out: a cover and two pages, each Automatic.
     const pages = screen.getByRole("list", { name: "Pages" });
@@ -293,22 +300,22 @@ describe("Library Studio", () => {
     expect(saved.sentences.map((x) => x.picture)).toEqual(["straw-house", undefined, null, undefined]);
   });
 
-  it("falls back to the offline drafter when the AI provider has no key", async () => {
+  it("starts Review with every section empty, and makes one section with AI on request", async () => {
     await startBook();
     fireEvent.click(screen.getByRole("button", { name: "Continue" }));
-    fireEvent.click(screen.getByRole("button", { name: /Draft the questions/ }));
+    expect(api.requestAiDraft).not.toHaveBeenCalled();
+    fireEvent.click(await screen.findByRole("tab", { name: /Understand/ }));
+    expect(screen.getByText(/No Understand questions yet/)).toBeTruthy();
+    await act(async () => { fireEvent.click(screen.getByRole("button", { name: "Make 2 with AI" })); });
     expect(await screen.findByText(/No Gemini API key is configured/)).toBeTruthy();
-    fireEvent.click(screen.getByRole("button", { name: "Use the offline drafter" }));
-    expect(await screen.findByText(/The offline drafter drafted/)).toBeTruthy();
-    expect(api.requestAiDraft).toHaveBeenCalledWith(expect.objectContaining({ provider: "gemini", language: "en", band: "A", sentences: expect.any(Array) }));
+    expect(api.requestAiDraft).toHaveBeenCalledWith(expect.objectContaining({ provider: "gemini", language: "en", band: "A", questionCounts: expect.objectContaining({ understand: 2, words: 0, spell: 0 }) }));
   });
 
   it("drafts, catches a broken question, publishes once it is fixed", async () => {
     await startBook();
     fireEvent.click(screen.getByRole("radio", { name: /Offline drafter/ }));
     fireEvent.click(screen.getByRole("button", { name: "Continue" }));
-    fireEvent.click(screen.getByRole("button", { name: /Draft the questions/ }));
-    await screen.findByRole("tab", { name: /Understand/ });
+    await fillSections();
     expect(screen.getByRole("tab", { name: /Spell/ })).toBeTruthy();
     fireEvent.click(screen.getByRole("tab", { name: /Understand/ }));
 
@@ -342,8 +349,7 @@ describe("Library Studio", () => {
     await startBook();
     fireEvent.click(screen.getByRole("radio", { name: /Offline drafter/ }));
     fireEvent.click(screen.getByRole("button", { name: "Continue" }));
-    fireEvent.click(screen.getByRole("button", { name: /Draft the questions/ }));
-    await screen.findByRole("tab", { name: /Understand/ });
+    await fillSections();
 
     // One Words card: its word, and the three pictures it shows.
     fireEvent.click(screen.getByRole("tab", { name: /Words/ }));
@@ -381,9 +387,8 @@ describe("Library Studio", () => {
     await startBook();
     fireEvent.click(screen.getByRole("radio", { name: /Offline drafter/ }));
     fireEvent.click(screen.getByRole("button", { name: "Continue" }));
-    fireEvent.click(screen.getByRole("button", { name: /Draft the questions/ }));
-    await screen.findByRole("tab", { name: /Understand/ });
-    fireEvent.click(screen.getByRole("button", { name: /^8\s*Publish$/ }));
+    await fillSections();
+    fireEvent.click(screen.getByRole("button", { name: /^7\s*Publish$/ }));
     await act(async () => { fireEvent.click(screen.getByRole("button", { name: /^Publish$/ })); });
 
     await waitFor(() => expect(api.publishBook).toHaveBeenCalledWith("market-day"));
@@ -404,7 +409,6 @@ describe("Library Studio", () => {
     fireEvent.change(screen.getByPlaceholderText(/One sentence after another\. Khmer/), { target: { value: "សុខា ទៅ ផ្សារ ជាមួយ ម្តាយ។\nនាង ទិញ ស្វាយ មួយ។\nស្វាយ ផ្អែម ណាស់។" } });
     fireEvent.click(screen.getByRole("radio", { name: /Offline drafter/ }));
     fireEvent.click(screen.getByRole("button", { name: "Continue" }));
-    fireEvent.click(screen.getByRole("button", { name: /Draft the questions/ }));
     await screen.findByText(/checked the text and every split/);
     expect(screen.getByText(/✕ 8 · Khmer word splits are confirmed by a person/)).toBeTruthy();
     fireEvent.click(screen.getByRole("checkbox", { name: /checked the text and every split/ }));
@@ -420,7 +424,6 @@ describe("Library Studio", () => {
     fireEvent.change(screen.getByPlaceholderText(/One sentence after another\. Khmer/), { target: { value: "សុខា ទៅ ផ្សារ ជាមួយ ម្តាយ។\nនាង ទិញ ស្វាយ មួយ។\nស្វាយ ផ្អែម ណាស់។" } });
     fireEvent.click(screen.getByRole("radio", { name: /Offline drafter/ }));
     fireEvent.click(screen.getByRole("button", { name: "Continue" }));
-    fireEvent.click(screen.getByRole("button", { name: /Draft the questions/ }));
     await screen.findByText(/checked the text and every split/);
     const confirm = () => screen.getByRole("checkbox", { name: /checked the text and every split/ }) as HTMLInputElement;
     fireEvent.click(confirm());
@@ -449,8 +452,7 @@ describe("Library Studio", () => {
     await startBook();
     fireEvent.click(screen.getByRole("radio", { name: /Offline drafter/ }));
     fireEvent.click(screen.getByRole("button", { name: "Continue" }));
-    fireEvent.click(screen.getByRole("button", { name: /Draft the questions/ }));
-    await screen.findByRole("tab", { name: /Understand/ });
+    await fillSections();
     fireEvent.click(screen.getByRole("button", { name: /Voice \(optional\)/ }));
     expect(screen.getByText("0 of 4 recorded")).toBeTruthy();
     expect(screen.getByRole("radio", { name: /Lila/ })).toHaveProperty("checked", true);
@@ -484,7 +486,6 @@ describe("Library Studio", () => {
     fireEvent.change(screen.getByPlaceholderText(/One sentence after another\. Khmer/), { target: { value: "សុខា ទៅ ផ្សារ ជាមួយ ម្តាយ។\nនាង ទិញ ស្វាយ មួយ។\nស្វាយ ផ្អែម ណាស់។" } });
     fireEvent.click(screen.getByRole("radio", { name: /Offline drafter/ }));
     fireEvent.click(screen.getByRole("button", { name: "Continue" }));
-    fireEvent.click(screen.getByRole("button", { name: /Draft the questions/ }));
     await screen.findByText(/checked the text and every split/);
     fireEvent.click(screen.getByRole("button", { name: /Voice \(optional\)/ }));
     expect(screen.getByText(/Choose a recorded or Gemini voice/)).toBeTruthy();

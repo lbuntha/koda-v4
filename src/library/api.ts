@@ -163,6 +163,8 @@ export async function requestAiDraft(input: {
   sentences: string[];
   pictures: string[];
   easyWords?: string[];
+  /** What the book already asks, so a section filled again does not repeat it. */
+  avoid?: string[];
 }): Promise<{ draft: ModelDraft; provider: string }> {
   const res = await fetch("/api/library/draft", { method: "POST", headers: await tutorHeaders(), body: JSON.stringify(input) });
   const body = (await res.json().catch(() => null)) as { draft?: ModelDraft; provider?: string; error?: { message?: string } } | null;
@@ -199,6 +201,22 @@ export async function requestAiMatch(input: {
   const body = (await res.json().catch(() => null)) as { prompt?: string | null; pairs?: Array<{ left: string; right: string; evidence?: string }>; error?: { message?: string } } | null;
   if (!res.ok || !body?.pairs?.length) throw new Error(body?.error?.message ?? translate("studio.error.matchFailed"));
   return { prompt: body.prompt ?? null, pairs: body.pairs };
+}
+
+/** Suggested readings and opposites for story words. `words` empty: the AI picks the words. */
+export async function requestAiWordNotes(input: {
+  provider?: Provider;
+  language: Language;
+  band: Band;
+  sentences: string[];
+  words: string[];
+  /** Words already noted, so a pick-for-me run does not offer them again. */
+  have: string[];
+}): Promise<Array<{ word: string; reading?: string; opposite?: string }>> {
+  const res = await fetch("/api/library/word-notes", { method: "POST", headers: await tutorHeaders(), body: JSON.stringify(input) });
+  const body = (await res.json().catch(() => null)) as { notes?: Array<{ word: string; reading?: string; opposite?: string }>; error?: { message?: string } } | null;
+  if (!res.ok || !body?.notes?.length) throw new Error(body?.error?.message ?? translate("studio.notes.aiFailed"));
+  return body.notes;
 }
 
 export type ReportReason = "wrong_in_story" | "wrong_question" | "not_for_children" | "other";

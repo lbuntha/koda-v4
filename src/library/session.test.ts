@@ -21,7 +21,39 @@ describe("quizOf", () => {
   });
 
   it("names each part's task kind so they never average together", () => {
-    expect(new Set(["understand", "match", "words", "spell"].map((p) => taskKindOf(p as Outcome["part"]))).size).toBe(4);
+    expect(new Set(["understand", "match", "words", "opposite", "reading", "spell"].map((p) => taskKindOf(p as Outcome["part"]))).size).toBe(6);
+  });
+
+  it("makes opposite and reading boards from the notes only once the author ticks them", () => {
+    const book = structuredClone(MARKET);
+    book.wordNotes = {
+      big: { opposite: "small", reading: "big" },
+      hot: { opposite: "cold" },
+      sweet: { opposite: "sour", reading: "sweet" },
+      market: { reading: "mar·ket" },
+      lone: {},
+    };
+    expect(quizOf(book).some((q) => q.part === "opposite" || q.part === "reading")).toBe(false);
+
+    book.notesInQuiz = { opposite: true, reading: true };
+    const quiz = quizOf(book);
+    // After words, before spell.
+    expect(quiz.map((q) => q.part).filter((p, i, all) => all.indexOf(p) === i)).toEqual(["understand", "words", "opposite", "reading", "spell"]);
+    const opposite = quiz.find((q) => q.part === "opposite");
+    expect(opposite?.part === "opposite" && opposite.question.pairs).toEqual([{ left: "big", right: "small" }, { left: "hot", right: "cold" }, { left: "sweet", right: "sour" }]);
+    const reading = quiz.filter((q) => q.part === "reading");
+    expect(reading).toHaveLength(1);
+  });
+
+  it("leaves out a board of one, and folds a last pair into the board before it", () => {
+    const book = structuredClone(MARKET);
+    book.notesInQuiz = { opposite: true };
+    book.wordNotes = { big: { opposite: "small" } };
+    expect(quizOf(book).some((q) => q.part === "opposite")).toBe(false);
+
+    book.wordNotes = Object.fromEntries(Array.from({ length: 6 }, (_, i) => [`w${i}`, { opposite: `o${i}` }]));
+    const boards = quizOf(book).filter((q) => q.part === "opposite");
+    expect(boards.map((q) => (q.part === "opposite" ? q.question.pairs.length : 0))).toEqual([6]);
   });
 
   it("plays an optional matching set after understand, and counts it once in the tally", () => {
@@ -58,9 +90,11 @@ describe("tally and words to practise", () => {
   it("counts first tries per part against the part's size", () => {
     expect(tally(outcomes, quiz)).toEqual([
       { part: "understand", firstTry: 1, total: 2 },
-      // Matching is optional; a book without it tallies none.
+      // Matching, opposites and reading are optional; a book without them tallies none.
       { part: "match", firstTry: 0, total: 0 },
       { part: "words", firstTry: 1, total: 2 },
+      { part: "opposite", firstTry: 0, total: 0 },
+      { part: "reading", firstTry: 0, total: 0 },
       { part: "spell", firstTry: 2, total: 3 },
     ]);
   });

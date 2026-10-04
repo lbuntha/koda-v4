@@ -144,6 +144,12 @@ const storyPictures = (sentences: readonly Sentence[], lang: Language, keys: rea
   return map;
 };
 
+/** A new book: the story with its picture words found and nothing asked yet — each Review section is filled on its own. */
+export function withStoryPictures(base: Omit<Passage, "rev">, keys: readonly string[]): Omit<Passage, "rev"> {
+  const pictures = storyPictures(base.sentences, base.language, keys);
+  return { ...base, pictures, picture: Object.values(pictures)[0] ?? "book" };
+}
+
 /** The story, split, with nothing asked yet. */
 export function baseOf(input: StoryInput, splitter?: WordSplitter): Omit<Passage, "rev"> {
   return {
