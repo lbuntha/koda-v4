@@ -10,7 +10,6 @@ import {
   KeyRound,
   Pencil,
   RefreshCw,
-  Search,
   ShieldCheck,
   Trash2,
   UserCheck,
@@ -29,6 +28,7 @@ import {
   UIDialog,
   UIModal,
   UITabs,
+  UISearchInput,
 } from "../ui";
 import { NoAccess } from "./NoAccess";
 
@@ -597,7 +597,7 @@ export const UsersPage: React.FC = () => {
 
         <section className="overflow-hidden rounded-2xl border border-[#E8E4F6] bg-white shadow-sm dark:border-line dark:bg-surface">
           <div className="flex flex-col gap-3 border-b border-line p-4 lg:flex-row lg:items-center">
-            <label className="relative min-w-0 flex-1"><Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted" /><span className="sr-only">{translate("admin.usersPage.searchUsers")}</span><input value={query} onChange={(event) => setQuery(event.target.value)} className={`${inputClass} pl-9`} placeholder={translate("admin.usersPage.searchByNameOrEmail")} /></label>
+            <UISearchInput className="flex-1" label={translate("admin.usersPage.searchUsers")} placeholder={translate("admin.usersPage.searchByNameOrEmail")} value={query} onChange={(event) => setQuery(event.target.value)} />
             <select value={role} onChange={(event) => setRole(event.target.value)} className={`${inputClass} lg:w-44`} aria-label={translate("admin.usersPage.filterByRole")}><option value="">{translate("admin.usersPage.allRoles")}</option><optgroup label={translate("admin.usersPage.platformRoles")}>{platformRoles.map((item) => <option key={item.id} value={item.id}>{item.name}</option>)}</optgroup><optgroup label={translate("admin.usersPage.familyRoles")}><option value="owner">{translate("admin.usersPage.owner")}</option><option value="parent">{translate("admin.usersPage.parent")}</option><option value="caregiver">{translate("admin.usersPage.caregiver")}</option><option value="student">{translate("admin.usersPage.student")}</option><option value="child">{translate("admin.usersPage.child")}</option></optgroup></select>
             {view === "directory" ? <select value={status} onChange={(event) => setStatus(event.target.value)} className={`${inputClass} lg:w-40`} aria-label={translate("admin.usersPage.filterByStatus")}><option value="">{translate("admin.usersPage.allStatuses")}</option><option value="active">{translate("admin.usersPage.active")}</option><option value="suspended">{translate("admin.usersPage.suspended")}</option></select> : <select value={onboarding} onChange={(event) => setOnboarding(event.target.value as "" | OnboardingStatus)} className={`${inputClass} lg:w-52`} aria-label={translate("admin.usersPage.filterByOnboardingStage")}><option value="">{translate("admin.usersPage.allOnboarding")}</option><option value="pending">{translate("admin.usersPage.awaitingSignIn")}</option><option value="completed">{translate("admin.usersPage.onboarded")}</option><option value="blocked">{translate("admin.usersPage.blocked")}</option></select>}
             <UIButton variant="secondary" size="icon" icon={<RefreshCw />} onClick={() => void load()} isLoading={loading} aria-label={translate("admin.usersPage.refreshUsers")} />

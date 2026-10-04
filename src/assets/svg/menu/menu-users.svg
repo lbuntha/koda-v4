@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+  <title>Users</title>
+  <circle cx="68" cy="36" r="13" fill="#7DD3FC" />
+  <path fill="#0EA5E9" d="M46 82 C46 64 56 56 68 56 C80 56 90 64 90 82 Z" />
+  <circle cx="38" cy="38" r="16" fill="#C4B5FD" />
+  <path fill="#8B5CF6" d="M10 86 C10 66 22 58 38 58 C54 58 66 66 66 86 Z" />
+  <path fill="#A78BFA" d="M10 86 C10 66 22 58 38 58 C30 62 22 70 22 86 Z" />
+</svg>

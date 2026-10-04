@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+  <title>Profile</title>
+  <circle cx="50" cy="50" r="44" fill="#E2E8F0" />
+  <clipPath id="menuProfileClip"><circle cx="50" cy="50" r="44" /></clipPath>
+  <g clip-path="url(#menuProfileClip)">
+    <path fill="#8B5CF6" d="M18 96 C18 74 32 66 50 66 C68 66 82 74 82 96 Z" />
+    <circle cx="50" cy="44" r="18" fill="#FBCFB0" />
+    <path fill="#334155" d="M32 42 C32 28 42 22 52 22 C62 22 69 30 68 40 C60 40 52 36 47 30 C44 36 38 40 32 42 Z" />
+    <circle cx="43" cy="47" r="2.6" fill="#1E293B" />
+    <circle cx="57" cy="47" r="2.6" fill="#1E293B" />
+    <circle cx="39" cy="53" r="3" fill="#FDA4AF" />
+    <circle cx="61" cy="53" r="3" fill="#FDA4AF" />
+    <path fill="none" stroke="#9F1239" stroke-width="2.4" stroke-linecap="round" d="M45 55 Q50 59 55 55" />
+  </g>
+</svg>

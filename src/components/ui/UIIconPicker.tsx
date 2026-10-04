@@ -1,11 +1,10 @@
 import React, { useState } from "react";
-import { Search, X } from "lucide-react";
+import { X } from "lucide-react";
+import { UISearchInput } from "./UISearchInput";
 import { svgAssetIds } from "../../assets/svg";
 import { ART_ICON_PREFIX, SidebarIcon } from "./sidebarIcon";
 import { sidebarIcons } from "./sidebarIcons";
-import { themeSystem } from "../../lib/themeSystem";
 
-const FIELD = themeSystem.field("lg", "font-mono");
 
 export interface UIIconPickerProps {
   value: string;
@@ -40,7 +39,7 @@ export const UIIconPicker: React.FC<UIIconPickerProps> = ({ value, artIds = [], 
               </button>
             ))}
           </div>
-          <div className="relative"><Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted" /><input value={query} onChange={(event) => setQuery(event.target.value)} placeholder={tab === "icons" ? "Search icons" : "Search SVG artwork"} className={`${FIELD} w-full pl-10`} autoFocus /></div>
+          <UISearchInput label={tab === "icons" ? "Search icons" : "Search SVG artwork"} value={query} onChange={(event) => setQuery(event.target.value)} autoFocus />
           <div className="grid grid-cols-3 sm:grid-cols-5 md:grid-cols-6 gap-2">
             {tab === "icons" ? icons.map((name) => (
               <button key={name} type="button" onClick={() => onSelect(name)} className={`flex flex-col items-center gap-2 rounded-xl border-2 p-3 cursor-pointer hover:border-indigo-400 hover:bg-indigo-50/60 dark:hover:bg-indigo-500/10 ${value === name ? "border-indigo-500 bg-indigo-50 dark:bg-indigo-500/15" : "border-line"}`}><SidebarIcon name={name} className="w-6 h-6 text-indigo-600 dark:text-indigo-300" /><span className="text-[11px] text-body truncate max-w-full">{name}</span></button>

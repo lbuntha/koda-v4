@@ -5,12 +5,12 @@
  */
 
 import { useCallback, useEffect, useMemo, useRef, useState, useSyncExternalStore } from "react";
-import { AlertCircle, ArrowLeft, Check, ChevronLeft, ChevronRight, Download, Flag, GripVertical, ImagePlus, Loader2, ListPlus, MoreHorizontal, Pencil, Plus, Rocket, Search, Settings2, Star, Trash2, Undo2, Upload, Wand2, X } from "lucide-react";
+import { AlertCircle, ArrowLeft, Check, ChevronLeft, ChevronRight, Download, Flag, GripVertical, ImagePlus, Loader2, ListPlus, MoreHorizontal, Pencil, Plus, Rocket, Settings2, Star, Trash2, Undo2, Upload, Wand2, X } from "lucide-react";
 import { ScoringAPI } from "../../lib/scoring";
 import { useT } from "../../lib/i18n";
 import { themeSystem } from "../../lib/themeSystem";
 import { usePermissions } from "../../lib/sync";
-import { UIBadge, UIButton, UIDialog, UIFlashMessage, UIMenu, UIMenuItem, UIPagination } from "../../components/ui";
+import { UIBadge, UIButton, UIDialog, UIFlashMessage, UIMenu, UIMenuItem, UIPagination, UISearchInput } from "../../components/ui";
 import { COLLECTION_STATUSES, collectionStatus, matches, pageOf, sortBy, type CollectionStatus, type ListSort } from "./listView";
 import type { ItemStats, PendingCollection, Problem, Report, StudioCollection } from "../data/api";
 import {
@@ -293,10 +293,7 @@ export function CollectionsList({ onOpen, onOpenItem, creating, onCreating }: { 
       ) : rows.length > 0 && (
         <section className={themeSystem.card("default", "flex flex-col gap-3 p-4")} aria-label={t("traceStudio.view.collections")}>
           <div className="flex flex-wrap items-center gap-2">
-            <label className="relative min-w-48 flex-1">
-              <Search className="pointer-events-none absolute left-2.5 top-1/2 h-4 w-4 -translate-y-1/2 text-muted" aria-hidden="true" />
-              <input type="search" className={`${inputCls} pl-8`} lang="km" placeholder={t("traceStudio.col.search")} aria-label={t("traceStudio.col.search")} value={q} onChange={(e) => setQ(e.target.value)} />
-            </label>
+            <UISearchInput size="sm" className="min-w-48 flex-1" lang="km" label={t("traceStudio.col.search")} value={q} onChange={(e) => setQ(e.target.value)} />
             <select aria-label={t("traceStudio.filterStatus")} className={`${inputCls} w-auto`} value={stand} onChange={(e) => setStand(e.target.value as CollectionStatus | "")}>
               <option value="">{t("traceStudio.allStatus")} ({rows.length})</option>
               {COLLECTION_STATUSES.filter((st) => counts[st]).map((st) => (
@@ -904,10 +901,7 @@ function AddExisting({ exclude, onAdd }: { exclude: Set<string>; onAdd(ids: stri
   const all = TraceDrafts.list().filter((d) => !exclude.has(d.item.id) && matches(d.item.title, q));
   return (
     <div className={panelCls}>
-      <label className="relative">
-        <Search className="pointer-events-none absolute left-2.5 top-1/2 h-4 w-4 -translate-y-1/2 text-muted" aria-hidden="true" />
-        <input className={`${inputCls} pl-8`} lang="km" placeholder={t("traceStudio.search")} value={q} onChange={(e) => setQ(e.target.value)} aria-label={t("traceStudio.search")} />
-      </label>
+      <UISearchInput size="sm" lang="km" label={t("traceStudio.search")} value={q} onChange={(e) => setQ(e.target.value)} />
       {all.length === 0 ? (
         <p className="text-sm text-muted">{t("traceStudio.col.noOthers")}</p>
       ) : (

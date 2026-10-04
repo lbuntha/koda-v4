@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useState } from "react";
-import { BookOpen, CheckCircle2, RefreshCw, Search } from "lucide-react";
+import { BookOpen, CheckCircle2, RefreshCw } from "lucide-react";
 import { filterSkillCatalog, learnOrder } from "../lib/skillCatalog";
 import { useSkillCatalog } from "../lib/useSkillCatalog";
 import { useSkillRegistrations } from "../lib/skillRegistrationApi";
@@ -8,7 +8,7 @@ import { playSound } from "../utils/audio";
 import { offlineMessage, useOfflineDownload } from "../lib/offlineSkill";
 import { themeSystem } from "../lib/themeSystem";
 import { useIsCompact } from "../lib/useBreakpoint";
-import { UIBadge, UIButton, UIPageHeader, UISkillCard } from "./ui";
+import { UIBadge, UIButton, UIPageHeader, UISkillCard, UISearchInput } from "./ui";
 import { subjectForSkill, useSubjects } from "../lib/subjects";
 import { refreshSystem } from "../lib/sync/system";
 import { useT } from "../lib/i18n";
@@ -189,19 +189,15 @@ export const SkillCatalogPage: React.FC<SkillCatalogPageProps> = ({
         action={viewer.showAllSkills ? <UIBadge variant="primary">{t("catalog.adminBadge")}</UIBadge> : undefined}
       />
 
-      <div className="relative">
-        <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-muted pointer-events-none" />
-        <input
-          value={query}
-          onChange={(event) => {
-            setQuery(event.target.value);
-            setVisibleLimit(PAGE_SIZE);
-          }}
-          placeholder={t("catalog.searchPlaceholder")}
-          aria-label={t("catalog.search")}
-          className={themeSystem.field("lg", "w-full rounded-2xl py-3 pl-11 pr-4")}
-        />
-      </div>
+      <UISearchInput
+        label={t("catalog.search")}
+        placeholder={t("catalog.searchPlaceholder")}
+        value={query}
+        onChange={(event) => {
+          setQuery(event.target.value);
+          setVisibleLimit(PAGE_SIZE);
+        }}
+      />
 
       <div className="flex gap-2 overflow-x-auto pb-1" aria-label={t("catalog.subjects")}>
         {[{ id: "all", name: t("catalog.forYou") }, ...categories].map(({ id: value, name }) => (

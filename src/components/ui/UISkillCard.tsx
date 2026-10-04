@@ -55,20 +55,24 @@ export interface UISkillCardProps {
 }
 
 /**
- * The banner's colour for each subject: the poster tile's gradient a step
- * deeper, so white words on it stay readable. No amber or lime — yellow tones
- * are hard to read in this app, so those subjects borrow a neighbour's colour.
+ * The banner's colour for each subject: a pale wash of the poster tile's hue,
+ * with the words in ink and the subject's colour kept for the bar and the
+ * button — a strong colour across a whole banner read as heavy. No amber or
+ * lime: yellow tones are hard to read in this app, so those subjects borrow a
+ * neighbour's colour.
  */
-const HERO_TONE: Record<string, string> = {
-  "number-sense": "from-indigo-600 to-violet-800",
-  operations: "from-emerald-600 to-teal-800",
-  "place-value": "from-sky-600 to-indigo-800",
-  patterns: "from-sky-600 to-cyan-800",
-  fractions: "from-rose-600 to-pink-800",
-  measurement: "from-emerald-600 to-green-800",
-  geometry: "from-fuchsia-600 to-purple-800",
+type HeroTone = { wash: string; accent: string };
+const HERO_TONE: Record<string, HeroTone> = {
+  "number-sense": { wash: "from-indigo-50 to-violet-100 dark:from-indigo-950 dark:to-violet-900/60", accent: "bg-indigo-600" },
+  operations: { wash: "from-emerald-50 to-teal-100 dark:from-emerald-950 dark:to-teal-900/60", accent: "bg-emerald-600" },
+  "place-value": { wash: "from-sky-50 to-indigo-100 dark:from-sky-950 dark:to-indigo-900/60", accent: "bg-sky-600" },
+  patterns: { wash: "from-sky-50 to-cyan-100 dark:from-sky-950 dark:to-cyan-900/60", accent: "bg-cyan-600" },
+  fractions: { wash: "from-rose-50 to-pink-100 dark:from-rose-950 dark:to-pink-900/60", accent: "bg-rose-600" },
+  measurement: { wash: "from-emerald-50 to-green-100 dark:from-emerald-950 dark:to-green-900/60", accent: "bg-emerald-600" },
+  geometry: { wash: "from-fuchsia-50 to-purple-100 dark:from-fuchsia-950 dark:to-purple-900/60", accent: "bg-fuchsia-600" },
 };
-export const heroTone = (category?: string) => HERO_TONE[category ?? ""] ?? "from-indigo-500 to-indigo-800";
+const heroTone = (category?: string): HeroTone =>
+  HERO_TONE[category ?? ""] ?? { wash: "from-indigo-50 to-indigo-100 dark:from-indigo-950 dark:to-indigo-900/60", accent: "bg-indigo-600" };
 
 /**
  * One progress bar, at the weight its card size calls for.
@@ -212,9 +216,10 @@ export const UISkillCard: React.FC<UISkillCardProps> = ({
    * phone the artwork is a band across the top, fading downwards.
    */
   if (size === "lg") {
+    const tone = heroTone(category);
     return (
       <section
-        className={`relative grid overflow-hidden rounded-3xl bg-gradient-to-br text-white md:grid-cols-[minmax(0,3fr)_minmax(0,2fr)] ${heroTone(category)} ${className}`}
+        className={`relative grid overflow-hidden rounded-3xl border-2 border-line bg-gradient-to-br text-ink md:grid-cols-[minmax(0,3fr)_minmax(0,2fr)] ${tone.wash} ${className}`}
         aria-label={title}
       >
         {hasArtwork ? (
@@ -227,50 +232,44 @@ export const UISkillCard: React.FC<UISkillCardProps> = ({
         ) : (
           /* A glyph floats whole on the colour; stretched across half a banner it is one symbol saying very little. */
           <span aria-hidden="true" className="order-first flex h-32 items-center justify-center md:order-last md:h-auto md:min-h-64">
-            <span className="block h-24 w-24 overflow-hidden rounded-3xl shadow-lg ring-4 ring-white/25 md:h-32 md:w-32">
+            <span className="block h-24 w-24 overflow-hidden rounded-3xl shadow-lg ring-4 ring-white/70 dark:ring-white/10 md:h-32 md:w-32">
               <UISkillThumbnail thumbnail={thumbnail} fallbackIconName={fallbackIconName} category={category} size="lg" fill />
             </span>
           </span>
         )}
         <div className="relative z-10 flex min-w-0 flex-col gap-3 p-5 pt-1 md:p-8">
-          {eyebrow && <span className="text-xs font-extrabold uppercase tracking-widest text-white/80">{eyebrow}</span>}
+          {eyebrow && <span className="text-xs font-extrabold uppercase tracking-widest text-muted">{eyebrow}</span>}
           {(subjectName || badges) && (
-            <div className="flex flex-wrap items-center gap-2 text-sm font-semibold text-white/85">
+            <div className="flex flex-wrap items-center gap-2 text-sm font-semibold text-muted">
               {subjectName && <span>{subjectName}</span>}
               {badges}
             </div>
           )}
-          <h2 className="text-3xl font-extrabold leading-tight tracking-tight text-white sm:text-4xl">{title}</h2>
-          {tagline && <p className="line-clamp-2 max-w-lg text-sm text-white/85 sm:text-base">{tagline}</p>}
-          {meta && <p className="font-mono text-xs font-bold text-white/75">{meta}</p>}
+          <h2 className="text-3xl font-extrabold leading-tight tracking-tight text-ink sm:text-4xl">{title}</h2>
+          {tagline && <p className="line-clamp-2 max-w-lg text-sm text-muted sm:text-base">{tagline}</p>}
+          {meta && <p className="font-mono text-xs font-bold text-muted">{meta}</p>}
           <div className="flex max-w-sm flex-col gap-1.5">
             <span
-              className="block h-2 overflow-hidden rounded-full bg-white/25"
+              className="block h-2 overflow-hidden rounded-full bg-black/10 dark:bg-white/15"
               role="progressbar"
               aria-valuenow={percent}
               aria-valuemin={0}
               aria-valuemax={100}
               aria-label={t("skillCard.progress", { title })}
             >
-              <span className="block h-full rounded-full bg-white transition-all" style={{ width: `${percent}%` }} />
+              <span className={`block h-full rounded-full transition-all ${tone.accent}`} style={{ width: `${percent}%` }} />
             </span>
-            <span className="text-sm font-semibold tabular-nums text-white/85">
+            <span className="text-sm font-semibold tabular-nums text-muted">
               {completedLessons
                 ? t("skillCard.lessonsComplete", { done: completedLessons, total: lessonCount })
                 : t("skillCard.readyToBegin")}
             </span>
-            {footnote && <span className="text-xs text-white/75">{footnote}</span>}
+            {footnote && <span className="text-xs text-muted">{footnote}</span>}
           </div>
           <div className="mt-2">
-            <button
-              type="button"
-              onClick={act}
-              disabled={registering}
-              className="inline-flex min-h-12 items-center gap-2 rounded-2xl bg-white px-5 text-base font-extrabold text-slate-900 shadow-sm transition hover:bg-white/90 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-white/50 disabled:opacity-60"
-            >
-              <Play className="h-5 w-5 fill-current" aria-hidden="true" />
+            <UIButton size="lg" icon={<Play className="fill-current" aria-hidden="true" />} onClick={act} disabled={registering}>
               {registering ? t("skillCard.adding") : label}
-            </button>
+            </UIButton>
           </div>
         </div>
       </section>

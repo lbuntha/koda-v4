@@ -51,7 +51,6 @@ export const WelcomeBack: React.FC<{ userProgress: UserProgress }> = ({ userProg
   return (
     <UIBanner
       tone={away ? "primary" : "streak"}
-      vivid
       icon={away ? <Hand /> : <Flame className="fill-current" />}
       onDismiss={() => setDismissed(true)}
       dismissLabel={t("welcomeBack.dismiss")}

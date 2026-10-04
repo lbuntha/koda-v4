@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { BookPlus, ChevronDown, Mic, Pencil, RefreshCw, Search, Trash2, Wrench, X } from "lucide-react";
-import { UIBadge, UIButton, UIDataTable, UIDialog, UIFlashMessage, UIMenu, UIMenuItem, UIPageHeader, UIPagination, UISpinner, UITabs, type UIDataTableColumn } from "../../components/ui";
+import { UIBadge, UIButton, UIDataTable, UIDialog, UIFlashMessage, UIMenu, UIMenuItem, UIPageHeader, UIPagination, UISpinner, UITabs, type UIDataTableColumn, UISearchInput } from "../../components/ui";
 import { themeSystem } from "../../lib/themeSystem";
 import { deleteBook, fetchStudioBooks, type BookSummary, type StudioMeta, type StudioPage, type StudioQuery, type StudioStatus } from "../api";
 import { BANDS, type Band } from "../data/passage";
@@ -311,11 +311,7 @@ export function StudioHome({ meta, onOpen, onNew, onSoundNames, opening = null, 
             <UITabs<Tab> items={tabs} value={view.tab} onChange={(tab) => setView({ tab })} label={t("studio.byStatus")} />
           </div>
           <div className="flex flex-col gap-2 lg:flex-row lg:items-center">
-            <label className="relative min-w-0 flex-1">
-              <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted" aria-hidden="true" />
-              <span className="sr-only">{t("library.search")}</span>
-              <input type="search" value={query} onChange={(e) => setQuery(e.target.value)} placeholder={t("studio.searchPlaceholder")} className={themeSystem.field("lg", "pl-9")} />
-            </label>
+            <UISearchInput className="flex-1" label={t("library.search")} placeholder={t("studio.searchPlaceholder")} value={query} onChange={(e) => setQuery(e.target.value)} />
             <div className="flex flex-wrap items-center gap-2">
               <Select label={t("studio.col.language")} value={view.language} onChange={(language) => setView({ language })} all={t("studio.allLanguages")}
                 options={(facets?.languages ?? []).map((f) => ({ value: f.value, label: `${languageName(f.value)} (${f.count})` }))} />

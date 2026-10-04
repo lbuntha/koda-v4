@@ -1,11 +1,11 @@
 import React, { useCallback, useEffect, useState } from "react";
-import { Check, CreditCard, Pencil, Plus, Search, Users } from "lucide-react";
+import { Check, CreditCard, Pencil, Plus, Users } from "lucide-react";
 
 import { ApiError, accessToken, request, usePermissions } from "../../lib/sync";
 import { formatPrice } from "../../lib/billing";
 import { themeSystem } from "../../lib/themeSystem";
 import { playSound } from "../../utils/audio";
-import { UIBadge, UIButton, UIModal, UISectionHeader } from "../ui";
+import { UIBadge, UIButton, UIModal, UISectionHeader, UISearchInput } from "../ui";
 import { NoAccess } from "./NoAccess";
 
 import { translate } from "../../lib/i18n";
@@ -280,18 +280,15 @@ export const BillingPage: React.FC<{ embedded?: boolean }> = ({ embedded = false
         />
 
         <div className="flex items-center gap-2">
-          <div className="relative flex-1">
-            <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted" />
-            <input
-              className={`${field} pl-9`}
-              placeholder={translate("admin.billingPage.searchByNameEmailOrFamily")}
+          <UISearchInput
+              className="flex-1"
+              label={translate("admin.billingPage.searchByNameEmailOrFamily")}
               value={query}
               onChange={(event) => setQuery(event.target.value)}
               onKeyDown={(event) => {
                 if (event.key === "Enter") void loadSubs(query);
               }}
             />
-          </div>
           <UIButton variant="secondary" size="sm" onClick={() => void loadSubs(query)}>
             {translate("admin.billingPage.search")}
           </UIButton>

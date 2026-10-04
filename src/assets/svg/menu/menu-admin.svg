@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+  <title>Admin</title>
+  <rect x="12" y="12" width="76" height="76" rx="14" fill="#475569" />
+  <rect x="12" y="12" width="76" height="20" rx="10" fill="#64748B" />
+  <rect x="24" y="24" width="52" height="6" rx="3" fill="#94A3B8" />
+  <rect x="24" y="47" width="52" height="6" rx="3" fill="#94A3B8" />
+  <rect x="24" y="70" width="52" height="6" rx="3" fill="#94A3B8" />
+  <circle cx="60" cy="27" r="8" fill="#F43F5E" />
+  <circle cx="36" cy="50" r="8" fill="#0EA5E9" />
+  <circle cx="54" cy="73" r="8" fill="#10B981" />
+</svg>

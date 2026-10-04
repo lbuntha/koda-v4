@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+  <title>Roles</title>
+  <path fill="#059669" d="M50 10 L84 22 V48 C84 70 70 84 50 92 C30 84 16 70 16 48 V22 Z" />
+  <path fill="#34D399" d="M50 10 L16 22 V48 C16 60 20 70 26 77 L50 10 Z" />
+  <path fill="none" stroke="#FFFFFF" stroke-width="8" stroke-linecap="round" stroke-linejoin="round" d="M35 50 L46 61 L66 40" />
+</svg>

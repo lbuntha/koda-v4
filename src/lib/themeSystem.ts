@@ -5,7 +5,8 @@ export type ButtonVariant =
   | "danger"
   | "warning"
   | "ghost"
-  | "outline";
+  | "outline"
+  | "glass";
 export type ButtonSize = "sm" | "md" | "lg" | "icon" | "step" | "choice";
 
 export type CardVariant = "default" | "glass" | "bordered" | "interactive";
@@ -155,6 +156,11 @@ export const themeSystem = {
         "bg-transparent hover:bg-slate-100 text-slate-500 dark:hover:bg-slate-800/60 dark:text-slate-400 border-transparent focus-visible:ring-slate-400",
       outline:
         "bg-transparent hover:bg-indigo-50 text-indigo-600 border-indigo-300 dark:hover:bg-indigo-950/40 dark:text-indigo-400 dark:border-indigo-800 focus-visible:ring-indigo-500",
+      /* The second action on a coloured banner: see-through white, so the
+         banner's colour shows through and the white button beside it stays
+         the one to press. */
+      glass:
+        "bg-white/20 hover:bg-white/30 text-white border-white/30 backdrop-blur-sm focus-visible:ring-white",
     };
 
     return `${base} ${sizes[size]} ${variants[variant]} ${className}`;
@@ -340,22 +346,6 @@ export const themeSystem = {
         success: "border-emerald-200 dark:border-emerald-500/30 bg-emerald-50/70 dark:bg-emerald-500/10",
         danger: "border-rose-200 dark:border-rose-500/30 bg-rose-50/70 dark:bg-rose-500/10",
       })[tone],
-    /* A banner in the home page's poster colours: the tone as a gradient with
-       the words in white, so it sits with the skill banners under it rather
-       than reading as a system notice above them. */
-    cardVivid: (tone: "primary" | "streak" | "success" | "danger" = "primary") =>
-      "relative rounded-2xl bg-gradient-to-br p-4 text-white shadow-sm transition-all duration-300 motion-reduce:transition-none " +
-      ({
-        primary: "from-indigo-500 to-violet-700",
-        streak: "from-orange-500 to-rose-600",
-        success: "from-emerald-500 to-teal-700",
-        danger: "from-rose-500 to-pink-700",
-      })[tone],
-    wellVivid:
-      "w-10 h-10 rounded-xl bg-white/20 text-white flex items-center justify-center shrink-0 [&>svg]:w-5 [&>svg]:h-5",
-    messageVivid: "text-sm font-bold text-white leading-snug",
-    closeVivid:
-      "absolute right-2 top-2 w-8 h-8 rounded-full flex items-center justify-center text-white/80 hover:text-white hover:bg-white/15 transition cursor-pointer [&>svg]:w-4 [&>svg]:h-4",
     enter: "animate-[fade-in_300ms_ease-out] motion-reduce:animate-none",
     leave: "translate-y-1 opacity-0",
     row: "flex flex-wrap items-center gap-3",
@@ -690,7 +680,7 @@ export const themeSystem = {
     groupLabel:
       "text-[11px] font-black uppercase tracking-wider text-muted font-mono px-1 mb-2",
     group:
-      "bg-surface border border-line rounded-2xl overflow-hidden divide-y divide-line",
+      "bg-surface border-2 border-line rounded-2xl overflow-hidden divide-y divide-line",
     /* One row. Generous vertical padding: this is a list a child scrolls with a
        thumb, and 44px is the floor, not the target. */
     row: "w-full flex items-center justify-between gap-3 px-4 py-3.5 text-left",
@@ -744,11 +734,11 @@ export const themeSystem = {
    */
   sidebar: {
     aside:
-      "hidden rail:flex sticky top-0 z-30 h-screen shrink-0 pt-[env(safe-area-inset-top)] pb-[env(safe-area-inset-bottom)] bg-white dark:bg-slate-900 border-r border-slate-200 dark:border-slate-800/90 text-slate-900 dark:text-slate-100 transition-[width] duration-300 flex-col justify-between p-3.5 sm:p-4",
-    widthExpanded: "w-64",
+      "hidden rail:flex sticky top-0 z-30 h-screen shrink-0 pt-[env(safe-area-inset-top)] pb-[env(safe-area-inset-bottom)] bg-white dark:bg-slate-900 border-r-2 border-slate-200 dark:border-slate-800/90 text-slate-900 dark:text-slate-100 transition-[width] duration-300 flex-col justify-between p-3.5 sm:p-4",
+    widthExpanded: "w-72",
     widthCollapsed: "w-20",
     brandBar:
-      "flex items-center justify-between pb-3 border-b border-slate-200 dark:border-slate-800/90",
+      "flex items-center justify-between pb-3 border-b-2 border-slate-200 dark:border-slate-800/90",
     brandIcon:
       "w-9 h-9 rounded-xl bg-indigo-600 flex items-center justify-center shrink-0",
     brandTitle:
@@ -759,11 +749,11 @@ export const themeSystem = {
       "p-2 min-w-[40px] min-h-[40px] flex items-center justify-center rounded-xl bg-white dark:bg-slate-800 text-slate-500 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-slate-50 dark:hover:bg-slate-700 transition border-2 border-slate-200 dark:border-slate-700",
     sectionLabel:
       "text-[11px] font-black uppercase tracking-wider text-slate-500 dark:text-slate-400 font-mono px-3 mb-2",
-    footer: "pt-3 border-t border-slate-200 dark:border-slate-800/90 space-y-3",
+    footer: "pt-3 border-t-2 border-slate-200 dark:border-slate-800/90 space-y-3",
 
     navItem: (isActive: boolean = false, isCollapsed: boolean = false, className: string = "") => {
       const base =
-        "w-full flex items-center gap-3 px-3 py-3 rounded-xl cursor-pointer group";
+        "w-full flex items-center gap-3 px-3 py-1.5 rounded-xl cursor-pointer group";
       const collapsed = isCollapsed ? "justify-center px-2" : "";
       /* Selection reads as a soft wash of the brand hue rather than a solid
          fill, so the rail stays quiet and the label keeps its contrast. */
@@ -776,7 +766,7 @@ export const themeSystem = {
     /* Sizes whatever icon element the caller passes, so Lucide's 24px default
        does not leak through the wrapper. */
     navIcon: (isActive: boolean = false) =>
-      `inline-flex shrink-0 [&>svg]:w-5 [&>svg]:h-5 ${
+      `inline-flex h-8 w-8 shrink-0 items-center justify-center [&>svg]:w-5 [&>svg]:h-5 ${
         isActive
           ? "text-indigo-600 dark:text-indigo-400"
           : "text-slate-400 dark:text-slate-400 group-hover:text-slate-900 dark:group-hover:text-white"

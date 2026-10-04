@@ -23,7 +23,7 @@ import { prefetchPhotos } from "./photos";
 import { reportBook, type ReportReason } from "./api";
 import { BookReader } from "./BookReader";
 import { playSound } from "../utils/audio";
-import { UIButton, UICard, UICarousel, UIMenu, UIMenuItem, UIGuideBubble, UIBookCard, UILinkButton, UIInput, UIQuizToolbar, UIModal, UIMatchPairs } from "../components/ui";
+import { UIButton, UICard, UICarousel, UIMenu, UIMenuItem, UIGuideBubble, UIBookCard, UILinkButton, UIQuizToolbar, UIModal, UIMatchPairs, UISearchInput } from "../components/ui";
 import "./khmerFont";
 import { useT } from "../lib/i18n";
 
@@ -316,17 +316,9 @@ function Catalog({ shelf, lang, onLang, onOpen }: { shelf: readonly Passage[]; l
       {browsing && hero && <LibraryHero book={hero} reading={readingIds.has(hero.id)} progress={progressOf(hero)} onOpen={onOpen} />}
 
       <div className="mt-4 flex items-center justify-end gap-2 sm:mt-5">
-        {mine.length > 0 && <label className="relative block min-w-0 flex-1">
-          <span className="sr-only">{tr("library.search")}</span>
-          <Search className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-muted" aria-hidden="true" />
-          <UIInput
-            type="search"
-            value={q}
-            onChange={(e) => setQ(e.target.value)}
-            placeholder={tr("library.search")}
-            className="rounded-full pl-10 pr-4"
-          />
-        </label>}
+        {mine.length > 0 && (
+          <UISearchInput label={tr("library.search")} value={q} onChange={(e) => setQ(e.target.value)} className="flex-1" />
+        )}
         <div className="shrink-0">{languageMenu}</div>
       </div>
 
@@ -416,11 +408,9 @@ function LibraryHero({ book, reading, progress, onOpen }: { book: Passage; readi
           {reading && progress?.stage === "quiz" ? ` · ${tr("library.inProgress")}` : ""}
         </p>
         <div className="mt-2">
-          <button type="button" onClick={() => onOpen(book.id)}
-            className="inline-flex min-h-12 items-center gap-2 rounded-2xl bg-white px-5 text-base font-extrabold text-slate-900 shadow-sm transition hover:bg-white/90 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-white/50">
-            <BookOpen className="h-5 w-5" aria-hidden="true" />
+          <UIButton variant="secondary" size="lg" icon={<BookOpen aria-hidden="true" />} onClick={() => onOpen(book.id)}>
             {tr(reading ? "library.hero.keepReading" : "library.hero.startReading")}
-          </button>
+          </UIButton>
         </div>
       </div>
       {/* A photo fills its side and fades into the colour, a poster rather than a

@@ -14,7 +14,7 @@ from app import db as database
 from app import errors
 from app.art_defaults import load_defaults as load_art_defaults
 from app.indexes import ensure_indexes
-from app.menu_defaults import DEFAULT_MENU
+from app.menu_defaults import DEFAULT_MENU, LEGACY_ICONS
 from app.middleware.requests import RequestContextMiddleware
 from app.persona_defaults import DEFAULT_PERSONAS
 from app.plan_defaults import DEFAULT_PLANS
@@ -127,6 +127,16 @@ async def lifespan(app: FastAPI):
         log.info("removed the legacy You badge from Profile")
     if await menu_repo.remove_legacy_badge(db, "settings", "Preferences"):
         log.info("removed the legacy Preferences badge from Settings")
+
+    # Every row moved from a line glyph to drawn artwork. Exact match
+    # again, so only an icon nobody has changed follows the code.
+    shipped_icons = {item["itemId"]: item["icon"] for item in DEFAULT_MENU}
+    redrawn = sum([
+        await menu_repo.replace_legacy_icon(db, item_id, legacy, shipped_icons[item_id])
+        for item_id, legacy in LEGACY_ICONS.items()
+    ])
+    if redrawn:
+        log.info("moved %s menu items onto their drawn icons", redrawn)
 
     # And an entry the code has stopped shipping is not hidden, it is gone: it
     # leads nowhere, and an operator editing the Menu screen should not be

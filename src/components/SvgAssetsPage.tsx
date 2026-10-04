@@ -10,7 +10,6 @@ import {
   Loader2,
   Pencil,
   Plus,
-  Search,
   Shapes,
   Trash2,
   X,
@@ -31,7 +30,7 @@ import {
 import { SvgAssetEditorModal } from "./SvgAssetEditorModal";
 import { SvgAssetPreviewModal } from "./SvgAssetPreviewModal";
 import { useSession } from "../lib/sync";
-import { UISectionHeader, UIStatGrid, UIStatTile } from "./ui";
+import { UISectionHeader, UIStatGrid, UIStatTile, UISearchInput } from "./ui";
 
 import { translate } from "../lib/i18n";
 const usageSnippet = (id: string) => `<SvgAsset id="${id}" size={48} />`;
@@ -300,16 +299,13 @@ export const SvgAssetsPage: React.FC = () => {
 
           <div className="min-w-0 space-y-4">
             <div className="flex items-center gap-2">
-              <div className="relative flex-1 min-w-0">
-                <Search className="w-5 h-5 text-muted absolute left-3 top-1/2 -translate-y-1/2" />
-                <input
-                  value={query}
-                  onChange={(event) => setQuery(event.target.value)}
-                  placeholder={translate("admin.svgAssetsPage.searchByIdOrCategory")}
-                  aria-label={translate("admin.svgAssetsPage.searchArtwork")}
-                  className="w-full bg-surface border border-line rounded-xl pl-10 pr-4 py-3 text-sm sm:text-base font-mono text-ink placeholder:text-muted focus:outline-none focus:border-indigo-500"
-                />
-              </div>
+              <UISearchInput
+                className="flex-1"
+                label={translate("admin.svgAssetsPage.searchArtwork")}
+                placeholder={translate("admin.svgAssetsPage.searchByIdOrCategory")}
+                value={query}
+                onChange={(event) => setQuery(event.target.value)}
+              />
 
               {/* Sorting is per group, so a category keeps its own newest-first order. */}
               <div className="flex items-center border border-line rounded-lg overflow-hidden shrink-0">

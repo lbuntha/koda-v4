@@ -284,3 +284,19 @@ async def test_a_translation_needs_a_real_language_code(client, db):
     refused = await client.patch("/menu/home", headers=admin, json={"labels": {"<b>": "x"}})
 
     assert refused.status_code == 409
+
+
+async def test_an_untouched_glyph_moves_to_its_drawn_icon_and_a_chosen_one_stays(client, db):
+    from app.repos import menu as menu_repo
+
+    await db.menu_items.insert_many([
+        {"familyId": None, "itemId": "home", "icon": "home"},
+        {"familyId": None, "itemId": "library", "icon": "star"},
+    ])
+
+    assert await menu_repo.replace_legacy_icon(db, "home", "home", "art:menu-home") is True
+    assert await menu_repo.replace_legacy_icon(db, "library", "book", "art:menu-library") is False
+    home = await db.menu_items.find_one({"familyId": None, "itemId": "home"})
+    library = await db.menu_items.find_one({"familyId": None, "itemId": "library"})
+    assert home["icon"] == "art:menu-home"
+    assert library["icon"] == "star"

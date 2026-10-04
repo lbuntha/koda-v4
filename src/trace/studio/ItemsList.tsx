@@ -9,10 +9,10 @@
  */
 
 import { useEffect, useMemo, useState, useSyncExternalStore } from "react";
-import { AlertCircle, Check, Copy, PenLine, Plus, Search, Trash2 } from "lucide-react";
+import { AlertCircle, Check, Copy, PenLine, Plus, Trash2 } from "lucide-react";
 import { useT } from "../../lib/i18n";
 import { themeSystem } from "../../lib/themeSystem";
-import { UIBadge, UIButton, UIDialog, UIPagination } from "../../components/ui";
+import { UIBadge, UIButton, UIDialog, UIPagination, UISearchInput } from "../../components/ui";
 import type { TraceKind } from "../geometry/types";
 import { runChecks } from "./checks";
 import { TraceDrafts, type TraceDraft } from "./drafts";
@@ -97,10 +97,7 @@ export function ItemsList({ kinds, onOpen, onCreate }: { kinds: readonly TraceKi
   return (
     <section className={themeSystem.card("default", "flex flex-col gap-3 p-4")} aria-label={t("traceStudio.view.items")}>
       <div className="flex flex-wrap items-center gap-2">
-        <label className="relative min-w-48 flex-1">
-          <Search className="pointer-events-none absolute left-2.5 top-1/2 h-4 w-4 -translate-y-1/2 text-muted" aria-hidden="true" />
-          <input type="search" className={`${inputCls} pl-8`} lang="km" placeholder={t("traceStudio.search")} aria-label={t("traceStudio.search")} value={q} onChange={(e) => setQ(e.target.value)} />
-        </label>
+        <UISearchInput size="sm" className="min-w-48 flex-1" lang="km" label={t("traceStudio.search")} value={q} onChange={(e) => setQ(e.target.value)} />
         <select aria-label={t("traceStudio.filterKind")} className={`${inputCls} w-auto`} value={kind} onChange={(e) => setKind(e.target.value as TraceKind | "")}>
           <option value="">{t("traceStudio.allKinds")}</option>
           {kinds.map((k) => <option key={k} value={k}>{t(`traceStudio.kind.${k}`)}</option>)}

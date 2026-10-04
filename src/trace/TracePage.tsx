@@ -314,15 +314,13 @@ function Hero({ title, description, cover, picture, tone, entries, onPlay, onBro
         </div>
         <div className="mt-2 flex flex-wrap gap-2">
           {p.next && (
-            <button type="button" onClick={() => onPlay(p.next)} className="inline-flex min-h-12 items-center gap-2 rounded-2xl bg-white px-5 text-base font-extrabold text-slate-900 shadow-sm transition hover:bg-white/90 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-white/50">
-              <Play className="h-5 w-5 fill-current" />
+            <UIButton variant="secondary" size="lg" icon={<Play className="fill-current" />} onClick={() => onPlay(p.next)}>
               {p.all ? t("trace.cover.again") : p.started ? t("trace.action.continue") : t("trace.flow.start")}
-            </button>
+            </UIButton>
           )}
-          <button type="button" onClick={onBrowse} className="inline-flex min-h-12 items-center gap-2 rounded-2xl bg-white/20 px-5 text-base font-bold text-white backdrop-blur-sm transition hover:bg-white/30 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-white/50">
-            <LayoutGrid className="h-5 w-5" />
+          <UIButton variant="glass" size="lg" icon={<LayoutGrid />} onClick={onBrowse}>
             {t("trace.hero.allItems")}
-          </button>
+          </UIButton>
         </div>
       </div>
     </section>

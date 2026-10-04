@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import { Check, ChevronDown, ImageOff, ImagePlus, PanelBottom, PanelLeft, PanelRight, PanelTop, Pencil, Search, Settings2, Sparkles, Wand2, X } from "lucide-react";
+import { Check, ChevronDown, ImageOff, ImagePlus, PanelBottom, PanelLeft, PanelRight, PanelTop, Pencil, Settings2, Sparkles, Wand2, X } from "lucide-react";
 import { themeSystem } from "../../lib/themeSystem";
 import { SvgMarkup, useArtLibrary } from "../../assets/svg";
 import type { PagePicture } from "../bookLayout";
@@ -14,7 +14,7 @@ import { describeShape, type PictureKind } from "../pictureShape";
 import { cropToShape, generateBookImage, improvePicturePrompt, type ImageProvider, type ImageStyle } from "../imageGenerationApi";
 import { Picture, PICTURE_KEYS } from "../Picture";
 import { aiDefault } from "../../lib/aiDefaults";
-import { UIButton, UIFlashMessage, UIInput, UILinkButton, UIMenu, UIMenuItem, UIMenuLabel, UIMenuSeparator, UITabs, UITextarea } from "../../components/ui";
+import { UIButton, UIFlashMessage, UIInput, UILinkButton, UIMenu, UIMenuItem, UIMenuLabel, UIMenuSeparator, UITabs, UITextarea, UISearchInput } from "../../components/ui";
 import { translate, useT } from "../../lib/i18n";
 
 /**
@@ -358,11 +358,7 @@ function LibraryWay({ library, loading, chosen, suggested, suggestedLabel, photo
       <QuickTiles heading={t("studio.picture.photosInBook")} keys={photos} chosen={chosen} onUse={onUse} />
 
       <div className="grid gap-3">
-        <label className="relative block">
-          <span className="sr-only">{t("studio.picture.search")}</span>
-          <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted" aria-hidden="true" />
-          <UIInput type="search" value={query} onChange={(e) => setQuery(e.target.value)} placeholder={t("studio.picture.search")} className="pl-9" />
-        </label>
+        <UISearchInput label={t("studio.picture.search")} value={query} onChange={(e) => setQuery(e.target.value)} />
 
         {/* One row that scrolls sideways. A library with twenty collections in it
             would otherwise open on four rows of chips and no pictures. */}

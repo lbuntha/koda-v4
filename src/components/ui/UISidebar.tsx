@@ -159,7 +159,7 @@ export const UISidebarSection: React.FC<UISidebarSectionProps> = ({
   const { isCollapsed } = useUISidebar();
 
   return (
-    <nav className={`space-y-1 ${className}`}>
+    <nav className={`space-y-0.5 ${className}`}>
       {label && !isCollapsed && (
         <div className={themeSystem.sidebar.sectionLabel}>{label}</div>
       )}
@@ -294,7 +294,7 @@ export const UISidebarNav: React.FC<UISidebarNavProps> = ({ sections, activeId, 
         {section.items.map((item) => (
           <UISidebarNavItem
             key={item.id}
-            icon={<SidebarIcon name={item.icon} size={40} className="w-10 h-10" />}
+            icon={<SidebarIcon name={item.icon} size={32} className="w-8 h-8" />}
             label={item.label}
             badge={item.badge}
             isActive={activeId === item.id}

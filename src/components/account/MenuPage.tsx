@@ -7,7 +7,6 @@ import {
   EyeOff,
   GripVertical,
   ListOrdered,
-  Search,
   RotateCcw,
   Baby,
   GraduationCap,
@@ -19,7 +18,7 @@ import { ApiError, accessToken, Menu, refreshMenu, request, useMenu } from "../.
 import { listSvgAssets, type SvgAssetRecord } from "../../lib/svgAssetsApi";
 import { themeSystem } from "../../lib/themeSystem";
 import { playSound } from "../../utils/audio";
-import { UIBadge, UISectionHeader, sidebarIcons } from "../ui";
+import { UIBadge, UISectionHeader, sidebarIcons, UISearchInput } from "../ui";
 import { ART_ICON_PREFIX, SidebarIcon } from "../ui/sidebarIcon";
 import { UIIconPicker } from "../ui/UIIconPicker";
 import { BASE_LANGUAGE, availableLanguages, hasMessage, translate } from "../../lib/i18n";
@@ -329,16 +328,11 @@ export const MenuPage: React.FC = () => {
         />
 
         <div className="grid gap-3 lg:grid-cols-[minmax(0,1fr)_260px] items-start py-3">
-          <div className="relative">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted" />
-            <input
-              value={query}
-              onChange={(event) => setQuery(event.target.value)}
-              placeholder={translate("admin.menuPage.searchMenuEntries")}
-              aria-label={translate("admin.menuPage.searchMenuEntries")}
-              className={`${FIELD} w-full pl-10`}
-            />
-          </div>
+          <UISearchInput
+            label={translate("admin.menuPage.searchMenuEntries")}
+            value={query}
+            onChange={(event) => setQuery(event.target.value)}
+          />
           <label className="flex items-center gap-2 text-sm text-body px-1">
             <input type="checkbox" checked={showHidden} onChange={(event) => setShowHidden(event.target.checked)} className="h-4 w-4 accent-indigo-600" />
             {translate("admin.menuPage.includeHiddenEntries")}

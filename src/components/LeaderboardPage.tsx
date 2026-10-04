@@ -38,6 +38,7 @@ import {
   UIPageLoader,
   UISectionHeader,
   UISpinner,
+  UISearchInput,
 } from "./ui";
 
 import { currentLanguage, translate } from "../lib/i18n";
@@ -585,16 +586,12 @@ export const LeaderboardPage: React.FC = () => {
             <UICard className="p-5">
               <UISectionHeader title={translate("leaderboard.yourBuddies")} subtitle={translate("leaderboard.lengthConnected", { length: buddies.length })} icon={<Users className="h-5 w-5 text-cyan-600" />} />
               {buddies.length > 5 && (
-                <label className="relative mt-4 block">
-                  <Search className="pointer-events-none absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
-                  <span className="sr-only">{translate("leaderboard.searchBuddies")}</span>
-                  <input
-                    value={buddySearch}
-                    onChange={(event) => setBuddySearch(event.target.value)}
-                    placeholder={translate("leaderboard.searchBuddies")}
-                    className="w-full rounded-2xl border-2 border-slate-200 bg-white py-2.5 pl-10 pr-4 text-sm text-slate-900 outline-none focus:border-indigo-500 dark:border-slate-700 dark:bg-slate-950 dark:text-white"
-                  />
-                </label>
+                <UISearchInput
+                  label={translate("leaderboard.searchBuddies")}
+                  value={buddySearch}
+                  onChange={(event) => setBuddySearch(event.target.value)}
+                  className="mt-4"
+                />
               )}
               <div className="mt-4 max-h-[28rem] space-y-2 overflow-y-auto overscroll-contain pr-1">
                 {filteredBuddies.length ? filteredBuddies.map((buddy) => (

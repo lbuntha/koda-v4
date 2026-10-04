@@ -34,3 +34,5 @@ export * from "./UIToggle";
 export * from "./UIForm";
 export * from "./UIPagination";
 export * from "./UICarousel";
+export * from "./UISearchInput";
+export * from "./UISettings";

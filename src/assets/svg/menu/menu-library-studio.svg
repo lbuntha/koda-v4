@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+  <title>Library Studio</title>
+  <rect x="14" y="14" width="56" height="74" rx="6" fill="#059669" />
+  <rect x="14" y="14" width="12" height="74" rx="6" fill="#047857" />
+  <rect x="34" y="26" width="26" height="14" rx="3" fill="#D1FAE5" />
+  <rect x="34" y="48" width="26" height="5" rx="2.5" fill="#6EE7B7" />
+  <rect x="34" y="58" width="18" height="5" rx="2.5" fill="#6EE7B7" />
+  <g transform="rotate(40 74 54)">
+    <rect x="66" y="20" width="16" height="10" rx="4" fill="#F472B6" />
+    <rect x="66" y="29" width="16" height="44" fill="#F43F5E" />
+    <rect x="66" y="29" width="5" height="44" fill="#FB7185" />
+    <path fill="#FDE6D2" d="M66 73 H82 L74 88 Z" />
+    <path fill="#334155" d="M71.3 83 H76.7 L74 88 Z" />
+  </g>
+</svg>

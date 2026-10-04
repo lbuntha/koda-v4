@@ -3,8 +3,7 @@ import { Languages, Moon, Sun, Volume2, VolumeX } from "lucide-react";
 import { KodaFace } from "./KodaFace";
 import { useTheme } from "../context/ThemeContext";
 import { playSound } from "../utils/audio";
-import { themeSystem } from "../lib/themeSystem";
-import { UIPageHeader, UIToggle } from "./ui";
+import { UIPageHeader, UISettingGroup, UISettingRow, UIToggle } from "./ui";
 import { YourLearning } from "./account/YourLearning";
 import { PlanCard } from "./account/PlanCard";
 import { DevicesPage } from "./account/DevicesPage";
@@ -36,48 +35,6 @@ interface SettingsPageProps {
   /** A section to scroll to on arrival — the notification setup sheet sends people here. */
   focus?: "notifications" | null;
 }
-
-/**
- * One row of a settings group.
- *
- * Flat: an icon, a label, and the control. It used to be a bordered card with
- * its own tinted background *inside* the section card, which on a phone meant
- * two borders and two fills around every switch before you reached the switch.
- * The group draws one border; the rows are separated by a hairline.
- */
-const SettingRow: React.FC<{
-  icon: React.ReactNode;
-  title: string;
-  /** A single short line, and only when the control does not already say it. */
-  note?: string;
-  control: React.ReactNode;
-}> = ({ icon, title, note, control }) => {
-  const l = themeSystem.list;
-  return (
-    <div className={l.row}>
-      <div className="flex items-center gap-3 min-w-0">
-        <span className={l.rowIcon}>{icon}</span>
-        <div className="min-w-0">
-          <h4 className={l.rowTitle}>{title}</h4>
-          {note && <p className={l.rowNote}>{note}</p>}
-        </div>
-      </div>
-      {control}
-    </div>
-  );
-};
-
-/** A titled group of rows. The heading sits above the card, not inside it. */
-const SettingGroup: React.FC<{ label: string; children: React.ReactNode; className?: string }> = ({
-  label,
-  children,
-  className = "",
-}) => (
-  <section className={className}>
-    <div className={themeSystem.list.groupLabel}>{label}</div>
-    <div className={themeSystem.list.group}>{children}</div>
-  </section>
-);
 
 /**
  * A family's own settings — what the app looks and sounds like, and what their
@@ -192,17 +149,17 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({
 
       {/* First, because a family that cannot read the page cannot find the
           switch anywhere lower down it. */}
-      <SettingGroup label={t("settings.language.group")}>
-        <SettingRow
+      <UISettingGroup label={t("settings.language.group")}>
+        <UISettingRow
           icon={<Languages className="text-ink" />}
           title={t("settings.language.title")}
           note={t("settings.language.note")}
           control={<LanguagePicker />}
         />
-      </SettingGroup>
+      </UISettingGroup>
 
-      <SettingGroup label={t("settings.appearance.group")}>
-        <SettingRow
+      <UISettingGroup label={t("settings.appearance.group")}>
+        <UISettingRow
           /* `text-ink`, not amber and not indigo: the icon reads as the row's
              own mark rather than as a third accent colour in a card that has
              only a title and a switch. Ink flips with the theme, so it stays
@@ -221,10 +178,10 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({
             />
           }
         />
-      </SettingGroup>
+      </UISettingGroup>
 
-      <SettingGroup label={t("settings.sound.group")}>
-        <SettingRow
+      <UISettingGroup label={t("settings.sound.group")}>
+        <UISettingRow
           icon={
             soundEnabled ? (
               <Volume2 className="text-emerald-600 dark:text-emerald-400" />
@@ -246,7 +203,7 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({
             />
           }
         />
-        <SettingRow
+        <UISettingRow
           /* Koda, not a microphone. The row switches whether Koda *speaks*, and
              a mic is the input side of sound — it was pointing at the wrong
              half of the thing it controls. Greyed out when the switch is off,
@@ -257,7 +214,7 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({
             <UIToggle checked={voiceEnabled} onChange={handleToggleVoice} label={t("settings.sound.voice")} />
           }
         />
-      </SettingGroup>
+      </UISettingGroup>
 
       {/*
         * Everything about how Koda treats this learner, for the learner.

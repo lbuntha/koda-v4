@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+  <title>Skills</title>
+  <path fill="#6366F1" d="M16 30 a8 8 0 0 1 8 -8 H40 a10 10 0 1 1 20 0 H76 a8 8 0 0 1 8 8 V44 a10 10 0 1 0 0 20 V78 a8 8 0 0 1 -8 8 H24 a8 8 0 0 1 -8 -8 Z" />
+  <path fill="#818CF8" d="M16 30 a8 8 0 0 1 8 -8 H40 a10 10 0 0 1 2 -6 L24 54 L16 70 Z" />
+  <path fill="#FFFFFF" d="M50 36 L54.7 45.6 L65.2 47.1 L57.6 54.5 L59.4 65 L50 60 L40.6 65 L42.4 54.5 L34.8 47.1 L45.3 45.6 Z" />
+</svg>

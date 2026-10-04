@@ -16,46 +16,46 @@ hard-code the wording around it.
 """
 
 DEFAULT_MENU: list[dict] = [
-    {"itemId": "home", "label": "Home", "icon": "home", "order": 10},
-    {"itemId": "game", "label": "Learn", "icon": "game", "order": 20},
+    {"itemId": "home", "label": "Home", "icon": "art:menu-home", "order": 10},
+    {"itemId": "game", "label": "Learn", "icon": "art:menu-learn", "order": 20},
     # Koda Library — books to read, answer and spell. Everyone who can learn can read.
-    {"itemId": "library", "label": "Library", "icon": "book", "order": 22},
+    {"itemId": "library", "label": "Library", "icon": "art:menu-library", "order": 22},
     # Koda Trace — write letters and numbers, draw pictures, stroke by stroke.
-    {"itemId": "trace", "label": "Trace", "icon": "pencil", "order": 23},
-    {"itemId": "profile", "label": "Profile", "icon": "user", "order": 25},
-    {"itemId": "leaderboard", "label": "Leaderboard", "icon": "leaderboard",
+    {"itemId": "trace", "label": "Trace", "icon": "art:menu-trace", "order": 23},
+    {"itemId": "profile", "label": "Profile", "icon": "art:menu-profile", "order": 25},
+    {"itemId": "leaderboard", "label": "Leaderboard", "icon": "art:menu-leaderboard",
      "requires": "learner:read", "order": 26},
     # Family notifications are for adults; notification settings are an
     # operator feature and are grouped under Admin by `system:write`.
-    {"itemId": "notifications", "label": "Notifications", "icon": "bell",
+    {"itemId": "notifications", "label": "Notifications", "icon": "art:menu-notifications",
      "requires": "member:list", "order": 27},
-    {"itemId": "notification-settings", "label": "Notification Settings", "icon": "bell",
+    {"itemId": "notification-settings", "label": "Notification Settings", "icon": "art:menu-notification-settings",
      "requires": "system:write", "order": 28},
-    {"itemId": "skills", "label": "Skills", "icon": "brain", "badge": "Manage",
+    {"itemId": "skills", "label": "Skills", "icon": "art:menu-skills", "badge": "Manage",
      "requires": "content:write", "order": 30},
-    {"itemId": "subjects", "label": "Subjects", "icon": "list",
+    {"itemId": "subjects", "label": "Subjects", "icon": "art:menu-subjects",
      "requires": "content:write", "order": 35},
-    {"itemId": "assets", "label": "Art", "icon": "shapes", "badge": "{art} SVG",
+    {"itemId": "assets", "label": "Art", "icon": "art:menu-art", "badge": "{art} SVG",
      "requires": "content:write", "order": 40},
     # Where library books are written, reviewed and published. Same gate as Art.
-    {"itemId": "library-studio", "label": "Library Studio", "icon": "pen",
+    {"itemId": "library-studio", "label": "Library Studio", "icon": "art:menu-library-studio",
      "requires": "content:write", "order": 42},
     # Where trace items and collections are made and published. Its own grant
     # (`trace:create`), which a Koda admin gives to chosen adults.
-    {"itemId": "trace-studio", "label": "Trace Studio", "icon": "pencil",
+    {"itemId": "trace-studio", "label": "Trace Studio", "icon": "art:menu-trace-studio",
      "requires": "trace:create", "order": 43},
-    {"itemId": "users", "label": "Users", "icon": "users", "badge": "Manage",
+    {"itemId": "users", "label": "Users", "icon": "art:menu-users", "badge": "Manage",
      "requires": "user:manage", "order": 45},
-    {"itemId": "roles", "label": "Roles", "icon": "shield", "badge": "Access",
+    {"itemId": "roles", "label": "Roles", "icon": "art:menu-roles", "badge": "Access",
      "requires": "role:manage", "order": 50},
-    {"itemId": "children", "label": "Children", "icon": "baby", "badge": "Family",
+    {"itemId": "children", "label": "Children", "icon": "art:menu-children", "badge": "Family",
      "requires": "learner:create", "order": 52},
     # No Devices row. The device list is a section of Settings now — it is read
     # once when a tablet goes missing, not navigated to, and a permanent sidebar
     # row for it cost more attention than it was worth. `prune_orphans` deletes
     # the seeded row (and any family's override of it) on the next boot, which
     # is why removing it from this list is the whole change.
-    {"itemId": "menu", "label": "Menu", "icon": "list", "badge": "Sidebar",
+    {"itemId": "menu", "label": "Menu", "icon": "art:menu-menu", "badge": "Sidebar",
      "requires": "menu:manage", "order": 55},
     # Two rows, and the split is by *whose decision it is* rather than by
     # seniority. Admin holds what one person decides for everybody — the XP
@@ -70,9 +70,35 @@ DEFAULT_MENU: list[dict] = [
     # this product sells and the one an operator comes back to: whether Koda
     # answers at all, what kinds of help it gives, and the key it calls with.
     # Same right as Admin — it is a ceiling over every family, not a setting.
-    {"itemId": "koda", "label": "Ask Koda", "icon": "sparkles", "badge": "Assistant",
+    {"itemId": "koda", "label": "Ask Koda", "icon": "art:menu-koda", "badge": "Assistant",
      "requires": "system:write", "order": 57},
-    {"itemId": "admin", "label": "Admin", "icon": "sliders", "badge": "Manage",
+    {"itemId": "admin", "label": "Admin", "icon": "art:menu-admin", "badge": "Manage",
      "requires": "system:write", "order": 58},
-    {"itemId": "settings", "label": "Settings", "icon": "settings", "order": 60},
+    {"itemId": "settings", "label": "Settings", "icon": "art:menu-settings", "order": 60},
 ]
+
+# Every row wears drawn artwork (src/assets/svg/menu) rather than line
+# glyphs. These are the glyphs they shipped with, so boot can move an untouched
+# row onto its artwork by exact match and leave an icon somebody chose alone.
+LEGACY_ICONS: dict[str, str] = {
+    "home": "home",
+    "game": "game",
+    "library": "book",
+    "trace": "pencil",
+    "profile": "user",
+    "leaderboard": "leaderboard",
+    "settings": "settings",
+    "notifications": "bell",
+    "notification-settings": "bell",
+    "skills": "brain",
+    "subjects": "list",
+    "assets": "shapes",
+    "library-studio": "pen",
+    "trace-studio": "pencil",
+    "users": "users",
+    "roles": "shield",
+    "children": "baby",
+    "menu": "list",
+    "koda": "sparkles",
+    "admin": "sliders",
+}

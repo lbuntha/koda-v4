@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+  <title>Home</title>
+  <path fill="#38BDF8" d="M22 46 L50 24 L78 46 V80 a8 8 0 0 1 -8 8 H30 a8 8 0 0 1 -8 -8 Z" />
+  <path fill="#7DD3FC" d="M22 46 L50 24 L56 28.7 L30 49 V88 a8 8 0 0 1 -8 -8 Z" />
+  <path fill="#F43F5E" d="M12 46 L50 14 L88 46 a5 5 0 0 1 -6.4 7.6 L50 27 L18.4 53.6 A5 5 0 0 1 12 46 Z" />
+  <path fill="#FB7185" d="M12 46 L50 14 L54 17.4 L18.4 47.4 A5 5 0 0 1 12 46 Z" />
+  <circle cx="50" cy="52" r="7" fill="#0C4A6E" />
+  <path fill="#0369A1" d="M41 88 V72 a9 9 0 0 1 18 0 V88 Z" />
+</svg>

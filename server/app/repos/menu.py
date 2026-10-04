@@ -113,6 +113,17 @@ async def replace_legacy_label(
     return result.modified_count > 0
 
 
+async def replace_legacy_icon(
+    db: AsyncIOMotorDatabase, item_id: str, legacy_icon: str, new_icon: str
+) -> bool:
+    """Move an unchanged shipped icon to a new one, leaving chosen icons alone."""
+    result = await db.menu_items.update_one(
+        {"familyId": None, "itemId": item_id, "icon": legacy_icon},
+        {"$set": {"icon": new_icon, "updatedAt": now()}},
+    )
+    return result.modified_count > 0
+
+
 async def reset_default(db: AsyncIOMotorDatabase, item: dict[str, Any]) -> None:
     """Force a shipped default back to what the code says. Used by the CLI."""
     optional = {"badge", "labels", "badges", "requires", "roles"}

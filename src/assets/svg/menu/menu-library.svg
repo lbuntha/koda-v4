@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+  <title>Library</title>
+  <path fill="#047857" d="M50 30 C40 22 24 20 12 22 V80 C24 78 40 80 50 88 C60 80 76 78 88 80 V22 C76 20 60 22 50 30 Z" />
+  <path fill="#FFFFFF" d="M50 28 C41 20 28 17 18 18 V74 C28 73 41 75 50 82 Z" />
+  <path fill="#ECFDF5" d="M50 28 C59 20 72 17 82 18 V74 C72 73 59 75 50 82 Z" />
+  <path fill="#10B981" d="M47 26 V82 a3 3 0 0 0 6 0 V26 Z" />
+  <rect x="25" y="32" width="17" height="5" rx="2.5" fill="#A7F3D0" />
+  <rect x="25" y="43" width="17" height="5" rx="2.5" fill="#A7F3D0" />
+  <rect x="58" y="32" width="17" height="5" rx="2.5" fill="#6EE7B7" />
+  <rect x="58" y="43" width="17" height="5" rx="2.5" fill="#6EE7B7" />
+  <rect x="58" y="54" width="12" height="5" rx="2.5" fill="#6EE7B7" />
+</svg>
