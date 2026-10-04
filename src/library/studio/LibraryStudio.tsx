@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState, type ReactNode } from "react";
 import { ArrowLeft, BookOpen, Check, ChevronDown, ChevronRight, ChevronUp, CornerLeftUp, Download, Mic, Play, Pencil, Plus, RefreshCw, Sparkles, Square, Trash2, Upload } from "lucide-react";
-import { BANDS, CHOICES, MATCH_MAX_QUESTIONS, minimumQuestions, type Band, type Language, type Question, type QuestionCounts, type WordCue } from "../data/passage";
+import { BANDS, CHOICES, MATCH_MAX_QUESTIONS, meetsTarget, minimumQuestions, TARGET_MAX, type Band, type Language, type Question, type QuestionCounts, type WordCue } from "../data/passage";
 import { readingLexiconFor, readingWordsFor } from "../data/readingLexicon";
 import { core } from "../data/text";
 import { RULES, verifyPassage, type Verdict } from "../data/verifyPassage";
@@ -27,7 +27,7 @@ import { say, stop } from "../voice";
 import { tutorHeaders } from "../../lib/tutorApi";
 import { aiDefault } from "../../lib/aiDefaults";
 import { ScoringAPI } from "../../lib/scoring";
-import { UIBadge, UIButton, UICard, UIFlashMessage, UIInput, UISelect, UITabs, UITextarea, type UITabItem } from "../../components/ui";
+import { UIBadge, UIButton, UICard, UIFlashMessage, UIInput, UISelect, UIStepper, UITabs, UITextarea, type UITabItem } from "../../components/ui";
 import { themeSystem } from "../../lib/themeSystem";
 import "../khmerFont";
 import { translate, useT } from "../../lib/i18n";
@@ -202,7 +202,20 @@ function Editor({ row, categories, reports = [], onResolved, onClose }: { row: B
         reply = r.draft;
         usedAi = true;
       }
-      const next = fromModel(base, reply, PICTURE_KEYS);
+      let next = fromModel(base, reply, PICTURE_KEYS);
+      // Matching sets come from their own AI call, one set at a time, each told
+      // what the earlier ones asked so none repeats. A failed set is skipped —
+      // Review shows the shortfall and the author can add one there.
+      const wantMatch = usedAi ? Math.min(base.questionCounts?.match ?? 0, MATCH_MAX_QUESTIONS) : 0;
+      for (let i = 0; i < wantMatch; i++) {
+        try {
+          const avoid = next.questions.flatMap((q) => (q.kind === "match" ? q.pairs.map((pr) => pr.left) : []));
+          const made = await requestAiMatch({ provider: via as Provider, language: next.language, band: next.band, sentences: next.sentences.map((x) => ({ id: x.id, text: x.text })), pairs: 4, avoid });
+          next = { ...next, questions: [...next.questions, { id: `m${i + 1}`, kind: "match", prompt: made.prompt ?? matchPrompt(next.language), pairs: made.pairs }] };
+        } catch {
+          break;
+        }
+      }
       setDraft(next);
       setConfirmed(base.language !== "km");
       setDirty(true);
@@ -281,28 +294,22 @@ function Editor({ row, categories, reports = [], onResolved, onClose }: { row: B
         </div>
       </div>
 
-      <ol className="mb-5 flex items-center gap-0 overflow-x-auto px-1 pb-2" aria-label={t("studio.steps")}>
-        {STEPS.map((name, i) => {
+      <UIStepper
+        className="mb-5"
+        label={t("studio.steps")}
+        current={step - 1}
+        onSelect={(i) => setStep((i + 1) as Step)}
+        steps={STEPS.map((name, i) => {
           const n = (i + 1) as Step;
-          const locked = n > 2 && !draft;
           const complete = n === 1 ? Boolean(input.title.trim() && input.text.trim())
             : n === 2 ? Boolean(draft?.questions.length)
             : n === 3 || n === 7 ? Boolean(verdict?.publishable)
             : n === 4 ? Boolean(draft?.picture && layoutBook(draft).story.every((page) => pagePicture(page, draft).key))
             : n === 5 ? Boolean(draft?.sentences.length && draft.sentences.every((sentence) => sentence.audio))
             : n === 6 ? previewed : status.published && !dirty;
-          return (
-            <li key={name} className="flex shrink-0 items-center">
-              <button type="button" disabled={locked} aria-current={step === n ? "step" : undefined} onClick={() => setStep(n)}
-                className={`group inline-flex min-h-11 items-center gap-2 rounded-2xl border px-3 py-2 text-sm font-semibold transition-colors ${step === n ? "border-[#534AB7] bg-[#F1EFFF] text-[#0E0B55] shadow-sm" : complete ? "border-emerald-200 bg-white text-[#6D6997]" : "border-line bg-white text-[#8D89AE]"} disabled:cursor-not-allowed disabled:opacity-40`}>
-                <span className={`grid h-7 w-7 place-items-center rounded-full text-xs ${complete ? "bg-emerald-500 text-white" : step === n ? "bg-[#534AB7] text-white" : "bg-[#F1EFFF] text-[#534AB7]"}`}>{complete ? <><span className="sr-only">{n}</span><Check className="h-4 w-4" aria-hidden="true" /></> : n}</span>
-                <span className="whitespace-nowrap">{t(`studio.step.${name}`)}</span>
-              </button>
-              {i < STEPS.length - 1 && <span aria-hidden="true" className={`mx-1 h-0.5 w-5 shrink-0 ${complete ? "bg-emerald-300" : "bg-[#E5E1F5]"}`} />}
-            </li>
-          );
+          return { id: name, label: t(`studio.step.${name}`), complete, disabled: n > 2 && !draft };
         })}
-      </ol>
+      />
 
       {reports.length > 0 && (
         <div className="mb-4 rounded-2xl border border-rose-300 bg-rose-50 p-3 dark:border-rose-800 dark:bg-rose-950/50">
@@ -351,7 +358,8 @@ function Editor({ row, categories, reports = [], onResolved, onClose }: { row: B
               if (draft && !storyChanged && next.questionCounts && (
                 next.questionCounts.understand !== (input.questionCounts?.understand ?? 10) ||
                 next.questionCounts.words !== (input.questionCounts?.words ?? 10) ||
-                next.questionCounts.spell !== (input.questionCounts?.spell ?? 10)
+                next.questionCounts.spell !== (input.questionCounts?.spell ?? 10) ||
+                next.questionCounts.match !== input.questionCounts?.match
               )) {
                 setDraft({ ...draft, title: next.title, category: next.category, questionCounts: next.questionCounts });
                 setDirty(true);
@@ -421,12 +429,16 @@ function StepFrame({ plain, children }: { plain: boolean; children: ReactNode })
 
 /* -------------------------------------------------------------------------- */
 
+/** The shelf menu's last choice, which opens a box to name a new shelf. */
+const NEW_SHELF = "__new_shelf__";
+
 function SourceStep({ input, categories, isNew, source, onSource, onInput, onNext }: {
   input: StoryInput; categories: readonly string[]; isNew: boolean; source: Source; onSource(s: Source): void; onInput(i: StoryInput): void; onNext(): void;
 }) {
   const { t } = useT();
   const km = input.language === "km";
   const [showAiStory, setShowAiStory] = useState(false);
+  const [addingShelf, setAddingShelf] = useState(false);
   const [storyIdea, setStoryIdea] = useState("");
   const [writingStory, setWritingStory] = useState(false);
   const [storyError, setStoryError] = useState("");
@@ -487,22 +499,46 @@ function SourceStep({ input, categories, isNew, source, onSource, onInput, onNex
         <fieldset className="sm:col-span-2 rounded-2xl border border-line bg-surface-muted p-3">
           <legend className={`${label} px-1`}>{t("studio.field.target")}</legend>
           <p className="mb-2 text-xs text-muted">{t("studio.field.targetNote")}</p>
-          <div className="grid grid-cols-3 gap-2">
-            {(["understand", "words", "spell"] as const).map((kind) => (
-              <label key={kind}>
-                <span className="mb-1 block text-xs font-bold capitalize text-muted">{t(`library.part.${kind}`)}</span>
-                <UIInput type="number" min={1} max={10} value={input.questionCounts?.[kind] ?? 10} onChange={(e) => set("questionCounts", { ...(input.questionCounts ?? BANDS[input.band]), [kind]: Math.max(1, Math.min(10, Number(e.target.value) || 1)) })} />
-              </label>
-            ))}
+          <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
+            {(["understand", "words", "spell", "match"] as const).map((kind) => {
+              // Matching sets are capped lower than the other sections, and default to none.
+              const max = kind === "match" ? MATCH_MAX_QUESTIONS : TARGET_MAX;
+              return (
+                <label key={kind}>
+                  <span className="mb-1 block text-xs font-bold capitalize text-muted">{t(`library.part.${kind}`)}</span>
+                  <UIInput type="number" min={0} max={max} value={input.questionCounts?.[kind] ?? (kind === "match" ? 0 : TARGET_MAX)} onChange={(e) => set("questionCounts", { ...(input.questionCounts ?? BANDS[input.band]), [kind]: Math.max(0, Math.min(max, Math.round(Number(e.target.value)) || 0)) })} />
+                </label>
+              );
+            })}
           </div>
         </fieldset>
         <label>
           <span className={label}>{t("studio.col.shelf")}</span>
-          <UISelect value={input.category} onChange={(e) => set("category", e.target.value)}>
+          <UISelect
+            value={addingShelf ? NEW_SHELF : input.category}
+            onChange={(e) => {
+              const picked = e.target.value;
+              setAddingShelf(picked === NEW_SHELF);
+              set("category", picked === NEW_SHELF ? "" : picked);
+            }}
+          >
             <option value="">{t("studio.field.noShelf")}</option>
             {/* The server's list; a book's own shelf stays choosable even if the list has moved on. */}
-            {[...new Set([...categories, ...(input.category ? [input.category] : [])])].map((c) => <option key={c} value={c}>{c}</option>)}
+            {[...new Set([...categories, ...(input.category && !addingShelf ? [input.category] : [])])].map((c) => <option key={c} value={c}>{c}</option>)}
+            <option value={NEW_SHELF}>{t("studio.field.newShelf")}</option>
           </UISelect>
+          {/* A shelf of the author's own: it exists once this book is saved on it, and is offered for every book after. */}
+          {addingShelf && (
+            <UIInput
+              className="mt-2"
+              autoFocus
+              maxLength={40}
+              placeholder={t("studio.field.newShelfName")}
+              aria-label={t("studio.field.newShelfName")}
+              value={input.category}
+              onChange={(e) => set("category", e.target.value)}
+            />
+          )}
         </label>
       </div>
       <div>
@@ -595,8 +631,9 @@ function ReviewStep({ draft, verdict, confirmed, onConfirmed, onEdit, target }: 
   const add = (kind: Question["kind"]) => {
     setAddMessage("");
     if (kind === "match") {
-      // Optional, so no target to reach — only a ceiling.
-      if (count("match") >= MATCH_MAX_QUESTIONS) setAddMessage(t("studio.review.matchFull", { max: MATCH_MAX_QUESTIONS }));
+      // The book's matching target when it sets one; otherwise only the ceiling.
+      if (need.match !== undefined && count("match") >= need.match) setAddMessage(t("studio.review.full"));
+      else if (count("match") >= MATCH_MAX_QUESTIONS) setAddMessage(t("studio.review.matchFull", { max: MATCH_MAX_QUESTIONS }));
       else onEdit({ ...draft, questions: [...draft.questions, blankMatch(nextId("m"), draft.language)] });
       return;
     }
@@ -624,6 +661,7 @@ function ReviewStep({ draft, verdict, confirmed, onConfirmed, onEdit, target }: 
   /** A matching set drafted by AI, added like one typed by hand — the checks below judge it the same way. */
   const makeMatch = async () => {
     setAddMessage("");
+    if (need.match !== undefined && count("match") >= need.match) return setAddMessage(t("studio.review.full"));
     if (count("match") >= MATCH_MAX_QUESTIONS) return setAddMessage(t("studio.review.matchFull", { max: MATCH_MAX_QUESTIONS }));
     setMakingMatch(true);
     try {
@@ -650,8 +688,10 @@ function ReviewStep({ draft, verdict, confirmed, onConfirmed, onEdit, target }: 
       const passing = have >= minimumQuestions(want) && have <= want;
       return { id: key, label: `${passing ? "✓" : "✕"} ${name}`, count: `${have}/${want}` };
     }),
-    // Optional: no ✓ or ✕ for how many — a book with none publishes. Its own checks still apply.
-    { id: "match" as const, label: `${t("library.part.match")} · ${t("studio.review.optional")}`, count: String(count("match")) },
+    // Held to its target like any section once the book sets one; without one, just the count.
+    need.match !== undefined
+      ? { id: "match" as const, label: `${meetsTarget(count("match"), need.match) ? "✓" : "✕"} ${t("library.part.match")}`, count: `${count("match")}/${need.match}` }
+      : { id: "match" as const, label: t("library.part.match"), count: String(count("match")) },
   ];
   // One piece fixes the word, several split it, none deletes it.
   const applyWordEdit = (sid: string, index: number, pieces: string[]) => {
@@ -680,7 +720,8 @@ function ReviewStep({ draft, verdict, confirmed, onConfirmed, onEdit, target }: 
     <div className="grid gap-4">
       <UITabs items={tabItems} value={tab} onChange={setTab} label={t("studio.review.sections")} />
 
-      <p className="text-sm text-muted">{t("studio.review.toPublish", { understand: minimumQuestions(need.understand), words: minimumQuestions(need.words), spell: minimumQuestions(need.spell) })}</p>
+      <p className="text-sm text-muted">{t("studio.review.toPublish", { understand: minimumQuestions(need.understand), words: minimumQuestions(need.words), spell: minimumQuestions(need.spell) })}
+        {need.match ? ` ${t("studio.review.toPublishMatch", { match: minimumQuestions(need.match) })}` : ""}</p>
 
       {tab === "splits" && <details open={km} className="rounded-2xl border border-line p-3">
         <summary className="cursor-pointer font-extrabold text-ink">{t(km ? "studio.review.splitsKm" : "studio.review.splitsEn")}</summary>
@@ -751,7 +792,7 @@ function ReviewStep({ draft, verdict, confirmed, onConfirmed, onEdit, target }: 
         <div key={q.id} id={`studio-question-${q.id}`}><QuestionCard q={q} draft={draft} checks={byQ(q.id)} onChange={(patch) => setQ(q.id, patch)} onVocab={(next) => setVocab(q.id, next)} onDelete={() => del(q.id)} /></div>
       ))}
 
-      {tab === "match" && <p className="text-sm text-muted">{t("studio.review.matchNote")}</p>}
+      {tab === "match" && need.match === undefined && <p className="text-sm text-muted">{t("studio.review.matchNote")}</p>}
 
       {tab !== "splits" && <div className="flex flex-wrap items-center gap-2">
         <UIButton type="button" variant="outline" size="sm" icon={<Plus className="h-4 w-4" aria-hidden="true" />} onClick={() => add(tabKind[tab])}>
@@ -1280,9 +1321,10 @@ function SummaryStep({ draft, verdict, confirmed, onEdit, onNavigate, onQuestion
   const spellWords = [...new Set(draft.questions.filter((q) => q.kind === "spell").map((q) => q.word))];
   const storyWords = draft.sentences.reduce((sum, sentence) => sum + sentence.words.length, 0);
   const need = draft.questionCounts ?? BANDS[draft.band];
-  const countsReady = verdict.counts.comprehension >= minimumQuestions(need.understand) && verdict.counts.comprehension <= need.understand
-    && verdict.counts.vocab >= minimumQuestions(need.words) && verdict.counts.vocab <= need.words
-    && verdict.counts.spell >= minimumQuestions(need.spell) && verdict.counts.spell <= need.spell;
+  const countsReady = meetsTarget(verdict.counts.comprehension, need.understand)
+    && meetsTarget(verdict.counts.vocab, need.words)
+    && meetsTarget(verdict.counts.spell, need.spell)
+    && (need.match === undefined || meetsTarget(verdict.counts.match, need.match));
   const ready = verdict.failures === 0 && countsReady && (draft.language !== "km" || confirmed);
 
   useEffect(() => {
@@ -1392,13 +1434,17 @@ function SummaryStep({ draft, verdict, confirmed, onEdit, onNavigate, onQuestion
  */
 function PublishChecklist({ verdict, need, draft, confirmed }: { verdict: Verdict; need: QuestionCounts; draft: Draft; confirmed: boolean }) {
   const { t } = useT();
-  const part = (have: number, want: number) => have >= minimumQuestions(want) && have <= want;
+  const part = meetsTarget;
   const matchIds = new Set(draft.questions.filter((q) => q.kind === "match").map((q) => q.id));
   const matchFails = verdict.checks.filter((c) => matchIds.has(c.question) && c.status === "fail").length;
   const rows: Array<{ ok: boolean | "info"; text: string }> = [
     { ok: part(verdict.counts.comprehension, need.understand), text: t("studio.checklist.part", { part: t("library.part.understand"), have: verdict.counts.comprehension, min: minimumQuestions(need.understand), max: need.understand }) },
     { ok: part(verdict.counts.vocab, need.words), text: t("studio.checklist.part", { part: t("library.part.words"), have: verdict.counts.vocab, min: minimumQuestions(need.words), max: need.words }) },
     { ok: part(verdict.counts.spell, need.spell), text: t("studio.checklist.part", { part: t("library.part.spell"), have: verdict.counts.spell, min: minimumQuestions(need.spell), max: need.spell }) },
+    // A book with a matching target is held to it like any section; without one, matching stays optional.
+    ...(need.match !== undefined && (need.match > 0 || verdict.counts.match > 0)
+      ? [{ ok: part(verdict.counts.match, need.match), text: t("studio.checklist.part", { part: t("library.part.match"), have: verdict.counts.match, min: minimumQuestions(need.match), max: need.match }) }]
+      : []),
     verdict.counts.match === 0
       ? { ok: "info", text: t("studio.checklist.noMatch") }
       : { ok: matchFails === 0, text: t("studio.checklist.match", { count: verdict.counts.match }) },

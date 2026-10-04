@@ -28,7 +28,7 @@
  * the story (1), its words are easy (4), and no two ask the same thing (6).
  */
 
-import { BANDS, CHOICES, MATCH_MAX_PAIRS, MATCH_MAX_QUESTIONS, MATCH_MIN_PAIRS, minimumQuestions, type Passage, type Question, type Sentence } from "./passage";
+import { BANDS, CHOICES, MATCH_MAX_PAIRS, MATCH_MAX_QUESTIONS, MATCH_MIN_PAIRS, meetsTarget, type Passage, type Question, type Sentence } from "./passage";
 import { core, gapOf, sentenceText } from "./text";
 import { SPELL_PROBLEM_TEXT, whyUnspellable } from "./tiles";
 
@@ -323,14 +323,16 @@ export function verifyPassage(p: Passage, opts: VerifyOptions = {}): Verdict {
     comprehension: p.questions.filter((q) => q.kind === "comprehension").length,
     vocab: p.questions.filter((q) => q.kind === "vocab").length,
     spell: p.questions.filter((q) => q.kind === "spell").length,
-    // Optional: counted so the Studio can show it, never part of `countsMatchBand`.
+    // Part of `countsMatchBand` only when the book sets a matching target.
     match: p.questions.filter((q) => q.kind === "match").length,
   };
   const band = p.questionCounts ?? BANDS[p.band];
   const countsMatchBand = !!band &&
-    counts.comprehension >= minimumQuestions(band.understand) && counts.comprehension <= band.understand &&
-    counts.vocab >= minimumQuestions(band.words) && counts.vocab <= band.words &&
-    counts.spell >= minimumQuestions(band.spell) && counts.spell <= band.spell;
+    meetsTarget(counts.comprehension, band.understand) &&
+    meetsTarget(counts.vocab, band.words) &&
+    meetsTarget(counts.spell, band.spell) &&
+    // Matching counts only once a book asks for it; older books leave it optional.
+    (band.match === undefined || meetsTarget(counts.match, band.match));
   // Reading-level feedback is useful in Review, but it is optional and must
   // never prevent an author from publishing a book.
   const failures = checks.filter((c) => c.status === "fail" && c.rule !== 4).length;

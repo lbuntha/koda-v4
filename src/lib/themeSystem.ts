@@ -6,7 +6,8 @@ export type ButtonVariant =
   | "warning"
   | "ghost"
   | "outline"
-  | "glass";
+  | "glass"
+  | "light";
 export type ButtonSize = "sm" | "md" | "lg" | "icon" | "step" | "choice";
 
 export type CardVariant = "default" | "glass" | "bordered" | "interactive";
@@ -159,6 +160,10 @@ export const themeSystem = {
       /* The second action on a coloured banner: see-through white, so the
          banner's colour shows through and the white button beside it stays
          the one to press. */
+      /* White with the primary colour in the glyph: the arrow on a card, which
+         should be easy to find without outshouting the card's own picture. */
+      light:
+        "bg-white hover:bg-indigo-50 text-indigo-600 border-indigo-200 dark:bg-slate-800 dark:hover:bg-slate-700 dark:text-indigo-300 dark:border-slate-900 focus-visible:ring-indigo-500",
       glass:
         "bg-white/20 hover:bg-white/30 text-white border-white/30 backdrop-blur-sm focus-visible:ring-white",
     };
@@ -332,6 +337,12 @@ export const themeSystem = {
      "A new skill is out". A plain surface card: the hue lives on the icon only,
      the same rule as `statTile`, so a banner never outshouts the cards below
      it. Colour by meaning, from THEME.md: indigo primary, orange streak. */
+  /* The one colour every "carry on" banner wears — the skill catalog's and
+     Trace's — so the big card at the top of a page reads as Koda, not as
+     whichever subject or collection happens to be in it. */
+  heroGradient:
+    "bg-gradient-to-br from-purple-400 via-purple-500 to-violet-700 dark:from-purple-700 dark:via-purple-800 dark:to-violet-950",
+
   banner: {
     card: "relative rounded-2xl border-2 border-line bg-surface p-4 transition-all duration-300 motion-reduce:transition-none",
     /* The same card with the tone at its edge and under its icon, for a moment
@@ -772,8 +783,10 @@ export const themeSystem = {
           : "text-slate-400 dark:text-slate-400 group-hover:text-slate-900 dark:group-hover:text-white"
       }`,
 
+    /* Khmer one size up: at 14px the subscripts and vowel signs stacked on
+       each consonant blur together, and they are what make the word readable. */
     navLabel: (isActive: boolean = false) =>
-      `text-sm font-mono tracking-tight ${
+      `text-sm [&:lang(km)]:text-base font-mono tracking-tight ${
         isActive
           ? "font-extrabold text-indigo-700 dark:text-indigo-300"
           : "font-bold text-slate-600 dark:text-slate-300 group-hover:text-slate-900 dark:group-hover:text-white"

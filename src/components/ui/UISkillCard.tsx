@@ -1,7 +1,8 @@
 import React from "react";
-import { Check, ChevronRight, Play } from "lucide-react";
+import { ArrowRight, Check, ChevronRight, Play } from "lucide-react";
 import { themeSystem } from "../../lib/themeSystem";
 import { UIBadge, UIButton } from "./ThemeUI";
+import { UIProgressBar } from "./UIProgressBar";
 import { UISkillThumbnail, skillArtFor, useHasSkillArtwork } from "./UISkillThumbnail";
 import { useT } from "../../lib/i18n";
 
@@ -53,56 +54,6 @@ export interface UISkillCardProps {
   onRegister?(): void;
   className?: string;
 }
-
-/**
- * The banner's colour for each subject: a pale wash of the poster tile's hue,
- * with the words in ink and the subject's colour kept for the bar and the
- * button — a strong colour across a whole banner read as heavy. No amber or
- * lime: yellow tones are hard to read in this app, so those subjects borrow a
- * neighbour's colour.
- */
-type HeroTone = { wash: string; accent: string };
-const HERO_TONE: Record<string, HeroTone> = {
-  "number-sense": { wash: "from-indigo-50 to-violet-100 dark:from-indigo-950 dark:to-violet-900/60", accent: "bg-indigo-600" },
-  operations: { wash: "from-emerald-50 to-teal-100 dark:from-emerald-950 dark:to-teal-900/60", accent: "bg-emerald-600" },
-  "place-value": { wash: "from-sky-50 to-indigo-100 dark:from-sky-950 dark:to-indigo-900/60", accent: "bg-sky-600" },
-  patterns: { wash: "from-sky-50 to-cyan-100 dark:from-sky-950 dark:to-cyan-900/60", accent: "bg-cyan-600" },
-  fractions: { wash: "from-rose-50 to-pink-100 dark:from-rose-950 dark:to-pink-900/60", accent: "bg-rose-600" },
-  measurement: { wash: "from-emerald-50 to-green-100 dark:from-emerald-950 dark:to-green-900/60", accent: "bg-emerald-600" },
-  geometry: { wash: "from-fuchsia-50 to-purple-100 dark:from-fuchsia-950 dark:to-purple-900/60", accent: "bg-fuchsia-600" },
-};
-const heroTone = (category?: string): HeroTone =>
-  HERO_TONE[category ?? ""] ?? { wash: "from-indigo-50 to-indigo-100 dark:from-indigo-950 dark:to-indigo-900/60", accent: "bg-indigo-600" };
-
-/**
- * One progress bar, at the weight its card size calls for.
- *
- * `label` both names the bar and decides whether it is a bar at all to a
- * screen reader. The `sm` row wraps its whole self in a `<button>`, and a
- * `progressbar` nested inside a control is read inconsistently — some readers
- * fold it into the button's name, some announce a second widget. That row
- * already carries "3 of 15" as text inside the button's accessible name, so
- * there it stays decorative and the number does the work.
- */
-const Progress: React.FC<{ percent: number; size: SkillCardSize; label?: string }> = ({
-  percent,
-  size,
-  label,
-}) => (
-  <div
-    /* `md` was a 4px hairline beside a count it now shares a line with. A bar
-       nobody can see is decoration, not progress. */
-    className={`${size === "lg" ? "h-2" : "h-1.5"} flex-1 overflow-hidden rounded-full bg-surface-muted`}
-    {...(label
-      ? { role: "progressbar", "aria-valuenow": percent, "aria-valuemin": 0, "aria-valuemax": 100, "aria-label": label }
-      : { "aria-hidden": true })}
-  >
-    <div
-      className="h-full rounded-full bg-indigo-600 transition-all"
-      style={{ width: `${percent}%` }}
-    />
-  </div>
-);
 
 /**
  * Shared skill card — the one place a skill is drawn.
@@ -191,7 +142,7 @@ export const UISkillCard: React.FC<UISkillCardProps> = ({
           )}
 
           <div className="mt-1.5 flex items-center gap-2">
-            <Progress percent={percent} size="sm" />
+            <UIProgressBar value={percent} max={100} size="sm" className="flex-1" />
             <span className="shrink-0 text-[11px] font-bold text-muted tabular-nums">
               {completedLessons}/{lessonCount}
             </span>
@@ -210,64 +161,67 @@ export const UISkillCard: React.FC<UISkillCardProps> = ({
   }
 
   /*
-   * A banner, drawn the way the Library and Trace draw theirs: the subject's
-   * colour on the left with the words in white, the artwork filling the right
-   * and fading into the colour — a poster rather than a picture in a box. On a
-   * phone the artwork is a band across the top, fading downwards.
+   * A banner: a violet gradient across the whole card with the words in white
+   * and the artwork filling the right half, fading into the colour —
+   * the same calm colour for every subject, so the banner reads as Koda rather
+   * than as whichever skill happens to be in it.
    */
   if (size === "lg") {
-    const tone = heroTone(category);
     return (
       <section
-        className={`relative grid overflow-hidden rounded-3xl border-2 border-line bg-gradient-to-br text-ink md:grid-cols-[minmax(0,3fr)_minmax(0,2fr)] ${tone.wash} ${className}`}
+        className={`relative isolate grid overflow-hidden rounded-3xl ${themeSystem.heroGradient} text-white md:grid-cols-[minmax(0,1fr)_minmax(0,1fr)] ${className}`}
         aria-label={title}
       >
+        {/* The artwork runs to the card's edges and fades into the violet, as the
+            Library's "pick up where you left off" card does; on a phone it is a
+            band across the top fading downwards. */}
         {hasArtwork ? (
-          <span
-            aria-hidden="true"
-            className="relative order-first block aspect-[16/9] [mask-image:linear-gradient(to_bottom,black_60%,transparent)] md:order-last md:aspect-auto md:min-h-64 md:[mask-image:linear-gradient(to_right,transparent,black_35%)]"
-          >
+          <span aria-hidden="true" className="relative order-first block aspect-[16/9] [mask-image:linear-gradient(to_bottom,black_60%,transparent)] md:order-last md:aspect-auto md:min-h-64 md:[mask-image:linear-gradient(to_right,transparent,black_35%)]">
             <UISkillThumbnail thumbnail={thumbnail} fallbackIconName={fallbackIconName} category={category} size="lg" fill cover />
           </span>
         ) : (
           /* A glyph floats whole on the colour; stretched across half a banner it is one symbol saying very little. */
-          <span aria-hidden="true" className="order-first flex h-32 items-center justify-center md:order-last md:h-auto md:min-h-64">
-            <span className="block h-24 w-24 overflow-hidden rounded-3xl shadow-lg ring-4 ring-white/70 dark:ring-white/10 md:h-32 md:w-32">
+          <span aria-hidden="true" className="order-first flex h-32 items-center justify-center pt-5 md:order-last md:h-auto md:min-h-64 md:pt-0">
+            <span className="block h-24 w-24 overflow-hidden rounded-3xl shadow-lg ring-4 ring-white/50 md:h-32 md:w-32">
               <UISkillThumbnail thumbnail={thumbnail} fallbackIconName={fallbackIconName} category={category} size="lg" fill />
             </span>
           </span>
         )}
-        <div className="relative z-10 flex min-w-0 flex-col gap-3 p-5 pt-1 md:p-8">
-          {eyebrow && <span className="text-xs font-extrabold uppercase tracking-widest text-muted">{eyebrow}</span>}
+        <div className="relative z-10 flex min-w-0 flex-col justify-center gap-3 p-5 pt-1 sm:p-6 sm:pt-1 md:p-8">
+          {eyebrow && <span className="text-xs font-extrabold uppercase tracking-widest text-white/90">{eyebrow}</span>}
           {(subjectName || badges) && (
-            <div className="flex flex-wrap items-center gap-2 text-sm font-semibold text-muted">
-              {subjectName && <span>{subjectName}</span>}
+            <div className="flex flex-wrap items-center gap-2 text-sm font-semibold">
+              {subjectName && <span className="rounded-full bg-white/25 px-2.5 py-0.5 text-xs font-bold text-white">{subjectName}</span>}
               {badges}
             </div>
           )}
-          <h2 className="text-3xl font-extrabold leading-tight tracking-tight text-ink sm:text-4xl">{title}</h2>
-          {tagline && <p className="line-clamp-2 max-w-lg text-sm text-muted sm:text-base">{tagline}</p>}
-          {meta && <p className="font-mono text-xs font-bold text-muted">{meta}</p>}
+          <h2 className="text-3xl font-extrabold leading-tight tracking-tight text-white sm:text-4xl">{title}</h2>
+          {tagline && <p className="line-clamp-2 max-w-lg text-base font-medium text-white sm:text-lg">{tagline}</p>}
+          {meta && <p className="font-mono text-xs font-bold text-white/90">{meta}</p>}
           <div className="flex max-w-sm flex-col gap-1.5">
-            <span
-              className="block h-2 overflow-hidden rounded-full bg-black/10 dark:bg-white/15"
-              role="progressbar"
-              aria-valuenow={percent}
-              aria-valuemin={0}
-              aria-valuemax={100}
-              aria-label={t("skillCard.progress", { title })}
-            >
-              <span className={`block h-full rounded-full transition-all ${tone.accent}`} style={{ width: `${percent}%` }} />
-            </span>
-            <span className="text-sm font-semibold tabular-nums text-muted">
-              {completedLessons
-                ? t("skillCard.lessonsComplete", { done: completedLessons, total: lessonCount })
-                : t("skillCard.readyToBegin")}
-            </span>
-            {footnote && <span className="text-xs text-muted">{footnote}</span>}
+            <UIProgressBar
+              onColor
+              size="lg"
+              value={percent}
+              max={100}
+              label={t("skillCard.progress", { title })}
+              caption={
+                completedLessons
+                  ? t("skillCard.lessonsComplete", { done: completedLessons, total: lessonCount })
+                  : t("skillCard.readyToBegin")
+              }
+            />
+            {footnote && <span className="text-xs text-white/90">{footnote}</span>}
           </div>
-          <div className="mt-2">
-            <UIButton size="lg" icon={<Play className="fill-current" aria-hidden="true" />} onClick={act} disabled={registering}>
+          <div className="mt-1">
+            {/* White on the violet, medium, and the full width of a phone — as the Library's and Trace's banners. */}
+            <UIButton
+              variant="light"
+              className="w-full sm:w-auto"
+              icon={<Play className="fill-current" aria-hidden="true" />}
+              onClick={act}
+              disabled={registering}
+            >
               {registering ? t("skillCard.adding") : label}
             </UIButton>
           </div>
@@ -337,7 +291,7 @@ export const UISkillCard: React.FC<UISkillCardProps> = ({
         </button>
 
         {/* The bar only once there is progress; before that, a full bar of nothing is noise. */}
-        {completedLessons > 0 && <Progress percent={percent} size="md" label={t("skillCard.progress", { title })} />}
+        {completedLessons > 0 && <UIProgressBar value={percent} max={100} size="sm" label={t("skillCard.progress", { title })} />}
 
         <div className="mt-auto flex min-h-10 items-center justify-between gap-3">
           {/* The lesson count only until progress gives it — at poster width a third clause truncates the ages away. */}
@@ -351,16 +305,23 @@ export const UISkillCard: React.FC<UISkillCardProps> = ({
               : `${t("skillCard.lessons", { count: lessonCount })}${ages ? ` · ${t("skillCard.ages", { from: ages[0], to: ages[1] })}` : ""}`}
           </span>
           {registered ? (
-            <button
+            <UIButton
               type="button"
+              variant="light"
+              size="icon"
+              className="shrink-0"
+              icon={<ArrowRight aria-hidden="true" />}
               onClick={act}
               aria-label={`${label} ${title}`}
-              className="grid h-10 w-10 shrink-0 place-items-center rounded-full bg-indigo-50 text-xl text-indigo-600 transition hover:bg-indigo-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 dark:bg-indigo-950 dark:text-indigo-300"
-            >
-              <span aria-hidden="true">→</span>
-            </button>
+            />
           ) : (
-            <UIButton type="button" size="sm" className="shrink-0 rounded-full" onClick={act} isLoading={registering} aria-label={`${label} ${title}`}>
+            <UIButton
+              type="button"
+              variant="light"
+              /* The arrow's height: the icon size is 42px (44px under a finger), so
+                 a card reads the same whether its skill is added or not. */
+              className="h-[42px] shrink-0 !py-0 pointer-coarse:h-11"
+              onClick={act} isLoading={registering} aria-label={`${label} ${title}`}>
               {label}
             </UIButton>
           )}

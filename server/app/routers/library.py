@@ -61,7 +61,18 @@ IMAGE_MAGIC = {
 }
 PHOTO_PREFIX = "photo-"
 PLACES = {"top", "bottom", "left", "right"}
+# The shelves every studio starts with. An author may add their own: a new
+# shelf exists once a book sits on it, and is offered for every book after.
 CATEGORIES = {"Animals", "Food", "Family", "Places", "Weather & play", "Everyday"}
+CATEGORY_MAX = 40
+
+
+def clean_category(value: Any) -> str | None:
+    """A shelf name an author typed, tidied — or None when it is not one."""
+    if not isinstance(value, str):
+        return None
+    name = " ".join(value.split())
+    return name if 1 <= len(name) <= CATEGORY_MAX else None
 
 
 class BookOut(Model):
@@ -183,8 +194,11 @@ def _clean(passage: dict[str, Any]) -> dict[str, Any]:
             or any(not isinstance(pr, dict) or too_long(pr.get("left")) or too_long(pr.get("right")) for pr in pairs)
         ):
             raise AppError(400, "invalid_passage", "A matching question is malformed or too long.")
-    if passage.get("category") is not None and passage.get("category") not in CATEGORIES:
-        raise AppError(400, "invalid_category", "Unknown category.")
+    if passage.get("category") is not None:
+        name = clean_category(passage.get("category"))
+        if name is None:
+            raise AppError(400, "invalid_category", f"A shelf name is 1–{CATEGORY_MAX} characters.")
+        passage["category"] = name
     return passage
 
 
@@ -287,9 +301,10 @@ PAGE_SIZE_MIN, PAGE_SIZE_MAX = 5, 100
 
 
 @router.get("/studio/meta")
-async def studio_meta(_: CanWrite) -> StudioMeta:
+async def studio_meta(db: Db, _: CanWrite) -> StudioMeta:
+    in_use = {row["value"] for row in (await library_repo.studio_facets(db))["categories"] if isinstance(row["value"], str)}
     return StudioMeta(
-        categories=sorted(CATEGORIES),
+        categories=sorted(CATEGORIES | in_use),
         sorts=list(library_repo.STUDIO_SORTS),
         statuses=list(library_repo.STUDIO_STATUSES),
         pageSizeMin=PAGE_SIZE_MIN,

@@ -6,7 +6,7 @@
 import { useEffect, useRef, useState } from "react";
 import { Lock, Sparkles, Wand2 } from "lucide-react";
 import { useT } from "../../lib/i18n";
-import { UIButton } from "../../components/ui";
+import { UIButton, UIProgressBar } from "../../components/ui";
 import type { Stroke, TraceItem } from "../geometry/types";
 import type { Source } from "./autoStrokes";
 import { autoStrokes, canUseAi } from "./autoStrokes";
@@ -161,9 +161,7 @@ export function AutoStrokesForSet({ itemIds, onDone }: { itemIds: string[]; onDo
       <AiSwitch allowed={allowed} on={ai} onChange={setAi} />
       {progress ? (
         <div className="flex flex-col gap-1.5">
-          <div className="h-2 overflow-hidden rounded-full bg-surface-muted">
-            <div className="h-full bg-indigo-600 transition-all" style={{ width: `${(100 * progress.done) / Math.max(1, progress.total)}%` }} />
-          </div>
+          <UIProgressBar value={progress.done} max={progress.total} />
           <p className="text-sm text-body">
             {progress.done < progress.total ? t("traceStudio.auto.working", { done: progress.done, total: progress.total }) : t("traceStudio.auto.setDone", { count: progress.total, ai: progress.ai })}
           </p>

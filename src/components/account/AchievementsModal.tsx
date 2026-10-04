@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { Award } from "lucide-react";
 import { useT } from "../../lib/i18n";
 
-import { UIModal, UIButton } from "../ui";
+import { UIModal, UIButton, UIRewardProgress } from "../ui";
 import { BADGE_METRICS, badgeShelf, useBadges } from "../../lib/badges";
 import { BadgeIcon } from "./BadgeVisuals";
 import {
@@ -92,7 +92,7 @@ export const AchievementsModal: React.FC<AchievementsModalProps> = ({
         </div>
 
         <div className="space-y-3">
-          {shelf.map(({ rule, earned, standing, progress }) => {
+          {shelf.map(({ rule, earned, standing }) => {
             const metric = BADGE_METRICS.find((m) => m.id === rule.metric)?.id;
             return (
               <div
@@ -133,12 +133,12 @@ export const AchievementsModal: React.FC<AchievementsModalProps> = ({
                     </p>
                   ) : (
                     <>
-                      <div className="mt-1.5 h-2 w-full overflow-hidden rounded-full bg-surface">
-                        <div
-                          className="h-full rounded-full bg-amber-400 transition-all"
-                          style={{ width: `${Math.min(100, Math.round(progress * 100))}%` }}
-                        />
-                      </div>
+                      <UIRewardProgress
+                        className="mt-1.5"
+                        value={standing}
+                        max={rule.threshold}
+                        label={rule.label}
+                      />
                       <p className="mt-1 text-xs text-muted">
                         {metric
                           ? t(`home.toGo.${metric}`, { count: Math.max(0, rule.threshold - standing) })

@@ -32,10 +32,20 @@ export interface BandSpec {
   understand: number;
   words: number;
   spell: number;
+  /** Matching sets wanted. Absent leaves matching optional, as books saved before it were. */
+  match?: number;
   ages: readonly [number, number];
 }
 
-export type QuestionCounts = Pick<BandSpec, "understand" | "words" | "spell">;
+/**
+ * The per-book question targets. Any section may be 0 — a book can skip one.
+ * `match` is the number of matching sets wanted (0–MATCH_MAX_QUESTIONS);
+ * absent on books saved before it existed, which leaves matching optional.
+ */
+export type QuestionCounts = Pick<BandSpec, "understand" | "words" | "spell" | "match">;
+
+/** The range an author may set each target to. */
+export const TARGET_MAX = 10;
 
 export const BANDS: Readonly<Record<Band, BandSpec>> = {
   A: { understand: 10, words: 10, spell: 10, ages: [5, 7] },
@@ -45,6 +55,8 @@ export const BANDS: Readonly<Record<Band, BandSpec>> = {
 /** Publication accepts at least 85% of the requested questions, rounded up. */
 export const QUESTION_MINIMUM_RATIO = 0.85;
 export const minimumQuestions = (requested: number): number => Math.ceil(requested * QUESTION_MINIMUM_RATIO);
+/** One section is ready: at least 85% of its target and never over it. A target of 0 wants none. */
+export const meetsTarget = (have: number, want: number): boolean => have >= minimumQuestions(want) && have <= want;
 
 /** A word must be 2–8 tiles: a ninth tile does not fit a 360px ring. */
 export const MIN_TILES = 2;

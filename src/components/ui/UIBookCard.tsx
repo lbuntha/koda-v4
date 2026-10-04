@@ -1,5 +1,6 @@
 import React from "react";
-import { Clock3, ListChecks, Volume2 } from "lucide-react";
+import { ArrowRight, Clock3, ListChecks, Volume2 } from "lucide-react";
+import { themeSystem } from "../../lib/themeSystem";
 import { useT } from "../../lib/i18n";
 
 export interface UIBookCardProps {
@@ -32,7 +33,7 @@ export const UIBookCard: React.FC<UIBookCardProps> = ({ cover, title, meta, stat
       <span className="min-w-0 break-words text-xs text-muted">{status}</span>
       <span className={`${showAction ? "mt-2" : "mt-1"} flex min-h-10 items-center ${showAction ? "justify-between" : "justify-start"} gap-3 text-sm font-medium text-indigo-600 dark:text-indigo-300`}>
         <span className="min-w-0 break-words inline-flex items-center gap-2"><ListChecks className="h-4 w-4 shrink-0" aria-hidden="true" />{quizLabel}</span>
-        {showAction && <span className="grid h-10 w-10 shrink-0 place-items-center rounded-full bg-indigo-50 text-xl font-normal transition group-hover:bg-indigo-100 dark:bg-indigo-950" aria-hidden="true">→</span>}
+        {showAction && <span className={themeSystem.button("light", "icon", "shrink-0")} aria-hidden="true"><ArrowRight /></span>}
       </span>
     </span>
   </button>

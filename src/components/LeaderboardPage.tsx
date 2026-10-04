@@ -39,6 +39,7 @@ import {
   UISectionHeader,
   UISpinner,
   UISearchInput,
+  UIProgressBar,
 } from "./ui";
 
 import { currentLanguage, translate } from "../lib/i18n";
@@ -460,9 +461,7 @@ export const LeaderboardPage: React.FC = () => {
                             <span>{translate("leaderboard.yourWeeklyProgress")}</span>
                             <span className="tabular-nums">{translate("leaderboard.valueXp", { value: yourRow.weeklyXp.toLocaleString() })}</span>
                           </div>
-                          <div className="mt-2 h-2 overflow-hidden rounded-full bg-slate-200 dark:bg-slate-700">
-                            <div className="h-full rounded-full bg-gradient-to-r from-indigo-500 to-violet-500 transition-[width]" style={{ width: `${weeklyProgress}%` }} />
-                          </div>
+                          <UIProgressBar className="mt-2" value={weeklyProgress} max={100} label={translate("leaderboard.yourWeeklyProgress")} />
                         </div>
                       </div>
                     </div>

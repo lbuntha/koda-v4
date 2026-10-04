@@ -1664,7 +1664,7 @@ app.post("/api/library/draft", async (req, res) => {
   const lang = language === "km" ? "km" : "en";
   const level = band === "B" ? "B" : "A";
   const requested = questionCounts && typeof questionCounts === "object" ? questionCounts as Record<string, unknown> : {};
-  const countOf = (key: string) => Math.max(1, Math.min(10, Number.isFinite(Number(requested[key])) ? Math.round(Number(requested[key])) : 10));
+  const countOf = (key: string) => Math.max(0, Math.min(10, Number.isFinite(Number(requested[key])) ? Math.round(Number(requested[key])) : 10));
   const counts = { u: countOf("understand"), w: countOf("words"), s: countOf("spell") };
   const lines: string[] = Array.isArray(sentences) ? sentences.map((x: unknown) => String(x ?? "").slice(0, 400)) : [];
   const allowedPictures: string[] = Array.isArray(pictures)

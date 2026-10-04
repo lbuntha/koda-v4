@@ -20,11 +20,11 @@ import { useSkillCatalog } from "../lib/useSkillCatalog";
 import { themeSystem } from "../lib/themeSystem";
 import { useStreak } from "../lib/streak";
 import { BADGE_METRICS, nextBadge, useBadges } from "../lib/badges";
-import { levelFromXp, levelProgress, XP_PER_LEVEL, xpToNextLevel } from "../lib/level";
+import { levelFromXp, XP_PER_LEVEL, xpToNextLevel } from "../lib/level";
 import { BadgeIcon } from "./account/BadgeVisuals";
 import type { UserProgress } from "../types";
 import { playSound } from "../utils/audio";
-import { UIButton, UILessonCard, UISkillCard, UISubjectLessonCard } from "./ui";
+import { UIButton, UILessonCard, UIRewardProgress, UISkillCard, UISubjectLessonCard } from "./ui";
 import { WelcomeBack } from "./WelcomeBack";
 import { DailyGoalBanner } from "./DailyGoalBanner";
 import { ChildrenOverview } from "./account/ChildrenOverview";
@@ -159,15 +159,12 @@ const NextBadge: React.FC<{
           </p>
         </div>
       </div>
-      <div className="mt-3 h-2 rounded-full bg-surface-muted overflow-hidden">
-        {/* Indigo, like the level bar it sits under. Amber was the only one of
-            its colour in the column, which made "how close am I" look like two
-            unrelated measures rather than one rail. */}
-        <div
-          className="h-full rounded-full bg-indigo-500 transition-all"
-          style={{ width: `${Math.round(next.progress * 100)}%` }}
-        />
-      </div>
+      <UIRewardProgress
+        className="mt-3"
+        value={next.standing}
+        max={next.rule.threshold}
+        label={next.rule.label}
+      />
     </section>
   );
 };
@@ -259,12 +256,12 @@ const HomeRail: React.FC<{
                 {t("home.xpToLevel", { xp: xpToNextLevel(userProgress.xp), level: levelFromXp(userProgress.xp) + 1 })}
               </span>
             </div>
-            <div className="mt-1 h-1.5 rounded-full bg-surface-muted overflow-hidden">
-              <div
-                className="h-full rounded-full bg-indigo-500 transition-all"
-                style={{ width: `${Math.round(levelProgress(userProgress.xp) * 100)}%` }}
-              />
-            </div>
+            <UIRewardProgress
+              className="mt-1.5"
+              value={XP_PER_LEVEL - xpToNextLevel(userProgress.xp)}
+              max={XP_PER_LEVEL}
+              label={t("home.xpLevel", { level: levelFromXp(userProgress.xp) })}
+            />
             {/* The rule itself, said once. "XP Level 4" and "Lesson 4" are two
                 different numbers on two different screens, and this is the
                 sentence that keeps them apart: levels come from points, and
@@ -303,23 +300,17 @@ const HomeRail: React.FC<{
               fallback={<Target className="w-8 h-8" />}
             />
           </span>
-          <p className="font-mono font-black text-lg text-ink">
-            {streak.solvedToday} / {goal}
-          </p>
-          <p className="text-xs text-muted flex-1 min-w-0">
+          <p className="text-sm font-bold text-muted flex-1 min-w-0">
             {percent >= 100 ? t("home.goalMet") : t("home.lessonsToday")}
           </p>
         </div>
-        {/* Indigo, for the reason the badge bar below already gives: amber was
-            the only one of its colour in this column, which made "how close am
-            I" look like two unrelated measures rather than one rail. That fix
-            reached the badge bar and stopped there. */}
-        <div className="mt-3 h-2 rounded-full bg-surface-muted overflow-hidden">
-          <div
-            className="h-full rounded-full bg-indigo-600 transition-all"
-            style={{ width: `${percent}%` }}
-          />
-        </div>
+        {/* The count lives inside the bar now, so it is not said twice. */}
+        <UIRewardProgress
+          className="mt-3"
+          value={streak.solvedToday}
+          max={goal}
+          label={t("home.dailyGoal")}
+        />
       </section>
 
       <NextBadge userProgress={userProgress} starsEarned={starsEarned} />

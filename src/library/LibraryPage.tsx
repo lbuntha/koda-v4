@@ -23,7 +23,8 @@ import { prefetchPhotos } from "./photos";
 import { reportBook, type ReportReason } from "./api";
 import { BookReader } from "./BookReader";
 import { playSound } from "../utils/audio";
-import { UIButton, UICard, UICarousel, UIMenu, UIMenuItem, UIGuideBubble, UIBookCard, UILinkButton, UIQuizToolbar, UIModal, UIMatchPairs, UISearchInput } from "../components/ui";
+import { UIButton, UICard, UICarousel, UIMenu, UIMenuItem, UIGuideBubble, UIBookCard, UILinkButton, UIQuizToolbar, UIModal, UIMatchPairs, UIProgressBar, UISearchInput } from "../components/ui";
+import { themeSystem } from "../lib/themeSystem";
 import "./khmerFont";
 import { useT } from "../lib/i18n";
 
@@ -396,9 +397,10 @@ function ShelfNote({ title, note, icon = "book", other = null, action }: {
 /** The book to carry on with, or a new one to start: large, one tap to its page. */
 function LibraryHero({ book, reading, progress, onOpen }: { book: Passage; reading: boolean; progress: BookProgress | null; onOpen(id: string): void }) {
   const { t: tr } = useT();
-  const tone = COVER[book.category ?? ""] ?? "from-indigo-500 to-indigo-800";
+  /* The shared banner violet, as Learn's and Trace's — not the book's category colour. */
+  const tone = themeSystem.heroGradient;
   return (
-    <section className={`relative mt-0 grid overflow-hidden rounded-3xl sm:mt-5 bg-gradient-to-br text-white sm:grid-cols-[minmax(0,1fr)_minmax(0,1fr)] ${tone}`} aria-label={tr(reading ? "library.hero.carryOn" : "library.hero.tryNew")}>
+    <section className={`relative mt-0 grid overflow-hidden rounded-3xl sm:mt-5 text-white sm:grid-cols-[minmax(0,1fr)_minmax(0,1fr)] ${tone}`} aria-label={tr(reading ? "library.hero.carryOn" : "library.hero.tryNew")}>
       <div className="relative z-10 flex flex-col justify-center gap-3 p-5 pt-0 sm:p-8">
         <span className="text-xs font-extrabold uppercase tracking-widest text-white/80">{tr(reading ? "library.hero.carryOn" : "library.hero.tryNew")}</span>
         <h2 className={`text-3xl font-extrabold leading-tight text-white sm:text-4xl ${kh(book)}`}>{book.title}</h2>
@@ -407,8 +409,9 @@ function LibraryHero({ book, reading, progress, onOpen }: { book: Passage; readi
           {book.category ? ` · ${book.category}` : ""}
           {reading && progress?.stage === "quiz" ? ` · ${tr("library.inProgress")}` : ""}
         </p>
-        <div className="mt-2">
-          <UIButton variant="secondary" size="lg" icon={<BookOpen aria-hidden="true" />} onClick={() => onOpen(book.id)}>
+        {/* Medium and white-on-violet, as Trace's banner; the full width of a phone. */}
+        <div className="mt-1">
+          <UIButton variant="light" icon={<BookOpen aria-hidden="true" />} onClick={() => onOpen(book.id)} className="w-full sm:w-auto">
             {tr(reading ? "library.hero.keepReading" : "library.hero.startReading")}
           </UIButton>
         </div>
@@ -683,9 +686,7 @@ function Quiz({ book, onLeave, onFinish, preview = false }: { book: Passage; onL
               <span className="min-w-0 truncate">{tr(`library.part.${p}`)}</span>
               <span className="shrink-0 tabular-nums">{doneIn(p)}/{n}</span>
             </div>
-            <div className="h-2 overflow-hidden rounded-full bg-surface-muted">
-              <div className="h-full bg-indigo-600 transition-[width]" style={{ width: `${n ? (doneIn(p) / n) * 100 : 0}%` }} />
-            </div>
+            <UIProgressBar value={doneIn(p)} max={n} label={tr(`library.part.${p}`)} />
           </div>
         ))}
       </div>

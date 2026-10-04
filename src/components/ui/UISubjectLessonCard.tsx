@@ -3,6 +3,7 @@ import { ChevronRight, Play } from "lucide-react";
 import { themeSystem } from "../../lib/themeSystem";
 import { UISkillThumbnail } from "./UISkillThumbnail";
 import { useT } from "../../lib/i18n";
+import { UIProgressBar } from "./UIProgressBar";
 
 export interface UISubjectLessonCardProps {
   /** The skill's name — the group's heading. */
@@ -100,24 +101,17 @@ export const UISubjectLessonCard: React.FC<UISubjectLessonCardProps> = ({
           <span className="mt-0.5 block truncate text-base font-black leading-tight text-ink">
             {lessonTitle}
           </span>
-          <span
-            aria-hidden="true"
-            className="mt-2.5 block h-1.5 w-full overflow-hidden rounded-full bg-surface-muted"
-          >
-            <span
-              className="block h-full rounded-full bg-indigo-600 transition-all"
-              style={{ width: `${percent}%` }}
-            />
-          </span>
+          <UIProgressBar value={percent} max={100} size="sm" className="mt-2.5" />
         </span>
 
         {/* Its own column, centred on the card. Sharing the bar's line left it
             hanging below the text block, level with nothing. A mark rather than
             a labelled button at every width — the card's accessible name carries
             the word — and a span, not a nested button, since the whole card is
-            already the control. */}
-        <span className="shrink-0 grid h-10 w-10 sm:h-11 sm:w-11 place-items-center rounded-full bg-indigo-600 text-white shadow-sm">
-          <Play className="h-4 w-4 sm:h-5 sm:w-5 translate-x-px fill-current" />
+            already the control. Drawn with the shared button style, so it matches
+            every other button in the app. */}
+        <span aria-hidden="true" className={themeSystem.button("primary", "icon", "shrink-0")}>
+          <Play className="fill-current" />
         </span>
       </button>
     </section>

@@ -10,7 +10,7 @@ import {
   X,
   Zap,
 } from "lucide-react";
-import { UILessonIcon, UIMenu, UIMenuItem, UISpinner } from "../../../components/ui";
+import { UILessonIcon, UIMenu, UIMenuItem, UIProgressBar, UISpinner } from "../../../components/ui";
 import { KodaFace } from "../../../components/KodaFace";
 import { KodaAskModal } from "../../../components/KodaAskModal";
 import { LiveVoiceCoachModal } from "../../../components/LiveVoiceCoachModal";
@@ -324,19 +324,13 @@ export const SkillRoundTopBar: React.FC<SkillRoundTopBarProps> = ({
               {questionIndex}
               <span className="opacity-70">/{totalQuestions}</span>
             </span>
-            <div
-              className="flex-1 h-3 bg-surface-muted rounded-full overflow-hidden ring-1 ring-line/60"
-              role="progressbar"
-              aria-valuenow={percent}
-              aria-valuemin={0}
-              aria-valuemax={100}
-              aria-label={t("lessonCard.questionOf", { answered: questionIndex, total: totalQuestions })}
-            >
-              <div
-                className="h-full bg-gradient-to-r from-amber-400 via-orange-400 to-orange-500 rounded-full transition-[width] duration-500 ease-out"
-                style={{ width: `${percent}%` }}
-              />
-            </div>
+            <UIProgressBar
+              size="lg"
+              className="flex-1"
+              value={percent}
+              max={100}
+              label={t("lessonCard.questionOf", { answered: questionIndex, total: totalQuestions })}
+            />
           </div>
 
           {/* Wide only: standing, then every control */}

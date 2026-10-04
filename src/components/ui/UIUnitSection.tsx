@@ -1,6 +1,7 @@
 import React from "react";
 import { Check, ChevronDown, Lock } from "lucide-react";
 import { themeSystem } from "../../lib/themeSystem";
+import { UIProgressBar } from "./UIProgressBar";
 
 export interface UIUnitSectionProps {
   /** Unique on the page — names the panel the header controls. */
@@ -46,7 +47,6 @@ export const UIUnitSection: React.FC<UIUnitSectionProps> = ({
   className = "",
 }) => {
   const complete = total > 0 && done >= total;
-  const percent = total ? Math.round((done / total) * 100) : 0;
   const panelId = `${id}-lessons`;
 
   return (
@@ -77,15 +77,7 @@ export const UIUnitSection: React.FC<UIUnitSectionProps> = ({
           <span className="mt-0.5 block text-base font-black leading-tight text-ink line-clamp-2">
             {title}
           </span>
-          <span
-            aria-hidden="true"
-            className="mt-2 block h-1.5 w-full max-w-xs overflow-hidden rounded-full bg-surface-muted"
-          >
-            <span
-              className="block h-full rounded-full bg-indigo-600 transition-all"
-              style={{ width: `${percent}%` }}
-            />
-          </span>
+          <UIProgressBar value={done} max={total} size="sm" className="mt-2 max-w-xs" />
         </span>
 
         <span className="shrink-0 font-mono text-xs font-black tabular-nums text-muted">

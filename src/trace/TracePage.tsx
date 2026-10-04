@@ -11,9 +11,11 @@
  */
 
 import { useState, useSyncExternalStore } from "react";
-import { AlarmClock, ArrowLeft, Check, LayoutGrid, PenLine, Play, RotateCcw } from "lucide-react";
-import { UIButton, UICarousel } from "../components/ui";
+import { AlarmClock, ArrowLeft, ArrowRight, Check, LayoutGrid, PenLine, Play, RotateCcw } from "lucide-react";
+import { UIBanner, UIButton, UICarousel, UIProgressBar } from "../components/ui";
+import { useSession } from "../lib/sync";
 import { useT } from "../lib/i18n";
+import { themeSystem } from "../lib/themeSystem";
 import { useTraceShelf } from "./data/shelf";
 import { GOLDEN_ITEMS } from "./fixtures/items";
 import type { TraceItem } from "./geometry/types";
@@ -48,6 +50,14 @@ const xpOf = (e: Entry, collections: { id: string; xpPerStep?: number | null }[]
 export function TracePage({ onAwardXp, canCreate = false, onGoHome }: Props) {
   const { t } = useT();
   const [open, setOpen] = useState<Entry | null>(null);
+  const tallyKey = `koda.traceTallyClosed.${useSession()?.learnerId ?? "me"}`;
+  const [closedTally, setClosedTally] = useState<string | null>(() => {
+    try {
+      return localStorage.getItem(tallyKey);
+    } catch {
+      return null;
+    }
+  });
   /** The collection whose cover was tapped: its page, until the child goes back. */
   const [shelfId, setShelfId] = useState<string | null>(null);
   const shelf = useTraceShelf();
@@ -101,6 +111,17 @@ export function TracePage({ onAwardXp, canCreate = false, onGoHome }: Props) {
     .slice(0, 12);
   const canWrite = published.filter((e) => modeOf(e.item.kind) === "writing" && isDone(progressOf(e))).length;
   const canDraw = published.filter((e) => modeOf(e.item.kind) === "drawing" && isDone(progressOf(e))).length;
+  /* Closed until the counts change: a learner who closes "1 can write" sees the card again at 2. */
+  const tally = `${canWrite}:${canDraw}`;
+  const showTally = (canWrite > 0 || canDraw > 0) && closedTally !== tally;
+  const closeTally = () => {
+    setClosedTally(tally);
+    try {
+      localStorage.setItem(tallyKey, tally);
+    } catch {
+      /* Closed for this visit only. */
+    }
+  };
 
   const shelfOf = collections.map((c) => ({ id: c.id, itemIds: c.items.map((e) => e.item.id), c }));
   const { hero, rows } = homeRows(shelfOf, (id) => TraceProgress.get(id));
@@ -111,22 +132,26 @@ export function TracePage({ onAwardXp, canCreate = false, onGoHome }: Props) {
           tagline is a sentence read once, so the banner leads. With no counts
           to show the header is empty there, and the column's gap is taken
           back so the banner sits at the top instead of under a blank band. */}
-      <header className={`flex flex-wrap items-end justify-between gap-3 ${canWrite > 0 || canDraw > 0 ? "" : "max-sm:-mb-7"}`}>
+      <header className="flex flex-wrap items-end justify-between gap-3 max-sm:-mb-7">
         <div className="flex min-w-0 flex-col gap-1">
           {/* Below `rail:` the app bar already names the page; the heading stays for screen readers. */}
           <h1 className="sr-only items-center gap-2 text-3xl font-bold text-ink rail:not-sr-only rail:flex">
-            <PenLine className="h-7 w-7 text-indigo-600" />
             {t("trace.title")}
           </h1>
           <p className="hidden text-sm text-muted sm:block">{t("trace.subtitle")}</p>
         </div>
-        {(canWrite > 0 || canDraw > 0) && (
-          <div className="flex gap-2">
+      </header>
+
+      {/* What the learner can already do, as a card they can close — the full
+          width of a phone rather than a chip squeezed beside an empty title. */}
+      {showTally && (
+        <UIBanner tone="success" tinted icon={<PenLine />} onDismiss={closeTally}>
+          <span className="flex flex-wrap items-baseline gap-x-4 gap-y-1">
             {canWrite > 0 && <Stat value={canWrite} label={t("trace.status.canWrite")} />}
             {canDraw > 0 && <Stat value={canDraw} label={t("trace.status.canDraw")} />}
-          </div>
-        )}
-      </header>
+          </span>
+        </UIBanner>
+      )}
 
       {hero && (
         <Hero
@@ -134,7 +159,7 @@ export function TracePage({ onAwardXp, canCreate = false, onGoHome }: Props) {
           description={hero.c.description}
           cover={coverOf(hero.c)}
           picture={pictureOf(hero.c)}
-          tone={toneOf(hero.c.id)}
+          tone={themeSystem.heroGradient}
           entries={entriesOf(hero.c)}
           onPlay={setOpen}
           onBrowse={() => setShelfId(hero.c.id)}
@@ -266,14 +291,6 @@ function collectionProgress(entries: Entry[]) {
   return { done, started, next, pct: entries.length ? Math.round((100 * done) / entries.length) : 0, all: entries.length > 0 && done === entries.length };
 }
 
-function ProgressBar({ pct }: { pct: number }) {
-  return (
-    <span className="block h-2 overflow-hidden rounded-full bg-surface-muted" role="progressbar" aria-valuenow={pct} aria-valuemin={0} aria-valuemax={100}>
-      <span className="block h-full rounded-full bg-emerald-500 transition-all" style={{ width: `${pct}%` }} />
-    </span>
-  );
-}
-
 /**
  * The banner's picture, as the Library's: a band across the top on a phone and
  * the right-hand side on a wider screen. A photo fills it and fades into the
@@ -306,19 +323,16 @@ function Hero({ title, description, cover, picture, tone, entries, onPlay, onBro
         <span className="text-xs font-extrabold uppercase tracking-widest text-white/80">{p.all ? t("trace.hero.again") : p.started ? t("trace.hero.carryOn") : t("trace.hero.tryNew")}</span>
         <h2 className="text-3xl font-extrabold leading-tight text-white sm:text-4xl">{title}</h2>
         {description && description !== title && <p className="line-clamp-2 max-w-lg text-sm text-white/85 sm:text-base">{description}</p>}
-        <div className="flex max-w-sm flex-col gap-1.5">
-          <span className="block h-2 overflow-hidden rounded-full bg-white/25" role="progressbar" aria-valuenow={p.pct} aria-valuemin={0} aria-valuemax={100}>
-            <span className="block h-full rounded-full bg-white transition-all" style={{ width: `${p.pct}%` }} />
-          </span>
-          <span className="text-sm font-semibold tabular-nums text-white/85">{t("trace.shelfProgress", { done: p.done, total: entries.length })}</span>
-        </div>
-        <div className="mt-2 flex flex-wrap gap-2">
+        <UIProgressBar onColor value={p.done} max={entries.length} label={title} caption={t("trace.shelfProgress", { done: p.done, total: entries.length })} className="max-w-sm" />
+        {/* Medium, not large: two large buttons outweighed the title. On a phone
+            they share the row half and half rather than wrapping ragged. */}
+        <div className="mt-1 grid grid-cols-2 gap-2 sm:flex sm:flex-wrap">
           {p.next && (
-            <UIButton variant="secondary" size="lg" icon={<Play className="fill-current" />} onClick={() => onPlay(p.next)}>
+            <UIButton variant="light" icon={<Play className="fill-current" />} onClick={() => onPlay(p.next)} className="w-full sm:w-auto">
               {p.all ? t("trace.cover.again") : p.started ? t("trace.action.continue") : t("trace.flow.start")}
             </UIButton>
           )}
-          <UIButton variant="glass" size="lg" icon={<LayoutGrid />} onClick={onBrowse}>
+          <UIButton variant="glass" icon={<LayoutGrid />} onClick={onBrowse} className={`w-full sm:w-auto ${p.next ? "" : "col-span-2"}`}>
             {t("trace.hero.allItems")}
           </UIButton>
         </div>
@@ -334,8 +348,9 @@ function Poster({ title, cover, picture, tone, entries, onOpen }: { title: strin
   const status = p.all ? t("trace.cover.allDone") : t("trace.shelfProgress", { done: p.done, total: entries.length });
   return (
     <button type="button" onClick={onOpen} aria-label={`${title} · ${status}`}
-      className="group grid w-full overflow-hidden rounded-2xl border-2 border-line bg-surface text-left transition hover:border-indigo-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500">
-      <span className="relative block overflow-hidden">
+      className={`group grid w-full overflow-hidden rounded-2xl text-left text-white shadow-sm transition hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-2 ${themeSystem.heroGradient}`}>
+      {/* The banner's violet, with the cover fading down into it as the Library's "pick up where you left off" card does. */}
+      <span className="relative block overflow-hidden [mask-image:linear-gradient(to_bottom,black_70%,transparent)]">
         <CoverArt item={cover} picture={picture} others={entries.map((e) => e.item).filter((i) => i.id !== cover?.id)} tone={tone} className="aspect-[2/1] w-full" />
         <span className="absolute left-3 top-3 rounded-full bg-white/95 px-3 py-1 text-[11px] font-black text-slate-900">{t("trace.cover.count", { count: entries.length })}</span>
         {p.all && (
@@ -344,12 +359,12 @@ function Poster({ title, cover, picture, tone, entries, onOpen }: { title: strin
           </span>
         )}
       </span>
-      <span className="grid gap-2 p-3">
-        <span className="line-clamp-2 text-lg font-extrabold leading-tight text-ink">{title}</span>
-        <ProgressBar pct={p.pct} />
+      <span className="grid gap-2 p-3 pt-0">
+        <span className="line-clamp-2 text-lg font-extrabold leading-tight text-white">{title}</span>
+        <UIProgressBar onColor value={p.done} max={entries.length} />
         <span className="flex min-h-10 items-center justify-between gap-3">
-          <span className={`text-sm font-semibold tabular-nums ${p.all ? "text-emerald-700 dark:text-emerald-400" : "text-muted"}`}>{status}</span>
-          <span className="grid h-10 w-10 shrink-0 place-items-center rounded-full bg-indigo-50 text-xl text-indigo-600 transition group-hover:bg-indigo-100 dark:bg-indigo-950 dark:text-indigo-300" aria-hidden="true">→</span>
+          <span className="text-sm font-semibold tabular-nums text-white/90">{status}</span>
+          <span className={themeSystem.button("light", "icon", "shrink-0")} aria-hidden="true"><ArrowRight /></span>
         </span>
       </span>
     </button>
@@ -376,10 +391,7 @@ function CollectionView({ title, description, cover, picture, tone, entries, onO
         <div className="flex flex-col gap-3 p-4 sm:p-6">
           <h1 className="text-2xl font-extrabold leading-tight text-ink sm:text-3xl">{title}</h1>
           {description && <p className="text-sm text-body sm:text-base">{description}</p>}
-          <div className="flex flex-col gap-1.5">
-            <ProgressBar pct={p.pct} />
-            <span className="text-sm font-semibold tabular-nums text-muted">{t("trace.shelfProgress", { done: p.done, total: entries.length })}</span>
-          </div>
+          <UIProgressBar value={p.done} max={entries.length} label={title} caption={t("trace.shelfProgress", { done: p.done, total: entries.length })} />
           {p.next && (
             <div className="mt-auto">
               <UIButton size="lg" icon={p.all ? <RotateCcw /> : <Play />} onClick={() => onOpen(p.next)} className="w-full sm:w-auto">
@@ -400,10 +412,10 @@ function CollectionView({ title, description, cover, picture, tone, entries, onO
 
 function Stat({ value, label }: { value: number; label: string }) {
   return (
-    <div className="flex items-center gap-2 rounded-2xl bg-emerald-50 px-3 py-2 dark:bg-emerald-950/40">
+    <span className="inline-flex items-baseline gap-1.5">
       <span className="text-2xl font-bold tabular-nums text-emerald-700 dark:text-emerald-300">{value}</span>
-      <span className="text-xs font-semibold leading-tight text-emerald-800 dark:text-emerald-200">{label}</span>
-    </div>
+      <span className="text-sm font-semibold text-ink">{label}</span>
+    </span>
   );
 }
 

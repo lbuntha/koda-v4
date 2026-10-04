@@ -455,12 +455,19 @@ def verify_passage(p: dict[str, Any], *, confirmed_split: bool = False) -> Verdi
         isinstance(configured.get(k), int) for k in ("understand", "words", "spell")
     )
     band = configured if configured_ok else BANDS.get(str(p.get("band")))
-    if isinstance(band, dict) and any(not 1 <= int(band[k]) <= 10 for k in ("understand", "words", "spell")):
+    # Any section may be 0 (the book skips it). "match" is a separate, optional
+    # target: absent on older books, which leaves matching optional for them.
+    if isinstance(band, dict) and any(not 0 <= int(band[k]) <= 10 for k in ("understand", "words", "spell")):
         band = None
-    # "match" is counted for the Studio and never part of the band: it is optional.
+    match_target = configured.get("match") if configured_ok else None
+    if match_target is not None and (not isinstance(match_target, int) or not 0 <= match_target <= MATCH_MAX_QUESTIONS):
+        band = None
     v.counts = {k: sum(1 for q in questions if q.get("kind") == k) for k in ("comprehension", "vocab", "spell", "match")}
     v.counts_match_band = bool(band) and all(
         int(band[k] * QUESTION_MINIMUM_RATIO + 0.999999) <= v.counts[count_key] <= band[k]
         for k, count_key in (("understand", "comprehension"), ("words", "vocab"), ("spell", "spell"))
+    ) and (
+        match_target is None
+        or int(match_target * QUESTION_MINIMUM_RATIO + 0.999999) <= v.counts["match"] <= match_target
     )
     return v

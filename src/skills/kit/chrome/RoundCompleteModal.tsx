@@ -3,6 +3,7 @@ import { Star, RotateCcw, ArrowRight, Trophy, Sparkles, Flame, Zap, Target, Home
 import { playSound } from "../../../utils/audio";
 import { levelBar, roundPraise, type PraiseFacts } from "../round/roundPraise";
 import { useT } from "../../../lib/i18n";
+import { UIRewardProgress } from "../../../components/ui/UIRewardProgress";
 
 interface PracticeRoundCompleteModalProps {
   levelNumber: number;
@@ -328,19 +329,12 @@ export const PracticeRoundCompleteModal: React.FC<PracticeRoundCompleteModalProp
                 <span>{t("home.xpLevel", { level: bar.level })}</span>
                 <span>{bar.toNext} XP to Level {bar.level + 1}</span>
               </div>
-              <div
-                className="h-2 w-full overflow-hidden rounded-full bg-slate-800"
-                role="progressbar"
-                aria-valuemin={0}
-                aria-valuemax={bar.per}
-                aria-valuenow={bar.into}
-                aria-label={t("round.levelProgress", { level: bar.level })}
-              >
-                <div
-                  className="h-full rounded-full bg-gradient-to-r from-cyan-400 to-indigo-400 transition-[width] duration-700 ease-out"
-                  style={{ width: `${Math.round((bar.into / bar.per) * 100)}%` }}
-                />
-              </div>
+              <UIRewardProgress
+                onDark
+                value={bar.into}
+                max={bar.per}
+                label={t("round.levelProgress", { level: bar.level })}
+              />
               {/* "{bar.per} XP earns a level" stood here as a third line, to
                   stop "Level 4" reading as "lesson 4". It has gone for height:
                   Home's rail states the same rule under the same bar

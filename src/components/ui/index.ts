@@ -36,3 +36,6 @@ export * from "./UIPagination";
 export * from "./UICarousel";
 export * from "./UISearchInput";
 export * from "./UISettings";
+export * from "./UIProgressBar";
+export * from "./UIRewardProgress";
+export * from "./UIStepper";

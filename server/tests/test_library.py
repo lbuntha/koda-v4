@@ -422,6 +422,19 @@ async def test_one_book_loads_in_full_and_the_list_rejects_silly_requests(client
     assert "Weather & play" in meta["categories"] and meta["pageSizeMax"] == 100 and "changed" in meta["statuses"]
 
 
+async def test_an_author_can_start_a_shelf_of_their_own(client, db):
+    dev = await _login(client, db, "dev@example.com", platform_role="developer")
+    # Tidied on the way in, then offered for every book after.
+    await _shelf_of(client, dev, 1, prefix="sea", category="  Sea   life ")
+    assert (await client.get("/library/drafts/sea-00", headers=dev)).json()["category"] == "Sea life"
+    meta = (await client.get("/library/studio/meta", headers=dev)).json()
+    assert "Sea life" in meta["categories"] and "Animals" in meta["categories"]
+
+    for bad in ("   ", "x" * 41):
+        book = {**copy.deepcopy(MARKET), "category": bad}
+        assert (await client.put("/library/drafts/bad-shelf", json=_draft(book), headers=dev)).status_code == 400
+
+
 async def test_the_units_to_record_come_from_every_khmer_book(client, db):
     dev = await _login(client, db, "dev@example.com", platform_role="developer")
     await client.put("/library/drafts/km-one", json=_draft(MARKET_KM), headers=dev)

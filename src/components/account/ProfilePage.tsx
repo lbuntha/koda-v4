@@ -23,7 +23,7 @@ import {
   subscribeProfileStats,
   type ProfileStats,
 } from "../../lib/profileStats";
-import { levelFromXp, levelProgress, XP_PER_LEVEL, xpToNextLevel } from "../../lib/level";
+import { levelFromXp, XP_PER_LEVEL, xpToNextLevel } from "../../lib/level";
 import {
   ApiError,
   accessToken,
@@ -35,7 +35,7 @@ import {
 } from "../../lib/sync";
 import { themeSystem } from "../../lib/themeSystem";
 import { playSound } from "../../utils/audio";
-import { UIAvatar, UIBadge, UIButton, UISectionHeader, UIModal } from "../ui";
+import { UIAvatar, UIBadge, UIButton, UIRewardProgress, UISectionHeader, UIModal } from "../ui";
 import { ProfileEditModal } from "./ProfileEditModal";
 import { ChangePasswordCard } from "./ChangePasswordCard";
 
@@ -125,7 +125,6 @@ const EmptyNote: React.FC<{ icon: React.ReactNode; title: string; detail: string
 
 const ProfileProgress: React.FC<{ stats: ProfileStats }> = ({ stats }) => {
   const level = levelFromXp(stats.totalXp);
-  const progress = Math.round(levelProgress(stats.totalXp) * 100);
   const { t } = useT();
 
   return (
@@ -164,12 +163,12 @@ const ProfileProgress: React.FC<{ stats: ProfileStats }> = ({ stats }) => {
               {t("home.xpToLevel", { xp: xpToNextLevel(stats.totalXp), level: level + 1 })}
             </span>
           </div>
-          <div className="mt-1.5 h-2 overflow-hidden rounded-full bg-surface-muted">
-            <div
-              className="h-full rounded-full bg-indigo-500 transition-all"
-              style={{ width: `${progress}%` }}
-            />
-          </div>
+          <UIRewardProgress
+            className="mt-1.5"
+            value={XP_PER_LEVEL - xpToNextLevel(stats.totalXp)}
+            max={XP_PER_LEVEL}
+            label={t("home.xpLevel", { level })}
+          />
           <p className="mt-1.5 text-[0.6875rem] text-muted">
             {t("home.xpRule", { xp: XP_PER_LEVEL })}
           </p>
