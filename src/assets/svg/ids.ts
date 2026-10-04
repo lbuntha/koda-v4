@@ -23,6 +23,7 @@ export const SVG_ASSET_IDS = [
   "division-quest",
   "fractions-quest",
   "grape",
+  "koda-logo",
   "mango",
   "menu-admin",
   "menu-art",
@@ -83,6 +84,7 @@ export const SVG_ASSET_CATEGORIES: Record<string, string> = {
   "division-quest": "thumbnail",
   "fractions-quest": "thumbnail",
   "grape": "fruits",
+  "koda-logo": "brand",
   "mango": "fruits",
   "menu-admin": "menu",
   "menu-art": "menu",
@@ -121,6 +123,7 @@ export const SVG_ASSET_CATEGORIES: Record<string, string> = {
 export const SVG_CATEGORIES = [
   "avatars",
   "badges",
+  "brand",
   "flowers",
   "fruits",
   "icons",

@@ -29,7 +29,7 @@ const svg = await readFile(SRC);
 // Android's maskable spec guarantees only the middle 80% is visible; the safe
 // zone is a circle of 40% radius. 12% padding a side keeps the glyph inside it.
 const MASKABLE_PAD = 0.12;
-const BACKDROP = "#4527C9"; // the darkest stop of the mark's own gradient
+const BACKDROP = "#3B1FB8"; // the darkest stop of the mark's own gradient
 
 const sizes = [64, 192, 512];
 
