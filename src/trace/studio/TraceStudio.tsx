@@ -99,7 +99,7 @@ import { ItemsList } from "./ItemsList";
 import { AutoStrokesButton } from "./AutoStrokesPanel";
 import { expandGroups, groupStrokes, mirrorSelection, remapGroups, ungroupStrokes } from "./groups";
 import type { TraceDraft } from "./drafts";
-import { TraceDrafts, newDraft, strokesPrint } from "./drafts";
+import { TraceDrafts, blankItem, newDraft, strokesPrint } from "./drafts";
 import type { Primitive } from "./primitives";
 import { PRIMITIVES, makePrimitive } from "./primitives";
 import type { EditMode, Magic, View } from "./StrokeEditor";
@@ -123,20 +123,6 @@ const TOOLS: { mode: EditMode; key: string; icon: React.ReactNode }[] = [
 ];
 
 const renumber = (strokes: Stroke[]) => strokes.map((s, i) => ({ ...s, order: i + 1, join: i === 0 ? ("lift" as const) : s.join }));
-
-function blankItem(): TraceItem {
-  return {
-    id: uid("t-"),
-    rev: 1,
-    title: "",
-    kind: "letter",
-    script: "khmer",
-    grid: "4x3-moeys",
-    strokes: [],
-    sensitivity: "balanced",
-    guide: { glyph: { text: "", size: 720, x: 500, y: 780 } },
-  };
-}
 
 /* ================================================================= list */
 
@@ -168,7 +154,7 @@ export function TraceStudio() {
         subtitle={t("traceStudio.subtitle")}
         action={
           view === "items" ? (
-            <UIButton icon={<Plus className="h-4 w-4" />} onClick={() => create(blankItem())}>
+            <UIButton icon={<Plus className="h-4 w-4" />} onClick={() => create(blankItem(uid("t-")))}>
               {t("traceStudio.newItem")}
             </UIButton>
           ) : !openCollection && !creatingCollection ? (
@@ -207,7 +193,7 @@ export function TraceStudio() {
         )
       ) : (
         <>
-        <ItemsList kinds={KINDS} onOpen={setOpenId} onCreate={() => create(blankItem())} />
+        <ItemsList kinds={KINDS} onOpen={setOpenId} onCreate={() => create(blankItem(uid("t-")))} />
         </>
       )}
     </div>
@@ -220,7 +206,7 @@ type Tab = "shape" | "steps" | "details";
 
 function DraftEditor({ id, onClose }: { id: string; onClose(): void }) {
   const { t } = useT();
-  const [draft, setDraft] = useState<TraceDraft>(() => TraceDrafts.get(id) ?? newDraft(blankItem()));
+  const [draft, setDraft] = useState<TraceDraft>(() => TraceDrafts.get(id) ?? newDraft(blankItem(uid("t-"))));
   const [past, setPast] = useState<TraceItem[]>([]);
   const [future, setFuture] = useState<TraceItem[]>([]);
   const [tab, setTab] = useState<Tab>("shape");

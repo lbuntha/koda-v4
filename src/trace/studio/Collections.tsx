@@ -5,7 +5,7 @@
  */
 
 import { useCallback, useEffect, useMemo, useRef, useState, useSyncExternalStore } from "react";
-import { AlertCircle, ArrowLeft, Check, ChevronLeft, ChevronRight, Download, Flag, GripVertical, ImagePlus, Loader2, ListPlus, MoreHorizontal, Pencil, Plus, Rocket, Settings2, Star, Trash2, Undo2, Upload, Wand2, X } from "lucide-react";
+import { AlertCircle, ArrowLeft, Check, ChevronDown, ChevronLeft, ChevronRight, Download, Flag, GripVertical, ImagePlus, Loader2, ListPlus, MoreHorizontal, PanelRightClose, PanelRightOpen, Pencil, Plus, Rocket, Settings2, Star, Trash2, Undo2, Upload, Wand2, X } from "lucide-react";
 import { ScoringAPI } from "../../lib/scoring";
 import { useT } from "../../lib/i18n";
 import { themeSystem } from "../../lib/themeSystem";
@@ -32,7 +32,7 @@ import { ItemThumb } from "../player/Thumb";
 import { itemFor, parseList } from "./batch";
 import { runChecks } from "./checks";
 import type { TraceDraft } from "./drafts";
-import { TraceDrafts, newDraft } from "./drafts";
+import { TraceDrafts, blankItem, newDraft } from "./drafts";
 import { Field, IconButton, Section, inputCls, panelCls } from "./ui";
 import { AutoStrokesForSet } from "./AutoStrokesPanel";
 import { PicturePanel } from "../../library/studio/PicturePanel";
@@ -42,6 +42,8 @@ import { svgMarkupFor } from "../../assets/svg";
 
 const uid = (p: string) => `${p}${Date.now().toString(36)}${Math.random().toString(36).slice(2, 6)}`;
 const GRIDS: TraceItem["grid"][] = ["4x3-moeys", "3x3", "baseline-4-lines", "dots", "none"];
+/** Whether the board's side panel (cover, description, language) is open, remembered on this device. */
+const ABOUT_KEY = "koda_trace_board_about_v1";
 
 function StatusChip({ c }: { c: StudioCollection }) {
   const { t } = useT();
@@ -379,6 +381,21 @@ export function CollectionBoard({ id, onBack, onOpenItem }: { id: string; onBack
   const isAdmin = can("content:write");
   const [dragFrom, setDragFrom] = useState<number | null>(null);
   const [dragOver, setDragOver] = useState<number | null>(null);
+  const [aboutShown, setAboutShown] = useState(() => {
+    try {
+      return localStorage.getItem(ABOUT_KEY) !== "hidden";
+    } catch {
+      return true;
+    }
+  });
+  const showAbout = (on: boolean) => {
+    setAboutShown(on);
+    try {
+      localStorage.setItem(ABOUT_KEY, on ? "shown" : "hidden");
+    } catch {
+      // A private window: the choice lasts until the page closes.
+    }
+  };
 
   useEffect(() => {
     void TraceDrafts.pull();
@@ -418,6 +435,21 @@ export function CollectionBoard({ id, onBack, onOpenItem }: { id: string; onBack
   if (!col) return <p className="text-muted">{saving === "error" ? t("traceStudio.col.offline") : t("traceStudio.col.loading")}</p>;
 
   const items = col.itemIds.map((i) => ({ id: i, draft: drafts.get(i) }));
+
+  // A blank item at the end of the set, opened straight away. The set is saved now, not after the usual pause, so it is not lost when the editor opens.
+  const addBlank = () => {
+    const last = items.length ? items[items.length - 1].draft?.item : undefined;
+    const item = blankItem(uid("t-"), last);
+    TraceDrafts.save(newDraft(item));
+    const next = { ...col, itemIds: [...col.itemIds, item.id] };
+    clearTimeout(timer.current);
+    setCol(next);
+    setSaving("saving");
+    saveStudioCollection(next)
+      .then(() => setSaving("saved"))
+      .catch(() => setSaving("error"));
+    onOpenItem(item.id);
+  };
   const ready = items.filter((x) => x.draft && runChecks(x.draft).every((c) => c.ok)).length;
 
   const move = (i: number, dir: -1 | 1) => moveTo(i, i + dir);
@@ -475,8 +507,11 @@ export function CollectionBoard({ id, onBack, onOpenItem }: { id: string; onBack
           />
           <Pencil className="h-4 w-4 shrink-0 text-muted group-hover:text-indigo-600" aria-hidden="true" />
         </label>
-        <StatusChip c={col} />
-        <span className="text-xs text-muted">{t(`traceStudio.col.save.${saving}`)}</span>
+        {/* Published state and save state read as one line, never split by a wrap. */}
+        <span className="flex shrink-0 items-center gap-2 whitespace-nowrap">
+          <StatusChip c={col} />
+          <span className="text-xs text-muted">{t(`traceStudio.col.save.${saving}`)}</span>
+        </span>
         <div className="ml-auto flex flex-wrap items-center gap-2">
           <UIButton icon={<Rocket className="h-4 w-4" />} isLoading={busy} disabled={col.itemIds.length === 0 || (!isAdmin && col.reviewState === "pending" && !col.changed)} onClick={publish}>
             {!isAdmin ? t("traceStudio.review.send") : col.publishedRev === null ? t("traceStudio.col.publish") : t("traceStudio.col.republish")}
@@ -550,29 +585,71 @@ export function CollectionBoard({ id, onBack, onOpenItem }: { id: string; onBack
         </div>
       )}
 
-      <div className="grid gap-4 xl:grid-cols-[minmax(0,1fr)_340px]">
+      <div className={`grid gap-4 ${aboutShown ? "xl:grid-cols-[minmax(0,1fr)_340px]" : ""}`}>
         {/* Items */}
         <div className="flex min-w-0 flex-col gap-3">
           <div className="flex flex-wrap items-center gap-2">
             <span className="text-sm font-semibold text-body">{t("traceStudio.col.itemCount", { count: items.length })}</span>
             <span className="text-xs text-muted">{t("traceStudio.col.readyCount", { ready, total: items.length })}</span>
             {items.length > 1 && <span className="hidden text-xs text-muted sm:inline">· {t("traceStudio.col.dragHint")}</span>}
-            <div className="ml-auto flex flex-wrap gap-2">
-              <UIButton size="sm" icon={<ListPlus className="h-4 w-4" />} variant={panel === "list" ? "primary" : "secondary"} onClick={() => setPanel(panel === "list" ? null : "list")}>
-                {t("traceStudio.col.fromList")}
+            <div className="ml-auto flex flex-wrap items-center gap-2">
+              <UIButton size="sm" icon={<Plus className="h-4 w-4" />} onClick={addBlank}>
+                {t("traceStudio.newItem")}
               </UIButton>
-              <UIButton size="sm" icon={<Plus className="h-4 w-4" />} variant={panel === "existing" ? "primary" : "secondary"} onClick={() => setPanel(panel === "existing" ? null : "existing")}>
-                {t("traceStudio.col.addExisting")}
-              </UIButton>
-              <UIButton size="sm" icon={<Wand2 className="h-4 w-4" />} variant={panel === "auto" ? "primary" : "secondary"} disabled={items.length === 0} onClick={() => setPanel(panel === "auto" ? null : "auto")}>
-                {t("traceStudio.auto.forSet")}
-              </UIButton>
-              <UIButton size="sm" icon={<Settings2 className="h-4 w-4" />} variant={panel === "apply" ? "primary" : "secondary"} disabled={items.length === 0} onClick={() => setPanel(panel === "apply" ? null : "apply")}>
-                {t("traceStudio.col.applyAll")}
-              </UIButton>
+              {/* The less common ways to fill a collection, and the tools that change every item at once. */}
+              <UIMenu align="end" className="w-64" trigger={({ toggle, isOpen }) => (
+                <UIButton size="sm" variant="secondary" icon={<ListPlus className="h-4 w-4" />} aria-haspopup="menu" aria-expanded={isOpen} onClick={toggle}>
+                  <span className="inline-flex items-center gap-1">
+                    {t("traceStudio.col.addMore")}
+                    <ChevronDown className="h-3.5 w-3.5" />
+                  </span>
+                </UIButton>
+              )}>
+                {({ close }) => (
+                  <>
+                    <UIMenuItem icon={<ListPlus className="h-4 w-4" />} isActive={panel === "list"} onSelect={() => { close(); setPanel(panel === "list" ? null : "list"); }}>
+                      {t("traceStudio.col.fromList")}
+                    </UIMenuItem>
+                    <UIMenuItem icon={<Plus className="h-4 w-4" />} isActive={panel === "existing"} onSelect={() => { close(); setPanel(panel === "existing" ? null : "existing"); }}>
+                      {t("traceStudio.col.addExistingLong")}
+                    </UIMenuItem>
+                  </>
+                )}
+              </UIMenu>
+              <UIMenu align="end" className="w-56" trigger={({ toggle, isOpen }) => (
+                <UIButton size="sm" variant="secondary" icon={<Settings2 className="h-4 w-4" />} disabled={items.length === 0} aria-haspopup="menu" aria-expanded={isOpen} onClick={toggle}>
+                  <span className="inline-flex items-center gap-1">
+                    {t("traceStudio.col.editAll")}
+                    <ChevronDown className="h-3.5 w-3.5" />
+                  </span>
+                </UIButton>
+              )}>
+                {({ close }) => (
+                  <>
+                    <UIMenuItem icon={<Wand2 className="h-4 w-4" />} isActive={panel === "auto"} onSelect={() => { close(); setPanel(panel === "auto" ? null : "auto"); }}>
+                      {t("traceStudio.auto.forSet")}
+                    </UIMenuItem>
+                    <UIMenuItem icon={<Settings2 className="h-4 w-4" />} isActive={panel === "apply"} onSelect={() => { close(); setPanel(panel === "apply" ? null : "apply"); }}>
+                      {t("traceStudio.col.applyAll")}
+                    </UIMenuItem>
+                  </>
+                )}
+              </UIMenu>
+              {!aboutShown && (
+                <IconButton label={t("traceStudio.col.showAbout")} onClick={() => showAbout(true)}>
+                  <PanelRightOpen className="h-5 w-5" />
+                </IconButton>
+              )}
             </div>
           </div>
 
+          {panel && (
+            <div className="relative">
+              <div className="absolute right-2 top-2 z-10">
+                <IconButton size="sm" label={t("common.close")} onClick={() => setPanel(null)}>
+                  <X className="h-4 w-4" />
+                </IconButton>
+              </div>
           {panel === "list" && (
             <FromList
               onCreate={(made) => {
@@ -602,6 +679,8 @@ export function CollectionBoard({ id, onBack, onOpenItem }: { id: string; onBack
                 setPanel(null);
               }}
             />
+          )}
+            </div>
           )}
 
           {items.length === 0 ? (
@@ -694,35 +773,41 @@ export function CollectionBoard({ id, onBack, onOpenItem }: { id: string; onBack
         </div>
 
         {/* About the collection */}
-        <div className="flex min-w-0 flex-col gap-3">
-          <Section title={t("traceStudio.col.about")}>
-            <CoverPicture picture={col.picture ?? null} name={col.title} onPick={() => setPicking(true)} onPicture={(picture) => update({ picture })} />
-            <Field label={t("traceStudio.col.description")}>
-              <textarea className={`${inputCls} min-h-20`} maxLength={400} value={col.description} onChange={(e) => update({ description: e.target.value })} />
-            </Field>
-            <Field label={t("traceStudio.col.language")}>
-              <select className={inputCls} value={col.language} onChange={(e) => update({ language: e.target.value })}>
-                <option value="km">{t("traceStudio.scriptKhmer")}</option>
-                <option value="en">{t("traceStudio.col.english")}</option>
-              </select>
-            </Field>
-            <Field label={t("traceStudio.col.xpPerStep")}>
-              <input
-                type="number"
-                inputMode="numeric"
-                min={0}
-                max={500}
-                step={5}
-                className={inputCls}
-                placeholder={String(ScoringAPI.current().xpPerLevel)}
-                value={col.xpPerStep ?? ""}
-                onChange={(e) => update({ xpPerStep: e.target.value === "" ? null : Math.min(500, Math.max(0, Math.round(Number(e.target.value)))) })}
-              />
-            </Field>
-            <p className="text-xs text-muted">{t("traceStudio.col.xpPerStepNote", { xp: ScoringAPI.current().xpPerLevel })}</p>
-            <p className="text-xs text-muted">{t("traceStudio.col.publicNote")}</p>
-          </Section>
-        </div>
+        {aboutShown && (
+          <div className="flex min-w-0 flex-col gap-3">
+            <Section title={t("traceStudio.col.about")} action={
+              <IconButton size="sm" label={t("traceStudio.col.hideAbout")} onClick={() => showAbout(false)}>
+                <PanelRightClose className="h-4 w-4" />
+              </IconButton>
+            }>
+              <CoverPicture picture={col.picture ?? null} name={col.title} onPick={() => setPicking(true)} onPicture={(picture) => update({ picture })} />
+              <Field label={t("traceStudio.col.description")}>
+                <textarea className={`${inputCls} min-h-20`} maxLength={400} value={col.description} onChange={(e) => update({ description: e.target.value })} />
+              </Field>
+              <Field label={t("traceStudio.col.language")}>
+                <select className={inputCls} value={col.language} onChange={(e) => update({ language: e.target.value })}>
+                  <option value="km">{t("traceStudio.scriptKhmer")}</option>
+                  <option value="en">{t("traceStudio.col.english")}</option>
+                </select>
+              </Field>
+              <Field label={t("traceStudio.col.xpPerStep")}>
+                <input
+                  type="number"
+                  inputMode="numeric"
+                  min={0}
+                  max={500}
+                  step={5}
+                  className={inputCls}
+                  placeholder={String(ScoringAPI.current().xpPerLevel)}
+                  value={col.xpPerStep ?? ""}
+                  onChange={(e) => update({ xpPerStep: e.target.value === "" ? null : Math.min(500, Math.max(0, Math.round(Number(e.target.value)))) })}
+                />
+              </Field>
+              <p className="text-xs text-muted">{t("traceStudio.col.xpPerStepNote", { xp: ScoringAPI.current().xpPerLevel })}</p>
+              <p className="text-xs text-muted">{t("traceStudio.col.publicNote")}</p>
+            </Section>
+          </div>
+        )}
       </div>
 
       {/* The same drawer the Library Studio uses for a book's cover, opened on

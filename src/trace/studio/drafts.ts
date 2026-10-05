@@ -119,6 +119,22 @@ export function strokesPrint(item: TraceItem): string {
   return (h >>> 0).toString(36);
 }
 
+/** An empty item. Given `like`, it keeps that item's kind, script and settings — a new item in a set of line drawings starts as a line drawing. */
+export function blankItem(id: string, like?: TraceItem): TraceItem {
+  return {
+    id,
+    rev: 1,
+    title: "",
+    kind: like?.kind ?? "letter",
+    script: like?.script ?? "khmer",
+    ...(like?.numerals ? { numerals: like.numerals } : {}),
+    grid: like?.grid ?? "4x3-moeys",
+    strokes: [],
+    sensitivity: like?.sensitivity ?? "balanced",
+    guide: { glyph: { text: "", size: 720, x: 500, y: 780 } },
+  };
+}
+
 export function newDraft(item: TraceItem): TraceDraft {
   return { item, plan: defaultPlan(item), tests: {}, updatedAt: Date.now() };
 }

@@ -69,15 +69,19 @@ export function Divider({ vertical = false }: { vertical?: boolean }) {
   return <span aria-hidden="true" className={vertical ? "mx-1 h-6 w-px bg-line" : "my-1 h-px w-6 bg-line"} />;
 }
 
-export function Section({ title, aside, defaultOpen = true, children }: { title: string; aside?: ReactNode; defaultOpen?: boolean; children: ReactNode }) {
+/** `action` sits in the header beside the chevron, outside the toggle (a button cannot hold a button). */
+export function Section({ title, aside, action, defaultOpen = true, children }: { title: string; aside?: ReactNode; action?: ReactNode; defaultOpen?: boolean; children: ReactNode }) {
   const [open, setOpen] = useState(defaultOpen);
   return (
     <section className={themeSystem.card("default")}>
-      <button type="button" onClick={() => setOpen((o) => !o)} aria-expanded={open} className="flex w-full items-center gap-2 px-4 py-3 text-left">
-        <span className="text-sm font-semibold text-ink">{title}</span>
-        <span className="ml-auto flex items-center gap-2 text-xs text-muted">{aside}</span>
-        <ChevronDown className={`h-4 w-4 text-muted transition ${open ? "rotate-180" : ""}`} />
-      </button>
+      <div className="flex items-center">
+        <button type="button" onClick={() => setOpen((o) => !o)} aria-expanded={open} className={`flex min-w-0 flex-1 items-center gap-2 py-3 text-left ${action ? "pl-4 pr-2" : "px-4"}`}>
+          <span className="text-sm font-semibold text-ink">{title}</span>
+          <span className="ml-auto flex items-center gap-2 text-xs text-muted">{aside}</span>
+          <ChevronDown className={`h-4 w-4 text-muted transition ${open ? "rotate-180" : ""}`} />
+        </button>
+        {action && <span className="pr-3">{action}</span>}
+      </div>
       {open && <div className="flex flex-col gap-3 border-t border-line px-4 py-3">{children}</div>}
     </section>
   );

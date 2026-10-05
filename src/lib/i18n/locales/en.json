@@ -3885,7 +3885,12 @@
       "more": "More actions",
       "uploadCover": "Upload",
       "downloadCover": "Download",
-      "downloadFailed": "The picture could not be saved. Try again when it has loaded."
+      "downloadFailed": "The picture could not be saved. Try again when it has loaded.",
+      "addMore": "Add more",
+      "addExistingLong": "Add existing items",
+      "editAll": "Edit all",
+      "hideAbout": "Hide details",
+      "showAbout": "Show details"
     },
     "view": {
       "collections": "Collections",
