@@ -28,7 +28,9 @@ import type { Point } from "../geometry/types";
 import type { CoachState, Suggestion } from "../progress/coach";
 import { aidsFor, coachAttempt, coachStroke, initialCoach } from "../progress/coach";
 import type { LadderEvent, StepPlan } from "../progress/ladder";
-import { RECHECK_DAYS, applyAttempt, defaultPlan, isRecheckDue, ruleFor } from "../progress/ladder";
+import { RECHECK_DAYS, applyAttempt, defaultPlan, isRecheckDue, passes as passesBar, ruleFor } from "../progress/ladder";
+import { TraceRecorder } from "../learning";
+import type { AgeRange } from "../../lib/ages";
 import { TraceProgress } from "../progress/store";
 import { stepXp } from "../progress/reward";
 import { ScoringAPI } from "../../lib/scoring";
@@ -57,6 +59,8 @@ interface Props {
   xpPerStep?: number | null;
   /** Leave Trace for the home screen. Omitted: the end screen offers no Home. */
   onGoHome?(): void;
+  /** Who the collection is for, carried into the learning log. */
+  ages?: AgeRange | null;
 }
 
 export interface TracePlace {
@@ -102,7 +106,7 @@ interface InkEntry extends SceneInk {
   hidden?: boolean;
 }
 
-export function TracePlayer({ item, onExit, onAwardXp, ageBand = "B", plan: planProp, forceStep, onResult, source, place, xpPerStep, onGoHome }: Props) {
+export function TracePlayer({ item, onExit, onAwardXp, ageBand = "B", plan: planProp, forceStep, onResult, source, place, xpPerStep, onGoHome, ages }: Props) {
   const { t } = useT();
   const plan = useMemo(() => planProp ?? defaultPlan(item), [item, planProp]);
   const sandbox = forceStep !== undefined;
@@ -110,6 +114,9 @@ export function TracePlayer({ item, onExit, onAwardXp, ageBand = "B", plan: plan
   useSyncExternalStore(TraceProgress.subscribe, TraceProgress.version);
   const progress = TraceProgress.get(item.id);
   const [recheck, setRecheck] = useState(() => isRecheckDue(TraceProgress.get(item.id)));
+  /* This item in the learning log (see ../learning.ts). None for a Studio test run. */
+  const [recorder] = useState(() => (sandbox ? null : new TraceRecorder(item, { collectionId: source?.collectionId, ages })));
+  useEffect(() => () => recorder?.abandon(), [recorder]);
 
   const [play, setPlay] = useState<PlayMode>("steps");
   const [mySwitches, setMySwitches] = useState<Switches>(() => stepSwitches(progress.step));
@@ -345,13 +352,9 @@ export function TracePlayer({ item, onExit, onAwardXp, ageBand = "B", plan: plan
     if (result && play !== "justDraw") {
       const ladderStep = play === "steps" ? step : myWayScoring(mySwitches).counts && progress.step === plan.canDoAt ? plan.canDoAt : null;
       if (ladderStep) {
-        const r = applyAttempt(
-          progress,
-          plan,
-          { step: ladderStep, accepted: result.accepted, score: result.score, fault: result.feedback?.fault },
-          Date.now(),
-          recheck && play === "steps",
-        );
+        const attempt = { step: ladderStep, accepted: result.accepted, score: result.score, fault: result.feedback?.fault };
+        const r = applyAttempt(progress, plan, attempt, Date.now(), recheck && play === "steps");
+        recorder?.attempt(ladderStep, { passed: passesBar(plan, attempt), score: result.score, fault: attempt.fault });
         TraceProgress.set(item.id, { ...r.progress, title: item.title, kind: item.kind });
         event = r.event;
         counted = true;
@@ -364,7 +367,10 @@ export function TracePlayer({ item, onExit, onAwardXp, ageBand = "B", plan: plan
     }
     const ends = !sandbox && result !== null && (event === "canDo" || event === "learned" || event === "rechecked");
     // The end screen brings its own fanfare.
-    if (ends) setFinished({ stars: result.stars, xp });
+    if (ends) {
+      recorder?.complete(event as "canDo" | "learned" | "rechecked", result.stars, xp);
+      setFinished({ stars: result.stars, xp });
+    }
     else soundFor(result, event);
     setOutcome({ result, event, counted, passes, xp });
   };
@@ -416,6 +422,8 @@ export function TracePlayer({ item, onExit, onAwardXp, ageBand = "B", plan: plan
     entry.state = "rejected";
     playSound("hint");
     const failed = result.strokes.find((s) => !s.accepted && s.fault && s.tries > 0);
+    // A wrong stroke on a counted step is a wrong answer in the log; a drill's is practice.
+    if (failed?.fault && play === "steps" && drill === null) recorder?.strokeMissed(step, failed.fault);
     if (failed?.fault) {
       const at = prepared.findIndex((p) => p.stroke.order === failed.order);
       const c = coachStroke(coach, failed.order, failed.fault, prepared[at]?.stroke.shape ?? "free");
@@ -502,10 +510,12 @@ export function TracePlayer({ item, onExit, onAwardXp, ageBand = "B", plan: plan
   const takeSuggestion = () => {
     if (!suggestion) return;
     if (suggestion.kind === "drill") {
+      recorder?.support("walkthrough");
       const idx = prepared.findIndex((p) => p.stroke.order === suggestion.order);
       setDrill(idx >= 0 ? idx : null);
       resetAttempt();
     } else if (suggestion.kind === "watch") {
+      recorder?.support("reveal");
       const idx = prepared.findIndex((p) => p.stroke.order === suggestion.order);
       setWatchOnly(idx >= 0 ? idx : 0);
       setWatchKey((k) => k + 1);

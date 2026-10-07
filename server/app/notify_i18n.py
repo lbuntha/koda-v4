@@ -52,6 +52,13 @@ PHRASES: dict[str, Any] = {
     "fullTime": "used the full daily time",
     "nextUp": "next up: {lesson}",
     "partSeparator": "; ",
+    # Learn's three, counted — Think, Read and Write.
+    "lessonsCount": {"one": "{count} lesson", "other": "{count} lessons"},
+    "booksCount": {"one": "{count} book", "other": "{count} books"},
+    "writingCount": {"one": "{count} writing item", "other": "{count} writing items"},
+    "canWrite": "can now write {items}",
+    "canDraw": "can now draw {items}",
+    "readBooks": "read {books}",
 }
 
 

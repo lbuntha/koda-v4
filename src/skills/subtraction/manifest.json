@@ -10,6 +10,7 @@
   "thumbnail": "subtraction-quest",
   "status": "published",
   "audience": { "ages": [5, 9], "category": "operations" },
+  "topics": ["numbers", "subtraction"],
   "teaches": [
     "remover", "remainder-counter", "separator", "comparer",
     "subtraction-equation-reader", "count-back", "subtract-zero",

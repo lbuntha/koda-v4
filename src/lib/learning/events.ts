@@ -233,6 +233,12 @@ export interface LessonCompletedEvent extends LearningEventBase {
   durationMs: number;
   stars?: number;
   xpEarned?: number;
+  /**
+   * What the round proved, for work measured on a ladder rather than a score —
+   * Koda Trace's "can write" (`canDo`), a check-up passed, or `learned`.
+   * Absent for lessons and books.
+   */
+  milestone?: "canDo" | "rechecked" | "learned";
 }
 
 /** The learner left mid-round. Abandonment is a stronger difficulty signal than

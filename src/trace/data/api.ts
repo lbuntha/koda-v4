@@ -8,6 +8,7 @@ import { accessToken } from "../../lib/sync/session";
 import type { TraceItem } from "../geometry/types";
 import type { StepPlan } from "../progress/ladder";
 import type { TraceDraft } from "../studio/drafts";
+import type { AgeRange } from "../../lib/ages";
 
 /** Shelves must appear even on a slow line: past this, the device plays what it has. */
 export const SHELF_DEADLINE_MS = 4_000;
@@ -25,6 +26,10 @@ export interface CollectionSummary {
   cover: TraceItem | null;
   /** A cover picture made for it (art-library name or photo key); the cover item draws it when absent. */
   picture?: string | null;
+  /** Who it is for, in years. Absent on collections published before ages were required: all ages. */
+  ages?: AgeRange | null;
+  /** What it is about, from the shared list in `src/lib/topics.ts`. */
+  topics?: string[] | null;
 }
 
 export interface CollectionBundle {
@@ -38,6 +43,10 @@ export interface CollectionBundle {
   picture?: string | null;
   /** What passing one step pays at three stars; the app's XP per level when absent. */
   xpPerStep?: number | null;
+  /** Who it is for, in years. Absent on collections published before ages were required: all ages. */
+  ages?: AgeRange | null;
+  /** What it is about, from the shared list in `src/lib/topics.ts`. */
+  topics?: string[] | null;
   publishedAt: string;
 }
 
@@ -53,6 +62,10 @@ export interface StudioCollection {
   picture?: string | null;
   /** What passing one step pays at three stars; null uses the app's XP per level. */
   xpPerStep?: number | null;
+  /** Who it is for, in years. Required to publish; its items inherit it. */
+  ages?: AgeRange | null;
+  /** What it is about, from the shared list in `src/lib/topics.ts`. Optional. */
+  topics?: string[] | null;
   rev: number;
   publishedRev: number | null;
   publishedAt: string | null;
@@ -108,12 +121,12 @@ export async function fetchStudioCollections(): Promise<StudioCollection[]> {
 }
 
 export async function saveStudioCollection(
-  c: Pick<StudioCollection, "id" | "title" | "description" | "language" | "itemIds" | "order"> & { cover?: string | null; picture?: string | null; xpPerStep?: number | null },
+  c: Pick<StudioCollection, "id" | "title" | "description" | "language" | "itemIds" | "order"> & { cover?: string | null; picture?: string | null; xpPerStep?: number | null; ages?: AgeRange | null; topics?: string[] | null },
 ): Promise<StudioCollection> {
   return request<StudioCollection>(`/trace/studio/collections/${enc(c.id)}`, {
     method: "PUT",
     token: await token(),
-    body: { title: c.title, description: c.description, language: c.language, itemIds: c.itemIds, order: c.order, cover: c.cover ?? null, picture: c.picture ?? null, xpPerStep: c.xpPerStep ?? null },
+    body: { title: c.title, description: c.description, language: c.language, itemIds: c.itemIds, order: c.order, cover: c.cover ?? null, picture: c.picture ?? null, xpPerStep: c.xpPerStep ?? null, ages: c.ages ?? null, topics: c.topics ?? null },
   });
 }
 

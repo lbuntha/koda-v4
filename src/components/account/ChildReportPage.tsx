@@ -1,5 +1,6 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { LIBRARY_CONCEPT_NAMES } from "../../library/session";
+import { TRACE_CONCEPT_NAMES } from "../../trace/learning";
 import {
   ArrowLeft,
   BookOpen,
@@ -97,8 +98,8 @@ const conceptNames = (): Map<string, ConceptName> => {
       }
     }
   }
-  // Koda Library is a module, not a skill, so its concepts are named here.
-  for (const [key, name] of Object.entries(LIBRARY_CONCEPT_NAMES)) if (!names.has(key)) names.set(key, name);
+  // Koda Library and Koda Trace are modules, not skills, so their concepts are named here.
+  for (const [key, name] of Object.entries({ ...LIBRARY_CONCEPT_NAMES, ...TRACE_CONCEPT_NAMES })) if (!names.has(key)) names.set(key, name);
   return names;
 };
 

@@ -1,12 +1,13 @@
 import { useEffect, useMemo, useState, type ReactNode } from "react";
 import { ArrowLeft, BookOpen, Check, ChevronDown, ChevronRight, ChevronUp, CornerLeftUp, Download, Mic, Play, Pencil, Plus, RefreshCw, Sparkles, Square, Trash2, Upload } from "lucide-react";
-import { BANDS, CHOICES, MATCH_MAX_QUESTIONS, meetsTarget, minimumQuestions, TARGET_MAX, type Band, type Language, type Question, type QuestionCounts, type WordCue } from "../data/passage";
+import { BANDS, bookAges, CHOICES, MATCH_MAX_QUESTIONS, meetsTarget, minimumQuestions, TARGET_MAX, type Band, type Language, type Question, type QuestionCounts, type WordCue } from "../data/passage";
 import { readingLexiconFor, readingWordsFor } from "../data/readingLexicon";
 import { core } from "../data/text";
 import { RULES, verifyPassage, type Verdict } from "../data/verifyPassage";
 import { deleteBook, fetchDraft, fetchReports, fetchStudioMeta, publishBook, requestAiCorrection, requestAiDraft, requestAiMatch, requestAiStory, resolveReport, saveDraft, unpublishBook, type BookReport, type BookRow, type BookSummary, type Provider, type StudioMeta } from "../api";
 import { baseOf, draftLocally, fromModel, withStoryPictures, joinSentences, mergeWords, pictureFor, sentenceIdFor, withVocabWord, type StoryInput, type VocabEdit } from "../draft";
 import { BookPreview } from "../LibraryPage";
+import { bookTopics } from "../tags";
 import { PagesStep } from "./PagesStep";
 import { UnitNamesPanel } from "./UnitNamesPanel";
 import { StudioHome } from "./StudioHome";
@@ -29,7 +30,8 @@ import { say, stop } from "../voice";
 import { tutorHeaders } from "../../lib/tutorApi";
 import { aiDefault } from "../../lib/aiDefaults";
 import { ScoringAPI } from "../../lib/scoring";
-import { UIBadge, UIButton, UICard, UIFlashMessage, UIInput, UISelect, UIStepper, UITabs, UITextarea, type UITabItem } from "../../components/ui";
+import { isAgeRange, type AgeRange } from "../../lib/ages";
+import { UIAgePicker, UITopicPicker, UIBadge, UIButton, UICard, UIFlashMessage, UIInput, UISelect, UIStepper, UITabs, UITextarea, type UITabItem } from "../../components/ui";
 import { themeSystem } from "../../lib/themeSystem";
 import "../khmerFont";
 import { translate, useT } from "../../lib/i18n";
@@ -75,7 +77,7 @@ const slug = (s: string) =>
   `book-${Date.now().toString(36)}`;
 
 /** A new book: the first band, and no shelf until the author picks one from the server's list. */
-const emptyInput = (): StoryInput => ({ id: "", title: "", language: "en", band: Object.keys(BANDS)[0] as Band, questionCounts: { ...BANDS.A }, category: "", text: "" });
+const emptyInput = (): StoryInput => ({ id: "", title: "", language: "en", band: Object.keys(BANDS)[0] as Band, ages: BANDS.A.ages, questionCounts: { ...BANDS.A }, category: "", text: "" });
 
 export function LibraryStudio() {
   const { t } = useT();
@@ -147,10 +149,11 @@ function Editor({ row, categories, reports = [], onResolved, onClose }: { row: B
   const [source, setSource] = useState<Source>(() => (row?.provider as Source) ?? libraryDefault());
   const [input, setInput] = useState<StoryInput>(() =>
     start
-      ? { id: row!.id, title: start.title, language: start.language, band: start.band, questionCounts: start.questionCounts ?? { ...BANDS[start.band] }, category: start.category ?? "", text: start.sentences.map((s) => s.text).join("\n") }
+      ? { id: row!.id, title: start.title, language: start.language, band: start.band, ages: bookAges(start), topics: start.topics, questionCounts: start.questionCounts ?? { ...BANDS[start.band] }, category: start.category ?? "", text: start.sentences.map((s) => s.text).join("\n") }
       : emptyInput(),
   );
-  const [draft, setDraft] = useState<Draft | null>(start ?? null);
+  // A book saved before ages were required starts from its band's, so it can be republished as it was.
+  const [draft, setDraft] = useState<Draft | null>(start ? { ...start, ages: bookAges(start) } : null);
   const [confirmed, setConfirmed] = useState(row?.confirmedSplit ?? false);
   const [status, setStatus] = useState<{ rev: number; published: boolean }>({ rev: row?.rev ?? 0, published: row?.status === "published" });
   const [dirty, setDirty] = useState(false);
@@ -165,8 +168,10 @@ function Editor({ row, categories, reports = [], onResolved, onClose }: { row: B
     try {
       const saved = JSON.parse(localStorage.getItem(recoveryKey) ?? "null");
       if (saved?.input && saved?.dirty) {
-        setInput(saved.input);
-        setDraft(saved.draft ?? null);
+        // Work recovered from before ages were required starts from its band's, like a saved book.
+        const band = (saved.input.band in BANDS ? saved.input.band : "A") as Band;
+        setInput({ ...saved.input, ages: isAgeRange(saved.input.ages) ? saved.input.ages : BANDS[band].ages });
+        setDraft(saved.draft ? { ...saved.draft, ages: bookAges(saved.draft) } : null);
         setConfirmed(Boolean(saved.confirmed));
         setDirty(true);
         setNote({ kind: "info", text: t("studio.summary.recovered") });
@@ -185,7 +190,7 @@ function Editor({ row, categories, reports = [], onResolved, onClose }: { row: B
   const verdict = useMemo<Verdict | null>(() => (draft ? verifyPassage({ ...draft, rev: 1 }, { confirmedSplit: confirmed, lexicon: readingLexiconFor(draft.band, draft.language) }) : null), [draft, confirmed]);
   const edit = (next: Draft) => {
     setDraft(next);
-    setInput((current) => ({ ...current, title: next.title, category: next.category ?? "", language: next.language, band: next.band, text: next.sentences.map((sentence) => sentence.text).join("\n"), questionCounts: next.questionCounts }));
+    setInput((current) => ({ ...current, title: next.title, category: next.category ?? "", language: next.language, band: next.band, ages: next.ages, topics: next.topics, text: next.sentences.map((sentence) => sentence.text).join("\n"), questionCounts: next.questionCounts }));
     setDirty(true);
     setPreviewed(false);
   };
@@ -295,7 +300,7 @@ function Editor({ row, categories, reports = [], onResolved, onClose }: { row: B
                 setConfirmed(false);
                 setNote({ kind: "info", text: t("studio.storyChanged") });
               }
-              if (draft && !storyChanged) setDraft({ ...draft, title: next.title, category: next.category, questionCounts: next.questionCounts });
+              if (draft && !storyChanged) setDraft({ ...draft, title: next.title, category: next.category, ages: next.ages, topics: next.topics?.length ? next.topics : undefined, questionCounts: next.questionCounts });
               setDirty(true);
               setPreviewed(false);
               // Changing only the requested counts is safe: keep the existing
@@ -332,6 +337,7 @@ function Editor({ row, categories, reports = [], onResolved, onClose }: { row: B
           <PublishStep
             verdict={verdict}
             band={draft.band}
+            ages={draft.ages}
             counts={draft.questionCounts}
             km={km}
             confirmed={confirmed}
@@ -425,10 +431,14 @@ function SourceStep({ input, categories, isNew, source, onSource, onInput, onNex
           <span className={label}>{t("studio.field.ageBand")}</span>
           <div className="flex gap-2">
             {(Object.keys(BANDS) as Band[]).map((b) => (
-              <UIButton key={b} type="button" size="sm" variant={input.band === b ? "primary" : "secondary"} aria-pressed={input.band === b} onClick={() => onInput({ ...input, band: b, questionCounts: { ...BANDS[b] } })}>{`${b} · ${BANDS[b].ages[0]}–${BANDS[b].ages[1]}`}</UIButton>
+              <UIButton key={b} type="button" size="sm" variant={input.band === b ? "primary" : "secondary"} aria-pressed={input.band === b} onClick={() => onInput({ ...input, band: b, ages: BANDS[b].ages, questionCounts: { ...BANDS[b] } })}>{`${b} · ${BANDS[b].ages[0]}–${BANDS[b].ages[1]}`}</UIButton>
             ))}
           </div>
         </div>
+        {/* Who it is for: starts from the band, required to publish. */}
+        <UIAgePicker className="sm:col-span-2" value={input.ages} onChange={(ages) => set("ages", ages)} />
+        {/* What it is about: reading and its shelf's topic come with every book, so they show locked. */}
+        <UITopicPicker className="sm:col-span-2" value={input.topics} implied={bookTopics({ category: input.category })} onChange={(topics) => set("topics", topics)} />
         <fieldset className="sm:col-span-2 rounded-2xl border border-line bg-surface-muted p-3">
           <legend className={`${label} px-1`}>{t("studio.field.target")}</legend>
           <p className="mb-2 text-xs text-muted">{t("studio.field.targetNote")}</p>
@@ -1383,7 +1393,7 @@ function SummaryStep({ draft, verdict, confirmed, onEdit, onNavigate, onQuestion
       </div>
 
       <div className="grid grid-cols-2 gap-2 lg:grid-cols-4">
-        <SummaryCard label={t("studio.summary.story")} value={t("studio.summary.storyValue", { sentences: draft.sentences.length, words: storyWords })} detail={t("studio.summary.storyDetail", { language: draft.language === "km" ? "ភាសាខ្មែរ" : "English", ages: `${BANDS[draft.band].ages[0]}–${BANDS[draft.band].ages[1]}` })} />
+        <SummaryCard label={t("studio.summary.story")} value={t("studio.summary.storyValue", { sentences: draft.sentences.length, words: storyWords })} detail={t("studio.summary.storyDetail", { language: draft.language === "km" ? "ភាសាខ្មែរ" : "English", ages: `${bookAges(draft)[0]}–${bookAges(draft)[1]}` })} />
         <SummaryCard label={t("studio.summary.questions")} value={t("studio.summary.questionValue", { understand: verdict.counts.comprehension, words: verdict.counts.vocab, spell: verdict.counts.spell })} detail={t("studio.summary.questionDetail", { checks: verdict.failures })} />
         <SummaryCard label={t("studio.summary.voices")} value={t("studio.summary.voiceValue", { sentences: sentenceAudio.length, total: draft.sentences.length, words: wordAudio.length })} detail={mediaBytes.voice ? t("studio.summary.storage", { size: formatBytes(mediaBytes.voice) }) : t("studio.summary.noStorage")} />
         <SummaryCard label={t("studio.summary.images")} value={t("studio.summary.imageValue", { total: imageIds.length, pages: pageImages.length })} detail={uploadedImages.length ? t("studio.summary.imageStorage", { count: uploadedImages.length, size: mediaBytes.images ? formatBytes(mediaBytes.images) : "…" }) : t("studio.summary.builtInImages")} />
@@ -1510,8 +1520,8 @@ function SummaryCard({ label: cardLabel, value, detail }: { label: string; value
 
 /* -------------------------------------------------------------------------- */
 
-function PublishStep({ verdict, band, counts, km, confirmed, status, busy, onPublish, onUnpublish, onDelete }: {
-  verdict: Verdict; band: Band; counts?: QuestionCounts; km: boolean; confirmed: boolean; status: { rev: number; published: boolean }; busy: string;
+function PublishStep({ verdict, band, ages, counts, km, confirmed, status, busy, onPublish, onUnpublish, onDelete }: {
+  verdict: Verdict; band: Band; ages?: AgeRange; counts?: QuestionCounts; km: boolean; confirmed: boolean; status: { rev: number; published: boolean }; busy: string;
   onPublish(): void; onUnpublish(): void; onDelete?: () => void;
 }) {
   /*
@@ -1535,6 +1545,7 @@ function PublishStep({ verdict, band, counts, km, confirmed, status, busy, onPub
     verdict.failures > 0 ? t("studio.publish.failing", { count: verdict.failures }) : "",
     off.length ? t("studio.publish.bandNeeds", { band, list: off.join(", ") }) : "",
     km && !confirmed ? t("studio.publish.splitsUnconfirmed") : "",
+    isAgeRange(ages) ? "" : t("ages.required"),
   ].filter(Boolean);
   const ready = reasons.length === 0;
   const [sure, setSure] = useState(false);

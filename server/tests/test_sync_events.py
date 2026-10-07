@@ -457,3 +457,34 @@ async def test_a_book_read_lands_page_by_page_and_counts_as_a_day_practised(clie
     assert totals["practisedOn"] == ["2026-08-19"]
     assert totals["questionsAnswered"] == 0
     assert totals.get("lessonsCompleted", 0) == 0
+
+
+def trace_event(event_id: str, **fields) -> dict:
+    """What `src/trace/learning.ts` sends: Koda Trace through the ordinary lesson events."""
+    return event(event_id, skillId="koda-trace", activityId="writing", lessonId="ka", conceptKey="trace-write-khmer", **fields)
+
+
+async def test_writing_lands_as_lessons_and_counts_towards_its_concept(client, parent, db):
+    body = {
+        "events": [
+            trace_event("t_1", type="lesson_started", entry="picker", ageBand=[6, 8]),
+            trace_event("t_2", correct=False, given="direction", errorKind="unknown", taskKind="trace_guided"),
+            trace_event("t_3", type="support_used", support="walkthrough"),
+            trace_event("t_4", attempt=1, correct=True, given="91"),
+            trace_event("t_5", type="lesson_completed", questionsAnswered=2, correctFirstTry=1, stars=3, xpEarned=40, milestone="canDo"),
+        ]
+    }
+    r = await client.post("/sync/push", json=body, headers=parent)
+    assert r.status_code == 200, r.text
+    assert r.json()["accepted"] == 5
+
+    totals = (await client.get("/sync/profile/l_mia", headers=parent)).json()["concepts"][0]
+    assert totals["conceptKey"] == "trace-write-khmer"
+    assert totals["skillIds"] == ["koda-trace"]
+    assert totals["lessonsCompleted"] == 1
+    assert totals["supportsUsed"] == 1
+    assert totals["practisedOn"] == ["2026-08-19"]
+
+    # The milestone rides along for the parent summary to read.
+    stored = await db.events.find_one({"eventId": "t_5"})
+    assert stored["milestone"] == "canDo"

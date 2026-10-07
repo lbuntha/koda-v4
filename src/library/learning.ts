@@ -40,7 +40,9 @@ import {
 import type { Passage } from "./data/passage";
 import { ageBandOf, conceptFor, itemId, taskKindOf, type QuizItem } from "./session";
 
-export const LIBRARY_SKILL_ID = "koda-library";
+import { LIBRARY_SKILL_ID } from "./ids";
+
+export { LIBRARY_SKILL_ID };
 
 export class BookRecorder {
   private tracker: LessonTracker;

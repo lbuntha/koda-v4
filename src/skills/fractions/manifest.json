@@ -16,6 +16,7 @@
     ],
     "category": "fractions"
   },
+  "topics": ["numbers", "fractions"],
   "teaches": [
     "equal-part-checker",
     "unit-fraction-namer",

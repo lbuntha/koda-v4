@@ -30,6 +30,9 @@ import { DailyGoalBanner } from "./DailyGoalBanner";
 import { ChildrenOverview } from "./account/ChildrenOverview";
 import { SvgAsset } from "../assets/svg";
 import { useT } from "../lib/i18n";
+import { useTodayPicks } from "./learn/useToday";
+import { SidebarIcon } from "./ui";
+import type { PickWhy } from "../lib/today";
 
 interface HomeProps {
   userProgress: UserProgress;
@@ -41,7 +44,20 @@ interface HomeProps {
   onOpenChild?(learnerId: string): void;
   /** A parent with no children yet, going to the page that makes one. */
   onAddChild?(): void;
+  /** Today's Read pick: open this book in Learn. */
+  onOpenBook?(bookId: string): void;
+  /** Today's Write pick: open this collection in Learn. */
+  onOpenCollection?(collectionId: string): void;
 }
+
+/** A Read or Write pick's reason, in the Today band's colours and words. */
+const TONE_FOR: Record<PickWhy, "review" | "practise" | "advance" | "resume"> = {
+  checkUp: "review",
+  continue: "resume",
+  linked: "advance",
+  new: "advance",
+  again: "practise",
+};
 
 /** Beyond this many subjects the list folds, so Home stays about one screen. */
 const SUBJECTS_SHOWN = 6;
@@ -326,6 +342,8 @@ export const Home: React.FC<HomeProps> = ({
   onBrowseSkills,
   onOpenChild,
   onAddChild,
+  onOpenBook,
+  onOpenCollection,
 }) => {
   const session = useSession();
   const { can } = usePermissions();
@@ -343,6 +361,10 @@ export const Home: React.FC<HomeProps> = ({
   useBilling();
   const [showAllSubjects, setShowAllSubjects] = React.useState(false);
   const { t } = useT();
+  const todayPicks = useTodayPicks();
+  /** What a "goes with" pick shares, said plainly: the letter or number itself, or the topic's name. */
+  const linkName = (link?: string): string =>
+    !link ? "" : link.startsWith("letter:") || link.startsWith("number:") ? link.slice(link.lastIndexOf(":") + 1) : t(`topics.name.${link}`);
 
   const byId = new Map(skills.map((skill) => [skill.id, skill]));
   const registered = registrations
@@ -536,16 +558,47 @@ export const Home: React.FC<HomeProps> = ({
     />
   ) : null;
 
-  /* Two, so the band is three things whichever way it was filled. A single
-     lead with nothing beside it is left as it is: one thing to do is a clearer
-     message than one thing plus filler.
-
-     None once a subject is under way: its group below already offers the
-     lesson it is on, so the rows here were the same lessons a second time —
-     "Ten Frame · Addition" above a card for Addition's Ten Frame. */
-  const rest = hasInProgress
+  /*
+   * Read and Write beside Think: one pick each, from the rule the Read and
+   * Write pages' banners use (`src/lib/today.ts`), so the three never disagree.
+   * They took the places of the two extra lessons this band used to offer —
+   * one thing from each kind of learning is a better day than three lessons.
+   * Not for a parent: the picks are about the learner holding the device.
+   */
+  const categoryCards = isParent
     ? []
-    : (interrupted ? suggestions : suggestions.slice(1)).slice(0, 2);
+    : [
+        todayPicks.read && (
+          <UILessonCard
+            key={`read-${todayPicks.read.book.id}`}
+            variant="compact"
+            icon={<SidebarIcon name="art:menu-library" size={40} className="h-10 w-10 shrink-0" />}
+            title={todayPicks.read.book.title}
+            subject={t("learnHub.books")}
+            message={t(`today.read.${todayPicks.read.why}`, { link: linkName(todayPicks.read.link) })}
+            tone={TONE_FOR[todayPicks.read.why]}
+            onClick={() => {
+              playSound("pop");
+              onOpenBook?.(todayPicks.read!.book.id);
+            }}
+          />
+        ),
+        todayPicks.write && (
+          <UILessonCard
+            key={`write-${todayPicks.write.collection.id}`}
+            variant="compact"
+            icon={<SidebarIcon name="art:menu-trace" size={40} className="h-10 w-10 shrink-0" />}
+            title={todayPicks.write.collection.title}
+            subject={t("learnHub.trace")}
+            message={t(`today.write.${todayPicks.write.why}`, { link: linkName(todayPicks.write.link) })}
+            tone={TONE_FOR[todayPicks.write.why]}
+            onClick={() => {
+              playSound("pop");
+              onOpenCollection?.(todayPicks.write!.collection.id);
+            }}
+          />
+        ),
+      ].filter(Boolean);
 
   return (
     /* Column 1 is the app shell's sidebar; this is columns 2 and 3. Neither
@@ -605,7 +658,7 @@ export const Home: React.FC<HomeProps> = ({
                 {t("home.today")}
               </h1>
 
-              {today.length || interrupted ? (
+              {today.length || interrupted || categoryCards.length ? (
                 /*
                  * One first thing, then the alternatives.
                  *
@@ -626,22 +679,7 @@ export const Home: React.FC<HomeProps> = ({
                  */
                 <div className="mt-3 grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
                   {lead}
-                  {rest.map((pick) => {
-                    const lesson = byRef.get(pick.lesson.ref);
-                    return (
-                      <UILessonCard
-                        key={pick.lesson.ref}
-                        variant="compact"
-                        title={pick.lesson.title}
-                        subject={byId.get(pick.lesson.skillId)?.name ?? pick.lesson.skillId}
-                        message={t(`today.${pick.kind}`)}
-                        iconName={lesson?.iconName}
-                        iconTone={lesson?.iconTone}
-                        tone={pick.kind}
-                        onClick={() => start(pick.lesson.ref)}
-                      />
-                    );
-                  })}
+                  {categoryCards}
                 </div>
               ) : (
                 <p
@@ -742,6 +780,14 @@ export const Home: React.FC<HomeProps> = ({
            * one screen where the answer is "add a child". `ChildrenOverview`
            * above says that instead, and says it whether or not this branch runs.
            */
+          <>
+          {/* No skills chosen yet, but books and writing need none: today's Read and Write still lead. */}
+          {categoryCards.length > 0 && (
+            <section>
+              <h1 className="font-mono font-black uppercase tracking-widest text-xs text-indigo-600">{t("home.today")}</h1>
+              <div className="mt-3 grid gap-4 sm:grid-cols-2">{categoryCards}</div>
+            </section>
+          )}
           <div className={`${themeSystem.card("default")} p-6 sm:p-8 text-center`}>
             <BookOpen className="w-11 h-11 mx-auto text-indigo-500" />
             <h1 className="mt-3 font-mono font-black text-lg text-ink">{t("home.buildList")}</h1>
@@ -750,6 +796,7 @@ export const Home: React.FC<HomeProps> = ({
               {t("home.browseSkills")}
             </UIButton>
           </div>
+          </>
         )}
       </div>
 

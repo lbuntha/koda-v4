@@ -19,12 +19,17 @@ import { whyUnspellable, tilesOf } from "./data/tiles";
 import { normalizeKhmer } from "./data/khmer";
 import { BAND_LEVEL_CAP, spellingLevel } from "./data/khmerCoach";
 import type { ModelDraft } from "./api";
+import type { AgeRange } from "../lib/ages";
 
 export interface StoryInput {
   id: string;
   title: string;
   language: Language;
   band: Band;
+  /** Who it is for, in years; starts from the band's ages. */
+  ages?: AgeRange;
+  /** What it is about — see `src/lib/topics.ts`. */
+  topics?: string[];
   questionCounts?: QuestionCounts;
   category: string;
   text: string;
@@ -156,6 +161,8 @@ export function baseOf(input: StoryInput, splitter?: WordSplitter): Omit<Passage
     id: input.id,
     language: input.language,
     band: input.band,
+    ages: input.ages ?? BANDS[input.band].ages,
+    topics: input.topics?.length ? input.topics : undefined,
     questionCounts: input.questionCounts ?? BANDS[input.band],
     title: input.title.trim() || (input.language === "km" ? "រឿងថ្មី" : "New story"),
     category: input.category || undefined,

@@ -10,7 +10,7 @@ import { ScoringAPI } from "../../lib/scoring";
 import { useT } from "../../lib/i18n";
 import { themeSystem } from "../../lib/themeSystem";
 import { usePermissions } from "../../lib/sync";
-import { UIBadge, UIButton, UIDialog, UIFlashMessage, UIMenu, UIMenuItem, UIPagination, UISearchInput } from "../../components/ui";
+import { UIAgePicker, UITopicPicker, UIBadge, UIButton, UIDialog, UIFlashMessage, UIMenu, UIMenuItem, UIPagination, UISearchInput } from "../../components/ui";
 import { COLLECTION_STATUSES, collectionStatus, matches, pageOf, sortBy, type CollectionStatus, type ListSort } from "./listView";
 import type { ItemStats, PendingCollection, Problem, Report, StudioCollection } from "../data/api";
 import {
@@ -35,6 +35,7 @@ import type { TraceDraft } from "./drafts";
 import { TraceDrafts, blankItem, newDraft } from "./drafts";
 import { Field, IconButton, Section, inputCls, panelCls } from "./ui";
 import { AutoStrokesForSet } from "./AutoStrokesPanel";
+import { collectionTags } from "../tags";
 import { PicturePanel } from "../../library/studio/PicturePanel";
 import { Picture } from "../../library/Picture";
 import { isPhoto, photoUrl, uploadPhoto } from "../../library/photos";
@@ -790,6 +791,14 @@ export function CollectionBoard({ id, onBack, onOpenItem }: { id: string; onBack
                   <option value="en">{t("traceStudio.col.english")}</option>
                 </select>
               </Field>
+              {/* Who it is for: required to publish, and every item in the set inherits it. */}
+              <UIAgePicker value={col.ages} onChange={(ages) => update({ ages })} />
+              {/* What it is about: writing, letters, numbers or drawing come from its items, so they show locked. */}
+              <UITopicPicker
+                value={col.topics}
+                implied={[...collectionTags({ items: items.flatMap((i) => (i.draft ? [{ item: i.draft.item }] : [])) }).topics]}
+                onChange={(topics) => update({ topics })}
+              />
               <Field label={t("traceStudio.col.xpPerStep")}>
                 <input
                   type="number"

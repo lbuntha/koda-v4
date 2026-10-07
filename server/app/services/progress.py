@@ -29,7 +29,9 @@ from motor.motor_asyncio import AsyncIOMotorDatabase
 
 from app import notify_i18n
 from app.repos import learners as learners_repo
+from app.repos import library as library_repo
 from app.repos import progress_marks, push_runs
+from app.repos import trace as trace_repo
 from app.services import email_notify, mastery, push
 
 log = logging.getLogger("koda.progress")
@@ -38,6 +40,9 @@ MASTERED = "learn.mastered"
 STUCK = "learn.stuck"
 TIME_LIMIT = "learn.time_limit"
 LIMIT_EVENT = "daily_limit_reached"
+COMPLETED = "lesson_completed"
+LIBRARY = "koda-library"
+TRACE = "koda-trace"
 
 Pair = tuple[str, str]
 
@@ -87,6 +92,7 @@ async def after_sync(
     try:
         await _time_limits(db, family_id, inserted)
         await _learning_changes(db, family_id, inserted, before)
+        await _reading_and_writing(db, family_id, inserted)
     except Exception:  # noqa: BLE001 — a notification is never worth a failed sync
         log.exception("could not notify about a synced batch")
 
@@ -131,6 +137,47 @@ async def _time_limits(db: AsyncIOMotorDatabase, family_id: str, inserted: list[
         )
 
 
+async def _reading_and_writing(db: AsyncIOMotorDatabase, family_id: str, inserted: list[dict[str, Any]]) -> None:
+    """Books finished and letters newly written, as marks for the summaries.
+
+    Not pushed: one message per letter would be a stream, and the weekly
+    summary, the daily digest and "Your children" say it at the right size.
+    Claimed like everything else here, so a replayed outbox marks nothing twice:
+    a letter is learned once; a book is finished once a day.
+    """
+    done = [e for e in inserted if e.get("type") == COMPLETED and e.get("skillId") in (LIBRARY, TRACE)]
+    if not done:
+        return
+    items: dict[str, dict[str, str]] | None = None
+    for event in done:
+        learner_id, day, lesson_id = event.get("learnerId"), event.get("localDay"), str(event.get("lessonId") or "")
+        if not learner_id or not isinstance(day, str) or not lesson_id:
+            continue
+        if event.get("skillId") == TRACE:
+            # "Can write" is the ladder's milestone; a check-up passed later is the same letter, not news.
+            if event.get("milestone") != "canDo":
+                continue
+            if not await push_runs.claim(db, kind="learn.can_write", recipient_id=f"{learner_id}:{lesson_id}", date_key="secure"):
+                continue
+            if items is None:
+                items = await trace_repo.titles(db)
+            item = items.get(lesson_id) or {}
+            await progress_marks.record(
+                db, family_id=family_id, learner_id=learner_id, kind="can_write", local_day=day,
+                detail={"item": lesson_id, "title": item.get("title") or "", "draw": item.get("kind") in ("line", "drawing")},
+            )
+        else:
+            book_id = lesson_id.split("@")[0]
+            if not await push_runs.claim(db, kind="learn.book_finished", recipient_id=f"{learner_id}:{book_id}", date_key=day):
+                continue
+            row = await library_repo.get(db, book_id)
+            title = str(((row or {}).get("published") or (row or {}).get("draft") or {}).get("title") or "")
+            await progress_marks.record(
+                db, family_id=family_id, learner_id=learner_id, kind="book_finished", local_day=day,
+                detail={"book": book_id, "title": title},
+            )
+
+
 async def _learning_changes(
     db: AsyncIOMotorDatabase,
     family_id: str,
@@ -153,7 +200,7 @@ async def _learning_changes(
 
     for (learner_id, concept), was in sorted(before.items()):
         day = days.get(learner_id)
-        if not day:
+        if not day or mastery.is_ladder_concept(concept):
             continue
         row = totals.get((learner_id, concept))
         status = mastery.status_of(row)

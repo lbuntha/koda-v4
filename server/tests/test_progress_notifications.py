@@ -258,3 +258,87 @@ async def test_a_stuck_child_outranks_an_absence_on_home(client, parent, db, fam
 
     assert body["attention"]["kind"] == "learn.stuck"
     assert body["attention"]["title"] == "Mia could use a hand"
+
+
+# --- Read and Write (Learn's other two) --------------------------------------
+
+
+async def publish_trace_letter(db, item_id: str = "ka", title: str = "ក", kind: str = "letter"):
+    await db.trace_collections.insert_one(
+        {"id": "consonants", "deletedAt": None, "rev": 1, "order": 1,
+         "published": {"id": "consonants", "rev": 1, "title": "Consonants",
+                       "items": [{"item": {"id": item_id, "title": title, "kind": kind}}]}}
+    )
+
+
+async def publish_book(db, book_id: str = "pigs", title: str = "The Three Little Pigs"):
+    await db.library_books.insert_one({"id": book_id, "deletedAt": None, "rev": 1, "published": {"id": book_id, "rev": 1, "title": title}})
+
+
+async def test_writing_never_reads_as_a_mastered_concept(db, family, seeded):
+    """One "Writing Khmer letters" concept would be "mastered" after a few good letters; the ladder tells parents instead."""
+    await set_totals(db, family, "trace-write-khmer", questionsAnswered=10, correctFirstTry=10, lessonsCompleted=3,
+                     practisedOn=["2026-08-15", "2026-08-16"])
+
+    await progress.after_sync(db, family["familyId"], batch(family, "2026-08-16"), {(family["mia"], "trace-write-khmer"): "practising"})
+
+    assert await told(db, "learn.mastered") == []
+    assert await progress_marks.for_days(db, family["familyId"], family["mia"], ["2026-08-16"]) == []
+
+
+async def test_a_letter_learned_and_a_book_finished_are_marked_once(db, family, seeded):
+    await publish_trace_letter(db)
+    await publish_book(db)
+    events = batch(family, "2026-08-16", skillId="koda-trace", lessonId="ka", milestone="canDo") + batch(
+        family, "2026-08-16", skillId="koda-library", lessonId="pigs@1"
+    )
+
+    await progress.after_sync(db, family["familyId"], events, {})
+    await progress.after_sync(db, family["familyId"], events, {})  # a replayed outbox
+
+    marks = await progress_marks.for_days(db, family["familyId"], family["mia"], ["2026-08-16"])
+    assert sorted((m["kind"], m["detail"]["title"]) for m in marks) == [("book_finished", "The Three Little Pigs"), ("can_write", "ក")]
+    # Not pushed: one message per letter would be a stream.
+    assert await told(db, "learn.mastered") == []
+
+
+async def test_a_check_up_passed_is_not_a_new_letter(db, family, seeded):
+    await publish_trace_letter(db)
+    events = batch(family, "2026-08-16", skillId="koda-trace", lessonId="ka", milestone="rechecked")
+    await progress.after_sync(db, family["familyId"], events, {})
+    assert await progress_marks.for_days(db, family["familyId"], family["mia"], ["2026-08-16"]) == []
+
+
+async def test_the_weekly_email_counts_think_read_and_write_and_names_the_news(db, family, seeded, outbox):
+    for n, skill in enumerate(("counting", "koda-library", "koda-trace")):
+        await db.events.insert_one(
+            {"_id": f"ev{n}", "familyId": family["familyId"], "eventId": f"e{n}", "learnerId": family["mia"], "skillId": skill,
+             "type": "lesson_completed", "localDay": "2026-08-16", "tzOffsetMinutes": 120, "durationMs": 300_000, "receivedAt": now()}
+        )
+    await progress_marks.record(db, family_id=family["familyId"], learner_id=family["mia"], kind="can_write",
+                                local_day="2026-08-16", detail={"item": "ka", "title": "ក", "draw": False})
+    await progress_marks.record(db, family_id=family["familyId"], learner_id=family["mia"], kind="book_finished",
+                                local_day="2026-08-16", detail={"book": "pigs", "title": "The Three Little Pigs"})
+
+    await task_service.weekly_summary(db, at=SUNDAY_EVENING_UTC)
+
+    [letter] = outbox
+    assert "1 lesson, 1 book and 1 writing item" in letter["body"]
+    assert "can now write ក" in letter["body"]
+    assert "read The Three Little Pigs" in letter["body"]
+
+
+async def test_home_shows_a_child_s_day_across_learn_and_the_week_s_news(client, parent, db, family, seeded):
+    local_today = (datetime.now(UTC) + timedelta(minutes=120)).date().isoformat()
+    for n, skill in enumerate(("counting", "koda-trace", "koda-trace")):
+        await db.events.insert_one(
+            {"_id": f"ov{n}", "familyId": family["familyId"], "eventId": f"o{n}", "learnerId": family["mia"], "skillId": skill,
+             "type": "lesson_completed", "localDay": local_today, "tzOffsetMinutes": 120, "durationMs": 60_000, "receivedAt": now()}
+        )
+    await progress_marks.record(db, family_id=family["familyId"], learner_id=family["mia"], kind="can_write",
+                                local_day=local_today, detail={"item": "ka", "title": "ក", "draw": False})
+
+    [mia] = (await client.get("/learners/overview", headers=parent)).json()["children"]
+
+    assert mia["today"]["mix"] == {"think": 1, "read": 0, "write": 2}
+    assert mia["week"] == {"canWrite": ["ក"], "booksRead": []}

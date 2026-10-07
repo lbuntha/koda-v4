@@ -24,7 +24,13 @@
     "fullTime": "បានប្រើពេលប្រចាំថ្ងៃអស់",
     "nextUp": "បន្ទាប់៖ {lesson}",
     "partSeparator": "; ",
-    "goalMetToday": " — សម្រេចគោលដៅថ្ងៃនេះ"
+    "goalMetToday": " — សម្រេចគោលដៅថ្ងៃនេះ",
+    "lessonsCount": "{count} មេរៀន",
+    "booksCount": "{count} សៀវភៅ",
+    "writingCount": "{count} លំហាត់សរសេរ",
+    "canWrite": "អាចសរសេរ {items} បានហើយ",
+    "canDraw": "អាចគូរ {items} បានហើយ",
+    "readBooks": "បានអាន {books}"
   },
   "kinds": {
     "device.new_signin": {

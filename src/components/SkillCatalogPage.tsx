@@ -17,6 +17,8 @@ export interface SkillCatalogPageProps {
   activeLevelNumber: number;
   completedLevels: Record<number, number>;
   onSelectSkill(skillId: string): void;
+  /** Shown inside Learn, which carries the page's title: keep only the admin badge. */
+  embedded?: boolean;
 }
 
 const PAGE_SIZE = 12;
@@ -35,6 +37,7 @@ export const SkillCatalogPage: React.FC<SkillCatalogPageProps> = ({
   activeLevelNumber,
   completedLevels,
   onSelectSkill,
+  embedded = false,
 }) => {
   const { skills, viewer } = useSkillCatalog(completedLevels);
   const { t } = useT();
@@ -178,6 +181,13 @@ export const SkillCatalogPage: React.FC<SkillCatalogPageProps> = ({
       {/* The title goes on a phone — the toolbar says "Learn" already. The badge
           stays: it is the only thing here explaining why unreleased skills are
           on screen. */}
+      {embedded ? (
+        viewer.showAllSkills && (
+          <div className="flex justify-end">
+            <UIBadge variant="primary">{t("catalog.adminBadge")}</UIBadge>
+          </div>
+        )
+      ) : (
       <UIPageHeader
         eyebrow={t("catalog.eyebrow")}
         title={t("nav.game")}
@@ -188,6 +198,7 @@ export const SkillCatalogPage: React.FC<SkillCatalogPageProps> = ({
         }
         action={viewer.showAllSkills ? <UIBadge variant="primary">{t("catalog.adminBadge")}</UIBadge> : undefined}
       />
+      )}
 
       <UISearchInput
         label={t("catalog.search")}

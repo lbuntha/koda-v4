@@ -2,7 +2,7 @@
  * Synthesis Tutor - AI Math & Problem Solving Socratic Tutor
  */
 
-import React, { Suspense, lazy, useState, useEffect, useRef, useSyncExternalStore } from "react";
+import React, { Suspense, lazy, useState, useEffect, useRef, useSyncExternalStore, useTransition } from "react";
 import {
   Megaphone,
   Sparkles,
@@ -58,6 +58,7 @@ import { ApiError } from "./lib/sync";
 import { refreshDeploymentRules } from "./lib/deploymentRules";
 import { BadgeAPI, earnedBadges } from "./lib/badges";
 import { LearnPage } from "./components/LearnPage";
+import { LearnHub, LibraryPage, TracePage, useLearnCategory } from "./components/learn/LearnHub";
 import { SkillCatalogPage } from "./components/SkillCatalogPage";
 import { AppNav } from "./components/AppNav";
 import { SidebarNav } from "./components/SidebarNav";
@@ -140,8 +141,6 @@ import { refreshMaintenanceVersions } from "./lib/maintenanceReset";
 const SkillManagerPage = lazy(() =>
   import("./components/skills/SkillManagerPage").then((m) => ({ default: m.SkillManagerPage })),
 );
-const LibraryPage = lazy(() => import("./library/LibraryPage").then((m) => ({ default: m.LibraryPage })));
-const TracePage = lazy(() => import("./trace/TracePage").then((m) => ({ default: m.TracePage })));
 const TraceStudio = lazy(() => import("./trace/studio/TraceStudio").then((m) => ({ default: m.TraceStudio })));
 const LibraryStudio = lazy(() => import("./library/studio/LibraryStudio").then((m) => ({ default: m.LibraryStudio })));
 const SvgAssetsPage = lazy(() =>
@@ -186,6 +185,12 @@ export default function App() {
   const [skillNodes, setSkillNodes] = useState<SkillNode[]>(INITIAL_SKILL_NODES);
   const [libraryReaderOpen, setLibraryReaderOpen] = useState(false);
   const [libraryBookOpen, setLibraryBookOpen] = useState(false);
+  /* Learn holds Lessons, Books and Write & Draw; which one is showing. */
+  const [learnCategory, setLearnCategory] = useLearnCategory();
+  const [traceDeep, setTraceDeep] = useState(false);
+  /* A book or collection to open once Learn shows it — a Today pick on Home. */
+  const [learnTarget, setLearnTarget] = useState<{ bookId?: string; collectionId?: string } | null>(null);
+  const [switchingCategory, startCategorySwitch] = useTransition();
   const session = useSession();
   const { can, known: permissionsKnown } = usePermissions();
   const canManageMenu = Boolean(session && can("menu:manage"));
@@ -275,9 +280,7 @@ export default function App() {
     | "leaderboard"
     | "skills"
     | "assets"
-    | "library"
     | "library-studio"
-    | "trace"
     | "trace-studio"
     | "users"
     | "roles"
@@ -463,6 +466,7 @@ export default function App() {
     }
 
     setActiveTab("game");
+    setLearnCategory("lessons");
     // Read now rather than from the render that drew the button: `outsideHours`
     // turns over on the wall clock, so a child who has been sitting on the picker
     // since 19:59 is holding a render that said "open".
@@ -930,13 +934,14 @@ export default function App() {
    * thing on screen.
   */
   const inLesson = activeTab === "game" && inRound;
+  const inBooks = activeTab === "game" && !inRound && learnCategory === "books";
 
   return (
     <MainLayout
       // Only a running round wants the full width; the picker is a normal page.
       contained={!inLesson}
-      hideMobileChrome={activeTab === "library" && libraryReaderOpen}
-      hideMobileTabBar={activeTab === "library" && libraryBookOpen}
+      hideMobileChrome={inBooks && libraryReaderOpen}
+      hideMobileTabBar={inBooks && libraryBookOpen}
       /* Two shells, each hiding itself at the width that is not its own — the
          rail from `rail:` up, the toolbar and tab bar below it. A round stands
          both of them down: what a rail shows a five-year-old counting crowns is
@@ -984,30 +989,68 @@ export default function App() {
         {activeTab === "game" &&
           (inRound ? (
             lessonHost
-          ) : outsideHours && studyHours !== null ? (
-            /* Both reasons can be true at nine at night, and this one goes first
-               because it names a time: "Koda wakes up at 7 AM" is something a
-               five-year-old can act on, where "that's it for today" leaves them
-               to work out when today ends. The cap will have reset by then
-               anyway, so nothing is hidden by saying this instead. */
-            <KodaAsleepScreen opensAt={studyHours.from} onGoHome={() => setActiveTab("home")} />
-          ) : dayDone && sessionCap !== null ? (
-            /* Stands in for the picker rather than sitting beside it: a path a
-               child can still tap is a path they will keep tapping. */
-            <DayDoneScreen cap={sessionCap} onGoHome={() => setActiveTab("home")} />
-          ) : selectedLearnSkillId ? (
-            <LearnPage
-              skillId={selectedLearnSkillId}
-              completedLevels={completedGameLevels}
-              onBack={() => setSelectedLearnSkillId(null)}
-              onStartLesson={startLesson}
-            />
           ) : (
-            <SkillCatalogPage
-              activeLevelNumber={activeLevelNumber}
-              completedLevels={completedGameLevels}
-              onSelectSkill={setSelectedLearnSkillId}
-            />
+            /* Learn: Think, Read and Write behind one switcher. The
+               day's cap and study hours stand in for the lesson picker only —
+               reading and tracing stay open, as they were as their own tabs. */
+            <LearnHub
+              value={learnCategory}
+              onChange={(next) => startCategorySwitch(() => setLearnCategory(next))}
+              pending={switchingCategory}
+              immersed={
+                learnCategory === "lessons"
+                  ? Boolean(selectedLearnSkillId) && !outsideHours && !dayDone
+                  : learnCategory === "books"
+                    ? libraryBookOpen
+                    : traceDeep
+              }
+            >
+              {learnCategory === "books" ? (
+                <LibraryPage
+                  embedded
+                  openBookId={learnTarget?.bookId}
+                  onOpened={() => setLearnTarget(null)}
+                  onAwardXp={(earnedXp) => setUserProgress((prev) => ({ ...prev, xp: prev.xp + earnedXp }))}
+                  onReaderChange={setLibraryReaderOpen}
+                  onBookChange={setLibraryBookOpen}
+                />
+              ) : learnCategory === "trace" ? (
+                <TracePage
+                  embedded
+                  openCollectionId={learnTarget?.collectionId}
+                  onOpened={() => setLearnTarget(null)}
+                  canCreate={canTrace}
+                  onDeepChange={setTraceDeep}
+                  onAwardXp={(earnedXp) => setUserProgress((prev) => ({ ...prev, xp: prev.xp + earnedXp }))}
+                  onGoHome={() => setActiveTab("home")}
+                />
+              ) : outsideHours && studyHours !== null ? (
+                /* Both reasons can be true at nine at night, and this one goes first
+                   because it names a time: "Koda wakes up at 7 AM" is something a
+                   five-year-old can act on, where "that's it for today" leaves them
+                   to work out when today ends. The cap will have reset by then
+                   anyway, so nothing is hidden by saying this instead. */
+                <KodaAsleepScreen opensAt={studyHours.from} onGoHome={() => setActiveTab("home")} />
+              ) : dayDone && sessionCap !== null ? (
+                /* Stands in for the picker rather than sitting beside it: a path a
+                   child can still tap is a path they will keep tapping. */
+                <DayDoneScreen cap={sessionCap} onGoHome={() => setActiveTab("home")} />
+              ) : selectedLearnSkillId ? (
+                <LearnPage
+                  skillId={selectedLearnSkillId}
+                  completedLevels={completedGameLevels}
+                  onBack={() => setSelectedLearnSkillId(null)}
+                  onStartLesson={startLesson}
+                />
+              ) : (
+                <SkillCatalogPage
+                  embedded
+                  activeLevelNumber={activeLevelNumber}
+                  completedLevels={completedGameLevels}
+                  onSelectSkill={setSelectedLearnSkillId}
+                />
+              )}
+            </LearnHub>
           ))}
 
         {/* TAB 0: CREATIVE LEARNING PATHWAY HOME HUB */}
@@ -1019,11 +1062,13 @@ export default function App() {
               onOpenSkill={(skillId) => {
                 setSelectedLearnSkillId(skillId);
                 setInRound(false);
+                setLearnCategory("lessons");
                 setActiveTab("game");
               }}
               onBrowseSkills={() => {
                 setSelectedLearnSkillId(null);
                 setInRound(false);
+                setLearnCategory("lessons");
                 setActiveTab("game");
               }}
               onOpenChild={(learnerId) => {
@@ -1034,6 +1079,18 @@ export default function App() {
               onAddChild={() => {
                 setChildReport(null);
                 setActiveTab("children");
+              }}
+              onOpenBook={(bookId) => {
+                setInRound(false);
+                setLearnCategory("books");
+                setLearnTarget({ bookId });
+                setActiveTab("game");
+              }}
+              onOpenCollection={(collectionId) => {
+                setInRound(false);
+                setLearnCategory("trace");
+                setLearnTarget({ collectionId });
+                setActiveTab("game");
               }}
             />
           )}
@@ -1073,28 +1130,10 @@ export default function App() {
             </Deferred>
           )}
 
-          {/* TAB: KODA LIBRARY — books to read, answer and spell */}
-          {activeTab === "library" && (
-            <Deferred label="Loading the library">
-              <LibraryPage
-                onAwardXp={(earnedXp) => setUserProgress((prev) => ({ ...prev, xp: prev.xp + earnedXp }))}
-                onReaderChange={setLibraryReaderOpen}
-                onBookChange={setLibraryBookOpen}
-              />
-            </Deferred>
-          )}
-
           {/* TAB: TRACE STUDIO — make trace items: strokes, steps, tests (content:write) */}
           {activeTab === "trace-studio" && canTrace && (
             <Deferred label="Loading Trace Studio">
               <TraceStudio />
-            </Deferred>
-          )}
-
-          {/* TAB: KODA TRACE — write and draw, stroke by stroke */}
-          {activeTab === "trace" && (
-            <Deferred label="Loading Trace">
-              <TracePage canCreate={canTrace} onAwardXp={(earnedXp) => setUserProgress((prev) => ({ ...prev, xp: prev.xp + earnedXp }))} onGoHome={() => setActiveTab("home")} />
             </Deferred>
           )}
 

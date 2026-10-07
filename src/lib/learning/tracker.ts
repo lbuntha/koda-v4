@@ -55,6 +55,8 @@ export interface AnswerReport {
 export interface LessonSummaryExtras {
   stars?: number;
   xpEarned?: number;
+  /** See `LessonCompletedEvent.milestone`. */
+  milestone?: "canDo" | "rechecked" | "learned";
 }
 
 /**

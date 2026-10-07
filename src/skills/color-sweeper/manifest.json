@@ -16,6 +16,7 @@
     ],
     "category": "logic"
   },
+  "topics": ["logic", "colours"],
   "teaches": [
     "neighbor-identifier",
     "color-neighbor-counter",

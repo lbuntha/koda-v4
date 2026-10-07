@@ -61,9 +61,31 @@ def status_of(totals: dict[str, Any] | None) -> str:
     return "practising"
 
 
+#: Koda Library and Koda Trace are modules, not skills with lessons to name their
+#: concepts, so a parent's message names them here — the server's copy of
+#: `LIBRARY_CONCEPT_NAMES` and `TRACE_CONCEPT_NAMES` in the app.
+MODULE_CONCEPT_NAMES: dict[str, str] = {
+    "read-and-answer": "Reading a story and answering questions",
+    "read-and-answer-long": "Reading a longer story and answering questions",
+    "trace-write-khmer": "Writing Khmer letters and numbers",
+    "trace-write-latin": "Writing English letters and numbers",
+    "trace-draw": "Drawing lines and pictures",
+}
+
+#: Writing is measured per letter on the trace ladder ("can write ក"), not per
+#: concept: one "Writing Khmer letters" concept would read as mastered after a
+#: handful of good tries at three letters. So its concepts never raise
+#: mastered/stuck — the ladder's own milestones tell parents instead.
+LADDER_CONCEPT_PREFIX = "trace-"
+
+
+def is_ladder_concept(concept_key: str) -> bool:
+    return concept_key.startswith(LADDER_CONCEPT_PREFIX)
+
+
 @lru_cache(maxsize=1)
 def _lesson_names() -> dict[str, str]:
-    names: dict[str, str] = {}
+    names: dict[str, str] = dict(MODULE_CONCEPT_NAMES)
     for skill in load_skill_defaults():
         for lesson in skill.get("lessons") or []:
             key = lesson.get("conceptKey")
@@ -92,7 +114,9 @@ async def next_step(db: AsyncIOMotorDatabase, family_id: str, learner_id: str) -
     The report's "best use of the next session", said as one lesson name.
     """
     practising = [
-        row for row in await rollups.for_learner(db, family_id, learner_id) if status_of(row) == "practising"
+        row
+        for row in await rollups.for_learner(db, family_id, learner_id)
+        if status_of(row) == "practising" and not is_ladder_concept(str(row.get("conceptKey") or ""))
     ]
     if not practising:
         return None

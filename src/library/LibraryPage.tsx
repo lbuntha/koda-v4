@@ -1,6 +1,8 @@
 import type React from "react";
 import { memo, useCallback, useDeferredValue, useEffect, useMemo, useRef, useState, useSyncExternalStore, type ReactNode } from "react";
 import { createPortal } from "react-dom";
+import { LANG_KEY, readLang } from "./lang";
+import { readPickFrom, useTodayContext } from "../components/learn/useToday";
 import { ArrowLeft, BookOpen, Check, ChevronDown, Globe, Lightbulb, RotateCcw, Search, Star, Volume2, X, Zap } from "lucide-react";
 import { LetterWheel } from "../components/wheel/LetterWheel";
 import { ScoringAPI } from "../lib/scoring";
@@ -40,7 +42,6 @@ import { useT } from "../lib/i18n";
 
 type Screen = "catalog" | "book" | "read" | "quiz" | "results";
 
-const LANG_KEY = "koda_library_lang_v1";
 /** Each book language in its own name, so a reader finds theirs whatever the app is set to. */
 const LANGUAGE_NAMES: Record<Language, string> = { en: "English", km: "ភាសាខ្មែរ" };
 const KHMER = "font-['Noto_Sans_Khmer','Khmer_OS','Khmer_MN',sans-serif]";
@@ -61,13 +62,7 @@ const ROW_ITEM = "[&>li]:w-full sm:[&>li]:w-72";
 const ROW_GRID = "grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4";
 const kh = (p: { language: Language }) => (p.language === "km" ? KHMER : "");
 
-function readLang(): Language {
-  try {
-    return localStorage.getItem(LANG_KEY) === "km" ? "km" : "en";
-  } catch {
-    return "en";
-  }
-}
+
 
 export interface LibraryPageProps {
   /** Paid once, when a book is finished. The host owns the total. */
@@ -76,9 +71,15 @@ export interface LibraryPageProps {
   onReaderChange?(open: boolean): void;
   /** Whether a book is open at all (its page, the reader, the quiz, the results) — the phone hides its tab bar then. */
   onBookChange?(open: boolean): void;
+  /** Shown inside Learn, which carries the page's title. */
+  embedded?: boolean;
+  /** Open this book's page straight away — a Today pick on Home. */
+  openBookId?: string | null;
+  /** The book above was opened (or is not on the shelf), so the host can forget it. */
+  onOpened?(): void;
 }
 
-export function LibraryPage({ onAwardXp, onReaderChange, onBookChange }: LibraryPageProps) {
+export function LibraryPage({ onAwardXp, onReaderChange, onBookChange, embedded = false, openBookId, onOpened }: LibraryPageProps) {
   const [screen, setScreen] = useState<Screen>("catalog");
   const [bookId, setBookId] = useState<string | null>(null);
   const [lang, setLangState] = useState<Language>(readLang);
@@ -118,11 +119,18 @@ export function LibraryPage({ onAwardXp, onReaderChange, onBookChange }: Library
     go("book");
   }, []); // eslint-disable-line react-hooks/exhaustive-deps -- go only touches refs and setters
 
+  // A Today pick from Home: open its page once, then let the host forget it.
+  useEffect(() => {
+    if (!openBookId) return;
+    if (shelf.some((b) => b.id === openBookId)) open(openBookId);
+    onOpened?.();
+  }, [openBookId]); // eslint-disable-line react-hooks/exhaustive-deps -- once per target, not per shelf change
+
   // scroll-mt: a phone's toolbar is sticky, and scrolling to the top must land
   // below it, or a book opens with its back link hidden under the bar.
   return (
     <div ref={top} className={`mx-auto w-full max-w-5xl ${screen === "read" || screen === "quiz" ? "px-0 pb-4" : "scroll-mt-14 px-2 pb-24 rail:scroll-mt-0"} pt-4 sm:px-6`} data-koda-library>
-      {screen === "catalog" && <Catalog shelf={shelf} lang={lang} onLang={setLang} onOpen={open} />}
+      {screen === "catalog" && <Catalog shelf={shelf} lang={lang} onLang={setLang} onOpen={open} embedded={embedded} />}
       {book && screen === "book" && (
         <BookPage book={book} onBack={() => go("catalog")} onRead={() => go("read")} />
       )}
@@ -224,9 +232,10 @@ function Cover({ book, size = "shelf", showTitle = size === "page" }: { book: Pa
   );
 }
 
-function Catalog({ shelf, lang, onLang, onOpen }: { shelf: readonly Passage[]; lang: Language; onLang(l: Language): void; onOpen(id: string): void }) {
+function Catalog({ shelf, lang, onLang, onOpen, embedded }: { shelf: readonly Passage[]; lang: Language; onLang(l: Language): void; onOpen(id: string): void; embedded: boolean }) {
   const { t: tr } = useT();
   const progressOf = useProgress();
+  const todayContext = useTodayContext();
   const [q, setQ] = useState("");
   const [cat, setCat] = useState("All");
   const deferredQ = useDeferredValue(q);
@@ -246,8 +255,10 @@ function Catalog({ shelf, lang, onLang, onOpen }: { shelf: readonly Passage[]; l
     .sort((a, b) => (progressOf(b)?.updatedAt ?? 0) - (progressOf(a)?.updatedAt ?? 0));
   // A book already under "Continue reading" is not listed a second time below it.
   const readingIds = new Set(reading.map((p) => p.id));
-  // The banner: the book being read most recently, else the first one not yet opened.
-  const hero = reading[0] ?? mine.find((p) => !progressOf(p)) ?? null;
+  /* The banner is Today's Read pick — the same one Home offers: the book being
+     read most recently, else a new one that suits the child and goes with what
+     they did lately. The first unopened book is the fallback. */
+  const hero = readPickFrom(shelf, lang, todayContext)?.book ?? reading[0] ?? mine.find((p) => !progressOf(p)) ?? null;
   const browsing = !query && active === "All";
   const belowReading = reading.filter((p) => p.id !== hero?.id);
   const belowShelves = cats
@@ -305,14 +316,17 @@ function Catalog({ shelf, lang, onLang, onOpen }: { shelf: readonly Passage[]; l
   );
 
   return (
-    <div>
-      <header className="flex flex-wrap items-end justify-between gap-3">
-        <div className="min-w-0">
-          {/* Below `rail:` the app bar already names the page; the heading stays for screen readers. */}
-          <h1 className="sr-only text-3xl font-extrabold tracking-tight text-ink rail:not-sr-only">{tr("nav.library")}</h1>
-          <p className="hidden text-sm text-muted sm:block">{tr("library.tagline")}</p>
-        </div>
-      </header>
+    /* Inside Learn the switcher above already spaces the page; the banner needs no top margin of its own. */
+    <div className={embedded ? "sm:[&>section:first-child]:mt-0" : undefined}>
+      {!embedded && (
+        <header className="flex flex-wrap items-end justify-between gap-3">
+          <div className="min-w-0">
+            {/* Below `rail:` the app bar already names the page; the heading stays for screen readers. */}
+            <h1 className="sr-only text-3xl font-extrabold tracking-tight text-ink rail:not-sr-only">{tr("nav.library")}</h1>
+            <p className="hidden text-sm text-muted sm:block">{tr("library.tagline")}</p>
+          </div>
+        </header>
+      )}
 
       {browsing && hero && <LibraryHero book={hero} reading={readingIds.has(hero.id)} progress={progressOf(hero)} onOpen={onOpen} />}
 

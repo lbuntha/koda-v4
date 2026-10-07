@@ -16,6 +16,8 @@ export interface ChildToday {
   minutes: number;
   goal: number;
   goalMet: boolean;
+  /** Today's rounds by Learn's three. Absent from an answer stored before it existed. */
+  mix?: { think: number; read: number; write: number };
 }
 
 export interface ChildOverview {
@@ -27,6 +29,8 @@ export interface ChildOverview {
   /** Whole days since the last round; `null` for a child who has not started. */
   daysAway: number | null;
   daysThisWeek: number;
+  /** This week's news from Read and Write. Absent from an answer stored before it existed. */
+  week?: { canWrite: string[]; booksRead: string[] };
 }
 
 /** The one thing worth a parent's eye, already worded by the absence message. */

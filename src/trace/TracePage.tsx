@@ -10,7 +10,7 @@
  * as a child would before publishing.
  */
 
-import { useState, useSyncExternalStore } from "react";
+import { useEffect, useState, useSyncExternalStore } from "react";
 import { AlarmClock, ArrowLeft, ArrowRight, Check, LayoutGrid, PenLine, Play, RotateCcw } from "lucide-react";
 import { UIBanner, UIButton, UICarousel, UIProgressBar } from "../components/ui";
 import { useSession } from "../lib/sync";
@@ -29,6 +29,7 @@ import { ItemThumb } from "./player/Thumb";
 import { Picture } from "../library/Picture";
 import { isPhoto } from "../library/photos";
 import { TraceDrafts } from "./studio/drafts";
+import { useTodayContext, writePickFrom } from "../components/learn/useToday";
 
 interface Props {
   onAwardXp?(xp: number): void;
@@ -36,6 +37,14 @@ interface Props {
   canCreate?: boolean;
   /** Leave Trace for the home screen, offered when an item is finished. */
   onGoHome?(): void;
+  /** An item or a collection is open — the host hides what is around the page. */
+  onDeepChange?(deep: boolean): void;
+  /** Shown inside Learn, which carries the page's title. */
+  embedded?: boolean;
+  /** Open this collection's page straight away — a Today pick on Home. */
+  openCollectionId?: string | null;
+  /** The collection above was opened (or is not on the shelf), so the host can forget it. */
+  onOpened?(): void;
 }
 
 interface Entry {
@@ -47,7 +56,7 @@ interface Entry {
 /** What a step of this entry pays at three stars: its collection's setting, if it has one. */
 const xpOf = (e: Entry, collections: { id: string; xpPerStep?: number | null }[]) => collections.find((c) => c.id === e.source?.collectionId)?.xpPerStep ?? null;
 
-export function TracePage({ onAwardXp, canCreate = false, onGoHome }: Props) {
+export function TracePage({ onAwardXp, canCreate = false, onGoHome, onDeepChange, embedded = false, openCollectionId, onOpened }: Props) {
   const { t } = useT();
   const [open, setOpen] = useState<Entry | null>(null);
   const tallyKey = `koda.traceTallyClosed.${useSession()?.learnerId ?? "me"}`;
@@ -60,7 +69,19 @@ export function TracePage({ onAwardXp, canCreate = false, onGoHome }: Props) {
   });
   /** The collection whose cover was tapped: its page, until the child goes back. */
   const [shelfId, setShelfId] = useState<string | null>(null);
+  const deep = Boolean(open || shelfId);
+  useEffect(() => {
+    onDeepChange?.(deep);
+  }, [onDeepChange, deep]);
   const shelf = useTraceShelf();
+  const todayContext = useTodayContext();
+  // A Today pick from Home: open its collection once, then let the host forget it.
+  useEffect(() => {
+    if (!openCollectionId) return;
+    setOpen(null);
+    setShelfId(openCollectionId);
+    onOpened?.();
+  }, [openCollectionId]); // eslint-disable-line react-hooks/exhaustive-deps -- once per target
   useSyncExternalStore(TraceProgress.subscribe, TraceProgress.version);
   useSyncExternalStore(TraceDrafts.subscribe, TraceDrafts.version);
 
@@ -68,7 +89,7 @@ export function TracePage({ onAwardXp, canCreate = false, onGoHome }: Props) {
 
   if (open) {
     const place = placeOf(open, collections, setOpen);
-    return <TracePlayer key={open.item.id} item={open.item} plan={open.plan} source={open.source} place={place} xpPerStep={xpOf(open, collections)} onExit={() => setOpen(null)} onAwardXp={onAwardXp} onGoHome={onGoHome} />;
+    return <TracePlayer key={open.item.id} item={open.item} plan={open.plan} source={open.source} place={place} xpPerStep={xpOf(open, collections)} ages={collections.find((c) => c.id === open.source?.collectionId)?.ages} onExit={() => setOpen(null)} onAwardXp={onAwardXp} onGoHome={onGoHome} />;
   }
 
   const entriesOf = (c: (typeof collections)[number]): Entry[] => c.items.map((e) => ({ ...e, source: { collectionId: c.id, rev: c.rev } }));
@@ -124,7 +145,11 @@ export function TracePage({ onAwardXp, canCreate = false, onGoHome }: Props) {
   };
 
   const shelfOf = collections.map((c) => ({ id: c.id, itemIds: c.items.map((e) => e.item.id), c }));
-  const { hero, rows } = homeRows(shelfOf, (id) => TraceProgress.get(id));
+  const { hero: shelfHero, rows } = homeRows(shelfOf, (id) => TraceProgress.get(id));
+  /* The banner is Today's Write pick — the same one Home offers — so a child who
+     tapped it there finds it here. The shelf's own choice is the fallback. */
+  const todayPick = writePickFrom(collections, todayContext);
+  const hero = (todayPick && shelfOf.find((s) => s.id === todayPick.collection.id)) ?? shelfHero;
 
   return (
     <div className="mx-auto flex w-full max-w-6xl flex-col gap-7 pb-10">
@@ -132,15 +157,17 @@ export function TracePage({ onAwardXp, canCreate = false, onGoHome }: Props) {
           tagline is a sentence read once, so the banner leads. With no counts
           to show the header is empty there, and the column's gap is taken
           back so the banner sits at the top instead of under a blank band. */}
-      <header className="flex flex-wrap items-end justify-between gap-3 max-sm:-mb-7">
-        <div className="flex min-w-0 flex-col gap-1">
-          {/* Below `rail:` the app bar already names the page; the heading stays for screen readers. */}
-          <h1 className="sr-only items-center gap-2 text-3xl font-bold text-ink rail:not-sr-only rail:flex">
-            {t("trace.title")}
-          </h1>
-          <p className="hidden text-sm text-muted sm:block">{t("trace.subtitle")}</p>
-        </div>
-      </header>
+      {!embedded && (
+        <header className="flex flex-wrap items-end justify-between gap-3 max-sm:-mb-7">
+          <div className="flex min-w-0 flex-col gap-1">
+            {/* Below `rail:` the app bar already names the page; the heading stays for screen readers. */}
+            <h1 className="sr-only items-center gap-2 text-3xl font-bold text-ink rail:not-sr-only rail:flex">
+              {t("trace.title")}
+            </h1>
+            <p className="hidden text-sm text-muted sm:block">{t("trace.subtitle")}</p>
+          </div>
+        </header>
+      )}
 
       {/* What the learner can already do, as a card they can close — the full
           width of a phone rather than a chip squeezed beside an empty title. */}
@@ -316,20 +343,23 @@ function Banner({ item, picture, others }: { item: TraceItem | null; picture: st
 function Hero({ title, description, cover, picture, tone, entries, onPlay, onBrowse }: { title: string; description: string; cover: TraceItem | null; picture: string | null; tone: string; entries: Entry[]; onPlay(e: Entry): void; onBrowse(): void }) {
   const { t } = useT();
   const p = collectionProgress(entries);
+  /* A check-up due here leads: the banner says so and its button opens that item,
+     as Home's "Warm up" card promised. */
+  const due = entries.find((e) => isRecheckDue(TraceProgress.get(e.item.id)));
   return (
     <section className={`relative grid overflow-hidden rounded-3xl bg-gradient-to-br text-white sm:grid-cols-[minmax(0,3fr)_minmax(0,2fr)] ${tone}`} aria-label={title}>
       <Banner item={cover} picture={picture} others={entries.map((e) => e.item).filter((i) => i.id !== cover?.id)} />
       <div className="relative z-10 flex flex-col gap-3 p-5 pt-1 sm:p-8">
-        <span className="text-xs font-extrabold uppercase tracking-widest text-white/80">{p.all ? t("trace.hero.again") : p.started ? t("trace.hero.carryOn") : t("trace.hero.tryNew")}</span>
+        <span className="text-xs font-extrabold uppercase tracking-widest text-white/80">{due ? t("trace.home.due") : p.all ? t("trace.hero.again") : p.started ? t("trace.hero.carryOn") : t("trace.hero.tryNew")}</span>
         <h2 className="text-3xl font-extrabold leading-tight text-white sm:text-4xl">{title}</h2>
         {description && description !== title && <p className="line-clamp-2 max-w-lg text-sm text-white/85 sm:text-base">{description}</p>}
         <UIProgressBar onColor value={p.done} max={entries.length} label={title} caption={t("trace.shelfProgress", { done: p.done, total: entries.length })} className="max-w-sm" />
         {/* Medium, not large: two large buttons outweighed the title. On a phone
             they share the row half and half rather than wrapping ragged. */}
         <div className="mt-1 grid grid-cols-2 gap-2 sm:flex sm:flex-wrap">
-          {p.next && (
-            <UIButton variant="light" icon={<Play className="fill-current" />} onClick={() => onPlay(p.next)} className="w-full sm:w-auto">
-              {p.all ? t("trace.cover.again") : p.started ? t("trace.action.continue") : t("trace.flow.start")}
+          {(due ?? p.next) && (
+            <UIButton variant="light" icon={<Play className="fill-current" />} onClick={() => onPlay(due ?? p.next!)} className="w-full sm:w-auto">
+              {due ? t("trace.checkUp") : p.all ? t("trace.cover.again") : p.started ? t("trace.action.continue") : t("trace.flow.start")}
             </UIButton>
           )}
           <UIButton variant="glass" icon={<LayoutGrid />} onClick={onBrowse} className={`w-full sm:w-auto ${p.next ? "" : "col-span-2"}`}>

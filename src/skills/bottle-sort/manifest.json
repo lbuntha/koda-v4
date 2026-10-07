@@ -16,6 +16,7 @@
     ],
     "category": "logic-and-planning"
   },
+  "topics": ["logic", "colours", "patterns"],
   "teaches": [
     "pourer",
     "space-maker",

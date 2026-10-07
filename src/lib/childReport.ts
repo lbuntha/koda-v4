@@ -10,6 +10,7 @@ import {
 } from "./learning/mastery";
 import type { ErrorKind } from "./learning/events";
 import { translate } from "./i18n";
+import { isLadderConcept } from "../trace/learning";
 
 /**
  * What one child has learned, read by an adult.
@@ -291,7 +292,10 @@ export async function fetchChildReport(
 ): Promise<ChildReport> {
   const token = await accessToken();
   const profile = await request<ProfileResponse>(`/sync/profile/${learnerId}`, { token, signal });
-  return buildReport(profile.learnerId, profile.concepts ?? [], profile.eventsStored ?? 0);
+  // Writing has its own section on the report (the trace ladder, letter by letter); as one
+  // coarse concept it would read "mastered" after a few good letters, so it is left out here.
+  const concepts = (profile.concepts ?? []).filter((concept) => !isLadderConcept(concept.conceptKey));
+  return buildReport(profile.learnerId, concepts, profile.eventsStored ?? 0);
 }
 
 /**

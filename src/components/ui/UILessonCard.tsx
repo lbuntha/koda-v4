@@ -34,6 +34,8 @@ export interface UILessonCardProps {
   iconName?: string;
   /** `iconTone` from the lesson's metadata. */
   iconTone?: string;
+  /** Drawn in place of the lesson icon — a book or a trace collection on the Today band. */
+  icon?: React.ReactNode;
   tone?: UILessonCardTone;
   actionLabel?: string;
   variant?: UILessonCardVariant;
@@ -104,6 +106,7 @@ export const UILessonCard: React.FC<UILessonCardProps> = ({
   progress,
   iconName,
   iconTone,
+  icon,
   tone = "advance",
   actionLabel,
   variant = "card",
@@ -125,7 +128,7 @@ export const UILessonCard: React.FC<UILessonCardProps> = ({
       } ${className}`}
     >
       <div className={`flex items-center gap-3 shrink-0 ${compact ? "sm:w-full" : "w-full"}`}>
-        <UILessonIcon name={iconName} tone={iconTone} />
+        {icon ?? <UILessonIcon name={iconName} tone={iconTone} />}
         {/* On a phone the row has no room for a chip, and no need of one: the
             same word rides on the subject line below the title. */}
         <span

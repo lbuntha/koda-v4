@@ -17,6 +17,10 @@
       ],
       "category": "operations"
     },
+    "topics": [
+      "numbers",
+      "addition"
+    ],
     "teaches": [
       "count-all",
       "combiner",
@@ -3802,6 +3806,11 @@
       ],
       "category": "logic-and-planning"
     },
+    "topics": [
+      "logic",
+      "colours",
+      "patterns"
+    ],
     "teaches": [
       "pourer",
       "space-maker",
@@ -5459,6 +5468,10 @@
       ],
       "category": "logic"
     },
+    "topics": [
+      "logic",
+      "colours"
+    ],
     "teaches": [
       "neighbor-identifier",
       "color-neighbor-counter",
@@ -7442,6 +7455,10 @@
       ],
       "category": "number-sense"
     },
+    "topics": [
+      "numbers",
+      "counting"
+    ],
     "teaches": [
       "corresponder",
       "counter",
@@ -8876,6 +8893,10 @@
       ],
       "category": "operations"
     },
+    "topics": [
+      "numbers",
+      "division"
+    ],
     "teaches": [
       "equal-sharer",
       "measurer-divider",
@@ -12283,6 +12304,10 @@
       ],
       "category": "fractions"
     },
+    "topics": [
+      "numbers",
+      "fractions"
+    ],
     "teaches": [
       "equal-part-checker",
       "unit-fraction-namer",
@@ -15622,6 +15647,10 @@
       ],
       "category": "operations"
     },
+    "topics": [
+      "numbers",
+      "multiplication"
+    ],
     "teaches": [
       "equal-grouper",
       "equal-group-checker",
@@ -19210,6 +19239,10 @@
       ],
       "category": "spatial-reasoning"
     },
+    "topics": [
+      "logic",
+      "shapes"
+    ],
     "teaches": [
       "visual-scanner",
       "visual-matcher",
@@ -20592,6 +20625,10 @@
       ],
       "category": "operations"
     },
+    "topics": [
+      "numbers",
+      "subtraction"
+    ],
     "teaches": [
       "remover",
       "remainder-counter",

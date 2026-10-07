@@ -29,6 +29,11 @@ def _away_text(away: int, language: str = notify_i18n.BASE) -> str:
     return notify_i18n.phrase(language, "aDay") if away <= 1 else notify_i18n.phrase(language, "days", away)
 
 
+def _titles(marks: list[dict[str, Any]], kind: str) -> list[str]:
+    """The titles of one kind of mark, once each, in the order they happened."""
+    return list(dict.fromkeys(str(m["detail"]["title"]) for m in marks if m["kind"] == kind and (m.get("detail") or {}).get("title")))
+
+
 async def for_family(db: AsyncIOMotorDatabase, family_id: str, user_id: str | None) -> dict[str, Any]:
     at = utc_now()
     # The parent's own clock first — they are the one reading "today" — and the
@@ -52,6 +57,10 @@ async def for_family(db: AsyncIOMotorDatabase, family_id: str, user_id: str | No
         name = learner.get("displayName") or notify_i18n.phrase(language, "yourChild")
         days = await events_repo.practice_days(db, family_id, learner_id)
         rounds, spent_ms = await events_repo.rounds_and_time(db, family_id, learner_id, [today])
+        mix = await events_repo.rounds_by_category(db, family_id, learner_id, [today])
+        # This week's news from Read and Write: letters they can now write, books they finished.
+        week_marks = await progress_marks.for_days(db, family_id, learner_id, sorted(week))
+
         goal = await milestones.goal_for(db, family_id, learner_id)
         away = streaks.days_away(days, today=today)
 
@@ -65,7 +74,9 @@ async def for_family(db: AsyncIOMotorDatabase, family_id: str, user_id: str | No
                     "minutes": round(spent_ms / 60_000),
                     "goal": goal,
                     "goalMet": rounds >= goal,
+                    "mix": mix,
                 },
+                "week": {"canWrite": _titles(week_marks, "can_write"), "booksRead": _titles(week_marks, "book_finished")},
                 "streak": streaks.run_length(days, today=today),
                 "daysAway": away,
                 "daysThisWeek": len(week.intersection(days)),

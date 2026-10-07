@@ -16,6 +16,7 @@
     ],
     "category": "operations"
   },
+  "topics": ["numbers", "addition"],
   "teaches": [
     "count-all",
     "combiner",

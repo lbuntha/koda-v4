@@ -18,10 +18,9 @@ hard-code the wording around it.
 DEFAULT_MENU: list[dict] = [
     {"itemId": "home", "label": "Home", "icon": "art:menu-home", "order": 10},
     {"itemId": "game", "label": "Learn", "icon": "art:menu-learn", "order": 20},
-    # Koda Library — books to read, answer and spell. Everyone who can learn can read.
-    {"itemId": "library", "label": "Library", "icon": "art:menu-library", "order": 22},
-    # Koda Trace — write letters and numbers, draw pictures, stroke by stroke.
-    {"itemId": "trace", "label": "Trace", "icon": "art:menu-trace", "order": 23},
+    # No Library or Trace rows. Books and Write & Draw are categories inside
+    # Learn now, beside the lessons — one place for a child to go rather than
+    # three. `prune_orphans` removes the old rows on the next boot.
     {"itemId": "profile", "label": "Profile", "icon": "art:menu-profile", "order": 25},
     {"itemId": "leaderboard", "label": "Leaderboard", "icon": "art:menu-leaderboard",
      "requires": "learner:read", "order": 26},
@@ -83,8 +82,6 @@ DEFAULT_MENU: list[dict] = [
 LEGACY_ICONS: dict[str, str] = {
     "home": "home",
     "game": "game",
-    "library": "book",
-    "trace": "pencil",
     "profile": "user",
     "leaderboard": "leaderboard",
     "settings": "settings",

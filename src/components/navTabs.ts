@@ -8,12 +8,9 @@
 export type TabId =
   | "home"
   | "game"
-  // Koda Library: books to read, answer and spell. A module, not a skill.
-  | "library"
+  // Learn: Lessons, Books (Koda Library) and Write & Draw (Koda Trace), one tab.
   // Where library books are written and published. content:write, like Art.
   | "library-studio"
-  // Koda Trace: write letters and numbers, draw pictures, stroke by stroke. A module, not a skill.
-  | "trace"
   // Where trace items are made: strokes, steps, tests. content:write, like Library Studio.
   | "trace-studio"
   | "profile"

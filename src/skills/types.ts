@@ -559,6 +559,11 @@ export interface SkillManifest {
   audience: Audience;
   /** Concept keys this skill can take a learner through. */
   teaches?: string[];
+  /**
+   * What the skill is about, from the shared list in `src/lib/topics.ts` —
+   * how a counting skill is linked to counting stories and to tracing numbers.
+   */
+  topics?: string[];
   /** Concept keys a learner should have mastered before starting this skill.
    *  What makes "recommend the next skill" a data question, not a code one. */
   requires?: string[];

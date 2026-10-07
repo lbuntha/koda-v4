@@ -21,6 +21,7 @@ from fastapi import APIRouter, Depends, Query, Response
 from pydantic import Field
 
 from app import audio_store
+from app.ages import clean_ages, require_ages
 from app.deps import AUTHENTICATED, CurrentPrincipal, Db, require
 from app.errors import AppError, Forbidden, NotFound
 from app.khmer_spelling import spelling_units
@@ -29,6 +30,7 @@ from app.models.auth import Principal
 from app.models.common import Model
 from app.repos import library as library_repo
 from app.security import principal_can
+from app.topics import clean_topics
 
 router = APIRouter(prefix="/library", tags=["library"], dependencies=[AUTHENTICATED])
 
@@ -212,6 +214,8 @@ def _clean(passage: dict[str, Any]) -> dict[str, Any]:
         not isinstance(in_quiz, dict) or any(k not in ("opposite", "reading") or not isinstance(v, bool) for k, v in in_quiz.items())
     ):
         raise AppError(400, "invalid_passage", "notesInQuiz takes true or false for opposite and reading.")
+    passage["ages"] = clean_ages(passage.get("ages"))
+    passage["topics"] = clean_topics(passage.get("topics"))
     if passage.get("category") is not None:
         name = clean_category(passage.get("category"))
         if name is None:
@@ -393,6 +397,7 @@ async def publish(book_id: str, db: Db, p: CanWrite) -> BookOut:
     row = await library_repo.get(db, book_id)
     if row is None or not row.get("draft"):
         raise NotFound(f'No draft "{book_id}".', "book_not_found")
+    require_ages(row["draft"].get("ages"))
     verdict = verify_passage(row["draft"], confirmed_split=bool(row.get("confirmedSplit")))
     if not verdict.publishable:
         reasons = verdict.summary()

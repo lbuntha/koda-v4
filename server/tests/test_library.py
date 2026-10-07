@@ -23,6 +23,9 @@ FIXTURES = Path(__file__).parent / "fixtures" / "library"
 MARKET = json.loads((FIXTURES / "starter-market.json").read_text("utf-8"))
 RAINY = json.loads((FIXTURES / "starter-rainy-day.json").read_text("utf-8"))
 MARKET_KM = json.loads((FIXTURES / "starter-market-km.json").read_text("utf-8"))
+# Publishing needs to know who a book is for; the starters are band A.
+for _book in (MARKET, RAINY, MARKET_KM):
+    _book["ages"] = [5, 7]
 
 
 @pytest.fixture(autouse=True)
@@ -611,3 +614,40 @@ def test_a_blank_matching_set_is_reported_as_empty_not_as_repeated():
     p = _with_set({**MATCH_SET, "pairs": [{"left": "", "right": ""}] * 3})
     messages = [c.message for c in verify_passage(p, confirmed_split=True).failures if c.question == "m1"]
     assert messages == ["every pair needs both sides filled in"]
+
+
+async def test_a_book_says_who_it_is_for_before_it_is_published(client, db):
+    dev = await _login(client, db, "dev@example.com", platform_role="developer")
+    book = copy.deepcopy(MARKET)
+
+    # A draft may be saved before its ages are chosen…
+    del book["ages"]
+    saved = await client.put("/library/drafts/no-age", json=_draft(book), headers=dev)
+    assert saved.status_code == 200, saved.text
+    # …but it is not published without them, whatever else is ready.
+    refused = await client.post("/library/drafts/no-age/publish", headers=dev)
+    assert refused.status_code == 422 and refused.json()["error"]["code"] == "missing_ages"
+
+    # Ages are whole years from 4 to 18, youngest first.
+    for bad in ([7, 5], [2, 6], [5, 30], [5], "5-7"):
+        book["ages"] = bad
+        assert (await client.put("/library/drafts/no-age", json=_draft(book), headers=dev)).status_code == 400, bad
+
+    book["ages"] = [6, 8]
+    kept = await client.put("/library/drafts/no-age", json=_draft(book), headers=dev)
+    assert kept.json()["draft"]["ages"] == [6, 8]
+
+
+async def test_a_book_s_topics_come_from_the_shared_list(client, db):
+    dev = await _login(client, db, "dev@example.com", platform_role="developer")
+    book = copy.deepcopy(MARKET)
+
+    book["topics"] = ["food", "money", "food"]
+    kept = await client.put("/library/drafts/topics", json=_draft(book), headers=dev)
+    assert kept.status_code == 200, kept.text
+    # Once each, in the list's order.
+    assert kept.json()["draft"]["topics"] == ["money", "food"]
+
+    book["topics"] = ["dragons"]
+    refused = await client.put("/library/drafts/topics", json=_draft(book), headers=dev)
+    assert refused.status_code == 400 and refused.json()["error"]["code"] == "invalid_topics"

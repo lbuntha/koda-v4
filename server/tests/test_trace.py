@@ -80,7 +80,7 @@ async def test_a_creator_publishes_a_collection_everyone_can_download(client, db
     saved = await client.put("/trace/studio/items/line-1", json={"item": LINE, "plan": PLAN, "tests": PASSED}, headers=dev)
     assert saved.status_code == 200
     assert saved.json()["item"]["id"] == "line-1"
-    col = await client.put("/trace/studio/collections/lines", json={"title": "Lines", "itemIds": ["line-1"]}, headers=dev)
+    col = await client.put("/trace/studio/collections/lines", json={"ages": [6, 8], "title": "Lines", "itemIds": ["line-1"]}, headers=dev)
     assert col.json()["publishedRev"] is None
 
     published = await client.post("/trace/studio/collections/lines/publish", headers=dev)
@@ -100,7 +100,7 @@ async def test_a_creator_publishes_a_collection_everyone_can_download(client, db
 async def test_publish_refuses_an_untested_item_and_says_which(client, db):
     dev = await _login(client, db, "dev@example.com", platform_role="developer")
     await client.put("/trace/studio/items/line-1", json={"item": LINE, "plan": PLAN, "tests": {}}, headers=dev)
-    await client.put("/trace/studio/collections/lines", json={"title": "Lines", "itemIds": ["line-1"]}, headers=dev)
+    await client.put("/trace/studio/collections/lines", json={"ages": [6, 8], "title": "Lines", "itemIds": ["line-1"]}, headers=dev)
     refused = await client.post("/trace/studio/collections/lines/publish", headers=dev)
     assert refused.status_code == 422
     assert "Line" in refused.text
@@ -111,7 +111,7 @@ async def test_publish_refuses_an_untested_item_and_says_which(client, db):
 async def test_republishing_makes_a_new_revision_and_unpublish_takes_it_off_the_shelf(client, db):
     dev = await _login(client, db, "dev@example.com", platform_role="developer")
     await client.put("/trace/studio/items/line-1", json={"item": LINE, "plan": PLAN, "tests": PASSED}, headers=dev)
-    await client.put("/trace/studio/collections/lines", json={"title": "Lines", "itemIds": ["line-1"]}, headers=dev)
+    await client.put("/trace/studio/collections/lines", json={"ages": [6, 8], "title": "Lines", "itemIds": ["line-1"]}, headers=dev)
     await client.post("/trace/studio/collections/lines/publish", headers=dev)
     again = await client.post("/trace/studio/collections/lines/publish", headers=dev)
     assert again.json()["publishedRev"] == 2
@@ -122,7 +122,7 @@ async def test_republishing_makes_a_new_revision_and_unpublish_takes_it_off_the_
 async def test_ids_and_duplicates_are_refused(client, db):
     dev = await _login(client, db, "dev@example.com", platform_role="developer")
     assert (await client.put("/trace/studio/items/Bad_Id", json={"item": LINE, "plan": PLAN}, headers=dev)).status_code == 422
-    dup = await client.put("/trace/studio/collections/c", json={"title": "C", "itemIds": ["a", "a"]}, headers=dev)
+    dup = await client.put("/trace/studio/collections/c", json={"ages": [6, 8], "title": "C", "itemIds": ["a", "a"]}, headers=dev)
     assert dup.status_code == 422
 
 
@@ -159,7 +159,9 @@ async def test_the_chosen_cover_is_the_shelf_cover(client, db):
     await client.put("/trace/studio/items/line-1", json={"item": LINE, "plan": PLAN, "tests": PASSED}, headers=dev)
     await client.put("/trace/studio/items/line-2", json={"item": second, "plan": PLAN, "tests": PASSED}, headers=dev)
     saved = await client.put(
-        "/trace/studio/collections/lines", json={"title": "Lines", "itemIds": ["line-1", "line-2"], "cover": "line-2"}, headers=dev
+        "/trace/studio/collections/lines",
+        json={"ages": [6, 8], "title": "Lines", "itemIds": ["line-1", "line-2"], "cover": "line-2"},
+        headers=dev,
     )
     assert saved.json()["cover"] == "line-2"
     await client.post("/trace/studio/collections/lines/publish", headers=dev)
@@ -167,7 +169,11 @@ async def test_the_chosen_cover_is_the_shelf_cover(client, db):
     assert shelf[0]["cover"]["title"] == "Second"
     # A cover that is not in the collection is dropped.
     assert (
-        await client.put("/trace/studio/collections/lines", json={"title": "Lines", "itemIds": ["line-1"], "cover": "line-2"}, headers=dev)
+        await client.put(
+            "/trace/studio/collections/lines",
+            json={"ages": [6, 8], "title": "Lines", "itemIds": ["line-1"], "cover": "line-2"},
+            headers=dev,
+        )
     ).json()["cover"] is None
 
 
@@ -176,13 +182,13 @@ async def test_a_cover_picture_is_saved_and_published(client, db):
     await client.put("/trace/studio/items/line-1", json={"item": LINE, "plan": PLAN, "tests": PASSED}, headers=dev)
     photo = "photo-" + "a" * 64
     url = "/trace/studio/collections/lines"
-    saved = await client.put(url, json={"title": "Lines", "itemIds": ["line-1"], "picture": photo}, headers=dev)
+    saved = await client.put(url, json={"ages": [6, 8], "title": "Lines", "itemIds": ["line-1"], "picture": photo}, headers=dev)
     assert saved.json()["picture"] == photo
     await client.post("/trace/studio/collections/lines/publish", headers=dev)
     assert (await client.get("/trace/collections", headers=dev)).json()["collections"][0]["picture"] == photo
     assert (await client.get("/trace/collections/lines", headers=dev)).json()["picture"] == photo
     # Only a picture name or a photo key, never markup or a URL.
-    bad = await client.put(url, json={"title": "Lines", "itemIds": ["line-1"], "picture": "https://x/y.png"}, headers=dev)
+    bad = await client.put(url, json={"ages": [6, 8], "title": "Lines", "itemIds": ["line-1"], "picture": "https://x/y.png"}, headers=dev)
     assert bad.status_code == 422
 
 
@@ -191,13 +197,13 @@ async def test_a_collections_xp_per_step_is_saved_and_published(client, db):
     dev = await _login(client, db, "dev@example.com", platform_role="developer")
     await client.put("/trace/studio/items/line-1", json={"item": LINE, "plan": PLAN, "tests": PASSED}, headers=dev)
     url = "/trace/studio/collections/lines"
-    saved = await client.put(url, json={"title": "Lines", "itemIds": ["line-1"], "xpPerStep": 35}, headers=dev)
+    saved = await client.put(url, json={"ages": [6, 8], "title": "Lines", "itemIds": ["line-1"], "xpPerStep": 35}, headers=dev)
     assert saved.json()["xpPerStep"] == 35
     await client.post("/trace/studio/collections/lines/publish", headers=dev)
     assert (await client.get("/trace/collections/lines", headers=dev)).json()["xpPerStep"] == 35
     # Absent means the deployment's XP per level; out of range is refused.
-    assert (await client.put(url, json={"title": "Lines", "itemIds": ["line-1"]}, headers=dev)).json()["xpPerStep"] is None
-    assert (await client.put(url, json={"title": "Lines", "xpPerStep": 9999}, headers=dev)).status_code == 422
+    assert (await client.put(url, json={"ages": [6, 8], "title": "Lines", "itemIds": ["line-1"]}, headers=dev)).json()["xpPerStep"] is None
+    assert (await client.put(url, json={"ages": [6, 8], "title": "Lines", "xpPerStep": 9999}, headers=dev)).status_code == 422
 
 # ------------------------------------------------- creators, review, progress
 
@@ -213,7 +219,7 @@ async def _creator(client, db, email):
 
 async def _ready_collection(client, headers, cid="lines", iid="line-1"):
     await client.put(f"/trace/studio/items/{iid}", json={"item": LINE, "plan": PLAN, "tests": PASSED}, headers=headers)
-    await client.put(f"/trace/studio/collections/{cid}", json={"title": "Lines", "itemIds": [iid]}, headers=headers)
+    await client.put(f"/trace/studio/collections/{cid}", json={"ages": [6, 8], "title": "Lines", "itemIds": [iid]}, headers=headers)
 
 
 async def test_a_creator_sees_and_changes_only_their_own_work(client, db):
@@ -372,3 +378,41 @@ async def test_a_creator_uploads_a_cover_photo_without_being_a_library_author(cl
     # Not a photo at all: refused here as it is in the library.
     fake = base64.b64encode(b"not a picture").decode()
     assert (await client.post("/trace/studio/images", json={"mime": "image/png", "data": fake}, headers=ann)).status_code == 415
+
+
+async def test_a_collection_says_who_it_is_for_before_it_is_published(client, db):
+    dev = await _login(client, db, "dev@example.com", platform_role="developer")
+    await client.put("/trace/studio/items/line-1", json={"item": LINE, "plan": PLAN, "tests": PASSED}, headers=dev)
+    url = "/trace/studio/collections/lines"
+
+    # Saved without ages, it is a draft that cannot go out, and the check says why.
+    saved = await client.put(url, json={"title": "Lines", "itemIds": ["line-1"]}, headers=dev)
+    assert saved.json()["ages"] is None
+    problems = (await client.post(f"{url}/check", headers=dev)).json()["problems"]
+    assert any("grades" in p for pr in problems for p in pr["problems"])
+    assert (await client.post(f"{url}/publish", headers=dev)).status_code == 422
+
+    # A malformed range is refused outright.
+    assert (await client.put(url, json={"title": "Lines", "itemIds": ["line-1"], "ages": [9, 6]}, headers=dev)).status_code == 400
+
+    # With ages it publishes, and the shelf and the bundle carry them.
+    await client.put(url, json={"title": "Lines", "itemIds": ["line-1"], "ages": [6, 8]}, headers=dev)
+    assert (await client.post(f"{url}/publish", headers=dev)).status_code == 200
+    assert (await client.get("/trace/collections", headers=dev)).json()["collections"][0]["ages"] == [6, 8]
+    assert (await client.get("/trace/collections/lines", headers=dev)).json()["ages"] == [6, 8]
+
+
+async def test_a_collection_s_topics_come_from_the_shared_list_and_are_published(client, db):
+    dev = await _login(client, db, "dev@example.com", platform_role="developer")
+    await client.put("/trace/studio/items/line-1", json={"item": LINE, "plan": PLAN, "tests": PASSED}, headers=dev)
+    url = "/trace/studio/collections/lines"
+
+    body = {"title": "Lines", "itemIds": ["line-1"], "ages": [6, 8], "topics": ["shapes", "drawing"]}
+    saved = await client.put(url, json=body, headers=dev)
+    assert saved.json()["topics"] == ["shapes", "drawing"]
+    assert (await client.put(url, json={"title": "Lines", "itemIds": ["line-1"], "topics": ["dragons"]}, headers=dev)).status_code == 400
+
+    await client.put(url, json={"title": "Lines", "itemIds": ["line-1"], "ages": [6, 8], "topics": ["shapes"]}, headers=dev)
+    await client.post(f"{url}/publish", headers=dev)
+    assert (await client.get("/trace/collections", headers=dev)).json()["collections"][0]["topics"] == ["shapes"]
+    assert (await client.get("/trace/collections/lines", headers=dev)).json()["topics"] == ["shapes"]

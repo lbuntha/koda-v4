@@ -44,20 +44,18 @@ describe("badges and labels coming from the menu record", () => {
 describe("splitting a menu into tabs and everywhere else", () => {
   const item = (id: string) => ({ id, label: id, icon: id });
 
-  it("gives a family Home, Learn, Library, Trace and Settings, in that order", () => {
+  it("gives a family Home, Learn and Settings, in that order", () => {
     const { primary, overflow } = splitTabs([
       item("settings"),
-      item("trace"),
       item("children"),
       item("leaderboard"),
-      item("library"),
       item("users"),
       item("game"),
       item("home"),
       item("profile"),
     ]);
 
-    expect(primary.map((i) => i.id)).toEqual(["home", "game", "library", "trace", "settings"]);
+    expect(primary.map((i) => i.id)).toEqual(["home", "game", "settings"]);
     expect(overflow.map((i) => i.id)).toEqual(["children", "leaderboard", "users", "profile"]);
   });
 
@@ -72,15 +70,13 @@ describe("splitting a menu into tabs and everywhere else", () => {
     const { primary, overflow } = splitTabs([
       item("home"),
       item("game"),
-      item("library"),
-      item("trace"),
       item("leaderboard"),
       item("profile"),
       item("settings"),
     ]);
 
-    expect(primary.map((i) => i.id)).toEqual(["home", "game", "library", "trace", "settings"]);
-    expect(primary).toHaveLength(5);
+    expect(primary.map((i) => i.id)).toEqual(["home", "game", "settings"]);
+    expect(primary).toHaveLength(3);
     expect(overflow.map((i) => i.id)).toEqual(["leaderboard", "profile"]);
   });
 

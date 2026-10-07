@@ -39,3 +39,5 @@ export * from "./UISettings";
 export * from "./UIProgressBar";
 export * from "./UIRewardProgress";
 export * from "./UIStepper";
+export * from "./UIAgePicker";
+export * from "./UITopicPicker";

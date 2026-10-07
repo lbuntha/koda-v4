@@ -41,6 +41,33 @@ export const dayOf = (child: ChildOverview): string => {
   return translate("overview.daysAgo", { count: child.daysAway });
 };
 
+/**
+ * Today across Learn's three, when it was more than lessons — "3 lessons · 1 book
+ * · 2 writing". Nothing for a lessons-only day: the line above already says it.
+ */
+export const mixOf = (child: ChildOverview): string | null => {
+  const mix = child.today.mix;
+  if (!mix || (!mix.read && !mix.write)) return null;
+  return [
+    mix.think ? translate("overview.mixLessons", { count: mix.think }) : "",
+    mix.read ? translate("overview.mixBooks", { count: mix.read }) : "",
+    mix.write ? translate("overview.mixWriting", { count: mix.write }) : "",
+  ]
+    .filter(Boolean)
+    .join(" · ");
+};
+
+/** This week's news from Read and Write: the letters they can now write, the books they finished. */
+export const newsOf = (child: ChildOverview): string | null => {
+  const week = child.week;
+  if (!week) return null;
+  const parts = [
+    week.canWrite.length ? translate("overview.canWrite", { items: week.canWrite.join(" ") }) : "",
+    week.booksRead.length ? translate("overview.booksRead", { books: week.booksRead.join(", ") }) : "",
+  ].filter(Boolean);
+  return parts.length ? parts.join(" · ") : null;
+};
+
 const ago = (savedAt: number, now: number): string => {
   const minutes = Math.round((now - savedAt) / 60_000);
   if (minutes < 1) return translate("overview.justNow");
@@ -153,6 +180,8 @@ export const ChildrenOverview: React.FC<{
               <div className="min-w-0">
                 <p className={l.rowTitle}>{child.displayName}</p>
                 <p className={l.rowNote}>{dayOf(child)}</p>
+                {mixOf(child) && <p className={`${l.rowNote} truncate`}>{mixOf(child)}</p>}
+                {newsOf(child) && <p className="truncate text-xs font-semibold text-emerald-700 dark:text-emerald-400">{newsOf(child)}</p>}
               </div>
             </div>
             <div className="flex shrink-0 flex-wrap items-center justify-end gap-x-3 gap-y-1 text-xs font-semibold">

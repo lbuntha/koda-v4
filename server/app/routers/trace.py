@@ -23,6 +23,7 @@ from typing import Annotated, Any
 from fastapi import APIRouter, Depends
 from pydantic import Field
 
+from app.ages import clean_ages, is_age_range
 from app.deps import AUTHENTICATED, CurrentPrincipal, Db, require
 from app.errors import AppError, Forbidden, NotFound
 from app.models.auth import Principal
@@ -31,6 +32,7 @@ from app.repos import trace as trace_repo
 from app.routers.library import AudioSaved, AudioWrite, ImageWrite, store_audio, store_image
 from app.security import principal_can
 from app.services.entitlements import entitlements
+from app.topics import clean_topics
 from app.trace_verify import for_children, item_problems
 
 router = APIRouter(prefix="/trace", tags=["trace"], dependencies=[AUTHENTICATED])
@@ -119,6 +121,10 @@ class CollectionWrite(Model):
     picture: str | None = Field(default=None, max_length=100, pattern=r"^[a-z0-9]+(-[a-z0-9]+)*$")
     # What passing one writing step pays at three stars; the deployment's XP per level when absent.
     xp_per_step: int | None = Field(default=None, alias="xpPerStep", ge=0, le=500)
+    # Who it is for, in years: [min, max]. Optional on a draft, required to publish.
+    ages: list[int] | None = Field(default=None, min_length=2, max_length=2)
+    # What it is about, from the shared list (app/topics.py). Optional.
+    topics: list[str] | None = Field(default=None, max_length=40)
 
 
 class CollectionOut(Model):
@@ -131,6 +137,8 @@ class CollectionOut(Model):
     cover: str | None
     picture: str | None = None
     xpPerStep: int | None = None
+    ages: list[int] | None = None
+    topics: list[str] | None = None
     rev: int
     ownerId: str | None = None
     # "pending" — waiting for an admin to approve it; "rejected" — sent back, with a note.
@@ -170,6 +178,8 @@ def _collection_out(row: dict[str, Any]) -> CollectionOut:
         cover=d.get("cover"),
         picture=d.get("picture"),
         xpPerStep=d.get("xpPerStep"),
+        ages=d.get("ages"),
+        topics=d.get("topics"),
         rev=int(row.get("rev") or 0),
         ownerId=row.get("ownerId"),
         reviewState=(row.get("review") or {}).get("state"),
@@ -201,6 +211,8 @@ async def published_collections(db: Db, _: CanRead) -> dict[str, list[dict[str, 
                 # The chosen item's strokes are the cover (else the first); small, drawn without images.
                 "cover": next((x["item"] for x in items if x["item"].get("id") == b.get("cover")), items[0]["item"] if items else None),
                 "picture": b.get("picture"),
+                "ages": b.get("ages"),
+                "topics": b.get("topics"),
             }
         )
     return {"collections": out}
@@ -284,6 +296,8 @@ async def save_collection(collection_id: str, body: CollectionWrite, db: Db, p: 
         "cover": cover,
         "picture": body.picture,
         "xpPerStep": body.xp_per_step,
+        "ages": clean_ages(body.ages),
+        "topics": clean_topics(body.topics),
     }
     return _collection_out(await trace_repo.save_collection(db, collection_id, draft, p.subject_id))
 
@@ -306,6 +320,8 @@ async def _problems(db: Any, row: dict[str, Any]) -> list[Problem]:
         out.append(Problem(item="", title="", problems=["the collection has no title"]))
     if not ids:
         out.append(Problem(item="", title="", problems=["the collection has no items"]))
+    if not is_age_range(d.get("ages")):
+        out.append(Problem(item="", title="", problems=["choose the grades this collection is for"]))
     found = await trace_repo.get_items(db, ids)
     for i in ids:
         r = found.get(i)
@@ -348,6 +364,8 @@ async def publish(collection_id: str, db: Db, p: CanWrite) -> CollectionOut:
         "cover": d.get("cover"),
         "picture": d.get("picture"),
         "xpPerStep": d.get("xpPerStep"),
+        "ages": d.get("ages"),
+        "topics": d.get("topics"),
         "items": items,
     }
     if not _is_admin(p):

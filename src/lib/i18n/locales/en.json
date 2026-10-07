@@ -47,6 +47,57 @@
     "viewStatistics": "View statistics",
     "viewAchievements": "View achievements"
   },
+  "learnHub": {
+    "categories": "What to do",
+    "subtitle": "Think, read and write — all in one place.",
+    "lessons": "Think",
+    "books": "Read",
+    "trace": "Write",
+    "loading": "Getting it ready"
+  },
+  "ages": {
+    "label": "Who it's for",
+    "preK": "Pre-K",
+    "grade": "Grade {grade}",
+    "summary": "{grades} · ages {from}–{to}",
+    "summaryOne": "{grades} · age {from}",
+    "required": "Pick the grades this is for — it can't be published without them."
+  },
+  "topics": {
+    "label": "Topics",
+    "implied": "Comes with this content — not picked by hand",
+    "note": "Optional. Pick what it is about; letters and numbers it uses are found on their own.",
+    "name": {
+      "numbers": "Numbers",
+      "counting": "Counting",
+      "addition": "Adding",
+      "subtraction": "Taking away",
+      "multiplication": "Times tables",
+      "division": "Sharing",
+      "fractions": "Fractions",
+      "money": "Money",
+      "time": "Time",
+      "measurement": "Measuring",
+      "shapes": "Shapes",
+      "colours": "Colours",
+      "patterns": "Patterns",
+      "logic": "Thinking",
+      "letters": "Letters",
+      "words": "Words",
+      "reading": "Reading",
+      "writing": "Writing",
+      "drawing": "Drawing",
+      "animals": "Animals",
+      "food": "Food",
+      "family": "Family",
+      "nature": "Nature",
+      "school": "School",
+      "places": "Places",
+      "feelings": "Feelings",
+      "health": "Health",
+      "culture": "Culture"
+    }
+  },
   "navBadge": {
     "skills": "Manage",
     "assets": "{art} SVG",
@@ -207,7 +258,19 @@
   "today": {
     "review": "Let's warm up with something you already know!",
     "practise": "One more round to make it stick!",
-    "advance": "Ready for something new?"
+    "advance": "Ready for something new?",
+    "read": {
+      "continue": "Pick up your book where you left off.",
+      "linked": "Goes with {link}, from something you did lately.",
+      "new": "A new story for you."
+    },
+    "write": {
+      "checkUp": "Time for a quick check-up!",
+      "continue": "Keep writing where you stopped.",
+      "linked": "Goes with {link}, from something you did lately.",
+      "new": "Something new to write.",
+      "again": "Write it again to keep it fresh."
+    }
   },
   "lessonCard": {
     "tone": {
@@ -1577,7 +1640,21 @@
     "minAgo": "{count} min ago",
     "hoursAgo": "{count} h ago",
     "dAgo": "{count} d ago",
-    "streak": "{count}-day streak"
+    "streak": "{count}-day streak",
+    "mixLessons": {
+      "one": "{count} lesson",
+      "other": "{count} lessons"
+    },
+    "mixBooks": {
+      "one": "{count} book",
+      "other": "{count} books"
+    },
+    "mixWriting": {
+      "one": "{count} writing",
+      "other": "{count} writing"
+    },
+    "canWrite": "Can now write {items}",
+    "booksRead": "Read {books}"
   },
   "yourLearning": {
     "title": "Your learning",

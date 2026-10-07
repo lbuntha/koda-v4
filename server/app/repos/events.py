@@ -228,6 +228,28 @@ async def practised_on(
     )
 
 
+#: Which of Learn's three a finished round belongs to, by the skill that sent it.
+READ_SKILL = "koda-library"
+WRITE_SKILL = "koda-trace"
+
+
+async def rounds_by_category(
+    db: AsyncIOMotorDatabase, family_id: str, learner_id: str, days: list[str]
+) -> dict[str, int]:
+    """Finished rounds on these days, split into Think (lessons), Read (books) and Write (tracing)."""
+    out = {"think": 0, "read": 0, "write": 0}
+    if not days:
+        return out
+    pipeline = [
+        {"$match": {"familyId": family_id, "learnerId": learner_id, "type": COMPLETED, "localDay": {"$in": days}}},
+        {"$group": {"_id": "$skillId", "n": {"$sum": 1}}},
+    ]
+    async for row in db.events.aggregate(pipeline):
+        key = "read" if row["_id"] == READ_SKILL else "write" if row["_id"] == WRITE_SKILL else "think"
+        out[key] += int(row["n"])
+    return out
+
+
 async def practice_days(
     db: AsyncIOMotorDatabase, family_id: str, learner_id: str, *, limit: int = 400
 ) -> list[str]:

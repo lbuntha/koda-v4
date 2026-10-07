@@ -22,6 +22,8 @@
  *     unlock or break a course.
  */
 
+import { isAgeRange, type AgeRange } from "../../lib/ages";
+
 export type Language = "en" | "km";
 
 /** Two age bands are built for release 1. Band C (11+) needs typed spelling. */
@@ -51,6 +53,10 @@ export const BANDS: Readonly<Record<Band, BandSpec>> = {
   A: { understand: 10, words: 10, spell: 10, ages: [5, 7] },
   B: { understand: 10, words: 10, spell: 10, ages: [8, 10] },
 };
+
+/** A book's audience: its own ages, else its band's, for books published before ages were required. */
+export const bookAges = (book: Pick<Passage, "ages" | "band">): AgeRange =>
+  isAgeRange(book.ages) ? book.ages : (BANDS[book.band] ?? BANDS.A).ages;
 
 /** Publication accepts at least 85% of the requested questions, rounded up. */
 export const QUESTION_MINIMUM_RATIO = 0.85;
@@ -182,6 +188,13 @@ export interface Passage {
   rev: number;
   language: Language;
   band: Band;
+  /**
+   * Who the book is for, in years. Required to publish; books published before
+   * it was have none, and `bookAges` reads their band instead.
+   */
+  ages?: AgeRange;
+  /** What it is about, from the shared list in `src/lib/topics.ts`. See `bookTags`. */
+  topics?: string[];
   /** Per-book question target chosen before generation. */
   questionCounts?: QuestionCounts;
   title: string;

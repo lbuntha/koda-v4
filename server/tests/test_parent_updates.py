@@ -236,7 +236,11 @@ async def test_the_overview_says_each_childs_day_and_gap(client, parent, db, fam
     body = (await client.get("/learners/overview", headers=parent)).json()
 
     children = {child["displayName"]: child for child in body["children"]}
-    assert children["Mia"]["today"] == {"rounds": 2, "minutes": 20, "goal": 5, "goalMet": False}
+    assert children["Mia"]["today"] == {
+        "rounds": 2, "minutes": 20, "goal": 5, "goalMet": False,
+        # Two lessons and nothing from Read or Write.
+        "mix": {"think": 2, "read": 0, "write": 0},
+    }
     assert children["Mia"]["streak"] == 2
     assert children["Mia"]["daysAway"] == 0
     assert children["Leo"]["daysAway"] == 10

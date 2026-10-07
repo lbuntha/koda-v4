@@ -16,6 +16,7 @@
     ],
     "category": "number-sense"
   },
+  "topics": ["numbers", "counting"],
   "teaches": [
     "corresponder",
     "counter",

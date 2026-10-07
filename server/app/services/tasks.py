@@ -789,6 +789,15 @@ async def _progress_suffix(
     tricky, the daily time spent — and, for the week, the lesson to do next."""
     marks = await progress_marks.for_days(db, family_id, learner_id, days)
     parts: list[str] = []
+    # Think, Read and Write, when it was more than lessons: "4 lessons, 1 book and 2 writing items".
+    mix = await events_repo.rounds_by_category(db, family_id, learner_id, days)
+    if mix["read"] or mix["write"]:
+        counted = [
+            notify_i18n.phrase(language, key, mix[part])
+            for part, key in (("think", "lessonsCount"), ("read", "booksCount"), ("write", "writingCount"))
+            if mix[part]
+        ]
+        parts.append(notify_i18n.join_names(counted, language))
     mastered = notify_i18n.join_names(
         [mastery.lesson_name(m["conceptKey"]) for m in marks if m["kind"] == "mastered" and m.get("conceptKey")],
         language,
@@ -799,6 +808,23 @@ async def _progress_suffix(
         [mastery.lesson_name(m["conceptKey"]) for m in marks if m["kind"] == "stuck" and m.get("conceptKey")],
         language,
     )
+    for key, draw in (("canWrite", False), ("canDraw", True)):
+        learned = notify_i18n.join_names(
+            [
+                str(m["detail"].get("title"))
+                for m in marks
+                if m["kind"] == "can_write" and m.get("detail", {}).get("title") and bool(m["detail"].get("draw")) is draw
+            ],
+            language,
+        )
+        if learned:
+            parts.append(notify_i18n.phrase(language, key, items=learned))
+    books = notify_i18n.join_names(
+        [str(m["detail"].get("title")) for m in marks if m["kind"] == "book_finished" and m.get("detail", {}).get("title")],
+        language,
+    )
+    if books:
+        parts.append(notify_i18n.phrase(language, "readBooks", books=books))
     if tricky:
         parts.append(notify_i18n.phrase(language, "tricky", lessons=tricky))
     if any(m["kind"] == "time_limit" for m in marks):
