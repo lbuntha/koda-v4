@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { AnimatePresence, motion } from "motion/react";
-import { GraduationCap, Plus, Shuffle, Trash2 } from "lucide-react";
+import { GraduationCap, Plus, Trash2 } from "lucide-react";
 
 import { ApiError, accessToken, request } from "../../lib/sync";
 import { Personas } from "../../lib/personas";
@@ -10,7 +10,6 @@ import { UIBadge, UIButton, UIDialog, UIModal, UISectionHeader, UIToggle } from 
 import { CharacterAvatar, tintFor } from "./CharacterVisuals";
 import { CharacterPreview } from "./CharacterPreview";
 import { KodaMascot } from "../KodaMascot";
-import { newAvatarSeed } from "../../lib/avatar";
 
 import { translate } from "../../lib/i18n";
 /**
@@ -425,7 +424,7 @@ const CharacterEditor: React.FC<{
             question about how it moves, not how it sits still. */}
         <div className="flex items-center gap-4">
           <motion.div
-            key={value.avatarSeed}
+            key={value.personaId}
             initial={{ scale: 0.85, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
             transition={{ type: "spring", stiffness: 400, damping: 20 }}
@@ -448,17 +447,6 @@ const CharacterEditor: React.FC<{
                 onChange={(e) => set({ name: e.target.value })}
               />
             </label>
-            {/* Rerolling is the whole of face selection: the seed is opaque and
-                the only useful question is "do I like this one". Same system,
-                and the same gesture, as the avatar picker every account uses. */}
-            <UIButton
-              variant="secondary"
-              size="sm"
-              icon={<Shuffle />}
-              onClick={() => set({ avatarSeed: newAvatarSeed() })}
-            >
-              {translate("admin.kodaCharacters.differentFace")}
-            </UIButton>
           </div>
         </div>
 
