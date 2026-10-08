@@ -34,9 +34,6 @@ export type FactStrategy =
 /** The three facts a child is expected to know outright before deriving any other. */
 export const FOUNDATIONAL: readonly FactStrategy[] = ["doubles", "tens", "fives"] as const;
 
-export const isFoundational = (strategy: FactStrategy): boolean =>
-  FOUNDATIONAL.includes(strategy);
-
 /**
  * What turns the helper products into the target product.
  *

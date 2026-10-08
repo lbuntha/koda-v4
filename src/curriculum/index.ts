@@ -177,8 +177,6 @@ export function getLessonByLevel(
   return getCourseLessons(viewer).find((l) => l.levelNumber === levelNumber);
 }
 
-export const totalLessonCount = (viewer?: Viewer): number => getCourseLessons(viewer).length;
-
 /**
  * Whether a lesson is practice rather than teaching.
  *

@@ -1,4 +1,4 @@
-import { randInt, shuffle } from "./multiplicationNumbers";
+import { randInt } from "./multiplicationNumbers";
 
 /**
  * The patterns a times table holds, as data.
@@ -98,6 +98,3 @@ export function noteFor(driver: number): string | undefined {
   return undefined;
 }
 
-/** Four squares from the diagonal, for a round that should not repeat itself. */
-export const squaresUpTo = (ceiling: number): number[] =>
-  shuffle(Array.from({ length: ceiling - 1 }, (_, i) => i + 2));

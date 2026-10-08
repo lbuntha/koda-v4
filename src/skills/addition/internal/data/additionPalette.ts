@@ -68,14 +68,3 @@ export const CHANGE: Role = {
   label: "pink",
 };
 
-/** Neither addend nor answer: a number path's ticks, an untouched block. */
-export const NEUTRAL: Role = {
-  solid: "bg-slate-400",
-  soft: "bg-surface",
-  text: "text-ink",
-  border: "border-line",
-  label: "grey",
-};
-
-/** The two addends, in order, for anything that draws both. */
-export const ADDENDS: readonly [Role, Role] = [ADDEND_A, ADDEND_B];

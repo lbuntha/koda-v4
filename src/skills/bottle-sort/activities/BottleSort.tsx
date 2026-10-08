@@ -170,7 +170,6 @@ export function bottleHints(
 }
 
 export const promptFor = (q: BottleSortQuestion): string => q.prompt ?? "Sort every bottle.";
-export const printedFor = (): null => null;
 
 export const BottleSort: React.FC<ActivityProps<BottleSortParams>> = ({ params, koda, onComplete, lesson }) => {
   const setup = useMemo(() => ({ ...params, ...params.question }), [params]);

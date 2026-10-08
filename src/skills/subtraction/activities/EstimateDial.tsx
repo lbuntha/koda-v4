@@ -147,12 +147,6 @@ export function estimateHints(
   );
 }
 
-export const roundingChoices = (value: number, unit: 10 | 100): number[] => {
-  const down = Math.floor(value / unit) * unit;
-  return shuffle([down, down + unit, roundTo(value, unit) + unit * (roundTo(value, unit) === down ? 2 : -2)]
-    .filter((option, at, all) => option >= 0 && all.indexOf(option) === at));
-};
-
 /**
  * Four distinct estimates, always.
  *

@@ -51,10 +51,6 @@ export const TOPICS = [
 
 export type Topic = (typeof TOPICS)[number];
 
-const TOPIC_SET: ReadonlySet<string> = new Set(TOPICS);
-
-export const isTopic = (value: unknown): value is Topic => typeof value === "string" && TOPIC_SET.has(value);
-
 /** The known topics in `values`, once each, in the list's order. Unknown ones are dropped. */
 export const cleanTopics = (values: readonly unknown[] | null | undefined): Topic[] =>
   TOPICS.filter((topic) => values?.includes(topic));

@@ -74,11 +74,6 @@ const LOCAL: Record<string, string> = {
 </svg>`,
 };
 
-export const hasLocalPicture = (key: string) => key in LOCAL;
-
-/** The house drawing for a key, so the art editor can open it to be redrawn. */
-export const localPicture = (key: string): string => LOCAL[key] ?? "";
-
 /**
  * Every picture key a story may use: the drawings here, and the pictures already
  * in the art library. A drafter is told this list and a word whose picture is not

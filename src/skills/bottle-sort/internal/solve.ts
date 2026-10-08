@@ -63,7 +63,3 @@ export function minimumPours(start: Rack, goal: Goal = UNIFORM): SolveResult {
   return { moves: null, visited };
 }
 
-/** Is there any way to finish from here? */
-export function isSolvable(rack: Rack, goal: Goal = UNIFORM): boolean {
-  return minimumPours(rack, goal).moves !== null;
-}

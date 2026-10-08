@@ -8,13 +8,11 @@
  */
 
 import {
-  WHOLES,
   partWord,
   canPartition,
   drawFraction,
   fractionDistractors,
   fractionKey,
-  partitionsFor,
   randInt,
   shuffle,
   withoutRepeat,
@@ -254,10 +252,6 @@ export const STRIP_REFUSALS: Record<Exclude<StripBlock, null>, string> = {
   "shade-more": "Shade more of them — count how many the question asked for.",
   "shade-fewer": "That is too many. Take one off.",
 };
-
-/** Every whole this engine can draw, for a test that wants to walk them. */
-export const drawableWholes = (kinds: Whole["kind"][]): Whole[] =>
-  WHOLES.filter((w) => kinds.includes(w.kind) && partitionsFor(w).length > 0);
 
 export { canPartition };
 

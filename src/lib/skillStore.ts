@@ -539,19 +539,3 @@ export function useInstalledSkills() {
   return skills;
 }
 
-/**
- * Custom React Hook to observe a single skill reactively
- */
-export function useSkill(skillId: string) {
-  const [skill, setSkill] = useState<InstalledSkill | undefined>(() => SkillStoreAPI.getSkill(skillId));
-
-  useEffect(() => {
-    const handleUpdate = () => setSkill(SkillStoreAPI.getSkill(skillId));
-    skillSubscribers.add(handleUpdate);
-    return () => {
-      skillSubscribers.delete(handleUpdate);
-    };
-  }, [skillId]);
-
-  return skill;
-}

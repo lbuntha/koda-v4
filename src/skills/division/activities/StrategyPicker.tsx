@@ -10,7 +10,7 @@ import {
   useGuide,
   useSkillRound,
 } from "../../kit";
-import { drawQuotient, pick, shuffle, type Quotient } from "../internal/data/divisionNumbers";
+import { drawQuotient, shuffle, type Quotient } from "../internal/data/divisionNumbers";
 
 /**
  * Which route, and why.
@@ -275,7 +275,6 @@ export const StrategyPicker: React.FC<ActivityProps<StrategyParams>> = ({
 
 /** Kept for the worksheet adapter; the picker draws its own routes. */
 export const routeLabel = (id: string): string => ROUTES.find((r) => r.id === id)?.label ?? id;
-export const anyRoute = (): string => pick(ROUTES).id;
 
 /* -------------------------------------------------------------------------- */
 /* On paper                                                                    */

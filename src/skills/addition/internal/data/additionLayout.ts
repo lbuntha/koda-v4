@@ -12,9 +12,6 @@
  * finger stops missing, so nothing here drops below it at any width.
  */
 
-/** A countable thing in a tray: an apple, a bead, a balloon. */
-export const TOKEN = "w-14 h-14 sm:w-20 sm:h-20 lg:w-[88px] lg:h-[88px]";
-
 /** The same object where two groups share the width, as in `count_on`. */
 export const TOKEN_COMPACT = "w-12 h-12 sm:w-14 sm:h-14 lg:w-16 lg:h-16";
 
@@ -35,24 +32,10 @@ export const BLOCK_FLAT = "w-[104px] h-[104px] sm:w-[124px] sm:h-[124px]";
 /** An addend chip in a chain — a number to be tapped, so sized like a button. */
 export const CHIP = "min-w-[3.25rem] h-12 sm:min-w-[3.75rem] sm:h-14 px-3";
 
-/** A digit cell in the place-value chart or the column pad. */
-export const DIGIT_CELL = "w-12 h-12 sm:w-14 sm:h-14";
-
 /** The badge that numbers a counted object, so it cannot be counted twice. */
 export const COUNT_BADGE =
   "absolute -top-1.5 -right-1.5 w-7 h-7 sm:w-9 sm:h-9 rounded-full font-black text-sm sm:text-lg " +
   "tabular-nums flex items-center justify-center shadow-lg ring-[3px] ring-surface";
-
-/**
- * What "held" looks like, for every tap-to-place move in the skill.
- *
- * Tap the source, tap the destination. The state between those two taps is the
- * one thing a child has to be able to see, and it is never colour alone: a ring
- * and a lift, with `aria-pressed` carrying the same fact to a screen reader.
- * Shared because twelve engines showing "held" four different ways is twelve
- * chances to get it wrong once.
- */
-export const HELD = "ring-4 ring-violet-500/70 -translate-y-1 shadow-xl z-10";
 
 /**
  * The ground an addition activity happens on.

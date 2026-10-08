@@ -230,23 +230,6 @@ export function connectToPrevious(stroke: Stroke, prev: Stroke): Stroke {
   return { ...moved, join: "continue" };
 }
 
-/** Connect to Next: this stroke ends where `nextStroke` starts. */
-export function connectToNext(stroke: Stroke, nextStroke: Stroke): Stroke {
-  return moveNode(stroke, stroke.nodes.length - 1, nextStroke.nodes[0]);
-}
-
-/** Resize every node and handle about a centre point. */
-export function scaleStroke(stroke: Stroke, k: number, about: Point = { x: 500, y: 500 }): Stroke {
-  const nodes = stroke.nodes.map((n) => ({
-    ...n,
-    x: about.x + (n.x - about.x) * k,
-    y: about.y + (n.y - about.y) * k,
-    in: n.in ? { dx: n.in.dx * k, dy: n.in.dy * k } : undefined,
-    out: n.out ? { dx: n.out.dx * k, dy: n.out.dy * k } : undefined,
-  }));
-  return withNodes(stroke, nodes);
-}
-
 /* ------------------------------------------------ resize and fit */
 
 export interface Box {

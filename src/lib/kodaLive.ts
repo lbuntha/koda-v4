@@ -69,23 +69,6 @@ export function mascotStateFor(signals: LiveSignals): MascotState {
 }
 
 /**
- * The mouth, from Koda's own volume.
- *
- * This is what makes it lip-sync rather than a loop: the frame is chosen by how
- * loud the model is at this instant, so the mouth is wide on a stressed syllable
- * and nearly shut between words. Three steps, not a continuous scale, because
- * the faces are three drawings — and because two thresholds are something a
- * person can retune by ear, which a curve is not.
- *
- * **Feed this a smoothed level, not the raw meter.** See `EnvelopeFollower`.
- */
-export function mouthForEnergy(energy: number): ExpressionName {
-  if (energy > 0.22) return "talkWide";
-  if (energy > 0.07) return "talkOpen";
-  return "talkClosed";
-}
-
-/**
  * Whether the mouth is in an open beat, and how wide.
  *
  * Simulating the real meter against a speaking voice turned up the opposite

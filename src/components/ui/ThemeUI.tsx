@@ -8,7 +8,6 @@ import {
   CardVariant,
   BadgeVariant,
   FlashType,
-  TypographyVariant,
 } from "../../lib/themeSystem";
 import { UIButtonSpinner } from "./UISpinner";
 import { translate } from "../../lib/i18n";
@@ -261,19 +260,3 @@ export const UIDialog: React.FC<UIDialogProps> = ({
   );
 };
 
-export interface UITypographyProps {
-  variant?: TypographyVariant;
-  children: React.ReactNode;
-  className?: string;
-  as?: React.ElementType;
-}
-
-export const UITypography: React.FC<UITypographyProps> = ({
-  variant = "body" as TypographyVariant,
-  children,
-  className = "",
-  as: Component = "p",
-}) => {
-  const Tag = Component || "p";
-  return <Tag className={themeSystem.typography(variant, className)}>{children}</Tag>;
-};

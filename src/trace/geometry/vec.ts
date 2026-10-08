@@ -1,6 +1,5 @@
 import type { Point } from "./types";
 
-export const pt = (x: number, y: number): Point => ({ x, y });
 export const add = (a: Point, b: Point): Point => ({ x: a.x + b.x, y: a.y + b.y });
 export const sub = (a: Point, b: Point): Point => ({ x: a.x - b.x, y: a.y - b.y });
 export const scale = (a: Point, k: number): Point => ({ x: a.x * k, y: a.y * k });

@@ -141,8 +141,6 @@ export function pagePicture(page: readonly Pick<SetSentence, "sentence" | "token
   return { key: null, how: "auto", at };
 }
 
-export const pictureOf = (page: readonly SetSentence[], book: Pick<Passage, "pictures">): string | null => pagePicture(page, book).key;
-
 /**
  * Change one page's picture choice. `picture`: a key to choose one, null for
  * none, undefined for automatic; `at`: where it sits. Whatever the patch leaves

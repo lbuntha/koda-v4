@@ -122,6 +122,3 @@ export function isEnabledHere(p: Skill): boolean {
 export const visibleSkills = (viewer: Viewer): Skill[] =>
   SKILLS.filter((p) => visibleTo(p, viewer));
 
-/** All lessons from all visible skills, in registry order. */
-export const allLessons = (viewer: Viewer): Lesson[] =>
-  visibleSkills(viewer).flatMap((p) => p.lessons);

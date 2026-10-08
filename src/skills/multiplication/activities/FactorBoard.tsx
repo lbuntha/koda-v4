@@ -74,8 +74,6 @@ const CANDIDATES = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
  */
 const DIVISOR_CANDIDATES = CANDIDATES.filter((n) => n > 1);
 
-export const FACTOR_MAX = 100;
-
 interface FactorSetup {
   mode?: FactorMode;
   modes?: string[];

@@ -83,8 +83,3 @@ export function withCheckpoints(stroke: Stroke): Stroke {
   return { ...stroke, checkpoints };
 }
 
-/** Where a checkpoint sits on the canvas. */
-export function checkpointPoint(stroke: Stroke, t: number) {
-  const tr = track(strokePolyline(stroke, 0.25));
-  return pointAt(tr, t * tr.length);
-}

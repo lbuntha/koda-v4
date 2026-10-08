@@ -25,9 +25,6 @@ export const MULTIPLICATION_SOUND = {
 
 export type MultiplicationSound = keyof typeof MULTIPLICATION_SOUND;
 
-/** `levelup` is the round-complete fanfare and belongs to the shared chrome. */
-export const CHROME_ONLY: SoundType[] = ["levelup"];
-
 /** Play what just happened. `playChrome` owns the `sound_chimes` gate. */
 export const chime = (koda: KodaSDK, sound: MultiplicationSound): void =>
   playChrome(koda, MULTIPLICATION_SOUND[sound]);

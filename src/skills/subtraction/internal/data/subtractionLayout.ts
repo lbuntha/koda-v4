@@ -8,7 +8,6 @@
 
 export const TOUCH_TARGET = "min-w-11 min-h-11";
 
-export const TOKEN = "w-14 h-14 sm:w-20 sm:h-20 lg:w-[88px] lg:h-[88px]";
 export const TOKEN_COMPACT = "w-12 h-12 sm:w-14 sm:h-14 lg:w-16 lg:h-16";
 export const FRAME_CELL = "h-14 sm:h-16 lg:h-20";
 export const BOND_NODE = "min-w-16 min-h-14 sm:min-w-20 sm:min-h-16";

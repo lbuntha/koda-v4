@@ -226,15 +226,3 @@ export function kodaFace(seed: string, expression: KodaExpression, shapeColor: s
   return uri;
 }
 
-/**
- * Every frame a state will ever need, rendered ahead of time.
- *
- * Called when a mascot mounts, so the first blink is not the first time the
- * browser has seen that image — a face that pops on its opening frame undoes
- * the whole effect.
- */
-export function warmFaces(seed: string, shapeColor: string): void {
-  for (const animation of Object.values(STATE_ANIMATION)) {
-    for (const frame of animation.frames) kodaFace(seed, EXPRESSIONS[frame], shapeColor);
-  }
-}

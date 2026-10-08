@@ -91,7 +91,6 @@ export function predictHints(question: PredictQuestion, kidTip?: string): string
 }
 
 export const promptFor = (q: PredictQuestion): string => q.prompt ?? "Which rack comes next?";
-export const printedFor = (): null => null;
 
 /**
  * Geometry for a small, still bottle. The sorter's is animated and stateful,

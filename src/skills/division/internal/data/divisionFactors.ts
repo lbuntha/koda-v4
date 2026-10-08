@@ -9,7 +9,7 @@
  * applied to the wrong number a year later.
  */
 
-import { pick, shuffle } from "./divisionNumbers";
+import { pick } from "./divisionNumbers";
 
 export type FactorMode =
   /** 2, 5 and 10 — decided by the last digit. */
@@ -258,6 +258,3 @@ export function buildFactorQuestion(
   };
 }
 
-/** Candidate divisors in an order a child cannot learn. */
-export const shuffledCandidates = (question: FactorQuestion): number[] =>
-  shuffle(question.candidates);

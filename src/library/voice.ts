@@ -127,10 +127,6 @@ async function playRecording(clipId: string, onTime?: (elapsedMs: number | null,
 export const sentenceSpeaks = (book: Pick<Passage, "language">, s: Pick<Sentence, "audio">): boolean =>
   !!s.audio || (isVoiceEnabled() && canSpeak(book.language));
 
-/** Whether a book has anything that can be read aloud, for "Read to me". */
-export const bookSpeaks = (book: Pick<Passage, "language" | "sentences">): boolean =>
-  book.sentences.some((s) => sentenceSpeaks(book, s));
-
 /**
  * Say `text`. A book's own recording comes first when `clipId` is given; then the
  * voices below. Resolves when it has been said, or at once if it will not be.

@@ -224,10 +224,6 @@ export const withArticle = (parts: number): string => {
   return `${/^[aeiou]/i.test(word) ? "an" : "a"} ${word}`;
 };
 
-/** "three quarters", for a fraction read aloud rather than written. */
-export const spokenFraction = (taken: number, parts: number): string =>
-  `${taken} ${partWord(parts, taken !== 1)}`;
-
 /* -------------------------------------------------------------------------- */
 /* A fraction                                                                  */
 /* -------------------------------------------------------------------------- */

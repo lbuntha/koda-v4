@@ -44,10 +44,3 @@ export const COMPARISON: Role = {
   label: "blue",
 };
 
-export const NEUTRAL: Role = {
-  solid: "bg-slate-400",
-  soft: "bg-surface",
-  text: "text-ink",
-  border: "border-line",
-  label: "grey",
-};

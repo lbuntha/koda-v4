@@ -12,7 +12,7 @@ import { speechRate, tagLabelsFrom } from "../internal/data/subtractionChrome";
 import { useNudge } from "../internal/ui/useNudge";
 import { chime } from "../internal/data/subtractionSound";
 import {
-  differenceKey, digitsOf, drawDifference, exchangesIn, withoutRepeat,
+  differenceKey, digitsOf, drawDifference, withoutRepeat,
   type Difference, type DifferenceSpec,
 } from "../internal/data/subtractionNumbers";
 
@@ -371,5 +371,3 @@ export const ColumnPad: React.FC<ActivityProps<ColumnPadParams>> = ({ params, ko
   </SkillRound>;
 };
 
-/** Exported for the exchange test: the shape `exchangesIn` says a question needs. */
-export const requiredExchanges = (q: ColumnQuestion): number => exchangesIn(q.minuend, q.subtrahend).length;

@@ -116,5 +116,3 @@ export const getConceptMastery = (conceptKey: string): ConceptMastery => {
 export const getAllMastery = (): ConceptMastery[] =>
   Object.values(LearningLog.profile().concepts).map(masteryFrom);
 
-export const isMastered = (conceptKey: string): boolean =>
-  getConceptMastery(conceptKey).status === "mastered";

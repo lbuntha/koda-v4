@@ -121,13 +121,6 @@ export const OBJECT_CATALOG: ObservationObject[] = Object.entries(PACKS).flatMap
 
 export const OBJECT_BY_ID = new Map(OBJECT_CATALOG.map((object) => [object.id, object]));
 
-export const BEACH_OBJECT_IDS = PACKS.beach.map((name) => `beach-${slug(name)}`);
-
 /** The character swarm rounds hide many times over. */
 export const SWARM_OBJECT_ID = "castle-frog";
 
-/** Objects grouped by what they are, for category rounds. */
-export const OBJECTS_BY_CATEGORY = OBJECT_CATALOG.reduce<Record<string, string[]>>((all, object) => {
-  if (object.category) all[object.category] = [...(all[object.category] ?? []), object.id];
-  return all;
-}, {});

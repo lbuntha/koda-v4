@@ -134,12 +134,6 @@ export function photoUrl(key: string): Promise<string | null> {
   return job;
 }
 
-/** Whether a photo is already on this device — in hand, or saved from a past visit. */
-export async function photoSaved(key: string): Promise<boolean> {
-  const id = photoId(key);
-  return urls.has(id) || (await fromCache(id)) !== null;
-}
-
 /** Stored byte sizes for uploaded book photos; built-in drawings have no per-book download size. */
 export async function photoSizes(keys: string[]): Promise<Record<string, number>> {
   const out: Record<string, number> = {};

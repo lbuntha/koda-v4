@@ -147,11 +147,6 @@ export function clipUrl(id: string): Promise<string | null> {
   return job;
 }
 
-/** Whether a clip is already on this device — in hand, or saved from a past visit. */
-export async function clipSaved(id: string): Promise<boolean> {
-  return urls.has(id) || (await fromCache(id)) !== null;
-}
-
 /** Every recording a book points at. */
 export const clipsOf = (p: Pick<Passage, "sentences" | "wordAudio">): string[] =>
   [...new Set([...p.sentences.map((s) => s.audio).filter((x): x is string => !!x), ...Object.values(p.wordAudio ?? {})])];

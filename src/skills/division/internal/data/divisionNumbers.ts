@@ -104,8 +104,6 @@ export type Meaning = "share" | "group";
 export const digitsOf = (n: number): number[] =>
   String(Math.abs(n)).split("").map(Number);
 
-export const digitCount = (n: number): number => String(Math.abs(n)).length;
-
 /**
  * A zero with a digit on both sides of it — 103, 4052.
  *

@@ -10,7 +10,6 @@
 
 export const TOUCH_TARGET = "min-w-11 min-h-11";
 
-export const TOKEN = "w-12 h-12 sm:w-16 sm:h-16 lg:w-20 lg:h-20";
 export const TOKEN_COMPACT = "w-9 h-9 sm:w-12 sm:h-12 lg:w-14 lg:h-14";
 export const DIGIT_CELL = "w-12 h-12 sm:w-14 sm:h-14";
 
@@ -87,12 +86,6 @@ export const WORD_CHOICE =
   "min-h-11 rounded-2xl border-2 px-4 py-3 text-base font-bold text-ink " +
   "text-center focus:outline-none focus-visible:ring-2 focus-visible:ring-sky-500";
 
-/** Held is ring + lift, never colour alone. Pair with `aria-pressed`. */
-export const HELD = "ring-4 ring-violet-500/70 -translate-y-1 shadow-xl z-10";
-
-/** A selected cell in a pattern hunt: ring + inset, so selection survives colour blindness. */
-export const SELECTED = "ring-4 ring-emerald-500/70 ring-inset font-black";
-
 /** The number line's hop arc. */
 export const HOP_ARC = "stroke-[3] fill-none";
 
@@ -122,18 +115,8 @@ export const HOP_LINE = {
  */
 export const HOP_LABEL_LIMIT = 12;
 
-/**
- * The area model's frame.
- *
- * Its parts are not drawn to true scale — 23 × 46 cannot be at this width — so
- * every part carries its own label and no part is ever allowed to collapse
- * below a readable minimum.
- */
-export const AREA_FRAME = "w-full max-w-md aspect-[4/3] rounded-xl";
-export const AREA_PART_MIN = "min-w-12 min-h-12";
 
 export const SCENE = "rounded-[2rem] bg-gradient-to-b from-play-sky to-play-ground";
-export const ZONE = "rounded-3xl px-4 py-3";
 
 /**
  * A factor tile, and the small numbers a child tries against one.

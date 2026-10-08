@@ -75,8 +75,6 @@ export interface RackSpec {
 export const isBottleDone = (b: Bottle): boolean =>
   b.seg.length === 0 || (b.seg.length === b.cap && b.seg.every((c) => c === b.seg[0]));
 
-export const isSolved = (rack: Rack): boolean => rack.every(isBottleDone);
-
 /** The run of one colour at the pourable end. */
 export function topRun(b: Bottle): { colour: number; n: number } {
   if (!b.seg.length) return { colour: -1, n: 0 };

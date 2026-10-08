@@ -180,7 +180,6 @@ export const MATCH_MAX_QUESTIONS = 5;
 export type Question = ComprehensionQuestion | VocabQuestion | SpellQuestion | MatchQuestion;
 /** The question kinds that are answered by picking one of three choices. */
 export type ChoiceQuestion = ComprehensionQuestion | VocabQuestion;
-export const isChoice = (q: Question): q is ChoiceQuestion => q.kind === "comprehension" || q.kind === "vocab";
 
 export interface Passage {
   id: string;

@@ -231,10 +231,6 @@ export const DIGIT_REFUSALS: Record<Exclude<DigitVerdict, "ok">, string> = {
   "too-small": "Another whole one still fits there. Try a bigger digit.",
 };
 
-/** What the child is dividing into at place `i`, given the carries so far. */
-export const workingAt = (question: ColumnQuestion, index: number): number =>
-  question.steps[index]?.working ?? 0;
-
 /** Confirms the built answer is the one the question wanted. */
 export const answerMatches = (
   question: ColumnQuestion,

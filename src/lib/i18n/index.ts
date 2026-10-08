@@ -162,10 +162,6 @@ export function currentLanguage(): string {
   return matchLanguage(device) ?? BASE_LANGUAGE;
 }
 
-export function languageMeta(code = currentLanguage()): LanguageMeta | undefined {
-  return languages.get(code);
-}
-
 /** The chain a key is looked up along: chosen, its fallbacks, English. */
 const chainFor = (code: string): string[] => {
   const chain: string[] = [];

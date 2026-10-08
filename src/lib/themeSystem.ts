@@ -16,7 +16,6 @@ export type FlashType = "info" | "success" | "warning" | "error";
 export type TypographyVariant = "h1" | "h2" | "h3" | "h4" | "body" | "body-sm" | "caption" | "subtitle";
 export type StatTone = "primary" | "streak" | "success" | "danger";
 export type SurfaceVariant = "default" | "glass" | "bordered" | "interactive";
-export type FeatureVariant = "default" | "accent" | "subtle";
 /**
  * `premium` is a lock a grown-up can open, `locked` is one only work opens.
  *
@@ -388,102 +387,6 @@ export const themeSystem = {
       })[tone],
   },
 
-  /* Hero/feature card: an eyebrow row, a title, a highlighted note, meta chips,
-     and one primary action. */
-  featureCard: {
-    card: (variant: FeatureVariant = "default", className: string = "") => {
-      const base = "relative overflow-hidden rounded-2xl p-4 sm:p-5 border-2 transition";
-      const variants = {
-        default: "bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800",
-        accent:
-          "bg-indigo-50 dark:bg-indigo-950/40 border-indigo-200 dark:border-indigo-800/60",
-        subtle:
-          "bg-slate-50 dark:bg-slate-900/60 border-slate-200 dark:border-slate-800/80",
-      };
-      return `${base} ${variants[variant]} ${className}`;
-    },
-    body: "relative z-10 flex flex-col md:flex-row items-center justify-between gap-4",
-    icon: "w-9 h-9 rounded-xl bg-indigo-100 dark:bg-indigo-600/20 border-2 border-indigo-200 dark:border-indigo-500/40 flex items-center justify-center text-indigo-600 dark:text-indigo-400 shrink-0 [&>svg]:w-4 [&>svg]:h-4",
-    eyebrow:
-      "bg-slate-100 dark:bg-slate-800 text-indigo-600 dark:text-indigo-300 font-mono font-black text-xs px-3 py-1.5 rounded-xl border-2 border-slate-200 dark:border-slate-700 uppercase tracking-wider",
-    title:
-      "text-2xl sm:text-3xl font-black tracking-tight leading-tight text-slate-900 dark:text-white",
-    note: "flex items-start gap-2.5 bg-slate-50 dark:bg-slate-800/40 p-3 rounded-2xl border-2 border-slate-200 dark:border-slate-700/60 text-slate-700 dark:text-slate-200 text-xs sm:text-sm max-w-xl font-medium",
-    noteStrong: "text-slate-900 dark:text-white font-mono",
-    metaRow: "flex flex-wrap items-center justify-center md:justify-start gap-3 pt-0.5",
-    metaLead: "text-indigo-700 dark:text-indigo-400 font-mono text-xs font-black uppercase tracking-wider",
-    metaItem:
-      "flex items-center gap-1.5 text-slate-600 dark:text-slate-300 text-xs font-mono font-bold [&>svg]:w-3.5 [&>svg]:h-3.5 [&>svg]:shrink-0",
-    metaDot: "text-slate-500 dark:text-slate-400",
-    action:
-      "w-full md:w-auto shrink-0 px-6 py-3 rounded-2xl bg-indigo-600 hover:bg-indigo-500 text-white font-black text-sm font-mono uppercase tracking-wider border-2 border-b-4 border-indigo-700 active:border-b-2 active:translate-y-0.5 transition-all duration-100 flex items-center justify-center gap-2 cursor-pointer group",
-  },
-
-  /* Stepping-stone node on the learning path. Laid out on a grid rather than a
-     winding column — the offsets left most of the card empty and the alignment
-     read as accidental. */
-  pathNode: {
-    /* `pt-16` is the start bubble's clearance — it floats above its node, so
-       the grid has to reserve the room or the first row clips it. */
-    grid: "grid grid-cols-2 sm:grid-cols-4 gap-4 pt-16",
-    /* `min-w-0` so a long lesson title wraps inside its column instead of
-       pushing the grid wide — the path sits in a half-width card on Home. */
-    item: "flex min-w-0 flex-col items-center gap-2 text-center",
-
-    circle: (state: PathNodeState = "available") => {
-      /* Same pressable geometry as the buttons: a 4px darker underside that
-         compresses on tap. Locked nodes are flat grey and do not move. */
-      const base =
-        "relative w-16 h-16 sm:w-20 sm:h-20 rounded-full flex items-center justify-center transition-all duration-100 border-2 border-b-4";
-      const press = "active:border-b-2 active:translate-y-0.5 cursor-pointer";
-      const states = {
-        completed: `bg-indigo-400 dark:bg-indigo-600 hover:bg-indigo-300 dark:hover:bg-indigo-500 text-white border-indigo-600 dark:border-indigo-900 ${press}`,
-        /* The one node the learner is meant to hit, so it carries a halo as
-           well as the bubble above it — findable in a peripheral glance down a
-           long path. */
-        current: `bg-indigo-600 dark:bg-indigo-500 hover:bg-indigo-500 dark:hover:bg-indigo-400 text-white border-indigo-800 dark:border-indigo-800 ring-4 ring-indigo-500/20 dark:ring-indigo-400/25 ${press}`,
-        available: `bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700 text-slate-400 dark:text-slate-300 border-slate-300 dark:border-slate-900 ${press}`,
-        locked:
-          "bg-slate-200 dark:bg-slate-800 text-slate-400 dark:text-slate-500 border-slate-300 dark:border-slate-700 cursor-not-allowed",
-        /* Pressable, unlike `locked`: the tap is the whole point — it is what
-           tells a family what the lesson is behind. Violet rather than the
-           indigo the open states use, so the difference is visible at a glance
-           down a path and not only on the icon inside. */
-        premium: `bg-violet-100 dark:bg-violet-950/60 text-violet-600 dark:text-violet-300 border-violet-300 dark:border-violet-800 hover:bg-violet-200 dark:hover:bg-violet-900/60 ${press}`,
-      };
-      return `${base} ${states[state]}`;
-    },
-
-    starBadge:
-      "absolute -top-1 -right-1 bg-amber-400 text-slate-900 font-black text-[10px] w-5 h-5 rounded-full flex items-center justify-center border-2 border-amber-600",
-    /* Duolingo floats the call-to-action above the node as a speech bubble.
-       Sized as a real button rather than a chip: it is the one thing on the
-       path a child is meant to hit, so it gets a full tap target. Any change
-       to its height has to move `-top-14` and the containers' `pt-16` with it
-       — `UISkillPath` and `pathNode.grid` both reserve that room. */
-    startBadge:
-      "absolute -top-14 bg-white dark:bg-slate-800 text-indigo-600 dark:text-indigo-300 font-black text-xs px-4 py-2 rounded-xl uppercase tracking-wider font-mono border-2 border-b-4 border-slate-200 dark:border-slate-600 whitespace-nowrap koda-bob",
-    /* The bubble's tail: a square rotated 45deg with only its two outward
-       edges bordered, so it inherits the bubble's outline and fill instead of
-       needing a second stacked triangle. */
-    startTail:
-      "absolute left-1/2 -bottom-[7px] -translate-x-1/2 rotate-45 w-3 h-3 rounded-br-[3px] bg-white dark:bg-slate-800 border-r-2 border-b-2 border-slate-200 dark:border-slate-600",
-
-    title: (state: PathNodeState = "available") => {
-      const base = "text-xs font-black font-mono block leading-tight";
-      const states = {
-        completed: "text-slate-700 dark:text-slate-200",
-        current: "text-indigo-700 dark:text-indigo-300",
-        available: "text-slate-700 dark:text-slate-300",
-        locked: "text-slate-500 dark:text-slate-400",
-        premium: "text-violet-700 dark:text-violet-300",
-      };
-      return `${base} ${states[state]}`;
-    },
-
-    subtitle: "text-[10px] text-slate-500 dark:text-slate-400 hidden sm:block truncate",
-  },
-
   sectionHeader: {
     wrap: "flex items-center justify-between gap-4",
     title:
@@ -491,19 +394,6 @@ export const themeSystem = {
     eyebrowIcon:
       "text-indigo-500 dark:text-indigo-400 [&>svg]:w-5 [&>svg]:h-5 sm:[&>svg]:w-6 sm:[&>svg]:h-6",
     subtitle: "text-xs sm:text-sm text-slate-600 dark:text-indigo-200/70 font-medium",
-  },
-
-  /* Unit grouping on the learning path. The original used one-off hex purples;
-     these map onto the brand indigo scale so both themes resolve. */
-  unitBanner: {
-    card: "bg-white dark:bg-slate-900 rounded-2xl p-4 sm:p-5 border-2 border-slate-200 dark:border-slate-800 relative overflow-hidden",
-    banner:
-      "rounded-2xl bg-indigo-600 dark:bg-indigo-900 p-3 sm:p-4 flex items-center justify-between gap-3 mb-4 border-2 border-b-4 border-indigo-700 dark:border-indigo-950",
-    icon: "text-2xl sm:text-3xl shrink-0",
-    title: "text-sm sm:text-base font-black uppercase tracking-wide text-white dark:text-indigo-50",
-    description: "text-xs sm:text-[13px] text-indigo-100 dark:text-indigo-200/90 font-bold",
-    badge:
-      "bg-indigo-500 dark:bg-indigo-800 text-white border-2 border-b-4 border-indigo-700 dark:border-indigo-950 px-3 py-1.5 rounded-xl text-xs font-mono font-black uppercase tracking-wider whitespace-nowrap",
   },
 
   /* Feedback shown to a learner. Large type and a big single action, because
