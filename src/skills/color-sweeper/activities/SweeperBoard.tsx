@@ -1,9 +1,10 @@
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import type { ActivityProps, PrintedQuestion } from "../../types";
 import { SkillRound, composeHints, isPractice, modeAt, playCopy, useSkillRound, type RoundQuestion } from "../../kit";
-import type { Assignment, Board, Color } from "../internal/board";
+import { scopeOf, type Assignment, type Board, type Color } from "../internal/board";
 import { isSolution } from "../internal/validation";
 import { deduce } from "../internal/deduction";
+import { clueName } from "../internal/reasons";
 import { BoardGrid, tileLabel } from "../internal/BoardGrid";
 import { PALETTE } from "../internal/palette";
 import { BOARD_MODES, generatePuzzle, type BoardMode, type PatternKind } from "../internal/puzzles";
@@ -224,7 +225,8 @@ export function nextStep(
   const [evidence] = step.evidence;
   const clue = board.clues.find((c) => c.id === evidence.clueId)!;
   const colour = PALETTE[step.color].name.toLowerCase();
-  const name = `Look at the ${colour} ${clue.count} at ${where(board, clue.cell)}.`;
+  // Named by what it counts: a line or board-total clue has no tile of its own.
+  const name = `Look at ${clueName(board, clue)}.`;
   const first = step.changes[0] ? where(board, step.changes[0].cell) : "the next open tile";
   const worked =
     step.rule === "zero"
@@ -412,7 +414,7 @@ export const SweeperBoard: React.FC<ActivityProps<SweeperParams>> = ({ params, k
       message: correct
         ? "Each tile has a reason, and all the clues agree."
         : clue
-          ? `Count around the ${PALETTE[clue.color].name.toLowerCase()} ${clue.count} at ${where(board, clue.cell)} and compare it with what it says.`
+          ? `${scopeOf(clue).kind === "neighborhood" ? "Count around" : "Recount"} ${clueName(board, clue)} and compare it with what it says.`
           : "Check each clue against the tiles it touches.",
     });
   };

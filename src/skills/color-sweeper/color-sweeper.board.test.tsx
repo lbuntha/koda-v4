@@ -72,7 +72,7 @@ describe("colouring a board", () => {
     const [q] = roundOf(params, 1);
     const clue = q.board.clues[0];
     const h = renderActivity(board, { params });
-    const name = tileLabel(q.board, clue.cell, undefined, q.board.givens);
+    const name = tileLabel(q.board, clue.cell!, undefined, q.board.givens);
     expect(h.buttons(), "a clue tile is pressable").not.toContain(name);
     expect(h.screen.getByRole("img", { name })).toBeTruthy();
     for (const cell of q.blanks) {
@@ -150,7 +150,7 @@ describe("hints come off the board as it stands", () => {
       const applied = deduce(q.board, q.board.givens).steps[0];
       const clue = q.board.clues.find((c) => c.id === applied.evidence[0].clueId)!;
       expect(step!.name).toContain(String(clue.count));
-      expect(step!.name).toContain(PALETTE[clue.color].name.toLowerCase());
+      expect(step!.name).toContain(PALETTE[clue.color!].name.toLowerCase());
     }
   });
 
@@ -295,7 +295,7 @@ describe("levels 13-16 need the reduction they are named after", () => {
 
   it("the pattern lessons ship a wall that reads like the pattern and settles differently", () => {
     const wall = (q: ReturnType<typeof buildQuestion>) => q.board.clues
-      .slice().sort((a, b) => a.cell - b.cell).map((c) => c.count).join("-");
+      .slice().sort((a, b) => a.cell! - b.cell!).map((c) => c.count).join("-");
     for (const id of ["the-one-two-one", "the-one-two-two-one"]) {
       const walls = boardsOf(id).map(wall);
       expect(walls, `${id} never shows a 1-2-1`).toContain("1-2-1");
@@ -318,7 +318,7 @@ describe("levels 13-16 need the reduction they are named after", () => {
         expect(clue.countedColor, "a pattern clue must count the other colour").not.toBe(clue.color);
         /* And a reader has to be told, or the wall is three orange tiles with
            numbers on and nothing saying what they count. */
-        expect(tileLabel(q.board, clue.cell)).toContain(
+        expect(tileLabel(q.board, clue.cell!)).toContain(
           `clue counting ${PALETTE[clue.countedColor!].name.toLowerCase()}`,
         );
       }
@@ -547,4 +547,31 @@ describe("levels 23-26", () => {
       expect(enumerateSolutions(q.board).status).toBe("unique");
     }
   });
+});
+
+describe("boards whose clues sit beside the grid", () => {
+  /* A line, region or board-total clue has no tile and no colour of its own,
+     so anything that names a clue has to name it by what it counts. */
+  for (const mode of ["line", "region", "global"]) {
+    it(`${mode}: the next-step hint names the clue it reads`, () => {
+      for (const q of roundOf({ mode }, 3)) {
+        const step = nextStep(q.board, q.board.givens.map((c) => c ?? null) as never);
+        if (!step) continue;
+        expect(step.name).not.toMatch(/NaN|undefined/);
+      }
+    });
+
+    it(`${mode}: a wrong board says which clue to recount`, async () => {
+      const [q] = roundOf({ mode }, 1);
+      const right = solutionOf(q);
+      const wrong = right.map((c) => q.board.palette.find((other) => other !== c)!) as Color[];
+      const h = renderActivity(board, { params: { mode, questionsPerRound: 1 } });
+      await paint(h, q, wrong);
+      await h.press(/^Check$/);
+      expect(h.text()).toMatch(/One clue is not true yet/);
+      expect(h.text()).toMatch(/(Count around|Recount) .+ and compare it with what it says|Check each clue/);
+      expect(h.text()).not.toMatch(/NaN|undefined/);
+      h.unmount();
+    });
+  }
 });
