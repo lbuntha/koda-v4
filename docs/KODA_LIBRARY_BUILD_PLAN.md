@@ -59,7 +59,7 @@ schedule.
 
 ### Phase 0 — Data groundwork · nothing registered, no UI · **done**
 
-**Try it:** `docs/koda-library-phase0-check.html` runs the real data layer in a browser.
+**Try it:** the data layer is covered by `src/library/*.test.ts`.
 
 | | |
 |---|---|
@@ -128,8 +128,8 @@ with *Check* or at `autoSubmitAt`; the keyboard does everything a finger does. S
 is never an attempt. Reduced motion draws the ring straight from state, with identical
 behaviour — which is also how it runs under test.
 
-**Try it:** `docs/letter-wheel-demo.html` (built by `node scripts/build-library-pages.mjs`)
-spells the Phase 0 starter stories with the real component.
+**Try it:** the Library reader in the running app spells the Phase 0 starter
+stories with the real component.
 
 **What Phase 1 caught.** In a real browser at 360px: the floating word chip landed on the
 top tile, the drawing box kept space for buttons that had moved out of it, and in dark

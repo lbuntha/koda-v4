@@ -285,7 +285,6 @@ export const LiveVoiceCoachModal: React.FC<LiveVoiceCoachModalProps> = ({
             const now = Date.now();
             if (now - lastNextQuestionTimeRef.current > 3500) {
               lastNextQuestionTimeRef.current = now;
-              console.log("Koda said 'next question', triggering onNextQuestion()");
               onNextQuestion?.();
             }
           }
