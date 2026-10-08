@@ -74,7 +74,7 @@ export const KodaBuddy: React.FC<KodaBuddyProps> = ({
   // zeros on the first render, and a transform reading it never recomputed when
   // the real measurement landed — so which way Koda looked depended on which
   // corner it happened to start in.
-  const facing = useTransform(centreX, (cx) =>
+  const facing = useTransform<number, number>(centreX, (cx) =>
     // The drawn face looks to its *right* — the eyes and mouth sit on that side
     // of the head — so it is the right half of the screen that has to be
     // mirrored, or Koda stands in the corner staring off the edge. Worth

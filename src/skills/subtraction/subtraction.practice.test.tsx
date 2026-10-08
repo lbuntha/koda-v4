@@ -90,7 +90,7 @@ describe("a practice round cycles its modes rather than sampling them", () => {
       const seen = new Set<string>();
       const asked = new Set<string>();
       for (let i = 1; i <= questionsPerRound; i += 1) {
-        const question = activity.worksheet!.build!({ practice: true, modes }, i, seen, undefined) as { mode: string };
+        const question = activity.worksheet!.build!({ practice: true, modes }, i, seen, { current: undefined }) as { mode: string };
         asked.add(question.mode);
       }
       // A ten-question round over four modes must hit all four. Random

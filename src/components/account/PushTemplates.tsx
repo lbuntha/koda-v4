@@ -215,7 +215,7 @@ const WordingCard: React.FC<{
   const test = () =>
     run(async () => {
       const result = await sendTestEmail(row.id);
-      setNote(result.sent ? translate("admin.pushTemplates.sentToToUsingTheSaved", { to: result.to }) : (result.note ?? translate("admin.pushTemplates.nothingWasSent")));
+      setNote(result.sent ? translate("admin.pushTemplates.sentToToUsingTheSaved", { to: result.to ?? "" }) : (result.note ?? translate("admin.pushTemplates.nothingWasSent")));
     }, "The test email could not be sent.");
 
   return (

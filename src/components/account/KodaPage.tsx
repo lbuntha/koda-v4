@@ -298,7 +298,7 @@ export const KodaPage: React.FC<{ embedded?: boolean; onOpenKeys?: () => void }>
                 <div className="flex flex-wrap items-center gap-2">
                   <h4 className="font-mono text-sm font-bold text-ink">{translate("admin.kodaPage.gemini")}</h4>
                   {geminiKey.isSet ? (
-                    <UIBadge variant="success">{translate("admin.kodaPage.savedHint", { hint: geminiKey.hint })}</UIBadge>
+                    <UIBadge variant="success">{translate("admin.kodaPage.savedHint", { hint: geminiKey.hint ?? "" })}</UIBadge>
                   ) : (
                     <UIBadge variant="warning">{translate("admin.kodaPage.notSavedUsesGeminiApiKey")}</UIBadge>
                   )}

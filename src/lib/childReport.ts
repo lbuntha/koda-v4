@@ -294,7 +294,7 @@ export async function fetchChildReport(
   const profile = await request<ProfileResponse>(`/sync/profile/${learnerId}`, { token, signal });
   // Writing has its own section on the report (the trace ladder, letter by letter); as one
   // coarse concept it would read "mastered" after a few good letters, so it is left out here.
-  const concepts = (profile.concepts ?? []).filter((concept) => !isLadderConcept(concept.conceptKey));
+  const concepts = (profile.concepts ?? []).filter((concept) => !isLadderConcept(concept.conceptKey ?? ""));
   return buildReport(profile.learnerId, concepts, profile.eventsStored ?? 0);
 }
 

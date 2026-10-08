@@ -186,7 +186,7 @@ export const ApiKeysPanel: React.FC = () => {
                         <div className="flex flex-wrap items-center gap-2">
                           {provider.fields.length > 1 && <span className="text-xs font-bold uppercase tracking-wider text-muted">{setting.label.replace(/^.*— /, "")}</span>}
                           {from === "saved" ? (
-                            <UIBadge variant="success">{translate("admin.apiKeysPanel.savedHint", { hint: setting.hint })}</UIBadge>
+                            <UIBadge variant="success">{translate("admin.apiKeysPanel.savedHint", { hint: setting.hint ?? "" })}</UIBadge>
                           ) : from === "env" ? (
                             <UIBadge variant="info">{translate("admin.apiKeysPanel.fromTheDeploymentEnv", { env: env })}</UIBadge>
                           ) : (

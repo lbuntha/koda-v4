@@ -147,13 +147,13 @@ export function applyDoc(doc: SyncDoc): boolean {
     map[skillId] = { ...(map[skillId] ?? {}) };
     if (doc.deleted) delete map[skillId][lessonId];
     else map[skillId][lessonId] = doc.body;
-    writeJson(spec.storageKey, map);
+    writeJson(target, map);
   } else {
     // `skill`: the store keeps an array, one entry per skill.
     const list = Array.isArray(stored) ? (stored as Record<string, unknown>[]) : [];
     const next = list.filter((entry) => entry.id !== doc.key);
     if (!doc.deleted) next.push({ ...doc.body, id: doc.key });
-    writeJson(spec.storageKey!, next);
+    writeJson(target, next);
   }
 
   rememberRevision(doc.kind, doc.key, doc.rev);

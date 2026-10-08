@@ -108,7 +108,7 @@ export function buildPrediction(
   // the last resort, and is always different because a chosen move always moves
   // something.
   const candidates: Rack[] = [
-    moves.reduce((r, m) => pourOne(r, m.from, m.to), rack),
+    moves.reduce<Rack>((r, m) => pourOne(r, m.from, m.to), rack),
     steps === 2 && moves.length === 2 ? pour(rack, moves[0].from, moves[0].to)
       : pourEverything(rack, moves[0].from, moves[0].to),
     applyAll(rack, moves.map((m) => ({ from: m.to, to: m.from }))),

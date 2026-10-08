@@ -151,7 +151,7 @@ export function registerSvgAssetRoutes(app: Express): void {
         id: req.params.id,
         category,
         created: !existing,
-        moved: Boolean(existing) && existing.category !== category,
+        moved: existing !== undefined && existing.category !== category,
       });
     } catch (error) {
       res.status(500).json({ error: `Could not save: ${(error as Error).message}` });

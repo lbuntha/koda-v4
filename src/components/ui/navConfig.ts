@@ -13,7 +13,7 @@ export interface NavItemConfig {
   id: string;
   label: string;
   icon?: string;
-  badge?: string;
+  badge?: string | null;
   /**
    * The entry's wording in other languages, keyed by language code — set on the
    * Menu screen. `label` and `badge` are the base language. See `useNavItems`
@@ -22,7 +22,7 @@ export interface NavItemConfig {
   labels?: Record<string, string> | null;
   badges?: Record<string, string> | null;
   /** Permission the account must hold. Absent means everybody. */
-  requires?: string;
+  requires?: string | null;
   roles?: string[];
   order?: number;
 }

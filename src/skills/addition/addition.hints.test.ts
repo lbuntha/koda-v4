@@ -334,7 +334,7 @@ describe("the bond keeps each mode's shape", () => {
   it("reports every box as one answer", () => {
     const seen = new Set<string>();
     const q = buildBond({ mode: "split_both", addendRange: [23, 23] }, 1, seen);
-    expect(q.expected.split(",")).toHaveLength(4);
+    expect(q.expected!.split(",")).toHaveLength(4);
   });
 
   it("names the ten a bridging pair is reaching for", () => {
@@ -867,7 +867,7 @@ describe("choosing a strategy is judged on what suits the numbers", () => {
   it("holds every right answer, not one of them", () => {
     const memory = { current: null as ProblemMemory | null };
     const q = buildStrategy({ addendRange: [8, 9] }, 1, new Set(), memory);
-    expect(q.expected.split("|")).toEqual(q.fitting);
+    expect(q.expected!.split("|")).toEqual(q.fitting);
     expect(q.fitting.length).toBeGreaterThan(1);
   });
 

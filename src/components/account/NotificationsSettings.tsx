@@ -434,7 +434,7 @@ export const NotificationsSettings: React.FC = () => {
                     <p className={l.rowNote}>
                       {email.stopped
                         ? translate("admin.notificationsSettings.kodaWonTEmailYouUpdates")
-                        : translate("admin.notificationsSettings.sentToAddress", { address: email.address })}
+                        : translate("admin.notificationsSettings.sentToAddress", { address: email.address ?? "" })}
                     </p>
                   </div>
                 </div>

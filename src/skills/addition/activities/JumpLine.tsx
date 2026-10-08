@@ -282,9 +282,9 @@ export const promptFor = (q: JumpQuestion, template?: string): string => {
 export const printedFor = (q: JumpQuestion): PrintedQuestion => {
   switch (q.mode) {
     case "bridge_ten":
-      return { text: `What jump takes ${q.a} to the next ten?`, answer: q.expected };
+      return { text: `What jump takes ${q.a} to the next ten?`, answer: q.expected ?? "" };
     case "bridge_hundred":
-      return { text: `What jump takes ${q.a} to the next hundred?`, answer: q.expected };
+      return { text: `What jump takes ${q.a} to the next hundred?`, answer: q.expected ?? "" };
     case "compensate":
       return {
         text: `${q.a} + ${q.b}. Jump a round number, then give back what you overshot.`,

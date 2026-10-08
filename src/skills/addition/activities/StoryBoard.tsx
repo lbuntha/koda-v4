@@ -391,7 +391,7 @@ const SlotBox: React.FC<{
  */
 export const printedFor = (q: StoryQuestion): PrintedQuestion => ({
   text: q.step === 2 ? `${q.text} — and after the second lot?` : q.text,
-  answer: q.expected,
+  answer: q.expected ?? "",
 });
 
 export const StoryBoard: React.FC<ActivityProps<StoryBoardParams>> = ({

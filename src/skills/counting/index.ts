@@ -68,7 +68,8 @@ registerSkillVoice(
 );
 
 export const skill: Skill = {
-  manifest: manifestFields as SkillManifest,
+  // JSON widens `ages` to number[]; ages.test.ts holds every manifest to a [min, max] pair.
+  manifest: manifestFields as unknown as SkillManifest,
   features: features as SkillFeature[],
   settings: settings as Record<string, unknown>,
   settingsSchema: settingsSchema as Skill["settingsSchema"],

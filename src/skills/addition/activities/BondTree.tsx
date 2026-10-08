@@ -215,7 +215,7 @@ export const printedFor = (q: BondQuestion): PrintedQuestion => {
     case "split_both":
       return {
         text: `Split ${q.a} and ${q.b} into their tens and ones.`,
-        answer: q.expected,
+        answer: q.expected ?? "",
       };
     case "part_unknown": {
       // Either part may be the hidden one; the visible one is what is left.

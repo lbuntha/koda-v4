@@ -163,7 +163,7 @@ export const printedFor = (q: EstimateQuestion): PrintedQuestion =>
       }
     : {
         text: `About how many is ${q.a} + ${q.b}? Round each number first.`,
-        answer: q.expected,
+        answer: q.expected ?? "",
       };
 
 export function estimateHints(

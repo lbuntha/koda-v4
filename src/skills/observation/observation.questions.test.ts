@@ -49,7 +49,7 @@ describe("observation question generator", () => {
       // A swarm round asks for the same character every question, so the
       // no-repeat promise applies to its count, not to a rotating first target.
       if (lesson.params.question.mode === "swarm") {
-        questions.forEach((question) => expect(question.targets).toHaveLength(lesson.params.question.swarmCount));
+        questions.forEach((question) => expect(question.targets).toHaveLength(lesson.params.question.swarmCount!));
       } else if (lesson.params.question.mode === "category") {
         // A category round's targets are whatever belongs to the group, so the
         // varying part is the group and the scene, not a rotating first target.

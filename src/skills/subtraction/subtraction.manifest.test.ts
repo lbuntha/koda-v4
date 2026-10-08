@@ -128,7 +128,7 @@ describe("every lesson can actually be played", () => {
       // Building one question is the cheapest proof the mode resolves: an
       // unknown mode falls back silently rather than throwing.
       const params = (lesson.params as { question?: Record<string, unknown> }).question ?? {};
-      const built = activity.worksheet!.build!(params, 1, new Set(), undefined) as { mode?: string; expected: string };
+      const built = activity.worksheet!.build!(params, 1, new Set(), { current: undefined }) as { mode?: string; expected: string };
       expect(built.expected, `${lesson.id} builds a question with no expected answer`).toBeTruthy();
       const wanted = params.mode ?? (params.modes as string[] | undefined)?.[0];
       if (wanted) expect(built.mode, `${lesson.id} asked for ${wanted} and got ${built.mode}`).toBe(wanted);
@@ -139,11 +139,11 @@ describe("every lesson can actually be played", () => {
     for (const lesson of lessons) {
       const activity = skill.activities[lesson.activity.split("/")[1]];
       const params = (lesson.params as { question?: Record<string, unknown> }).question ?? {};
-      const question = activity.worksheet!.build!(params, 1, new Set(), undefined);
-      const printed = activity.worksheet!.printed!(question as never);
+      const question = activity.worksheet!.build!(params, 1, new Set(), { current: undefined });
+      const printed = activity.worksheet!.printed!(question as never)!;
       expect(printed.text, `${lesson.id} prints no question`).toBeTruthy();
       expect(String(printed.answer), `${lesson.id} prints no answer`).toBeTruthy();
-      expect(activity.worksheet!.method!(question as never).length, `${lesson.id} prints no method`).toBeGreaterThan(0);
+      expect(activity.worksheet!.method!(question as never)!.length, `${lesson.id} prints no method`).toBeGreaterThan(0);
     }
   });
 });

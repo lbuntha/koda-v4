@@ -401,7 +401,7 @@ export const ColumnPad: React.FC<ActivityProps<ColumnParams>> = ({ params, koda,
 
   const rubOut = () => {
     if (round.feedback) return;
-    const last = written.reduce((found, v, i) => (v !== undefined ? i : found), -1);
+    const last = written.reduce<number>((found, v, i) => (v !== undefined ? i : found), -1);
     if (last < 0) return;
     setWritten((current) => {
       const next = [...current];

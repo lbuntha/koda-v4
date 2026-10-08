@@ -2,7 +2,7 @@ import React, { useCallback, useEffect, useMemo, useState } from "react";
 import type { ActivityProps, PrintedQuestion } from "../../types";
 import { SkillRound, composeHints, isPractice, modeAt, playCopy, useSkillRound, type RoundQuestion } from "../../kit";
 import { quietWhenPractising } from "../../kit/practice";
-import { selectionKey, type Color } from "../internal/board";
+import { counted, selectionKey, type Color } from "../internal/board";
 import { BoardGrid, tileLabel } from "../internal/BoardGrid";
 import { PALETTE } from "../internal/palette";
 import { generateLens, LENS_MODES, type Lens, type LensMode } from "../internal/lenses";
@@ -67,7 +67,7 @@ const promptText = (lens: Lens): string => {
       return "What does this clue say?";
     case "complement": {
       const clue = lens.clue!;
-      const named = PALETTE[clue.color].name.toLowerCase();
+      const named = PALETTE[counted(clue)].name.toLowerCase();
       const other = PALETTE[lens.otherColor!].name.toLowerCase();
       return `This clue touches ${n} tiles and says ${clue.count} are ${named}. How many are ${other}?`;
     }
@@ -139,7 +139,7 @@ export function printedFor(question: LensQuestion): PrintedQuestion | null {
       };
     case "complement":
       return {
-        text: `${where}. It touches ${question.neighborhood.length} tiles and ${question.clue!.count} of them are ${PALETTE[question.clue!.color].name.toLowerCase()}. How many are ${PALETTE[question.otherColor!].name.toLowerCase()}? ____`,
+        text: `${where}. It touches ${question.neighborhood.length} tiles and ${question.clue!.count} of them are ${PALETTE[counted(question.clue!)].name.toLowerCase()}. How many are ${PALETTE[question.otherColor!].name.toLowerCase()}? ____`,
         answer: String(question.expectedCount),
       };
   }
@@ -184,7 +184,7 @@ export function lensHints(question: LensQuestion, kidTip: string | undefined, st
       return composeHints(
         kidTip,
         `The clue touches ${n} tiles altogether.`,
-        `Some of those ${n} are ${PALETTE[question.clue!.color].name.toLowerCase()}. There are only two colours, so the rest are the other one.`,
+        `Some of those ${n} are ${PALETTE[counted(question.clue!)].name.toLowerCase()}. There are only two colours, so the rest are the other one.`,
       );
   }
 }
@@ -303,7 +303,7 @@ export const NeighborLens: React.FC<ActivityProps<LensParams>> = ({ params, koda
       String(value),
       correct ? "That is the count" : "Count again",
       question.mode === "complement"
-        ? `${question.neighborhood.length} tiles touch it and ${question.clue!.count} are ${PALETTE[question.clue!.color].name.toLowerCase()}, so ${question.expectedCount} are ${PALETTE[question.otherColor!].name.toLowerCase()}.`
+        ? `${question.neighborhood.length} tiles touch it and ${question.clue!.count} are ${PALETTE[counted(question.clue!)].name.toLowerCase()}, so ${question.expectedCount} are ${PALETTE[question.otherColor!].name.toLowerCase()}.`
         : `${question.expectedCount} of the ${question.neighborhood.length} tiles touching it match.`,
     );
   };

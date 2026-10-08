@@ -188,7 +188,7 @@ describe("the method is one method, for the whole sheet", () => {
       const methods = new Set<string>();
       for (let i = 0; i < 12; i += 1) {
         const q = source.build(params as never, i, seen, memory);
-        methods.add(source.method(q).join(" | "));
+        methods.add(source.method(q)!.join(" | "));
       }
       expect(
         methods.size,

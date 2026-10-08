@@ -285,7 +285,7 @@ const SystemPanel: React.FC<{
                       <KeyRound className="w-4 h-4 text-amber-500 shrink-0" />
                       <h4 className="text-sm font-bold text-ink font-mono">{setting.label}</h4>
                       {setting.isSet ? (
-                        <UIBadge variant="success">{translate("admin.adminPage.setHint", { hint: setting.hint })}</UIBadge>
+                        <UIBadge variant="success">{translate("admin.adminPage.setHint", { hint: setting.hint ?? "" })}</UIBadge>
                       ) : (
                         <UIBadge variant="neutral">{translate("admin.adminPage.notSet")}</UIBadge>
                       )}

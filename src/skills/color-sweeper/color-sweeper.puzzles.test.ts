@@ -26,9 +26,9 @@ function checkCertificate(board: Board, steps: readonly ProofStep[]) {
   for (const step of steps) {
     for (const evidence of step.evidence) {
       const clue = board.clues.find(c => c.id === evidence.clueId)!;
-      const adjacent = domains.flatMap((_, i) => i !== clue.cell && Math.abs(Math.floor(i / board.size) - Math.floor(clue.cell / board.size)) <= 1 && Math.abs(i % board.size - clue.cell % board.size) <= 1 ? [i] : []);
+      const adjacent = domains.flatMap((_, i) => i !== clue.cell! && Math.abs(Math.floor(i / board.size) - Math.floor(clue.cell! / board.size)) <= 1 && Math.abs(i % board.size - clue.cell! % board.size) <= 1 ? [i] : []);
       const matches = adjacent.filter(i => domains[i].length === 1 && domains[i][0] === clue.color);
-      const candidates = adjacent.filter(i => domains[i].length > 1 && domains[i].includes(clue.color));
+      const candidates = adjacent.filter(i => domains[i].length > 1 && domains[i].includes(clue.color!));
       expect(evidence.knownMatches).toEqual(matches);
       expect(evidence.candidates).toEqual(candidates);
       expect(evidence.remaining).toBe(clue.count - matches.length);
@@ -157,7 +157,7 @@ describe("bounded technique-directed generation", () => {
       expect(isSolution(puzzle.board, puzzle.solution)).toBe(true);
       expect(puzzle.expected).toBe(answerKey(puzzle.board, puzzle.solution));
       checkCertificate(puzzle.board, puzzle.proof);
-      if (spec.anchor) expect(positionKind(puzzle.board.clues[0].cell, puzzle.board.size)).toBe(spec.anchor);
+      if (spec.anchor) expect(positionKind(puzzle.board.clues[0].cell!, puzzle.board.size)).toBe(spec.anchor);
       if (spec.mode === "overlap") expect(deduce(puzzle.board, puzzle.board.givens, { overlap: false }).status).toBe("stalled");
       if (spec.mode === "chain") expect(puzzle.proof.some(s => s.depth >= 2)).toBe(true);
     }

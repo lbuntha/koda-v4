@@ -366,7 +366,7 @@ export const DevicesPage: React.FC<DevicesPageProps> = ({ embedded = false }) =>
             ? translate("admin.devicesPage.youAreUsingThisOneYou")
             : translate("admin.devicesPage.valueWillBeSignedOutStraight", { value: signingOut?.learnerName
                   ? translate("admin.devicesPage.learnernameSSessionOnName", { learnerName: signingOut.learnerName, name: signingOut.name })
-                  : signingOut?.name })
+                  : signingOut?.name ?? "" })
         }
         confirmText={translate("admin.devicesPage.signOut")}
         variant="danger"
