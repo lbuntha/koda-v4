@@ -1,10 +1,14 @@
 import { render } from "@testing-library/react";
-import { describe, expect, it } from "vitest";
+import { beforeAll, describe, expect, it } from "vitest";
+import { SKILLS, loadSkill } from "../registry";
 import { getCourseLessons, type ResolvedLesson } from "../../curriculum";
 import { buildWorksheet, canPrint, DEFAULT_WORKSHEET_SIZE, MIN_WORKSHEET_ITEMS } from "../../lib/worksheet";
 import type { Viewer } from "../viewer";
 import { skill } from ".";
 import { PALETTE } from "./internal/palette";
+
+// Worksheets are built from the games, which load on demand.
+beforeAll(() => Promise.all(SKILLS.map((skill) => loadSkill(skill.manifest.id))));
 
 /**
  * Every lesson on paper.

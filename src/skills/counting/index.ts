@@ -1,4 +1,5 @@
-import type { Lesson, SkillFeature, SkillManifest, Skill } from "../types";
+import type { Skill } from "../types";
+import { describeSkill } from "../describe";
 import manifestJson from "./manifest.json";
 import lessonsJson from "./lessons.json";
 import * as orbit from "./activities/TouchOrbit";
@@ -22,7 +23,7 @@ import voiceJson from "./voice.json";
  * level it is. This replaced a single fifteen-level component whose state, judge
  * and render for level 15 were in scope while level 1 played.
  */
-const { features, settings, settingsSchema, ...manifestFields } = manifestJson;
+const info = describeSkill(manifestJson, lessonsJson);
 
 /**
  * The countable objects this skill draws with, registered at import time.
@@ -36,7 +37,7 @@ const { features, settings, settingsSchema, ...manifestFields } = manifestJson;
  * Referenced as `counting-rocket` — see `assets/svg/skillArt.ts` for why the
  * ids are namespaced that way.
  */
-const assets = registerSkillArt(manifestFields.id, import.meta.glob("./assets/*.svg", {
+const assets = registerSkillArt(info.manifest.id, import.meta.glob("./assets/*.svg", {
   query: "?raw",
   import: "default",
   eager: true,
@@ -64,16 +65,11 @@ registerSkillVoice(
     eager: true,
   }) as Record<string, string>,
   voiceJson.groups,
-  manifestFields.id,
+  info.manifest.id,
 );
 
 export const skill: Skill = {
-  // JSON widens `ages` to number[]; ages.test.ts holds every manifest to a [min, max] pair.
-  manifest: manifestFields as unknown as SkillManifest,
-  features: features as SkillFeature[],
-  settings: settings as Record<string, unknown>,
-  settingsSchema: settingsSchema as Skill["settingsSchema"],
-  lessons: lessonsJson.lessons as unknown as Lesson[],
+  ...info,
   assets,
 
   activities: {

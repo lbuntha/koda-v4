@@ -1,6 +1,8 @@
 import React, { useMemo, useRef } from "react";
 import { useTheme } from "../../context/ThemeContext";
-import { getSkill, resolveActivity } from "../registry";
+import { getSkill, loadSkill, resolveActivity, skillLoadFailed, useLoadedSkill } from "../registry";
+import { UIButton, UIPageLoader } from "../../components/ui";
+import { translate } from "../../lib/i18n";
 import { createKodaSDK, type KodaHost } from "../sdk/createKodaSDK";
 import type { ActivityLesson, LearnerSnapshot, SkillResult } from "../types";
 import type { LearningContext, LessonEntry } from "../../lib/learning/events";
@@ -93,6 +95,9 @@ export const SkillHost: React.FC<SkillHostProps> = ({
 }) => {
   const { theme } = useTheme();
   const viewer = useAudienceViewer();
+  // The skill's games arrive on demand; this re-renders the host when they do.
+  const ownerId = activityRef.split("/")[0] ?? "";
+  const ownerLoaded = useLoadedSkill(ownerId);
   const activity = resolveActivity(activityRef);
 
   /**
@@ -221,6 +226,18 @@ export const SkillHost: React.FC<SkillHostProps> = ({
     pathComplete,
     Boolean(onGoHome),
   ]);
+
+  if (!ownerLoaded && getSkill(ownerId)) {
+    if (!skillLoadFailed(ownerId)) return <UIPageLoader label={translate("round.gettingReady")} />;
+    return (
+      <div className="flex-1 flex items-center justify-center p-8 text-center">
+        <div className="max-w-sm space-y-4">
+          <p className="text-ink font-bold">{translate("round.couldNotLoad")}</p>
+          <UIButton onClick={() => void loadSkill(ownerId).catch(() => {})}>{translate("round.tryAgain")}</UIButton>
+        </div>
+      </div>
+    );
+  }
 
   if (!activity) {
     // Visible rather than silent: a bad reference is a config bug worth seeing.

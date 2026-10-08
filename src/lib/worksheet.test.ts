@@ -1,8 +1,12 @@
-import { describe, expect, it } from "vitest";
+import { beforeAll, describe, expect, it } from "vitest";
 
 import { getCourseLessons, type ResolvedLesson } from "../curriculum";
 import { DEFAULT_WORKSHEET_SIZE, buildWorksheet, canPrint } from "./worksheet";
+import { SKILLS, loadSkill } from "../skills/registry";
 import type { Viewer } from "../skills/viewer";
+
+// The games load on demand, and a sheet is built from them — so load them all, as the Learn page does for its lessons.
+beforeAll(() => Promise.all(SKILLS.map((skill) => loadSkill(skill.manifest.id))));
 
 /**
  * A lesson, on paper.

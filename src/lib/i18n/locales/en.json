@@ -1408,7 +1408,10 @@
     "crash": {
       "title": "That didn't work",
       "body": "Something went wrong with this lesson. Your progress is safe."
-    }
+    },
+    "gettingReady": "Getting the game ready…",
+    "couldNotLoad": "This game has not downloaded yet. Connect to the internet once, then try again.",
+    "tryAgain": "Try again"
   },
   "praise": {
     "practiceComplete": {

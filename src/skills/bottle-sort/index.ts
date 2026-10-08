@@ -1,4 +1,5 @@
-import type { Lesson, Skill, SkillFeature, SkillManifest } from "../types";
+import type { Skill } from "../types";
+import { describeSkill } from "../describe";
 import manifestJson from "./manifest.json";
 import lessonsJson from "./lessons.json";
 import * as sort from "./activities/BottleSort";
@@ -7,7 +8,7 @@ import { registerSkillVoice } from "../../lib/voiceClips";
 import audioManifest from "./audio/manifest.json";
 import voiceJson from "./voice.json";
 
-const { features, settings, settingsSchema, ...manifestFields } = manifestJson;
+const info = describeSkill(manifestJson, lessonsJson);
 
 // No `registerSkillArt`: bottles are geometry, not artwork. A body that grows
 // with capacity cannot be a fixed SVG, and nothing else here is illustrated.
@@ -15,16 +16,11 @@ registerSkillVoice(
   audioManifest as Record<string, string>,
   import.meta.glob("./audio/**/*.{wav,mp3,ogg,m4a}", { query: "?url", import: "default", eager: true }) as Record<string, string>,
   voiceJson.groups,
-  manifestFields.id,
+  info.manifest.id,
 );
 
 export const skill: Skill = {
-  // JSON widens `ages` to number[]; ages.test.ts holds every manifest to a [min, max] pair.
-  manifest: manifestFields as unknown as SkillManifest,
-  features: features as SkillFeature[],
-  settings: settings as Record<string, unknown>,
-  settingsSchema: settingsSchema as Skill["settingsSchema"],
-  lessons: lessonsJson.lessons as unknown as Lesson[],
+  ...info,
   assets: [],
   activities: {
     sort: {

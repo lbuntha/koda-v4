@@ -1,4 +1,5 @@
-import type { Lesson, SkillFeature, SkillManifest, Skill } from "../types";
+import type { Skill } from "../types";
+import { describeSkill } from "../describe";
 import manifestJson from "./manifest.json";
 import lessonsJson from "./lessons.json";
 import * as neighbors from "./activities/NeighborLens";
@@ -19,10 +20,10 @@ import audioManifest from "./audio/manifest.json";
  * A draft, so it reaches developers only. That is the correct state: nothing
  * here yet asks a child to solve anything.
  */
-const { features, settings, settingsSchema, ...manifestFields } = manifestJson;
+const info = describeSkill(manifestJson, lessonsJson);
 
 /** Skill-owned artwork. Empty for now; the folder exists so the glob resolves. */
-const assets = registerSkillArt(manifestFields.id, import.meta.glob("./assets/*.svg", {
+const assets = registerSkillArt(info.manifest.id, import.meta.glob("./assets/*.svg", {
   query: "?raw",
   import: "default",
   eager: true,
@@ -43,15 +44,11 @@ registerSkillVoice(
     eager: true,
   }) as Record<string, string>,
   {},
-  manifestFields.id,
+  info.manifest.id,
 );
 
 export const skill: Skill = {
-  manifest: manifestFields as SkillManifest,
-  features: features as SkillFeature[],
-  settings: settings as Record<string, unknown>,
-  settingsSchema: settingsSchema as Skill["settingsSchema"],
-  lessons: lessonsJson.lessons as unknown as Lesson[],
+  ...info,
   assets,
 
   activities: {

@@ -31,7 +31,7 @@ import {
 import { SKILLS, hiddenReason, type HiddenReason } from "../../skills/registry";
 import { SvgAsset, THUMBNAIL_ART_CATEGORY, useArtCategory, useHasArt } from "../../assets/svg";
 import { setViewer, useViewer, type Viewer } from "../../skills/viewer";
-import type { Lesson, SettingField, Skill } from "../../skills/types";
+import type { Lesson, SettingField, SkillInfo } from "../../skills/types";
 import { themeSystem } from "../../lib/themeSystem";
 import { ScoringAPI } from "../../lib/scoring";
 import { LessonContentAPI, editsAsLessonJson } from "../../lib/lessonContent";
@@ -278,7 +278,7 @@ const HIDDEN_COPY: Record<Exclude<HiddenReason, null>, string> = {
 };
 
 const SkillRow: React.FC<{
-  skill: Skill;
+  skill: SkillInfo;
   stored: InstalledSkill | undefined;
   viewer: Viewer;
   onOpen: () => void;
@@ -288,7 +288,8 @@ const SkillRow: React.FC<{
   const features = stored?.features ?? skill.features;
   const activeCount = features.filter((f) => f.isEnabled).length;
   const hidden = hiddenReason(skill, viewer);
-  const activityCount = Object.keys(skill.activities).length;
+  // The games its lessons play, read off the lessons so this list never downloads a skill.
+  const activityCount = new Set(skill.lessons.map((lesson) => lesson.activity)).size;
   const activityLabel = `${activityCount} ${activityCount === 1 ? "activity" : "activities"}`;
 
   return (
@@ -371,7 +372,7 @@ const describeThumbnail = (value: string, isArt: boolean, shipped?: string): str
 };
 
 const ListingEditor: React.FC<{
-  skill: Skill;
+  skill: SkillInfo;
   stored: InstalledSkill | undefined;
 }> = ({ skill, stored }) => {
   const { manifest } = skill;
@@ -860,7 +861,7 @@ const LessonRows: React.FC<{
 );
 
 const SkillDetail: React.FC<{
-  skill: Skill;
+  skill: SkillInfo;
   stored: InstalledSkill | undefined;
   viewer: Viewer;
   onBack: () => void;

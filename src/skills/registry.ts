@@ -1,22 +1,39 @@
+import { useEffect, useSyncExternalStore } from "react";
 import { SkillStoreAPI, type InstalledSkill } from "../lib/skillStore";
-import { skill as counting } from "./counting";
-import { skill as addition } from "./addition";
-import { skill as subtraction } from "./subtraction";
-import { skill as multiplication } from "./multiplication";
-import { skill as division } from "./division";
-import { skill as fractions } from "./fractions";
-import { skill as observation } from "./observation";
-import { skill as bottleSort } from "./bottle-sort";
-import { skill as colorSweeper } from "./color-sweeper";
-import type { AnyActivityDefinition, Lesson, Skill } from "./types";
+import { describeSkill } from "./describe";
+import type { AnyActivityDefinition, Lesson, Skill, SkillInfo } from "./types";
 import type { Viewer } from "./viewer";
 import { releaseStatusOf } from "../lib/skillRegistryApi";
 
 /**
- * Every skill in the build. Adding one is a single import and a single entry —
- * this is the only file outside a skill folder that a new skill touches.
+ * Every skill in the build, in course order. Adding one is a single entry here
+ * and a folder with a manifest.json, lessons.json and index.ts.
  */
-export const SKILLS: Skill[] = [counting, addition, subtraction, multiplication, division, fractions, observation, bottleSort, colorSweeper];
+const SKILL_IDS = [
+  "counting", "addition", "subtraction", "multiplication", "division",
+  "fractions", "observation", "bottle-sort", "color-sweeper",
+] as const;
+
+/*
+ * Two halves of every skill, loaded at different times.
+ *
+ * The descriptions are two small JSON files each, read eagerly: the course,
+ * the catalog, Home and the Skill Manager all need every skill's lessons and
+ * manifest before anything is played. The games — every activity, its art and
+ * its recorded voice — are `index.ts`, and are fetched only when a round or a
+ * worksheet needs them. They used to be in the first download: a third of the
+ * app's entry bundle was activities a child had not opened.
+ *
+ * Offline is unaffected: the service worker precaches every chunk, so a skill
+ * fetched on demand comes from the cache with no network.
+ */
+const manifests = import.meta.glob<Parameters<typeof describeSkill>[0]>("./*/manifest.json", { eager: true, import: "default" });
+const lessonFiles = import.meta.glob<{ lessons: unknown }>("./*/lessons.json", { eager: true, import: "default" });
+const modules = import.meta.glob<{ skill: Skill }>("./*/index.ts");
+
+export const SKILLS: SkillInfo[] = SKILL_IDS.map((id) =>
+  describeSkill(manifests[`./${id}/manifest.json`], lessonFiles[`./${id}/lessons.json`]),
+);
 
 /**
  * Publish every registered skill into the settings store.
@@ -52,11 +69,82 @@ function publishToStore(): void {
 
 publishToStore();
 
-export const getSkill = (id: string): Skill | undefined =>
+export const getSkill = (id: string): SkillInfo | undefined =>
   SKILLS.find((p) => p.manifest.id === id);
 
+const loaded = new Map<string, Skill>();
+const loading = new Map<string, Promise<Skill | undefined>>();
+const failed = new Set<string>();
+const listeners = new Set<() => void>();
+let version = 0;
+
+/** The whole skill, games included, fetched once and kept. Unknown ids resolve to undefined. */
+export function loadSkill(id: string): Promise<Skill | undefined> {
+  const done = loaded.get(id);
+  if (done) return Promise.resolve(done);
+  const load = modules[`./${id}/index.ts`];
+  if (!getSkill(id) || !load) return Promise.resolve(undefined);
+  let pending = loading.get(id);
+  if (!pending) {
+    pending = load().then(
+      ({ skill }) => {
+        loaded.set(id, skill);
+        failed.delete(id);
+        version += 1;
+        listeners.forEach((fn) => fn());
+        return skill;
+      },
+      (error: unknown) => {
+        // Forgotten, so the next ask retries rather than repeating the failure.
+        loading.delete(id);
+        failed.add(id);
+        version += 1;
+        listeners.forEach((fn) => fn());
+        throw error;
+      },
+    );
+    loading.set(id, pending);
+  }
+  return pending;
+}
+
 /**
- * Resolve an activity reference of the form "skillId/activityId".
+ * Whether the last attempt to fetch a skill failed — offline on a device that
+ * has not yet cached it. Cleared by the next `loadSkill` that succeeds.
+ */
+export const skillLoadFailed = (id: string): boolean => failed.has(id);
+
+/** The whole skill if it has already been loaded, without asking for it. */
+export const loadedSkill = (id: string): Skill | undefined => loaded.get(id);
+
+const subscribe = (fn: () => void) => {
+  listeners.add(fn);
+  return () => {
+    listeners.delete(fn);
+  };
+};
+
+/**
+ * The whole skill for a component: starts the download and re-renders when it
+ * lands. `undefined` until then — and for good, when the id is not a skill.
+ */
+export function useLoadedSkill(id: string | null | undefined): Skill | undefined {
+  useLoadedSkills(id ? [id] : []);
+  return id ? loaded.get(id) : undefined;
+}
+
+/** `useLoadedSkill` for several at once — the skills behind a page of lessons. */
+export function useLoadedSkills(ids: readonly string[]): void {
+  useSyncExternalStore(subscribe, () => version, () => version);
+  const key = [...new Set(ids)].sort().join(",");
+  useEffect(() => {
+    for (const id of key ? key.split(",") : []) void loadSkill(id).catch(() => {});
+  }, [key]);
+}
+
+/**
+ * Resolve an activity reference of the form "skillId/activityId", from a skill
+ * already loaded — see `useLoadedSkill`.
  *
  * This flat namespace is the reuse surface: a lesson in any skill may point at
  * any activity, so overlapping pedagogy (counting teaching "making 10") reuses
@@ -65,7 +153,7 @@ export const getSkill = (id: string): Skill | undefined =>
 export const resolveActivity = (ref: string): AnyActivityDefinition | undefined => {
   const [skillId, activityId] = ref.split("/");
   if (!skillId || !activityId) return undefined;
-  return getSkill(skillId)?.activities[activityId];
+  return loaded.get(skillId)?.activities[activityId];
 };
 
 /** Look up a lesson by "skillId/lessonId". */
@@ -90,7 +178,7 @@ export type HiddenReason =
  *
  * On top of status, a parent's per-install choice can always switch a skill off.
  */
-export function hiddenReason(p: Skill, viewer: Viewer): HiddenReason {
+export function hiddenReason(p: SkillInfo, viewer: Viewer): HiddenReason {
   if (viewer.showAllSkills) return null;
   if (releaseStatusOf(p) === "draft") {
     // A draft is a developer preview, and previewing it ignores the audience
@@ -105,7 +193,7 @@ export function hiddenReason(p: Skill, viewer: Viewer): HiddenReason {
   return isEnabledHere(p) ? null : "disabled-here";
 }
 
-export const visibleTo = (p: Skill, viewer: Viewer): boolean =>
+export const visibleTo = (p: SkillInfo, viewer: Viewer): boolean =>
   hiddenReason(p, viewer) === null;
 
 /**
@@ -114,11 +202,11 @@ export const visibleTo = (p: Skill, viewer: Viewer): boolean =>
  * store about an unknown id returns `false`, which would silently hide a freshly
  * registered skill — and take its lessons out of the course with it.
  */
-export function isEnabledHere(p: Skill): boolean {
+export function isEnabledHere(p: SkillInfo): boolean {
   const known = SkillStoreAPI.getSkill(p.manifest.id) !== undefined;
   return known ? SkillStoreAPI.isSkillEnabled(p.manifest.id) : true;
 }
 
-export const visibleSkills = (viewer: Viewer): Skill[] =>
+export const visibleSkills = (viewer: Viewer): SkillInfo[] =>
   SKILLS.filter((p) => visibleTo(p, viewer));
 

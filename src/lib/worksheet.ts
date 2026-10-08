@@ -1,7 +1,7 @@
 import type React from "react";
 
 import type { ResolvedLesson } from "../curriculum";
-import { getSkill } from "../skills/registry";
+import { getSkill, loadedSkill } from "../skills/registry";
 import type { WorksheetSource } from "../skills/types";
 
 /**
@@ -121,10 +121,15 @@ const contentKey = (question: unknown): string => {
   }
 };
 
-/** The activity behind a lesson, if the registry still has it. */
+/**
+ * The activity behind a lesson, once its skill is loaded.
+ *
+ * Nothing prints until then — a page of lessons loads the skills behind them
+ * with `useLoadedSkills`, and re-renders with the Print button when they land.
+ */
 const sourceFor = (lesson: ResolvedLesson): WorksheetSource | undefined => {
   const [skillId, activityId] = (lesson.activity ?? "").split("/");
-  return getSkill(skillId)?.activities[activityId]?.worksheet;
+  return loadedSkill(skillId)?.activities[activityId]?.worksheet;
 };
 
 /**

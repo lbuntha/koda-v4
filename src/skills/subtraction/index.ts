@@ -1,4 +1,5 @@
-import type { Lesson, SkillFeature, SkillManifest, Skill } from "../types";
+import type { Skill } from "../types";
+import { describeSkill } from "../describe";
 import manifestJson from "./manifest.json";
 import lessonsJson from "./lessons.json";
 import * as tray from "./activities/RemoveTray";
@@ -16,9 +17,9 @@ import { registerSkillArt } from "../../assets/svg/skillArt";
 import { registerSkillVoice } from "../../lib/voiceClips";
 import audioManifest from "./audio/manifest.json";
 
-const { features, settings, settingsSchema, ...manifestFields } = manifestJson;
+const info = describeSkill(manifestJson, lessonsJson);
 
-const assets = registerSkillArt(manifestFields.id, import.meta.glob("./assets/*.svg", {
+const assets = registerSkillArt(info.manifest.id, import.meta.glob("./assets/*.svg", {
   query: "?raw", import: "default", eager: true,
 }) as Record<string, string>);
 
@@ -31,15 +32,11 @@ registerSkillVoice(
   // no subject. `reactionPool` pools a skill's own with common's, so passing
   // none is a choice to use the shared voice, not a gap to fill later.
   {},
-  manifestFields.id,
+  info.manifest.id,
 );
 
 export const skill: Skill = {
-  manifest: manifestFields as SkillManifest,
-  features: features as SkillFeature[],
-  settings: settings as Record<string, unknown>,
-  settingsSchema: settingsSchema as Skill["settingsSchema"],
-  lessons: lessonsJson.lessons as unknown as Lesson[],
+  ...info,
   assets,
   activities: {
     tray: {

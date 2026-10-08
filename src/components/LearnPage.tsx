@@ -29,7 +29,7 @@ import { WorksheetDialog } from "./WorksheetDialog";
 import { useBilling } from "../lib/useBilling";
 import { useSkillRegistrations } from "../lib/skillRegistrationApi";
 import { skillTitle, useInstalledSkills } from "../lib/skillStore";
-import { getSkill } from "../skills/registry";
+import { getSkill, useLoadedSkills } from "../skills/registry";
 import { useAudienceViewer } from "../skills/viewer";
 import { playSound } from "../utils/audio";
 import { themeSystem } from "../lib/themeSystem";
@@ -117,6 +117,8 @@ export const LearnPage: React.FC<LearnPageProps> = ({
   const { progress: offline, prepare } = useOfflineDownload();
   const skill = getSkill(skillId);
   const lessons = useMemo(() => getSkillLessons(skillId, viewer), [skillId, viewer]);
+  // The games behind these lessons — which may belong to another skill — so Print can build a sheet.
+  useLoadedSkills(lessons.map((lesson) => (lesson.activity ?? "").split("/")[0]).filter(Boolean));
   /*
    * Units come from the course, not the skill: `course.json` owns sequencing and
    * a unit may mix lessons from several skills, so each one is narrowed to what

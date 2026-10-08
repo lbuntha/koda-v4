@@ -1,8 +1,11 @@
-import { describe, expect, it } from "vitest";
+import { beforeAll, describe, expect, it } from "vitest";
 
 import course from "../../curriculum/course.json";
 import { skill } from ".";
-import { resolveLesson, resolveActivity } from "../registry";
+import { SKILLS, loadSkill, resolveLesson, resolveActivity } from "../registry";
+
+// Lessons may point at another skill's games, which load on demand.
+beforeAll(() => Promise.all(SKILLS.map((other) => loadSkill(other.manifest.id))));
 
 /**
  * Where fractions sits in the course.

@@ -1,5 +1,5 @@
 import { useSyncExternalStore } from "react";
-import type { ReleaseStatus, Skill } from "../skills/types";
+import type { ReleaseStatus, SkillInfo } from "../skills/types";
 import { request } from "./sync/api";
 import { SessionAPI, accessToken } from "./sync/session";
 
@@ -260,7 +260,7 @@ if (typeof window !== "undefined") {
 }
 
 /** Server/cache release state, with the bundled manifest as offline first-run fallback. */
-export function releaseStatusOf(skill: Skill): ReleaseStatus {
+export function releaseStatusOf(skill: SkillInfo): ReleaseStatus {
   return records.find((record) => record.id === skill.manifest.id)?.status ?? skill.manifest.status;
 }
 

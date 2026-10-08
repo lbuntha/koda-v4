@@ -594,3 +594,13 @@ export interface Skill {
    */
   assets?: string[];
 }
+
+/**
+ * A skill without its games: what the app needs before a round starts.
+ *
+ * Read from the skill's own manifest.json and lessons.json, so the course,
+ * the catalog and every list of skills can be drawn without downloading a
+ * single activity. The full `Skill` is loaded when a round or a worksheet
+ * asks for it — see `loadSkill` in the registry.
+ */
+export type SkillInfo = Omit<Skill, "activities" | "assets">;

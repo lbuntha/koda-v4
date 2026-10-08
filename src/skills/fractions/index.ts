@@ -1,4 +1,5 @@
-import type { Lesson, SkillFeature, SkillManifest, Skill } from "../types";
+import type { Skill } from "../types";
+import { describeSkill } from "../describe";
 import manifestJson from "./manifest.json";
 import lessonsJson from "./lessons.json";
 import * as strip from "./activities/FoldStrip";
@@ -28,7 +29,7 @@ import audioManifest from "./audio/manifest.json";
  * every question names its whole, because half a pizza is not half a stadium.
  * See `internal/data/fractionNumbers.ts`.
  */
-const { features, settings, settingsSchema, ...manifestFields } = manifestJson;
+const info = describeSkill(manifestJson, lessonsJson);
 
 /**
  * This skill's recorded voice lines, registered at import time.
@@ -48,15 +49,11 @@ registerSkillVoice(
   // No skill-scoped reactions: praise comes from the common pack, which names no
   // subject. Passing none is a choice to use the shared voice, not a gap.
   {},
-  manifestFields.id,
+  info.manifest.id,
 );
 
 export const skill: Skill = {
-  manifest: manifestFields as SkillManifest,
-  features: features as SkillFeature[],
-  settings: settings as Record<string, unknown>,
-  settingsSchema: settingsSchema as Skill["settingsSchema"],
-  lessons: lessonsJson.lessons as unknown as Lesson[],
+  ...info,
 
   activities: {
     strip: {

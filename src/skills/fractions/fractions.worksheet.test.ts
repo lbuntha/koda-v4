@@ -1,8 +1,12 @@
-import { describe, expect, it } from "vitest";
+import { beforeAll, describe, expect, it } from "vitest";
+import { SKILLS, loadSkill } from "../registry";
 
 import { skill } from ".";
 import { buildWorksheet, canPrint } from "../../lib/worksheet";
 import type { ResolvedLesson } from "../../curriculum";
+
+// Worksheets are built from the games, which load on demand.
+beforeAll(() => Promise.all(SKILLS.map((skill) => loadSkill(skill.manifest.id))));
 
 /**
  * Fractions on paper.

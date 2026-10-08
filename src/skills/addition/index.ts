@@ -1,4 +1,5 @@
-import type { Lesson, SkillFeature, SkillManifest, Skill } from "../types";
+import type { Skill } from "../types";
+import { describeSkill } from "../describe";
 import manifestJson from "./manifest.json";
 import lessonsJson from "./lessons.json";
 import * as tray from "./activities/CountTray";
@@ -29,7 +30,7 @@ import voiceJson from "./voice.json";
  * One engine so far. `docs/ADDITION_BUILD_PLAN.md` holds the phase order and
  * the other eleven.
  */
-const { features, settings, settingsSchema, ...manifestFields } = manifestJson;
+const info = describeSkill(manifestJson, lessonsJson);
 
 /**
  * The things this skill asks a child to count and combine.
@@ -38,7 +39,7 @@ const { features, settings, settingsSchema, ...manifestFields } = manifestJson;
  * skill that registered them, and a family who disabled counting would
  * otherwise take addition's objects away with it.
  */
-const assets = registerSkillArt(manifestFields.id, import.meta.glob("./assets/*.svg", {
+const assets = registerSkillArt(info.manifest.id, import.meta.glob("./assets/*.svg", {
   query: "?raw",
   import: "default",
   eager: true,
@@ -60,15 +61,11 @@ registerSkillVoice(
     eager: true,
   }) as Record<string, string>,
   voiceJson.groups,
-  manifestFields.id,
+  info.manifest.id,
 );
 
 export const skill: Skill = {
-  manifest: manifestFields as SkillManifest,
-  features: features as SkillFeature[],
-  settings: settings as Record<string, unknown>,
-  settingsSchema: settingsSchema as Skill["settingsSchema"],
-  lessons: lessonsJson.lessons as unknown as Lesson[],
+  ...info,
   assets,
 
   activities: {
