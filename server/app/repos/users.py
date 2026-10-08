@@ -7,6 +7,7 @@ from motor.motor_asyncio import AsyncIOMotorDatabase
 from pymongo import ReturnDocument
 
 from app.models.common import now
+from app.repos import notify_prefs, notify_schedule, push_tokens
 from app.services.entitlements import plans_for_families
 
 
@@ -301,6 +302,10 @@ async def delete_account(db: AsyncIOMotorDatabase, user_id: str) -> bool:
         await db.skill_registrations.delete_many(
             {"ownerType": "user", "ownerId": user_id}
         )
+        # Its browsers stop ringing and its notification choices go with it.
+        await push_tokens.delete_for_user(db, user_id)
+        await notify_prefs.forget_user(db, user_id)
+        await notify_schedule.forget_user(db, user_id)
     return result.deleted_count == 1
 
 

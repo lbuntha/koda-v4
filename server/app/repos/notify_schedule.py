@@ -140,16 +140,6 @@ def is_quiet(schedule: dict[str, Any], local_hour: int) -> bool:
     return local_hour >= start or local_hour < end
 
 
-def next_open_hour(schedule: dict[str, Any], local_hour: int) -> int:
-    """The first hour this person is willing to hear from us again.
-
-    A courtesy notification inside quiet hours is *held to the edge of the
-    window*, not dropped — §5's own words. What is returned is the hour to hold
-    it until, which is `quietTo`; a caller outside quiet hours gets the hour it
-    already has.
-    """
-    return schedule["quietTo"] if is_quiet(schedule, local_hour) else local_hour
-
 
 async def forget_user(db: AsyncIOMotorDatabase, user_id: str) -> int:
     """Deleting an account takes its schedule with it."""

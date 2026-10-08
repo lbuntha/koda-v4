@@ -197,3 +197,19 @@ async def test_admin_can_change_platform_and_family_roles(client, db, signup_bod
     )
     assert owner_change.status_code == 409
     assert owner_change.json()["error"]["code"] == "cannot_demote_owner"
+
+
+async def test_deleting_an_account_forgets_its_notification_data(db):
+    from app.repos import users
+
+    user = await users.create(db, "gone@example.com", "x", platform_role="support", display_name="Gone")
+    user_id = user["_id"]
+    await db.push_tokens.insert_one({"_id": "t1", "userId": user_id, "token": "t1"})
+    await db.notify_prefs.insert_one({"userId": user_id, "kind": "learn.goal_met", "on": True})
+    await db.notify_schedule.insert_one({"_id": user_id, "quietFrom": 21, "quietTo": 7})
+
+    assert await users.delete_account(db, user_id)
+
+    assert await db.push_tokens.count_documents({"userId": user_id}) == 0
+    assert await db.notify_prefs.count_documents({"userId": user_id}) == 0
+    assert await db.notify_schedule.count_documents({"_id": user_id}) == 0

@@ -103,12 +103,6 @@ def ending(days: list[str], *, today: str) -> int:
     return length if length >= 2 else 0
 
 
-async def ending_today(
-    db: AsyncIOMotorDatabase, family_id: str, learner_id: str, *, today: str
-) -> int:
-    """`ending`, for a caller that holds a database rather than a list of days."""
-    return ending(await events_repo.practice_days(db, family_id, learner_id), today=today)
-
 
 async def for_reminder(
     db: AsyncIOMotorDatabase, family_id: str, learner_id: str, *, today: str
