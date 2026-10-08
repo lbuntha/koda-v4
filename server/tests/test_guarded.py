@@ -30,6 +30,10 @@ PUBLIC = {
     # answers the same way for known and unknown addresses.
     ("POST", "/v1/auth/email/resend"),
     ("POST", "/v1/auth/email/verify"),
+    # Wording corrections, read by the sign-in screen before there is a session.
+    # The app's own labels, nothing about a person; writing them still needs
+    # `content:write`, and the PUT/DELETE routes stay in the sweep below.
+    ("GET", "/v1/translations"),
 }
 
 DOCS = {"/v1/docs", "/v1/openapi.json", "/v1/docs/oauth2-redirect"}
