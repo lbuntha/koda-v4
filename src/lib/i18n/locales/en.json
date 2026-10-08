@@ -30,6 +30,7 @@
     "notification-settings": "Notification Settings",
     "skills": "Skills",
     "subjects": "Subjects",
+    "translations": "Translations",
     "assets": "Art",
     "library-studio": "Library Studio",
     "trace-studio": "Trace Studio",
@@ -144,8 +145,8 @@
     }
   },
   "signIn": {
-    "headline": "Learning your child asks for",
-    "tagline": "Kids’ maths practice: counting, addition and number bonds. Ages 5–11.",
+    "headline": "Learning that grows with your child",
+    "tagline": "Maths, reading and writing practice, with progress you can see.",
     "offline": "Works offline after sign-in"
   },
   "account": {
@@ -162,7 +163,7 @@
     "forChildren": "For my children",
     "forMyself": "For myself",
     "forChildrenNote": "You add each child, and set their goals and limits.",
-    "forMyselfNote": "Your own space, with nobody above it. You set your own goal and limits, and Koda starts at counting — skip ahead in Settings.",
+    "forMyselfNote": "Your own space. You set your own goal and limits.",
     "childCode": "Child code",
     "childCodeNote": "Ask a parent for their 8-character code. It works once, within 15 minutes.",
     "email": "Email",
@@ -173,7 +174,6 @@
     "resetSent": "If {email} has an account, a reset link is on its way. It works once and expires in 30 minutes.",
     "familyName": "Family or group name",
     "familyNamePlaceholder": "My family, Class 2B, Grandma's house",
-    "familyNameNote": "The name for all your children's accounts. You can change it later.",
     "defaultFamilyName": "My family",
     "defaultStudentSpace": "My learning space",
     "useChildCode": "Signing in a child? Use a child code",
@@ -3319,6 +3319,30 @@
     },
     "personaPicker": {
       "agesMinageMaxage": "ages {minAge}–{maxAge}"
+    },
+    "translations": {
+      "intro": "Correct the app's wording for any language. A save reaches every device the next time it opens — no update needed.",
+      "who": "Admins and developers correct the app's wording.",
+      "language": "Language",
+      "section": "Section",
+      "allSections": "All sections",
+      "search": "Search English, translation or key",
+      "show": "Show",
+      "filterAll": "All {count}",
+      "filterMissing": "Missing {count}",
+      "filterEdited": "Edited {count}",
+      "edited": "Edited",
+      "missing": "Missing",
+      "save": "Save",
+      "saving": "Saving…",
+      "cancel": "Cancel",
+      "reset": "Use built-in text",
+      "keepTokens": "Keep these exactly as they are: {tokens}",
+      "offline": "No connection. Your change was not saved — try again when you are online.",
+      "englishNote": "You are editing English, the language every other one falls back to.",
+      "nothing": "Nothing matches.",
+      "showing": "Showing {shown} of {total}",
+      "more": "Show more"
     }
   },
   "app": {

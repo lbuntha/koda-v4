@@ -1,88 +1,120 @@
 import React from "react";
+import { WifiOff } from "lucide-react";
 
 import { themeSystem } from "../../lib/themeSystem";
 import { AccountForm } from "./AccountForm";
 import { LanguagePicker } from "../LanguagePicker";
-import { useT } from "../../lib/i18n";
+import { availableLanguages, useT } from "../../lib/i18n";
+import { PreferencesAPI } from "../../lib/preferences";
+import { playSound } from "../../utils/audio";
+
+/**
+ * The language switch, as buttons while there are few enough to show.
+ *
+ * Before the form, not in Settings: a family that cannot read English has to
+ * be able to change it before they have an account to change it in. A select
+ * hides the choice behind a tap and shows only the current language's name;
+ * two or three buttons show every option in its own script at once. Past
+ * that, the shared select takes over so the row never wraps.
+ */
+const LanguageSwitch: React.FC = () => {
+  const { t, language } = useT();
+  const languages = availableLanguages();
+  if (languages.length > 3) return <LanguagePicker compact />;
+  return (
+    <div
+      role="radiogroup"
+      aria-label={t("settings.language.title")}
+      className="inline-flex gap-1 rounded-xl bg-surface-muted p-1"
+    >
+      {languages.map((lang) => (
+        <button
+          key={lang.code}
+          type="button"
+          role="radio"
+          lang={lang.code}
+          aria-checked={language === lang.code}
+          onClick={() => {
+            if (language === lang.code) return;
+            playSound("pop");
+            PreferencesAPI.update({ language: lang.code });
+          }}
+          className={`min-h-9 rounded-lg px-3 text-sm font-bold transition cursor-pointer ${
+            language === lang.code ? "bg-surface text-ink shadow-sm" : "text-muted hover:text-ink"
+          }`}
+        >
+          {lang.name}
+        </button>
+      ))}
+    </div>
+  );
+};
 
 /**
  * The sign-in page.
  *
  * A page in its own right rather than a panel dropped into whatever is behind
- * it: it owns the full viewport and its own background, so it can be routed to
- * from a landing page without inheriting that page's layout.
+ * it: it owns the full viewport and its own background.
  *
- * It takes no props and offers no way past — signing in is required (App.tsx),
- * so an escape hatch here would lead nowhere. Once a device *has* signed in the
- * session is local and lessons keep working with no connection; this screen is
- * the one thing that needs a network, on a device that has never used it.
+ * One column on a phone — the mark, one line of promise, then the form — and
+ * two on a computer, the promise on the left and the form on the right. The
+ * left side stays short on purpose: a headline, one sentence and the offline
+ * note. What Koda teaches keeps growing; the front door should not have to be
+ * rewritten every time it does.
+ *
+ * It offers no way past — signing in is required (App.tsx). Once a device has
+ * signed in the session is local and lessons keep working with no connection;
+ * this screen is the one thing that needs a network.
  */
 export const SignInScreen: React.FC = () => {
   const { t } = useT();
   return (
-  <div className="min-h-screen w-full bg-canvas flex flex-col items-center justify-center px-4 py-10">
-    <div className="w-full max-w-[400px]">
-      {/* Before the form, not in Settings: a family that cannot read English
-          has to be able to change it before they have an account to change it
-          in. Saved on the device and carried into the family's preferences. */}
-      <div className="mb-4 flex justify-end">
-        <LanguagePicker compact />
-      </div>
-      {/*
-       * The product's own mark, not a stock shield.
-       *
-       * A padlock says "security", which is not the feeling wanted at the front
-       * door of a children's maths app, and it is the icon every login screen
-       * uses so it carries no information. This is `public/favicon.svg` — the
-       * same tile that sits on the home screen once the app is installed, so a
-       * parent opening it recognises where they are.
-       *
-       * Referenced by URL rather than inlined: one file, one definition, and
-       * changing the brand changes it everywhere at once.
-       */}
-      <div className="text-center mb-7">
-        <img
-          src="/favicon.svg"
-          alt=""
-          width={64}
-          height={64}
-          className="mx-auto mb-4 h-16 w-16 rounded-2xl shadow-lg shadow-indigo-600/25"
-        />
-        <h1 className="text-[26px] font-extrabold tracking-tight text-ink">
-          {t("signIn.headline")}
-        </h1>
-        {/*
-         * Specific, and one line.
-         *
-         * "Maths practice for ages 5–8" named a category and an age band —
-         * the sentence every children's app on the store writes. The
-         * techniques are what make it this app rather than any of them, and a
-         * child recognises them too: they know what counting is. The headline
-         * above does the selling, so this only has to say what is inside.
-         *
-         * The offline promise and the evidence sit at the foot of the page,
-         * where a parent looks after deciding to read on rather than before.
-        */}
-        <p className="mt-2 text-sm text-muted">
-          {t("signIn.tagline")}
-        </p>
-      </div>
+    <div className="min-h-dvh w-full bg-canvas flex flex-col">
+      <header className="mx-auto flex w-full max-w-5xl items-center justify-between gap-3 px-4 pt-4 sm:px-6">
+        {/* The product's own mark (public/favicon.svg), the same tile as the
+            installed app's icon. Here only on a computer, where the intro
+            column is laid out without it. */}
+        <span className="hidden items-center gap-2 lg:inline-flex">
+          <img src="/favicon.svg" alt="" width={32} height={32} className="h-8 w-8 rounded-lg" />
+          <span className="text-lg font-extrabold tracking-tight text-ink">Koda</span>
+        </span>
+        <span className="lg:hidden" />
+        <LanguageSwitch />
+      </header>
 
-      <div className={themeSystem.card("default", "p-5 sm:p-6")}>
-        <AccountForm autoFocus />
-      </div>
+      <main className="mx-auto grid w-full max-w-5xl flex-1 items-center gap-6 px-4 py-6 sm:px-6 lg:grid-cols-2 lg:gap-16 lg:py-10">
+        <section className="text-center lg:text-left">
+          <img
+            src="/favicon.svg"
+            alt=""
+            width={56}
+            height={56}
+            className="mx-auto mb-4 h-14 w-14 rounded-2xl shadow-lg shadow-indigo-600/25 lg:hidden"
+          />
+          <h1 className="text-[26px] font-extrabold leading-tight tracking-tight text-balance text-ink sm:text-3xl lg:text-5xl">
+            {t("signIn.headline")}
+          </h1>
+          <p className="mx-auto mt-2 max-w-sm text-sm text-muted lg:mx-0 lg:mt-4 lg:max-w-md lg:text-lg">
+            {t("signIn.tagline")}
+          </p>
+          {/* The offline promise: unusual for a tablet on a household's patchy
+              wifi, and reassurance rather than a feature list. Under the form
+              on a phone, where it does not push the fields down. */}
+          <p className="mt-6 hidden items-center gap-2 text-sm font-semibold text-muted lg:inline-flex">
+            <WifiOff className="h-4 w-4" aria-hidden />
+            {t("signIn.offline")}
+          </p>
+        </section>
 
-      {/*
-       * The offline promise, restated where a parent decides whether to bother.
-       *
-       * It is the one genuinely unusual thing about this app on a tablet that
-       * shares a household's patchy wifi, and it reads as reassurance rather
-       * than as a feature list.
-      */}
-      <p className="mt-5 text-center text-xs leading-relaxed text-muted">
-        {t("signIn.offline")}
-      </p>
+        <section className="mx-auto w-full max-w-[420px] lg:mr-0">
+          <div className={themeSystem.card("default", "p-5 sm:p-6")}>
+            <AccountForm autoFocus />
+          </div>
+          <p className="mt-4 text-center text-xs leading-relaxed text-muted lg:hidden">
+            {t("signIn.offline")}
+          </p>
+        </section>
+      </main>
     </div>
-  </div>
   );
 };

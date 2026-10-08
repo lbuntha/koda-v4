@@ -20,7 +20,7 @@
     <title>Learn with Koda</title>
     <meta
       name="description"
-      content="Counting, addition, number bonds — reading next. Ages 5–11. Works offline, no ads."
+      content="Maths, reading and writing practice for children, with progress parents can see. Works offline, no ads."
     />
 
     <!-- Address bar and standalone chrome. Two values so the bar matches the
@@ -44,10 +44,10 @@
     <meta name="apple-mobile-web-app-title" content="Koda" />
     <meta name="mobile-web-app-capable" content="yes" />
 
-    <meta property="og:title" content="Koda — Math for Young Learners" />
+    <meta property="og:title" content="Koda — Learning that grows with your child" />
     <meta
       property="og:description"
-      content="Counting, comparing and place value practice for 5–6 year olds. Works offline."
+      content="Maths, reading and writing practice for children, with progress parents can see. Works offline, no ads."
     />
     <meta property="og:type" content="website" />
     <meta name="twitter:card" content="summary_large_image" />
@@ -90,7 +90,28 @@
     </script>
   </head>
   <body>
-    <div id="root"></div>
+    <!-- The boot mark, until React takes over #root and replaces it.
+
+         Without it the first visit was an empty canvas for as long as the
+         bundle took — on a slow connection, long enough to look broken. It
+         fades in only after 400ms, so a fast load goes straight to the app
+         without the mark blinking past. -->
+    <style>
+      #koda-boot {
+        min-height: 100vh;
+        min-height: 100dvh;
+        display: grid;
+        place-items: center;
+        opacity: 0;
+        animation: koda-boot-in 300ms ease-out 400ms forwards;
+      }
+      #koda-boot img { width: 64px; height: 64px; border-radius: 16px; }
+      @keyframes koda-boot-in { to { opacity: 1; } }
+      @media (prefers-reduced-motion: reduce) {
+        #koda-boot { animation-duration: 1ms; }
+      }
+    </style>
+    <div id="root"><div id="koda-boot" aria-hidden="true"><img src="/favicon.svg" alt="" /></div></div>
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>

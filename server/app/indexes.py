@@ -227,6 +227,10 @@ INDEXES: dict[str, list[IndexModel]] = {
             name="owner_registration_order",
         ),
     ],
+    "translation_overrides": [
+        # One correction per message per language; the editor upserts on it.
+        IndexModel([("lang", ASCENDING), ("key", ASCENDING)], unique=True, name="translation_unique"),
+    ],
     "system_settings": [
         # Global: there is no family in the key, which is the whole point.
         IndexModel([("settingId", ASCENDING)], unique=True, name="system_setting_unique"),

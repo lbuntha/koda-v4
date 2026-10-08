@@ -26,6 +26,8 @@ export type TabId =
   | "admin"
   | "scoring"
   | "subjects"
+  // Wording corrections per language. content:write, like Art.
+  | "translations"
   | "badges"
   | "billing"
   | "keys"

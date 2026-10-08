@@ -158,6 +158,7 @@ const MenuPage = lazy(() =>
 const AdminPage = lazy(() =>
   import("./components/account/AdminPage").then((m) => ({ default: m.AdminPage })),
 );
+const TranslationsPage = lazy(() => import("./components/account/TranslationsPage").then((m) => ({ default: m.TranslationsPage })));
 const SubjectsPage = lazy(() => import("./components/account/SubjectsPage").then((m) => ({ default: m.SubjectsPage })));
 const KodaPage = lazy(() =>
   import("./components/account/KodaPage").then((m) => ({ default: m.KodaPage })),
@@ -291,6 +292,7 @@ export default function App() {
     | "admin"
     | "scoring"
     | "subjects"
+    | "translations"
     | "badges"
     | "billing"
     | "keys"
@@ -355,6 +357,7 @@ export default function App() {
     if (activeTab === "children" && !canManageChildren) setActiveTab("home");
     if (activeTab === "assets" && !canEditArt) setActiveTab("home");
     if (activeTab === "library-studio" && !canEditArt) setActiveTab("home");
+    if (activeTab === "translations" && !canEditArt) setActiveTab("home");
     if (activeTab === "trace-studio" && !canTrace) setActiveTab("home");
     if (activeTab === "skills" && !canManageSkills) setActiveTab("home");
     if (activeTab === "koda" && !canOperate) setActiveTab("home");
@@ -1203,6 +1206,11 @@ export default function App() {
             </Deferred>
           )}
           {activeTab === "subjects" && <Deferred label="Loading Subjects"><SubjectsPage /></Deferred>}
+          {activeTab === "translations" && canEditArt && (
+            <Deferred label="Loading Translations">
+              <TranslationsPage />
+            </Deferred>
+          )}
 
           {activeTab === "settings" && (
             <SettingsPage

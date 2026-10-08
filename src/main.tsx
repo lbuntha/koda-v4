@@ -11,6 +11,7 @@ import './voice/common';
 import './index.css';
 import './library/khmerFont';
 import { syncDocumentLanguage, useT } from './lib/i18n';
+import { applyCachedOverrides, refreshOverrides } from './lib/i18n/overrides';
 
 /* Before the first render: a child can pinch the splash screen too. Never torn
    down — it lives as long as the document does. */
@@ -19,6 +20,11 @@ blockPinchZoom();
 /* `<html lang dir>` follows the chosen language from the first paint, so the
    right font and the right screen-reader voice are picked before React runs. */
 syncDocumentLanguage();
+
+/* Wording corrections from the Translations page: this device's copy now, so
+   the first paint is already corrected, and the server's newer set after. */
+applyCachedOverrides();
+void refreshOverrides();
 
 /*
  * Repaints the whole app when the language changes.

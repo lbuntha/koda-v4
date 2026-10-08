@@ -696,9 +696,6 @@ export const AccountForm: React.FC<AccountFormProps> = ({ onSignedIn, autoFocus 
               onChange={(e) => setFamilyName(e.target.value)}
               className={field}
             />
-            <p className="mt-1.5 text-xs leading-relaxed text-muted">
-              {t("account.familyNameNote")}
-            </p>
           </div>
         )}
 

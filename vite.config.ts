@@ -69,11 +69,10 @@ export default defineConfig(() => {
           name: 'Learn with Koda',
           short_name: 'Koda',
           // What a parent reads on the install prompt and the store card. The
-          // same sentence as the sign-in screen, kept specific for the same
-          // reason: the techniques are what make this app recognisable, and the
-          // age band alone is what every other children's app also says.
+          // same promise as the sign-in screen: the three areas and the parent's
+          // view of progress, without a feature list that goes stale as it grows.
           description:
-            'Counting, addition, number bonds — reading next. Ages 5–11. Works offline, no ads.',
+            'Maths, reading and writing practice for children, with progress parents can see. Works offline, no ads.',
           lang: 'en',
           start_url: '/',
           scope: '/',

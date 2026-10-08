@@ -44,6 +44,16 @@ export const BASE_LANGUAGE = "en";
 
 const languages = new Map<string, LanguageMeta>();
 const catalogs = new Map<string, Map<string, Message>>();
+/**
+ * Corrections made in the Translations page, over the bundled catalogs.
+ *
+ * Kept apart from `catalogs` rather than merged into them, so the editor can
+ * show what the app ships with beside the correction, and resetting a line is
+ * deleting a row rather than remembering what used to be there.
+ */
+const overrides = new Map<string, Map<string, Message>>();
+
+export type { Message as CatalogMessage };
 
 const isPluralSet = (value: CatalogTree): boolean => {
   const keys = Object.keys(value);
@@ -97,6 +107,23 @@ const bundled = import.meta.glob<CatalogTree>("./locales/*.json", { eager: true,
 for (const [path, tree] of Object.entries(bundled)) {
   const code = path.match(/([^/]+)\.json$/)![1];
   registerMessages(code, tree);
+}
+
+/**
+ * Replace the whole correction layer — what the server sent, or the copy
+ * this device kept from last time.
+ */
+export function setOverrides(tree: Record<string, Record<string, Message>>): void {
+  overrides.clear();
+  for (const [code, messages] of Object.entries(tree)) {
+    overrides.set(code, new Map(Object.entries(messages)));
+  }
+  notify();
+}
+
+/** One language's corrections, by key. For the editor. */
+export function overrideMessages(code: string): ReadonlyMap<string, Message> {
+  return overrides.get(code) ?? new Map();
 }
 
 /** Every language with a described catalog, the base language first. */
@@ -201,7 +228,7 @@ export function translate(key: string, vars?: TranslateVars, code = currentLangu
   let message: Message | undefined;
   let from = code;
   for (const lang of chainFor(code)) {
-    message = catalogs.get(lang)?.get(key);
+    message = overrides.get(lang)?.get(key) ?? catalogs.get(lang)?.get(key);
     if (message !== undefined) {
       from = lang;
       break;
@@ -226,14 +253,14 @@ export function translate(key: string, vars?: TranslateVars, code = currentLangu
   });
 }
 
-/** One catalog's own messages, flattened — no fallback. For tests and tooling. */
+/** One catalog's own messages as bundled, flattened — no fallback, no corrections. */
 export function catalogMessages(code: string): ReadonlyMap<string, Message> {
   return catalogs.get(code) ?? new Map();
 }
 
 /** Whether any catalog on the chain has this key — for optional overrides. */
 export function hasMessage(key: string, code = currentLanguage()): boolean {
-  return chainFor(code).some((lang) => catalogs.get(lang)?.has(key));
+  return chainFor(code).some((lang) => overrides.get(lang)?.has(key) || catalogs.get(lang)?.has(key));
 }
 
 /** Change signal for `useSyncExternalStore`: catalogs *or* the choice moved. */

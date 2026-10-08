@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { CloudOff, Download, UploadCloud, X } from "lucide-react";
 import { themeSystem } from "../lib/themeSystem";
 import { useOnlineStatus, useServiceWorker } from "../pwa/useServiceWorker";
-import { useSyncStatus } from "../lib/sync";
+import { useSession, useSyncStatus } from "../lib/sync";
 
 import { translate } from "../lib/i18n";
 /**
@@ -17,6 +17,7 @@ import { translate } from "../lib/i18n";
 export const PwaStatus: React.FC = () => {
   const online = useOnlineStatus();
   const sync = useSyncStatus();
+  const session = useSession();
   const { updateReady, offlineReady, applyUpdate, dismiss } = useServiceWorker();
   const [showOfflineReady, setShowOfflineReady] = useState(false);
   /**
@@ -87,7 +88,7 @@ export const PwaStatus: React.FC = () => {
   const stalled = sync.state === "refused" || sync.state === "signed-out";
   const waiting = online && !stalled && sync.pending > 20 && savingIsSlow ? sync.pending : 0;
 
-  const anything = !online || updateReady || showOfflineReady || waiting > 0;
+  const anything = !online || updateReady || (showOfflineReady && session) || waiting > 0;
   if (!anything) return null;
 
   return (
@@ -145,7 +146,10 @@ export const PwaStatus: React.FC = () => {
         </div>
       )}
 
-      {showOfflineReady && online && !updateReady && (
+      {/* Not on the sign-in screen: nobody can play there yet, so "ready to
+          play" was a promise the page could not keep, and it popped in and out
+          over the form on every first visit. */}
+      {showOfflineReady && session && online && !updateReady && (
         <div className="flex items-center gap-2.5 rounded-2xl border-2 border-line bg-surface px-4 py-2.5 shadow-sm">
           <p className="text-xs font-bold text-ink">{translate("app.pwaStatus.readyToPlayWithoutInternet")}</p>
         </div>
