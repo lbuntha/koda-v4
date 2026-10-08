@@ -80,7 +80,6 @@ export const PracticeStepHeader: React.FC<PracticeStepHeaderProps> = ({
   hintCount,
   hintPanelId,
   onReadAloud,
-  levelNumber,
   contextTag,
   tagLabels,
 }) => {

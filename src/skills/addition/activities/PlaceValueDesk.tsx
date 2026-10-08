@@ -271,8 +271,6 @@ export const buildQuestion = (
     const hundred = sum >= 100;
     /** Keeps the addends under T and O when H is drawn. */
     const lead: DeskCell[] = hundred ? [{ text: "" }] : [];
-    /** And keeps the running rows the same width as the header. */
-    const tail: DeskCell[] = hundred ? [{ text: "" }, { text: "" }] : [{ text: "" }];
 
     return {
       ...base,

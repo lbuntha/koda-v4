@@ -479,7 +479,7 @@ export const StoryBoard: React.FC<ActivityProps<StoryBoardParams>> = ({
   const toPlace = slots.filter((s) => s.value !== undefined);
   const built = toPlace.every((s) => placed[s.id] !== undefined);
 
-  const tapChip = (value: number, at: number) => {
+  const tapChip = (_value: number, at: number) => {
     if (round.feedback) return;
     setHeld((h) => (h === at ? null : at));
     playChrome(koda, "clink");
@@ -591,7 +591,7 @@ export const StoryBoard: React.FC<ActivityProps<StoryBoardParams>> = ({
       }
       onExit={koda.ui.exit}
       onReadAloud={
-        practising
+        !speaks
           ? undefined
           : () => {
             round.useSupport("audio_replay");

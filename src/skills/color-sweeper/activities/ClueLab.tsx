@@ -1,10 +1,9 @@
-import React, { useCallback, useEffect, useMemo, useState } from "react";
+import React, { useCallback, useEffect, useMemo } from "react";
 import type { ActivityProps, PrintedQuestion } from "../../types";
 import { SkillRound, composeHints, isPractice, modeAt, playCopy, useSkillRound, type RoundQuestion } from "../../kit";
 import { quietWhenPractising } from "../../kit/practice";
 import type { Color } from "../internal/board";
 import { BoardGrid, tileLabel } from "../internal/BoardGrid";
-import { PALETTE } from "../internal/palette";
 import type { BoardMode } from "../internal/puzzles";
 import { clueName, forces, generateLab, LAB_MODES, type Lab, type LabMode } from "../internal/reasons";
 import { chime, speechRate, tagLabelsFrom } from "../internal/sweeperChrome";

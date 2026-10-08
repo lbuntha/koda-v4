@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useState, useSyncExternalStore } from "react";
-import { Check, Copy, KeyRound, LineChart, MoreVertical, Pencil, Plus, RefreshCw, Trash2, UserRound } from "lucide-react";
+import { Check, Copy, KeyRound, LineChart, MoreVertical, Pencil, Plus, Trash2, UserRound } from "lucide-react";
 
 import { ApiError, accessToken, request, SessionAPI, usePermissions, useSession } from "../../lib/sync";
 import { DAILY_GOAL_DEFAULT, DailyGoalAPI } from "../../lib/dailyGoal";

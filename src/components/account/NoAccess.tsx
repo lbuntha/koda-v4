@@ -17,7 +17,7 @@ export const NoAccess: React.FC<{ title: string; permission: string; what: strin
   permission,
   what,
 }) => {
-  const { t, tNodes } = useT();
+  const { tNodes } = useT();
   return (
   <div className={"max-w-3xl mx-auto"}>
     <section

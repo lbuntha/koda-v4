@@ -97,7 +97,7 @@ export const STRATEGIES: Strategy[] = [
   {
     id: "jump_tens_ones",
     name: "Tens, then ones",
-    why: (a, b) => `${b} splits into ${digitsOf(b).tens * 10} and ${digitsOf(b).ones}, and tens are an easy jump.`,
+    why: (_a, b) => `${b} splits into ${digitsOf(b).tens * 10} and ${digitsOf(b).ones}, and tens are an easy jump.`,
     fits: (a, b) => a >= 10 && b >= 10 && digitsOf(b).ones > 0,
     work: (a, b) => {
       const tens = digitsOf(b).tens * 10;

@@ -258,7 +258,7 @@ export function printedFor(question: StoryQuestion): { text: string; answer: str
 }
 
 /** An empty bar, ruled into nothing: the cutting is the child's decision. */
-export const figureFor = (question: StoryQuestion): React.ReactNode | null =>
+export const figureFor = (_question: StoryQuestion): React.ReactNode | null =>
   printBar(1, 0, { width: 220, label: "an empty bar to model the story on" });
 
 export function methodFor(question: StoryQuestion): string[] | null {

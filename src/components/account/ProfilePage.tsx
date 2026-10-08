@@ -14,7 +14,6 @@ import {
 
 import { SvgAsset } from "../../assets/svg";
 import { DailyGoalAPI } from "../../lib/dailyGoal";
-import { currentLearnerId } from "../../lib/learnerProgress";
 import { formatDate, translate, useT } from "../../lib/i18n";
 
 import {
@@ -246,10 +245,6 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({ onNavigate }) => {
   // arrives and a device with no connection to fetch it.
   const figures = stats ?? EMPTY_STATS;
   const isLearner = audience === "child" || audience === "student";
-  // Their own goal, when this reading is a learner reading their own profile
-  // and they hold the right to change it. `null` means "not theirs to set" —
-  // a child, or an adult, both of whom see the goal but not the stepper.
-  const ownGoal = isLearner && can("learner:update") ? DailyGoalAPI.for(currentLearnerId()) : null;
   // The chips list what this account may do; the *count* beside them is a
   // recorded figure like every other one.
   const permissions = session.permissions ?? [];

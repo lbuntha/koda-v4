@@ -285,9 +285,7 @@ const SkillRow: React.FC<{
 }> = ({ skill, stored, viewer, onOpen }) => {
   const { manifest } = skill;
   const releaseStatus = releaseStatusOf(skill);
-  const isEnabled = stored?.isEnabled ?? true;
   const features = stored?.features ?? skill.features;
-  const settings = { ...skill.settings, ...(stored?.settings ?? {}) };
   const activeCount = features.filter((f) => f.isEnabled).length;
   const hidden = hiddenReason(skill, viewer);
   const activityCount = Object.keys(skill.activities).length;

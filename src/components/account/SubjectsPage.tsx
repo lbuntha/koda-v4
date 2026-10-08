@@ -1,4 +1,3 @@
-import React from "react";
 import { usePermissions } from "../../lib/sync";
 import { NoAccess } from "./NoAccess";
 import { SubjectsPanel } from "./SubjectsPanel";

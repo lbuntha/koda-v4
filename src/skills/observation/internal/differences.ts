@@ -41,7 +41,7 @@ function supports(kind: DifferenceKind, object: SceneObject, freeSlots: SceneObj
 }
 
 /** The replacement a `swapped` difference uses: a meaningful near-miss. */
-function decoyFor(object: SceneObject, scene: ObservationScene, used: Set<string>): SceneObject | undefined {
+function decoyFor(object: SceneObject, _scene: ObservationScene, used: Set<string>): SceneObject | undefined {
   const group = OBJECT_BY_ID.get(object.id)?.decoyGroup;
   if (!group) return undefined;
   const partner = [...OBJECT_BY_ID.values()].find((candidate) =>

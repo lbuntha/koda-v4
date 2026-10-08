@@ -2,7 +2,7 @@ import React, { useCallback, useEffect, useRef, useState } from "react";
 import { motion } from "motion/react";
 import type { ActivityProps, PrintedQuestion } from "../../types";
 import {
-  SkillRound, SPRING, composeHints, isPractice, modeAt, playCopy,
+  SkillRound, composeHints, isPractice, modeAt, playCopy,
   useSkillRound, guideSetup, useGuide, type PracticeSetup, type RoundQuestion,
   answerChoices,
 } from "../../kit";

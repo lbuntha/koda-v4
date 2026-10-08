@@ -177,7 +177,6 @@ export function buildPlaceQuestion(
       return { dividend: quotient * divisor, divisor, quotient, remainder: 0, meaning: "group" };
     }
     if (mode === "tens_into_tens") {
-      const a = 2 + Math.floor(Math.random() * 8);
       const b = 2 + Math.floor(Math.random() * 8);
       const quotient = 2 + Math.floor(Math.random() * 9);
       const divisor = b * 10;

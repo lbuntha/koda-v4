@@ -15,7 +15,6 @@ import * as strategy from "./activities/StrategyPicker";
 import { registerSkillArt } from "../../assets/svg/skillArt";
 import { registerSkillVoice } from "../../lib/voiceClips";
 import audioManifest from "./audio/manifest.json";
-import voiceJson from "./voice.json";
 
 const { features, settings, settingsSchema, ...manifestFields } = manifestJson;
 

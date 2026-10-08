@@ -177,13 +177,6 @@ const dayWords = (day: string, now: Date = new Date()): string => {
   return formatDate(date, { weekday: "short", day: "numeric", month: "short" });
 };
 
-/** "4s", "1m 10s" — a typical answer, in units a person uses out loud. */
-const durationWords = (ms: number): string => {
-  const seconds = Math.round(ms / 1000);
-  if (seconds < 60) return `${seconds}s`;
-  return `${Math.floor(seconds / 60)}m ${seconds % 60}s`;
-};
-
 /**
  * What a headline number is made of, opened from the tile that shows it.
  *

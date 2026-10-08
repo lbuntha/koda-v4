@@ -198,7 +198,7 @@ describe("writing the column", () => {
 describe("the second row multiplies by the tens, not by the digit", () => {
   it("offers the bare digit and refuses it with a reason", async () => {
     const h = render("two_digit");
-    const [, a, b] = /(\d+) × (\d+)\. One row for the ones/.exec(h.text())!;
+    const [, , b] = /(\d+) × (\d+)\. One row for the ones/.exec(h.text())!;
     const tens = placeValueSplit(Number(b))[0];
     const digit = tens / 10;
     expect(h.buttons()).toContain(`The second row multiplies by ${digit}`);

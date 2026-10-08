@@ -47,7 +47,7 @@ export function buildQuestion(params: AreaParams, index: number, seen?: Set<stri
 export const promptFor = (question: MultiplyQuestion): string => question.prompt;
 
 export function multiplyHints(question: MultiplyQuestion): string[] {
-  const { fraction, other, total, copies } = question;
+  const { fraction, other, copies } = question;
   switch (question.mode) {
     case "of_whole":
       /*

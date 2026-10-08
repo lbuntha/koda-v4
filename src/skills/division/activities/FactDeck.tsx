@@ -58,7 +58,7 @@ export function factHints(question: FactQuestion, kidTip?: string): string[] {
 }
 
 function factHintsRungs(question: FactQuestion): string[] {
-  const { divisor, dividend, quotient } = question;
+  const { divisor, dividend } = question;
   switch (question.mode) {
     case "family":
       return composeHints(

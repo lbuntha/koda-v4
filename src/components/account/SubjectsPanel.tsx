@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { ArrowDown, ArrowUp, Plus, Save, Trash2 } from "lucide-react";
 import { getSkill } from "../../skills/registry";
 import { SkillRegistryAPI, useSkillRegistryVersion } from "../../lib/skillRegistryApi";

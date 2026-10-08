@@ -472,7 +472,6 @@ export const Home: React.FC<HomeProps> = ({
   const visibleSubjects = showAllSubjects ? subjects : subjects.slice(0, SUBJECTS_SHOWN);
   const inProgress = visibleSubjects.filter((entry) => entry.current);
   const otherSubjects = visibleSubjects.filter((entry) => !entry.current);
-  const hasInProgress = subjects.some((entry) => entry.current);
 
   if (!skills.length) {
     return (

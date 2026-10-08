@@ -82,7 +82,7 @@ export const CharacterAvatar: React.FC<{
   muted?: boolean;
   animated?: boolean;
   className?: string;
-}> = ({ personaId, avatarSeed, size = "md", muted = false, animated = false, className = "" }) => {
+}> = ({ personaId, size = "md", muted = false, animated = false, className = "" }) => {
   const body = (
     <span
       className={[
@@ -96,7 +96,7 @@ export const CharacterAvatar: React.FC<{
       {/* The same mascot a child meets, at whatever size this is. Not a second
           drawing of the character: one component, so a teacher cannot look like
           two different people on two screens. */}
-      <KodaMascot personaId={personaId} avatarSeed={avatarSeed} size={PIXELS[size]} />
+      <KodaMascot personaId={personaId} size={PIXELS[size]} />
     </span>
   );
 

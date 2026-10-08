@@ -70,7 +70,7 @@ export const ROUTES: readonly Route[] = [
     id: "chunk",
     label: "Take away big chunks",
     fits: (n, d) => n / d > 12,
-    why: (n, d) => `The answer is big, so take away tens of ${d}s at a time.`,
+    why: (_n, d) => `The answer is big, so take away tens of ${d}s at a time.`,
   },
   {
     id: "scale",
@@ -101,7 +101,7 @@ export interface StrategyQuestion {
   fitting: string[];
 }
 
-export function buildQuestion(params: StrategyParams, index: number): StrategyQuestion {
+export function buildQuestion(_params: StrategyParams, index: number): StrategyQuestion {
   /*
    * Drawn until at least one route fits and at least one does not.
    *

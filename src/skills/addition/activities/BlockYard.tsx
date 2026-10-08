@@ -537,9 +537,6 @@ export const BlockYard: React.FC<ActivityProps<BlockYardParams>> = ({
   const prompt = promptFor(question, copy.prompts?.default);
   const ready = readyToBundle(built);
   const columns: Place[] = ["hundreds", "tens", "ones"];
-  const visible = columns.filter(
-    (p) => question.offers.includes(p) || built[p] > 0 || p === "hundreds",
-  );
 
   /*
    * The coach: the same ladder, offered rather than waited for.

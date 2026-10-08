@@ -103,7 +103,7 @@ export interface LineQuestion {
  * the span is one — past that it multiplies by the span and puts `7/4` on mark
  * fourteen of eight. A number line that runs off its own end.
  */
-export const tickAt = (f: Fraction, span: number): number => f.taken;
+export const tickAt = (f: Fraction, _span: number): number => f.taken;
 
 export const intervalsFor = (f: Fraction, span: number): number => f.parts * span;
 

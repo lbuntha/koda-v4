@@ -11,7 +11,6 @@ import {
   explainDecimal,
   isDecimalCorrect,
   nameOf,
-  percentOf,
   type DecimalMode,
   type DecimalQuestion,
   type DecimalSetup,

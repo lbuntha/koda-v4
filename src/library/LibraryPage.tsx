@@ -3,7 +3,7 @@ import { memo, useCallback, useDeferredValue, useEffect, useMemo, useRef, useSta
 import { createPortal } from "react-dom";
 import { LANG_KEY, readLang } from "./lang";
 import { readPickFrom, useTodayContext } from "../components/learn/useToday";
-import { ArrowLeft, BookOpen, Check, ChevronDown, Globe, Lightbulb, RotateCcw, Search, Star, Volume2, X, Zap } from "lucide-react";
+import { ArrowLeft, BookOpen, Check, ChevronDown, Globe, Lightbulb, RotateCcw, Search, Star, Volume2, Zap } from "lucide-react";
 import { LetterWheel } from "../components/wheel/LetterWheel";
 import { ScoringAPI } from "../lib/scoring";
 import { noteFor, type Language, type Passage } from "./data/passage";

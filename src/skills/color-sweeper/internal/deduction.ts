@@ -125,7 +125,7 @@ export function deduce(board: Board, assigned: Assignment = board.givens, option
         for (let mask = 0; mask < (1 << line.length); mask++) {
           const picked = line.filter((_, k) => mask & (1 << k));
           if (picked.length !== clue.count) continue;
-          const at = line.map((cell, k) => (mask & (1 << k)) ? k : -1).filter(k => k >= 0);
+          const at = line.map((_cell, k) => (mask & (1 << k)) ? k : -1).filter(k => k >= 0);
           const together = at.every((k, n) => n === 0 || k === at[n - 1] + 1);
           if (clue.run === "together" ? !together : together) continue;
           if (line.some((cell, k) => !domains[cell].includes((mask & (1 << k)) ? color : other))) continue;

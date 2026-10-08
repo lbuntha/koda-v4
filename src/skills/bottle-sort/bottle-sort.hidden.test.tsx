@@ -5,7 +5,6 @@ import { skill } from ".";
 import { buildQuestion } from "./activities/BottleSort";
 import { buildQuestion as buildPredict } from "./activities/PredictThePour";
 import { canPour, pour } from "./internal/pour";
-import { specFor } from "./internal/specs";
 import type { Rack } from "./internal/types";
 
 /**

@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { renderActivity, type ActivityHarness } from "../kit/testing";
+import { renderActivity } from "../kit/testing";
 import { skill } from ".";
 import {
   buildFactorQuestion,

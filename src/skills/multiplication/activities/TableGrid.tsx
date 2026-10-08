@@ -16,9 +16,7 @@ import { themeSystem } from "../../../lib/themeSystem";
 import { drawProduct, randInt, withoutRepeat } from "../internal/data/multiplicationNumbers";
 import {
   drawPatternHunt,
-  matchesIn,
   noteFor,
-  ruleById,
   type PatternRuleId,
 } from "../internal/data/tablePatterns";
 import { chime } from "../internal/data/multiplicationSound";

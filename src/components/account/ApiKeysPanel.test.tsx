@@ -1,4 +1,3 @@
-import React from "react";
 import { fireEvent, render, screen, waitFor, within } from "@testing-library/react";
 import { afterEach, beforeEach, expect, it, vi } from "vitest";
 import { ApiKeysPanel } from "./ApiKeysPanel";

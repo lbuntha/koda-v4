@@ -22,7 +22,6 @@ import {
 import {
   PARTNER_MAX,
   PARTNER_MIN,
-  applyAdjust,
   availableAt,
   factsForStrategy,
   productOf,
@@ -360,7 +359,6 @@ export function buildQuestion(params: FactDeckParams, index: number, seen?: Set<
     itemCount: product,
   };
 
-  const n = base.partner;
   const fact = `${a} × ${b}`;
 
   switch (mode) {
@@ -476,7 +474,7 @@ export function factHints(
   kidTip: string | undefined,
   state: LiveState,
 ): string[] {
-  const { a, b, partner } = question;
+  const { a, b } = question;
   const first = question.helpers[0];
 
   switch (question.mode) {
@@ -660,7 +658,7 @@ export const FactDeck: React.FC<ActivityProps<FactDeckParams>> = ({ params, koda
 
   if (!question) return null;
 
-  const { mode, a, b, partner } = question;
+  const { mode, a, b } = question;
   const first = question.helpers[0];
   /** `known_fact` withholds the answer until a route has been chosen. */
   const picking = mode === "known_fact" && !revealed;

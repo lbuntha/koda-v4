@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import { accessToken, request, usePermissions } from "../../lib/sync";
 import { cacheSystemSetting } from "../../lib/sync/system";
 import { parseSubjects, SUBJECT_SETTING, useSubjects } from "../../lib/subjects";

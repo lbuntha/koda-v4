@@ -1,7 +1,6 @@
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import type { ActivityProps, PrintedQuestion } from "../../types";
 import { SkillRound, composeHints, isPractice, modeAt, playCopy, useSkillRound, type RoundQuestion } from "../../kit";
-import { quietWhenPractising } from "../../kit/practice";
 import type { Assignment, Board, Color } from "../internal/board";
 import { isSolution } from "../internal/validation";
 import { deduce } from "../internal/deduction";
@@ -275,11 +274,6 @@ export const SweeperBoard: React.FC<ActivityProps<SweeperParams>> = ({ params, k
   const nudge = useNudge(koda);
   const clearNudge = nudge.clear;
 
-  const speakAloud = (text: string) => {
-    if (!koda.config.isEnabled("audio_speech", true)) return;
-    void koda.speech.say(text, speechRate(koda)).catch(() => {});
-  };
-  const speak = quietWhenPractising(speakAloud, practising);
 
   const round = useSkillRound({
     koda,

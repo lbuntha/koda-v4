@@ -24,8 +24,8 @@ import {
 import { castFor, count, type StoryCast } from "../internal/data/storyCast";
 import { chime } from "../internal/data/multiplicationSound";
 import { speechRate, tagLabelsFrom } from "../internal/data/multiplicationChrome";
-import { ADJUSTMENT, EACH, GROUPS, NEUTRAL, PRODUCT } from "../internal/data/multiplicationPalette";
-import { SCROLL_BOX, TOUCH_TARGET } from "../internal/data/multiplicationLayout";
+import { EACH, GROUPS, NEUTRAL, PRODUCT } from "../internal/data/multiplicationPalette";
+import { SCROLL_BOX } from "../internal/data/multiplicationLayout";
 import { useNudge } from "../internal/ui/useNudge";
 
 /**

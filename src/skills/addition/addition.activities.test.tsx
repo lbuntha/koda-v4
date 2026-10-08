@@ -608,12 +608,6 @@ describe("the chain board plays a standard round", () => {
 });
 
 describe("the column pad plays a standard round", () => {
-  const setBox = (h: ActivityHarness, label: RegExp, value: string) => {
-    const box = h.screen.getByLabelText(label) as HTMLInputElement;
-    const setter = Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, "value")!.set!;
-    setter.call(box, value);
-    box.dispatchEvent(new Event("input", { bubbles: true }));
-  };
 
   /** Fill every answer column, and every carry the sum actually needs. */
   const workTheColumns = async (h: ActivityHarness) => {
@@ -768,6 +762,15 @@ describe("story problems play a standard round", () => {
       },
       { params: { mode: "start_unknown" }, level: 49 },
     );
+  });
+
+  it("offers no read-aloud control when the family has switched speech off", () => {
+    const on = renderActivity(story, { params: { mode: "join" }, level: 46 });
+    expect(on.buttons()).toContain("Read question aloud");
+    on.unmount();
+    const off = renderActivity(story, { params: { mode: "join" }, level: 46, features: { audio_speech: false } });
+    expect(off.buttons()).not.toContain("Read question aloud");
+    off.unmount();
   });
 
   it("a number put in the wrong box is refused, not scored", async () => {

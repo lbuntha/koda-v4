@@ -1,9 +1,8 @@
-import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { motion } from "motion/react";
 import { SvgAsset } from "../../../assets/svg";
 import type { ActivityProps } from "../../types";
 import { SkillRound, SPRING, composeHints, isPractice, playCopy, useMotionOK, useSkillRound, type RoundQuestion } from "../../kit";
-import { OBJECT_BY_ID } from "../internal/data";
 import { SCENE_BY_ID } from "../internal/scenes";
 import { buildDifferencePair, type DifferenceKind, type SceneDifference } from "../internal/differences";
 import { seedHash, seededShuffle } from "../internal/placement";

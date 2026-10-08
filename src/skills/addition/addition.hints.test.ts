@@ -15,7 +15,6 @@ import {
 import {
   buildQuestion as buildBond,
   bondHints,
-  specFor as bondSpec,
 } from "./activities/BondTree";
 import {
   buildQuestion as buildJump,

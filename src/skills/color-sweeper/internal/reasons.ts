@@ -1,4 +1,4 @@
-import { counted, governed, type Assignment, type Board, type Clue, type Color } from "./board";
+import { counted, type Assignment, type Board, type Clue, type Color } from "./board";
 import { deduce, type ProofStep } from "./deduction";
 import { PALETTE } from "./palette";
 import { generatePuzzle, type BoardMode } from "./puzzles";
@@ -83,7 +83,7 @@ export function forces(board: Board, clueIds: readonly string[], cell: number): 
 }
 
 /** The words for a step, and an equally true way of saying the same thing. */
-function reasonsFor(board: Board, step: ProofStep, cell: number): [string, string] {
+function reasonsFor(board: Board, step: ProofStep, _cell: number): [string, string] {
   const colour = PALETTE[step.color].name.toLowerCase();
   const clue = board.clues.find((c) => c.id === step.evidence[0].clueId)!;
   const name = clueName(board, clue);

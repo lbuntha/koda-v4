@@ -3,23 +3,13 @@ import { holdVoiceFloor } from "../lib/voiceClips";
 import {
   Mic,
   MicOff,
-  Volume2,
-  VolumeX,
   X,
   Sparkles,
-  RefreshCw,
   Radio,
   MessageSquare,
-  ChevronDown,
-  Info,
-  Play,
-  Award,
-  Zap,
   HelpCircle,
   Bot,
-  Maximize2,
   Minimize2,
-  GripHorizontal,
   Keyboard,
   Lightbulb,
   Wrench,
@@ -490,12 +480,6 @@ export const LiveVoiceCoachModal: React.FC<LiveVoiceCoachModalProps> = ({
       ? 1 + modelEnergy * 0.35
       : 1 + userEnergy * 0.25
     : 1;
-
-  const orbGlow = isLiveActive
-    ? isKodaSpeaking
-      ? "shadow-[0_0_60px_rgba(34,211,238,0.8)] ring-4 ring-cyan-400/60"
-      : "shadow-[0_0_50px_rgba(251,191,36,0.7)] ring-4 ring-violet-500/50"
-    : "shadow-[0_0_25px_rgba(100,116,139,0.3)] ring-2 ring-line";
 
   return (
     <>

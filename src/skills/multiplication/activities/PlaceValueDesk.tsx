@@ -164,7 +164,7 @@ export function printedFor(question: DeskQuestion): PrintedQuestion | null {
 }
 
 export function methodFor(question: DeskQuestion): string[] | null {
-  const { a, b, count, place } = question;
+  const { a, b, count } = question;
   switch (question.mode) {
     case "multiples_of_ten":
       return [
@@ -190,7 +190,7 @@ export function methodFor(question: DeskQuestion): string[] | null {
 }
 
 /** The columns, drawn empty, for a child to fill in with a pencil. */
-export function figureFor(question: DeskQuestion): React.ReactNode | null {
+export function figureFor(_question: DeskQuestion): React.ReactNode | null {
   const cell = 34;
   const labels = ["Th", "H", "T", "O"];
   return (
@@ -234,7 +234,7 @@ export function deskHints(
   kidTip: string | undefined,
   state: LiveState,
 ): string[] {
-  const { a, b, count } = question;
+  const { a, b } = question;
   switch (question.mode) {
     case "multiples_of_ten":
       return composeHints(

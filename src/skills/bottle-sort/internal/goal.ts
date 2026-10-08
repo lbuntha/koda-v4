@@ -53,7 +53,7 @@ export function accepts(goal: Goal, dest: Bottle, colour: number): number {
 }
 
 /** Why this bottle will not take that colour, in a child's words. */
-export function refusalFor(goal: Goal, dest: Bottle, colour: number): string {
+export function refusalFor(goal: Goal, dest: Bottle, _colour: number): string {
   if (dest.seg.length >= dest.cap) return "That bottle is full.";
   if (goal.kind === "order") {
     if (dest.seg.some((c, i) => c !== goal.order[i])) return "That bottle is not in order yet.";
@@ -130,7 +130,7 @@ export const numbered = (spec: RackSpec): boolean =>
   !!spec.goal && spec.goal !== "pattern";
 
 /** What each colour is called on screen, for a goal that numbers them. */
-export function labelFor(goal: Goal, spec: RackSpec, colour: number): string {
+export function labelFor(_goal: Goal, spec: RackSpec, colour: number): string {
   if (spec.goal === "by-size") return FRACTIONS[colour] ?? String(colour + 1);
   if (spec.goal === "count-by-twos") return String((colour + 1) * 2);
   if (spec.goal === "pattern") return shapeOf(colour);

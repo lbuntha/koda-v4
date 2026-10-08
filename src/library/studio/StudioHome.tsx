@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { BookPlus, ChevronDown, Mic, Pencil, RefreshCw, Search, Trash2, Wrench, X } from "lucide-react";
+import { BookPlus, ChevronDown, Mic, Pencil, RefreshCw, Trash2, Wrench, X } from "lucide-react";
 import { UIBadge, UIButton, UIDataTable, UIDialog, UIFlashMessage, UIMenu, UIMenuItem, UIPageHeader, UIPagination, UISpinner, UITabs, type UIDataTableColumn, UISearchInput } from "../../components/ui";
 import { themeSystem } from "../../lib/themeSystem";
 import { deleteBook, fetchStudioBooks, type BookSummary, type StudioMeta, type StudioPage, type StudioQuery, type StudioStatus } from "../api";

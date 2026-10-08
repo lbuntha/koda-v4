@@ -333,7 +333,7 @@ export function orderBySeed<T>(items: readonly T[], seed: string): T[] {
  */
 function constructedValue(
   mode: ShareMode,
-  spec: QuotientSpec,
+  _spec: QuotientSpec,
   ceiling: number,
 ): Quotient | undefined {
   if (mode === "identity") {

@@ -96,7 +96,6 @@ export interface SkillActionLog {
 const DEFAULT_SKILLS: InstalledSkill[] = [];
 
 const STORAGE_KEY_SKILLS = "koda_learning_skills_v2";
-const STORAGE_KEY_LOGS = "koda_skill_logs_v2";
 /** What the key was called before skills were called skills. */
 const LEGACY_KEY_SKILLS = "koda_learning_plugins_v2";
 

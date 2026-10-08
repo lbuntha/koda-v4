@@ -9,7 +9,6 @@ import {
   useSkillRound,
   type RoundQuestion,
   isPractice,
-  modeAt,
   playChrome,
   guideSetup,
   useGuide,

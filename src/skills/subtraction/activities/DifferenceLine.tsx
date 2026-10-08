@@ -7,7 +7,7 @@ import {
   answerChoices,
 } from "../../kit";
 import { themeSystem } from "../../../lib/themeSystem";
-import { COMPARISON, DIFFERENCE, REMOVED_PART, WHOLE } from "../internal/data/subtractionPalette";
+import { COMPARISON, DIFFERENCE } from "../internal/data/subtractionPalette";
 import { SCENE } from "../internal/data/subtractionLayout";
 import { speechRate, tagLabelsFrom } from "../internal/data/subtractionChrome";
 import { useNudge } from "../internal/ui/useNudge";

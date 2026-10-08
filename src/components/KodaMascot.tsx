@@ -13,7 +13,6 @@ import {
   STATE_ANIMATION,
   expressionNameFor,
   expressionNameOf,
-  kodaFace,
   type ExpressionName,
   type MascotState,
 } from "../lib/kodaFace";
@@ -207,7 +206,7 @@ export const KodaMascot: React.FC<{
   state?: MascotState;
   /** Colour and tilt come from the character, so one teacher looks like one. */
   personaId?: string;
-  /** The DiceBear seed. Falls back to the id, so a character always has a face. */
+  /** A character's saved DiceBear seed. Not drawn: the vector face is chosen by `personaId`. */
   avatarSeed?: string;
   /**
    * Koda's own voice level, 0–1, while speaking.
@@ -248,7 +247,6 @@ export const KodaMascot: React.FC<{
 }> = ({
   state = "idle",
   personaId = "koda",
-  avatarSeed,
   energy,
   palette,
   size = 160,
@@ -259,7 +257,6 @@ export const KodaMascot: React.FC<{
   const mirrored = facing !== undefined && facing !== FACE_LOOKS;
   const skin = palette ?? paletteFor(personaId);
   const tilt = tiltFor(personaId);
-  const seed = avatarSeed || personaId;
 
   /*
    * Somebody who asked their system for less movement gets a face that changes

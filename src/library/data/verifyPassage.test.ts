@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { BANDS, type Passage, type Question } from "./passage";
+import { type Passage, type Question } from "./passage";
 import { STARTER_PASSAGES } from "./starterPassages";
 import { verifyPassage, type RuleId } from "./verifyPassage";
 import { readingLexiconFor } from "./readingLexicon";

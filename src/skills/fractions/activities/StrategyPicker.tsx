@@ -107,7 +107,7 @@ export interface StrategyQuestion {
   fitting: string[];
 }
 
-export function buildQuestion(params: StrategyParams, index: number): StrategyQuestion {
+export function buildQuestion(_params: StrategyParams, index: number): StrategyQuestion {
   /*
    * Drawn until at least one route fits and at least one does not.
    *

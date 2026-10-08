@@ -11,8 +11,7 @@ import {
   useGuide,
 } from "../../kit";
 import { quietWhenPractising } from "../../kit/practice";
-import { themeSystem } from "../../../lib/themeSystem";
-import { drawProduct, randInt, shuffle, withoutRepeat } from "../internal/data/multiplicationNumbers";
+import { drawProduct, shuffle, withoutRepeat } from "../internal/data/multiplicationNumbers";
 import {
   fittingStrategies,
   strategyById,
@@ -141,7 +140,7 @@ export function printedFor(question: StrategyQuestion): PrintedQuestion | null {
   };
 }
 
-export function methodFor(question: StrategyQuestion): string[] | null {
+export function methodFor(_question: StrategyQuestion): string[] | null {
   return [
     "Look at the two numbers before choosing how to start.",
     "Some routes only work on certain numbers: halving needs an even one, doubling twice needs a four.",

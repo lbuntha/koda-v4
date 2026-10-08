@@ -18,7 +18,7 @@ import { ApiError, accessToken, Menu, refreshMenu, request, useMenu } from "../.
 import { listSvgAssets, type SvgAssetRecord } from "../../lib/svgAssetsApi";
 import { themeSystem } from "../../lib/themeSystem";
 import { playSound } from "../../utils/audio";
-import { UIBadge, UISectionHeader, sidebarIcons, UISearchInput } from "../ui";
+import { UIBadge, UISectionHeader, UISearchInput } from "../ui";
 import { ART_ICON_PREFIX, SidebarIcon } from "../ui/sidebarIcon";
 import { UIIconPicker } from "../ui/UIIconPicker";
 import { BASE_LANGUAGE, availableLanguages, hasMessage, translate } from "../../lib/i18n";

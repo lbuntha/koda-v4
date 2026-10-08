@@ -1,7 +1,7 @@
 import { isSolvedRack, signature } from "./pour";
 import { minimumPours } from "./solve";
 import { bottleDone, goalFor } from "./goal";
-import { topRun, type Bottle, type Rack, type RackSpec } from "./types";
+import { topRun, type Bottle, type RackSpec } from "./types";
 
 /**
  * Where a rack comes from, and why none of them can be impossible.
@@ -18,7 +18,6 @@ import { topRun, type Bottle, type Rack, type RackSpec } from "./types";
  * than the promise, and honest: `dealRack` never returns an unsolvable rack.
  */
 
-const MIX = 2654435761;
 /** Deterministic stream. The same seed deals the same rack, forever. */
 export function rng(seed: string): () => number {
   let h = 2166136261;

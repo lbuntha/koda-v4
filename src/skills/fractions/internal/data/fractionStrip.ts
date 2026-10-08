@@ -15,7 +15,6 @@ import {
   fractionDistractors,
   fractionKey,
   partitionsFor,
-  pick,
   randInt,
   shuffle,
   withoutRepeat,

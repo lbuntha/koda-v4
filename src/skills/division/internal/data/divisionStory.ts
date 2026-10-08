@@ -75,7 +75,7 @@ function options(answer: number, ...traps: number[]): number[] {
 }
 
 export function buildStoryQuestion(
-  setup: StorySetup,
+  _setup: StorySetup,
   mode: StoryMode,
   index: number,
 ): StoryQuestion {
