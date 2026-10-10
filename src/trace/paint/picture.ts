@@ -204,7 +204,9 @@ export function findLines(pixels: Uint8ClampedArray, strength: number): { mask: 
 /** Grow every line by `gap` old-grid cells (2 units each, a round brush), sealing breaks up to about twice that wide. */
 export function closeGaps(mask: Uint8Array, gap: number): Uint8Array {
   if (gap <= 0) return mask;
-  const r = Math.round(gap * GRID_SCALE);
+  // One cell more than the old grid's reach: there a line pixel marked a whole 2-unit cell, which sealed that much
+  // more. Without it, dashed outlines that used to close leaked (a tree became one part); with it, they match.
+  const r = Math.round(gap * GRID_SCALE) + 1;
   const out = mask.slice();
   const offsets: [number, number][] = [];
   for (let dy = -r; dy <= r; dy++) for (let dx = -r; dx <= r; dx++) if (dx * dx + dy * dy <= r * r + r) offsets.push([dx, dy]);
