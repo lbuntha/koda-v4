@@ -4437,8 +4437,14 @@
     "delete": "Delete",
     "deleteConfirm": "Delete this painting",
     "more": "More",
-    "shortcuts": "Keys: B brush · F fill · E eraser · 1–3 brush size · ⌘Z undo",
+    "shortcuts": "Keys: B brush · F fill · E eraser · 1–3 brush size · ⌘Z undo · Ctrl + wheel zoom",
     "finish": "Finish",
-    "tools": "Tools"
+    "tools": "Tools",
+    "fit": "Whole picture",
+    "pinchTip": "Pinch with two fingers to zoom in on small parts; two fingers also move the picture.",
+    "notYet": {
+      "title": "Colour more first",
+      "text": "Fill at least half of the glowing part, then press Done."
+    }
   }
 }

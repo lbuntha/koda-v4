@@ -12,7 +12,7 @@
  */
 
 import { useCallback, useEffect, useMemo, useRef, useState, useSyncExternalStore } from "react";
-import { ArrowLeft, ArrowRight, Brush, Check, Download, Eraser, Images, Lightbulb, MoreHorizontal, PaintBucket, Palette, RotateCcw, ShieldCheck, Star, Undo2, Volume2 } from "lucide-react";
+import { ArrowLeft, ArrowRight, Brush, Check, Download, Eraser, Images, Lightbulb, Maximize2, MoreHorizontal, PaintBucket, Palette, RotateCcw, ShieldCheck, Star, Undo2, Volume2 } from "lucide-react";
 import { useT } from "../../lib/i18n";
 import { UIButton, UIModal, UIProgressBar } from "../../components/ui";
 import { ScoringAPI } from "../../lib/scoring";
@@ -45,6 +45,8 @@ interface Props {
 }
 
 const SIZES = { s: 16, m: 32, l: 56 } as const;
+/** How far a child can zoom into the picture. */
+const MAX_ZOOM = 5;
 type Size = keyof typeof SIZES;
 /** How long a flash stays: praise briefly, advice long enough to read. */
 const FLASH_MS = { correct: 1800, hint: 4000, nudge: 4000 } as const;
@@ -213,19 +215,21 @@ export function ColorPlayer({ item, onExit, onAwardXp, sandbox = false, source, 
           rebuild();
           live.current.dirty = false;
         }
-        const k = canvas.width / 1000;
+        // Units → pixels, through the zoom: everything below is drawn on the 1000-unit picture.
+        const v = viewRef.current;
+        const k = (canvas.width / 1000) * v.z;
         ctx.setTransform(1, 0, 0, 1, 0, 0);
         ctx.fillStyle = "#ffffff";
         ctx.fillRect(0, 0, canvas.width, canvas.height);
+        ctx.setTransform(k, 0, 0, k, -v.x * k, -v.y * k);
         ctx.imageSmoothingEnabled = true;
         if (!live.current.finished) {
           ctx.globalAlpha = 0.14 + 0.16 * ((Math.sin(now / 320) + 1) / 2);
-          ctx.drawImage(hintLayer, 0, 0, canvas.width, canvas.height);
+          ctx.drawImage(hintLayer, 0, 0, 1000, 1000);
           ctx.globalAlpha = 1;
         }
-        ctx.drawImage(paintLayer, 0, 0, canvas.width, canvas.height);
-        if (linesRef.current && !item.paint?.picture?.smooth) ctx.drawImage(linesRef.current, 0, 0, canvas.width, canvas.height);
-        ctx.setTransform(k, 0, 0, k, 0, 0);
+        ctx.drawImage(paintLayer, 0, 0, 1000, 1000);
+        if (linesRef.current && !item.paint?.picture?.smooth) ctx.drawImage(linesRef.current, 0, 0, 1000, 1000);
         ctx.strokeStyle = INK;
         ctx.fillStyle = INK;
         ctx.lineWidth = LINE;
@@ -247,37 +251,101 @@ export function ColorPlayer({ item, onExit, onAwardXp, sandbox = false, source, 
     };
   }, [areas, lineArt, stepSets, steps, sources]);
 
-  /* ------------------------------------------------------------ painting */
+  /* ------------------------------------------------------------ painting
+   *
+   * One finger (or a mouse, or a stylus) paints. Two fingers zoom and move the
+   * picture and never paint: a stroke the first finger had begun is taken back
+   * when the second lands. Zoomed in, the brush keeps its size on the screen, so
+   * it paints finer. A stylus paints thicker as it presses harder, and once one
+   * has been used, fingers and a resting palm only zoom — they never paint.
+   */
   /** The stroke in progress, and the part it started in: with the helper on, it stays in that part. */
-  const penRef = useRef<{ id: number; last: Point; before: Uint8Array; part: number } | null>(null);
+  const penRef = useRef<{ id: number; last: Point; before: Uint8Array; part: number; pressure: number } | null>(null);
   /** The part the last stroke started in, for the advice after it. */
   const lastPartRef = useRef(-1);
-  const toUnits = (e: React.PointerEvent): Point => {
-    const r = canvasRef.current!.getBoundingClientRect();
-    return { x: ((e.clientX - r.left) / r.width) * 1000, y: ((e.clientY - r.top) / r.height) * 1000 };
+  /** What part of the picture is on screen: zoom ×1–×MAX_ZOOM, and the unit at the top-left corner. */
+  const viewRef = useRef({ z: 1, x: 0, y: 0 });
+  const [zoomed, setZoomed] = useState(false);
+  /** Fingers on the picture now, by pointer id, in screen pixels. */
+  const touchesRef = useRef(new Map<number, { x: number; y: number }>());
+  /** A two-finger gesture under way: where it started, and the view then. */
+  const pinchRef = useRef<{ dist: number; mid: { x: number; y: number }; view: { z: number; x: number; y: number } } | null>(null);
+  /** A Fill tap waits for the finger to lift: if it becomes a pinch, nothing is filled. */
+  const tapRef = useRef<{ id: number; at: { x: number; y: number }; p: Point } | null>(null);
+  /** A stylus has been used: from then on, fingers only zoom (a palm on the screen paints nothing). */
+  const stylusRef = useRef(false);
+
+  const setView = (z: number, x: number, y: number) => {
+    const zz = Math.min(MAX_ZOOM, Math.max(1, z));
+    const span = 1000 / zz;
+    viewRef.current = { z: zz, x: Math.min(1000 - span, Math.max(0, x)), y: Math.min(1000 - span, Math.max(0, y)) };
+    setZoomed(zz > 1.01);
+    live.current.dirty = true;
   };
+  const fitView = () => setView(1, 0, 0);
+  /** Screen pixels (relative to the picture) → units on the picture, through the zoom. */
+  const unitsAt = (sx: number, sy: number): Point => {
+    const r = canvasRef.current!.getBoundingClientRect();
+    const v = viewRef.current;
+    return { x: v.x + ((sx - r.left) / r.width) * (1000 / v.z), y: v.y + ((sy - r.top) / r.height) * (1000 / v.z) };
+  };
+  const toUnits = (e: { clientX: number; clientY: number }): Point => unitsAt(e.clientX, e.clientY);
   /**
    * Stay inside the lines keeps a stroke in the part it started in — any part,
    * not only the step's: every part of the picture can be coloured, and a
    * stroke never runs over a line into the next one. The eraser too.
    */
   const dab = (a: Point, b: Point) => {
-    const part = penRef.current?.part ?? -1;
+    const pen = penRef.current;
+    const part = pen?.part ?? -1;
     const allowed = inside && part >= 0 ? new Set([part]) : undefined;
-    brush(paintRef.current, areas, a, b, SIZES[size], tool === "eraser" ? 0 : crayonIndex(crayon), allowed);
+    // The same size on screen at any zoom; a stylus's pressure makes it thinner or thicker.
+    const r = (SIZES[size] / viewRef.current.z) * (pen?.pressure ?? 1);
+    brush(paintRef.current, areas, a, b, r, tool === "eraser" ? 0 : crayonIndex(crayon), allowed);
+    live.current.dirty = true;
+  };
+  const pressureOf = (e: PointerEvent | React.PointerEvent) => (e.pointerType === "pen" && e.pressure > 0 ? 0.45 + e.pressure * 1.1 : 1);
+
+  /** Take back the stroke a first finger began, when a second finger turns it into a pinch. */
+  const dropStroke = () => {
+    const pen = penRef.current;
+    if (!pen) return;
+    paintRef.current = pen.before;
+    penRef.current = null;
     live.current.dirty = true;
   };
 
+  const startPinch = () => {
+    const [a, b] = [...touchesRef.current.values()];
+    pinchRef.current = { dist: Math.hypot(a.x - b.x, a.y - b.y) || 1, mid: { x: (a.x + b.x) / 2, y: (a.y + b.y) / 2 }, view: { ...viewRef.current } };
+  };
+
   const onDown = (e: React.PointerEvent<HTMLCanvasElement>) => {
-    if (result || penRef.current) return;
+    if (result) return;
     try {
       e.currentTarget.setPointerCapture(e.pointerId);
     } catch {
       /* a pointer the browser no longer tracks: paint without capture */
     }
+    if (e.pointerType === "pen") stylusRef.current = true;
+    if (e.pointerType === "touch") {
+      touchesRef.current.set(e.pointerId, { x: e.clientX, y: e.clientY });
+      if (touchesRef.current.size >= 2) {
+        // Two fingers: zoom and move, and whatever the first finger began is undone.
+        dropStroke();
+        tapRef.current = null;
+        startPinch();
+        return;
+      }
+      if (stylusRef.current) return; // a palm, with a stylus in the other hand
+    }
+    if (penRef.current) return;
     const p = toUnits(e);
-    if (tool === "fill") return fillAt(p);
-    penRef.current = { id: e.pointerId, last: p, before: paintRef.current.slice(), part: areaAt(areas, p) };
+    if (tool === "fill") {
+      tapRef.current = { id: e.pointerId, at: { x: e.clientX, y: e.clientY }, p };
+      return;
+    }
+    penRef.current = { id: e.pointerId, last: p, before: paintRef.current.slice(), part: areaAt(areas, p), pressure: pressureOf(e) };
     lastPartRef.current = penRef.current.part;
     setMessage(null);
     dab(p, p);
@@ -297,17 +365,43 @@ export function ColorPlayer({ item, onExit, onAwardXp, sandbox = false, source, 
     review(before);
   };
   const onMove = (e: React.PointerEvent<HTMLCanvasElement>) => {
+    if (e.pointerType === "touch" && touchesRef.current.has(e.pointerId)) {
+      touchesRef.current.set(e.pointerId, { x: e.clientX, y: e.clientY });
+      const pinch = pinchRef.current;
+      if (pinch && touchesRef.current.size >= 2) {
+        const [a, b] = [...touchesRef.current.values()];
+        const r = canvasRef.current!.getBoundingClientRect();
+        const z = Math.min(MAX_ZOOM, Math.max(1, pinch.view.z * (Math.hypot(a.x - b.x, a.y - b.y) / pinch.dist)));
+        const mid = { x: (a.x + b.x) / 2, y: (a.y + b.y) / 2 };
+        // The point of the picture that was under the fingers stays under them.
+        const ux = pinch.view.x + ((pinch.mid.x - r.left) / r.width) * (1000 / pinch.view.z);
+        const uy = pinch.view.y + ((pinch.mid.y - r.top) / r.height) * (1000 / pinch.view.z);
+        setView(z, ux - ((mid.x - r.left) / r.width) * (1000 / z), uy - ((mid.y - r.top) / r.height) * (1000 / z));
+        return;
+      }
+    }
     const pen = penRef.current;
     if (!pen || pen.id !== e.pointerId) return;
     const list = e.nativeEvent.getCoalescedEvents?.() ?? [];
     for (const ev of list.length ? list : [e.nativeEvent]) {
-      const r = canvasRef.current!.getBoundingClientRect();
-      const p = { x: ((ev.clientX - r.left) / r.width) * 1000, y: ((ev.clientY - r.top) / r.height) * 1000 };
+      const p = toUnits(ev);
+      pen.pressure = pressureOf(ev);
       dab(pen.last, p);
       pen.last = p;
     }
   };
   const onUp = (e: React.PointerEvent<HTMLCanvasElement>) => {
+    if (e.pointerType === "touch") {
+      touchesRef.current.delete(e.pointerId);
+      if (touchesRef.current.size < 2) pinchRef.current = null;
+    }
+    const tap = tapRef.current;
+    if (tap && tap.id === e.pointerId) {
+      tapRef.current = null;
+      // A tap, not a drag that turned into a pinch: fill the part.
+      if (Math.hypot(e.clientX - tap.at.x, e.clientY - tap.at.y) < 12) fillAt(tap.p);
+      return;
+    }
     const pen = penRef.current;
     if (!pen || pen.id !== e.pointerId) return;
     penRef.current = null;
@@ -316,13 +410,32 @@ export function ColorPlayer({ item, onExit, onAwardXp, sandbox = false, source, 
     review(pen.before);
   };
 
+  // A computer: Ctrl/⌘ + the wheel (or a trackpad pinch) zooms about the pointer. Native, so it can stop the page zooming.
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const onWheel = (e: WheelEvent) => {
+      if (!(e.ctrlKey || e.metaKey)) return;
+      e.preventDefault();
+      const v = viewRef.current;
+      const r = canvas.getBoundingClientRect();
+      const z = Math.min(MAX_ZOOM, Math.max(1, v.z * Math.exp(-e.deltaY / 300)));
+      const ux = v.x + ((e.clientX - r.left) / r.width) * (1000 / v.z);
+      const uy = v.y + ((e.clientY - r.top) / r.height) * (1000 / v.z);
+      setView(z, ux - ((e.clientX - r.left) / r.width) * (1000 / z), uy - ((e.clientY - r.top) / r.height) * (1000 / z));
+    };
+    canvas.addEventListener("wheel", onWheel, { passive: false });
+    return () => canvas.removeEventListener("wheel", onWheel);
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps -- setView reads refs only
+
   /** Steps done: coloured past the bar, or said done by the child (and not rubbed out since). */
   const manualRef = useRef<Set<number>>(new Set());
   const doneNow = (paint: Uint8Array) => {
     const out = new Set<number>();
     steps.forEach((s, k) => {
       const cover = stepState(paint, areas, s, own).cover;
-      if (cover >= need || (manualRef.current.has(k) && cover > 0)) out.add(k);
+      // Said done stays done only while the step is still at least half coloured.
+      if (cover >= need || (manualRef.current.has(k) && cover >= NEARLY)) out.add(k);
       else manualRef.current.delete(k);
     });
     return out;
@@ -338,22 +451,27 @@ export function ColorPlayer({ item, onExit, onAwardXp, sandbox = false, source, 
 
   /**
    * The child says this step is done. The check can miss specks a child cannot
-   * see, so their word counts: past NEARLY, the step's last white gaps are filled
-   * in its colour (colour already there is kept), and it is done either way.
+   * see, so once at least NEARLY (half) is coloured their word counts: the
+   * step's last white gaps are filled in its colour (colour already there is
+   * kept) and it is done. Under half, Done says what is left instead — tapping
+   * Done through the steps must not finish a picture nobody coloured.
    */
   const completeStep = () => {
     if (!step || done.has(cur)) return;
     const paint = paintRef.current;
-    const before = paint.slice();
-    if (stepState(paint, areas, step, own).cover >= NEARLY) {
-      // In their own colours, the gaps take the crayon in hand; otherwise the step's colour.
-      const c = crayonIndex(own ? crayon : step.color);
-      const parts = stepSets[cur];
-      for (let i = 0; i < paint.length; i++) if (!paint[i] && parts.has(areas.labels[i])) paint[i] = c;
-      historyRef.current = [...historyRef.current.slice(-24), before];
-      setVer((v) => v + 1);
-      live.current.dirty = true;
+    // Done is a promise the child kept, not a shortcut: under half coloured, it says what is left.
+    if (stepState(paint, areas, step, own).cover < NEARLY) {
+      setMessage({ tone: "hint", title: t("paint.notYet.title"), text: t("paint.notYet.text") });
+      return;
     }
+    const before = paint.slice();
+    // In their own colours, the gaps take the crayon in hand; otherwise the step's colour.
+    const c = crayonIndex(own ? crayon : step.color);
+    const parts = stepSets[cur];
+    for (let i = 0; i < paint.length; i++) if (!paint[i] && parts.has(areas.labels[i])) paint[i] = c;
+    historyRef.current = [...historyRef.current.slice(-24), before];
+    setVer((v) => v + 1);
+    live.current.dirty = true;
     manualRef.current.add(cur);
     const nowDone = doneNow(paint);
     nowDone.add(cur);
@@ -451,6 +569,7 @@ export function ColorPlayer({ item, onExit, onAwardXp, sandbox = false, source, 
       });
     }
     setMessage(null);
+    fitView();
     setResult({ ...score, xp });
     // Keep it in My pictures (on the device now, on the server when it can). Not a Studio test.
     keptRef.current = null;
@@ -760,6 +879,17 @@ export function ColorPlayer({ item, onExit, onAwardXp, sandbox = false, source, 
                 onPointerCancel={onUp}
               />
               {flash}
+              {/* Zoomed in: how far, and one tap back to the whole picture */}
+              {zoomed && !result && (
+                <button
+                  type="button"
+                  onClick={fitView}
+                  className="absolute bottom-2 right-2 z-10 flex items-center gap-1.5 rounded-full bg-surface/95 px-3 py-1.5 text-xs font-semibold text-ink shadow-md ring-1 ring-line backdrop-blur transition hover:ring-indigo-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500"
+                >
+                  <Maximize2 className="h-3.5 w-3.5" />
+                  {t("paint.fit")}
+                </button>
+              )}
             </div>
           </div>
 
@@ -874,6 +1004,10 @@ export function ColorPlayer({ item, onExit, onAwardXp, sandbox = false, source, 
             {stepChips(false)}
           </div>
           {switches}
+          <p className="flex items-center gap-2 text-xs text-muted">
+            <Maximize2 className="h-3.5 w-3.5 shrink-0" />
+            {t("paint.pinchTip")}
+          </p>
           <UIButton
             variant="secondary"
             icon={<RotateCcw />}
