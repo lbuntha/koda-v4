@@ -89,7 +89,7 @@ import {
 import type { Activity, NodeType, Sensitivity, StepId, Stroke, StrokeShape, TraceItem, TraceKind, Zone } from "../geometry/types";
 import { activityOf, hasArt, modeOf } from "../geometry/types";
 import { PaintSteps } from "./PaintSteps";
-import { fittedPixels, loadImage, pictureFrom } from "../paint/picture";
+import { fittedPixels, loadImage, pictureFrom, pictureWalls, smoothLines } from "../paint/picture";
 import { PaintPicture } from "./PaintPicture";
 import { PaintPublish } from "./PaintPublish";
 import { ColorPlayer } from "../paint/ColorPlayer";
@@ -422,18 +422,24 @@ function DraftEditor({ id, onClose }: { id: string; onClose(): void }) {
   const selected = sel !== null ? item.strokes[sel] : undefined;
   const node = selected && selNode !== null ? selected.nodes[selNode] : undefined;
   const activity = activityOf(item);
-  // A picture made before its real lines were kept: find them once (no undo step — nothing the author did).
+  // A picture made before its real lines were kept, or on the old 500-cell grid: find its lines again once,
+  // in the current form (no undo step — nothing the author did).
   const upgrading = useRef(false);
   useEffect(() => {
     const picture = item.paint?.picture;
     const src = item.guide?.image?.src;
-    if (activity !== "color" || !picture || picture.raw || !src || upgrading.current) return;
+    if (activity !== "color" || !picture || picture.raw?.startsWith("rle1:") || !src || upgrading.current) return;
     upgrading.current = true;
     void loadImage(src)
       .then((img) => {
         const fresh = pictureFrom(fittedPixels(img), picture.strength, picture.gap ?? 0, picture.erase ?? []);
         const cur = itemRef.current;
-        if (cur.paint?.picture?.walls === picture.walls) setItem({ ...cur, paint: { ...cur.paint, steps: cur.paint.steps, picture: { ...fresh, smooth: picture.smooth } } });
+        if (cur.paint && cur.paint.picture?.raw === picture.raw && cur.paint.picture?.walls === picture.walls) {
+          const walls = pictureWalls(fresh);
+          // A smoothed picture's strokes are redrawn on the sharper grid too.
+          const strokes = picture.smooth && walls ? smoothLines(walls, () => uid("s")) : cur.strokes;
+          setItem({ ...cur, strokes, paint: { ...cur.paint, picture: { ...fresh, smooth: picture.smooth } } });
+        }
       })
       .catch(() => undefined);
   }, [activity, item.paint?.picture, item.guide?.image?.src, setItem]);
@@ -1259,6 +1265,23 @@ function DetailsPanel({ item, onChange }: { item: TraceItem; onChange(i: TraceIt
               ))}
             </select>
           </Field>
+          {coloring && (
+            <label className="flex cursor-pointer items-start gap-3 rounded-2xl border border-line p-3 sm:col-span-2">
+              <input
+                type="checkbox"
+                className="mt-0.5 h-4 w-4 accent-indigo-600"
+                checked={item.paint?.allowFill !== false}
+                onChange={(e) => {
+                  const { allowFill: _a, ...rest } = item.paint ?? { steps: [] };
+                  onChange({ ...item, paint: { ...rest, steps: rest.steps ?? [], ...(e.target.checked ? {} : { allowFill: false }) } });
+                }}
+              />
+              <span className="flex flex-col gap-0.5">
+                <span className="text-sm font-semibold text-ink">{t("traceStudio.allowFill")}</span>
+                <span className="text-xs text-muted">{t("traceStudio.allowFillNote")}</span>
+              </span>
+            </label>
+          )}
           {item.kind === "mark" && (
             <>
               <Field label={t("traceStudio.carrier")}>

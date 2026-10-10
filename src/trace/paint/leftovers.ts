@@ -8,13 +8,13 @@
 import type { PaintStep } from "../geometry/types";
 import type { Areas } from "./areas";
 import { owners } from "./areas";
-import { GRID } from "./grid";
-import { insidePoint } from "./picture";
+import { GRID, GRID_SCALE } from "./grid";
+import { insidePoints } from "./picture";
 
-/** Largest part counted as a leftover, in cells (about 2% of the page each way). */
-export const LEFTOVER = 700;
-/** How far across a line to look for the neighbouring part, in cells. */
-const REACH = 14;
+/** Largest part counted as a leftover, in cells (about 2,800 units², 2% of the page each way). */
+export const LEFTOVER = 700 * GRID_SCALE * GRID_SCALE;
+/** How far across a line to look for the neighbouring part, in cells (28 units). */
+const REACH = 14 * GRID_SCALE;
 
 /** Unowned parts small enough to be leftovers (specks included: they are left white too). */
 export function leftovers(areas: Areas, steps: readonly PaintStep[]): number[] {
@@ -62,13 +62,14 @@ export function fillLeftovers(areas: Areas, steps: readonly PaintStep[]): { step
   const cellsOf = new Map<number, number[]>(small.map((l) => [l, []]));
   for (let i = 0; i < areas.labels.length; i++) cellsOf.get(areas.labels[i])?.push(i);
   const added = steps.map(() => [] as { x: number; y: number }[]);
+  const points = insidePoints(areas, small);
   let placed = 0;
   const seen = new Int32Array(GRID * GRID);
   const smallSet = new Set(small);
   for (const [n, l] of small.entries()) {
     const k = neighbourStep(areas, own, l, cellsOf.get(l)!, seen, n + 1, smallSet);
     if (k < 0) continue;
-    added[k].push(insidePoint(areas, l));
+    added[k].push(points.get(l)!);
     placed++;
   }
   return { steps: steps.map((s, k) => (added[k].length ? { ...s, seeds: [...s.seeds, ...added[k]] } : s)), placed };

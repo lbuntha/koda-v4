@@ -134,8 +134,11 @@ def item_problems(item: Any, plan: Any, tests: Any) -> list[str]:
     return out
 
 
-# The paint grid is 500×500 cells, one bit each, base64 (see src/trace/paint/picture.ts).
-PACKED_WALLS = ((500 * 500 // 8 + 2) // 3) * 4
+# A line mask packed one bit per cell and base64'd: on the old 500-cell grid or
+# the current 1000-cell one (see src/trace/paint/picture.ts). Run-length masks
+# are far smaller; this caps them.
+PACKED_SIZES = {((n * n // 8 + 2) // 3) * 4 for n in (500, 1000)}
+MAX_RUNS = 400_000
 
 
 def _picture_problems(picture: Any) -> list[str]:
@@ -146,12 +149,23 @@ def _picture_problems(picture: Any) -> list[str]:
     walls = picture.get("walls")
     if not isinstance(lines, str) or not lines.startswith("data:image/png;base64,"):
         return ["its picture's line art is not readable; upload the picture again"]
-    if not isinstance(walls, str) or len(walls) != PACKED_WALLS:
-        return ["its picture's parts are not readable; upload the picture again"]
     raw = picture.get("raw")
-    if raw is not None and (not isinstance(raw, str) or len(raw) != PACKED_WALLS):
+    if walls is None and raw is None:
+        return ["its picture has no lines; upload the picture again"]
+    if walls is not None and (not isinstance(walls, str) or len(walls) not in PACKED_SIZES):
+        return ["its picture's parts are not readable; upload the picture again"]
+    if raw is not None and not _mask_ok(raw):
         return ["its picture's lines are not readable; upload the picture again"]
     return []
+
+
+def _mask_ok(mask: Any) -> bool:
+    """Run-length (`rle1:` and base64, current pictures) or packed bits on the old or the current grid."""
+    if not isinstance(mask, str):
+        return False
+    if mask.startswith("rle1:"):
+        return 5 < len(mask) <= MAX_RUNS and re.fullmatch(r"[A-Za-z0-9+/]*=*", mask[5:]) is not None
+    return len(mask) in PACKED_SIZES
 
 
 def _paint_problems(paint: Any) -> list[str]:
@@ -159,6 +173,8 @@ def _paint_problems(paint: Any) -> list[str]:
 
     Whether two steps share an area is the Studio's to check: it needs the line art drawn.
     """
+    if isinstance(paint, dict) and paint.get("allowFill") not in (None, True, False):
+        return ["its Fill setting is not readable"]
     steps = paint.get("steps") if isinstance(paint, dict) else None
     if not isinstance(steps, list) or not steps:
         return ["it has no colour steps"]

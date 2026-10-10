@@ -14,7 +14,7 @@ import type { EraseMark, Point, TraceItem } from "../geometry/types";
 import { GRID, labelAreas, seamSources } from "../paint/areas";
 import { strokePolyline } from "../geometry/bezier";
 import { LINE } from "../paint/areas";
-import { DEFAULT_GAP, DEFAULT_STRENGTH, SPECK, smoothLines, fittedPixels, loadImage, partCount, pictureFrom, readFile } from "../paint/picture";
+import { DEFAULT_GAP, DEFAULT_STRENGTH, SPECK, pictureWalls, smoothLines, fittedPixels, loadImage, partCount, pictureFrom, readFile } from "../paint/picture";
 import type { History } from "./ui";
 import { IconButton, Section, Slider, UndoRedo } from "./ui";
 
@@ -65,7 +65,7 @@ export function PaintPicture({ item, onChange, history, onDrawLines, onNext }: {
     const px = await pixelsOf(src);
     const picture = pictureFrom(px, s, g, erase);
     // Smooth lines stay smooth: the magic pen redraws them from the new lines.
-    if (base.paint?.picture?.smooth) onChange({ ...base, strokes: smoothLines(picture.walls, uid), paint: { steps: base.paint.steps, picture: { ...picture, smooth: true } } });
+    if (base.paint?.picture?.smooth) onChange({ ...base, strokes: smoothLines(pictureWalls(picture)!, uid), paint: { steps: base.paint.steps, picture: { ...picture, smooth: true } } });
     else onChange({ ...base, paint: { steps: base.paint?.steps ?? [], picture } });
   };
 
@@ -93,8 +93,9 @@ export function PaintPicture({ item, onChange, history, onDrawLines, onNext }: {
   };
   /** The magic pen: the picture's lines redrawn as smooth strokes (replacing any drawn ones). */
   const smoothOn = () => {
-    if (!picture) return;
-    onChange({ ...item, strokes: smoothLines(picture.walls, uid), paint: { steps: item.paint?.steps ?? [], picture: { ...picture, smooth: true } } });
+    const walls = picture && pictureWalls(picture);
+    if (!picture || !walls) return;
+    onChange({ ...item, strokes: smoothLines(walls, uid), paint: { steps: item.paint?.steps ?? [], picture: { ...picture, smooth: true } } });
   };
   const smoothOff = () => {
     if (!picture) return;

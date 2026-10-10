@@ -12,7 +12,7 @@ import { strokePolyline } from "../geometry/bezier";
 import type { PaintStep, Point, TraceItem } from "../geometry/types";
 import { GRID, CELL, SPECK } from "./grid";
 import { crayonIndex } from "./palette";
-import { unpackMask } from "./picture";
+import { pictureWalls, unpackMask } from "./picture";
 
 export { GRID, CELL, SPECK };
 /** How thick a line is as a wall, in units. The drawn line is thicker, so a wall's edge never shows. */
@@ -59,8 +59,8 @@ export function walls(item: Pick<TraceItem, "strokes" | "paint">): Uint8Array {
   // A picture's lines first, then any lines drawn on top to close a gap.
   // Smoothed by the magic pen, the strokes are the line art and the picture's own lines step aside.
   const picture = item.paint?.picture;
-  const packed = picture && !picture.smooth ? picture.walls : undefined;
-  const board = packed ? unpackMask(packed).slice() : new Uint8Array(GRID * GRID);
+  const thick = picture && !picture.smooth ? pictureWalls(picture) : null;
+  const board = thick ? thick.slice() : new Uint8Array(GRID * GRID);
   for (const s of item.strokes) {
     if (s.shape === "dot" || s.nodes.length === 1) {
       const n = s.nodes[0];
@@ -75,10 +75,12 @@ export function walls(item: Pick<TraceItem, "strokes" | "paint">): Uint8Array {
 /** Every area of the line art, labelled in one pass (4-connected, so a diagonal gap in a line does not leak). */
 export function labelAreas(item: Pick<TraceItem, "strokes" | "paint">): Areas {
   const wall = walls(item);
-  const labels = new Int32Array(GRID * GRID).fill(-2);
+  const n = GRID * GRID;
+  const labels = new Int32Array(n).fill(-2);
   const sizes: number[] = [];
-  const stack: number[] = [];
-  for (let start = 0; start < labels.length; start++) {
+  // A typed stack and the four neighbours written out: a million cells, so no small arrays per cell.
+  const stack = new Int32Array(n);
+  for (let start = 0; start < n; start++) {
     if (labels[start] !== -2) continue;
     if (wall[start]) {
       labels[start] = -1;
@@ -86,20 +88,20 @@ export function labelAreas(item: Pick<TraceItem, "strokes" | "paint">): Areas {
     }
     const id = sizes.length;
     let size = 0;
+    let top = 0;
     labels[start] = id;
-    stack.push(start);
-    while (stack.length) {
-      const i = stack.pop()!;
+    stack[top++] = start;
+    while (top > 0) {
+      const i = stack[--top];
       size++;
       const x = i % GRID;
-      const y = (i - x) / GRID;
-      const next = [x > 0 ? i - 1 : -1, x < GRID - 1 ? i + 1 : -1, y > 0 ? i - GRID : -1, y < GRID - 1 ? i + GRID : -1];
-      for (const j of next) {
-        if (j < 0 || labels[j] !== -2) continue;
+      for (let k = 0; k < 4; k++) {
+        const j = k === 0 ? (x > 0 ? i - 1 : -1) : k === 1 ? (x < GRID - 1 ? i + 1 : -1) : k === 2 ? i - GRID : i + GRID;
+        if (j < 0 || j >= n || labels[j] !== -2) continue;
         if (wall[j]) labels[j] = -1;
         else {
           labels[j] = id;
-          stack.push(j);
+          stack[top++] = j;
         }
       }
     }
@@ -142,14 +144,15 @@ function reclaim(labels: Int32Array, sizes: number[], raw: Uint8Array): Set<numb
   let head = 0;
   let tail = 0;
   for (let i = 0; i < n; i++) if (labels[i] >= 0) queue[tail++] = i;
-  const step = (i: number) => {
+  const near = (i: number, k: number) => {
     const x = i % GRID;
-    return [x > 0 ? i - 1 : -1, x < GRID - 1 ? i + 1 : -1, i - GRID, i + GRID];
+    return k === 0 ? (x > 0 ? i - 1 : -1) : k === 1 ? (x < GRID - 1 ? i + 1 : -1) : k === 2 ? i - GRID : i + GRID;
   };
   // 1. Grow each part into the swallowed cells beside it, as far as the real lines.
   while (head < tail) {
     const i = queue[head++];
-    for (const j of step(i)) {
+    for (let k = 0; k < 4; k++) {
+      const j = near(i, k);
       if (j < 0 || j >= n || labels[j] !== -1 || raw[j]) continue;
       labels[j] = labels[i];
       sizes[labels[i]]++;
@@ -167,7 +170,8 @@ function reclaim(labels: Int32Array, sizes: number[], raw: Uint8Array): Set<numb
     while (head < tail) {
       const i = queue[head++];
       size++;
-      for (const j of step(i)) {
+      for (let k = 0; k < 4; k++) {
+      const j = near(i, k);
         if (j < 0 || j >= n || labels[j] !== -1 || raw[j]) continue;
         labels[j] = id;
         queue[tail++] = j;
@@ -179,11 +183,14 @@ function reclaim(labels: Int32Array, sizes: number[], raw: Uint8Array): Set<numb
   return strips;
 }
 
-/** The area under a point — the nearest one within a few cells when the point is on a line. -1 when none. */
+/** How far (units) a tap on a line looks for the part beside it: more than half the thickest line. */
+const NEAR = 14;
+
+/** The area under a point — the nearest one within a few units when the point is on a line. -1 when none. */
 export function areaAt(areas: Areas, p: Point): number {
   const cx = cellOf(p.x);
   const cy = cellOf(p.y);
-  for (let r = 0; r <= 6; r++) {
+  for (let r = 0; r <= Math.ceil(NEAR / CELL); r++) {
     for (let dy = -r; dy <= r; dy++) {
       for (let dx = -r; dx <= r; dx++) {
         if (Math.max(Math.abs(dx), Math.abs(dy)) !== r) continue;
@@ -221,7 +228,8 @@ export function seamSources(areas: Areas): Int32Array {
   while (head < tail) {
     const i = queue[head++];
     const x = i % GRID;
-    for (const j of [x > 0 ? i - 1 : -1, x < GRID - 1 ? i + 1 : -1, i - GRID, i + GRID]) {
+    for (let k = 0; k < 4; k++) {
+      const j = k === 0 ? (x > 0 ? i - 1 : -1) : k === 1 ? (x < GRID - 1 ? i + 1 : -1) : k === 2 ? i - GRID : i + GRID;
       if (j < 0 || j >= n || out[j] >= 0) continue;
       out[j] = out[i];
       queue[tail++] = j;

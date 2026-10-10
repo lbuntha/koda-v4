@@ -132,6 +132,8 @@ export interface PaintStep {
 
 export interface PaintPlan {
   steps: PaintStep[];
+  /** False: children colour with the brush only — no Fill tool. Absent = Fill is offered. */
+  allowFill?: boolean;
   /** The colouring page itself, when the item was made from a picture (see paint/picture.ts). */
   picture?: PaintPicture;
 }
@@ -145,9 +147,9 @@ export interface EraseMark {
 export interface PaintPicture {
   /** The lines in ink on transparent, a PNG data URL covering the whole 1000×1000 square. */
   lines: string;
-  /** The same lines on the paint grid, thickened to close small gaps: one bit per cell, packed and base64-encoded. */
-  walls: string;
-  /** The lines as drawn, before thickening (same packing). Decides what can be painted: every cell not under it belongs to a part. */
+  /** Older pictures: the lines on the paint grid, already thickened to close small gaps (packed bits). Newer ones work this out from `raw`. */
+  walls?: string;
+  /** The lines as drawn, on the paint grid (run-length, or packed bits in older pictures). Decides what can be painted; thickened by `gap`, it keeps parts apart. */
   raw?: string;
   /** How dark a pixel had to be to count as a line (0–255). */
   strength: number;

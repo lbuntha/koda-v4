@@ -15,7 +15,7 @@ import { UIButton } from "../../components/ui";
 import { strokePolyline } from "../geometry/bezier";
 import type { PaintStep, Point, TraceItem } from "../geometry/types";
 import { hasArt } from "../geometry/types";
-import { areaColours, fittedPixels, insidePoint, loadImage, stepsFromColours } from "../paint/picture";
+import { areaColours, fittedPixels, insidePoints, loadImage, stepsFromColours } from "../paint/picture";
 import { fillLeftovers } from "../paint/leftovers";
 import { SuggestError, askForSteps, partsToName, stepsFromSuggestion, suggestImage } from "../paint/suggest";
 import { canUseAi } from "./autoStrokes";
@@ -162,7 +162,10 @@ export function PaintSteps({ item, onChange, history }: { item: TraceItem; onCha
     setBrushed(null);
     if (!joined || sel === null || !selected) return;
     const fresh = [...joined].filter((l) => own[l] !== sel);
-    if (fresh.length) editStep(sel, { seeds: [...selected.seeds, ...fresh.map((l) => insidePoint(areas, l))] });
+    if (fresh.length) {
+      const points = insidePoints(areas, fresh);
+      editStep(sel, { seeds: [...selected.seeds, ...fresh.map((l) => points.get(l)!)] });
+    }
   };
 
   /** Tap an area: add it to the selected step, take it out, or move it from another step. */

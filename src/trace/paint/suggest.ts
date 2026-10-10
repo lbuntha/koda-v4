@@ -13,7 +13,7 @@ import { tutorHeaders } from "../../lib/tutorApi";
 import type { Areas } from "./areas";
 import { GRID, SPECK } from "./grid";
 import { isColour } from "./palette";
-import { insidePoint } from "./picture";
+import { insidePoints } from "./picture";
 
 /** Parts this small are not numbered: too small to label, they join a neighbour when children play. */
 const LABELLED = SPECK * 2;
@@ -28,12 +28,13 @@ export interface SuggestPart {
 
 /** The parts worth naming, biggest first, numbered 1…n. */
 export function partsToName(areas: Areas): SuggestPart[] {
-  return areas.sizes
+  const chosen = areas.sizes
     .map((size, label) => ({ size, label }))
     .filter((p) => p.size >= LABELLED)
     .sort((a, b) => b.size - a.size)
-    .slice(0, MAX_PARTS)
-    .map((p, i) => ({ id: i + 1, label: p.label, at: insidePoint(areas, p.label), size: p.size }));
+    .slice(0, MAX_PARTS);
+  const points = insidePoints(areas, chosen.map((p) => p.label));
+  return chosen.map((p, i) => ({ id: i + 1, label: p.label, at: points.get(p.label)!, size: p.size }));
 }
 
 /** The model's answer → steps the Studio can use. Pure, and safe on any input. */

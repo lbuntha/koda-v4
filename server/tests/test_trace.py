@@ -70,6 +70,13 @@ def test_a_colouring_item_needs_colour_steps_not_writing_tests():
     assert "it has no line art" in item_problems({**colour, "strokes": []}, PLAN, {})
     broken = {**from_picture, "paint": {**from_picture["paint"], "picture": {**picture, "walls": "short"}}}
     assert any("parts are not readable" in p for p in item_problems(broken, PLAN, {}))
+    # The current form: real lines only, run-length, on the finer grid; and authors may take Fill away.
+    runs = {"lines": "data:image/png;base64,AAAA", "raw": "rle1:gIAB", "strength": 200, "gap": 2}
+    current = {**colour, "strokes": [], "paint": {**colour["paint"], "picture": runs, "allowFill": False}}
+    assert item_problems(current, PLAN, {}) == []
+    assert any("Fill setting" in p for p in item_problems({**current, "paint": {**current["paint"], "allowFill": "no"}}, PLAN, {}))
+    no_lines = {**current, "paint": {**current["paint"], "picture": {"lines": runs["lines"]}}}
+    assert any("no lines" in p for p in item_problems(no_lines, PLAN, {}))
 
 
 def test_a_continued_stroke_must_touch_the_one_before():

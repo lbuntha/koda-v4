@@ -4328,7 +4328,9 @@
       "fixFirst": "Fix what's listed under Before publishing first.",
       "nameTaken": "You already have a collection with this name. Pick it from the list instead, or use another name.",
       "createAndPublish": "Create and publish"
-    }
+    },
+    "allowFill": "Children can use Fill",
+    "allowFillNote": "Fill colours a whole part with one tap: quick and satisfying for young children, and the start tool on phones. Switch it off so every part has to be painted with the brush."
   },
   "pager": {
     "label": "Pages",

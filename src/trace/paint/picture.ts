@@ -15,16 +15,18 @@
 import type { EraseMark, PaintPicture, PaintStep, Point, Stroke } from "../geometry/types";
 import { pieces, readingOrder, strokesFromPlan } from "../geometry/vectorize";
 import type { Areas } from "./areas";
-import { GRID, SPECK } from "./grid";
+import { GRID, GRID_SCALE, OLD_GRID, SPECK } from "./grid";
 import { PALETTE, rgb, toHex } from "./palette";
 
-/** Pixels across the fitted square: two per grid cell. */
-export const SIDE = GRID * 2;
+/** Pixels across the fitted square: one per unit, the same as the grid. */
+export const SIDE = 1000;
+/** Pixels per grid cell. */
+const PX = SIDE / GRID;
 export const DEFAULT_STRENGTH = 200;
 /** A line is grey: a pixel this colourful is paint, however dark, unless it is very dark. */
 const GREY = 60;
 const VERY_DARK = 90;
-/** Cells each line grows by, so the small breaks a scanned or shrunk page has close up. */
+/** How much each line grows by (in old-grid cells, 2 units each), so the small breaks a scanned or shrunk page has close up. */
 export const DEFAULT_GAP = 2;
 export { SPECK } from "./grid";
 
@@ -36,6 +38,24 @@ const B64 = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
 export function packMask(mask: Uint8Array): string {
   const bytes = new Uint8Array(Math.ceil(mask.length / 8));
   for (let i = 0; i < mask.length; i++) if (mask[i]) bytes[i >> 3] |= 1 << (i & 7);
+  return toBase64(bytes);
+}
+
+const RUNS = "rle1:";
+
+function fromBase64(text: string): Uint8Array {
+  const clean = text.replace(/=+$/, "");
+  const out = new Uint8Array(Math.floor((clean.length * 3) / 4));
+  let o = 0;
+  for (let i = 0; i < clean.length; i += 4) {
+    let n = 0;
+    for (let k = 0; k < 4; k++) n = (n << 6) | Math.max(0, B64.indexOf(clean[i + k] ?? "A"));
+    for (const byte of [(n >> 16) & 255, (n >> 8) & 255, n & 255]) if (o < out.length) out[o++] = byte;
+  }
+  return out;
+}
+
+function toBase64(bytes: Uint8Array): string {
   let out = "";
   for (let i = 0; i < bytes.length; i += 3) {
     const n = (bytes[i] << 16) | ((bytes[i + 1] ?? 0) << 8) | (bytes[i + 2] ?? 0);
@@ -44,28 +64,113 @@ export function packMask(mask: Uint8Array): string {
   return out;
 }
 
+/**
+ * A line mask as runs: alternate lengths of no-line and line cells, each a
+ * varint. Line art is mostly paper, so this is a fraction of one bit per cell.
+ */
+export function packRuns(mask: Uint8Array): string {
+  const bytes: number[] = [];
+  const push = (n: number) => {
+    while (n >= 128) {
+      bytes.push((n & 127) | 128);
+      n >>>= 7;
+    }
+    bytes.push(n);
+  };
+  let value = 0;
+  let run = 0;
+  for (let i = 0; i < mask.length; i++) {
+    if ((mask[i] ? 1 : 0) === value) run++;
+    else {
+      push(run);
+      value ^= 1;
+      run = 1;
+    }
+  }
+  push(run);
+  return RUNS + toBase64(Uint8Array.from(bytes));
+}
+
+function unpackRuns(text: string): Uint8Array {
+  const bytes = fromBase64(text.slice(RUNS.length));
+  const runs: number[] = [];
+  let n = 0;
+  let shift = 0;
+  for (const b of bytes) {
+    n |= (b & 127) << shift;
+    if (b & 128) shift += 7;
+    else {
+      runs.push(n);
+      n = 0;
+      shift = 0;
+    }
+  }
+  const total = runs.reduce((a, r) => a + r, 0);
+  const mask = new Uint8Array(total);
+  let i = 0;
+  runs.forEach((r, k) => {
+    if (k % 2) mask.fill(1, i, i + r);
+    i += r;
+  });
+  return mask;
+}
+
+/** An old 500-cell mask on the current grid: each old cell becomes a square of cells. */
+function scaleUp(old: Uint8Array): Uint8Array {
+  const mask = new Uint8Array(GRID * GRID);
+  for (let y = 0; y < GRID; y++) {
+    const oy = Math.floor(y / GRID_SCALE) * OLD_GRID;
+    for (let x = 0; x < GRID; x++) if (old[oy + Math.floor(x / GRID_SCALE)]) mask[y * GRID + x] = 1;
+  }
+  return mask;
+}
+
 const cache = new Map<string, Uint8Array>();
 
+/** A stored line mask on the current grid — runs or packed bits, on this grid or the old one. */
 export function unpackMask(packed: string): Uint8Array {
   const hit = cache.get(packed);
   if (hit) return hit;
-  const mask = new Uint8Array(GRID * GRID);
-  const clean = packed.replace(/=+$/, "");
-  let bit = 0;
-  for (let i = 0; i < clean.length; i += 4) {
-    let n = 0;
-    for (let k = 0; k < 4; k++) n = (n << 6) | Math.max(0, B64.indexOf(clean[i + k] ?? "A"));
-    for (const byte of [(n >> 16) & 255, (n >> 8) & 255, n & 255]) {
-      for (let b = 0; b < 8 && bit < mask.length; b++, bit++) if (byte & (1 << b)) mask[bit] = 1;
-    }
+  let mask: Uint8Array;
+  if (packed.startsWith(RUNS)) mask = unpackRuns(packed);
+  else {
+    const bytes = fromBase64(packed);
+    const cells = bytes.length * 8 >= GRID * GRID ? GRID * GRID : OLD_GRID * OLD_GRID;
+    mask = new Uint8Array(cells);
+    for (let i = 0; i < cells; i++) if (bytes[i >> 3] & (1 << (i & 7))) mask[i] = 1;
   }
-  if (cache.size > 20) cache.clear();
+  if (mask.length === OLD_GRID * OLD_GRID) mask = scaleUp(mask);
+  else if (mask.length !== GRID * GRID) mask = new Uint8Array(GRID * GRID);
+  if (cache.size > 12) cache.clear();
   cache.set(packed, mask);
   return mask;
 }
 
-/** Packed length for a full grid, so a broken mask can be told from a real one. */
+/** Packed (bit) length for a full grid of the current size. */
 export const PACKED_LENGTH = Math.ceil(Math.ceil((GRID * GRID) / 8) / 3) * 4;
+
+const wallCache = new Map<string, Uint8Array>();
+
+/**
+ * A picture's lines thickened to close small gaps — what keeps one part from
+ * leaking into the next. Worked out from its real lines and gap setting (an
+ * older picture stored them ready-made). Null when the picture has neither.
+ */
+export function pictureWalls(picture: Pick<PaintPicture, "raw" | "walls" | "gap">): Uint8Array | null {
+  // An older picture stored its thickened lines ready-made: they are what its steps were made on.
+  if (picture.walls) return unpackMask(picture.walls);
+  if (picture.raw) {
+    const key = `${picture.gap ?? 0}|${picture.raw}`;
+    let w = wallCache.get(key);
+    if (!w) {
+      w = closeGaps(unpackMask(picture.raw), picture.gap ?? 0);
+      if (wallCache.size > 8) wallCache.clear();
+      wallCache.set(key, w);
+    }
+    return w;
+  }
+  return null;
+}
 
 /* ------------------------------------------------------------------ lines */
 
@@ -90,15 +195,16 @@ export function findLines(pixels: Uint8ClampedArray, strength: number): { mask: 
       if (l >= strength || (Math.max(r, g, b) - Math.min(r, g, b) > GREY && l > VERY_DARK)) continue;
       // Darker = more opaque, with a soft edge near the strength so lines stay smooth.
       alpha[y * SIDE + x] = Math.min(255, Math.round(255 * Math.min(1, (strength - l) / 40 + 0.35)));
-      mask[(y >> 1) * GRID + (x >> 1)] = 1;
+      mask[Math.floor(y / PX) * GRID + Math.floor(x / PX)] = 1;
     }
   }
   return { mask, alpha };
 }
 
-/** Grow every line by `r` cells (a round brush), sealing gaps up to about 2r cells wide. */
-export function closeGaps(mask: Uint8Array, r: number): Uint8Array {
-  if (r <= 0) return mask;
+/** Grow every line by `gap` old-grid cells (2 units each, a round brush), sealing breaks up to about twice that wide. */
+export function closeGaps(mask: Uint8Array, gap: number): Uint8Array {
+  if (gap <= 0) return mask;
+  const r = Math.round(gap * GRID_SCALE);
   const out = mask.slice();
   const offsets: [number, number][] = [];
   for (let dy = -r; dy <= r; dy++) for (let dx = -r; dx <= r; dx++) if (dx * dx + dy * dy <= r * r + r) offsets.push([dx, dy]);
@@ -146,8 +252,8 @@ export function areaColours(pixels: Uint8ClampedArray, areas: Areas): [number, n
   for (let i = 0; i < areas.labels.length; i++) {
     const l = areas.labels[i];
     if (l < 0) continue;
-    const x = (i % GRID) * 2;
-    const y = Math.floor(i / GRID) * 2;
+    const x = Math.floor((i % GRID) * PX);
+    const y = Math.floor(Math.floor(i / GRID) * PX);
     const p = (y * SIDE + x) * 4;
     const s = sum[l];
     s[0] += pixels[p];
@@ -158,29 +264,37 @@ export function areaColours(pixels: Uint8ClampedArray, areas: Areas): [number, n
   return sum.map(([r, g, b, n]) => (n ? [r / n, g / n, b / n] : [255, 255, 255]));
 }
 
-/** A point well inside a part: its cell nearest the part's centre. */
-export function insidePoint(areas: Areas, label: number): Point {
-  let sx = 0;
-  let sy = 0;
-  let n = 0;
+/**
+ * A point well inside each of these parts: its cell nearest the part's centre.
+ * Two passes over the grid for any number of parts — one per part would be a
+ * million cells each.
+ */
+export function insidePoints(areas: Areas, labels: Iterable<number>): Map<number, Point> {
+  const want = new Set(labels);
+  const sum = new Map<number, { x: number; y: number; n: number; best: number; d: number }>();
+  for (const l of want) sum.set(l, { x: 0, y: 0, n: 0, best: -1, d: Infinity });
   for (let i = 0; i < areas.labels.length; i++) {
-    if (areas.labels[i] !== label) continue;
-    sx += i % GRID;
-    sy += Math.floor(i / GRID);
-    n++;
+    const s = sum.get(areas.labels[i]);
+    if (!s) continue;
+    s.x += i % GRID;
+    s.y += Math.floor(i / GRID);
+    s.n++;
   }
-  const cx = sx / n;
-  const cy = sy / n;
-  let best = -1;
-  let bestD = Infinity;
+  for (const s of sum.values()) if (s.n) [s.x, s.y] = [s.x / s.n, s.y / s.n];
   for (let i = 0; i < areas.labels.length; i++) {
-    if (areas.labels[i] !== label) continue;
-    const d = (i % GRID - cx) ** 2 + (Math.floor(i / GRID) - cy) ** 2;
-    if (d < bestD) [bestD, best] = [d, i];
+    const s = sum.get(areas.labels[i]);
+    if (!s) continue;
+    const d = (i % GRID - s.x) ** 2 + (Math.floor(i / GRID) - s.y) ** 2;
+    if (d < s.d) [s.d, s.best] = [d, i];
   }
   const cell = 1000 / GRID;
-  return { x: Math.round(((best % GRID) + 0.5) * cell), y: Math.round((Math.floor(best / GRID) + 0.5) * cell) };
+  const out = new Map<number, Point>();
+  for (const [l, s] of sum) if (s.best >= 0) out.set(l, { x: Math.round(((s.best % GRID) + 0.5) * cell), y: Math.round((Math.floor(s.best / GRID) + 0.5) * cell) });
+  return out;
 }
+
+/** A point well inside one part. */
+export const insidePoint = (areas: Areas, label: number): Point => insidePoints(areas, [label]).get(label) ?? { x: 500, y: 500 };
 
 /**
  * Steps from a coloured example: one step per crayon, its parts the ones
@@ -200,13 +314,14 @@ export function stepsFromColours(colours: [number, number, number][], areas: Are
     gr.sum = [gr.sum[0] + r * n, gr.sum[1] + g * n, gr.sum[2] + b * n];
     groups.set(crayon, gr);
   });
+  const points = insidePoints(areas, [...groups.values()].flatMap((g) => g.labels));
   return [...groups.entries()]
     .sort((a, b) => b[1].size - a[1].size)
     .map(([crayon, gr]) => {
       // The crayon when it is close; otherwise the picture's own colour (a pale orange stays pale orange).
       const avg: [number, number, number] = [gr.sum[0] / gr.size, gr.sum[1] / gr.size, gr.sum[2] / gr.size];
       const exact = distance(avg, rgb(PALETTE.find((c) => c.id === crayon)!.hex)) > NEAR_CRAYON;
-      return { id: newId(), color: exact ? toHex(...avg) : crayon, seeds: gr.labels.map((l) => insidePoint(areas, l)) };
+      return { id: newId(), color: exact ? toHex(...avg) : crayon, seeds: gr.labels.map((l) => points.get(l)!) };
     });
 }
 
@@ -218,8 +333,7 @@ export const partCount = (areas: Areas) => areas.sizes.filter((s) => s >= SPECK)
  * line mask is thinned to its centre line, which joins dashes and evens out
  * wobbly edges, then fitted to curves. Specks too short to be a line are dropped.
  */
-export function smoothLines(walls: string, newId: () => string): Stroke[] {
-  const on = unpackMask(walls);
+export function smoothLines(on: Uint8Array, newId: () => string): Stroke[] {
   const list = pieces({ w: GRID, h: GRID, on }, { minSpur: 0.012, minLength: 14 });
   return strokesFromPlan(list, readingOrder(list), newId, 2.5).map((s) => ({ ...s, width: 30 }));
 }
@@ -293,7 +407,8 @@ export function applyErase(pixels: Uint8ClampedArray, erase: readonly EraseMark[
 /** Picture → what a colouring item keeps: its line art and its line mask. */
 export function pictureFrom(pixels: Uint8ClampedArray, strength: number, gap = DEFAULT_GAP, erase: EraseMark[] = []): PaintPicture {
   const { mask, alpha } = findLines(applyErase(pixels, erase), strength);
-  return { lines: linesPng(alpha), walls: packMask(closeGaps(mask, gap)), raw: packMask(mask), strength, gap, ...(erase.length ? { erase } : {}) };
+  // Only the real lines are kept; the thickened ones are worked out when the picture is read (`pictureWalls`).
+  return { lines: linesPng(alpha), raw: packRuns(mask), strength, gap, ...(erase.length ? { erase } : {}) };
 }
 
 /** An uploaded file, shrunk so a draft stays small, as a JPEG data URL. */

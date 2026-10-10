@@ -27,7 +27,7 @@ import { TraceProgress } from "../progress/store";
 import { stepXp } from "../progress/reward";
 import type { PaintScore } from "./areas";
 import { fillLeftovers } from "./leftovers";
-import { COVER, GRID, LINE, NEARLY, areaAt, seamSources, blankPaint, brush, labelAreas, scorePainting, stepAreas, stepState } from "./areas";
+import { CELL, COVER, GRID, LINE, NEARLY, areaAt, seamSources, blankPaint, brush, labelAreas, scorePainting, stepAreas, stepState } from "./areas";
 import { Gallery, sharePicture } from "./gallery";
 import { PALETTE, colourName, crayonHex, crayonIndex, customColours, hexOfIndex, rgb } from "./palette";
 
@@ -45,6 +45,8 @@ interface Props {
 }
 
 const SIZES = { s: 16, m: 32, l: 56 } as const;
+/** How far (cells) a line cell can show paint from beside it: the thickest lines, merged. Bounds a stroke's redraw. */
+const SEAM_MARGIN = 40;
 /** How far a child can zoom into the picture. */
 const MAX_ZOOM = 5;
 type Size = keyof typeof SIZES;
@@ -70,7 +72,10 @@ export function ColorPlayer({ item, onExit, onAwardXp, sandbox = false, source, 
   const [cur, setCur] = useState(0);
   const [done, setDone] = useState<Set<number>>(new Set());
   const [crayon, setCrayon] = useState(() => steps[0]?.color ?? PALETTE[0].id);
-  const [tool, setTool] = useState<"brush" | "fill" | "eraser">("brush");
+  /** The author can take Fill away, so every part is painted with the brush. */
+  const fillAllowed = item.paint?.allowFill !== false;
+  // A phone starts on Fill: tapping a part is how a small screen is best coloured; the brush is one tap away.
+  const [tool, setTool] = useState<"brush" | "fill" | "eraser">(() => (fillAllowed && isPhone() ? "fill" : "brush"));
   const [size, setSize] = useState<Size>("m");
   const [inside, setInside] = useState(true);
   /** My own colours: the child picks the colours; any colour completes a step and none is "wrong". */
@@ -120,7 +125,12 @@ export function ColorPlayer({ item, onExit, onAwardXp, sandbox = false, source, 
 
   /* ------------------------------------------------------------ canvas */
   const canvasRef = useRef<HTMLCanvasElement>(null);
-  const live = useRef({ cur, done, inside, own: false, finished: false, dirty: true });
+  /**
+   * What the drawing loop needs between renders. `dirty` redraws every cell
+   * (a step changed, an undo); `rect` only the cells a brush stroke touched —
+   * a million cells a frame would stutter on a phone, a brush's square does not.
+   */
+  const live = useRef<{ cur: number; done: Set<number>; inside: boolean; own: boolean; finished: boolean; dirty: boolean; rect: { x0: number; y0: number; x1: number; y1: number } | null }>({ cur, done, inside, own: false, finished: false, dirty: true, rect: null });
   live.current.cur = cur;
   live.current.done = done;
   live.current.inside = inside;
@@ -179,13 +189,19 @@ export function ColorPlayer({ item, onExit, onAwardXp, sandbox = false, source, 
     const ro = new ResizeObserver(resize);
     ro.observe(canvas);
 
-    const rebuild = () => {
+    const rebuild = (rect: { x0: number; y0: number; x1: number; y1: number } | null) => {
       const paint = paintRef.current;
       const { cur: c, done: d, finished } = live.current;
       const want = steps[c] ? crayonIndex(steps[c].color) : 0;
       const target = !finished && steps[c] && !d.has(c) ? stepSets[c] : null;
       const [hr, hg, hb] = steps[c] ? rgb(crayonHex(steps[c].color)) : [0, 0, 0];
-      for (let i = 0; i < paint.length; i++) {
+      const x0 = rect ? Math.max(0, rect.x0) : 0;
+      const y0 = rect ? Math.max(0, rect.y0) : 0;
+      const x1 = rect ? Math.min(GRID - 1, rect.x1) : GRID - 1;
+      const y1 = rect ? Math.min(GRID - 1, rect.y1) : GRID - 1;
+      for (let y = y0; y <= y1; y++)
+      for (let x = x0; x <= x1; x++) {
+        const i = y * GRID + x;
         const o = i * 4;
         let v = paint[i];
         // A line cell (or speck) shows its own side's paint: no white seam inside, no colour outside the border.
@@ -203,8 +219,8 @@ export function ColorPlayer({ item, onExit, onAwardXp, sandbox = false, source, 
         hintImg.data[o + 2] = hb;
         hintImg.data[o + 3] = blink ? 255 : 0;
       }
-      pctx.putImageData(paintImg, 0, 0);
-      hctx.putImageData(hintImg, 0, 0);
+      pctx.putImageData(paintImg, 0, 0, x0, y0, x1 - x0 + 1, y1 - y0 + 1);
+      hctx.putImageData(hintImg, 0, 0, x0, y0, x1 - x0 + 1, y1 - y0 + 1);
     };
 
     let frame = 0;
@@ -212,8 +228,12 @@ export function ColorPlayer({ item, onExit, onAwardXp, sandbox = false, source, 
       const ctx = canvas.getContext("2d");
       if (ctx) {
         if (live.current.dirty) {
-          rebuild();
+          rebuild(null);
           live.current.dirty = false;
+          live.current.rect = null;
+        } else if (live.current.rect) {
+          rebuild(live.current.rect);
+          live.current.rect = null;
         }
         // Units → pixels, through the zoom: everything below is drawn on the 1000-unit picture.
         const v = viewRef.current;
@@ -280,7 +300,6 @@ export function ColorPlayer({ item, onExit, onAwardXp, sandbox = false, source, 
     const span = 1000 / zz;
     viewRef.current = { z: zz, x: Math.min(1000 - span, Math.max(0, x)), y: Math.min(1000 - span, Math.max(0, y)) };
     setZoomed(zz > 1.01);
-    live.current.dirty = true;
   };
   const fitView = () => setView(1, 0, 0);
   /** Screen pixels (relative to the picture) → units on the picture, through the zoom. */
@@ -302,7 +321,11 @@ export function ColorPlayer({ item, onExit, onAwardXp, sandbox = false, source, 
     // The same size on screen at any zoom; a stylus's pressure makes it thinner or thicker.
     const r = (SIZES[size] / viewRef.current.z) * (pen?.pressure ?? 1);
     brush(paintRef.current, areas, a, b, r, tool === "eraser" ? 0 : crayonIndex(crayon), allowed);
-    live.current.dirty = true;
+    // Redraw only around the dab — wide enough for line cells, which show the paint beside them.
+    const m = r / CELL + SEAM_MARGIN;
+    const box = { x0: Math.floor(Math.min(a.x, b.x) / CELL - m), y0: Math.floor(Math.min(a.y, b.y) / CELL - m), x1: Math.ceil(Math.max(a.x, b.x) / CELL + m), y1: Math.ceil(Math.max(a.y, b.y) / CELL + m) };
+    const was = live.current.rect;
+    live.current.rect = was ? { x0: Math.min(was.x0, box.x0), y0: Math.min(was.y0, box.y0), x1: Math.max(was.x1, box.x1), y1: Math.max(was.y1, box.y1) } : box;
   };
   const pressureOf = (e: PointerEvent | React.PointerEvent) => (e.pointerType === "pen" && e.pressure > 0 ? 0.45 + e.pressure * 1.1 : 1);
 
@@ -358,7 +381,7 @@ export function ColorPlayer({ item, onExit, onAwardXp, sandbox = false, source, 
     const before = paintRef.current.slice();
     const c = crayonIndex(crayon);
     for (let i = 0; i < areas.labels.length; i++) if (areas.labels[i] === l) paintRef.current[i] = c;
-    historyRef.current = [...historyRef.current.slice(-24), before];
+    historyRef.current = [...historyRef.current.slice(-15), before];
     setMessage(null);
     setVer((v) => v + 1);
     live.current.dirty = true;
@@ -405,7 +428,7 @@ export function ColorPlayer({ item, onExit, onAwardXp, sandbox = false, source, 
     const pen = penRef.current;
     if (!pen || pen.id !== e.pointerId) return;
     penRef.current = null;
-    historyRef.current = [...historyRef.current.slice(-24), pen.before];
+    historyRef.current = [...historyRef.current.slice(-15), pen.before];
     setVer((v) => v + 1);
     review(pen.before);
   };
@@ -469,7 +492,7 @@ export function ColorPlayer({ item, onExit, onAwardXp, sandbox = false, source, 
     const c = crayonIndex(own ? crayon : step.color);
     const parts = stepSets[cur];
     for (let i = 0; i < paint.length; i++) if (!paint[i] && parts.has(areas.labels[i])) paint[i] = c;
-    historyRef.current = [...historyRef.current.slice(-24), before];
+    historyRef.current = [...historyRef.current.slice(-15), before];
     setVer((v) => v + 1);
     live.current.dirty = true;
     manualRef.current.add(cur);
@@ -539,7 +562,7 @@ export function ColorPlayer({ item, onExit, onAwardXp, sandbox = false, source, 
     setDone(doneNow(prev));
   };
   const clearAll = () => {
-    historyRef.current = [...historyRef.current.slice(-24), paintRef.current];
+    historyRef.current = [...historyRef.current.slice(-15), paintRef.current];
     paintRef.current = blankPaint();
     setVer((v) => v + 1);
     setDone(new Set());
@@ -684,7 +707,7 @@ export function ColorPlayer({ item, onExit, onAwardXp, sandbox = false, source, 
     }
     if (e.metaKey || e.ctrlKey || e.altKey) return;
     if (key === "b") setTool("brush");
-    else if (key === "f") setTool("fill");
+    else if (key === "f" && fillAllowed) setTool("fill");
     else if (key === "e") setTool("eraser");
     else if (key === "1" || key === "2" || key === "3") setSize((["s", "m", "l"] as const)[Number(key) - 1]);
   };
@@ -935,7 +958,9 @@ export function ColorPlayer({ item, onExit, onAwardXp, sandbox = false, source, 
                       ["fill", t("paint.fill"), "F", <PaintBucket key="f" className="h-[18px] w-[18px]" />],
                       ["eraser", t("paint.eraser"), "E", <Eraser key="e" className="h-[18px] w-[18px]" />],
                     ] as const
-                  ).map(([id, label, key, icon]) => (
+                  )
+                    .filter(([id]) => id !== "fill" || fillAllowed)
+                    .map(([id, label, key, icon]) => (
                     <button
                       key={id}
                       type="button"
@@ -1023,6 +1048,15 @@ export function ColorPlayer({ item, onExit, onAwardXp, sandbox = false, source, 
       </UIModal>
     </div>
   );
+}
+
+/** A phone: a touch screen whose short side is a phone's. Read once, when a picture opens. */
+function isPhone(): boolean {
+  try {
+    return window.matchMedia("(pointer: coarse)").matches && Math.min(window.screen.width, window.screen.height) < 600;
+  } catch {
+    return false;
+  }
 }
 
 /** A small round icon button for the tool bar: 36px on a phone, 40px larger. */
