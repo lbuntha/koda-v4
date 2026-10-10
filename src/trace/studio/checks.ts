@@ -7,6 +7,8 @@
 import { strokePolyline } from "../geometry/bezier";
 import { polylineLength } from "../geometry/polyline";
 import type { TraceItem } from "../geometry/types";
+import { activityOf, hasArt } from "../geometry/types";
+import { labelAreas, stepAreas } from "../paint/areas";
 import { dist } from "../geometry/vec";
 import { prepareItem } from "../score/score";
 import type { TraceDraft } from "./drafts";
@@ -21,12 +23,16 @@ export type CheckId =
   | "insideCanvas"
   | "continueTouches"
   | "planEndsAtCanDo"
-  | "tested";
+  | "tested"
+  | "hasLineArt"
+  | "paintSteps"
+  | "paintAreas"
+  | "paintShared";
 
 export interface CheckResult {
   id: CheckId;
   ok: boolean;
-  /** Strokes (by order) that fail it. */
+  /** Strokes (by order) that fail it — or, for a paint check, colour steps (1, 2, 3…). */
   strokes?: number[];
   /** Steps still to test. */
   steps?: string[];
@@ -48,6 +54,33 @@ export function runChecks(draft: TraceDraft): CheckResult[] {
   const outside = bad((i) => sorted[i].nodes.some((n) => n.x < 0 || n.y < 0 || n.x > 1000 || n.y > 1000));
   const prepared = prepareItem(item);
   const loose = bad((i) => i > 0 && sorted[i].join === "continue" && dist(prepared[i - 1].end, prepared[i].start) > TOUCH);
+
+  if (activityOf(item) === "color") {
+    // A colouring item: line art and colour steps, no writing steps to test.
+    const steps = item.paint?.steps ?? [];
+    const areas = labelAreas(item);
+    const sets = steps.map((st) => stepAreas(areas, st));
+    const empty = sets.flatMap((a, k) => (a.size === 0 ? [k + 1] : []));
+    const seen = new Map<number, number>();
+    const shared = new Set<number>();
+    sets.forEach((a, k) =>
+      a.forEach((l) => {
+        if (seen.has(l)) {
+          shared.add(seen.get(l)! + 1);
+          shared.add(k + 1);
+        } else seen.set(l, k);
+      }),
+    );
+    return [
+      { id: "hasTitle", ok: item.title.trim().length > 0 },
+      { id: "hasLineArt", ok: hasArt(item) },
+      { id: "strokeNodes", ok: fewNodes.length === 0, strokes: fewNodes },
+      { id: "insideCanvas", ok: outside.length === 0, strokes: outside },
+      { id: "paintSteps", ok: steps.length > 0 },
+      { id: "paintAreas", ok: empty.length === 0, strokes: empty },
+      { id: "paintShared", ok: shared.size === 0, strokes: [...shared].sort((a, b) => a - b) },
+    ];
+  }
 
   const print = strokesPrint(item);
   const untested = draft.plan.steps

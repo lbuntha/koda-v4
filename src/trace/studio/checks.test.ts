@@ -19,6 +19,15 @@ describe("publish checks", () => {
     expect(failing(d)).toEqual([]);
   });
 
+  it("a colouring item needs colour steps with their own areas, not writing tests", () => {
+    const ring = { ...makePrimitive("circle", "c1", 1), closed: true };
+    const base = { ...CHA, strokes: [ring], activity: "color" as const };
+    expect(failing(newDraft({ ...base, paint: { steps: [] } }))).toEqual(["paintSteps"]);
+    const step = (id: string, x: number) => ({ id, color: "red", seeds: [{ x, y: 500 }] });
+    expect(failing(newDraft({ ...base, paint: { steps: [step("a", 500)] } }))).toEqual([]);
+    expect(failing(newDraft({ ...base, paint: { steps: [step("a", 500), step("b", 510)] } }))).toEqual(["paintShared"]);
+  });
+
   it("changing a stroke asks for the tests again", () => {
     const d = newDraft(CHA);
     const print = strokesPrint(CHA);

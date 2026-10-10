@@ -28,6 +28,7 @@ import {
   unpublishStudioCollection,
 } from "../data/api";
 import type { TraceItem } from "../geometry/types";
+import { hasArt } from "../geometry/types";
 import { ItemThumb } from "../player/Thumb";
 import { itemFor, parseList } from "./batch";
 import { runChecks } from "./checks";
@@ -70,7 +71,7 @@ const PRESETS: { id: string; list: string; grid: TraceItem["grid"]; language: st
   { id: "numbers", list: "0-9", grid: "baseline-4-lines", language: "en" },
 ];
 
-function NewCollection({ onCreated, onCancel }: { onCreated(id: string): void; onCancel(): void }) {
+function NewCollection({ onCreated, onCancel, taken = [] }: { onCreated(id: string): void; onCancel(): void; /** Names already used: a new collection may not repeat one. */ taken?: string[] }) {
   const { t } = useT();
   const [name, setName] = useState("");
   const [named, setNamed] = useState(false); // the author typed a name: presets stop filling it in
@@ -87,7 +88,9 @@ function NewCollection({ onCreated, onCancel }: { onCreated(id: string): void; o
     if (p && !named) setName(t(`traceStudio.newCol.preset.${p.id}`));
   };
 
+  const clash = name.trim() !== "" && taken.some((x) => x.trim().toLowerCase() === name.trim().toLowerCase());
   const create = async () => {
+    if (clash) return;
     setBusy(true);
     setFailed(false);
     try {
@@ -167,9 +170,10 @@ function NewCollection({ onCreated, onCancel }: { onCreated(id: string): void; o
           <input className={`${inputCls} text-lg`} lang="km" value={custom} placeholder="A-Z · 0-9 · ក-អ · cat dog" onChange={(e) => setCustom(e.target.value)} />
         </Field>
       )}
+      {clash && <p className="-mt-2 text-sm text-rose-700 dark:text-rose-300">{t("traceStudio.newCol.nameTaken")}</p>}
       {failed && <p className="text-sm text-rose-700 dark:text-rose-300">{t("traceStudio.col.offline")}</p>}
       <div className="flex flex-wrap items-center gap-2">
-        <UIButton type="submit" icon={<Plus className="h-4 w-4" />} isLoading={busy}>
+        <UIButton type="submit" icon={<Plus className="h-4 w-4" />} isLoading={busy} disabled={clash}>
           {entries.length ? t("traceStudio.newCol.createWith", { count: entries.length }) : t("traceStudio.newCol.create")}
         </UIButton>
         <UIButton type="button" variant="secondary" onClick={onCancel}>
@@ -242,7 +246,7 @@ export function CollectionsList({ onOpen, onOpenItem, creating, onCreating }: { 
   return (
     <div className="flex flex-col gap-4">
       <p className="max-w-2xl text-sm text-muted">{t("traceStudio.col.intro")}</p>
-      {creating && <NewCollection onCreated={(id) => { onCreating(false); onOpen(id); }} onCancel={() => onCreating(false)} />}
+      {creating && <NewCollection taken={(rows ?? []).map((c) => c.title)} onCreated={(id) => { onCreating(false); onOpen(id); }} onCancel={() => onCreating(false)} />}
       {queue.length > 0 && <ReviewQueue queue={queue} onDone={(id) => setQueue((q) => q.filter((c) => c.id !== id))} />}
       {reports.length > 0 && (
         <Section title={t("traceStudio.reports.title", { count: reports.length })} aside={<Flag className="h-4 w-4 text-rose-600" />}>
@@ -253,7 +257,7 @@ export function CollectionsList({ onOpen, onOpenItem, creating, onCreating }: { 
               return (
                 <li key={r.id} className="flex flex-wrap items-center gap-3 py-2">
                   <span className="flex h-10 w-10 items-center justify-center text-indigo-700 dark:text-indigo-300">
-                    {item && item.strokes.length ? <ItemThumb item={item} className="h-10 w-10" /> : <span className="text-xl font-bold">{item?.title ?? "?"}</span>}
+                    {item && hasArt(item) ? <ItemThumb item={item} className="h-10 w-10" /> : <span className="text-xl font-bold">{item?.title ?? "?"}</span>}
                   </span>
                   <div className="flex min-w-0 flex-1 flex-col">
                     <span className="text-sm font-semibold text-ink">
@@ -732,7 +736,7 @@ export function CollectionBoard({ id, onBack, onOpenItem }: { id: string; onBack
                         </span>
                       ) : null}
                       <span className="flex h-16 items-center text-indigo-700 dark:text-indigo-300">
-                        {draft && draft.item.strokes.length > 0 ? (
+                        {draft && hasArt(draft.item) ? (
                           <ItemThumb item={draft.item} />
                         ) : (
                           <span className="text-4xl font-bold text-muted/60" lang={draft?.item.script === "khmer" ? "km" : undefined}>
@@ -1010,7 +1014,7 @@ function AddExisting({ exclude, onAdd }: { exclude: Set<string>; onAdd(ids: stri
                   className={`flex w-full flex-col items-center gap-1 rounded-xl border p-2 text-xs ${on ? "border-indigo-500 bg-surface ring-2 ring-indigo-300" : "border-line bg-surface"}`}
                 >
                   <span className="flex h-12 items-center text-indigo-700 dark:text-indigo-300">
-                    {d.item.strokes.length ? <ItemThumb item={d.item} className="h-12 w-12" /> : <span className="text-2xl font-bold text-muted/60">{d.item.title || "·"}</span>}
+                    {hasArt(d.item) ? <ItemThumb item={d.item} className="h-12 w-12" /> : <span className="text-2xl font-bold text-muted/60">{d.item.title || "·"}</span>}
                   </span>
                   <span className="truncate text-body">{d.item.title || t("traceStudio.untitled")}</span>
                 </button>

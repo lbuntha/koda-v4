@@ -10,8 +10,8 @@
  * as a child would before publishing.
  */
 
-import { useEffect, useState, useSyncExternalStore } from "react";
-import { AlarmClock, ArrowLeft, ArrowRight, Check, LayoutGrid, PenLine, Play, RotateCcw } from "lucide-react";
+import { createContext, useContext, useEffect, useMemo, useState, useSyncExternalStore } from "react";
+import { AlarmClock, ArrowLeft, ArrowRight, Check, Images, LayoutGrid, PenLine, Play, RotateCcw } from "lucide-react";
 import { UIBanner, UIButton, UICarousel, UIProgressBar } from "../components/ui";
 import { useSession } from "../lib/sync";
 import { useT } from "../lib/i18n";
@@ -19,7 +19,10 @@ import { themeSystem } from "../lib/themeSystem";
 import { useTraceShelf } from "./data/shelf";
 import { GOLDEN_ITEMS } from "./fixtures/items";
 import type { TraceItem } from "./geometry/types";
-import { modeOf } from "./geometry/types";
+import { activityOf, hasArt, modeOf } from "./geometry/types";
+import { ColorPlayer } from "./paint/ColorPlayer";
+import { crayonHex } from "./paint/palette";
+import { PaintingTile, PaintingViewer, usePaintings } from "./paint/MyPictures";
 import type { StepPlan } from "./progress/ladder";
 import { defaultPlan, isRecheckDue } from "./progress/ladder";
 import { homeRows, isDone, uniqueById, type RowId } from "./home";
@@ -39,6 +42,8 @@ interface Props {
   onGoHome?(): void;
   /** An item or a collection is open — the host hides what is around the page. */
   onDeepChange?(deep: boolean): void;
+  /** An item itself is open (being written or coloured) — the host can give it the phone's whole screen. */
+  onPlayingChange?(playing: boolean): void;
   /** Shown inside Learn, which carries the page's title. */
   embedded?: boolean;
   /** Open this collection's page straight away — a Today pick on Home. */
@@ -56,7 +61,7 @@ interface Entry {
 /** What a step of this entry pays at three stars: its collection's setting, if it has one. */
 const xpOf = (e: Entry, collections: { id: string; xpPerStep?: number | null }[]) => collections.find((c) => c.id === e.source?.collectionId)?.xpPerStep ?? null;
 
-export function TracePage({ onAwardXp, canCreate = false, onGoHome, onDeepChange, embedded = false, openCollectionId, onOpened }: Props) {
+export function TracePage({ onAwardXp, canCreate = false, onGoHome, onDeepChange, onPlayingChange, embedded = false, openCollectionId, onOpened }: Props) {
   const { t } = useT();
   const [open, setOpen] = useState<Entry | null>(null);
   const tallyKey = `koda.traceTallyClosed.${useSession()?.learnerId ?? "me"}`;
@@ -73,6 +78,10 @@ export function TracePage({ onAwardXp, canCreate = false, onGoHome, onDeepChange
   useEffect(() => {
     onDeepChange?.(deep);
   }, [onDeepChange, deep]);
+  useEffect(() => {
+    onPlayingChange?.(Boolean(open));
+    return () => onPlayingChange?.(false);
+  }, [onPlayingChange, open]);
   const shelf = useTraceShelf();
   const todayContext = useTodayContext();
   // A Today pick from Home: open its collection once, then let the host forget it.
@@ -84,12 +93,19 @@ export function TracePage({ onAwardXp, canCreate = false, onGoHome, onDeepChange
   }, [openCollectionId]); // eslint-disable-line react-hooks/exhaustive-deps -- once per target
   useSyncExternalStore(TraceProgress.subscribe, TraceProgress.version);
   useSyncExternalStore(TraceDrafts.subscribe, TraceDrafts.version);
+  /* The child's finished paintings: My pictures, and each coloured picture's tile. */
+  const paintings = usePaintings();
+  const paintingOf = useMemo(() => new Map(paintings.map((p) => [p.itemId, p.url])), [paintings]);
+  const [viewing, setViewing] = useState<string | null>(null);
 
   const collections = shelf.collections.flatMap((c) => (shelf.bundles[c.id] ? [shelf.bundles[c.id]] : []));
 
   if (open) {
     const place = placeOf(open, collections, setOpen);
-    return <TracePlayer key={open.item.id} item={open.item} plan={open.plan} source={open.source} place={place} xpPerStep={xpOf(open, collections)} ages={collections.find((c) => c.id === open.source?.collectionId)?.ages} onExit={() => setOpen(null)} onAwardXp={onAwardXp} onGoHome={onGoHome} />;
+    const ages = collections.find((c) => c.id === open.source?.collectionId)?.ages;
+    if (activityOf(open.item) === "color")
+      return <ColorPlayer key={open.item.id} item={open.item} source={open.source} place={place} xpPerStep={xpOf(open, collections)} ages={ages} onExit={() => setOpen(null)} onAwardXp={onAwardXp} onGoHome={onGoHome} />;
+    return <TracePlayer key={open.item.id} item={open.item} plan={open.plan} source={open.source} place={place} xpPerStep={xpOf(open, collections)} ages={ages} onExit={() => setOpen(null)} onAwardXp={onAwardXp} onGoHome={onGoHome} />;
   }
 
   const entriesOf = (c: (typeof collections)[number]): Entry[] => c.items.map((e) => ({ ...e, source: { collectionId: c.id, rev: c.rev } }));
@@ -100,6 +116,7 @@ export function TracePage({ onAwardXp, canCreate = false, onGoHome, onDeepChange
   const chosen = collections.find((c) => c.id === shelfId);
   if (chosen) {
     return (
+      <PaintingsContext.Provider value={paintingOf}>
       <CollectionView
         title={chosen.title}
         description={chosen.description}
@@ -110,6 +127,7 @@ export function TracePage({ onAwardXp, canCreate = false, onGoHome, onDeepChange
         onOpen={setOpen}
         onBack={() => setShelfId(null)}
       />
+      </PaintingsContext.Provider>
     );
   }
 
@@ -117,7 +135,7 @@ export function TracePage({ onAwardXp, canCreate = false, onGoHome, onDeepChange
   // published item, would otherwise be listed twice.
   const published: Entry[] = uniqueById(collections.flatMap(entriesOf));
   const publishedIds = new Set(published.map((e) => e.item.id));
-  const drafts = canCreate ? TraceDrafts.list().filter((d) => d.item.strokes.length > 0 && !publishedIds.has(d.item.id)) : [];
+  const drafts = canCreate ? TraceDrafts.list().filter((d) => hasArt(d.item) && !publishedIds.has(d.item.id)) : [];
   const draftEntries: Entry[] = drafts.map((d) => ({ item: d.item, plan: d.plan }));
   const everything: Entry[] = [...published, ...draftEntries];
 
@@ -152,6 +170,7 @@ export function TracePage({ onAwardXp, canCreate = false, onGoHome, onDeepChange
   const hero = (todayPick && shelfOf.find((s) => s.id === todayPick.collection.id)) ?? shelfHero;
 
   return (
+    <PaintingsContext.Provider value={paintingOf}>
     <div className="mx-auto flex w-full max-w-6xl flex-col gap-7 pb-10">
       {/* As the Library does: on a phone the app bar names the page and the
           tagline is a sentence read once, so the banner leads. With no counts
@@ -198,6 +217,23 @@ export function TracePage({ onAwardXp, canCreate = false, onGoHome, onDeepChange
           {due.map((e) => <Tile key={e.item.id} entry={e} onOpen={() => setOpen(e)} />)}
         </UICarousel>
       )}
+      {paintings.length > 0 && (
+        <UICarousel title={t("paint.myPictures")} subtitle={t("paint.myPicturesNote")} icon={<Images className="h-5 w-5 text-indigo-600" />} count={paintings.length} {...PICTURES}>
+          {paintings.map((p) => (
+            <PaintingTile key={p.key} p={p} onOpen={() => setViewing(p.key)} />
+          ))}
+        </UICarousel>
+      )}
+      <PaintingViewer
+        p={paintings.find((p) => p.key === viewing) ?? null}
+        onClose={() => setViewing(null)}
+        onColourAgain={(itemId) => {
+          const e = everything.find((x) => x.item.id === itemId);
+          setViewing(null);
+          if (e) setOpen(e);
+        }}
+      />
+
       {going.length > 0 && (
         <UICarousel title={t("trace.home.continue")} icon={<Play className="h-5 w-5 text-indigo-600" />} count={going.length} {...TILES}>
           {going.map((e) => <Tile key={e.item.id} entry={e} onOpen={() => setOpen(e)} />)}
@@ -232,6 +268,7 @@ export function TracePage({ onAwardXp, canCreate = false, onGoHome, onDeepChange
         </UICarousel>
       )}
     </div>
+    </PaintingsContext.Provider>
   );
 }
 
@@ -449,8 +486,15 @@ function Stat({ value, label }: { value: number; label: string }) {
   );
 }
 
+/** Each coloured picture's painting by this child, by item id, for its tile. */
+const PaintingsContext = createContext<Map<string, string>>(new Map());
+
+/** My pictures: square paintings, a little larger than item tiles. */
+const PICTURES = { itemClass: "[&>li]:w-36 sm:[&>li]:w-40", gridClass: "grid-cols-2 sm:grid-cols-4 lg:grid-cols-6", seeAllAfter: 6 };
+
 function Tile({ entry, draft = false, onOpen }: { entry: Entry; draft?: boolean; onOpen(): void }) {
   const { t } = useT();
+  const painting = useContext(PaintingsContext).get(entry.item.id);
   const { item } = entry;
   const p = TraceProgress.get(item.id);
   const plan = entry.plan ?? defaultPlan(item);
@@ -461,7 +505,8 @@ function Tile({ entry, draft = false, onOpen }: { entry: Entry; draft?: boolean;
   const stepsDone = done ? plan.steps.length : at;
   // Letters read best as the letter itself; drawings as their own strokes.
   const showText = writing && item.title.length <= 4;
-  const label = due ? t("trace.status.checkUp") : done ? t(writing ? "trace.status.canWrite" : "trace.status.canDraw") : p.status === "needsPractice" ? t("trace.status.needsPractice") : t(`trace.step.${p.step}`);
+  const coloring = activityOf(item) === "color";
+  const label = coloring ? (done ? t("paint.status.colored") : t("paint.status.toColor")) : due ? t("trace.status.checkUp") : done ? t(writing ? "trace.status.canWrite" : "trace.status.canDraw") : p.status === "needsPractice" ? t("trace.status.needsPractice") : t(`trace.step.${p.step}`);
   return (
     <li>
       <button
@@ -482,7 +527,9 @@ function Tile({ entry, draft = false, onOpen }: { entry: Entry; draft?: boolean;
         )}
         {draft && <span className="absolute left-1.5 top-1.5 rounded-full bg-indigo-100 px-1.5 py-0.5 text-[10px] font-semibold text-indigo-800 dark:bg-indigo-900/50 dark:text-indigo-200">{t("trace.draft")}</span>}
         <span className="flex flex-1 items-center justify-center text-ink">
-          {showText ? (
+          {painting ? (
+            <img src={painting} alt="" className="h-20 w-20 rounded-xl bg-white object-contain sm:h-24 sm:w-24" />
+          ) : showText ? (
             <span className="text-4xl font-bold leading-none sm:text-5xl" lang={item.script === "khmer" ? "km" : undefined}>
               {item.carrier ? `${item.carrier.text}${item.title}` : item.title}
             </span>
@@ -492,11 +539,20 @@ function Tile({ entry, draft = false, onOpen }: { entry: Entry; draft?: boolean;
             </span>
           )}
         </span>
-        <span className="flex w-full gap-0.5 px-1 pb-0.5" aria-hidden="true">
-          {plan.steps.map((s, i) => (
-            <span key={s.id} className={`h-1 flex-1 rounded-full ${i < stepsDone ? "bg-emerald-500" : i === at ? "bg-indigo-500" : "bg-line"}`} />
-          ))}
-        </span>
+        {coloring ? (
+          // A colouring picture: its crayons, in step order.
+          <span className="flex w-full justify-center gap-1 px-1 pb-0.5" aria-hidden="true">
+            {(item.paint?.steps ?? []).slice(0, 8).map((s) => (
+              <span key={s.id} className="h-2 w-2 rounded-full ring-1 ring-black/10" style={{ background: crayonHex(s.color) }} />
+            ))}
+          </span>
+        ) : (
+          <span className="flex w-full gap-0.5 px-1 pb-0.5" aria-hidden="true">
+            {plan.steps.map((s, i) => (
+              <span key={s.id} className={`h-1 flex-1 rounded-full ${i < stepsDone ? "bg-emerald-500" : i === at ? "bg-indigo-500" : "bg-line"}`} />
+            ))}
+          </span>
+        )}
       </button>
     </li>
   );

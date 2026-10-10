@@ -39,6 +39,7 @@ import { themeSystem } from "../../lib/themeSystem";
 import { UIAvatar, UIBadge, UIButton, UISectionHeader, UIStatGrid, UIStatTile } from "../ui";
 import { NoAccess } from "./NoAccess";
 import { TraceReport } from "../../trace/report/TraceReport";
+import { PaintingsReport } from "../../trace/report/PaintingsReport";
 import { formatDate, translate, useT } from "../../lib/i18n";
 
 /**
@@ -832,6 +833,8 @@ export const ChildReportPage: React.FC<ChildReportPageProps> = ({
 
             {/* Koda Trace: what they can write and draw now. Draws nothing until they have tried an item. */}
             <TraceReport learnerId={learnerId} learnerName={learnerName} />
+            {/* The pictures they finished colouring. Draws nothing until there is one. */}
+            <PaintingsReport learnerId={learnerId} learnerName={learnerName} />
           </>
         )}
       </div>

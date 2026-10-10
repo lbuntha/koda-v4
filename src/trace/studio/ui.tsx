@@ -5,7 +5,7 @@
  */
 
 import { useState, type ReactNode } from "react";
-import { ChevronDown } from "lucide-react";
+import { ChevronDown, Redo2, Undo2 } from "lucide-react";
 import { themeSystem } from "../../lib/themeSystem";
 
 /** The app's own field, at the studio's compact height. */
@@ -223,3 +223,25 @@ export const ShapeIcon = {
     </Svg>
   ),
 };
+
+/** The editor's undo history, handed to a panel that edits the item. */
+export interface History {
+  undo(): void;
+  redo(): void;
+  canUndo: boolean;
+  canRedo: boolean;
+}
+
+/** Undo and redo, for a panel's toolbar: the same history (and ⌘Z / ⇧⌘Z) as the stroke tools. */
+export function UndoRedo({ history, undoLabel, redoLabel }: { history: History; undoLabel: string; redoLabel: string }) {
+  return (
+    <>
+      <IconButton size="sm" label={undoLabel} shortcut="⌘Z" onClick={history.undo} disabled={!history.canUndo}>
+        <Undo2 className="h-4 w-4" />
+      </IconButton>
+      <IconButton size="sm" label={redoLabel} shortcut="⇧⌘Z" onClick={history.redo} disabled={!history.canRedo}>
+        <Redo2 className="h-4 w-4" />
+      </IconButton>
+    </>
+  );
+}

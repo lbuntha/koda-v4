@@ -1917,6 +1917,10 @@
           "fix": "sit with them for the first try and encourage the whole letter"
         }
       }
+    },
+    "paintings": {
+      "title": "Paintings",
+      "subtitle": "Pictures {name} finished colouring, newest first."
     }
   },
   "leaderboard": {
@@ -3859,7 +3863,11 @@
       "insideCanvas": "Every point is inside the canvas",
       "continueTouches": "Strokes that carry on really touch",
       "planEndsAtCanDo": "The steps end with the tick",
-      "tested": "Every step test-written and passed"
+      "tested": "Every step test-written and passed",
+      "paintSteps": "It has at least one colour step",
+      "paintAreas": "Every colour step has an area to colour",
+      "paintShared": "No two colour steps colour the same area",
+      "hasLineArt": "It has line art: a picture or strokes"
     },
     "allChecksPass": "Everything passes. Publishing arrives in the next phase.",
     "publishLater": "Fix these before publishing. Publishing arrives in the next phase.",
@@ -4023,7 +4031,8 @@
         "enUpper": "English capitals A–Z",
         "enLower": "English small letters a–z",
         "numbers": "Numbers 0–9"
-      }
+      },
+      "nameTaken": "You already have a collection with this name. Use another name, or open that collection."
     },
     "reports": {
       "title": {
@@ -4168,6 +4177,157 @@
       "aiVoice": "Voice",
       "loadingVoices": "Loading voices…",
       "making": "Making the voice…"
+    },
+    "activity": {
+      "label": "What children do",
+      "trace": "Trace",
+      "color": "Color",
+      "traceHint": "Children trace the strokes in order",
+      "colorHint": "Children colour the line art, step by step"
+    },
+    "paint": {
+      "backToEdit": "Back to editing",
+      "tryNote": "Playing as a child would. Nothing is saved.",
+      "noLineArt": "Upload a picture first, in the Picture step.",
+      "tapHint": "Tap areas to add them to step {n}. Tap again to take one out.",
+      "pickStep": "Pick a step, or add one, then tap the areas it colours.",
+      "hidePhoto": "Hide the photo",
+      "showPhoto": "Show the photo",
+      "canvas": "Colour steps canvas",
+      "steps": "Colour steps",
+      "stepCount": {
+        "one": "{count} step",
+        "other": "{count} steps"
+      },
+      "noSteps": "No steps yet. Add one, pick its crayon, then tap the areas it colours.",
+      "areaCount": {
+        "one": "{count} area",
+        "other": "{count} areas"
+      },
+      "crayon": "Crayon",
+      "words": "Words read to the child",
+      "clearAreas": "Clear this step's areas",
+      "addStep": "Add step",
+      "try": "Try it",
+      "emptySteps": "Steps with no areas yet: {steps}",
+      "howScored": "A step is done when most of its parts are filled in its colour (Relaxed 70%, Balanced 80%, Strict 90%; set on Details), or when the child presses Done. Past half, Done fills the last little gaps for them. Children can also colour any other part as they like; that is never marked down. When the child taps I'm done, the painting gets an accuracy score from the parts the steps ask for: filled in, and the right colours.",
+      "how1": "Add a step and pick its crayon.",
+      "how2": "Tap the parts of the picture that step colours.",
+      "how3": "Add the next step. Children follow them in order.",
+      "fromColours": "Make steps from the picture's colours",
+      "replaceFromColours": "Remake steps from the picture's colours",
+      "fromColoursHint": "For a coloured example: one step per colour, biggest parts first. You can change anything after.",
+      "noColours": "No colours found: this looks like a black-and-white page. Add the steps yourself.",
+      "sliversNote": {
+        "one": "{count} small sliver (pink) is next to a coloured part. It joins that part's step when children play; press to see it in the steps now.",
+        "other": "{count} small slivers (pink) are next to coloured parts. They join those parts' steps when children play; press to see them in the steps now."
+      },
+      "fillSlivers": {
+        "one": "Fill the sliver",
+        "other": "Fill {count} slivers"
+      },
+      "custom": "Pick any colour",
+      "magicBrush": "Magic brush: join white bits to a step",
+      "magicHint": "Brush over white bits to join them to step {n}. Lines stay as they are.",
+      "suggestTitle": "Suggested steps",
+      "suggest": "Suggest colour steps (AI)",
+      "suggestAgain": "Suggest again (replaces these steps)",
+      "suggesting": "Looking at the picture… (up to a minute)",
+      "suggestHint": "Koda's AI names each part (hair, apple, dress), picks its colour, and puts the steps in order: big parts first, details last. You can change anything after.",
+      "suggestNotAllowed": "AI suggestions come with a plan that includes AI. You can still add steps yourself.",
+      "suggestError": {
+        "not_a_trace_creator": "AI suggestions are for Trace Studio creators.",
+        "no_ai_key": "No AI key is set up for this Koda. Ask an admin.",
+        "offline": "Couldn't reach the AI. Check the internet and try again.",
+        "empty": "The AI didn't suggest any steps for this picture. Try again, or add them yourself.",
+        "plan_required": "AI suggestions are part of a paid plan.",
+        "ai_failed": "The AI couldn't suggest colours this time. Try again in a moment."
+      }
+    },
+    "colorNote": "Colouring: children fill each step's parts in its colour. How strict sets how much must be filled (70%, 80% or 90%); a child can also press Done on a step. The finished painting gets an accuracy score.",
+    "flow": {
+      "label": "Make a colouring picture",
+      "picture": "Picture",
+      "steps": "Colour steps",
+      "details": "Details",
+      "publish": "Check & publish",
+      "pictureHint": "Upload a colouring page or a coloured example. Koda finds the lines and the parts to colour.",
+      "stepsHint": "Say what to colour, in what order: each step is one crayon and the parts it colours.",
+      "detailsHint": "Give the picture a name, and choose how much of each part a child must fill.",
+      "publishHint": "Check nothing is missing, try it as a child, then publish it in a collection.",
+      "linesNote": "Draw a line where two parts run together, to close the gap. Lines drawn here show to the child too.",
+      "linesDone": "Done",
+      "next": "Next: {step}"
+    },
+    "picture": {
+      "emptyTitle": "Start with a picture",
+      "emptyText": "Koda finds the black lines and splits the picture into parts a child colours. No tracing needed.",
+      "kindLines": "A colouring page",
+      "kindLinesNote": "Black lines on white. You choose the colours.",
+      "kindColour": "A coloured example",
+      "kindColourNote": "Koda reads its colours and makes the steps for you.",
+      "upload": "Upload a picture",
+      "reading": "Reading the picture…",
+      "error": "That picture could not be read. Try a JPG or PNG.",
+      "original": "The picture you uploaded",
+      "partsHint": "Each tint is one part a child can colour.",
+      "showOriginal": "Show the uploaded picture",
+      "preview": "Parts found in the picture",
+      "title": "Lines and parts",
+      "parts": {
+        "one": "{count} part",
+        "other": "{count} parts"
+      },
+      "strength": "Line strength",
+      "strengthHint": "Two parts share one tint? Raise it to catch faint lines. Shading turned into lines? Lower it.",
+      "replace": "Replace",
+      "drawLines": "Draw extra lines",
+      "editLines": {
+        "one": "Extra lines ({count})",
+        "other": "Extra lines ({count})"
+      },
+      "drawLinesHint": "Only needed when a gap in a line joins two parts.",
+      "remove": "Remove the picture",
+      "next": "Next: colour steps",
+      "gap": "Close gaps",
+      "gapHint": "Parts still run together through a small break in a line? Raise this. Thin parts disappearing? Lower it.",
+      "magic": "Magic pen",
+      "magicHint": "Redraws the picture's lines as smooth, solid lines: dashes join up and wobbly edges come out clean. Replaces any lines you drew.",
+      "magicApply": "Smooth the lines",
+      "magicOn": "The lines are smooth now. Children see these lines, not the picture's own. Each is a pen line you can adjust.",
+      "magicEdit": "Adjust lines",
+      "magicOff": "Use the picture's own lines",
+      "erase": "Eraser: remove lines (noise, a watermark)",
+      "eraseHint": "Brush over noise to remove it from the line art. To colour a white bit, use the magic brush in Colour steps.",
+      "eraseSize": "Eraser size",
+      "eraseUndo": "Undo the last rub",
+      "erased": {
+        "one": "{count} rub-out",
+        "other": "{count} rub-outs"
+      },
+      "eraseClear": "Bring it all back"
+    },
+    "publish": {
+      "check": "Before publishing",
+      "tryFirst": "Try it as a child",
+      "title": "Publish",
+      "inReview": "In review",
+      "notPublished": "Not published",
+      "changed": "Unpublished changes",
+      "live": "Published",
+      "publish": "Publish",
+      "alsoAdd": "Add to another collection",
+      "addTo": "Add to a collection",
+      "pick": "Choose a collection…",
+      "add": "Add",
+      "newCollection": "+ New collection",
+      "newTitle": "Collection name",
+      "done": "Published. Children get it the next time their Trace page opens online.",
+      "publishChanges": "Publish changes",
+      "gradesFirst": "Choose who this collection is for, then publish.",
+      "fixFirst": "Fix what's listed under Before publishing first.",
+      "nameTaken": "You already have a collection with this name. Pick it from the list instead, or use another name.",
+      "createAndPublish": "Create and publish"
     }
   },
   "pager": {
@@ -4178,5 +4338,107 @@
     "last": "Last page",
     "page": "Page",
     "of": "of {pages}"
+  },
+  "paint": {
+    "colourThis": "Colour the glowing part {color}.",
+    "color": {
+      "red": "red",
+      "orange": "orange",
+      "yellow": "yellow",
+      "lime": "light green",
+      "green": "green",
+      "sky": "sky blue",
+      "blue": "blue",
+      "purple": "purple",
+      "pink": "pink",
+      "peach": "peach",
+      "brown": "brown",
+      "gray": "gray",
+      "black": "black"
+    },
+    "stepDone": "Step {n} complete",
+    "nextIs": "Next: {what}",
+    "nextStep": "Next step",
+    "adviceColor": {
+      "title": "Different colour needed",
+      "text": "This part should be {color}.",
+      "over": "Paint over it with {color}."
+    },
+    "useColor": "Use {color}",
+    "adviceInside": {
+      "title": "Outside the lines",
+      "text": "That stroke crossed into the next part."
+    },
+    "helperOn": "Turn on helper",
+    "adviceAlmost": {
+      "title": "Almost complete",
+      "text": "A few spots still glow. Fill them, or press Done."
+    },
+    "steps": "Colour steps",
+    "stepN": "Step {n}",
+    "done": "done",
+    "stepOf": "Step {n} of {total}",
+    "stepProgress": "How much of this step is coloured",
+    "slate": "Colouring page",
+    "crayons": "Crayons",
+    "brush": "Brush",
+    "eraser": "Eraser",
+    "size": "Brush size",
+    "sizes": {
+      "s": "Thin",
+      "m": "Medium",
+      "l": "Thick",
+      "xs": "Very thin"
+    },
+    "undo": "Undo",
+    "clear": "Start over",
+    "imDone": "I'm done",
+    "doneOf": "{done} of {total} done",
+    "anyOrder": "Colour any part you like. The glowing part is the suggested next step; tap a step to choose another.",
+    "helper": "Stay inside the lines",
+    "helperNote": "Each stroke stays inside the part where it starts.",
+    "nextPicture": "Next picture",
+    "accuracy": "Accuracy",
+    "result": {
+      "great": "Beautiful work!",
+      "good": "Nice colouring!",
+      "keepGoing": "Good start!"
+    },
+    "stars": "{n} of 3 stars",
+    "part": {
+      "filled": "Filled in",
+      "colors": "Right colours"
+    },
+    "tip": {
+      "perfect": "Every part filled with the right colour. Well done!",
+      "filled": "Next time, fill every glowing part right to its edges.",
+      "colors": "Next time, check the colour each step asks for."
+    },
+    "paintAgain": "Paint again",
+    "home": "Home",
+    "status": {
+      "colored": "Coloured",
+      "toColor": "Colour it"
+    },
+    "thisColour": "this colour",
+    "customN": "Colour {n}",
+    "fill": "Fill a part",
+    "stepDoneButton": "Done",
+    "ownColours": "My own colours",
+    "ownColoursNote": "Pick any colour you like. Every colour counts.",
+    "ownColoursResult": "Painted in your own colours.",
+    "save": "Save picture",
+    "saved": "Saved",
+    "myPictures": "My pictures",
+    "myPicturesNote": "Every picture you finish is kept here.",
+    "keptInGallery": "Kept in My pictures.",
+    "accuracyIs": "{n}% accuracy",
+    "colourAgain": "Colour again",
+    "delete": "Delete",
+    "deleteConfirm": "Delete this painting",
+    "more": "More",
+    "shortcuts": "Keys: B brush · F fill · E eraser · 1–3 brush size · ⌘Z undo",
+    "finish": "Finish",
+    "tools": "Tools"
   }
 }

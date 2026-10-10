@@ -683,6 +683,71 @@ Reply with JSON only: {"strokes":[{"pieces":[{"id":1,"reverse":false}],"lift":tr
   }
 });
 
+/** The crayons a colouring step may name (src/trace/paint/palette.ts). */
+const PAINT_CRAYONS = ["red", "orange", "yellow", "lime", "green", "sky", "blue", "purple", "pink", "peach", "brown", "gray", "black"];
+
+/**
+ * Suggested colour steps for a colouring page: the model sees the line art with
+ * every part numbered, names what each part is, picks its natural colour and
+ * groups the parts into steps a child colours in order. The Studio checks the
+ * answer (known parts, each once; a crayon or a hex) and the author edits it.
+ */
+app.post("/api/trace/colour-steps", async (req, res) => {
+  const authorization = req.headers.authorization;
+  if (!authorization) {
+    return res.status(401).json({ error: { code: "sign_in", message: "Sign in to use AI suggestions." } });
+  }
+  if (!(await traceAiAllowed(authorization, res, "AI colour suggestions"))) return;
+
+  const { image, parts, title, language } = (req.body ?? {}) as {
+    image?: string;
+    parts?: { id: number; x: number; y: number; size: number }[];
+    title?: string;
+    language?: string;
+  };
+  if (typeof image !== "string" || image.length > 3_000_000 || !Array.isArray(parts) || parts.length === 0 || parts.length > 160) {
+    return res.status(400).json({ error: { code: "bad_request", message: "Send the picture and between 1 and 160 parts." } });
+  }
+  const ai = getGeminiClient(await systemApiKey(authorization));
+  if (!ai) {
+    return res.status(503).json({ error: { code: "no_ai_key", message: "No AI key is set up for this Koda. Ask an admin." } });
+  }
+
+  const words = language === "km" ? "Khmer (ភាសាខ្មែរ)" : "English";
+  const brief = `This is a children's colouring page${title ? ` called "${String(title).slice(0, 60)}"` : ""}.
+The black lines split it into parts; each part is lightly tinted and marked with its number.
+Parts (id, a point inside it on a 0–1000 canvas with y down, and its size in cells; bigger is larger):
+${JSON.stringify(parts.map((p) => ({ id: p.id, at: [Math.round(p.x), Math.round(p.y)], size: p.size })))}
+
+Work out what each part is (hair, face, apple, sky, …) and the colour it naturally is.
+Then plan the colouring as steps for a child aged 5 to 9:
+- One step per colour, holding every part of that colour ("both shoes", "all the leaves").
+- Order: the big main parts first, then clothes and objects, small details last.
+- Colours: use one of these crayon ids when it fits: ${PAINT_CRAYONS.join(", ")}.
+  Use a hex colour like "#d9a066" only when no crayon is close (skin tones, pale shades).
+- Leave a part out (it stays white) when it is naturally white or paper: eyes' whites, highlights,
+  white collars, the empty background around the picture. Colour the background only if it is clearly
+  a scene (sky, grass, sea).
+- Each step has a short instruction in ${words} for the child, naming the thing and colour
+  ("Colour the hair brown."), at most 8 words, and a 1–3 word "name" of the thing in English.
+
+Reply with JSON only:
+{"steps":[{"color":"brown","parts":[3,7],"instruction":"Colour the hair brown.","name":"hair"}]}`;
+
+  try {
+    const response = await ai.models.generateContent({
+      model: "gemini-3.7-flash",
+      contents: { parts: [{ inlineData: { mimeType: "image/png", data: image.replace(/^data:image\/png;base64,/, "") } }, { text: brief }] },
+      config: { responseMimeType: "application/json", temperature: 0.3 },
+    });
+    const parsed = JSON.parse(response.text || "{}") as { steps?: unknown };
+    res.json({ steps: Array.isArray(parsed.steps) ? parsed.steps : [] });
+  } catch (error) {
+    console.error("Error in /api/trace/colour-steps:", error);
+    res.status(502).json({ error: { code: "ai_failed", message: "The AI could not suggest colours this time." } });
+  }
+});
+
 /**
  * What a model is allowed to hand back when asked for artwork.
  *

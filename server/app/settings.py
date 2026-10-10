@@ -20,6 +20,9 @@ class Settings(BaseSettings):
     #: GCS bucket because a Cloud Run instance's own disk disappears with it.
     library_audio_dir: str = "data/library-audio"
     library_audio_bucket: str | None = None
+    #: Children's finished Trace paintings: this folder in development; in
+    #: production the bucket above, under a `trace-paintings/` prefix.
+    trace_paintings_dir: str = "data/trace-paintings"
 
     # Dev default so `make dev-local` works out of the box. Production supplies
     # a real one; `main.py` refuses to start with this value outside dev.

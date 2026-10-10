@@ -69,6 +69,8 @@ export interface ItemProgress {
   /** So a report can name an item that is not (or no longer) published. */
   title?: string;
   kind?: TraceItem["kind"];
+  /** A colouring item: the best painting's accuracy, 0–100. */
+  paintBest?: number;
   updatedAt: number;
 }
 

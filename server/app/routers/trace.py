@@ -15,19 +15,25 @@ collection and plays it offline.
 
 from __future__ import annotations
 
+import base64
+import binascii
 import json
 import re
 import secrets
 from typing import Annotated, Any
 
 from fastapi import APIRouter, Depends
+from fastapi.responses import Response
 from pydantic import Field
 
+from app import painting_store
 from app.ages import clean_ages, is_age_range
 from app.deps import AUTHENTICATED, CurrentPrincipal, Db, require
 from app.errors import AppError, Forbidden, NotFound
 from app.models.auth import Principal
 from app.models.common import Model
+from app.repos import learners as learners_repo
+from app.repos import paintings as paintings_repo
 from app.repos import trace as trace_repo
 from app.routers.library import AudioSaved, AudioWrite, ImageWrite, store_audio, store_image
 from app.security import principal_can
@@ -559,3 +565,110 @@ async def ai_allowed(db: Db, p: CanWrite) -> dict[str, Any]:
     if "trace.ai" in (state.get("features") or []):
         return {"allowed": True}
     return {"allowed": False, "reason": "plan_required"}
+
+
+# ------------------------------------------------------------------ paintings
+#
+# A child's finished colouring picture. The device keeps it first and sends it
+# here when it can (see src/trace/paint/gallery.ts); the parent report and the
+# child's other tablets read it back. One per child per picture: a newer
+# painting replaces the older one, and an older one arriving late (a tablet
+# that was offline) never replaces a newer one.
+
+CanAppendChild = Annotated[Principal, Depends(require("learner_data:append"))]
+MAX_PAINTING_BYTES = 2 * 1024 * 1024
+ITEM_ID = re.compile(r"[A-Za-z0-9_-]{1,64}")
+
+
+class PaintingWrite(Model):
+    image: str  # base64 PNG
+    title: str = Field(default="", max_length=120)
+    collection_id: str | None = Field(default=None, alias="collectionId", max_length=MAX_ID)
+    accuracy: int = Field(ge=0, le=100)
+    stars: int = Field(ge=0, le=3)
+    own_colours: bool = Field(default=False, alias="ownColours")
+    painted_at: int = Field(alias="paintedAt", ge=0)
+
+
+async def _child_of(db: Any, p: Principal, learner_id: str) -> str:
+    """The family whose child this is — the caller's own, and only a learner in it."""
+    if p.family_id is None:
+        raise Forbidden("This account is not part of a family.", "no_family")
+    if p.learner_id and learner_id != p.learner_id:
+        raise Forbidden("That is not this device's learner.", "not_your_learner")
+    if await learners_repo.by_id(db, learner_id, p.family_id) is None:
+        raise NotFound("No such learner in this family.", "learner_not_found")
+    return p.family_id
+
+
+def _painting_out(row: dict[str, Any]) -> dict[str, Any]:
+    return {k: row.get(k) for k in ("itemId", "title", "collectionId", "accuracy", "stars", "ownColours", "paintedAt", "imageId")}
+
+
+@router.put("/paintings/{learner_id}/{item_id}")
+async def save_painting(learner_id: str, item_id: str, body: PaintingWrite, db: Db, p: CanAppendChild) -> dict[str, Any]:
+    """Keep a child's finished painting (a newer one of the same picture wins)."""
+    if not ITEM_ID.fullmatch(item_id):
+        raise AppError(422, "bad_id", "That is not a picture id.")
+    family_id = await _child_of(db, p, learner_id)
+    try:
+        data = base64.b64decode(body.image, validate=True)
+    except (binascii.Error, ValueError):
+        raise AppError(400, "invalid_image", "The painting is not valid base64.") from None
+    if not data.startswith(painting_store.PNG_MAGIC):
+        raise AppError(415, "unsupported_image", "A painting must be a PNG.")
+    if len(data) > MAX_PAINTING_BYTES:
+        raise AppError(413, "image_too_large", "A painting may be at most 2 MB.")
+    existing = await paintings_repo.get(db, family_id, learner_id, item_id)
+    if existing and (existing.get("paintedAt") or 0) > body.painted_at:
+        return _painting_out(existing)
+    image_id = await painting_store.put(data)
+    row, replaced = await paintings_repo.save(
+        db,
+        family_id,
+        learner_id,
+        item_id,
+        {
+            "imageId": image_id,
+            "bytes": len(data),
+            "title": body.title,
+            "collectionId": body.collection_id,
+            "accuracy": body.accuracy,
+            "stars": body.stars,
+            "ownColours": body.own_colours,
+            "paintedAt": body.painted_at,
+        },
+    )
+    if replaced and not await paintings_repo.image_in_use(db, replaced):
+        await painting_store.delete(replaced)
+    return _painting_out(row)
+
+
+@router.get("/paintings/{learner_id}")
+async def list_paintings(learner_id: str, db: Db, p: CanReadChild) -> dict[str, list[dict[str, Any]]]:
+    """A child's paintings, newest first: their gallery, and the parent report's."""
+    family_id = await _child_of(db, p, learner_id)
+    return {"paintings": [_painting_out(r) for r in await paintings_repo.for_learner(db, family_id, learner_id)]}
+
+
+@router.get("/paintings/{learner_id}/{item_id}/image")
+async def painting_image(learner_id: str, item_id: str, db: Db, p: CanReadChild) -> Response:
+    """The painting itself. Only for the child's own family."""
+    family_id = await _child_of(db, p, learner_id)
+    row = await paintings_repo.get(db, family_id, learner_id, item_id)
+    data = await painting_store.get(row["imageId"]) if row else None
+    if data is None:
+        raise NotFound("No such painting.", "painting_not_found")
+    return Response(
+        content=data,
+        media_type=painting_store.CONTENT_TYPE,
+        headers={"Cache-Control": "private, max-age=86400", "X-Content-Type-Options": "nosniff"},
+    )
+
+
+@router.delete("/paintings/{learner_id}/{item_id}", status_code=204)
+async def delete_painting(learner_id: str, item_id: str, db: Db, p: CanAppendChild) -> None:
+    family_id = await _child_of(db, p, learner_id)
+    orphan = await paintings_repo.remove(db, family_id, learner_id, item_id)
+    if orphan:
+        await painting_store.delete(orphan)

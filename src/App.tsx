@@ -150,6 +150,8 @@ export default function App() {
   /* Learn holds Lessons, Books and Write & Draw; which one is showing. */
   const [learnCategory, setLearnCategory] = useLearnCategory();
   const [traceDeep, setTraceDeep] = useState(false);
+  /** A Trace item is open (writing or colouring): like a book, it takes the phone's whole screen. */
+  const [tracePlaying, setTracePlaying] = useState(false);
   /* A book or collection to open once Learn shows it — a Today pick on Home. */
   const [learnTarget, setLearnTarget] = useState<{ bookId?: string; collectionId?: string } | null>(null);
   const [switchingCategory, startCategorySwitch] = useTransition();
@@ -726,13 +728,14 @@ export default function App() {
   */
   const inLesson = activeTab === "game" && inRound;
   const inBooks = activeTab === "game" && !inRound && learnCategory === "books";
+  const tracePlayingHere = activeTab === "game" && !inRound && learnCategory === "trace" && tracePlaying;
 
   return (
     <MainLayout
       // Only a running round wants the full width; the picker is a normal page.
       contained={!inLesson}
       hideMobileChrome={inBooks && libraryReaderOpen}
-      hideMobileTabBar={inBooks && libraryBookOpen}
+      hideMobileTabBar={(inBooks && libraryBookOpen) || tracePlayingHere}
       /* Two shells, each hiding itself at the width that is not its own — the
          rail from `rail:` up, the toolbar and tab bar below it. A round stands
          both of them down: what a rail shows a five-year-old counting crowns is
@@ -812,6 +815,7 @@ export default function App() {
                   onOpened={() => setLearnTarget(null)}
                   canCreate={canTrace}
                   onDeepChange={setTraceDeep}
+                  onPlayingChange={setTracePlaying}
                   onAwardXp={(earnedXp) => setUserProgress((prev) => ({ ...prev, xp: prev.xp + earnedXp }))}
                   onGoHome={() => setActiveTab("home")}
                 />
@@ -1042,7 +1046,8 @@ export default function App() {
         * character, in two different states, is the app disagreeing with itself
         * about where Koda is.
         */}
-      {!inLesson && !isLiveVoiceOpen && !isKodaAskOpen && (
+      {/* A Trace item open is a focused activity like a round: its own tools sit where the button would. */}
+      {!inLesson && !tracePlayingHere && !isLiveVoiceOpen && !isKodaAskOpen && (
         <KodaFab
           onAsk={(mode) => (mode === "voice" ? setIsLiveVoiceOpen(true) : setIsKodaAskOpen(true))}
         />

@@ -62,6 +62,8 @@ interface Props {
   showCheckpoints: boolean;
   /** A light design grid (every 100 units) under everything — the Studio's only, never the child's. */
   showGrid: boolean;
+  /** A colouring item: strokes are line art, so the writing band is not drawn. */
+  lineArt?: boolean;
   view: View;
   onView(v: View): void;
   onSelect(strokes: number[], node?: number | null): void;
@@ -178,7 +180,7 @@ function withHandles(stroke: Stroke, segment: number): Stroke {
 
 export { bendThrough, withHandles };
 
-export function StrokeEditor({ item, selection, selectedNode, mode, magic, showCheckpoints, showGrid, view, onView, onSelect, onBegin, onChange, newId }: Props) {
+export function StrokeEditor({ item, selection, selectedNode, mode, magic, showCheckpoints, showGrid, lineArt = false, view, onView, onSelect, onBegin, onChange, newId }: Props) {
   const svgRef = useRef<SVGSVGElement>(null);
   const drag = useRef<Drag | null>(null);
   const frame = useRef<number>(0);
@@ -597,7 +599,7 @@ export function StrokeEditor({ item, selection, selectedNode, mode, magic, showC
         const d = pathOf(s);
         return (
           <g key={s.id}>
-            <path d={d} fill="none" stroke="#8b7cf0" strokeOpacity={isSel ? 0.2 : 0.1} strokeWidth={s.width} strokeLinecap="round" strokeLinejoin="round" pointerEvents="none" />
+            {!lineArt && <path d={d} fill="none" stroke="#8b7cf0" strokeOpacity={isSel ? 0.2 : 0.1} strokeWidth={s.width} strokeLinecap="round" strokeLinejoin="round" pointerEvents="none" />}
             <path d={d} fill="none" stroke={isSel ? "#5b3fd9" : isHover ? "#7c68ea" : "#a99cf0"} strokeWidth={(isSel || isHover ? 8 : 6) * Math.max(0.6, k)} strokeLinecap="round" strokeLinejoin="round" pointerEvents="none" />
             <path d={d} fill="none" stroke="transparent" strokeWidth={Math.max(24, 36 * k)} {...hitProps} />
           </g>

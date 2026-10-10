@@ -212,6 +212,11 @@ INDEXES: dict[str, list[IndexModel]] = {
     "trace_revisions": [
         IndexModel([("collectionId", ASCENDING), ("rev", ASCENDING)], unique=True, name="trace_revision_unique"),
     ],
+    # One painting per child per picture: a newer one replaces it.
+    "trace_paintings": [
+        IndexModel([("familyId", ASCENDING), ("learnerId", ASCENDING), ("itemId", ASCENDING)], unique=True, name="trace_painting_unique"),
+        IndexModel([("familyId", ASCENDING), ("learnerId", ASCENDING), ("paintedAt", DESCENDING)], name="trace_paintings_recent"),
+    ],
     "skill_registry": [
         IndexModel([("id", ASCENDING)], unique=True, name="skill_id_unique"),
         IndexModel([("status", ASCENDING), ("id", ASCENDING)], name="skills_by_status"),

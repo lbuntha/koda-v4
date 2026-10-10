@@ -50,6 +50,28 @@ def test_an_item_is_publishable_only_when_complete_and_tested():
     assert any("guided" in p for p in item_problems(LINE, PLAN, low))
 
 
+def test_a_colouring_item_needs_colour_steps_not_writing_tests():
+    step = {"id": "p1", "color": "red", "seeds": [{"x": 300, "y": 500}]}
+    colour = {**LINE, "kind": "drawing", "activity": "color", "paint": {"steps": [step]}}
+    assert item_problems(colour, PLAN, {}) == []
+    custom = copy.deepcopy(colour)
+    custom["paint"]["steps"][0]["color"] = "#d6a078"
+    assert item_problems(custom, PLAN, {}) == []
+    assert "it has no colour steps" in item_problems({**colour, "paint": {"steps": []}}, PLAN, {})
+    bad = copy.deepcopy(colour)
+    bad["paint"]["steps"][0].update(color="gold", seeds=[])
+    problems = item_problems(bad, PLAN, {})
+    assert any("unknown colour" in p for p in problems)
+    assert any("no areas" in p for p in problems)
+    assert any("activity" in p for p in item_problems({**LINE, "activity": "paint"}, PLAN, PASSED))
+    picture = {"lines": "data:image/png;base64,AAAA", "walls": "A" * 41668, "strength": 150}
+    from_picture = {**colour, "strokes": [], "paint": {**colour["paint"], "picture": picture}}
+    assert item_problems(from_picture, PLAN, {}) == []
+    assert "it has no line art" in item_problems({**colour, "strokes": []}, PLAN, {})
+    broken = {**from_picture, "paint": {**from_picture["paint"], "picture": {**picture, "walls": "short"}}}
+    assert any("parts are not readable" in p for p in item_problems(broken, PLAN, {}))
+
+
 def test_a_continued_stroke_must_touch_the_one_before():
     two = copy.deepcopy(LINE)
     two["strokes"].append(
@@ -416,3 +438,47 @@ async def test_a_collection_s_topics_come_from_the_shared_list_and_are_published
     await client.post(f"{url}/publish", headers=dev)
     assert (await client.get("/trace/collections", headers=dev)).json()["collections"][0]["topics"] == ["shapes"]
     assert (await client.get("/trace/collections/lines", headers=dev)).json()["topics"] == ["shapes"]
+
+
+PNG = b"\x89PNG\r\n\x1a\n" + b"\x00" * 40
+
+
+def _painting(png: bytes = PNG, at: int = 1000, accuracy: int = 90) -> dict:
+    return {"image": base64.b64encode(png).decode(), "title": "Carrot", "accuracy": accuracy, "stars": 3, "paintedAt": at}
+
+
+async def test_a_childs_painting_is_kept_one_per_picture_and_only_for_the_family(client, db, signup_body, tmp_path, monkeypatch):
+    from app.settings import settings
+
+    monkeypatch.setattr(settings(), "trace_paintings_dir", str(tmp_path / "paintings"))
+    monkeypatch.setattr(settings(), "library_audio_bucket", None)
+    tokens = (await client.post("/auth/signup", json=signup_body())).json()
+    parent = {"Authorization": f"Bearer {tokens['accessToken']}"}
+    kid = (await client.post("/learners", headers=parent, json={"displayName": "Dara"})).json()["id"]
+
+    saved = await client.put(f"/trace/paintings/{kid}/carrot-1", headers=parent, json=_painting())
+    assert saved.status_code == 200
+    rows = (await client.get(f"/trace/paintings/{kid}", headers=parent)).json()["paintings"]
+    assert [(r["itemId"], r["accuracy"]) for r in rows] == [("carrot-1", 90)]
+    image = await client.get(f"/trace/paintings/{kid}/carrot-1/image", headers=parent)
+    assert image.status_code == 200 and image.content == PNG and image.headers["content-type"] == "image/png"
+
+    # A newer painting of the same picture replaces it, and its old file goes.
+    newer = PNG + b"newer"
+    await client.put(f"/trace/paintings/{kid}/carrot-1", headers=parent, json=_painting(newer, at=2000, accuracy=95))
+    assert (await client.get(f"/trace/paintings/{kid}/carrot-1/image", headers=parent)).content == newer
+    assert len(list((tmp_path / "paintings").rglob("*.png"))) == 1
+    # An older one arriving late (a tablet that was offline) does not.
+    late = await client.put(f"/trace/paintings/{kid}/carrot-1", headers=parent, json=_painting(PNG + b"old", at=1500))
+    assert late.json()["accuracy"] == 95
+
+    # Only a PNG, and only this family's children.
+    assert (await client.put(f"/trace/paintings/{kid}/carrot-1", headers=parent, json=_painting(b"GIF89a", at=3000))).status_code == 415
+    assert (await client.put("/trace/paintings/someone-else/carrot-1", headers=parent, json=_painting(at=3000))).status_code == 404
+    other = (await client.post("/auth/signup", json=signup_body("other@example.com"))).json()
+    stranger = {"Authorization": f"Bearer {other['accessToken']}"}
+    assert (await client.get(f"/trace/paintings/{kid}/carrot-1/image", headers=stranger)).status_code == 404
+
+    assert (await client.delete(f"/trace/paintings/{kid}/carrot-1", headers=parent)).status_code == 204
+    assert (await client.get(f"/trace/paintings/{kid}", headers=parent)).json()["paintings"] == []
+    assert list((tmp_path / "paintings").rglob("*.png")) == []

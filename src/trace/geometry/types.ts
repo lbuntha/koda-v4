@@ -105,6 +105,58 @@ export interface TraceItem {
   voice?: string;
   /** What the recording says when it is more than the title ("ក — ក្អែក"). Absent = the title. */
   voiceText?: string;
+  /** What the child does with it: trace the strokes (the default), or colour the line art in steps. */
+  activity?: Activity;
+  /** Colour: the steps, each naming the areas of the line art it colours. */
+  paint?: PaintPlan;
+}
+
+export type Activity = "trace" | "color";
+
+export const activityOf = (item: Pick<TraceItem, "activity">): Activity => item.activity ?? "trace";
+
+/** Something to show: strokes, or (colouring) a picture's line art. */
+export const hasArt = (item: Pick<TraceItem, "strokes" | "activity" | "paint">): boolean =>
+  item.strokes.length > 0 || (activityOf(item) === "color" && Boolean(item.paint?.picture));
+
+/** One colouring step: these areas, in this colour. */
+export interface PaintStep {
+  id: string;
+  /** A crayon from the paint palette (see paint/palette.ts). */
+  color: string;
+  /** One point inside each area this step colours, 0–1000. The area is what a flood fill from it reaches inside the line art. */
+  seeds: Point[];
+  /** Content, read to the child: "Colour the roof red." Absent = a generic line naming the colour. */
+  instruction?: string;
+}
+
+export interface PaintPlan {
+  steps: PaintStep[];
+  /** The colouring page itself, when the item was made from a picture (see paint/picture.ts). */
+  picture?: PaintPicture;
+}
+
+export interface EraseMark {
+  r: number;
+  points: Point[];
+}
+
+/** A picture turned into line art: what the child sees, and where its parts are. */
+export interface PaintPicture {
+  /** The lines in ink on transparent, a PNG data URL covering the whole 1000×1000 square. */
+  lines: string;
+  /** The same lines on the paint grid, thickened to close small gaps: one bit per cell, packed and base64-encoded. */
+  walls: string;
+  /** The lines as drawn, before thickening (same packing). Decides what can be painted: every cell not under it belongs to a part. */
+  raw?: string;
+  /** How dark a pixel had to be to count as a line (0–255). */
+  strength: number;
+  /** How many cells the lines grew by to close small breaks. Absent = none (older pictures). */
+  gap?: number;
+  /** The magic pen redrew the lines as smooth strokes: the child sees the strokes, not the picture's own lines. */
+  smooth?: boolean;
+  /** Noise rubbed out of the picture (a watermark, stray dots): brush paths in 0–1000 units, radius in units. */
+  erase?: EraseMark[];
 }
 
 export interface TraceGuide {

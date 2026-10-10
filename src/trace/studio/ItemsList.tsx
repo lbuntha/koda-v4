@@ -14,6 +14,7 @@ import { useT } from "../../lib/i18n";
 import { themeSystem } from "../../lib/themeSystem";
 import { UIBadge, UIButton, UIDialog, UIPagination, UISearchInput } from "../../components/ui";
 import type { TraceKind } from "../geometry/types";
+import { activityOf, hasArt } from "../geometry/types";
 import { runChecks } from "./checks";
 import { TraceDrafts, type TraceDraft } from "./drafts";
 import { matches, pageOf, sortBy, usage, type ListSort } from "./listView";
@@ -135,13 +136,15 @@ export function ItemsList({ kinds, onOpen, onCreate }: { kinds: readonly TraceKi
               <li key={d.item.id} className={`group relative flex flex-col rounded-2xl border-2 bg-surface transition hover:border-indigo-400 ${ticked ? "border-indigo-500 ring-2 ring-indigo-500/30" : "border-line"}`}>
                 <button onClick={() => onOpen(d.item.id)} className="flex flex-col items-center gap-2 px-4 pb-4 pt-6 text-center">
                   <span className="flex h-20 items-center text-indigo-700 dark:text-indigo-300">
-                    {d.item.strokes.length
+                    {hasArt(d.item)
                       ? <ItemThumb item={d.item} className="h-20 w-20" />
                       : <span className="text-6xl font-bold leading-none text-muted/60" lang={d.item.script === "khmer" ? "km" : undefined}>{d.item.title || "·"}</span>}
                   </span>
                   <span className="max-w-full truncate font-bold text-ink" lang={d.item.script === "khmer" ? "km" : undefined}>{d.item.title || t("traceStudio.untitled")}</span>
                   <span className="text-xs text-muted">
-                    {t(`traceStudio.kind.${d.item.kind}`)} · {t("traceStudio.strokeCount", { count: d.item.strokes.length })}
+                    {activityOf(d.item) === "color"
+                      ? `${t("traceStudio.activity.color")} · ${t("traceStudio.paint.stepCount", { count: d.item.paint?.steps.length ?? 0 })}`
+                      : `${t(`traceStudio.kind.${d.item.kind}`)} · ${t("traceStudio.strokeCount", { count: d.item.strokes.length })}`}
                     {used && ` · ${used.get(d.item.id) ? t("traceStudio.inCollections", { count: used.get(d.item.id) ?? 0 }) : t("traceStudio.inNoCollection")}`}
                   </span>
                   <UIBadge variant={issues ? "danger" : "success"} className="inline-flex items-center gap-1">

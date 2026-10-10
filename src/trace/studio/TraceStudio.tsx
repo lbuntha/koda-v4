@@ -19,6 +19,7 @@ import {
   AlignCenter,
   ArrowLeft,
   ArrowLeftRight,
+  ArrowRight,
   Check,
   ChevronDown,
   ChevronUp,
@@ -41,6 +42,8 @@ import {
   MapPin,
   Maximize2,
   Minus,
+  Palette,
+  PenLine,
   MousePointer2,
   Pencil,
   Play,
@@ -64,7 +67,7 @@ import {
 import { themeSystem } from "../../lib/themeSystem";
 import { VoiceRecord } from "./VoiceRecord";
 import { useT } from "../../lib/i18n";
-import { UIBadge, UIButton, UIPageHeader, UITabs } from "../../components/ui";
+import { UIBadge, UIButton, UIPageHeader, UIStepper, UITabs } from "../../components/ui";
 import type { FitHow } from "../geometry/edit";
 import {
   addLoop,
@@ -83,8 +86,13 @@ import {
   simplifyStroke,
   straighten,
 } from "../geometry/edit";
-import type { NodeType, Sensitivity, StepId, Stroke, StrokeShape, TraceItem, TraceKind, Zone } from "../geometry/types";
-import { modeOf } from "../geometry/types";
+import type { Activity, NodeType, Sensitivity, StepId, Stroke, StrokeShape, TraceItem, TraceKind, Zone } from "../geometry/types";
+import { activityOf, hasArt, modeOf } from "../geometry/types";
+import { PaintSteps } from "./PaintSteps";
+import { fittedPixels, loadImage, pictureFrom } from "../paint/picture";
+import { PaintPicture } from "./PaintPicture";
+import { PaintPublish } from "./PaintPublish";
+import { ColorPlayer } from "../paint/ColorPlayer";
 import type { StepPlan } from "../progress/ladder";
 import { defaultPlan } from "../progress/ladder";
 import { TracePlayer } from "../player/TracePlayer";
@@ -199,14 +207,17 @@ export function TraceStudio() {
 
 /* =============================================================== editor */
 
-type Tab = "shape" | "steps" | "details";
+/** A colouring item adds "picture"; its "shape" view (extra lines) opens from the Picture tab. */
+type Tab = "picture" | "shape" | "steps" | "details" | "publish";
+/** A colouring item is made in this order; the stepper and Back/Next walk it. */
+const COLOR_FLOW = ["picture", "steps", "details", "publish"] as const;
 
 function DraftEditor({ id, onClose }: { id: string; onClose(): void }) {
   const { t } = useT();
   const [draft, setDraft] = useState<TraceDraft>(() => TraceDrafts.get(id) ?? newDraft(blankItem(uid("t-"))));
   const [past, setPast] = useState<TraceItem[]>([]);
   const [future, setFuture] = useState<TraceItem[]>([]);
-  const [tab, setTab] = useState<Tab>("shape");
+  const [tab, setTab] = useState<Tab>(() => (TraceDrafts.get(id)?.item.activity === "color" ? "picture" : "shape"));
   const [mode, setMode] = useState<EditMode>("adjust");
   const [magic, setMagic] = useState<Magic>({ snap: true, autoConnect: true, gridOnly: false });
   const [showCps, setShowCps] = useState(false);
@@ -255,6 +266,7 @@ function DraftEditor({ id, onClose }: { id: string; onClose(): void }) {
     setPast([...past, item]);
     setItem(next);
   };
+  const history = { undo, redo, canUndo: past.length > 0, canRedo: future.length > 0 };
   const select = (s: number | null, n: number | null = null) => {
     setSelection(s === null ? [] : [s]);
     setSelNode(n);
@@ -329,14 +341,15 @@ function DraftEditor({ id, onClose }: { id: string; onClose(): void }) {
   // Keyboard shortcuts.
   const keyRef = useRef<(e: KeyboardEvent) => void>(() => {});
   keyRef.current = (e: KeyboardEvent) => {
-    if (tab !== "shape") return;
     const el = e.target as HTMLElement;
     if (el && (el.tagName === "INPUT" || el.tagName === "TEXTAREA" || el.tagName === "SELECT")) return;
     const key = e.key.toLowerCase();
-    if ((e.metaKey || e.ctrlKey) && key === "z") {
+    // Undo works wherever the item is edited on a canvas: strokes, and a colouring item's picture and steps.
+    if ((e.metaKey || e.ctrlKey) && key === "z" && (tab === "shape" || tab === "picture" || (tab === "steps" && activity === "color"))) {
       e.preventDefault();
       return e.shiftKey ? redo() : undo();
     }
+    if (tab !== "shape") return;
     if ((e.metaKey || e.ctrlKey) && key === "g") {
       e.preventDefault();
       return e.shiftKey ? ungroup() : group();
@@ -408,6 +421,42 @@ function DraftEditor({ id, onClose }: { id: string; onClose(): void }) {
   const issues = checks.filter((c) => !c.ok).length;
   const selected = sel !== null ? item.strokes[sel] : undefined;
   const node = selected && selNode !== null ? selected.nodes[selNode] : undefined;
+  const activity = activityOf(item);
+  // A picture made before its real lines were kept: find them once (no undo step — nothing the author did).
+  const upgrading = useRef(false);
+  useEffect(() => {
+    const picture = item.paint?.picture;
+    const src = item.guide?.image?.src;
+    if (activity !== "color" || !picture || picture.raw || !src || upgrading.current) return;
+    upgrading.current = true;
+    void loadImage(src)
+      .then((img) => {
+        const fresh = pictureFrom(fittedPixels(img), picture.strength, picture.gap ?? 0, picture.erase ?? []);
+        const cur = itemRef.current;
+        if (cur.paint?.picture?.walls === picture.walls) setItem({ ...cur, paint: { ...cur.paint, steps: cur.paint.steps, picture: { ...fresh, smooth: picture.smooth } } });
+      })
+      .catch(() => undefined);
+  }, [activity, item.paint?.picture, item.guide?.image?.src, setItem]);
+  const [tryingColor, setTryingColor] = useState(false);
+  /** Where a colouring item is in its flow: drawing extra lines belongs to the Picture step. */
+  const flowAt: (typeof COLOR_FLOW)[number] = tab === "shape" || tab === "picture" ? "picture" : tab;
+  const paintSteps = item.paint?.steps ?? [];
+  const flowDone: Record<(typeof COLOR_FLOW)[number], boolean> = {
+    picture: hasArt(item),
+    steps: paintSteps.length > 0 && checks.every((c) => c.id !== "paintAreas" || c.ok),
+    details: item.title.trim().length > 0,
+    publish: issues === 0,
+  };
+  /** Trace or Color. Colouring a picture is drawing, so a writing kind becomes a drawing; the grid goes, and the colour steps are kept either way. */
+  const setActivity = (next: Activity) => {
+    if (next === activity) return;
+    edit(
+      next === "color"
+        ? { ...item, activity: "color", kind: modeOf(item.kind) === "writing" ? "drawing" : item.kind, grid: "none", paint: item.paint ?? { steps: [] } }
+        : { ...item, activity: "trace" },
+    );
+    setTab(next === "color" ? "picture" : tab === "picture" ? "shape" : tab);
+  };
 
   return (
     <div className="mx-auto flex w-full max-w-[1400px] flex-col gap-4 pb-10">
@@ -426,18 +475,46 @@ function DraftEditor({ id, onClose }: { id: string; onClose(): void }) {
           </span>
         </div>
         <div className="ml-auto flex flex-wrap items-center gap-2">
-          <UITabs<Tab>
-            label={t("traceStudio.title")}
-            value={tab}
-            onChange={setTab}
-            items={(["shape", "steps", "details"] as const).map((x) => ({ id: x, label: t(`traceStudio.tab.${x}`) }))}
-          />
+          <ActivitySwitch value={activity} onChange={setActivity} />
+          {activity === "trace" && (
+            <UITabs<Tab>
+              label={t("traceStudio.title")}
+              onChange={setTab}
+              value={tab}
+              items={(["shape", "steps", "details"] as const).map((x) => ({ id: x, label: t(`traceStudio.tab.${x}`) }))}
+            />
+          )}
           <UIBadge variant={issues ? "danger" : "success"} className="inline-flex items-center gap-1">
             {issues ? <AlertCircle className="h-4 w-4" /> : <Check className="h-4 w-4" />}
             {issues ? t("traceStudio.issues", { count: issues }) : t("traceStudio.ready")}
           </UIBadge>
         </div>
       </div>
+
+      {activity === "color" && (
+        <div className="flex flex-col gap-3 rounded-2xl border border-line bg-surface px-4 py-3">
+          <UIStepper
+            label={t("traceStudio.flow.label")}
+            current={COLOR_FLOW.indexOf(flowAt)}
+            onSelect={(i) => {
+              setTryingColor(false);
+              setTab(COLOR_FLOW[i]);
+            }}
+            steps={COLOR_FLOW.map((x) => ({ id: x, label: t(`traceStudio.flow.${x}`), complete: flowDone[x] }))}
+          />
+          <p className="text-sm text-muted">{t(`traceStudio.flow.${flowAt}Hint`)}</p>
+        </div>
+      )}
+
+      {activity === "color" && tab === "shape" && (
+        <div className="flex flex-wrap items-center gap-3 rounded-2xl bg-indigo-50/60 px-4 py-2.5 text-sm text-body dark:bg-indigo-950/30">
+          <PenLine className="h-4 w-4 text-indigo-600 dark:text-indigo-300" />
+          <span className="min-w-0 flex-1">{t("traceStudio.flow.linesNote")}</span>
+          <UIButton size="sm" onClick={() => setTab("picture")}>
+            {t("traceStudio.flow.linesDone")}
+          </UIButton>
+        </div>
+      )}
 
       {tab === "shape" && (
         <div className="grid gap-4 lg:grid-cols-[auto_minmax(0,1fr)] xl:grid-cols-[auto_minmax(0,1fr)_360px]">
@@ -530,6 +607,7 @@ function DraftEditor({ id, onClose }: { id: string; onClose(): void }) {
               magic={magic}
               showCheckpoints={showCps || mode === "pin"}
               showGrid={showGrid}
+              lineArt={activity === "color"}
               view={view}
               onView={setView}
               onSelect={(s, n) => {
@@ -698,13 +776,71 @@ function DraftEditor({ id, onClose }: { id: string; onClose(): void }) {
         </div>
       )}
 
-      {tab === "steps" && <StepsPanel draft={draft} onChange={setDraft} checks={checks} />}
+      {tab === "picture" && <PaintPicture item={item} onChange={edit} history={history} onDrawLines={() => setTab("shape")} onNext={() => setTab("steps")} />}
+      {tab === "steps" && (activity === "color" ? <PaintSteps item={item} onChange={edit} history={history} /> : <StepsPanel draft={draft} onChange={setDraft} checks={checks} />)}
       {tab === "details" && <DetailsPanel item={item} onChange={edit} />}
+      {tab === "publish" &&
+        (tryingColor ? (
+          <div className="flex flex-col gap-3">
+            <div className="flex items-center gap-2">
+              <UIButton size="sm" variant="secondary" icon={<ArrowLeft className="h-4 w-4" />} onClick={() => setTryingColor(false)}>
+                {t("traceStudio.paint.backToEdit")}
+              </UIButton>
+              <span className="text-sm text-muted">{t("traceStudio.paint.tryNote")}</span>
+            </div>
+            <ColorPlayer item={item} sandbox onExit={() => setTryingColor(false)} />
+          </div>
+        ) : (
+          <PaintPublish item={item} ready={issues === 0} checks={<ChecksList checks={checks} />} onTry={() => setTryingColor(true)} />
+        ))}
+
+      {/* Back and Next through a colouring item's steps (the Picture step has its own Next). */}
+      {activity === "color" && (tab === "steps" || tab === "details" || (tab === "publish" && !tryingColor)) && (
+        <div className="flex items-center justify-between gap-2 border-t border-line pt-4">
+          <UIButton variant="ghost" icon={<ArrowLeft className="h-4 w-4" />} onClick={() => setTab(COLOR_FLOW[COLOR_FLOW.indexOf(flowAt) - 1])}>
+            {t(`traceStudio.flow.${COLOR_FLOW[COLOR_FLOW.indexOf(flowAt) - 1]}`)}
+          </UIButton>
+          {flowAt !== "publish" && (
+            <UIButton icon={<ArrowRight className="h-4 w-4" />} onClick={() => setTab(COLOR_FLOW[COLOR_FLOW.indexOf(flowAt) + 1])}>
+              {t("traceStudio.flow.next", { step: t(`traceStudio.flow.${COLOR_FLOW[COLOR_FLOW.indexOf(flowAt) + 1]}`) })}
+            </UIButton>
+          )}
+        </div>
+      )}
     </div>
   );
 }
 
 /* ============================================================== pieces */
+
+/** What the child does with this item: trace its strokes, or colour its line art. */
+function ActivitySwitch({ value, onChange }: { value: Activity; onChange(a: Activity): void }) {
+  const { t } = useT();
+  const options: { id: Activity; icon: React.ReactNode }[] = [
+    { id: "trace", icon: <PenLine className="h-4 w-4" /> },
+    { id: "color", icon: <Palette className="h-4 w-4" /> },
+  ];
+  return (
+    <div role="radiogroup" aria-label={t("traceStudio.activity.label")} className="flex items-center gap-0.5 rounded-xl bg-surface-muted p-1">
+      {options.map((o) => (
+        <button
+          key={o.id}
+          type="button"
+          role="radio"
+          aria-checked={value === o.id}
+          title={t(`traceStudio.activity.${o.id}Hint`)}
+          onClick={() => onChange(o.id)}
+          className={`flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-sm font-semibold transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 ${
+            value === o.id ? "bg-surface text-indigo-700 shadow-sm dark:text-indigo-300" : "text-muted hover:text-ink"
+          }`}
+        >
+          {o.icon}
+          {t(`traceStudio.activity.${o.id}`)}
+        </button>
+      ))}
+    </div>
+  );
+}
 
 /** One rail button that opens every ready-made shape; each is added as an ordinary, editable stroke. */
 function ShapePicker({ onPick }: { onPick(p: Primitive): void }) {
@@ -1056,6 +1192,8 @@ function GuidePanel({ item, onChange }: { item: TraceItem; onChange(i: TraceItem
 
 function DetailsPanel({ item, onChange }: { item: TraceItem; onChange(i: TraceItem): void }) {
   const { t } = useT();
+  // A colouring item has no stroke numbers or writing grid; "how strict" is how much of each step must be filled.
+  const coloring = activityOf(item) === "color";
   return (
     <div className="max-w-3xl">
       <Section title={t("traceStudio.tab.details")}>
@@ -1089,25 +1227,29 @@ function DetailsPanel({ item, onChange }: { item: TraceItem; onChange(i: TraceIt
               <option value="">{t("traceStudio.scriptNone")}</option>
             </select>
           </Field>
-          <Field label={t("traceStudio.numerals")}>
-            <select
-              className={inputCls}
-              value={item.numerals ?? (item.script === "khmer" ? "khmer" : "latin")}
-              onChange={(e) => onChange({ ...item, numerals: e.target.value as TraceItem["numerals"] })}
-            >
-              <option value="khmer">{t("traceStudio.numeralsKhmer")}</option>
-              <option value="latin">{t("traceStudio.numeralsLatin")}</option>
-            </select>
-          </Field>
-          <Field label={t("traceStudio.grid")}>
-            <select className={inputCls} value={item.grid} onChange={(e) => onChange({ ...item, grid: e.target.value as TraceItem["grid"] })}>
-              {GRIDS.map((g) => (
-                <option key={g} value={g}>
-                  {t(`traceStudio.gridName.${g}`)}
-                </option>
-              ))}
-            </select>
-          </Field>
+          {!coloring && (
+            <Field label={t("traceStudio.numerals")}>
+              <select
+                className={inputCls}
+                value={item.numerals ?? (item.script === "khmer" ? "khmer" : "latin")}
+                onChange={(e) => onChange({ ...item, numerals: e.target.value as TraceItem["numerals"] })}
+              >
+                <option value="khmer">{t("traceStudio.numeralsKhmer")}</option>
+                <option value="latin">{t("traceStudio.numeralsLatin")}</option>
+              </select>
+            </Field>
+          )}
+          {!coloring && (
+            <Field label={t("traceStudio.grid")}>
+              <select className={inputCls} value={item.grid} onChange={(e) => onChange({ ...item, grid: e.target.value as TraceItem["grid"] })}>
+                {GRIDS.map((g) => (
+                  <option key={g} value={g}>
+                    {t(`traceStudio.gridName.${g}`)}
+                  </option>
+                ))}
+              </select>
+            </Field>
+          )}
           <Field label={t("traceStudio.sensitivity")}>
             <select className={inputCls} value={item.sensitivity} onChange={(e) => onChange({ ...item, sensitivity: e.target.value as Sensitivity })}>
               {(["relaxed", "balanced", "strict"] as Sensitivity[]).map((s) => (
@@ -1138,7 +1280,7 @@ function DetailsPanel({ item, onChange }: { item: TraceItem; onChange(i: TraceIt
               </Field>
             </>
           )}
-          <p className="text-sm text-muted sm:col-span-2">{t(modeOf(item.kind) === "writing" ? "traceStudio.writingNote" : "traceStudio.drawingNote")}</p>
+          <p className="text-sm text-muted sm:col-span-2">{t(coloring ? "traceStudio.colorNote" : modeOf(item.kind) === "writing" ? "traceStudio.writingNote" : "traceStudio.drawingNote")}</p>
         </div>
       </Section>
     </div>
