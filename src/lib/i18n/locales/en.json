@@ -4447,6 +4447,10 @@
     "notYet": {
       "title": "Colour more first",
       "text": "Fill at least half of the glowing part, then press Done."
+    },
+    "partWhite": {
+      "title": "A part is still white",
+      "text": "Colour the glowing part too, then press Done."
     }
   }
 }

@@ -285,23 +285,37 @@ export interface StepState {
   wrong: number;
   /** The other crayon used most there, when any. */
   wrongCrayon: number;
+  /** The least-coloured of the parts the step must have (its own share, 0–1): a whole sleeve left white shows here, however big the rest is. 1 when it names none. */
+  weakest: number;
 }
 
-/** With `anyColour` (the child chose their own colours), every colour counts as right. */
-export function stepState(paint: Uint8Array, areas: Areas, step: PaintStep, anyColour = false): StepState {
+/**
+ * How a step is going. `required` are the parts it must have coloured — by
+ * default every part it names bigger than a speck. With `anyColour` (the child
+ * chose their own colours), every colour counts as right.
+ */
+export function stepState(paint: Uint8Array, areas: Areas, step: PaintStep, anyColour = false, required?: Set<number>): StepState {
   const own = stepAreas(areas, step);
+  const must = required ?? new Set([...own].filter((l) => areas.sizes[l] >= SPECK));
   const want = crayonIndex(step.color);
   let total = 0;
   let right = 0;
   const others = new Map<number, number>();
+  const perPart = new Map<number, number>();
   for (const l of own) total += areas.sizes[l];
-  if (total === 0) return { cover: 0, wrong: 0, wrongCrayon: 0 };
+  if (total === 0) return { cover: 0, wrong: 0, wrongCrayon: 0, weakest: 0 };
   for (let i = 0; i < paint.length; i++) {
     const c = paint[i];
-    if (!c || !own.has(areas.labels[i])) continue;
-    if (c === want || anyColour) right++;
-    else others.set(c, (others.get(c) ?? 0) + 1);
+    if (!c) continue;
+    const l = areas.labels[i];
+    if (!own.has(l)) continue;
+    if (c === want || anyColour) {
+      right++;
+      if (must.has(l)) perPart.set(l, (perPart.get(l) ?? 0) + 1);
+    } else others.set(c, (others.get(c) ?? 0) + 1);
   }
+  let weakest = 1;
+  for (const l of must) if (own.has(l)) weakest = Math.min(weakest, (perPart.get(l) ?? 0) / areas.sizes[l]);
   let wrongCrayon = 0;
   let most = 0;
   let wrong = 0;
@@ -309,8 +323,18 @@ export function stepState(paint: Uint8Array, areas: Areas, step: PaintStep, anyC
     wrong += n;
     if (n > most) [most, wrongCrayon] = [n, c];
   }
-  return { cover: right / total, wrong: wrong / total, wrongCrayon };
+  return { cover: right / total, wrong: wrong / total, wrongCrayon, weakest };
 }
+
+/** Each part a step names must be at least this coloured for the step to be complete — so a small part left white is never hidden by a big one done. */
+export const PART_DONE = 0.5;
+/** …and at least this begun before the child may say Done. */
+export const PART_STARTED = 0.25;
+
+/** The step is complete: coloured past the bar overall, and no part of it left behind. */
+export const isComplete = (st: StepState, need: number) => st.cover >= need && st.weakest >= PART_DONE;
+/** The child may finish it with Done: half coloured overall, and every part at least begun. */
+export const maySayDone = (st: StepState) => st.cover >= NEARLY && st.weakest >= PART_STARTED;
 
 /** How much of a step must be coloured, by the item's sensitivity. */
 export const COVER: Record<TraceItem["sensitivity"], number> = { relaxed: 0.7, balanced: 0.8, strict: 0.9 };

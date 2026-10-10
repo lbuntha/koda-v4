@@ -27,7 +27,7 @@ import { TraceProgress } from "../progress/store";
 import { stepXp } from "../progress/reward";
 import type { PaintScore } from "./areas";
 import { fillLeftovers } from "./leftovers";
-import { CELL, COVER, GRID, LINE, NEARLY, areaAt, seamSources, blankPaint, brush, labelAreas, scorePainting, stepAreas, stepState } from "./areas";
+import { CELL, COVER, GRID, LINE, NEARLY, SPECK, areaAt, isComplete, maySayDone, seamSources, blankPaint, brush, labelAreas, scorePainting, stepAreas, stepState } from "./areas";
 import { Gallery, sharePicture } from "./gallery";
 import { PALETTE, colourName, crayonHex, crayonIndex, customColours, hexOfIndex, rgb } from "./palette";
 
@@ -451,14 +451,22 @@ export function ColorPlayer({ item, onExit, onAwardXp, sandbox = false, source, 
     return () => canvas.removeEventListener("wheel", onWheel);
   }, []); // eslint-disable-line react-hooks/exhaustive-deps -- setView reads refs only
 
-  /** Steps done: coloured past the bar, or said done by the child (and not rubbed out since). */
+  /**
+   * The parts each step must have coloured: the ones its author chose (bigger
+   * than a speck) — not the slivers that joined it in play, so a hair-thin
+   * strip can never hold a step back.
+   */
+  const required = useMemo(() => (item.paint?.steps ?? []).map((s) => new Set([...stepAreas(areas, s)].filter((l) => areas.sizes[l] >= SPECK))), [areas, item.paint]);
+  const stateOf = (paint: Uint8Array, k: number, anyColour: boolean) => stepState(paint, areas, steps[k], anyColour, required[k]);
+
+  /** Steps done: coloured past the bar with no part left behind, or said done by the child (and not rubbed out since). */
   const manualRef = useRef<Set<number>>(new Set());
   const doneNow = (paint: Uint8Array) => {
     const out = new Set<number>();
-    steps.forEach((s, k) => {
-      const cover = stepState(paint, areas, s, own).cover;
-      // Said done stays done only while the step is still at least half coloured.
-      if (cover >= need || (manualRef.current.has(k) && cover >= NEARLY)) out.add(k);
+    steps.forEach((_, k) => {
+      const st = stateOf(paint, k, own);
+      // Said done stays done only while the step still meets what Done asked of it.
+      if (isComplete(st, need) || (manualRef.current.has(k) && maySayDone(st))) out.add(k);
       else manualRef.current.delete(k);
     });
     return out;
@@ -483,8 +491,14 @@ export function ColorPlayer({ item, onExit, onAwardXp, sandbox = false, source, 
     if (!step || done.has(cur)) return;
     const paint = paintRef.current;
     // Done is a promise the child kept, not a shortcut: under half coloured, it says what is left.
-    if (stepState(paint, areas, step, own).cover < NEARLY) {
-      setMessage({ tone: "hint", title: t("paint.notYet.title"), text: t("paint.notYet.text") });
+    const st = stateOf(paint, cur, own);
+    if (!maySayDone(st)) {
+      // Under half overall, or a part not even begun: say which, and the glow shows where.
+      setMessage(
+        st.cover < NEARLY
+          ? { tone: "hint", title: t("paint.notYet.title"), text: t("paint.notYet.text") }
+          : { tone: "hint", title: t("paint.partWhite.title"), text: t("paint.partWhite.text") },
+      );
       return;
     }
     const before = paint.slice();
@@ -518,7 +532,7 @@ export function ColorPlayer({ item, onExit, onAwardXp, sandbox = false, source, 
     }
     if (finishedHere) return stepFinished(nowDone);
     if (!step || tool === "eraser") return;
-    const st = stepState(paint, areas, step, own);
+    const st = stateOf(paint, cur, own);
     if (st.wrong >= 0.06 && st.wrongCrayon && st.wrongCrayon !== crayonIndex(step.color)) {
       const name = colourName(t, step.color);
       // Holding the right crayon already: the fix is to paint over the other colour, not to pick again.
@@ -543,7 +557,13 @@ export function ColorPlayer({ item, onExit, onAwardXp, sandbox = false, source, 
         return;
       }
     }
-    if (st.cover >= 0.6 && st.cover < need) setMessage({ tone: "hint", title: t("paint.adviceAlmost.title"), text: t("paint.adviceAlmost.text") });
+    // Most of it coloured but not complete: either specks still glow, or a whole part was missed.
+    if (st.cover >= 0.6 && !isComplete(st, need))
+      setMessage(
+        st.cover >= need
+          ? { tone: "hint", title: t("paint.partWhite.title"), text: t("paint.partWhite.text") }
+          : { tone: "hint", title: t("paint.adviceAlmost.title"), text: t("paint.adviceAlmost.text") },
+      );
   };
 
   // A flash goes by itself: nothing to close, nothing in the way.
@@ -678,7 +698,9 @@ export function ColorPlayer({ item, onExit, onAwardXp, sandbox = false, source, 
   }, [sandbox, item.id, item.voice, sayIt]);
 
   const painted = ver > 0 && paintRef.current.some((v) => v > 0);
-  const progress = step ? Math.min(1, stepState(paintRef.current, areas, step, own).cover / need) : 0;
+  // Full only when complete: a bar at 100% beside a white sleeve would say the opposite of the glow.
+  const stepNow = step ? stateOf(paintRef.current, cur, own) : null;
+  const progress = !stepNow ? 0 : isComplete(stepNow, need) ? 1 : Math.min(0.95, stepNow.cover / need);
   const next = place?.next;
 
   /* ------------------------------------------------------------ view
@@ -722,7 +744,10 @@ export function ColorPlayer({ item, onExit, onAwardXp, sandbox = false, source, 
     // Re-check every step against the new rule: in own colours a filled step is done whatever its colour.
     const paint = paintRef.current;
     const next = new Set<number>();
-    steps.forEach((s, k) => (stepState(paint, areas, s, on).cover >= need || manualRef.current.has(k)) && next.add(k));
+    steps.forEach((_, k) => {
+      const st = stateOf(paint, k, on);
+      if (isComplete(st, need) || (manualRef.current.has(k) && maySayDone(st))) next.add(k);
+    });
     setDone(next);
     setMessage(null);
   };

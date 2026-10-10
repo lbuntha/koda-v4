@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import type { PaintStep, Stroke, TraceItem } from "../geometry/types";
-import { GRID, areaAt, blankPaint, brush, labelAreas, owners, scorePainting, seamSources, stepState } from "./areas";
+import { GRID, areaAt, blankPaint, brush, isComplete, labelAreas, maySayDone, owners, scorePainting, seamSources, stepState } from "./areas";
 import { crayonIndex } from "./palette";
 
 const square = (id: string, x0: number, y0: number, x1: number, y1: number): Stroke => ({
@@ -106,5 +106,26 @@ describe("paint areas", () => {
     const s = scorePainting(paint, areas, [inside], true);
     expect(s.accuracy).toBe(100);
     expect(s.ownColours).toBe(true);
+  });
+
+  it("a step is not complete while one of its parts is left white, however big the rest", () => {
+    // A big dress and a small sleeve, both pink — the screenshot that found this.
+    const two = { strokes: [square("dress", 100, 100, 700, 700), square("sleeve", 760, 100, 880, 220)] } as Pick<TraceItem, "strokes">;
+    const areas = labelAreas(two);
+    const pink: PaintStep = { id: "pink", color: "pink", seeds: [{ x: 400, y: 400 }, { x: 820, y: 160 }] };
+    const dress = areaAt(areas, { x: 400, y: 400 });
+    const sleeve = areaAt(areas, { x: 820, y: 160 });
+    const paint = blankPaint();
+    fill(paint, areas, dress, "pink");
+    const onlyDress = stepState(paint, areas, pink);
+    expect(onlyDress.cover).toBeGreaterThan(0.9);
+    expect(onlyDress.weakest).toBe(0);
+    expect(isComplete(onlyDress, 0.8)).toBe(false);
+    expect(maySayDone(onlyDress)).toBe(false);
+    // Half of the sleeve: Done may finish it now; the whole sleeve completes it.
+    for (let i = 0; i < paint.length; i++) if (areas.labels[i] === sleeve && i % GRID < (760 + 820) / (1000 / GRID)) paint[i] = crayonIndex("pink");
+    expect(maySayDone(stepState(paint, areas, pink))).toBe(true);
+    fill(paint, areas, sleeve, "pink");
+    expect(isComplete(stepState(paint, areas, pink), 0.8)).toBe(true);
   });
 });
