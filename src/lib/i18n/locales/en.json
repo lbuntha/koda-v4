@@ -4305,7 +4305,9 @@
         "one": "{count} rub-out",
         "other": "{count} rub-outs"
       },
-      "eraseClear": "Bring it all back"
+      "eraseClear": "Bring it all back",
+      "cut": "Cut: draw a line to split parts",
+      "cutHint": "Draw along where a line should be, to split one part from another."
     },
     "publish": {
       "check": "Before publishing",

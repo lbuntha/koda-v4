@@ -7,10 +7,11 @@
  */
 
 import { useEffect, useMemo, useRef, useState } from "react";
-import { ArrowRight, Eraser, Eye, ImageUp, PenLine, RefreshCw, Trash2, Undo2, Wand2 } from "lucide-react";
+import { ArrowRight, Eraser, Eye, ImageUp, PenLine, RefreshCw, Scissors, Trash2, Undo2, Wand2 } from "lucide-react";
 import { useT } from "../../lib/i18n";
 import { UIButton } from "../../components/ui";
-import type { EraseMark, Point, TraceItem } from "../geometry/types";
+import type { EraseMark, Point, Stroke, TraceItem } from "../geometry/types";
+import { fitNodes } from "../geometry/fit";
 import { GRID, labelAreas, seamSources } from "../paint/areas";
 import { strokePolyline } from "../geometry/bezier";
 import { LINE } from "../paint/areas";
@@ -102,8 +103,16 @@ export function PaintPicture({ item, onChange, history, onDrawLines, onNext }: {
     onChange({ ...item, strokes: [], paint: { steps: item.paint?.steps ?? [], picture: { ...picture, smooth: false } } });
   };
 
-  /* ------------------------------------------------------------ eraser */
-  const [erasing, setErasing] = useState(false);
+  /* ------------------------------------------------------- eraser and cut
+   * Two tools on the preview. The eraser rubs noise out of the picture's own
+   * lines. Cut draws a new line — along a dashed outline whose gaps let a part
+   * run into its neighbour (a stem into the background), or anywhere a part
+   * should be split. A cut is an ordinary extra line: the child sees it, and
+   * Undo takes it back.
+   */
+  const [tool, setTool] = useState<"none" | "erase" | "cut">("none");
+  const erasing = tool === "erase";
+  const cutting = tool === "cut";
   const [eraseSize, setEraseSize] = useState<keyof typeof ERASE>("s");
   const marks = picture?.erase ?? [];
   const setMarks = (next: EraseMark[]) => original && void rebuild(original, strength, gap, itemRef.current, next);
@@ -112,15 +121,15 @@ export function PaintPicture({ item, onChange, history, onDrawLines, onNext }: {
     const r = e.currentTarget.getBoundingClientRect();
     return { x: Math.round(((e.clientX - r.left) / r.width) * 1000), y: Math.round(((e.clientY - r.top) / r.height) * 1000) };
   };
-  /** Show the rub as it happens: white over the preview, before the lines are found again. */
+  /** Show the rub (or the cut) as it happens, before the lines are found again. */
   const rubDab = (canvas: HTMLCanvasElement, a: Point, b: Point) => {
     const ctx = canvas.getContext("2d");
     if (!ctx) return;
     const k = canvas.width / 1000;
     ctx.save();
     ctx.setTransform(k, 0, 0, k, 0, 0);
-    ctx.strokeStyle = "rgba(255,255,255,0.92)";
-    ctx.lineWidth = ERASE[eraseSize] * 2;
+    ctx.strokeStyle = cutting ? "#1f2544" : "rgba(255,255,255,0.92)";
+    ctx.lineWidth = cutting ? LINE : ERASE[eraseSize] * 2;
     ctx.lineCap = "round";
     ctx.beginPath();
     ctx.moveTo(a.x, a.y);
@@ -129,7 +138,7 @@ export function PaintPicture({ item, onChange, history, onDrawLines, onNext }: {
     ctx.restore();
   };
   const rubDown = (e: React.PointerEvent<HTMLCanvasElement>) => {
-    if (!erasing || showOriginal) return;
+    if (tool === "none" || showOriginal) return;
     try {
       e.currentTarget.setPointerCapture(e.pointerId);
     } catch {
@@ -149,7 +158,16 @@ export function PaintPicture({ item, onChange, history, onDrawLines, onNext }: {
   const rubUp = () => {
     const pts = rubRef.current;
     rubRef.current = null;
-    if (pts) setMarks([...marks, { r: ERASE[eraseSize], points: pts }]);
+    if (!pts) return;
+    if (cutting) return addCut(pts);
+    setMarks([...marks, { r: ERASE[eraseSize], points: pts }]);
+  };
+  /** A cut becomes an extra line: smoothed into curves, drawn and walled like any line. */
+  const addCut = (pts: Point[]) => {
+    const kept = pts.filter((p, i) => i === 0 || Math.hypot(p.x - pts[i - 1].x, p.y - pts[i - 1].y) >= 3);
+    if (kept.length < 2 || Math.hypot(kept[kept.length - 1].x - kept[0].x, kept[kept.length - 1].y - kept[0].y) < 8) return;
+    const cut: Stroke = { id: uid(), order: item.strokes.length + 1, shape: "free", nodes: fitNodes(kept, 3), closed: false, join: "lift", width: 30, checkpoints: [] };
+    onChange({ ...itemRef.current, strokes: [...itemRef.current.strokes, cut] });
   };
 
   const remove = () => {
@@ -204,8 +222,9 @@ export function PaintPicture({ item, onChange, history, onDrawLines, onNext }: {
       lctx.putImageData(data, 0, 0);
       ctx.drawImage(layer, 0, 0, W, W);
       ctx.imageSmoothingEnabled = true;
-      if (picture?.smooth) {
-        // Smoothed: the strokes are the line art, drawn as the child will see them.
+      if (!picture?.smooth && images.lines) ctx.drawImage(images.lines, 0, 0, W, W);
+      // The strokes: the line art itself when smoothed, else the cuts and extra lines — drawn as the child will see them.
+      if (item.strokes.length) {
         const k = W / 1000;
         ctx.setTransform(k, 0, 0, k, 0, 0);
         ctx.strokeStyle = ctx.fillStyle = "#1f2544";
@@ -224,7 +243,7 @@ export function PaintPicture({ item, onChange, history, onDrawLines, onNext }: {
           ctx.stroke();
         }
         ctx.setTransform(1, 0, 0, 1, 0, 0);
-      } else if (images.lines) ctx.drawImage(images.lines, 0, 0, W, W);
+      }
     };
     draw();
     const ro = new ResizeObserver(draw);
@@ -280,8 +299,8 @@ export function PaintPicture({ item, onChange, history, onDrawLines, onNext }: {
       {fileInput}
       <div className="flex min-w-0 flex-col overflow-hidden rounded-2xl border border-line bg-surface">
         <div className="flex items-center gap-1 border-b border-line px-3 py-2">
-          <span className={`min-w-0 flex-1 truncate text-sm ${erasing ? "font-semibold text-indigo-700 dark:text-indigo-300" : "text-body"}`}>
-            {showOriginal ? t("traceStudio.picture.original") : erasing ? t("traceStudio.picture.eraseHint") : t("traceStudio.picture.partsHint")}
+          <span className={`min-w-0 flex-1 truncate text-sm ${tool !== "none" ? "font-semibold text-indigo-700 dark:text-indigo-300" : "text-body"}`}>
+            {showOriginal ? t("traceStudio.picture.original") : erasing ? t("traceStudio.picture.eraseHint") : cutting ? t("traceStudio.picture.cutHint") : t("traceStudio.picture.partsHint")}
           </span>
           {erasing && (
             <>
@@ -307,8 +326,14 @@ export function PaintPicture({ item, onChange, history, onDrawLines, onNext }: {
             </>
           )}
           <UndoRedo history={history} undoLabel={t("traceStudio.undo")} redoLabel={t("traceStudio.redo")} />
+          <IconButton size="sm" label={t("traceStudio.picture.cut")} active={cutting} onClick={() => {
+            setTool((v) => (v === "cut" ? "none" : "cut"));
+            setShowOriginal(false);
+          }}>
+            <Scissors className="h-4 w-4" />
+          </IconButton>
           <IconButton size="sm" label={t("traceStudio.picture.erase")} active={erasing} onClick={() => {
-            setErasing((v) => !v);
+            setTool((v) => (v === "erase" ? "none" : "erase"));
             setShowOriginal(false);
           }}>
             <Eraser className="h-4 w-4" />
@@ -322,7 +347,7 @@ export function PaintPicture({ item, onChange, history, onDrawLines, onNext }: {
             ref={canvasRef}
             aria-label={t("traceStudio.picture.preview")}
             className="block aspect-square w-full touch-none rounded-xl ring-1 ring-line"
-            style={{ cursor: erasing && !showOriginal ? "crosshair" : "default" }}
+            style={{ cursor: tool !== "none" && !showOriginal ? "crosshair" : "default" }}
             onPointerDown={rubDown}
             onPointerMove={rubMove}
             onPointerUp={rubUp}
