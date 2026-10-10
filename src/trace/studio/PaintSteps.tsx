@@ -42,7 +42,8 @@ export function PaintSteps({ item, onChange, history }: { item: TraceItem; onCha
   const [magic, setMagic] = useState(false);
   const [brushed, setBrushed] = useState<Set<number> | null>(null);
   const [noColours, setNoColours] = useState(false);
-  const areas = useMemo(() => labelAreas(item), [item.strokes, item.paint?.picture?.walls]); // eslint-disable-line react-hooks/exhaustive-deps -- areas follow the line art only
+  // Areas follow the line art: the strokes and the picture object (editing steps keeps the same picture, so nothing is redone).
+  const areas = useMemo(() => labelAreas(item), [item.strokes, item.paint?.picture]); // eslint-disable-line react-hooks/exhaustive-deps -- the line art only
   const sources = useMemo(() => seamSources(areas), [areas]);
   const own = useMemo(() => owners(areas, steps), [areas, steps]);
   const selected = sel !== null ? steps[sel] : undefined;

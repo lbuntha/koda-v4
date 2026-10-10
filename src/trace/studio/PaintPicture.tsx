@@ -157,7 +157,8 @@ export function PaintPicture({ item, onChange, history, onDrawLines, onNext }: {
     onChange({ ...item, guide, paint: { steps: item.paint?.steps ?? [] } });
   };
 
-  const areas = useMemo(() => (picture || item.strokes.length ? labelAreas(item) : null), [item.strokes, picture?.walls]); // eslint-disable-line react-hooks/exhaustive-deps -- parts follow the line art only
+  // Parts follow the line art: the strokes and the picture (a new upload, a slider, the eraser each make a new picture object).
+  const areas = useMemo(() => (picture || item.strokes.length ? labelAreas(item) : null), [item.strokes, picture]); // eslint-disable-line react-hooks/exhaustive-deps -- the line art only
   const sources = useMemo(() => (areas ? seamSources(areas) : new Int32Array(0)), [areas]);
   const parts = areas ? partCount(areas) : 0;
 
