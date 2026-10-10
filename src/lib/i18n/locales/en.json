@@ -4451,6 +4451,11 @@
     "partWhite": {
       "title": "A part is still white",
       "text": "Colour the glowing part too, then press Done."
-    }
+    },
+    "allDone": {
+      "title": "All steps done!",
+      "text": "Touch up anything you like, then press Finish."
+    },
+    "keepColouring": "Keep colouring"
   }
 }

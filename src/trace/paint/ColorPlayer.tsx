@@ -54,7 +54,7 @@ type Size = keyof typeof SIZES;
 const FLASH_MS = { correct: 1800, hint: 4000, nudge: 4000 } as const;
 const INK = "#1f2544";
 
-type Message = { tone: "correct" | "hint" | "nudge"; title: string; text?: string; action?: { label: string; run(): void } };
+type Message = { tone: "correct" | "hint" | "nudge"; title: string; text?: string; action?: { label: string; run(): void }; /** Stays this long (ms) instead of its tone's usual time. */ hold?: number };
 
 export function ColorPlayer({ item, onExit, onAwardXp, sandbox = false, source, place, xpPerStep, onGoHome }: Props) {
   const { t } = useT();
@@ -119,7 +119,8 @@ export function ColorPlayer({ item, onExit, onAwardXp, sandbox = false, source, 
     if (j < 0 || j >= steps.length) return;
     setCur(j);
     if (!ownRef.current) setCrayon(steps[j].color);
-    setTool("brush");
+    // Keep the child's tool (Fill stays Fill); only the eraser gives way, since a new step means colour.
+    setTool((tl) => (tl === "eraser" ? "brush" : tl));
     setMessage(null);
   };
 
@@ -472,6 +473,12 @@ export function ColorPlayer({ item, onExit, onAwardXp, sandbox = false, source, 
     return out;
   };
 
+  /**
+   * Every step is done — but the picture is the child's to finish: they may
+   * want to touch something up. Say so, light up Finish, and keep painting.
+   */
+  const allStepsDone = () => setMessage({ tone: "correct", title: t("paint.allDone.title"), text: t("paint.allDone.text"), hold: 5000 });
+
   /** A step just finished: a short flash, and on to the suggested step without a stop. */
   const stepFinished = (nowDone: Set<number>) => {
     playSound("success");
@@ -515,7 +522,7 @@ export function ColorPlayer({ item, onExit, onAwardXp, sandbox = false, source, 
     setDone(nowDone);
     if (nowDone.size === steps.length) {
       playSound("levelup");
-      return finish();
+      return allStepsDone();
     }
     stepFinished(nowDone);
   };
@@ -528,7 +535,7 @@ export function ColorPlayer({ item, onExit, onAwardXp, sandbox = false, source, 
     setDone(nowDone);
     if (nowDone.size === steps.length && steps.length > 0 && !(done.size === steps.length)) {
       playSound("levelup");
-      return finish();
+      return allStepsDone();
     }
     if (finishedHere) return stepFinished(nowDone);
     if (!step || tool === "eraser") return;
@@ -569,7 +576,7 @@ export function ColorPlayer({ item, onExit, onAwardXp, sandbox = false, source, 
   // A flash goes by itself: nothing to close, nothing in the way.
   useEffect(() => {
     if (!message) return;
-    const id = window.setTimeout(() => setMessage(null), FLASH_MS[message.tone]);
+    const id = window.setTimeout(() => setMessage(null), message.hold ?? FLASH_MS[message.tone]);
     return () => window.clearTimeout(id);
   }, [message]);
 
@@ -676,6 +683,14 @@ export function ColorPlayer({ item, onExit, onAwardXp, sandbox = false, source, 
   const savePicture = async (): Promise<boolean> => {
     const blob = keptRef.current ?? (await renderPng());
     return blob ? sharePicture(blob, item.title || t("paint.slate")) : false;
+  };
+
+  /** From the score card back to the same painting: nothing is lost, and Finish scores it again. */
+  const keepColouring = () => {
+    setResult(null);
+    setKept(null);
+    keptRef.current = null;
+    live.current.dirty = true;
   };
 
   const again = () => {
@@ -942,7 +957,7 @@ export function ColorPlayer({ item, onExit, onAwardXp, sandbox = false, source, 
           </div>
 
           {result ? (
-            <ResultCard result={result} kept={kept} onSave={savePicture} onNext={next ? next.open : undefined} onAgain={again} onBack={sandbox ? undefined : onExit} onHome={onGoHome} />
+            <ResultCard result={result} kept={kept} onSave={savePicture} onKeep={keepColouring} onNext={next ? next.open : undefined} onAgain={again} onBack={sandbox ? undefined : onExit} onHome={onGoHome} />
           ) : (
             /* The tools: fixed to the bottom of a phone, under the picture on a tablet or computer, beside it on a phone held sideways */
             <div className="sticky bottom-0 z-20 flex w-full max-w-xl flex-col gap-2.5 @lg:max-w-2xl rounded-t-3xl border-t border-line bg-surface/95 px-1 pb-[max(0.5rem,env(safe-area-inset-bottom))] pt-2.5 backdrop-blur @lg:static @lg:rounded-none @lg:border-0 @lg:bg-transparent @lg:p-0 @lg:backdrop-blur-none [@media(orientation:landscape)_and_(max-height:520px)]:static [@media(orientation:landscape)_and_(max-height:520px)]:w-64 [@media(orientation:landscape)_and_(max-height:520px)]:border-0 [@media(orientation:landscape)_and_(max-height:520px)]:bg-transparent">
@@ -1015,7 +1030,12 @@ export function ColorPlayer({ item, onExit, onAwardXp, sandbox = false, source, 
                   </RoundTool>
                 </span>
                 <span className="min-w-0 flex-1 @lg:hidden" />
-                <UIButton icon={<Check />} onClick={() => finish()} disabled={!painted} className="shrink-0 @lg:min-w-36">
+                <UIButton
+                  icon={<Check />}
+                  onClick={() => finish()}
+                  disabled={!painted}
+                  className={`shrink-0 @lg:min-w-36 ${steps.length > 0 && done.size === steps.length ? "ring-4 ring-emerald-300 motion-safe:animate-pulse dark:ring-emerald-700" : ""}`}
+                >
                   <span className="@lg:hidden">{t("paint.finish")}</span>
                   <span className="hidden @lg:inline">{t("paint.imDone")}</span>
                 </UIButton>
@@ -1101,7 +1121,7 @@ function RoundTool({ label, disabled, onClick, children }: { label: string; disa
 }
 
 /** How the painting went: the accuracy, its three parts, and where to go next. */
-function ResultCard({ result, kept, onSave, onNext, onAgain, onBack, onHome }: { result: PaintScore & { xp: number }; kept: boolean | null; onSave(): Promise<boolean>; onNext?(): void; onAgain(): void; onBack?(): void; onHome?(): void }) {
+function ResultCard({ result, kept, onSave, onKeep, onNext, onAgain, onBack, onHome }: { result: PaintScore & { xp: number }; kept: boolean | null; onSave(): Promise<boolean>; onKeep(): void; onNext?(): void; onAgain(): void; onBack?(): void; onHome?(): void }) {
   const { t } = useT();
   const [saved, setSaved] = useState<"idle" | "saving" | "saved" | "failed">("idle");
   // In their own colours, colour was the child's to choose: it is not a part of the score.
@@ -1174,7 +1194,11 @@ function ResultCard({ result, kept, onSave, onNext, onAgain, onBack, onHome }: {
         >
           {saved === "saved" ? t("paint.saved") : t("paint.save")}
         </UIButton>
-        <UIButton variant="secondary" icon={<RotateCcw />} onClick={onAgain} className={onNext ? "" : "flex-1"}>
+        {/* Back to this same painting, to fix something; Finish again scores it again */}
+        <UIButton variant="secondary" icon={<Brush />} onClick={onKeep}>
+          {t("paint.keepColouring")}
+        </UIButton>
+        <UIButton variant="ghost" icon={<RotateCcw />} onClick={onAgain}>
           {t("paint.paintAgain")}
         </UIButton>
         {onBack && (
