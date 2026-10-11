@@ -837,24 +837,37 @@ export function ColorPlayer({ item, onExit, onAwardXp, sandbox = false, source, 
     </>
   );
 
+  /*
+   * The note sits over the step bar, never over the picture: on a phone a note
+   * on the picture hid the very part a child was told to colour. It covers the
+   * step's words for a few seconds, then they come back; a tap closes it sooner.
+   */
   const flash = message && !result && (
-    <div className="pointer-events-none absolute inset-x-2 top-2 z-10 flex justify-center">
-      <div role="status" aria-live="polite" className="flex max-w-full items-center gap-2.5 rounded-2xl bg-surface/95 py-2 pl-2 pr-3 text-sm shadow-lg ring-1 ring-line backdrop-blur motion-safe:animate-[trace-pop_200ms_ease-out]">
+    <div className="absolute inset-0 z-10 flex">
+      <div
+        role="status"
+        aria-live="polite"
+        onClick={() => setMessage(null)}
+        className={`flex w-full cursor-pointer items-center gap-2.5 rounded-2xl px-3 py-2 text-sm shadow-md ring-1 motion-safe:animate-[trace-pop_200ms_ease-out] ${
+          message.tone === "correct" ? "bg-emerald-50 ring-emerald-200 dark:bg-emerald-950 dark:ring-emerald-800" : message.tone === "nudge" ? "bg-rose-50 ring-rose-200 dark:bg-rose-950 dark:ring-rose-800" : "bg-indigo-50 ring-indigo-200 dark:bg-indigo-950 dark:ring-indigo-800"
+        }`}
+      >
         <span className={`grid h-7 w-7 shrink-0 place-items-center rounded-full text-white ${message.tone === "correct" ? "bg-emerald-600" : message.tone === "nudge" ? "bg-rose-600" : "bg-indigo-600"}`}>
           {message.tone === "correct" ? <Check className="h-4 w-4" /> : <Lightbulb className="h-4 w-4" />}
         </span>
         <span className="flex min-w-0 flex-col leading-tight">
           <span className="font-semibold text-ink">{message.title}</span>
-          {message.text && <span className="truncate text-xs text-muted">{message.text}</span>}
+          {message.text && <span className="line-clamp-2 text-xs text-body">{message.text}</span>}
         </span>
         {message.action && (
           <button
             type="button"
-            onClick={() => {
+            onClick={(e) => {
+              e.stopPropagation();
               message.action!.run();
               setMessage(null);
             }}
-            className="pointer-events-auto ml-1 shrink-0 rounded-full bg-indigo-600 px-3 py-1 text-xs font-semibold text-white transition hover:bg-indigo-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500"
+            className="ml-auto shrink-0 rounded-full bg-indigo-600 px-3 py-1 text-xs font-semibold text-white transition hover:bg-indigo-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500"
           >
             {message.action.label}
           </button>
@@ -909,7 +922,8 @@ export function ColorPlayer({ item, onExit, onAwardXp, sandbox = false, source, 
           <div className="flex w-full min-w-0 flex-col items-center gap-2 [@media(orientation:landscape)_and_(max-height:520px)]:w-auto">
             {/* What to do now: the crayon, the step's words, and Done */}
             {!result && step && (
-              <div className="flex w-full max-w-xl flex-col gap-1 rounded-2xl bg-surface px-3 py-2 ring-1 ring-line">
+              <div className="relative flex w-full max-w-xl flex-col gap-1 rounded-2xl bg-surface px-3 py-2 ring-1 ring-line">
+                {flash}
                 <div className="flex items-center gap-2.5">
                   <span className="h-7 w-7 shrink-0 rounded-full shadow ring-2 ring-white @lg:h-8 @lg:w-8" style={{ background: crayonHex(step.color) }} aria-hidden="true" />
                   <p className="min-w-0 flex-1 text-sm font-semibold leading-snug text-ink">
@@ -941,7 +955,6 @@ export function ColorPlayer({ item, onExit, onAwardXp, sandbox = false, source, 
                 onPointerUp={onUp}
                 onPointerCancel={onUp}
               />
-              {flash}
               {/* Zoomed in: how far, and one tap back to the whole picture */}
               {zoomed && !result && (
                 <button
