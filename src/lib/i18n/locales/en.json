@@ -4458,6 +4458,8 @@
       "title": "All steps done!",
       "text": "Touch up anything you like, then press Finish."
     },
-    "keepColouring": "Keep colouring"
+    "keepColouring": "Keep colouring",
+    "pickColour": "Pick any colour",
+    "myColour": "My colour"
   }
 }

@@ -12,7 +12,7 @@
  */
 
 import { useCallback, useEffect, useMemo, useRef, useState, useSyncExternalStore } from "react";
-import { ArrowLeft, ArrowRight, Brush, Check, Download, Eraser, Images, Lightbulb, Maximize2, MoreHorizontal, PaintBucket, Palette, RotateCcw, ShieldCheck, Star, Undo2, Volume2 } from "lucide-react";
+import { ArrowLeft, ArrowRight, Brush, Check, Download, Eraser, Images, Lightbulb, Maximize2, MoreHorizontal, PaintBucket, Palette, Plus, RotateCcw, ShieldCheck, Star, Undo2, Volume2 } from "lucide-react";
 import { useT } from "../../lib/i18n";
 import { UIButton, UIModal, UIProgressBar } from "../../components/ui";
 import { ScoringAPI } from "../../lib/scoring";
@@ -29,7 +29,7 @@ import type { PaintScore } from "./areas";
 import { fillLeftovers } from "./leftovers";
 import { CELL, COVER, GRID, LINE, NEARLY, SPECK, areaAt, isComplete, maySayDone, seamSources, blankPaint, brush, labelAreas, scorePainting, stepAreas, stepState } from "./areas";
 import { Gallery, sharePicture } from "./gallery";
-import { PALETTE, colourName, crayonHex, crayonIndex, customColours, hexOfIndex, rgb } from "./palette";
+import { PALETTE, colourName, crayonHex, crayonIndex, customColours, hexOfIndex, isCustom, rgb } from "./palette";
 
 interface Props {
   item: TraceItem;
@@ -45,6 +45,9 @@ interface Props {
 }
 
 const SIZES = { s: 16, m: 32, l: 56 } as const;
+/** The child's own picked colours, kept on this device for the crayon row. */
+const MINE_KEY = "koda_paint_my_colours";
+const MAX_MINE = 8;
 /** How far (cells) a line cell can show paint from beside it: the thickest lines, merged. Bounds a stroke's redraw. */
 const SEAM_MARGIN = 40;
 /** How far a child can zoom into the picture. */
@@ -113,7 +116,42 @@ export function ColorPlayer({ item, onExit, onAwardXp, sandbox = false, source, 
   );
   const instruction = (s: PaintStep | undefined) => (s ? s.instruction?.trim() || t("paint.colourThis", { color: colourName(t, s.color) }) : "");
   /** The crayon box: every crayon, then the author's own colours for this picture. */
-  const box = useMemo(() => [...PALETTE.map((c) => ({ id: c.id, hex: c.hex, label: t(`paint.color.${c.id}`) })), ...customColours(steps).map((hex, k) => ({ id: hex, hex, label: t("paint.customN", { n: k + 1 }) }))], [steps, t]);
+  /** Colours the child picked themselves (in My own colours), newest first, remembered on this device. */
+  const [mine, setMine] = useState<string[]>(() => {
+    try {
+      const v = JSON.parse(localStorage.getItem(MINE_KEY) ?? "[]");
+      return Array.isArray(v) ? v.filter((x) => typeof x === "string" && isCustom(x)).slice(0, MAX_MINE) : [];
+    } catch {
+      return [];
+    }
+  });
+  const addMine = (hex: string) => {
+    const next = [hex, ...mine.filter((x) => x !== hex)].slice(0, MAX_MINE);
+    setMine(next);
+    try {
+      localStorage.setItem(MINE_KEY, JSON.stringify(next));
+    } catch {
+      /* a private window: they last until the page closes */
+    }
+  };
+  /** The picker reports every colour while it is open; the one it closes on joins My colours. */
+  const pickerRef = useRef<HTMLInputElement>(null);
+  useEffect(() => {
+    const input = pickerRef.current;
+    if (!input) return;
+    const done = () => addMine(input.value.toLowerCase());
+    input.addEventListener("change", done);
+    return () => input.removeEventListener("change", done);
+  });
+  const box = useMemo(() => {
+    const authors = customColours(steps);
+    const own = mine.filter((hex) => !authors.includes(hex));
+    return [
+      ...PALETTE.map((c) => ({ id: c.id, hex: c.hex, label: t(`paint.color.${c.id}`) })),
+      ...authors.map((hex, k) => ({ id: hex, hex, label: t("paint.customN", { n: k + 1 }) })),
+      ...own.map((hex) => ({ id: hex, hex, label: t("paint.myColour") })),
+    ];
+  }, [steps, t, mine]);
 
   const goTo = (j: number) => {
     if (j < 0 || j >= steps.length) return;
@@ -180,7 +218,9 @@ export function ColorPlayer({ item, onExit, onAwardXp, sandbox = false, source, 
     const hintImg = hctx.createImageData(GRID, GRID);
     // Grid numbers → colours, custom ones included (crayonIndex numbers them as they are first seen).
     steps.forEach((s) => crayonIndex(s.color));
-    const colors = Array.from({ length: 256 }, (_, i) => (i ? rgb(hexOfIndex(i)) : ([255, 255, 255] as [number, number, number])));
+    // Looked up as used, not fixed when the picture opens: a colour the child picks later gets its number then.
+    const colors: ([number, number, number] | undefined)[] = [];
+    const colourOf = (v: number) => (colors[v] ??= rgb(hexOfIndex(v)));
 
     const resize = () => {
       const dpr = window.devicePixelRatio || 1;
@@ -208,7 +248,7 @@ export function ColorPlayer({ item, onExit, onAwardXp, sandbox = false, source, 
         // A line cell (or speck) shows its own side's paint: no white seam inside, no colour outside the border.
         if (!v && sources[i] !== i && sources[i] >= 0) v = paint[sources[i]];
         if (v) {
-          const [r, g, b] = colors[v];
+          const [r, g, b] = colourOf(v);
           paintImg.data[o] = r;
           paintImg.data[o + 1] = g;
           paintImg.data[o + 2] = b;
@@ -843,21 +883,22 @@ export function ColorPlayer({ item, onExit, onAwardXp, sandbox = false, source, 
    * step's words for a few seconds, then they come back; a tap closes it sooner.
    */
   const flash = message && !result && (
-    <div className="absolute inset-0 z-10 flex">
+    <div className="absolute inset-x-0 top-0 z-10">
       <div
         role="status"
         aria-live="polite"
         onClick={() => setMessage(null)}
-        className={`flex w-full cursor-pointer items-center gap-2.5 rounded-2xl px-3 py-2 text-sm shadow-md ring-1 motion-safe:animate-[trace-pop_200ms_ease-out] ${
+        className={`flex min-h-[2.75rem] w-full cursor-pointer items-center gap-2 rounded-2xl px-2.5 py-1.5 text-sm shadow-md ring-1 motion-safe:animate-[trace-pop_200ms_ease-out] ${
           message.tone === "correct" ? "bg-emerald-50 ring-emerald-200 dark:bg-emerald-950 dark:ring-emerald-800" : message.tone === "nudge" ? "bg-rose-50 ring-rose-200 dark:bg-rose-950 dark:ring-rose-800" : "bg-indigo-50 ring-indigo-200 dark:bg-indigo-950 dark:ring-indigo-800"
         }`}
       >
-        <span className={`grid h-7 w-7 shrink-0 place-items-center rounded-full text-white ${message.tone === "correct" ? "bg-emerald-600" : message.tone === "nudge" ? "bg-rose-600" : "bg-indigo-600"}`}>
-          {message.tone === "correct" ? <Check className="h-4 w-4" /> : <Lightbulb className="h-4 w-4" />}
+        <span className={`grid h-6 w-6 shrink-0 place-items-center rounded-full text-white ${message.tone === "correct" ? "bg-emerald-600" : message.tone === "nudge" ? "bg-rose-600" : "bg-indigo-600"}`}>
+          {message.tone === "correct" ? <Check className="h-3.5 w-3.5" /> : <Lightbulb className="h-3.5 w-3.5" />}
         </span>
-        <span className="flex min-w-0 flex-col leading-tight">
+        {/* Title and words on one line where they fit; two at most */}
+        <span className="line-clamp-2 min-w-0 leading-snug">
           <span className="font-semibold text-ink">{message.title}</span>
-          {message.text && <span className="line-clamp-2 text-xs text-body">{message.text}</span>}
+          {message.text && <span className="text-body"> · {message.text}</span>}
         </span>
         {message.action && (
           <button
@@ -1001,6 +1042,30 @@ export function ColorPlayer({ item, onExit, onAwardXp, sandbox = false, source, 
                     />
                   );
                 })}
+                {/* My own colours: any colour from the device's picker, kept in the row for next time */}
+                {own && (
+                  <label
+                    title={t("paint.pickColour")}
+                    className="relative grid h-8 w-8 shrink-0 cursor-pointer place-items-center rounded-full bg-surface text-body ring-1 ring-line transition hover:scale-105 focus-within:ring-2 focus-within:ring-indigo-500 @lg:h-9 @lg:w-9"
+                    style={{ background: "conic-gradient(#e5383b, #f7d038, #2b9348, #4cc9f0, #2f6fd6, #7b4fd6, #f472b6, #e5383b)" }}
+                  >
+                    <span className="grid h-5 w-5 place-items-center rounded-full bg-surface text-ink shadow-sm">
+                      <Plus className="h-3.5 w-3.5" />
+                    </span>
+                    <input
+                      ref={pickerRef}
+                      type="color"
+                      aria-label={t("paint.pickColour")}
+                      defaultValue={isCustom(crayon) ? crayon : "#ff7a59"}
+                      onChange={(e) => {
+                        // While the picker is open: paint with it straight away.
+                        setCrayon(e.target.value.toLowerCase());
+                        if (tool === "eraser") setTool("brush");
+                      }}
+                      className="absolute inset-0 h-full w-full cursor-pointer opacity-0"
+                    />
+                  </label>
+                )}
               </div>
               <div className="flex items-center gap-1.5 @lg:flex-wrap @lg:justify-center @lg:gap-2 [@media(orientation:landscape)_and_(max-height:520px)]:flex-wrap">
                 {/* Brush, fill, eraser: one compact switch rather than three big buttons */}
