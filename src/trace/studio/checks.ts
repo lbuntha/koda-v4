@@ -11,6 +11,7 @@ import { activityOf, hasArt } from "../geometry/types";
 import { labelAreas, stepAreas } from "../paint/areas";
 import { dist } from "../geometry/vec";
 import { prepareItem } from "../score/score";
+import { leavesPage } from "../geometry/trim";
 import type { TraceDraft } from "./drafts";
 import { strokesPrint } from "./drafts";
 
@@ -51,34 +52,19 @@ export function runChecks(draft: TraceDraft): CheckResult[] {
     return s.shape === "dot" ? s.nodes.length !== 1 : s.nodes.length < 2;
   });
   const short = bad((i) => sorted[i].shape !== "dot" && polylineLength(strokePolyline(sorted[i])) < MIN_LENGTH);
-  const outside = bad((i) => sorted[i].nodes.some((n) => n.x < 0 || n.y < 0 || n.x > 1000 || n.y > 1000));
+  // The line itself, not only its points: a curve can bulge past the edge between two points on the page.
+  const outside = bad((i) => leavesPage(sorted[i]));
   const prepared = prepareItem(item);
   const loose = bad((i) => i > 0 && sorted[i].join === "continue" && dist(prepared[i - 1].end, prepared[i].start) > TOUCH);
 
   if (activityOf(item) === "color") {
     // A colouring item: line art and colour steps, no writing steps to test.
-    const steps = item.paint?.steps ?? [];
-    const areas = labelAreas(item);
-    const sets = steps.map((st) => stepAreas(areas, st));
-    const empty = sets.flatMap((a, k) => (a.size === 0 ? [k + 1] : []));
-    const seen = new Map<number, number>();
-    const shared = new Set<number>();
-    sets.forEach((a, k) =>
-      a.forEach((l) => {
-        if (seen.has(l)) {
-          shared.add(seen.get(l)! + 1);
-          shared.add(k + 1);
-        } else seen.set(l, k);
-      }),
-    );
     return [
       { id: "hasTitle", ok: item.title.trim().length > 0 },
       { id: "hasLineArt", ok: hasArt(item) },
       { id: "strokeNodes", ok: fewNodes.length === 0, strokes: fewNodes },
       { id: "insideCanvas", ok: outside.length === 0, strokes: outside },
-      { id: "paintSteps", ok: steps.length > 0 },
-      { id: "paintAreas", ok: empty.length === 0, strokes: empty },
-      { id: "paintShared", ok: shared.size === 0, strokes: [...shared].sort((a, b) => a - b) },
+      ...paintChecks(item),
     ];
   }
 
@@ -101,6 +87,31 @@ export function runChecks(draft: TraceDraft): CheckResult[] {
     { id: "continueTouches", ok: loose.length === 0, strokes: loose },
     { id: "planEndsAtCanDo", ok: draft.plan.steps.some((s) => s.id === draft.plan.canDoAt) && draft.plan.steps[draft.plan.steps.length - 1]?.id === draft.plan.canDoAt },
     { id: "tested", ok: untested.length === 0, steps: untested },
+    // Traced, then coloured: the colour steps must be as sound as a colouring item's.
+    ...(item.colorAfter ? paintChecks(item) : []),
+  ];
+}
+
+/** Colour steps: there are some, each colours a part, and no two colour the same part. */
+function paintChecks(item: TraceItem): CheckResult[] {
+  const steps = item.paint?.steps ?? [];
+  const areas = labelAreas(item);
+  const sets = steps.map((st) => stepAreas(areas, st));
+  const empty = sets.flatMap((a, k) => (a.size === 0 ? [k + 1] : []));
+  const seen = new Map<number, number>();
+  const shared = new Set<number>();
+  sets.forEach((a, k) =>
+    a.forEach((l) => {
+      if (seen.has(l)) {
+        shared.add(seen.get(l)! + 1);
+        shared.add(k + 1);
+      } else seen.set(l, k);
+    }),
+  );
+  return [
+    { id: "paintSteps", ok: steps.length > 0 },
+    { id: "paintAreas", ok: empty.length === 0, strokes: empty },
+    { id: "paintShared", ok: shared.size === 0, strokes: [...shared].sort((a, b) => a - b) },
   ];
 }
 

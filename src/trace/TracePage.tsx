@@ -25,7 +25,7 @@ import { crayonHex } from "./paint/palette";
 import { PaintingTile, PaintingViewer, usePaintings } from "./paint/MyPictures";
 import type { StepPlan } from "./progress/ladder";
 import { defaultPlan, isRecheckDue } from "./progress/ladder";
-import { homeRows, isDone, uniqueById, type RowId } from "./home";
+import { homeRows, isFinished, needsColoring, uniqueById, type RowId } from "./home";
 import { TraceProgress } from "./progress/store";
 import { TracePlayer } from "./player/TracePlayer";
 import { ItemThumb } from "./player/Thumb";
@@ -92,6 +92,8 @@ export function TracePage({ onAwardXp, canCreate = false, onGoHome, onDeepChange
     onOpened?.();
   }, [openCollectionId]); // eslint-disable-line react-hooks/exhaustive-deps -- once per target
   useSyncExternalStore(TraceProgress.subscribe, TraceProgress.version);
+  // Read once per opening (not on every progress change), so the player that earns "can draw" keeps the screen.
+  const colorOnOpen = useMemo(() => (open ? needsColoring(open.item, TraceProgress.get(open.item.id)) : false), [open]);
   useSyncExternalStore(TraceDrafts.subscribe, TraceDrafts.version);
   /* The child's finished paintings: My pictures, and each coloured picture's tile. */
   const paintings = usePaintings();
@@ -103,6 +105,10 @@ export function TracePage({ onAwardXp, canCreate = false, onGoHome, onDeepChange
   if (open) {
     const place = placeOf(open, collections, setOpen);
     const ages = collections.find((c) => c.id === open.source?.collectionId)?.ages;
+    // Drawn already, colour step still to do: open straight on colouring. Decided once, as it opens —
+    // earning "can draw" inside the player hands over to colouring there, with its own card.
+    if (colorOnOpen)
+      return <ColorPlayer key={`${open.item.id}#color`} item={open.item} afterTrace source={open.source} place={place} xpPerStep={xpOf(open, collections)} ages={ages} onExit={() => setOpen(null)} onAwardXp={onAwardXp} onGoHome={onGoHome} />;
     if (activityOf(open.item) === "color")
       return <ColorPlayer key={open.item.id} item={open.item} source={open.source} place={place} xpPerStep={xpOf(open, collections)} ages={ages} onExit={() => setOpen(null)} onAwardXp={onAwardXp} onGoHome={onGoHome} />;
     return <TracePlayer key={open.item.id} item={open.item} plan={open.plan} source={open.source} place={place} xpPerStep={xpOf(open, collections)} ages={ages} onExit={() => setOpen(null)} onAwardXp={onAwardXp} onGoHome={onGoHome} />;
@@ -148,8 +154,8 @@ export function TracePage({ onAwardXp, canCreate = false, onGoHome, onDeepChange
     })
     .sort((a, b) => progressOf(b).updatedAt - progressOf(a).updatedAt)
     .slice(0, 12);
-  const canWrite = published.filter((e) => modeOf(e.item.kind) === "writing" && isDone(progressOf(e))).length;
-  const canDraw = published.filter((e) => modeOf(e.item.kind) === "drawing" && isDone(progressOf(e))).length;
+  const canWrite = published.filter((e) => modeOf(e.item.kind) === "writing" && isFinished(e.item, progressOf(e))).length;
+  const canDraw = published.filter((e) => modeOf(e.item.kind) === "drawing" && isFinished(e.item, progressOf(e))).length;
   /* Closed until the counts change: a learner who closes "1 can write" sees the card again at 2. */
   const tally = `${canWrite}:${canDraw}`;
   const showTally = (canWrite > 0 || canDraw > 0) && closedTally !== tally;
@@ -288,7 +294,7 @@ function placeOf(open: Entry, collections: Bundle[], go: (e: Entry) => void) {
   const entry = (b: Bundle, e: Omit<Entry, "source">): Entry => ({ ...e, source: { collectionId: b.id, rev: b.rev } });
   if (i + 1 < c.items.length) return { n: i + 1, total: c.items.length, next: { n: i + 2, newCollection: false, open: () => go(entry(c, c.items[i + 1])) } };
   for (const b of collections.slice(at + 1)) {
-    const j = b.items.findIndex((e) => !isDone(TraceProgress.get(e.item.id)));
+    const j = b.items.findIndex((e) => !isFinished(e.item, TraceProgress.get(e.item.id)));
     if (j >= 0) return { n: i + 1, total: c.items.length, next: { n: j + 1, newCollection: true, open: () => go(entry(b, b.items[j])) } };
   }
   return { n: i + 1, total: c.items.length };
@@ -348,10 +354,10 @@ function Glyph({ item, className }: { item: TraceItem; className: string }) {
 }
 
 function collectionProgress(entries: Entry[]) {
-  const done = entries.filter((e) => isDone(TraceProgress.get(e.item.id))).length;
+  const done = entries.filter((e) => isFinished(e.item, TraceProgress.get(e.item.id))).length;
   const started = entries.some((e) => TraceProgress.get(e.item.id).step !== "watch");
   // Where Play goes: the first item not yet done, or the first item once all are.
-  const next = entries.find((e) => !isDone(TraceProgress.get(e.item.id))) ?? entries[0];
+  const next = entries.find((e) => !isFinished(e.item, TraceProgress.get(e.item.id))) ?? entries[0];
   return { done, started, next, pct: entries.length ? Math.round((100 * done) / entries.length) : 0, all: entries.length > 0 && done === entries.length };
 }
 
@@ -501,12 +507,13 @@ function Tile({ entry, draft = false, onOpen }: { entry: Entry; draft?: boolean;
   const at = Math.max(0, plan.steps.findIndex((s) => s.id === p.step));
   const writing = modeOf(item.kind) === "writing";
   const due = isRecheckDue(p);
-  const done = isDone(p);
+  const done = isFinished(item, p);
+  const toColor = needsColoring(item, p);
   const stepsDone = done ? plan.steps.length : at;
   // Letters read best as the letter itself; drawings as their own strokes.
   const showText = writing && item.title.length <= 4;
   const coloring = activityOf(item) === "color";
-  const label = coloring ? (done ? t("paint.status.colored") : t("paint.status.toColor")) : due ? t("trace.status.checkUp") : done ? t(writing ? "trace.status.canWrite" : "trace.status.canDraw") : p.status === "needsPractice" ? t("trace.status.needsPractice") : t(`trace.step.${p.step}`);
+  const label = coloring || toColor ? (done ? t("paint.status.colored") : t("paint.status.toColor")) : due ? t("trace.status.checkUp") : done ? t(writing ? "trace.status.canWrite" : "trace.status.canDraw") : p.status === "needsPractice" ? t("trace.status.needsPractice") : t(`trace.step.${p.step}`);
   return (
     <li>
       <button

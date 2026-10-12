@@ -11,6 +11,10 @@
 import { useCallback, useEffect, useMemo, useRef, useState, useSyncExternalStore } from "react";
 import {
   AlertCircle,
+  BringToFront,
+  ChevronsDown,
+  ChevronsUp,
+  SendToBack,
   Scaling,
   Scissors,
   MoveVertical,
@@ -86,8 +90,8 @@ import {
   simplifyStroke,
   straighten,
 } from "../geometry/edit";
-import type { Activity, NodeType, Sensitivity, StepId, Stroke, StrokeShape, TraceItem, TraceKind, Zone } from "../geometry/types";
-import { activityOf, hasArt, modeOf } from "../geometry/types";
+import type { Activity, NodeType, Sensitivity, StepId, Stroke, StrokeShape, TraceItem, TraceKind, TraceLook, Zone } from "../geometry/types";
+import { activityOf, hasArt, linesOf, modeOf } from "../geometry/types";
 import { PaintSteps } from "./PaintSteps";
 import { fittedPixels, loadImage, pictureFrom, pictureWalls, smoothLines } from "../paint/picture";
 import { PaintPicture } from "./PaintPicture";
@@ -107,9 +111,17 @@ import type { TraceDraft } from "./drafts";
 import { TraceDrafts, blankItem, newDraft, strokesPrint } from "./drafts";
 import type { Primitive } from "./primitives";
 import { PRIMITIVES, makePrimitive } from "./primitives";
-import type { EditMode, Magic, View } from "./StrokeEditor";
-import { FULL_VIEW, StrokeEditor, zoomView } from "./StrokeEditor";
-import { Divider, Field, Group, IconButton, IconSegment, Section, ShapeIcon, Slider, inputCls } from "./ui";
+import type { Restack } from "../geometry/layers";
+import { canFill, restack } from "../geometry/layers";
+import { MIN_TOLERANCE_WIDTH } from "../score/tolerance";
+import { isPartByPart, partIndexes } from "../geometry/parts";
+import { leavesPage, trimToPage } from "../geometry/trim";
+import { STYLE_PRESETS, STYLE_PRESETS_ORDER, applyPreset, presetOf } from "./presets";
+import type { Background } from "../paint/backgrounds";
+import { BACKGROUNDS } from "../paint/backgrounds";
+import type { EditMode, Magic, PenSize, View } from "./StrokeEditor";
+import { FULL_VIEW, MAX_VIEW, PEN_WIDTHS, StrokeEditor, dotRadius, zoomView } from "./StrokeEditor";
+import { Divider, Field, Group, IconButton, IconSegment, LabelButton, Section, ShapeIcon, Slider, SubSection, TextSegment, inputCls } from "./ui";
 
 const uid = (p: string) => `${p}${Date.now().toString(36)}${Math.random().toString(36).slice(2, 6)}`;
 const ALL_STEPS: StepId[] = ["watch", "big", "guided", "faded", "copy", "memory"];
@@ -126,6 +138,29 @@ const TOOLS: { mode: EditMode; key: string; icon: React.ReactNode }[] = [
   { mode: "cut", key: "C", icon: <Scissors className="h-5 w-5" /> },
   { mode: "hand", key: "H", icon: <Hand className="h-5 w-5" /> },
 ];
+
+/** State kept in this browser (an author's own preference); falls back quietly when storage is unavailable. */
+function useStoredState<T extends string>(key: string, fallback: T, valid: (v: string) => v is T): [T, (next: T | ((v: T) => T)) => void] {
+  const [value, setValue] = useState<T>(() => {
+    try {
+      const v = localStorage.getItem(key);
+      return v !== null && valid(v) ? v : fallback;
+    } catch {
+      return fallback;
+    }
+  });
+  const set = (next: T | ((v: T) => T)) =>
+    setValue((cur) => {
+      const v = typeof next === "function" ? next(cur) : next;
+      try {
+        localStorage.setItem(key, v);
+      } catch {
+        /* remembered for this visit only */
+      }
+      return v;
+    });
+  return [value, set];
+}
 
 const renumber = (strokes: Stroke[]) => strokes.map((s, i) => ({ ...s, order: i + 1, join: i === 0 ? ("lift" as const) : s.join }));
 
@@ -208,7 +243,7 @@ export function TraceStudio() {
 /* =============================================================== editor */
 
 /** A colouring item adds "picture"; its "shape" view (extra lines) opens from the Picture tab. */
-type Tab = "picture" | "shape" | "steps" | "details" | "publish";
+type Tab = "picture" | "shape" | "steps" | "colour" | "details" | "publish";
 /** A colouring item is made in this order; the stepper and Back/Next walk it. */
 const COLOR_FLOW = ["picture", "steps", "details", "publish"] as const;
 
@@ -222,19 +257,43 @@ function DraftEditor({ id, onClose }: { id: string; onClose(): void }) {
   const [magic, setMagic] = useState<Magic>({ snap: true, autoConnect: true, gridOnly: false });
   const [showCps, setShowCps] = useState(false);
   const [showGrid, setShowGrid] = useState(true);
+  /** The pen for new strokes, and whether every stroke shows its number: the author's own setup, kept on this device. */
+  const [penSize, setPenSize] = useStoredState<PenSize>("koda_trace_studio_pen", "medium", (v): v is PenSize => v === "fine" || v === "medium" || v === "bold");
+  const [showNumbers, setShowNumbers] = useStoredState<"on" | "off">("koda_trace_studio_numbers", "on", (v): v is "on" | "off" => v === "on" || v === "off");
+  const penWidth = PEN_WIDTHS[penSize];
   const [view, setView] = useState<View>(FULL_VIEW);
   const [selection, setSelection] = useState<number[]>([]);
   // One stroke selected = edit its points; several = act on them together.
   const sel = selection.length === 1 ? selection[0] : null;
+  const byParts = isPartByPart(draft.item);
+  /** Strokes drawn past the page's edge (fine while designing; a child sees only the page). */
+  const offPage = useMemo(() => draft.item.strokes.flatMap((st, i) => (leavesPage(st) ? [i] : [])), [draft.item.strokes]);
   const [selNode, setSelNode] = useState<number | null>(null);
   const [saveFailed, setSaveFailed] = useState(false);
   const item = draft.item;
 
-  // Autosave.
+  // Autosave, a moment after the last edit. An edit still waiting is saved at once when the author
+  // leaves the item or closes the page, so the last change before leaving is never lost.
+  const pendingRef = useRef<TraceDraft | null>(null);
   useEffect(() => {
-    const h = window.setTimeout(() => setSaveFailed(!TraceDrafts.save(draft)), 350);
+    pendingRef.current = draft;
+    const h = window.setTimeout(() => {
+      pendingRef.current = null;
+      setSaveFailed(!TraceDrafts.save(draft));
+    }, 350);
     return () => window.clearTimeout(h);
   }, [draft]);
+  useEffect(() => {
+    const flush = () => {
+      if (pendingRef.current) TraceDrafts.save(pendingRef.current);
+      pendingRef.current = null;
+    };
+    window.addEventListener("pagehide", flush);
+    return () => {
+      window.removeEventListener("pagehide", flush);
+      flush();
+    };
+  }, []);
 
   const setItem = useCallback((next: TraceItem) => setDraft((d) => ({ ...d, item: next })), []);
   const itemRef = useRef(item);
@@ -282,6 +341,11 @@ function DraftEditor({ id, onClose }: { id: string; onClose(): void }) {
   const selectMany = (indexes: number[]) => {
     setSelection([...new Set(indexes)].sort((a, b) => a - b));
     setSelNode(null);
+  };
+  /** Cut every stroke at the page's edge: the parts past it go, each part on the page stays a stroke. */
+  const trimPage = () => {
+    edit({ ...item, strokes: renumber(trimToPage(item.strokes, () => uid("s"))) });
+    select(null);
   };
   const removeStroke = (i: number) => removeMany([i]);
   const removeMany = (indexes: number[]) => {
@@ -333,7 +397,10 @@ function DraftEditor({ id, onClose }: { id: string; onClose(): void }) {
   };
 
   const addPrimitive = (p: Primitive) => {
-    edit({ ...item, strokes: renumber([...item.strokes, makePrimitive(p, uid("s"), item.strokes.length + 1)]) });
+    const made = makePrimitive(p, uid("s"), item.strokes.length + 1);
+    // Drawn with the chosen pen: a fine pen makes a fine shape.
+    const sized = { ...made, width: penWidth, ...(made.shape === "dot" ? { radius: dotRadius(penWidth) } : {}) };
+    edit({ ...item, strokes: renumber([...item.strokes, sized]) });
     select(item.strokes.length);
     setMode("adjust");
   };
@@ -353,6 +420,12 @@ function DraftEditor({ id, onClose }: { id: string; onClose(): void }) {
     if ((e.metaKey || e.ctrlKey) && key === "g") {
       e.preventDefault();
       return e.shiftKey ? ungroup() : group();
+    }
+    if ((e.metaKey || e.ctrlKey) && (e.key === "]" || e.key === "[" || e.code === "BracketRight" || e.code === "BracketLeft") && selection.length > 0) {
+      e.preventDefault();
+      const up = e.code === "BracketRight" || e.key === "]";
+      const how: Restack = e.shiftKey ? (up ? "front" : "back") : up ? "forward" : "backward";
+      return edit({ ...item, strokes: restack(item.strokes, selection, how) });
     }
     if ((e.metaKey || e.ctrlKey) && key === "a") {
       e.preventDefault();
@@ -445,7 +518,7 @@ function DraftEditor({ id, onClose }: { id: string; onClose(): void }) {
   }, [activity, item.paint?.picture, item.guide?.image?.src, setItem]);
   const [tryingColor, setTryingColor] = useState(false);
   /** Where a colouring item is in its flow: drawing extra lines belongs to the Picture step. */
-  const flowAt: (typeof COLOR_FLOW)[number] = tab === "shape" || tab === "picture" ? "picture" : tab;
+  const flowAt: (typeof COLOR_FLOW)[number] = tab === "shape" || tab === "picture" ? "picture" : tab === "colour" ? "steps" : tab;
   const paintSteps = item.paint?.steps ?? [];
   const flowDone: Record<(typeof COLOR_FLOW)[number], boolean> = {
     picture: hasArt(item),
@@ -487,7 +560,7 @@ function DraftEditor({ id, onClose }: { id: string; onClose(): void }) {
               label={t("traceStudio.title")}
               onChange={setTab}
               value={tab}
-              items={(["shape", "steps", "details"] as const).map((x) => ({ id: x, label: t(`traceStudio.tab.${x}`) }))}
+              items={(item.colorAfter ? (["shape", "steps", "colour", "details"] as const) : (["shape", "steps", "details"] as const)).map((x) => ({ id: x, label: t(`traceStudio.tab.${x}`) }))}
             />
           )}
           <UIBadge variant={issues ? "danger" : "success"} className="inline-flex items-center gap-1">
@@ -567,14 +640,14 @@ function DraftEditor({ id, onClose }: { id: string; onClose(): void }) {
                   <ClipboardPaste className="h-4 w-4" />
                 </IconButton>
                 <Divider vertical />
-                <IconButton size="sm" label={t("traceStudio.zoomOut")} shortcut="−" onClick={() => setView((v) => zoomView(v, 0.8))} disabled={view.size >= 1000}>
+                <IconButton size="sm" label={t("traceStudio.zoomOut")} shortcut="−" onClick={() => setView((v) => zoomView(v, 0.8))} disabled={view.size >= MAX_VIEW}>
                   <ZoomOut className="h-4 w-4" />
                 </IconButton>
                 <span className="w-12 text-center font-mono text-xs tabular-nums text-muted">{Math.round((1000 / view.size) * 100)}%</span>
                 <IconButton size="sm" label={t("traceStudio.zoomIn")} shortcut="+" onClick={() => setView((v) => zoomView(v, 1.25))}>
                   <ZoomIn className="h-4 w-4" />
                 </IconButton>
-                <IconButton size="sm" label={t("traceStudio.fit")} shortcut="0" onClick={() => setView(FULL_VIEW)} disabled={view.size >= 1000}>
+                <IconButton size="sm" label={t("traceStudio.fit")} shortcut="0" onClick={() => setView(FULL_VIEW)} disabled={view.size === FULL_VIEW.size && view.x === 0 && view.y === 0}>
                   <Maximize2 className="h-4 w-4" />
                 </IconButton>
                 <Divider vertical />
@@ -594,6 +667,16 @@ function DraftEditor({ id, onClose }: { id: string; onClose(): void }) {
                 <IconButton size="sm" label={t("traceStudio.checkpoints")} active={showCps} onClick={() => setShowCps((v) => !v)}>
                   <Target className="h-4 w-4" />
                 </IconButton>
+                <IconButton size="sm" label={t("traceStudio.showNumbers")} active={showNumbers === "on"} onClick={() => setShowNumbers((v) => (v === "on" ? "off" : "on"))}>
+                  <Hash className="h-4 w-4" />
+                </IconButton>
+                <Divider vertical />
+                {/* Pen size for new strokes: a dot as big as the line it draws. */}
+                {(Object.keys(PEN_WIDTHS) as PenSize[]).map((size) => (
+                  <IconButton key={size} size="sm" label={t("traceStudio.pen", { size: t(`traceStudio.penSize.${size}`), width: PEN_WIDTHS[size] })} active={penSize === size} onClick={() => setPenSize(size)}>
+                    <span aria-hidden="true" className="rounded-full bg-current" style={{ width: { fine: 4, medium: 8, bold: 13 }[size], height: { fine: 4, medium: 8, bold: 13 }[size] }} />
+                  </IconButton>
+                ))}
               </div>
               <Divider vertical />
               <VoiceRecord
@@ -613,6 +696,8 @@ function DraftEditor({ id, onClose }: { id: string; onClose(): void }) {
               magic={magic}
               showCheckpoints={showCps || mode === "pin"}
               showGrid={showGrid}
+              penWidth={penWidth}
+              showNumbers={showNumbers === "on"}
               lineArt={activity === "color"}
               view={view}
               onView={setView}
@@ -649,7 +734,14 @@ function DraftEditor({ id, onClose }: { id: string; onClose(): void }) {
                 <ol className="-mx-2 flex flex-col">
                   {item.strokes.map((s, i) => {
                     const Icon = ShapeIcon[s.shape === "curve" ? "curve" : s.shape];
-                    return (
+                    const part = byParts && (i === 0 || s.part) ? partIndexes(item.strokes)[i] : null;
+                    return [
+                      part !== null && (
+                        <li key={`${s.id}-part`} className="px-2 pb-1 pt-2 text-[11px] font-semibold uppercase tracking-wider text-indigo-700 dark:text-indigo-300">
+                          {t("traceStudio.partN", { n: part + 1 })}
+                          {s.part?.title ? ` · ${s.part.title}` : ""}
+                        </li>
+                      ),
                       <li key={s.id} className={`group flex items-center gap-2 rounded-xl px-2 py-1 ${selection.includes(i) ? "bg-indigo-50 dark:bg-indigo-950/40" : "hover:bg-surface-muted"}`}>
                         <button
                           onClick={(e) => (e.shiftKey || e.metaKey || e.ctrlKey ? selectMany(selection.includes(i) ? selection.filter((x) => x !== i) : [...selection, i]) : select(i))}
@@ -682,10 +774,18 @@ function DraftEditor({ id, onClose }: { id: string; onClose(): void }) {
                             <Trash2 className="h-4 w-4" />
                           </IconButton>
                         </span>
-                      </li>
-                    );
+                      </li>,
+                    ];
                   })}
                 </ol>
+              )}
+              {offPage.length > 0 && (
+                <div className="flex flex-col gap-2 rounded-xl bg-indigo-50 p-3 text-sm dark:bg-indigo-950/40">
+                  <p className="text-ink">{t("traceStudio.offPage", { count: offPage.length })}</p>
+                  <UIButton size="sm" variant="secondary" icon={<Scissors className="h-4 w-4" />} onClick={trimPage}>
+                    {t("traceStudio.trimPage")}
+                  </UIButton>
+                </div>
               )}
             </Section>
 
@@ -713,6 +813,20 @@ function DraftEditor({ id, onClose }: { id: string; onClose(): void }) {
                     <Trash2 className="h-4 w-4" />
                   </IconButton>
                 </Group>
+                <SubSection id="size" title={t("traceStudio.sub.size")}>
+                  {/* One width for all of them — thin a whole drawing in one go. Starts from the first one's. */}
+                  <Slider
+                    label={t("traceStudio.width")}
+                    value={item.strokes[selection[0]]?.width ?? 60}
+                    min={6}
+                    max={140}
+                    onChange={(v) => edit({ ...item, strokes: item.strokes.map((s, i) => (selection.includes(i) ? { ...s, width: v } : s)) })}
+                  />
+                </SubSection>
+                <SubSection id="picture" title={t("traceStudio.sub.picture")}>
+                  <StrokeArrange item={item} selection={selection} onChange={edit} />
+                  <StrokeLook item={item} selection={selection} onChange={edit} />
+                </SubSection>
                 <p className="text-xs text-muted">{t("traceStudio.multiHint")}</p>
               </Section>
             ) : selected && sel !== null ? (
@@ -729,28 +843,33 @@ function DraftEditor({ id, onClose }: { id: string; onClose(): void }) {
                     </button>
                   </div>
                 )}
-                {item.strokes.length > 1 && (
-                  <div className="flex flex-col gap-1.5">
-                    <span className="text-xs font-semibold text-muted">{t("traceStudio.order")}</span>
-                    <div className="flex flex-wrap gap-1.5" role="radiogroup" aria-label={t("traceStudio.order")}>
-                      {item.strokes.map((s, j) => (
-                        <button
-                          key={s.id}
-                          type="button"
-                          role="radio"
-                          aria-checked={j === sel}
-                          title={j === sel ? undefined : t("traceStudio.swapWith", { n: badge(s.order, item) })}
-                          onClick={() => swapStrokes(sel, j)}
-                          className={`${themeSystem.button(j === sel ? "primary" : "secondary", "icon")} min-w-10 text-sm`}
-                        >
-                          {badge(s.order, item)}
-                        </button>
-                      ))}
-                    </div>
-                    <p className="text-xs text-muted">{t("traceStudio.orderHint")}</p>
-                  </div>
-                )}
+
+                {byParts && <StrokePart item={item} index={sel} onChange={edit} />}
                 <Inspector
+                  order={
+                    item.strokes.length > 1 && (
+                      <SubSection id="order" title={t("traceStudio.order")} aside={t("traceStudio.orderOf", { n: badge(selected.order, item), total: item.strokes.length })} defaultOpen={false}>
+                        <div className="flex flex-wrap gap-1" role="radiogroup" aria-label={t("traceStudio.order")}>
+                          {item.strokes.map((s, j) => (
+                            <button
+                              key={s.id}
+                              type="button"
+                              role="radio"
+                              aria-checked={j === sel}
+                              title={j === sel ? undefined : t("traceStudio.swapWith", { n: badge(s.order, item) })}
+                              onClick={() => swapStrokes(sel, j)}
+                              className={`h-8 min-w-8 rounded-lg px-1.5 text-xs font-bold transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 ${
+                                j === sel ? "bg-indigo-600 text-white" : "border border-line bg-surface text-ink hover:border-indigo-300 hover:bg-indigo-50 dark:hover:bg-indigo-950/40"
+                              }`}
+                            >
+                              {badge(s.order, item)}
+                            </button>
+                          ))}
+                        </div>
+                        <p className="text-xs text-muted">{t("traceStudio.orderHint")}</p>
+                      </SubSection>
+                    )
+                  }
                   stroke={selected}
                   index={sel}
                   node={selNode}
@@ -770,6 +889,10 @@ function DraftEditor({ id, onClose }: { id: string; onClose(): void }) {
                   onConnect={() => sel > 0 && editStroke((s) => connectToPrevious(s, item.strokes[sel - 1]))}
                   onFit={(target, how) => editStroke((s) => fitStroke(s, strokeBox(item.strokes[target]), how))}
                 />
+                <SubSection id="picture" title={t("traceStudio.sub.picture")}>
+                  <StrokeArrange item={item} selection={selection} onChange={edit} />
+                  <StrokeLook item={item} selection={selection} onChange={edit} />
+                </SubSection>
               </Section>
             ) : (
               <p className="rounded-2xl border border-dashed border-line px-4 py-3 text-sm text-muted">{t("traceStudio.selectHint")}</p>
@@ -784,7 +907,8 @@ function DraftEditor({ id, onClose }: { id: string; onClose(): void }) {
 
       {tab === "picture" && <PaintPicture item={item} onChange={edit} history={history} onDrawLines={() => setTab("shape")} onNext={() => setTab("steps")} />}
       {tab === "steps" && (activity === "color" ? <PaintSteps item={item} onChange={edit} history={history} /> : <StepsPanel draft={draft} onChange={setDraft} checks={checks} />)}
-      {tab === "details" && <DetailsPanel item={item} onChange={edit} />}
+      {tab === "colour" && activity === "trace" && item.colorAfter && <PaintSteps item={item} onChange={edit} history={history} />}
+      {tab === "details" && <DetailsPanel item={item} onChange={edit} onPen={setPenSize} />}
       {tab === "publish" &&
         (tryingColor ? (
           <div className="flex flex-col gap-3">
@@ -901,7 +1025,180 @@ function ShapePicker({ onPick }: { onPick(p: Primitive): void }) {
   );
 }
 
+/** One click per age: the look, strictness, line widths, pen and colouring brush that suit it. */
+function StylePresets({ item, onChange, onPen }: { item: TraceItem; onChange(i: TraceItem): void; onPen(p: PenSize): void }) {
+  const { t } = useT();
+  const current = presetOf(item);
+  return (
+    <Section title={t("traceStudio.style.title")} aside={current ? t(`traceStudio.style.${current}`) : t("traceStudio.style.custom")}>
+      <p className="text-xs text-muted">{t("traceStudio.style.note")}</p>
+      <div className="grid gap-2 sm:grid-cols-3">
+        {STYLE_PRESETS_ORDER.map((p) => (
+          <button
+            key={p}
+            type="button"
+            aria-pressed={current === p}
+            onClick={() => {
+              onChange(applyPreset(item, p));
+              onPen(STYLE_PRESETS[p].pen);
+            }}
+            className={`flex flex-col gap-1 rounded-2xl border p-3 text-left transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 ${
+              current === p ? "border-indigo-500 bg-indigo-50 dark:bg-indigo-950/40" : "border-line bg-surface hover:border-indigo-300"
+            }`}
+          >
+            <span className="text-sm font-semibold text-ink">{t(`traceStudio.style.${p}`)}</span>
+            <span className="text-xs text-muted">{t(`traceStudio.style.${p}Note`)}</span>
+          </button>
+        ))}
+      </div>
+    </Section>
+  );
+}
+
+/** Part by part: whether this stroke begins a new part, and the part's name ("Add the roof"). */
+function StrokePart({ item, index, onChange }: { item: TraceItem; index: number; onChange(item: TraceItem): void }) {
+  const { t } = useT();
+  const stroke = item.strokes[index];
+  const begins = index === 0 || Boolean(stroke.part);
+  const n = partIndexes(item.strokes)[index] + 1;
+  const set = (part: Stroke["part"]) =>
+    onChange({
+      ...item,
+      strokes: item.strokes.map((s, i) => {
+        if (i !== index) return s;
+        const { part: _p, ...bare } = s;
+        return part ? { ...bare, part } : bare;
+      }),
+    });
+  return (
+    <div className="flex flex-col gap-2 rounded-xl bg-indigo-50 p-3 dark:bg-indigo-950/40">
+      {index > 0 && (
+        <label className="flex cursor-pointer items-center gap-2 text-sm font-semibold text-ink">
+          <input type="checkbox" className="h-4 w-4 accent-indigo-600" checked={begins} onChange={(e) => set(e.target.checked ? { title: "" } : undefined)} />
+          {t("traceStudio.beginsPart")}
+        </label>
+      )}
+      {begins ? (
+        <Field label={t("traceStudio.partTitle", { n })}>
+          <input className={inputCls} placeholder={t("traceStudio.partTitleHint")} value={stroke.part?.title ?? ""} onChange={(e) => set({ title: e.target.value })} />
+        </Field>
+      ) : (
+        <p className="text-xs text-muted">{t("traceStudio.inPart", { n })}</p>
+      )}
+    </div>
+  );
+}
+
+/**
+ * Arrange the selected strokes in the picture: front and back (apart from the
+ * writing order), and solid — a closed shape that hides what lies behind it.
+ */
+function StrokeArrange({ item, selection, onChange }: { item: TraceItem; selection: number[]; onChange(item: TraceItem): void }) {
+  const { t } = useT();
+  const strokes = selection.map((i) => item.strokes[i]).filter(Boolean);
+  const fillable = strokes.length > 0 && strokes.every(canFill);
+  const solid = fillable && strokes.every((s) => s.fill === "paper");
+  // Open lines that could be closed (a dot has no inside, ever).
+  const closable = !fillable && strokes.length > 0 && strokes.every((s) => s.shape !== "dot" && s.nodes.length > 1);
+  const move = (how: Restack) => onChange({ ...item, strokes: restack(item.strokes, selection, how) });
+  const each = (fn: (s: Stroke) => Stroke) => {
+    const pick = new Set(selection);
+    onChange({ ...item, strokes: item.strokes.map((s, i) => (pick.has(i) ? fn(s) : s)) });
+  };
+  const icon = "h-4 w-4";
+  return (
+    <>
+      <div className="flex flex-col gap-1">
+        <span className="text-[11px] font-semibold uppercase tracking-wider text-muted">{t("traceStudio.arrange")}</span>
+        <div className="grid grid-cols-2 gap-1.5">
+          <LabelButton icon={<BringToFront className={icon} />} label={t("traceStudio.toFront")} title="⇧⌘]" onClick={() => move("front")} />
+          <LabelButton icon={<SendToBack className={icon} />} label={t("traceStudio.toBack")} title="⇧⌘[" onClick={() => move("back")} />
+          <LabelButton icon={<ChevronsUp className={icon} />} label={t("traceStudio.forward")} title="⌘]" onClick={() => move("forward")} />
+          <LabelButton icon={<ChevronsDown className={icon} />} label={t("traceStudio.backward")} title="⌘[" onClick={() => move("backward")} />
+        </div>
+      </div>
+      {fillable ? (
+        <label className="flex cursor-pointer items-start gap-3 rounded-xl border border-line p-3">
+          <input
+            type="checkbox"
+            className="mt-0.5 h-4 w-4 accent-indigo-600"
+            checked={solid}
+            onChange={(e) =>
+              each((s) => {
+                const { fill: _f, ...bare } = s;
+                return e.target.checked ? { ...bare, fill: "paper" } : bare;
+              })
+            }
+          />
+          <span className="flex flex-col gap-0.5">
+            <span className="text-sm font-semibold text-ink">{t("traceStudio.solid")}</span>
+            <span className="text-xs text-muted">{t("traceStudio.solidNote")}</span>
+          </span>
+        </label>
+      ) : (
+        <div className="flex flex-col gap-1.5 rounded-xl bg-surface-muted p-3">
+          <span className="text-xs text-muted">
+            <span className="font-semibold text-ink">{t("traceStudio.solid")}</span> · {t("traceStudio.solidClosedOnly")}
+          </span>
+          {closable && <LabelButton icon={<Circle className={icon} />} label={t("traceStudio.closeShape")} onClick={() => each((s) => ({ ...s, closed: true }))} />}
+        </div>
+      )}
+    </>
+  );
+}
+
+/**
+ * The look of the selected strokes — e.g. thin wheels on a drawing that keeps
+ * its bands. Each setting follows the item's (Details) until set here.
+ */
+function StrokeLook({ item, selection, onChange }: { item: TraceItem; selection: number[]; onChange(item: TraceItem): void }) {
+  const { t } = useT();
+  const strokes = selection.map((i) => item.strokes[i]).filter(Boolean);
+  const set = (key: keyof TraceLook, value: "" | "on" | "off") => {
+    const pick = new Set(selection);
+    onChange({
+      ...item,
+      strokes: item.strokes.map((s, i) => {
+        if (!pick.has(i)) return s;
+        const { [key]: _k, ...rest } = s.look ?? {};
+        const look: TraceLook = value === "" ? rest : { ...rest, [key]: value === "on" };
+        const { look: _l, ...bare } = s;
+        return Object.keys(look).length ? { ...bare, look } : bare;
+      }),
+    });
+  };
+  return (
+    <div className="flex flex-col gap-2">
+      <span className="text-[11px] font-semibold uppercase tracking-wider text-muted">{t("traceStudio.strokeLook")}</span>
+      {(["thin", "dashed", "dotted", "hideNumbers", "hideArrows"] as (keyof TraceLook)[]).map((key) => {
+        const values = new Set(strokes.map((s) => (s.look?.[key] === undefined ? "" : s.look[key] ? "on" : "off")));
+        // Several strokes set differently: no choice is lit until one is picked.
+        const value = values.size === 1 ? ([...values][0] as "" | "on" | "off") : null;
+        return (
+          <div key={key} className="flex flex-col gap-1">
+            <span className="text-sm text-ink">
+              {t(`traceStudio.lookName.${key}`)}
+              {value === null && <span className="ml-2 text-xs text-muted">· {t("traceStudio.lookMixed")}</span>}
+            </span>
+            <TextSegment<"" | "on" | "off">
+              label={t(`traceStudio.lookName.${key}`)}
+              value={value}
+              onChange={(v) => set(key, v)}
+              options={[
+                { value: "", label: t("traceStudio.lookFollow", { state: item.look?.[key] ? t("traceStudio.lookOn") : t("traceStudio.lookOff") }) },
+                { value: "on", label: t("traceStudio.lookOn") },
+                { value: "off", label: t("traceStudio.lookOff") },
+              ]}
+            />
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
 function Inspector({
+  order,
   stroke,
   index,
   node,
@@ -914,6 +1211,8 @@ function Inspector({
   onConnect,
   onFit,
 }: {
+  /** The writing-order picker, shown under the quick actions. */
+  order: React.ReactNode;
   stroke: Stroke;
   index: number;
   node: number | null;
@@ -937,52 +1236,8 @@ function Inspector({
   const icon = "h-4 w-4";
   return (
     <>
-      <Group label={t("traceStudio.shapeLabel")}>
-        <IconSegment<StrokeShape>
-          value={stroke.shape}
-          onChange={(v) => onEdit((s) => ({ ...s, shape: v }))}
-          options={SHAPES.map((x) => {
-            const Icon = ShapeIcon[x];
-            return { value: x, label: t(`traceStudio.shape.${x}`), icon: <Icon /> };
-          })}
-        />
-      </Group>
-
-      {!dot && (
-        <Group label={t("traceStudio.groupCurve")}>
-          <IconButton size="sm" label={t("traceStudio.bendUp")} onClick={() => onEdit((s) => bendSegment(s, seg, "up"))}>
-            <ShapeIcon.bendUp />
-          </IconButton>
-          <IconButton size="sm" label={t("traceStudio.bendDown")} onClick={() => onEdit((s) => bendSegment(s, seg, "down"))}>
-            <ShapeIcon.bendDown />
-          </IconButton>
-          <IconButton size="sm" label={node !== null ? t("traceStudio.straightenSegment") : t("traceStudio.straighten")} onClick={() => onEdit((s) => straighten(s, node !== null ? seg : undefined))}>
-            <Minus className={icon} />
-          </IconButton>
-          <IconButton size="sm" label={t("traceStudio.blendAll")} onClick={() => onEdit(blendAll)}>
-            <Spline className={icon} />
-          </IconButton>
-          {/* A round loop at the chosen point, or the end: the head of ង, which bending cannot make. */}
-          {!stroke.closed && (
-            <>
-              <IconButton size="sm" label={t("traceStudio.loopLeft")} onClick={() => onEdit((s) => addLoop(s, node ?? s.nodes.length - 1, "left"))}>
-                <RotateCcw className={icon} />
-              </IconButton>
-              <IconButton size="sm" label={t("traceStudio.loopRight")} onClick={() => onEdit((s) => addLoop(s, node ?? s.nodes.length - 1, "right"))}>
-                <RotateCw className={icon} />
-              </IconButton>
-            </>
-          )}
-          <IconButton size="sm" label={t("traceStudio.simplify")} onClick={() => onEdit((s) => simplifyStroke(s, 4))}>
-            <Wand2 className={icon} />
-          </IconButton>
-          <IconButton size="sm" label={stroke.closed ? t("traceStudio.open") : t("traceStudio.close")} active={stroke.closed} onClick={() => onEdit((s) => ({ ...s, closed: !s.closed }))}>
-            <Circle className={icon} />
-          </IconButton>
-        </Group>
-      )}
-
-      <Group label={t("traceStudio.groupTransform")}>
+      {/* Quick actions: one row, always in reach. */}
+      <div className="flex flex-wrap items-center gap-1">
         {!dot && (
           <IconButton size="sm" label={t("traceStudio.reverse")} onClick={() => onEdit(reverseStroke)}>
             <ArrowLeftRight className={icon} />
@@ -997,83 +1252,76 @@ function Inspector({
         <IconButton size="sm" label={t("traceStudio.duplicate")} shortcut="⌘D" onClick={onDuplicate}>
           <Copy className={icon} />
         </IconButton>
+        <span className="ml-auto" />
         <IconButton size="sm" tone="danger" label={t("traceStudio.delete")} shortcut="⌫" onClick={onDelete}>
           <Trash2 className={icon} />
         </IconButton>
-      </Group>
+      </div>
 
-      <Group label={t("traceStudio.join")}>
-        <IconSegment<Stroke["join"]>
-          value={stroke.join}
-          disabled={index === 0}
-          onChange={(v) => onEdit((s) => ({ ...s, join: v }))}
-          options={[
-            { value: "lift", label: t("traceStudio.joinLift"), icon: <Unlink className={icon} /> },
-            { value: "continue", label: t("traceStudio.joinContinue"), icon: <Link2 className={icon} /> },
-          ]}
+      {order}
+
+      <SubSection id="shape" title={t("traceStudio.sub.shape")} aside={t(`traceStudio.shape.${stroke.shape}`)}>
+        <IconSegment<StrokeShape>
+          value={stroke.shape}
+          onChange={(v) => onEdit((s) => ({ ...s, shape: v }))}
+          options={SHAPES.map((x) => {
+            const Icon = ShapeIcon[x];
+            return { value: x, label: t(`traceStudio.shape.${x}`), icon: <Icon /> };
+          })}
         />
-        {index > 0 && (
-          <IconButton size="sm" label={t("traceStudio.connectPrev")} onClick={onConnect}>
-            <Magnet className={icon} />
-          </IconButton>
+        {!dot && (
+          <>
+            <TextSegment<"open" | "closed">
+              label={t("traceStudio.sub.ends")}
+              value={stroke.closed ? "closed" : "open"}
+              onChange={(v) => onEdit((s) => ({ ...s, closed: v === "closed" }))}
+              options={[
+                { value: "open", label: t("traceStudio.endsOpen") },
+                { value: "closed", label: t("traceStudio.endsClosed"), icon: <Circle className="h-3.5 w-3.5" /> },
+              ]}
+            />
+            <Group label={t("traceStudio.groupCurve")}>
+              <IconButton size="sm" label={t("traceStudio.bendUp")} onClick={() => onEdit((s) => bendSegment(s, seg, "up"))}>
+                <ShapeIcon.bendUp />
+              </IconButton>
+              <IconButton size="sm" label={t("traceStudio.bendDown")} onClick={() => onEdit((s) => bendSegment(s, seg, "down"))}>
+                <ShapeIcon.bendDown />
+              </IconButton>
+              <IconButton size="sm" label={node !== null ? t("traceStudio.straightenSegment") : t("traceStudio.straighten")} onClick={() => onEdit((s) => straighten(s, node !== null ? seg : undefined))}>
+                <Minus className={icon} />
+              </IconButton>
+              <IconButton size="sm" label={t("traceStudio.blendAll")} onClick={() => onEdit(blendAll)}>
+                <Spline className={icon} />
+              </IconButton>
+              {/* A round loop at the chosen point, or the end: the head of ង, which bending cannot make. */}
+              {!stroke.closed && (
+                <>
+                  <IconButton size="sm" label={t("traceStudio.loopLeft")} onClick={() => onEdit((s) => addLoop(s, node ?? s.nodes.length - 1, "left"))}>
+                    <RotateCcw className={icon} />
+                  </IconButton>
+                  <IconButton size="sm" label={t("traceStudio.loopRight")} onClick={() => onEdit((s) => addLoop(s, node ?? s.nodes.length - 1, "right"))}>
+                    <RotateCw className={icon} />
+                  </IconButton>
+                </>
+              )}
+              <IconButton size="sm" label={t("traceStudio.simplify")} onClick={() => onEdit((s) => simplifyStroke(s, 4))}>
+                <Wand2 className={icon} />
+              </IconButton>
+            </Group>
+          </>
         )}
-      </Group>
-
-      {!dot && target !== null && (
-        <Group label={t("traceStudio.fitTo")}>
-          <select aria-label={t("traceStudio.fitTo")} className={`${inputCls} w-auto min-w-28`} value={target} onChange={(e) => setFitTarget(Number(e.target.value))}>
-            {others.map((i) => (
-              <option key={i} value={i}>
-                {t("traceStudio.strokeN", { n: badge(item.strokes[i].order, item) })}
-              </option>
-            ))}
-          </select>
-          <IconButton size="sm" label={t("traceStudio.fitInside")} onClick={() => onFit(target, "inside")}>
-            <Scaling className={icon} />
-          </IconButton>
-          <IconButton size="sm" label={t("traceStudio.fitStretch")} onClick={() => onFit(target, "stretch")}>
-            <Maximize className={icon} />
-          </IconButton>
-          <IconButton size="sm" label={t("traceStudio.fitWidth")} onClick={() => onFit(target, "width")}>
-            <MoveHorizontal className={icon} />
-          </IconButton>
-          <IconButton size="sm" label={t("traceStudio.fitHeight")} onClick={() => onFit(target, "height")}>
-            <MoveVertical className={icon} />
-          </IconButton>
-          <IconButton size="sm" label={t("traceStudio.fitCenter")} onClick={() => onFit(target, "center")}>
-            <AlignCenter className={icon} />
-          </IconButton>
-        </Group>
-      )}
-
-      {stroke.badge && (
-        <UIButton size="sm" variant="secondary" icon={<Hash className="h-4 w-4" />} onClick={() => onEdit((s) => ({ ...s, badge: undefined }))}>
-          {t("traceStudio.autoBadge")}
-        </UIButton>
-      )}
-
-      <Slider label={t("traceStudio.width")} value={stroke.width} min={30} max={140} onChange={(v) => onEdit((s) => ({ ...s, width: v }))} />
+      </SubSection>
 
       {n && node !== null && (
-        <div className="flex flex-col gap-2 rounded-xl bg-surface-muted p-3">
-          <div className="flex items-center justify-between">
-            <span className="text-[11px] font-semibold uppercase tracking-wider text-muted">{t("traceStudio.pointN", { n: node + 1 })}</span>
-            <div className="flex items-center gap-0.5">
-              <IconButton size="sm" label={t("traceStudio.splitHere")} shortcut="X" disabled={stroke.shape === "dot" || (!stroke.closed && (node === 0 || node === stroke.nodes.length - 1))} onClick={onSplitNode}>
-                <Scissors className={icon} />
-              </IconButton>
-              <IconButton size="sm" tone="danger" label={t("traceStudio.deletePoint")} disabled={stroke.nodes.length <= 2} onClick={onDeleteNode}>
-                <Trash2 className={icon} />
-              </IconButton>
-            </div>
-          </div>
-          <IconSegment<NodeType>
+        <SubSection id="point" title={t("traceStudio.pointN", { n: node + 1 })}>
+          <TextSegment<NodeType>
+            label={t("traceStudio.pointN", { n: node + 1 })}
             value={n.type}
             onChange={(v) => onEdit((s) => setNodeType(s, node, v))}
             options={[
-              { value: "corner", label: t("traceStudio.node.corner"), icon: <Square className={icon} /> },
-              { value: "smooth", label: t("traceStudio.node.smooth"), icon: <Circle className={icon} /> },
-              { value: "symmetric", label: t("traceStudio.node.symmetric"), icon: <Diamond className={icon} /> },
+              { value: "corner", label: t("traceStudio.node.corner"), icon: <Square className="h-3.5 w-3.5" /> },
+              { value: "smooth", label: t("traceStudio.node.smooth"), icon: <Circle className="h-3.5 w-3.5" /> },
+              { value: "symmetric", label: t("traceStudio.node.symmetric"), icon: <Diamond className="h-3.5 w-3.5" /> },
             ]}
           />
           <div className="grid grid-cols-2 gap-2">
@@ -1090,18 +1338,80 @@ function Inspector({
               </Field>
             ))}
           </div>
-        </div>
+          <div className="grid grid-cols-2 gap-2">
+            <LabelButton
+              icon={<Scissors className={icon} />}
+              label={t("traceStudio.splitHere")}
+              title="X"
+              disabled={stroke.shape === "dot" || (!stroke.closed && (node === 0 || node === stroke.nodes.length - 1))}
+              onClick={onSplitNode}
+            />
+            <LabelButton icon={<Trash2 className={icon} />} tone="danger" label={t("traceStudio.deletePoint")} disabled={stroke.nodes.length <= 2} onClick={onDeleteNode} />
+          </div>
+        </SubSection>
       )}
 
-      <Field label={t("traceStudio.instruction")}>
-        <input className={inputCls} value={stroke.instruction ?? ""} onChange={(e) => onEdit((s) => ({ ...s, instruction: e.target.value || undefined }))} />
-      </Field>
-      {!dot && (
-        <p className="flex items-center gap-1.5 text-xs text-muted">
-          <MapPin className="h-3.5 w-3.5" />
-          {t("traceStudio.pinnedCount", { count: stroke.checkpoints.filter((c) => c.pinned).length })}
-        </p>
-      )}
+      <SubSection id="size" title={t("traceStudio.sub.size")} aside={String(stroke.width)}>
+        <Slider label={t("traceStudio.width")} value={stroke.width} min={6} max={140} onChange={(v) => onEdit((s) => ({ ...s, width: v }))} />
+        {stroke.width < MIN_TOLERANCE_WIDTH && <p className="text-xs text-muted">{t("traceStudio.widthThinNote")}</p>}
+        {!dot && target !== null && (
+          <Group label={t("traceStudio.fitTo")}>
+            <select aria-label={t("traceStudio.fitTo")} className={`${inputCls} !w-auto min-w-28`} value={target} onChange={(e) => setFitTarget(Number(e.target.value))}>
+              {others.map((i) => (
+                <option key={i} value={i}>
+                  {t("traceStudio.strokeN", { n: badge(item.strokes[i].order, item) })}
+                </option>
+              ))}
+            </select>
+            <IconButton size="sm" label={t("traceStudio.fitInside")} onClick={() => onFit(target, "inside")}>
+              <Scaling className={icon} />
+            </IconButton>
+            <IconButton size="sm" label={t("traceStudio.fitStretch")} onClick={() => onFit(target, "stretch")}>
+              <Maximize className={icon} />
+            </IconButton>
+            <IconButton size="sm" label={t("traceStudio.fitWidth")} onClick={() => onFit(target, "width")}>
+              <MoveHorizontal className={icon} />
+            </IconButton>
+            <IconButton size="sm" label={t("traceStudio.fitHeight")} onClick={() => onFit(target, "height")}>
+              <MoveVertical className={icon} />
+            </IconButton>
+            <IconButton size="sm" label={t("traceStudio.fitCenter")} onClick={() => onFit(target, "center")}>
+              <AlignCenter className={icon} />
+            </IconButton>
+          </Group>
+        )}
+        {stroke.badge && (
+          <UIButton size="sm" variant="secondary" icon={<Hash className="h-4 w-4" />} onClick={() => onEdit((s) => ({ ...s, badge: undefined }))}>
+            {t("traceStudio.autoBadge")}
+          </UIButton>
+        )}
+      </SubSection>
+
+      <SubSection id="writing" title={t("traceStudio.sub.writing")} defaultOpen={false}>
+        <div className="flex flex-col gap-1">
+          <span className="text-[11px] font-semibold uppercase tracking-wider text-muted">{t("traceStudio.join")}</span>
+          <TextSegment<Stroke["join"]>
+            label={t("traceStudio.join")}
+            value={stroke.join}
+            disabled={index === 0}
+            onChange={(v) => onEdit((s) => ({ ...s, join: v }))}
+            options={[
+              { value: "lift", label: t("traceStudio.joinLift"), icon: <Unlink className="h-3.5 w-3.5" /> },
+              { value: "continue", label: t("traceStudio.joinContinue"), icon: <Link2 className="h-3.5 w-3.5" /> },
+            ]}
+          />
+          {index > 0 && <LabelButton icon={<Magnet className={icon} />} label={t("traceStudio.connectPrev")} onClick={onConnect} />}
+        </div>
+        <Field label={t("traceStudio.instruction")}>
+          <input className={inputCls} value={stroke.instruction ?? ""} onChange={(e) => onEdit((s) => ({ ...s, instruction: e.target.value || undefined }))} />
+        </Field>
+        {!dot && (
+          <p className="flex items-center gap-1.5 text-xs text-muted">
+            <MapPin className="h-3.5 w-3.5" />
+            {t("traceStudio.pinnedCount", { count: stroke.checkpoints.filter((c) => c.pinned).length })}
+          </p>
+        )}
+      </SubSection>
     </>
   );
 }
@@ -1196,12 +1506,13 @@ function GuidePanel({ item, onChange }: { item: TraceItem; onChange(i: TraceItem
   );
 }
 
-function DetailsPanel({ item, onChange }: { item: TraceItem; onChange(i: TraceItem): void }) {
+function DetailsPanel({ item, onChange, onPen }: { item: TraceItem; onChange(i: TraceItem): void; onPen(p: PenSize): void }) {
   const { t } = useT();
   // A colouring item has no stroke numbers or writing grid; "how strict" is how much of each step must be filled.
   const coloring = activityOf(item) === "color";
   return (
     <div className="max-w-3xl">
+      {activityOf(item) === "trace" && <StylePresets item={item} onChange={onChange} onPen={onPen} />}
       <Section title={t("traceStudio.tab.details")}>
         <div className="grid gap-4 sm:grid-cols-2">
           <Field label={t("traceStudio.titleLabel")}>
@@ -1265,6 +1576,113 @@ function DetailsPanel({ item, onChange }: { item: TraceItem; onChange(i: TraceIt
               ))}
             </select>
           </Field>
+          {!coloring && (
+            <Field label={t("traceStudio.buildFlow")}>
+              <select
+                className={inputCls}
+                value={item.flow ?? ""}
+                onChange={(e) => {
+                  const { flow: _f, ...bare } = item;
+                  onChange(e.target.value ? { ...bare, flow: "parts" } : bare);
+                }}
+              >
+                <option value="">{t("traceStudio.flowWhole")}</option>
+                <option value="parts">{t("traceStudio.flowParts")}</option>
+              </select>
+              <span className="text-xs text-muted">{item.flow === "parts" ? t("traceStudio.flowPartsNote") : t("traceStudio.flowWholeNote")}</span>
+            </Field>
+          )}
+          {!coloring && (
+            <div className="flex flex-col gap-2 sm:col-span-2">
+              <span className="text-sm font-semibold text-ink">{t("traceStudio.look")}</span>
+              {(["thin", "dashed", "dotted", "hideNumbers", "hideArrows"] as (keyof TraceLook)[]).map((key) => (
+                <label key={key} className="flex cursor-pointer items-start gap-3 rounded-2xl border border-line p-3">
+                  <input
+                    type="checkbox"
+                    className="mt-0.5 h-4 w-4 accent-indigo-600"
+                    checked={Boolean(item.look?.[key])}
+                    onChange={(e) => {
+                      const { [key]: _k, ...rest } = item.look ?? {};
+                      const look: TraceLook = e.target.checked ? { ...rest, [key]: true } : rest;
+                      onChange({ ...item, look: Object.keys(look).length ? look : undefined });
+                    }}
+                  />
+                  <span className="flex flex-col gap-0.5">
+                    <span className="text-sm font-semibold text-ink">{t(`traceStudio.lookName.${key}`)}</span>
+                    <span className="text-xs text-muted">{t(`traceStudio.lookNote.${key}`)}</span>
+                  </span>
+                </label>
+              ))}
+            </div>
+          )}
+          {!coloring && (
+            <label className="flex cursor-pointer items-start gap-3 rounded-2xl border border-line p-3 sm:col-span-2">
+              <input
+                type="checkbox"
+                className="mt-0.5 h-4 w-4 accent-indigo-600"
+                checked={Boolean(item.colorAfter)}
+                onChange={(e) => {
+                  const { colorAfter: _c, ...bare } = item;
+                  onChange(e.target.checked ? { ...bare, colorAfter: true, paint: item.paint ?? { steps: [] } } : bare);
+                }}
+              />
+              <span className="flex flex-col gap-0.5">
+                <span className="text-sm font-semibold text-ink">{t("traceStudio.colorAfter")}</span>
+                <span className="text-xs text-muted">{t("traceStudio.colorAfterNote")}</span>
+              </span>
+            </label>
+          )}
+          {(coloring || item.colorAfter) && (
+            <label className="flex cursor-pointer items-start gap-3 rounded-2xl border border-line p-3 sm:col-span-2">
+              <input
+                type="checkbox"
+                className="mt-0.5 h-4 w-4 accent-indigo-600"
+                checked={item.paint?.shading === "soft"}
+                onChange={(e) => {
+                  const { shading: _s, ...rest } = item.paint ?? { steps: [] };
+                  onChange({ ...item, paint: { ...rest, steps: rest.steps ?? [], ...(e.target.checked ? { shading: "soft" as const } : {}) } });
+                }}
+              />
+              <span className="flex flex-col gap-0.5">
+                <span className="text-sm font-semibold text-ink">{t("traceStudio.softColours")}</span>
+                <span className="text-xs text-muted">{t("traceStudio.softColoursNote")}</span>
+              </span>
+            </label>
+          )}
+          {(coloring || item.colorAfter) && (
+            <div className="flex flex-col gap-1.5 sm:col-span-2">
+              <span className="text-sm font-semibold text-ink">{t("traceStudio.background")}</span>
+              <TextSegment<"none" | Background>
+                label={t("traceStudio.background")}
+                value={item.paint?.background ?? "none"}
+                onChange={(v) => {
+                  const { background: _b, ...rest } = item.paint ?? { steps: [] };
+                  onChange({ ...item, paint: { ...rest, steps: rest.steps ?? [], ...(v === "none" ? {} : { background: v }) } });
+                }}
+                options={(["none", ...BACKGROUNDS] as const).map((b) => ({ value: b, label: t(`traceStudio.bg.${b}`) }))}
+              />
+              <span className="text-xs text-muted">{t("traceStudio.backgroundNote")}</span>
+            </div>
+          )}
+          {(coloring || item.colorAfter) && (
+            <div className="flex flex-col gap-1.5 sm:col-span-2">
+              <span className="text-sm font-semibold text-ink">{t("traceStudio.linesAfter")}</span>
+              <TextSegment<"ink" | "colour" | "fade">
+                label={t("traceStudio.linesAfter")}
+                value={linesOf(item.paint)}
+                onChange={(v) => {
+                  const { lines: _l, hideLinesWhenDone: _h, ...rest } = item.paint ?? { steps: [] };
+                  onChange({ ...item, paint: { ...rest, steps: rest.steps ?? [], ...(v === "ink" ? {} : { lines: v }) } });
+                }}
+                options={[
+                  { value: "ink", label: t("traceStudio.linesInk") },
+                  { value: "colour", label: t("traceStudio.linesColour") },
+                  { value: "fade", label: t("traceStudio.linesFade") },
+                ]}
+              />
+              <span className="text-xs text-muted">{t(`traceStudio.lines${{ ink: "Ink", colour: "Colour", fade: "Fade" }[linesOf(item.paint)]}Note`)}</span>
+            </div>
+          )}
           {coloring && (
             <label className="flex cursor-pointer items-start gap-3 rounded-2xl border border-line p-3 sm:col-span-2">
               <input

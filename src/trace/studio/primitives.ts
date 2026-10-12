@@ -6,7 +6,7 @@
 import { blendAll, setNodeType } from "../geometry/edit";
 import type { Stroke, StrokeShape, TraceNode } from "../geometry/types";
 
-export const PRIMITIVES = ["line", "arc", "hook", "loop", "dot", "zigzag", "wave", "rectangle", "square", "triangle", "circle", "polygon"] as const;
+export const PRIMITIVES = ["line", "arc", "hook", "loop", "dot", "zigzag", "wave", "rectangle", "rounded", "square", "triangle", "circle", "polygon"] as const;
 
 /** Corners of a regular polygon, the first at the top, going clockwise. */
 function regular(sides: number, r: number, cx = 500, cy = 500): [number, number][] {
@@ -45,6 +45,22 @@ export function makePrimitive(kind: Primitive, id: string, order: number): Strok
     // corner (or the top), going round the way a child is taught.
     case "rectangle":
       return shape("free", corner([[250, 330], [250, 670], [750, 670], [750, 330]]), { closed: true });
+    case "rounded": {
+      // A rectangle with round corners (a car's body), from the top of the left side, going round like the rectangle.
+      const [x0, y0, x1, y1, r] = [200, 380, 800, 620, 70];
+      const h = r * KAPPA;
+      const nodes: TraceNode[] = [
+        { x: x0, y: y0 + r, type: "smooth", in: { dx: 0, dy: -h } },
+        { x: x0, y: y1 - r, type: "smooth", out: { dx: 0, dy: h } },
+        { x: x0 + r, y: y1, type: "smooth", in: { dx: -h, dy: 0 } },
+        { x: x1 - r, y: y1, type: "smooth", out: { dx: h, dy: 0 } },
+        { x: x1, y: y1 - r, type: "smooth", in: { dx: 0, dy: h } },
+        { x: x1, y: y0 + r, type: "smooth", out: { dx: 0, dy: -h } },
+        { x: x1 - r, y: y0, type: "smooth", in: { dx: h, dy: 0 } },
+        { x: x0 + r, y: y0, type: "smooth", out: { dx: -h, dy: 0 } },
+      ];
+      return shape("free", nodes, { closed: true });
+    }
     case "square":
       return shape("free", corner([[300, 300], [300, 700], [700, 700], [700, 300]]), { closed: true });
     case "triangle":

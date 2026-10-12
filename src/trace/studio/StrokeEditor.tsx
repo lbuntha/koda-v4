@@ -16,13 +16,22 @@ import { evalCubic, strokePolyline, strokeSegments } from "../geometry/bezier";
 import { withCheckpoints } from "../geometry/checkpoints";
 import type { Box } from "../geometry/edit";
 import { expandGroups, selectionBox } from "./groups";
-import { cutStrokeAt, extendStroke, moveNode, splitSegment, splitStrokeAt, transformStroke } from "../geometry/edit";
+import { BLEED, cutStrokeAt, extendStroke, moveNode, splitSegment, splitStrokeAt, transformStroke } from "../geometry/edit";
 import { fitNodes } from "../geometry/fit";
 import { nearest, pointAt, polylineLength, track } from "../geometry/polyline";
 import { snapPoint } from "../geometry/snap";
 import type { Point, Stroke, TraceItem, TraceNode } from "../geometry/types";
+import { lookOf } from "../geometry/types";
+import { isSolid, stackOrder } from "../geometry/layers";
 import { dist, len, normalize, sub } from "../geometry/vec";
 import { badge } from "../player/render";
+
+/** Pen sizes for new strokes, in units: fine details, everyday shapes, big shapes for the youngest. */
+export const PEN_WIDTHS = { fine: 12, medium: 30, bold: 60 } as const;
+export type PenSize = keyof typeof PEN_WIDTHS;
+
+/** A dot drawn with this pen: small for a fine pen (a star's eyes), round and easy for a bold one. */
+export const dotRadius = (penWidth: number) => (penWidth <= 12 ? 8 : penWidth <= 30 ? 14 : 20);
 
 export type EditMode = "adjust" | "add" | "pen" | "pin" | "hand" | "cut";
 
@@ -40,16 +49,21 @@ export interface View {
 }
 
 export const FULL_VIEW: View = { x: 0, y: 0, size: 1000 };
+/** The widest view: 40%, to see past the edges of the square (a picture larger than the page). */
+export const MAX_VIEW = 2500;
 
 export function zoomView(v: View, factor: number, about: Point = { x: v.x + v.size / 2, y: v.y + v.size / 2 }): View {
-  const size = Math.min(1000, Math.max(120, v.size / factor));
+  const size = Math.min(MAX_VIEW, Math.max(120, v.size / factor));
   const k = size / v.size;
   return clampView({ x: about.x - (about.x - v.x) * k, y: about.y - (about.y - v.y) * k, size });
 }
 
+/** Keep the square in reach: zoomed in, the view stays over it; zoomed out, the square stays inside the view. */
 function clampView(v: View): View {
   const m = v.size * 0.4;
-  return { size: v.size, x: Math.min(1000 - v.size + m, Math.max(-m, v.x)), y: Math.min(1000 - v.size + m, Math.max(-m, v.y)) };
+  const lo = Math.min(-m, 1000 - v.size - m);
+  const hi = Math.max(1000 - v.size + m, m);
+  return { size: v.size, x: Math.min(hi, Math.max(lo, v.x)), y: Math.min(hi, Math.max(lo, v.y)) };
 }
 
 interface Props {
@@ -62,6 +76,10 @@ interface Props {
   showCheckpoints: boolean;
   /** A light design grid (every 100 units) under everything — the Studio's only, never the child's. */
   showGrid: boolean;
+  /** Width, in units, of strokes drawn with the pen (Fine 12 · Medium 30 · Bold 60). */
+  penWidth: number;
+  /** Number badges on every stroke; off = only the selected strokes' numbers, for detailed pictures. */
+  showNumbers: boolean;
   /** A colouring item: strokes are line art, so the writing band is not drawn. */
   lineArt?: boolean;
   view: View;
@@ -180,7 +198,7 @@ function withHandles(stroke: Stroke, segment: number): Stroke {
 
 export { bendThrough, withHandles };
 
-export function StrokeEditor({ item, selection, selectedNode, mode, magic, showCheckpoints, showGrid, lineArt = false, view, onView, onSelect, onBegin, onChange, newId }: Props) {
+export function StrokeEditor({ item, selection, selectedNode, mode, magic, showCheckpoints, showGrid, penWidth, showNumbers, lineArt = false, view, onView, onSelect, onBegin, onChange, newId }: Props) {
   const svgRef = useRef<SVGSVGElement>(null);
   const drag = useRef<Drag | null>(null);
   const frame = useRef<number>(0);
@@ -243,7 +261,8 @@ export function StrokeEditor({ item, selection, selectedNode, mode, magic, showC
   };
   const toUnits = (e: { clientX: number; clientY: number }): Point => {
     const p = toUnitsRaw(e);
-    return { x: Math.min(1000, Math.max(0, p.x)), y: Math.min(1000, Math.max(0, p.y)) };
+    // The page and its bleed: an author may draw past the edge (see trimToPage).
+    return { x: Math.min(1000 + BLEED, Math.max(-BLEED, p.x)), y: Math.min(1000 + BLEED, Math.max(-BLEED, p.y)) };
   };
 
   const ends = (except: number | null) =>
@@ -513,10 +532,10 @@ export function StrokeEditor({ item, selection, selectedNode, mode, magic, showC
     const order = strokes.length + 1;
     let stroke: Stroke;
     if (polylineLength(pts) < 12 * k) {
-      stroke = { id: newId(), order, shape: "dot", nodes: [{ ...pts[0], type: "corner" }], closed: false, join: "lift", width: 60, radius: 20, checkpoints: [] };
+      stroke = { id: newId(), order, shape: "dot", nodes: [{ ...pts[0], type: "corner" }], closed: false, join: "lift", width: penWidth, radius: dotRadius(penWidth), checkpoints: [] };
     } else {
       const nodes = fitNodes(pts, 6 * k);
-      stroke = { id: newId(), order, shape: "free", nodes, closed: false, join: "lift", width: 60, checkpoints: [] };
+      stroke = { id: newId(), order, shape: "free", nodes, closed: false, join: "lift", width: penWidth, checkpoints: [] };
       const start = nodes[0];
       const prev = strokes[strokes.length - 1];
       const prevEnd = prev && prev.nodes.length > 0 ? prev.nodes[prev.nodes.length - 1] : undefined;
@@ -541,13 +560,15 @@ export function StrokeEditor({ item, selection, selectedNode, mode, magic, showC
   /* ---------------------------------------------------- render */
   const { x: gx, y: gy } = gridLines(item.grid);
   const guide = item.guide;
+  const penning = mode === "pen" && !panning;
   const cursor = drag.current?.kind === "pan" ? "grabbing" : panning ? "grab" : mode === "pen" || mode === "cut" ? "crosshair" : mode === "adjust" ? "default" : "copy";
 
   return (
     <svg
       ref={svgRef}
       viewBox={`${view.x} ${view.y} ${view.size} ${view.size}`}
-      className="block aspect-square w-full touch-none select-none bg-surface-muted"
+      // The pen draws wherever it is pressed — over a line, a point or a number too — so it shows its + everywhere.
+      className={`block aspect-square w-full touch-none select-none bg-surface-muted ${penning ? "[&_*]:cursor-crosshair!" : ""}`}
       style={{ cursor }}
       onPointerDown={onDown}
       onPointerMove={onMove}
@@ -581,26 +602,39 @@ export function StrokeEditor({ item, selection, selectedNode, mode, magic, showC
         </text>
       )}
 
-      {/* Strokes */}
-      {strokes.map((s, i) => {
+      {/* Strokes, back to front: a solid shape hides what lies behind it, as on the slate. */}
+      {stackOrder(strokes).map((i) => {
+        const s = strokes[i];
         const isSel = selection.includes(i);
-        const isHover = i === hover && !isSel;
+        const isHover = i === hover && !isSel && !penning;
         const hitProps = {
           "data-role": "stroke",
           "data-stroke": i,
-          onPointerEnter: () => setHover(i),
+          // Lines do not light up under the pen: it is not going to pick them.
+          onPointerEnter: () => !penning && setHover(i),
           onPointerLeave: () => setHover((h) => (h === i ? null : h)),
           style: { cursor: panning ? undefined : mode === "adjust" ? "move" : "pointer" },
         };
         if (s.shape === "dot" || s.nodes.length === 1) {
           const n = s.nodes[0];
-          return <circle key={s.id} cx={n.x} cy={n.y} r={(s.radius ?? 20) + 8} fill={isSel ? "#5b3fd9" : isHover ? "#7c68ea" : "#a99cf0"} {...hitProps} />;
+          return <circle key={s.id} cx={n.x} cy={n.y} r={(s.radius ?? 20) + 3 * k} fill={isSel ? "#5b3fd9" : isHover ? "#7c68ea" : "#a99cf0"} {...hitProps} />;
         }
         const d = pathOf(s);
         return (
           <g key={s.id}>
-            {!lineArt && <path d={d} fill="none" stroke="#8b7cf0" strokeOpacity={isSel ? 0.2 : 0.1} strokeWidth={s.width} strokeLinecap="round" strokeLinejoin="round" pointerEvents="none" />}
-            <path d={d} fill="none" stroke={isSel ? "#5b3fd9" : isHover ? "#7c68ea" : "#a99cf0"} strokeWidth={(isSel || isHover ? 8 : 6) * Math.max(0.6, k)} strokeLinecap="round" strokeLinejoin="round" pointerEvents="none" />
+            {isSolid(s) && <path d={`${d} Z`} fill="#ffffff" stroke="none" {...hitProps} />}
+            {!lineArt && !lookOf(item, s).thin && <path d={d} fill="none" stroke="#8b7cf0" strokeOpacity={isSel ? 0.2 : 0.1} strokeWidth={s.width} strokeLinecap="round" strokeLinejoin="round" pointerEvents="none" />}
+            <path
+              d={d}
+              fill="none"
+              stroke={isSel ? "#5b3fd9" : isHover ? "#7c68ea" : "#a99cf0"}
+              // A sharp line: thin on screen at any zoom, and never wider than the stroke itself.
+              strokeWidth={Math.min((isSel || isHover ? 5 : 3) * k, Math.max(s.width, 2))}
+              strokeDasharray={lookOf(item, s).dotted ? `0.01 ${10 * Math.max(0.6, k)}` : lookOf(item, s).dashed ? `${22 * Math.max(0.6, k)} ${16 * Math.max(0.6, k)}` : undefined}
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              pointerEvents="none"
+            />
             <path d={d} fill="none" stroke="transparent" strokeWidth={Math.max(24, 36 * k)} {...hitProps} />
           </g>
         );
@@ -626,25 +660,29 @@ export function StrokeEditor({ item, selection, selectedNode, mode, magic, showC
           const n = s.nodes[0];
           if (!n) return null;
           const c = centers[i];
-          const r = 22;
+          // Zoomed in: the same size on screen, so a small detail is not covered by numbers.
+          // Zoomed out: they shrink with the picture instead of swamping it.
+          const kb = Math.min(1, k);
+          const r = 22 * kb;
           const isSel = selection.includes(i);
+          if (!showNumbers && !isSel) return null;
           const draggable = mode !== "pen" && !panning;
           return (
             <g key={`b${s.id}`}>
-              <line x1={n.x} y1={n.y} x2={c.x} y2={c.y} stroke={isSel ? "#5b3fd9" : "#b3a8f2"} strokeWidth={2} strokeDasharray="4 4" pointerEvents="none" />
+              <line x1={n.x} y1={n.y} x2={c.x} y2={c.y} stroke={isSel ? "#5b3fd9" : "#b3a8f2"} strokeWidth={2 * kb} strokeDasharray={`${4 * kb} ${4 * kb}`} pointerEvents="none" />
               <circle
                 cx={c.x}
                 cy={c.y}
                 r={r}
                 fill={isSel ? "#5b3fd9" : "#b3a8f2"}
                 stroke={s.badge ? "#ffffff" : "none"}
-                strokeWidth={3}
+                strokeWidth={3 * kb}
                 data-role="badge"
                 data-stroke={i}
                 pointerEvents={draggable ? "all" : "none"}
                 style={{ cursor: draggable ? "move" : undefined }}
               />
-              <text x={c.x} y={c.y} dy="0.36em" textAnchor="middle" fontSize={24} fontWeight={700} fill="#ffffff" pointerEvents="none" fontFamily='"Noto Sans Khmer", system-ui, sans-serif'>
+              <text x={c.x} y={c.y} dy="0.36em" textAnchor="middle" fontSize={24 * kb} fontWeight={700} fill="#ffffff" pointerEvents="none" fontFamily='"Noto Sans Khmer", system-ui, sans-serif'>
                 {badge(s.order, item)}
               </text>
             </g>
@@ -736,7 +774,7 @@ export function StrokeEditor({ item, selection, selectedNode, mode, magic, showC
         </g>
       )}
 
-      {pen && pen.length > 1 && <polyline points={pen.map((p) => `${p.x},${p.y}`).join(" ")} fill="none" stroke="#1f2544" strokeWidth={8 * Math.max(0.6, k)} strokeLinecap="round" strokeLinejoin="round" pointerEvents="none" />}
+      {pen && pen.length > 1 && <polyline points={pen.map((p) => `${p.x},${p.y}`).join(" ")} fill="none" stroke="#1f2544" strokeWidth={Math.min(4 * k, penWidth)} strokeLinecap="round" strokeLinejoin="round" pointerEvents="none" />}
     </svg>
   );
 }

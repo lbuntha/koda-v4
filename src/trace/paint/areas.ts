@@ -9,15 +9,21 @@
  */
 
 import { strokePolyline } from "../geometry/bezier";
-import type { PaintStep, Point, TraceItem } from "../geometry/types";
+import type { PaintStep, Point, Stroke, TraceItem } from "../geometry/types";
 import { GRID, CELL, SPECK } from "./grid";
 import { crayonIndex } from "./palette";
 import { pictureWalls, unpackMask } from "./picture";
+import { isSolid, stackOrder } from "../geometry/layers";
 
 export { GRID, CELL, SPECK };
 /** How thick a line is as a wall, in units. The drawn line is thicker, so a wall's edge never shows. */
 export const WALL = 14;
 export const LINE = 18;
+
+/** A stroke's line in a colouring picture: as thick as it was designed, up to LINE (a wide trace band still draws a LINE-thick line). */
+export const lineOf = (s: Pick<Stroke, "width">) => Math.min(LINE, Math.max(4, s.width));
+/** The wall paint stops at: a little thinner than the drawn line, so paint always meets the line with no white gap. */
+export const wallOf = (s: Pick<Stroke, "width">) => Math.max(3, lineOf(s) - (LINE - WALL));
 
 export interface Areas {
   /** Per cell: the area it belongs to, or -1 on a line. */
@@ -61,15 +67,41 @@ export function walls(item: Pick<TraceItem, "strokes" | "paint">): Uint8Array {
   const picture = item.paint?.picture;
   const thick = picture && !picture.smooth ? pictureWalls(picture) : null;
   const board = thick ? thick.slice() : new Uint8Array(GRID * GRID);
-  for (const s of item.strokes) {
+  // Back to front, as the picture is drawn: a solid shape clears the lines behind it, so its inside is one part.
+  for (const i of stackOrder(item.strokes)) {
+    const s = item.strokes[i];
     if (s.shape === "dot" || s.nodes.length === 1) {
       const n = s.nodes[0];
-      if (n) stamp(board, n, (s.radius ?? 20) + WALL / 2);
+      if (n) stamp(board, n, (s.radius ?? 20) + wallOf(s) / 2);
       continue;
     }
-    stampLine(board, strokePolyline(s), WALL / 2);
+    const pts = strokePolyline(s);
+    if (isSolid(s)) clearInside(board, pts);
+    stampLine(board, pts, wallOf(s) / 2);
   }
   return board;
+}
+
+/** Clear every cell whose centre is inside the closed polygon (even–odd, a scanline per row). */
+function clearInside(board: Uint8Array, poly: Point[]) {
+  const ys = poly.map((p) => p.y);
+  const y0 = Math.max(0, Math.floor(Math.min(...ys) / CELL));
+  const y1 = Math.min(GRID - 1, Math.ceil(Math.max(...ys) / CELL));
+  for (let row = y0; row <= y1; row++) {
+    const y = (row + 0.5) * CELL;
+    const xs: number[] = [];
+    for (let i = 0; i < poly.length; i++) {
+      const a = poly[i];
+      const b = poly[(i + 1) % poly.length];
+      if (a.y <= y !== b.y <= y) xs.push(a.x + ((y - a.y) / (b.y - a.y)) * (b.x - a.x));
+    }
+    xs.sort((m, n) => m - n);
+    for (let k = 0; k + 1 < xs.length; k += 2) {
+      const from = Math.max(0, Math.ceil(xs[k] / CELL - 0.5));
+      const to = Math.min(GRID - 1, Math.floor(xs[k + 1] / CELL - 0.5));
+      board.fill(0, row * GRID + from, row * GRID + to + 1);
+    }
+  }
 }
 
 /** Every area of the line art, labelled in one pass (4-connected, so a diagonal gap in a line does not leak). */
@@ -238,6 +270,98 @@ export function seamSources(areas: Areas): Int32Array {
   return out;
 }
 
+/**
+ * Coloured lines: each cell near the paint takes the crayon of the nearest painted cell, so a
+ * line drawn there shows the colour beside it — a star's outline goes deep gold, a mouth inside it
+ * too. Paint put on a line itself (with the brush) is that line's own colour: `own` marks it.
+ * 0 = no paint within reach (the line stays ink).
+ */
+export function lineColours(areas: Areas, paint: Uint8Array, reach = 14): { crayon: Uint8Array; own: Uint8Array } {
+  const n = paint.length;
+  const crayon = new Uint8Array(n);
+  const own = new Uint8Array(n);
+  const steps = new Uint8Array(n);
+  const queue = new Int32Array(n);
+  let head = 0;
+  let tail = 0;
+  for (let i = 0; i < n; i++) {
+    if (!paint[i]) continue;
+    crayon[i] = paint[i];
+    own[i] = areas.labels[i] < 0 ? 1 : 0;
+    queue[tail++] = i;
+  }
+  while (head < tail) {
+    const i = queue[head++];
+    if (steps[i] >= reach) continue;
+    const x = i % GRID;
+    for (let k = 0; k < 4; k++) {
+      const j = k === 0 ? (x > 0 ? i - 1 : -1) : k === 1 ? (x < GRID - 1 ? i + 1 : -1) : k === 2 ? i - GRID : i + GRID;
+      if (j < 0 || j >= n || crayon[j]) continue;
+      crayon[j] = crayon[i];
+      own[j] = own[i];
+      steps[j] = steps[i] + 1;
+      queue[tail++] = j;
+    }
+  }
+  return { crayon, own };
+}
+
+/**
+ * The lines that may fade away once a picture is finished: only a line that
+ * parts two areas that are both coloured. A line beside an uncoloured area (a
+ * star against the white page) stays, and so does a line with the same area on
+ * both sides (a star's mouth, an eye, a feather) — it is drawing, not a border.
+ * An area counts as coloured when at least half of it is painted.
+ * Returns 1 for each line cell to hide.
+ */
+export function fadingLines(areas: Areas, paint: Uint8Array, reach = 14): Uint8Array {
+  const { labels, sizes } = areas;
+  const n = labels.length;
+  const painted = new Uint32Array(sizes.length);
+  for (let i = 0; i < n; i++) if (labels[i] >= 0 && paint[i]) painted[labels[i]]++;
+  const coloured = (l: number) => l >= 0 && sizes[l] >= SPECK && painted[l] * 2 >= sizes[l];
+
+  // Up to two areas reach each line cell, walking in through the line from either side.
+  const first = new Int32Array(n).fill(-1);
+  const second = new Int32Array(n).fill(-1);
+  const steps = new Uint8Array(n);
+  const queue = new Int32Array(n * 2);
+  let head = 0;
+  let tail = 0;
+  const offer = (j: number, l: number, d: number) => {
+    if (l < 0 || first[j] === l || second[j] === l) return;
+    if (first[j] < 0) first[j] = l;
+    else if (second[j] < 0) second[j] = l;
+    else return;
+    steps[j] = d;
+    if (tail < queue.length) queue[tail++] = j;
+  };
+  const near = (i: number, k: number) => {
+    const x = i % GRID;
+    return k === 0 ? (x > 0 ? i - 1 : -1) : k === 1 ? (x < GRID - 1 ? i + 1 : -1) : k === 2 ? i - GRID : i + GRID;
+  };
+  for (let i = 0; i < n; i++) {
+    if (labels[i] !== -1) continue;
+    for (let k = 0; k < 4; k++) {
+      const j = near(i, k);
+      if (j >= 0 && j < n && labels[j] >= 0 && sizes[labels[j]] >= SPECK) offer(i, labels[j], 1);
+    }
+  }
+  while (head < tail) {
+    const i = queue[head++];
+    if (steps[i] >= reach) continue;
+    for (let k = 0; k < 4; k++) {
+      const j = near(i, k);
+      if (j < 0 || j >= n || labels[j] !== -1) continue;
+      offer(j, first[i], steps[i] + 1);
+      offer(j, second[i], steps[i] + 1);
+    }
+  }
+  const out = new Uint8Array(n);
+  for (let i = 0; i < n; i++) if (first[i] >= 0 && second[i] >= 0 && coloured(first[i]) && coloured(second[i])) out[i] = 1;
+  return out;
+}
+
 export const stepAreas = (areas: Areas, step: Pick<PaintStep, "seeds">): Set<number> =>
   new Set(step.seeds.map((s) => areaAt(areas, s)).filter((l) => l >= 0));
 
@@ -258,7 +382,7 @@ export const blankPaint = () => new Uint8Array(GRID * GRID);
  * `allowed`, when given, keeps the paint inside those areas — "stay inside the lines".
  * Line cells are never painted: the line art covers them.
  */
-export function brush(paint: Uint8Array, areas: Areas, a: Point, b: Point, r: number, crayon: number, allowed?: Set<number>) {
+export function brush(paint: Uint8Array, areas: Areas, a: Point, b: Point, r: number, crayon: number, allowed?: Set<number>, onLines = false) {
   const n = Math.max(1, Math.ceil(Math.hypot(b.x - a.x, b.y - a.y) / (CELL / 2)));
   const rc = r / CELL;
   for (let k = 0; k <= n; k++) {
@@ -271,7 +395,8 @@ export function brush(paint: Uint8Array, areas: Areas, a: Point, b: Point, r: nu
         if (dx * dx + dy * dy > rc * rc) continue;
         const i = y * GRID + x;
         const l = areas.labels[i];
-        if (l < 0 || (allowed && !allowed.has(l))) continue;
+        // Lines take paint only when the picture's lines are coloured (see lineColours).
+        if (l < 0 ? !onLines : allowed && !allowed.has(l)) continue;
         paint[i] = crayon;
       }
     }

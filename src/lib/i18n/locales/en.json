@@ -3685,6 +3685,13 @@
       "tryNew": "Try something new",
       "allItems": "See all items",
       "again": "Practise again"
+    },
+    "partHint": "{n} of {total} · {title}",
+    "partNext": "Draw the next part",
+    "colorStep": {
+      "title": "You drew it!",
+      "text": "Now colour your picture to finish it.",
+      "go": "Colour it"
     }
   },
   "traceStudio": {
@@ -3711,7 +3718,8 @@
     "tab": {
       "shape": "Strokes",
       "steps": "Steps & test",
-      "details": "Details"
+      "details": "Details",
+      "colour": "Colour"
     },
     "mode": {
       "adjust": "Adjust & drag",
@@ -3746,6 +3754,7 @@
       "zigzag": "Zigzag",
       "wave": "Wave",
       "rectangle": "Rectangle",
+      "rounded": "Rounded",
       "square": "Square",
       "triangle": "Triangle",
       "circle": "Circle",
@@ -3860,7 +3869,7 @@
       "strokeNodes": "Every stroke has enough points",
       "strokeLength": "No stroke is too short",
       "orders": "Strokes are numbered 1, 2, 3…",
-      "insideCanvas": "Every point is inside the canvas",
+      "insideCanvas": "Every stroke is on the page (trim the parts past its edge)",
       "continueTouches": "Strokes that carry on really touch",
       "planEndsAtCanDo": "The steps end with the tick",
       "tested": "Every step test-written and passed",
@@ -4332,7 +4341,96 @@
       "createAndPublish": "Create and publish"
     },
     "allowFill": "Children can use Fill",
-    "allowFillNote": "Fill colours a whole part with one tap: quick and satisfying for young children, and the start tool on phones. Switch it off so every part has to be painted with the brush."
+    "allowFillNote": "Fill colours a whole part with one tap: quick and satisfying for young children, and the start tool on phones. Switch it off so every part has to be painted with the brush.",
+    "look": "How it looks while tracing",
+    "lookName": {
+      "thin": "Thin guide line",
+      "dashed": "Dashed line",
+      "dotted": "Dotted line",
+      "hideNumbers": "Hide stroke numbers",
+      "hideArrows": "Hide arrows"
+    },
+    "lookNote": {
+      "thin": "The shape shows as a slim outline, like the picture, and only the stroke to trace now is highlighted. Best for drawings with many parts. Scoring stays the same.",
+      "dashed": "The shape shows as dark dashes, like a trace-the-dashes worksheet. Pairs well with a thin path width.",
+      "dotted": "The shape shows as a line of round dots, like a dot-to-dot worksheet. Wins over Dashed line when both are on.",
+      "hideNumbers": "No number badges on the slate. Children still trace in your order, one stroke at a time.",
+      "hideArrows": "No direction arrows. They come back only when a child is stuck."
+    },
+    "strokeLook": "Look of the selected strokes",
+    "lookFollow": "As the item ({state})",
+    "lookMixed": "Mixed",
+    "lookOn": "On",
+    "lookOff": "Off",
+    "arrange": "Front & back",
+    "toFront": "Bring to front",
+    "forward": "Bring forward",
+    "backward": "Send backward",
+    "toBack": "Send to back",
+    "solid": "Solid shape",
+    "solidNote": "Fills the shape with paper, so it hides the lines behind it once it is drawn — a wheel over the car's body. Use Front & back to choose what sits in front.",
+    "solidClosedOnly": "Only a closed shape (a circle, a loop, a rectangle) can be solid.",
+    "buildFlow": "How the picture is built",
+    "flowWhole": "Whole picture at once",
+    "flowParts": "Part by part",
+    "flowWholeNote": "The whole picture is on the slate from the start; the child traces it stroke by stroke.",
+    "flowPartsNote": "Like a how-to-draw page: each part appears in its turn (1. the body, 2. the roof…), with the parts before it already drawn. On the Strokes tab, pick the stroke that begins each part and name the part.",
+    "beginsPart": "Begins a new part",
+    "partTitle": "Part {n} — what to draw",
+    "partTitleHint": "e.g. Add the roof",
+    "inPart": "In part {n}. Tick “Begins a new part” to start the next part here.",
+    "partN": "Part {n}",
+    "colorAfter": "Colour it in after tracing",
+    "colorAfterNote": "Once a child can draw it, they colour it in to finish — they must do it for the picture to count as done. Set the colours on the Colour tab.",
+    "sub": {
+      "shape": "Shape",
+      "ends": "Ends",
+      "size": "Size & fit",
+      "writing": "How it's written",
+      "picture": "In the picture"
+    },
+    "endsOpen": "Open line",
+    "endsClosed": "Closed shape",
+    "closeShape": "Close the shape",
+    "orderOf": "{n} of {total}",
+    "widthThinNote": "Thinner than 30 is only how it looks: children are still checked against a band 30 wide.",
+    "showNumbers": "Show every stroke's number",
+    "pen": "{size} pen ({width})",
+    "penSize": {
+      "fine": "Fine",
+      "medium": "Medium",
+      "bold": "Bold"
+    },
+    "offPage": "{count} strokes go past the page's edge. Children see only the page: trim them before publishing.",
+    "trimPage": "Trim at the page edge",
+    "style": {
+      "title": "Style",
+      "custom": "Custom",
+      "note": "Sets the look, how strict, the line widths, your pen for new strokes and the brush children start colouring with. You can change anything after.",
+      "young": "Young · 4–6",
+      "youngNote": "Wide paths with arrows and numbers, forgiving, bold lines. A big brush and Fill.",
+      "middle": "Middle · 7–9",
+      "middleNote": "A slim guide line, balanced checking, medium lines and brush.",
+      "older": "Older · 10+",
+      "olderNote": "A dotted worksheet line, no numbers or arrows, strict, fine lines. A sharp brush, no Fill."
+    },
+    "softColours": "Soft gradient colours",
+    "softColoursNote": "Children pick a crayon as usual; each part they colour is shaded softly, lighter at its top and deeper at its bottom, like a picture-book illustration. Pairs well with Colour the lines.",
+    "linesAfter": "Lines as children colour",
+    "linesInk": "Dark lines",
+    "linesColour": "Colour the lines",
+    "linesFade": "Fade between parts",
+    "linesInkNote": "The lines stay dark, like a colouring book.",
+    "linesColourNote": "Each line takes a deeper shade of the colour beside it as the child colours, so a yellow star gets a deep-gold outline. Children can also paint a line any colour with the brush.",
+    "linesFadeNote": "A line between two coloured parts fades away; lines beside a white part, and details inside a part (a face), stay.",
+    "background": "Background when finished",
+    "backgroundNote": "When the child finishes, the paper they left white fades into a soft wash; their colours stay as painted. The page stays white while they colour.",
+    "bg": {
+      "none": "White",
+      "sky": "Morning sky",
+      "field": "Sunny field",
+      "paper": "Soft paper"
+    }
   },
   "pager": {
     "label": "Pages",
@@ -4460,6 +4558,7 @@
     },
     "keepColouring": "Keep colouring",
     "pickColour": "Pick any colour",
-    "myColour": "My colour"
+    "myColour": "My colour",
+    "nowColour": "Now colour it"
   }
 }

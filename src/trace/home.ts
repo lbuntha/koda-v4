@@ -6,9 +6,17 @@
  * only draws them.
  */
 
+import type { TraceItem } from "./geometry/types";
+import { colorsAfter } from "./geometry/types";
 import type { ItemProgress } from "./progress/ladder";
 
 export const isDone = (p: ItemProgress): boolean => p.status === "canDo" || p.status === "learned";
+
+/** Drawn, but its colour step is still to do: the item opens on colouring, and is not finished yet. */
+export const needsColoring = (item: Pick<TraceItem, "activity" | "colorAfter" | "paint">, p: ItemProgress): boolean => colorsAfter(item) && isDone(p) && !p.coloredAt;
+
+/** Done with everything the publisher asked: traced (or coloured), and coloured too when there is a colour step. */
+export const isFinished = (item: Pick<TraceItem, "activity" | "colorAfter" | "paint">, p: ItemProgress): boolean => isDone(p) && !needsColoring(item, p);
 
 /**
  * One entry per item, the first one kept. Published entries come first, so an

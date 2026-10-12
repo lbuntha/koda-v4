@@ -28,6 +28,7 @@ const show = () => render(<ItemsList kinds={["letter", "line"]} onOpen={vi.fn()}
 
 beforeEach(() => {
   localStorage.clear();
+  TraceDrafts.resetForTests();
   vi.clearAllMocks();
   api.fetchStudioCollections.mockResolvedValue([]);
 });

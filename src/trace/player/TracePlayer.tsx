@@ -17,7 +17,11 @@ import { PracticeRoundCompleteModal } from "../../skills/kit/chrome/RoundComplet
 import { isVoiceEnabled, playSound } from "../../utils/audio";
 import { say, stop as stopVoice } from "../../library/voice";
 import type { AgeBand, Sensitivity, StepId, TraceItem } from "../geometry/types";
-import { isGuidedStep, modeOf } from "../geometry/types";
+import { isGuidedStep, lookOf, modeOf } from "../geometry/types";
+import { strokePolyline } from "../geometry/bezier";
+import { ColorPlayer } from "../paint/ColorPlayer";
+import { needsColoring } from "../home";
+import { isPartByPart, partsOf } from "../geometry/parts";
 import type { InkPoint } from "../score/capture";
 import { cleanInk } from "../score/capture";
 import type { AttemptResult, Feedback } from "../score/score";
@@ -127,6 +131,8 @@ export function TracePlayer({ item, onExit, onAwardXp, ageBand = "B", plan: plan
   const [sheet, setSheet] = useState(false);
   /** The item is finished — it can be written, or a check-up passed — so the end screen is up. */
   const [finished, setFinished] = useState<{ stars: number; xp: number } | null>(null);
+  /** The publisher's colour step: drawn now, so colour it in to finish. "ask" shows the hand-over card. */
+  const [colorStep, setColorStep] = useState<"ask" | "on" | null>(null);
   const [outcome, setOutcome] = useState<{
     result: AttemptResult | null;
     event: LadderEvent | null;
@@ -367,7 +373,11 @@ export function TracePlayer({ item, onExit, onAwardXp, ageBand = "B", plan: plan
     }
     const ends = !sandbox && result !== null && (event === "canDo" || event === "learned" || event === "rechecked");
     // The end screen brings its own fanfare.
-    if (ends) {
+    if (ends && needsColoring(item, TraceProgress.get(item.id))) {
+      // Not finished yet: the colour step comes first, and its own end screen closes the item.
+      playSound("levelup");
+      setColorStep("ask");
+    } else if (ends) {
       recorder?.complete(event as "canDo" | "learned" | "rechecked", result.stars, xp);
       setFinished({ stars: result.stars, xp });
     }
@@ -404,6 +414,12 @@ export function TracePlayer({ item, onExit, onAwardXp, ageBand = "B", plan: plan
     const gained = [...accepted].filter((i) => !done.has(i));
     if (gained.length > 0) {
       entry.state = "ok";
+      // On screen the accepted ink settles onto the path itself, so the finished drawing comes out clean.
+      // Scoring keeps the hand's own ink (`raw`).
+      if (gained.length === 1) {
+        entry.points = strokePolyline(prepared[gained[0]].stroke);
+        entry.stroke = gained[0]; // drawn in that stroke's layer, so a solid shape in front covers it
+      }
       let c = coach;
       for (const i of gained) c = coachStroke(c, prepared[i].stroke.order, null, prepared[i].stroke.shape).state;
       setCoach(c);
@@ -530,6 +546,11 @@ export function TracePlayer({ item, onExit, onAwardXp, ageBand = "B", plan: plan
     return t(`trace.event.${event}`);
   };
 
+  // Part by part: say which part is being drawn ("2 of 6 · Add the roof").
+  const parts = isPartByPart(active) && current >= 0 && !watching ? partsOf(prepared.map((p) => p.stroke)) : [];
+  const nowPart = parts.find((p) => p.strokes.includes(current));
+  const partHint = nowPart && parts.length > 1 ? t("trace.partHint", { n: nowPart.index + 1, total: parts.length, title: nowPart.title ?? t("trace.partNext") }) : null;
+
   const hint =
     drill !== null
       ? t("trace.hint.drill")
@@ -539,14 +560,16 @@ export function TracePlayer({ item, onExit, onAwardXp, ageBand = "B", plan: plan
           ? t("trace.hint.justDraw")
           : recheck
             ? t("trace.checkUpIntro")
-            : t(`trace.hint.${step}`);
+            : partHint ?? t(`trace.hint.${step}`);
 
   const stepIndex = plan.steps.findIndex((s) => s.id === progress.step);
   const status =
     progress.status === "canDo" ? (mode === "writing" ? "canWrite" : "canDraw") : progress.status === "learning" ? null : progress.status;
 
   /* ------------------------------------------------------------ view */
-  const helpList = play === "justDraw" ? (["ghost"] as Switch[]) : [...SWITCHES];
+  // A switch the look turns off on every stroke is not offered.
+  const looks = item.strokes.map((s) => lookOf(item, s));
+  const helpList = play === "justDraw" ? (["ghost"] as Switch[]) : SWITCHES.filter((sw) => !(sw === "numbers" && looks.every((l) => l.hideNumbers)) && !(sw === "arrows" && looks.every((l) => l.hideArrows)));
   const locked = play === "steps" || drill !== null;
 
   // How a try went, in the same message a skill's quiz answers with.
@@ -690,6 +713,9 @@ export function TracePlayer({ item, onExit, onAwardXp, ageBand = "B", plan: plan
       )}
     </>
   );
+
+  if (colorStep === "on")
+    return <ColorPlayer key={`${item.id}#color`} item={item} afterTrace source={source} place={place} xpPerStep={xpPerStep} ages={ages} onExit={onExit} onAwardXp={onAwardXp} onGoHome={onGoHome} />;
 
   return (
     <div className="@container mx-auto flex w-full max-w-6xl flex-col gap-4 pb-8">
@@ -887,6 +913,16 @@ export function TracePlayer({ item, onExit, onAwardXp, ageBand = "B", plan: plan
           </div>
         </aside>
       </div>
+
+      <UIModal isOpen={colorStep === "ask"} onClose={() => setColorStep("on")} title={t("trace.colorStep.title")} tone="plain">
+        <div className="flex flex-col items-center gap-4 text-center">
+          <Palette className="h-12 w-12 text-indigo-600 dark:text-indigo-300" />
+          <p className="text-base text-body">{t("trace.colorStep.text")}</p>
+          <UIButton icon={<Palette className="h-5 w-5" />} onClick={() => setColorStep("on")}>
+            {t("trace.colorStep.go")}
+          </UIButton>
+        </div>
+      </UIModal>
 
       {finished && (
         <PracticeRoundCompleteModal

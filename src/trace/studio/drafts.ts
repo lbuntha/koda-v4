@@ -85,7 +85,23 @@ function schedulePush(id: string) {
   );
 }
 
-function read(): Record<string, TraceDraft> {
+/*
+ * Storage. Drafts live in memory and are kept in IndexedDB, which has room
+ * for pictures. They used to sit in one localStorage key, whose ~5 MB filled
+ * up with guide pictures: a new picture then failed to save at all, and so
+ * never reached the server either. That key is read once, moved over, and
+ * removed. Without IndexedDB (tests, very old browsers) localStorage is used.
+ */
+
+const DB_NAME = "koda_trace_studio";
+const DB_STORE = "drafts";
+const DB_KEY = "all";
+
+let cache: Record<string, TraceDraft> | null = null;
+/** False once the device refused to keep the drafts (shown in the Studio); the server copy still goes. */
+let stored = true;
+
+function readLegacy(): Record<string, TraceDraft> {
   try {
     const raw = localStorage.getItem(KEY);
     const parsed = raw ? JSON.parse(raw) : {};
@@ -95,16 +111,104 @@ function read(): Record<string, TraceDraft> {
   }
 }
 
-function write(all: Record<string, TraceDraft>): boolean {
-  let ok = true;
-  try {
-    localStorage.setItem(KEY, JSON.stringify(all));
-  } catch {
-    ok = false; // full (a large guide picture) or blocked
-  }
+const hasIdb = () => typeof indexedDB !== "undefined";
+
+function openDb(): Promise<IDBDatabase> {
+  return new Promise((resolve, reject) => {
+    const req = indexedDB.open(DB_NAME, 1);
+    req.onupgradeneeded = () => {
+      if (!req.result.objectStoreNames.contains(DB_STORE)) req.result.createObjectStore(DB_STORE);
+    };
+    req.onsuccess = () => resolve(req.result);
+    req.onerror = () => reject(req.error);
+  });
+}
+
+async function idb<T>(mode: IDBTransactionMode, fn: (store: IDBObjectStore) => IDBRequest<T>): Promise<T> {
+  const db = await openDb();
+  return new Promise<T>((resolve, reject) => {
+    const tx = db.transaction(DB_STORE, mode);
+    const req = fn(tx.objectStore(DB_STORE));
+    tx.oncomplete = () => {
+      db.close();
+      resolve(req.result);
+    };
+    tx.onerror = () => {
+      db.close();
+      reject(tx.error);
+    };
+    tx.onabort = () => {
+      db.close();
+      reject(tx.error);
+    };
+  });
+}
+
+function notify() {
   version++;
   listeners.forEach((l) => l());
-  return ok;
+}
+
+/** Newer wins, per draft: what this device changed while the database was still opening is not lost. */
+function merge(a: Record<string, TraceDraft>, b: Record<string, TraceDraft>): Record<string, TraceDraft> {
+  const out = { ...a };
+  for (const [id, d] of Object.entries(b)) if (!out[id] || (d.updatedAt ?? 0) > (out[id].updatedAt ?? 0)) out[id] = d;
+  return out;
+}
+
+/** Read the database once, moving the old localStorage drafts into it. Ready when this settles. */
+const loaded: Promise<void> = (async () => {
+  if (!hasIdb()) return;
+  try {
+    const saved = ((await idb("readonly", (st) => st.get(DB_KEY))) as Record<string, TraceDraft> | undefined) ?? {};
+    const legacy = readLegacy();
+    cache = merge(merge(saved, legacy), cache ?? {});
+    await idb("readwrite", (st) => st.put(cache, DB_KEY));
+    // Moved: free the small store for everything else that lives there.
+    if (Object.keys(legacy).length) localStorage.removeItem(KEY);
+    notify();
+  } catch {
+    /* no database here: keep using localStorage */
+  }
+})();
+
+function read(): Record<string, TraceDraft> {
+  if (!cache) cache = readLegacy();
+  return { ...cache };
+}
+
+let saving: Promise<void> = Promise.resolve();
+
+/** Keep the drafts: in memory now, on the device a moment later. Writes go one after another, newest last. */
+function write(all: Record<string, TraceDraft>): boolean {
+  cache = { ...all };
+  const snapshot = cache;
+  if (hasIdb()) {
+    saving = saving
+      .then(() => loaded)
+      .then(() => idb("readwrite", (st) => st.put(snapshot, DB_KEY)))
+      .then(
+        () => {
+          if (!stored) {
+            stored = true;
+            notify();
+          }
+        },
+        () => {
+          stored = false;
+          notify();
+        },
+      );
+  } else {
+    try {
+      localStorage.setItem(KEY, JSON.stringify(all));
+      stored = true;
+    } catch {
+      stored = false; // full or blocked
+    }
+  }
+  notify();
+  return stored;
 }
 
 /** A fingerprint of the strokes: a test is valid only for the strokes it was made on. */
@@ -128,6 +232,7 @@ export function blankItem(id: string, like?: TraceItem): TraceItem {
     kind: like?.kind ?? "letter",
     script: like?.script ?? "khmer",
     ...(like?.numerals ? { numerals: like.numerals } : {}),
+    ...(like?.look ? { look: { ...like.look } } : {}),
     grid: like?.grid ?? "4x3-moeys",
     strokes: [],
     sensitivity: like?.sensitivity ?? "balanced",
@@ -174,6 +279,15 @@ export const TraceDrafts = {
       .catch(() => setSync("offline"));
   },
   syncState: () => sync,
+  /** False when this device could not keep the drafts (they still go to the server). */
+  storedHere: () => stored,
+  /** Settles once the drafts saved on this device have been read. */
+  ready: () => loaded,
+  /** Tests: forget the drafts in memory, as a fresh page would. */
+  resetForTests() {
+    cache = null;
+    stored = true;
+  },
 
   /** Send every unsent draft now (before publishing). Throws if the server can't be reached. */
   async flush(): Promise<void> {

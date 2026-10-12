@@ -14,20 +14,23 @@
 import { useCallback, useEffect, useMemo, useRef, useState, useSyncExternalStore } from "react";
 import { ArrowLeft, ArrowRight, Brush, Check, Download, Eraser, Images, Lightbulb, Maximize2, MoreHorizontal, PaintBucket, Palette, Plus, RotateCcw, ShieldCheck, Star, Undo2, Volume2 } from "lucide-react";
 import { useT } from "../../lib/i18n";
-import { UIButton, UIModal, UIProgressBar } from "../../components/ui";
+import { UIBadge, UIButton, UIModal, UIProgressBar } from "../../components/ui";
 import { ScoringAPI } from "../../lib/scoring";
 import { say, stop as stopVoice } from "../../library/voice";
 import { isVoiceEnabled, playSound } from "../../utils/audio";
 import type { AgeRange } from "../../lib/ages";
-import { strokePolyline } from "../geometry/bezier";
+import { drawLineArt } from "./lineArt";
+import { depthIn, partSpans, shade } from "./shade";
+import { drawBackground } from "./backgrounds";
 import type { PaintStep, Point, TraceItem } from "../geometry/types";
+import { linesOf } from "../geometry/types";
 import { isDone } from "../home";
 import type { TracePlace } from "../player/TracePlayer";
 import { TraceProgress } from "../progress/store";
 import { stepXp } from "../progress/reward";
 import type { PaintScore } from "./areas";
 import { fillLeftovers } from "./leftovers";
-import { CELL, COVER, GRID, LINE, NEARLY, SPECK, areaAt, isComplete, maySayDone, seamSources, blankPaint, brush, labelAreas, scorePainting, stepAreas, stepState } from "./areas";
+import { CELL, COVER, GRID, NEARLY, SPECK, areaAt, fadingLines, lineColours, isComplete, maySayDone, seamSources, blankPaint, brush, labelAreas, scorePainting, stepAreas, stepState } from "./areas";
 import { Gallery, sharePicture } from "./gallery";
 import { PALETTE, colourName, crayonHex, crayonIndex, customColours, hexOfIndex, isCustom, rgb } from "./palette";
 
@@ -42,9 +45,12 @@ interface Props {
   xpPerStep?: number | null;
   onGoHome?(): void;
   ages?: AgeRange | null;
+  /** The colour step of a traced item: finishing it completes the item; the tracing ladder is left as it is. */
+  afterTrace?: boolean;
 }
 
-const SIZES = { s: 16, m: 32, l: 56 } as const;
+/** Brush sizes, in units: a sharp tip for small details, then small, medium and large. */
+const SIZES = { xs: 8, s: 16, m: 32, l: 56 } as const;
 /** The child's own picked colours, kept on this device for the crayon row. */
 const MINE_KEY = "koda_paint_my_colours";
 const MAX_MINE = 8;
@@ -55,11 +61,60 @@ const MAX_ZOOM = 5;
 type Size = keyof typeof SIZES;
 /** How long a flash stays: praise briefly, advice long enough to read. */
 const FLASH_MS = { correct: 1800, hint: 4000, nudge: 4000 } as const;
-const INK = "#1f2544";
+
+/**
+ * A mask of the line cells to fade, one pixel per cell, grown by a few cells:
+ * a line is drawn a little wider than the cells it walls off, and its soft edge must go too.
+ */
+function maskOf(cells: Uint8Array): HTMLCanvasElement {
+  const base = document.createElement("canvas");
+  base.width = base.height = GRID;
+  const b = base.getContext("2d")!;
+  const img = b.createImageData(GRID, GRID);
+  for (let i = 0; i < cells.length; i++) if (cells[i]) img.data[i * 4 + 3] = 255;
+  b.putImageData(img, 0, 0);
+  const grown = document.createElement("canvas");
+  grown.width = grown.height = GRID;
+  const g = grown.getContext("2d")!;
+  const r = 3;
+  for (let dx = -r; dx <= r; dx += r) for (let dy = -r; dy <= r; dy += r) g.drawImage(base, dx, dy);
+  return grown;
+}
+
+/**
+ * The colour of each cell's line, one pixel per cell: a deeper shade of the paint beside it
+ * (a star's outline in deep gold), the exact colour where the child painted the line, ink elsewhere.
+ */
+function tintOf({ crayon, own }: { crayon: Uint8Array; own: Uint8Array }): HTMLCanvasElement {
+  const c = document.createElement("canvas");
+  c.width = c.height = GRID;
+  const x = c.getContext("2d")!;
+  const img = x.createImageData(GRID, GRID);
+  const ink = rgb(INK_LINE);
+  const deep = new Map<number, readonly number[]>();
+  const deepOf = (v: number) => {
+    let d = deep.get(v);
+    if (!d) deep.set(v, (d = rgb(hexOfIndex(v)).map((ch) => Math.round(ch * 0.58))));
+    return d;
+  };
+  for (let i = 0; i < crayon.length; i++) {
+    const v = crayon[i];
+    const col: readonly number[] = !v ? ink : own[i] ? rgb(hexOfIndex(v)) : deepOf(v);
+    img.data[i * 4] = col[0];
+    img.data[i * 4 + 1] = col[1];
+    img.data[i * 4 + 2] = col[2];
+    img.data[i * 4 + 3] = 255;
+  }
+  x.putImageData(img, 0, 0);
+  return c;
+}
+
+/** The ink a line keeps where no colour is near it. */
+const INK_LINE = "#1f2544";
 
 type Message = { tone: "correct" | "hint" | "nudge"; title: string; text?: string; action?: { label: string; run(): void }; /** Stays this long (ms) instead of its tone's usual time. */ hold?: number };
 
-export function ColorPlayer({ item, onExit, onAwardXp, sandbox = false, source, place, xpPerStep, onGoHome }: Props) {
+export function ColorPlayer({ item, onExit, onAwardXp, sandbox = false, source, place, xpPerStep, onGoHome, afterTrace = false }: Props) {
   const { t } = useT();
   useSyncExternalStore(TraceProgress.subscribe, TraceProgress.version);
   const areas = useMemo(() => labelAreas(item), [item]);
@@ -79,7 +134,8 @@ export function ColorPlayer({ item, onExit, onAwardXp, sandbox = false, source, 
   const fillAllowed = item.paint?.allowFill !== false;
   // A phone starts on Fill: tapping a part is how a small screen is best coloured; the brush is one tap away.
   const [tool, setTool] = useState<"brush" | "fill" | "eraser">(() => (fillAllowed && isPhone() ? "fill" : "brush"));
-  const [size, setSize] = useState<Size>("m");
+  // The author can start children on a sharper or bigger brush (a style preset sets it).
+  const [size, setSize] = useState<Size>(() => item.paint?.brush ?? "m");
   const [inside, setInside] = useState(true);
   /** My own colours: the child picks the colours; any colour completes a step and none is "wrong". */
   const [own, setOwn] = useState(false);
@@ -179,20 +235,96 @@ export function ColorPlayer({ item, onExit, onAwardXp, sandbox = false, source, 
     live.current.dirty = true;
   }, [ver, cur, done, result, own]);
 
-  const lineArt = useMemo(() => {
-    const path = new Path2D();
-    const dots: { x: number; y: number; r: number }[] = [];
-    for (const s of item.strokes) {
-      if (s.shape === "dot" || s.nodes.length === 1) {
-        if (s.nodes[0]) dots.push({ x: s.nodes[0].x, y: s.nodes[0].y, r: (s.radius ?? 20) + LINE / 2 });
-        continue;
-      }
-      const pts = strokePolyline(s);
-      pts.forEach((p, i) => (i ? path.lineTo(p.x, p.y) : path.moveTo(p.x, p.y)));
-      if (s.closed) path.closePath();
+  /** The author's choice: a soft background the white paper fades into at the finish. */
+  const background = item.paint?.background;
+  /** When the background began fading in (performance.now); null while colouring. */
+  const bgSince = useRef<number | null>(null);
+  /** The author's choice: soft gradient colours — each part shaded lighter at its top, deeper at its bottom. */
+  const soft = item.paint?.shading === "soft";
+  const spans = useMemo(() => partSpans(areas), [areas]);
+  /** The author's choice: the lines go once the picture is finished. */
+  const hideLines = linesOf(item.paint) === "fade";
+  /** The author's choice: lines take a deeper shade of the colour beside them (or the colour painted on them). */
+  const colourLines = linesOf(item.paint) === "colour";
+  /** Coloured lines: each cell's line colour, one pixel per cell (see lineColours); null = all ink. */
+  const lineTint = useRef<HTMLCanvasElement | null>(null);
+  /**
+   * "Hide the lines": a line fades as soon as both parts beside it are coloured — part by part, while
+   * the child colours, not only at the end. `gone` is what has already faded, `fading` what is fading
+   * now (since `since`), `cells` the line cells hidden so far.
+   */
+  const fade = useRef<{ cells: Uint8Array | null; gone: HTMLCanvasElement | null; fading: HTMLCanvasElement | null; since: number }>({ cells: null, gone: null, fading: null, since: 0 });
+  /** Work out again which lines may go; the ones newly allowed start fading now. */
+  const updateFade = () => {
+    if (!hideLines) return;
+    const next = fadingLines(areas, paintRef.current);
+    const prev = fade.current.cells;
+    // What stays gone: hidden before and still allowed (a part rubbed out brings its lines back).
+    let kept: Uint8Array | null = null;
+    if (prev) {
+      kept = new Uint8Array(next.length);
+      for (let i = 0; i < next.length; i++) kept[i] = prev[i] & next[i];
     }
-    return { path, dots };
-  }, [item.strokes]);
+    fade.current = { cells: next, gone: kept ? maskOf(kept) : null, fading: maskOf(next), since: performance.now() };
+    live.current.dirty = true;
+  };
+  // Coloured lines follow the paint: worked out again after each stroke, fill or undo.
+  useEffect(() => {
+    if (!colourLines) return;
+    lineTint.current = tintOf(lineColours(areas, paintRef.current));
+    live.current.dirty = true;
+  }, [ver, colourLines, areas]); // eslint-disable-line react-hooks/exhaustive-deps -- paint lives in a ref
+  // Each time a step is finished (or undone), the lines it settles fade — or come back.
+  useEffect(() => {
+    if (done.size > 0 || fade.current.cells) updateFade();
+  }, [done]); // eslint-disable-line react-hooks/exhaustive-deps -- once per change of finished steps
+
+  const lineLayer = useMemo(() => document.createElement("canvas"), []);
+  /**
+   * The line art over the paint, in the canvas's current transform. `fade` 0–1 takes that much of
+   * the fading lines away; every other line — beside an uncoloured part, or inside one part — stays.
+   */
+  const drawLines = (target: CanvasRenderingContext2D, amount: number) => {
+    const art = (c: CanvasRenderingContext2D) => {
+      if (linesRef.current && !item.paint?.picture?.smooth) c.drawImage(linesRef.current, 0, 0, 1000, 1000);
+      drawLineArt(c, item.strokes, artLayer);
+    };
+    const { gone, fading } = fade.current;
+    const tint = colourLines ? lineTint.current : null;
+    if (!tint && (!hideLines || (!gone && !fading))) return art(target);
+    if (lineLayer.width !== target.canvas.width || lineLayer.height !== target.canvas.height) {
+      lineLayer.width = target.canvas.width;
+      lineLayer.height = target.canvas.height;
+    }
+    const l = lineLayer.getContext("2d");
+    if (!l) return art(target);
+    l.setTransform(1, 0, 0, 1, 0, 0);
+    l.clearRect(0, 0, lineLayer.width, lineLayer.height);
+    l.setTransform(target.getTransform());
+    art(l);
+    if (tint) {
+      // Keep the lines' shape, take the colours: each line pixel in its cell's tint.
+      l.globalCompositeOperation = "source-in";
+      l.imageSmoothingEnabled = false;
+      l.drawImage(tint, 0, 0, 1000, 1000);
+      l.imageSmoothingEnabled = true;
+    } else {
+      l.globalCompositeOperation = "destination-out";
+      if (gone) l.drawImage(gone, 0, 0, 1000, 1000);
+      if (fading) {
+        l.globalAlpha = amount;
+        l.drawImage(fading, 0, 0, 1000, 1000);
+      }
+    }
+    l.globalCompositeOperation = "source-over";
+    l.globalAlpha = 1;
+    target.save();
+    target.setTransform(1, 0, 0, 1, 0, 0);
+    target.drawImage(lineLayer, 0, 0);
+    target.restore();
+  };
+  /** Where line art with solid shapes is drawn first, so a shape can rub out the lines behind it without touching the paint. */
+  const artLayer = useMemo(() => document.createElement("canvas"), []);
 
   // A picture's line art, drawn over the paint like the strokes.
   const linesRef = useRef<HTMLImageElement | null>(null);
@@ -248,7 +380,7 @@ export function ColorPlayer({ item, onExit, onAwardXp, sandbox = false, source, 
         // A line cell (or speck) shows its own side's paint: no white seam inside, no colour outside the border.
         if (!v && sources[i] !== i && sources[i] >= 0) v = paint[sources[i]];
         if (v) {
-          const [r, g, b] = colourOf(v);
+          const [r, g, b] = soft ? shade(colourOf(v), depthIn(spans, areas.labels[i] >= 0 ? areas.labels[i] : sources[i] >= 0 ? areas.labels[sources[i]] : -1, i)) : colourOf(v);
           paintImg.data[o] = r;
           paintImg.data[o + 1] = g;
           paintImg.data[o + 2] = b;
@@ -284,24 +416,16 @@ export function ColorPlayer({ item, onExit, onAwardXp, sandbox = false, source, 
         ctx.fillRect(0, 0, canvas.width, canvas.height);
         ctx.setTransform(k, 0, 0, k, -v.x * k, -v.y * k);
         ctx.imageSmoothingEnabled = true;
+        // Finished: the paper left white fades into the author's background, under the child's colours.
+        if (background && bgSince.current !== null) drawBackground(ctx, background, Math.min(1, (now - bgSince.current) / 1000));
         if (!live.current.finished) {
           ctx.globalAlpha = 0.14 + 0.16 * ((Math.sin(now / 320) + 1) / 2);
           ctx.drawImage(hintLayer, 0, 0, 1000, 1000);
           ctx.globalAlpha = 1;
         }
         ctx.drawImage(paintLayer, 0, 0, 1000, 1000);
-        if (linesRef.current && !item.paint?.picture?.smooth) ctx.drawImage(linesRef.current, 0, 0, 1000, 1000);
-        ctx.strokeStyle = INK;
-        ctx.fillStyle = INK;
-        ctx.lineWidth = LINE;
-        ctx.lineCap = "round";
-        ctx.lineJoin = "round";
-        ctx.stroke(lineArt.path);
-        for (const d of lineArt.dots) {
-          ctx.beginPath();
-          ctx.arc(d.x, d.y, d.r, 0, Math.PI * 2);
-          ctx.fill();
-        }
+        // "Hide the lines": the lines between coloured parts fade out over a second.
+        drawLines(ctx, Math.min(1, (now - fade.current.since) / 1000));
       }
       frame = requestAnimationFrame(loop);
     };
@@ -310,7 +434,7 @@ export function ColorPlayer({ item, onExit, onAwardXp, sandbox = false, source, 
       cancelAnimationFrame(frame);
       ro.disconnect();
     };
-  }, [areas, lineArt, stepSets, steps, sources]);
+  }, [areas, item.strokes, stepSets, steps, sources]);
 
   /* ------------------------------------------------------------ painting
    *
@@ -361,7 +485,7 @@ export function ColorPlayer({ item, onExit, onAwardXp, sandbox = false, source, 
     const allowed = inside && part >= 0 ? new Set([part]) : undefined;
     // The same size on screen at any zoom; a stylus's pressure makes it thinner or thicker.
     const r = (SIZES[size] / viewRef.current.z) * (pen?.pressure ?? 1);
-    brush(paintRef.current, areas, a, b, r, tool === "eraser" ? 0 : crayonIndex(crayon), allowed);
+    brush(paintRef.current, areas, a, b, r, tool === "eraser" ? 0 : crayonIndex(crayon), allowed, colourLines);
     // Redraw only around the dab — wide enough for line cells, which show the paint beside them.
     const m = r / CELL + SEAM_MARGIN;
     const box = { x0: Math.floor(Math.min(a.x, b.x) / CELL - m), y0: Math.floor(Math.min(a.y, b.y) / CELL - m), x1: Math.ceil(Math.max(a.x, b.x) / CELL + m), y1: Math.ceil(Math.max(a.y, b.y) / CELL + m) };
@@ -643,15 +767,17 @@ export function ColorPlayer({ item, onExit, onAwardXp, sandbox = false, source, 
     if (!sandbox) {
       const prev = TraceProgress.get(item.id);
       const passed = score.stars >= 2;
-      if (passed && !isDone(prev)) {
+      // After tracing, the picture is already drawn: colouring it adds `coloredAt`, never a ladder status.
+      const first = afterTrace ? !prev.coloredAt : !isDone(prev);
+      if (passed && first) {
         xp = stepXp("learned", score.stars, xpPerStep, ScoringAPI.current());
         if (xp > 0) onAwardXp?.(xp);
       }
       TraceProgress.set(item.id, {
         ...prev,
-        status: passed ? "learned" : prev.status,
-        earnedAt: passed && !isDone(prev) ? Date.now() : prev.earnedAt,
-        attempts: (prev.attempts ?? 0) + 1,
+        ...(afterTrace
+          ? { coloredAt: passed ? (prev.coloredAt ?? Date.now()) : prev.coloredAt }
+          : { status: passed ? "learned" : prev.status, earnedAt: passed && !isDone(prev) ? Date.now() : prev.earnedAt, attempts: (prev.attempts ?? 0) + 1 }),
         paintBest: Math.max(prev.paintBest ?? 0, score.accuracy),
         title: item.title,
         kind: item.kind,
@@ -660,6 +786,8 @@ export function ColorPlayer({ item, onExit, onAwardXp, sandbox = false, source, 
     }
     setMessage(null);
     fitView();
+    updateFade();
+    bgSince.current = performance.now();
     setResult({ ...score, xp });
     // Keep it in My pictures (on the device now, on the server when it can). Not a Studio test.
     keptRef.current = null;
@@ -689,6 +817,11 @@ export function ColorPlayer({ item, onExit, onAwardXp, sandbox = false, source, 
     if (!ctx) return null;
     ctx.fillStyle = "#ffffff";
     ctx.fillRect(0, 0, S, S);
+    if (background) {
+      ctx.setTransform(S / 1000, 0, 0, S / 1000, 0, 0);
+      drawBackground(ctx, background);
+      ctx.setTransform(1, 0, 0, 1, 0, 0);
+    }
     // The paint, line cells taking their own side's colour as on screen.
     const layer = document.createElement("canvas");
     layer.width = layer.height = GRID;
@@ -699,23 +832,16 @@ export function ColorPlayer({ item, onExit, onAwardXp, sandbox = false, source, 
       let v = paint[i];
       if (!v && sources[i] !== i && sources[i] >= 0) v = paint[sources[i]];
       if (!v) continue;
-      const [r, g, b] = rgb(hexOfIndex(v));
+      const base = rgb(hexOfIndex(v));
+      const [r, g, b] = soft ? shade(base, depthIn(spans, areas.labels[i] >= 0 ? areas.labels[i] : sources[i] >= 0 ? areas.labels[sources[i]] : -1, i)) : base;
       img.data.set([r, g, b, 255], i * 4);
     }
     lctx.putImageData(img, 0, 0);
     ctx.imageSmoothingEnabled = true;
     ctx.drawImage(layer, 0, 0, S, S);
-    if (linesRef.current && !item.paint?.picture?.smooth) ctx.drawImage(linesRef.current, 0, 0, S, S);
+    // The kept picture matches what the child saw at the end (lines between coloured parts gone, when chosen).
     ctx.setTransform(S / 1000, 0, 0, S / 1000, 0, 0);
-    ctx.strokeStyle = ctx.fillStyle = INK;
-    ctx.lineWidth = LINE;
-    ctx.lineCap = ctx.lineJoin = "round";
-    ctx.stroke(lineArt.path);
-    for (const d of lineArt.dots) {
-      ctx.beginPath();
-      ctx.arc(d.x, d.y, d.r, 0, Math.PI * 2);
-      ctx.fill();
-    }
+    drawLines(ctx, 1);
     return new Promise<Blob | null>((resolve) => out.toBlob(resolve, "image/png"));
   };
 
@@ -727,6 +853,7 @@ export function ColorPlayer({ item, onExit, onAwardXp, sandbox = false, source, 
 
   /** From the score card back to the same painting: nothing is lost, and Finish scores it again. */
   const keepColouring = () => {
+    bgSince.current = null; // back to white paper to colour on
     setResult(null);
     setKept(null);
     keptRef.current = null;
@@ -734,6 +861,8 @@ export function ColorPlayer({ item, onExit, onAwardXp, sandbox = false, source, 
   };
 
   const again = () => {
+    fade.current = { cells: null, gone: null, fading: null, since: 0 };
+    bgSince.current = null;
     paintRef.current = blankPaint();
     historyRef.current = [];
     setDone(new Set());
@@ -928,6 +1057,7 @@ export function ColorPlayer({ item, onExit, onAwardXp, sandbox = false, source, 
             <h1 className="truncate text-lg font-bold leading-tight text-ink @lg:text-xl" lang={item.script === "khmer" ? "km" : undefined}>
               {item.title}
             </h1>
+            {afterTrace && <UIBadge variant="primary">{t("paint.nowColour")}</UIBadge>}
             {item.voice && (
               <button
                 type="button"

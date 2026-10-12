@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import type { PaintStep, Stroke, TraceItem } from "../geometry/types";
-import { GRID, areaAt, blankPaint, brush, isComplete, labelAreas, maySayDone, owners, scorePainting, seamSources, stepState } from "./areas";
+import { GRID, areaAt, fadingLines, lineColours, lineOf, wallOf, blankPaint, brush, isComplete, labelAreas, maySayDone, owners, scorePainting, seamSources, stepState } from "./areas";
 import { crayonIndex } from "./palette";
 
 const square = (id: string, x0: number, y0: number, x1: number, y1: number): Stroke => ({
@@ -32,6 +32,67 @@ describe("paint areas", () => {
     const areas = labelAreas(item);
     expect(areas.sizes).toHaveLength(2);
     expect(areaAt(areas, { x: 500, y: 500 })).not.toBe(areaAt(areas, { x: 50, y: 50 }));
+  });
+
+  it("a solid shape in front hides the line behind it, so its inside is one part", () => {
+    // A wide body, and a wheel across its bottom edge.
+    const body = square("body", 200, 300, 800, 600);
+    const wheel = { ...square("wheel", 300, 500, 450, 700), order: 2 };
+    const open = labelAreas({ strokes: [body, wheel] });
+    // Without a fill the body's edge cuts the wheel in two.
+    expect(areaAt(open, { x: 375, y: 550 })).not.toBe(areaAt(open, { x: 375, y: 650 }));
+    const solid = labelAreas({ strokes: [body, { ...wheel, fill: "paper" }] });
+    expect(areaAt(solid, { x: 375, y: 550 })).toBe(areaAt(solid, { x: 375, y: 650 }));
+    // Behind the body (the body in front), the wheel's top half belongs to the body instead.
+    const behind = labelAreas({ strokes: [{ ...body, fill: "paper", layer: 5 }, { ...wheel, fill: "paper" }] });
+    expect(areaAt(behind, { x: 375, y: 550 })).toBe(areaAt(behind, { x: 600, y: 450 }));
+  });
+
+  it("a stroke designed thin still walls its parts off, with a thinner wall than its line", () => {
+    const thin = { ...square("a", 200, 200, 800, 800), width: 6 };
+    const areas = labelAreas({ strokes: [thin] });
+    expect(areaAt(areas, { x: 500, y: 500 })).not.toBe(areaAt(areas, { x: 50, y: 50 }));
+    expect(wallOf(thin)).toBeLessThan(lineOf(thin));
+    // A trace band of the usual width keeps the usual colouring line.
+    expect(lineOf({ width: 60 })).toBe(18);
+  });
+
+  it("fades only the lines between two coloured parts", () => {
+    // Two boxes side by side, sharing the line at x = 500; a mouth line inside the left one.
+    const left = { ...square("l", 200, 300, 500, 700) };
+    const right = { ...square("r", 500, 300, 800, 700), order: 2 };
+    const mouth: Stroke = { ...square("m", 0, 0, 0, 0), order: 3, closed: false, nodes: [{ x: 280, y: 600, type: "corner" }, { x: 420, y: 600, type: "corner" }] };
+    const areas = labelAreas({ strokes: [left, right, mouth] });
+    const paint = blankPaint();
+    const at = (x: number, y: number) => y * GRID + x;
+    // Colour the left box only.
+    fill(paint, areas, areaAt(areas, { x: 350, y: 400 }), "red");
+    let gone = fadingLines(areas, paint);
+    expect(gone[at(500, 500)]).toBe(0); // shared line: the right box is still white
+    expect(gone[at(200, 500)]).toBe(0); // the left box against the page
+    // Colour the right box too: now the shared line can go, the rest stays.
+    fill(paint, areas, areaAt(areas, { x: 650, y: 500 }), "blue");
+    gone = fadingLines(areas, paint);
+    expect(gone[at(500, 500)]).toBe(1);
+    expect(gone[at(800, 500)]).toBe(0); // the right box against the page
+    expect(gone[at(350, 600)]).toBe(0); // the mouth: the same part on both sides
+  });
+
+  it("colours a line from the paint beside it, or from paint put on the line itself", () => {
+    const areas = labelAreas(item);
+    const paint = blankPaint();
+    const at = (x: number, y: number) => y * GRID + x;
+    fill(paint, areas, areaAt(areas, { x: 500, y: 500 }), "red");
+    let lines = lineColours(areas, paint);
+    // The square's edge takes the red inside it; far outside, nothing.
+    expect(lines.crayon[at(200, 500)]).toBe(crayonIndex("red"));
+    expect(lines.own[at(200, 500)]).toBe(0);
+    expect(lines.crayon[at(50, 50)]).toBe(0);
+    // The brush on the line itself (lines take paint in this mode) gives the line its own colour.
+    brush(paint, areas, { x: 200, y: 400 }, { x: 200, y: 600 }, 6, crayonIndex("blue"), undefined, true);
+    lines = lineColours(areas, paint);
+    expect(lines.crayon[at(200, 500)]).toBe(crayonIndex("blue"));
+    expect(lines.own[at(200, 500)]).toBe(1);
   });
 
   it("finds the nearest area for a seed dropped on a line", () => {

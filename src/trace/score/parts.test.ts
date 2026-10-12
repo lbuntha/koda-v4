@@ -100,6 +100,8 @@ describe("fitInk", () => {
 describe("tolerance", () => {
   it("r = half the band × sensitivity × step × age band", () => {
     expect(radius(60)).toBe(30);
+    // A thin design line is still traced against a child-sized band.
+    expect(radius(10)).toBe(radius(30));
     expect(radius(60, { sensitivity: "relaxed" })).toBeCloseTo(48);
     expect(radius(60, { sensitivity: "strict", step: "memory", ageBand: "A" })).toBeCloseTo(30 * 0.7 * 1.3 * 1.2);
   });

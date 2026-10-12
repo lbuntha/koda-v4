@@ -14,7 +14,7 @@ import type { EraseMark, Point, Stroke, TraceItem } from "../geometry/types";
 import { fitNodes } from "../geometry/fit";
 import { GRID, labelAreas, seamSources } from "../paint/areas";
 import { strokePolyline } from "../geometry/bezier";
-import { LINE } from "../paint/areas";
+import { LINE, lineOf } from "../paint/areas";
 import { DEFAULT_GAP, DEFAULT_STRENGTH, SPECK, pictureWalls, smoothLines, fittedPixels, loadImage, partCount, pictureFrom, readFile } from "../paint/picture";
 import type { History } from "./ui";
 import { IconButton, Section, Slider, UndoRedo } from "./ui";
@@ -228,13 +228,13 @@ export function PaintPicture({ item, onChange, history, onDrawLines, onNext }: {
         const k = W / 1000;
         ctx.setTransform(k, 0, 0, k, 0, 0);
         ctx.strokeStyle = ctx.fillStyle = "#1f2544";
-        ctx.lineWidth = LINE;
         ctx.lineCap = ctx.lineJoin = "round";
         for (const s of item.strokes) {
           const pts = strokePolyline(s);
+          ctx.lineWidth = lineOf(s);
           ctx.beginPath();
           if (pts.length === 1) {
-            ctx.arc(pts[0].x, pts[0].y, (s.radius ?? 20) + LINE / 2, 0, Math.PI * 2);
+            ctx.arc(pts[0].x, pts[0].y, (s.radius ?? 20) + lineOf(s) / 2, 0, Math.PI * 2);
             ctx.fill();
             continue;
           }

@@ -11,6 +11,13 @@ import type { Handle, NodeType, Point, Stroke, TraceNode } from "./types";
 import { add, clamp, dist, len, normal, normalize, scale, sub } from "./vec";
 
 const CANVAS = 1000;
+/**
+ * How far past the page an author may draw (a picture cut off by its edge — half an apple).
+ * The child sees only the page; `trimToPage` cuts strokes at its edge before publishing.
+ */
+export const BLEED = 500;
+const LO = -BLEED;
+const HI = CANVAS + BLEED;
 
 const cloneNode = (n: TraceNode): TraceNode => ({
   ...n,
@@ -23,11 +30,11 @@ const next = (s: Stroke, i: number) => (i + 1) % s.nodes.length;
 const toHandle = (p: Point): Handle => ({ dx: p.x, dy: p.y });
 const fromHandle = (h: Handle | undefined): Point => (h ? { x: h.dx, y: h.dy } : { x: 0, y: 0 });
 
-/** Move a node; its handles travel with it. Kept inside the canvas. */
+/** Move a node; its handles travel with it. Kept inside the design area (the page and its bleed). */
 export function moveNode(stroke: Stroke, i: number, to: Point): Stroke {
   const nodes = stroke.nodes.map(cloneNode);
-  nodes[i].x = clamp(to.x, 0, CANVAS);
-  nodes[i].y = clamp(to.y, 0, CANVAS);
+  nodes[i].x = clamp(to.x, LO, HI);
+  nodes[i].y = clamp(to.y, LO, HI);
   return withNodes(stroke, nodes);
 }
 
@@ -188,8 +195,8 @@ export function addLoop(stroke: Stroke, i: number, turn: "left" | "right", radiu
   const k = r * KAPPA;
   const centre = add(node, scale(side, r));
   const at = (offset: Point, tangent: Point): TraceNode => ({
-    x: clamp(centre.x + offset.x * r, 0, CANVAS),
-    y: clamp(centre.y + offset.y * r, 0, CANVAS),
+    x: clamp(centre.x + offset.x * r, LO, HI),
+    y: clamp(centre.y + offset.y * r, LO, HI),
     type: "symmetric",
     in: toHandle(scale(tangent, -k)),
     out: toHandle(scale(tangent, k)),
@@ -204,7 +211,7 @@ export function addLoop(stroke: Stroke, i: number, turn: "left" | "right", radiu
 
 /** Add a node at the end (Add Points in empty space). */
 export function extendStroke(stroke: Stroke, to: Point): Stroke {
-  return withNodes(stroke, [...stroke.nodes.map(cloneNode), { x: clamp(to.x, 0, CANVAS), y: clamp(to.y, 0, CANVAS), type: "corner" }]);
+  return withNodes(stroke, [...stroke.nodes.map(cloneNode), { x: clamp(to.x, LO, HI), y: clamp(to.y, LO, HI), type: "corner" }]);
 }
 
 /** Remove node `i` (a stroke keeps at least two). */

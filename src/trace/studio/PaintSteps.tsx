@@ -12,15 +12,14 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { ChevronDown, ChevronUp, Eye, EyeOff, Pipette, Play, Plus, Sparkles, Trash2, Wand2, X } from "lucide-react";
 import { useT } from "../../lib/i18n";
 import { UIButton } from "../../components/ui";
-import { strokePolyline } from "../geometry/bezier";
 import type { PaintStep, Point, TraceItem } from "../geometry/types";
 import { hasArt } from "../geometry/types";
 import { areaColours, fittedPixels, insidePoints, loadImage, stepsFromColours } from "../paint/picture";
 import { fillLeftovers } from "../paint/leftovers";
 import { SuggestError, askForSteps, partsToName, stepsFromSuggestion, suggestImage } from "../paint/suggest";
 import { canUseAi } from "./autoStrokes";
-import { strokePolyline as polylineOf } from "../geometry/bezier";
-import { GRID, LINE, areaAt, labelAreas, seamSources, owners, stepAreas } from "../paint/areas";
+import { drawLineArt } from "../paint/lineArt";
+import { GRID, areaAt, labelAreas, seamSources, owners, stepAreas } from "../paint/areas";
 import { ColorPlayer } from "../paint/ColorPlayer";
 import { PALETTE, colourName, crayonHex, customColours, isCustom, rgb } from "../paint/palette";
 import type { History } from "./ui";
@@ -43,7 +42,9 @@ export function PaintSteps({ item, onChange, history }: { item: TraceItem; onCha
   const [brushed, setBrushed] = useState<Set<number> | null>(null);
   const [noColours, setNoColours] = useState(false);
   // Areas follow the line art: the strokes and the picture object (editing steps keeps the same picture, so nothing is redone).
-  const areas = useMemo(() => labelAreas(item), [item.strokes, item.paint?.picture]); // eslint-disable-line react-hooks/exhaustive-deps -- the line art only
+  const areas = useMemo(() => labelAreas(item), [item.strokes, item.paint?.picture]);
+  /** A spare canvas for line art with solid shapes (see drawLineArt). */
+  const artLayer = useMemo(() => document.createElement("canvas"), []); // eslint-disable-line react-hooks/exhaustive-deps -- the line art only
   const sources = useMemo(() => seamSources(areas), [areas]);
   const own = useMemo(() => owners(areas, steps), [areas, steps]);
   const selected = sel !== null ? steps[sel] : undefined;
@@ -96,15 +97,7 @@ export function PaintSteps({ item, onChange, history }: { item: TraceItem; onCha
       const smooth = item.paint?.picture?.smooth;
       const image = suggestImage(areas, parts, smooth ? null : linesImg, (ctx) => {
         if (!smooth && item.paint?.picture) return;
-        ctx.strokeStyle = "#1f2544";
-        ctx.lineWidth = LINE;
-        ctx.lineCap = ctx.lineJoin = "round";
-        for (const st of item.strokes) {
-          ctx.beginPath();
-          polylineOf(st).forEach((q, i) => (i ? ctx.lineTo(q.x, q.y) : ctx.moveTo(q.x, q.y)));
-          if (st.closed) ctx.closePath();
-          ctx.stroke();
-        }
+        drawLineArt(ctx, item.strokes, document.createElement("canvas"));
       });
       const made = stepsFromSuggestion(await askForSteps({ image, parts, title: item.title, language: item.script === "khmer" ? "km" : "en" }), parts, uid);
       if (made.length === 0) throw new SuggestError("empty");
@@ -251,25 +244,7 @@ export function PaintSteps({ item, onChange, history }: { item: TraceItem; onCha
       ctx.drawImage(layer, 0, 0, canvas.width, canvas.height);
       if (linesImg && !item.paint?.picture?.smooth) ctx.drawImage(linesImg, 0, 0, canvas.width, canvas.height);
       ctx.setTransform(k, 0, 0, k, 0, 0);
-      ctx.strokeStyle = "#1f2544";
-      ctx.fillStyle = "#1f2544";
-      ctx.lineWidth = LINE;
-      ctx.lineCap = "round";
-      ctx.lineJoin = "round";
-      for (const s of item.strokes) {
-        if (s.shape === "dot" || s.nodes.length === 1) {
-          const n = s.nodes[0];
-          if (!n) continue;
-          ctx.beginPath();
-          ctx.arc(n.x, n.y, (s.radius ?? 20) + LINE / 2, 0, Math.PI * 2);
-          ctx.fill();
-          continue;
-        }
-        ctx.beginPath();
-        strokePolyline(s).forEach((p, i) => (i ? ctx.lineTo(p.x, p.y) : ctx.moveTo(p.x, p.y)));
-        if (s.closed) ctx.closePath();
-        ctx.stroke();
-      }
+      drawLineArt(ctx, item.strokes, artLayer);
       // Each step's number on its first area, so the order reads at a glance.
       ctx.font = "bold 34px system-ui, sans-serif";
       ctx.textAlign = "center";

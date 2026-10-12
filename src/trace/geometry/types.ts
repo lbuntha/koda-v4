@@ -68,6 +68,13 @@ export interface Stroke {
   badge?: { dx: number; dy: number };
   /** Content, read aloud: "Start at the top, go down." */
   instruction?: string;
+  /** This stroke's own look; a field left out follows the item's (false turns the item's off here). */
+  look?: TraceLook;
+  /** A closed shape filled with the paper, hiding what lies behind it once it is drawn (a wheel over the car's body). */
+  fill?: "paper";
+  /** Front-to-back place in the picture, apart from writing order: higher sits in front. Absent = its writing place. */
+  layer?: number;  /** Part by part: this stroke begins a new part of the picture ("Add the roof"). The first stroke always begins part 1. */
+  part?: { title?: string };
 }
 
 export type TraceKind = "line" | "drawing" | "letter" | "mark" | "numeral" | "word";
@@ -109,11 +116,44 @@ export interface TraceItem {
   activity?: Activity;
   /** Colour: the steps, each naming the areas of the line art it colours. */
   paint?: PaintPlan;
+  /** How the slate looks while tracing. Absent = wide bands, numbers and arrows on every stroke. */
+  look?: TraceLook;
+  /** Traced, then coloured: once the child can draw it, they colour it in (the `paint` steps) to finish it. Absent = tracing only. */
+  colorAfter?: boolean;
+  /** "parts": the picture is built part by part — each part appears in its turn, the parts before it already drawn. Absent = the whole picture at once. */
+  flow?: "parts";
 }
+
+/** A cleaner slate for busy drawings. Only what is drawn changes; scoring stays the same. */
+export interface TraceLook {
+  /** A slim guide line like the picture's own outline, instead of the wide band. */
+  thin?: boolean;
+  /** No stroke numbers on the slate. */
+  hideNumbers?: boolean;
+  /** No direction arrows on the slate. */
+  hideArrows?: boolean;
+  /** The shape as a dashed line, like a trace-the-dashes worksheet. */
+  dashed?: boolean;
+  /** The shape as a line of round dots, like a dot-to-dot worksheet. Wins over dashed when both are on. */
+  dotted?: boolean;
+}
+
+/** How one stroke looks on the slate: its own setting where it has one, else the item's. */
+export const lookOf = (item: Pick<TraceItem, "look">, stroke: Pick<Stroke, "look">): Required<TraceLook> => ({
+  thin: stroke.look?.thin ?? item.look?.thin ?? false,
+  hideNumbers: stroke.look?.hideNumbers ?? item.look?.hideNumbers ?? false,
+  hideArrows: stroke.look?.hideArrows ?? item.look?.hideArrows ?? false,
+  dashed: stroke.look?.dashed ?? item.look?.dashed ?? false,
+  dotted: stroke.look?.dotted ?? item.look?.dotted ?? false,
+});
 
 export type Activity = "trace" | "color";
 
 export const activityOf = (item: Pick<TraceItem, "activity">): Activity => item.activity ?? "trace";
+
+/** A traced item the publisher also wants coloured, with colour steps to follow. */
+export const colorsAfter = (item: Pick<TraceItem, "activity" | "colorAfter" | "paint">): boolean =>
+  activityOf(item) === "trace" && Boolean(item.colorAfter) && (item.paint?.steps.length ?? 0) > 0;
 
 /** Something to show: strokes, or (colouring) a picture's line art. */
 export const hasArt = (item: Pick<TraceItem, "strokes" | "activity" | "paint">): boolean =>
@@ -130,10 +170,27 @@ export interface PaintStep {
   instruction?: string;
 }
 
+/** How a picture's lines behave as a child colours (see PaintPlan.lines), reading older drafts too. */
+export const linesOf = (paint: PaintPlan | undefined): "ink" | "colour" | "fade" => paint?.lines ?? (paint?.hideLinesWhenDone ? "fade" : "ink");
+
 export interface PaintPlan {
   steps: PaintStep[];
   /** False: children colour with the brush only — no Fill tool. Absent = Fill is offered. */
   allowFill?: boolean;
+  /** "soft": every part a child colours is shaded, lighter at its top and deeper at its bottom. Absent = flat colours. */
+  shading?: "soft";
+  /** A soft wash the white paper fades into when the child finishes ("sky", "field", "paper"). Absent = white. */
+  background?: "sky" | "field" | "paper";
+  /** The brush a child starts with: "xs" a sharp tip for small details … "l" a big one. Absent = "m". */
+  brush?: "xs" | "s" | "m" | "l";
+  /**
+   * The lines as the child colours: "colour" — each line takes a deeper shade of the colour beside it,
+   * and the brush can paint a line its own colour; "fade" — a line between two coloured parts fades
+   * away. Absent = dark ink lines.
+   */
+  lines?: "colour" | "fade";
+  /** Older drafts: the first form of "fade". Read through `linesOf`. */
+  hideLinesWhenDone?: boolean;
   /** The colouring page itself, when the item was made from a picture (see paint/picture.ts). */
   picture?: PaintPicture;
 }

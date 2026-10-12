@@ -71,6 +71,8 @@ export interface ItemProgress {
   kind?: TraceItem["kind"];
   /** A colouring item: the best painting's accuracy, 0–100. */
   paintBest?: number;
+  /** A traced item with a colour step: when the child finished colouring it. */
+  coloredAt?: number;
   updatedAt: number;
 }
 

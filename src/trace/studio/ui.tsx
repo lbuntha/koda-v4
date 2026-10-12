@@ -87,6 +87,83 @@ export function Section({ title, aside, action, defaultOpen = true, children }: 
   );
 }
 
+/**
+ * A titled group inside a panel (Shape, Size & fit, In the picture…). Lighter
+ * than a Section; folds away, and stays folded or open as the author left it.
+ */
+export function SubSection({ id, title, aside, defaultOpen = true, children }: { id: string; title: string; aside?: ReactNode; defaultOpen?: boolean; children: ReactNode }) {
+  const key = `koda_trace_studio_open_${id}`;
+  const [open, setOpen] = useState(() => {
+    try {
+      const v = localStorage.getItem(key);
+      return v === null ? defaultOpen : v === "1";
+    } catch {
+      return defaultOpen;
+    }
+  });
+  const toggle = () =>
+    setOpen((o) => {
+      try {
+        localStorage.setItem(key, o ? "0" : "1");
+      } catch {
+        /* remembered for this visit only */
+      }
+      return !o;
+    });
+  return (
+    <div className="-mx-1 flex flex-col border-t border-line pt-1 first:border-t-0">
+      <button type="button" onClick={toggle} aria-expanded={open} className="flex items-center gap-2 rounded-lg px-1 py-1.5 text-left hover:bg-surface-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500">
+        <span className="text-xs font-semibold uppercase tracking-wider text-ink">{title}</span>
+        {aside && <span className="ml-auto truncate text-xs text-muted">{aside}</span>}
+        <ChevronDown className={`h-4 w-4 shrink-0 text-muted transition ${aside ? "" : "ml-auto"} ${open ? "rotate-180" : ""}`} />
+      </button>
+      {open && <div className="flex flex-col gap-3 px-1 pb-2 pt-1">{children}</div>}
+    </div>
+  );
+}
+
+/** A choice with its words showing (not only an icon): "As the item · On · Off", "Corner · Smooth · Even". Wraps on a phone. */
+export function TextSegment<T extends string>({ value, options, onChange, disabled, label }: { value: T | null; options: { value: T; label: string; icon?: ReactNode }[]; onChange(v: T): void; disabled?: boolean; label?: string }) {
+  return (
+    <div role="radiogroup" aria-label={label} className="flex flex-wrap gap-1 rounded-xl bg-surface-muted p-1">
+      {options.map((o) => (
+        <button
+          key={o.value}
+          type="button"
+          role="radio"
+          aria-checked={value === o.value}
+          disabled={disabled}
+          onClick={() => onChange(o.value)}
+          className={`flex min-h-8 flex-1 items-center justify-center gap-1.5 whitespace-nowrap rounded-lg px-2.5 py-1 text-xs font-semibold transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 disabled:cursor-not-allowed disabled:opacity-40 ${
+            value === o.value ? "bg-surface text-indigo-700 shadow-sm dark:text-indigo-300" : "text-muted hover:text-ink"
+          }`}
+        >
+          {o.icon}
+          {o.label}
+        </button>
+      ))}
+    </div>
+  );
+}
+
+/** A small button with an icon and its words, for actions that an icon alone does not explain. */
+export function LabelButton({ icon, label, onClick, disabled, title, tone = "default" }: { icon: ReactNode; label: string; onClick(): void; disabled?: boolean; title?: string; tone?: "default" | "danger" }) {
+  return (
+    <button
+      type="button"
+      title={title}
+      disabled={disabled}
+      onClick={onClick}
+      className={`flex min-h-9 items-center gap-2 rounded-xl border border-line bg-surface px-3 py-1.5 text-left text-xs font-semibold transition hover:border-indigo-300 hover:bg-indigo-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 disabled:cursor-not-allowed disabled:opacity-40 dark:hover:bg-indigo-950/40 ${
+        tone === "danger" ? "text-rose-700 dark:text-rose-300" : "text-ink"
+      }`}
+    >
+      <span className={`shrink-0 ${tone === "danger" ? "" : "text-indigo-600 dark:text-indigo-300"}`}>{icon}</span>
+      <span className="min-w-0">{label}</span>
+    </button>
+  );
+}
+
 export function Group({ label, children }: { label: string; children: ReactNode }) {
   return (
     <div className="flex flex-col gap-1">
@@ -188,6 +265,11 @@ export const ShapeIcon = {
   rectangle: () => (
     <Svg>
       <rect x="3" y="6" width="18" height="12" rx="1" />
+    </Svg>
+  ),
+  rounded: () => (
+    <Svg>
+      <rect x="3" y="7" width="18" height="10" rx="4" />
     </Svg>
   ),
   square: () => (
