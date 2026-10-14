@@ -142,7 +142,14 @@ async def test_a_family_owner_cannot_work_the_switchboard(client, owner):
 async def test_reset_versions_are_visible_but_resets_are_admin_only(client, owner):
     versions = await client.get("/system/maintenance/versions", headers=owner)
     assert versions.status_code == 200
-    assert versions.json() == {"learningVersion": 0, "registrationsVersion": 0}
+    body = versions.json()
+    assert body["familyId"]  # the owner's own family, for its per-family XP reset
+    assert body == {
+        "learningVersion": 0,
+        "registrationsVersion": 0,
+        "familyId": body["familyId"],
+        "familyLearningVersion": 0,
+    }
     assert (
         await client.post("/system/maintenance/learning/reset", headers=owner)
     ).status_code == 403
