@@ -77,6 +77,10 @@ DEFAULT_MENU: list[dict] = [
      "requires": "system:write", "order": 57},
     {"itemId": "admin", "label": "Admin", "icon": "art:menu-admin", "badge": "Manage",
      "requires": "system:write", "order": 58},
+    # Permanent deletes of accounts, XP and studio content. The page and its
+    # routes also need `user:manage`; the row is gated on the rarer right.
+    {"itemId": "cleanup", "label": "Data Cleanup", "icon": "trash", "badge": "Danger",
+     "requires": "system:write", "order": 59},
     {"itemId": "settings", "label": "Settings", "icon": "art:menu-settings", "order": 60},
 ]
 

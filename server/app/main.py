@@ -28,6 +28,7 @@ from app.repos import skills as skills_repo
 from app.repos import system as system_repo
 from app.role_defaults import DEFAULT_PLATFORM_ROLES
 from app.routers import (
+    admin_cleanup,
     admin_roles,
     admin_users,
     art,
@@ -256,6 +257,7 @@ def create_app() -> FastAPI:
     for router in (
         health.router,
         auth.router,
+        admin_cleanup.router,
         admin_roles.router,
         admin_users.router,
         art.router,

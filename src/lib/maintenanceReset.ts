@@ -6,6 +6,16 @@ import { Outbox } from "./sync/outbox";
 export interface MaintenanceVersions {
   learningVersion: number;
   registrationsVersion: number;
+  /** This account's family, when it has one, and that family's own XP reset generation. */
+  familyId?: string | null;
+  familyLearningVersion?: number;
+}
+
+interface AppliedVersions {
+  learningVersion: number;
+  registrationsVersion: number;
+  /** Per family, because one device can be signed into more than one over its life. */
+  families: Record<string, number>;
 }
 
 export interface MaintenanceResult {
@@ -48,28 +58,39 @@ const REGISTRATION_KEYS = [
   "koda_skill_registration_outbox_v2",
 ];
 
-function applied(): MaintenanceVersions {
+function applied(): AppliedVersions {
   try {
+    const stored = JSON.parse(localStorage.getItem(APPLIED_KEY) ?? "{}");
     return {
-      learningVersion: 0,
-      registrationsVersion: 0,
-      ...JSON.parse(localStorage.getItem(APPLIED_KEY) ?? "{}"),
+      learningVersion: Number(stored.learningVersion ?? 0),
+      registrationsVersion: Number(stored.registrationsVersion ?? 0),
+      families: stored.families && typeof stored.families === "object" ? stored.families : {},
     };
   } catch {
-    return { learningVersion: 0, registrationsVersion: 0 };
+    return { learningVersion: 0, registrationsVersion: 0, families: {} };
   }
 }
 
 /** Apply a server reset locally before any queued work is uploaded. */
 export function applyMaintenanceVersions(next: MaintenanceVersions): boolean {
   const previous = applied();
-  const resetLearning = next.learningVersion > previous.learningVersion;
+  const familyId = next.familyId ?? null;
+  const familyVersion = next.familyLearningVersion ?? 0;
+  // An operator cleared XP for this family alone (Data cleanup). Same wipe as
+  // the global erase, scoped by whoever is signed in on this device.
+  const resetFamily = familyId !== null && familyVersion > (previous.families[familyId] ?? 0);
+  const resetLearning = next.learningVersion > previous.learningVersion || resetFamily;
   const resetRegistrations = next.registrationsVersion > previous.registrationsVersion;
   if (!resetLearning && !resetRegistrations) return false;
 
+  const stored: AppliedVersions = {
+    learningVersion: next.learningVersion,
+    registrationsVersion: next.registrationsVersion,
+    families: familyId !== null ? { ...previous.families, [familyId]: familyVersion } : previous.families,
+  };
   try {
     // Store the generation first so a reload cannot repeat forever.
-    localStorage.setItem(APPLIED_KEY, JSON.stringify(next));
+    localStorage.setItem(APPLIED_KEY, JSON.stringify(stored));
     if (resetLearning) matching(LEARNING_KEYS).forEach((key) => localStorage.removeItem(key));
     if (resetRegistrations) matching(REGISTRATION_KEYS).forEach((key) => localStorage.removeItem(key));
   } catch {

@@ -27,6 +27,7 @@ import {
   Zap,
   BarChart3,
   Target,
+  Trash2,
   type LucideIcon,
 } from "lucide-react";
 
@@ -62,6 +63,7 @@ export const sidebarIcons = {
   sparkles: Sparkles,
   star: Star,
   target: Target,
+  trash: Trash2,
   leaderboard: Trophy,
   trophy: Trophy,
   user: UserRound,

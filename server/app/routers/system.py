@@ -40,6 +40,7 @@ from app.push_defaults import (
     placeholders_for,
     unknown_placeholders,
 )
+from app.repos import cleanup as cleanup_repo
 from app.repos import maintenance as maintenance_repo
 from app.repos import notify_jobs, notify_prefs, notify_schedule, push_log, push_templates, push_tokens
 from app.repos import system as system_repo
@@ -90,6 +91,10 @@ class ValueIn(Model):
 class MaintenanceVersions(Model):
     learning_version: int = Field(alias="learningVersion")
     registrations_version: int = Field(alias="registrationsVersion")
+    #: The caller's own family's reset generation — bumped when an operator
+    #: clears XP for that family alone on the Data cleanup page.
+    family_id: str | None = Field(default=None, alias="familyId")
+    family_learning_version: int = Field(default=0, alias="familyLearningVersion")
 
 
 class MaintenanceResult(Model):
@@ -159,7 +164,15 @@ async def effective(db: Db, p: CurrentPrincipal) -> dict[str, Any]:
 @router.get("/maintenance/versions")
 async def maintenance_versions(db: Db, p: CurrentPrincipal) -> MaintenanceVersions:
     """Reset generations are readable by every device so offline data expires."""
-    return MaintenanceVersions(**await maintenance_repo.state(db))
+    family = (
+        {
+            "familyId": p.family_id,
+            "familyLearningVersion": await cleanup_repo.family_learning_version(db, p.family_id),
+        }
+        if p.family_id
+        else {}
+    )
+    return MaintenanceVersions(**await maintenance_repo.state(db), **family)
 
 
 @router.post("/maintenance/learning/reset")

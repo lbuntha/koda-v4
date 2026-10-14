@@ -24,6 +24,8 @@ export type TabId =
   | "menu"
   | "koda"
   | "admin"
+  // Permanent deletes of accounts, XP and studio content. user:manage + system:write.
+  | "cleanup"
   | "scoring"
   | "subjects"
   // Wording corrections per language. content:write, like Art.

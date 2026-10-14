@@ -122,6 +122,9 @@ const AdminPage = lazy(() =>
 );
 const TranslationsPage = lazy(() => import("./components/account/TranslationsPage").then((m) => ({ default: m.TranslationsPage })));
 const SubjectsPage = lazy(() => import("./components/account/SubjectsPage").then((m) => ({ default: m.SubjectsPage })));
+const DataCleanupPage = lazy(() =>
+  import("./components/account/DataCleanupPage").then((m) => ({ default: m.DataCleanupPage })),
+);
 const KodaPage = lazy(() =>
   import("./components/account/KodaPage").then((m) => ({ default: m.KodaPage })),
 );
@@ -170,6 +173,8 @@ export default function App() {
   // The deployment's own pages — Ask Koda and Admin. One right, because both
   // decide what every family on this Koda gets rather than what one family sets.
   const canOperate = Boolean(session && can("system:write"));
+  // Data cleanup deletes accounts as well as content, so it needs both rights.
+  const canClean = canOperate && can("user:manage");
 
   // A stored session is a claim, not proof — check it with the server on boot.
   // Offline it stands; rejected, it is cleared and the gate comes back.
@@ -253,6 +258,7 @@ export default function App() {
     | "menu"
     | "koda"
     | "admin"
+    | "cleanup"
     | "scoring"
     | "subjects"
     | "translations"
@@ -324,6 +330,7 @@ export default function App() {
     if (activeTab === "trace-studio" && !canTrace) setActiveTab("home");
     if (activeTab === "skills" && !canManageSkills) setActiveTab("home");
     if (activeTab === "koda" && !canOperate) setActiveTab("home");
+    if (activeTab === "cleanup" && !canClean) setActiveTab("home");
   }, [
     permissionsKnown,
     activeTab,
@@ -333,6 +340,7 @@ export default function App() {
     canManageRoles,
     canManageSkills,
     canOperate,
+    canClean,
   ]);
   /**
    * Sound and voice come from the family's preferences, not from state here.
@@ -974,6 +982,12 @@ export default function App() {
           {activeTab === "koda" && canOperate && (
             <Deferred label="Loading Ask Koda">
               <KodaPage onOpenKeys={() => setActiveTab("keys")} />
+            </Deferred>
+          )}
+
+          {activeTab === "cleanup" && canClean && (
+            <Deferred label="Loading Data Cleanup">
+              <DataCleanupPage />
             </Deferred>
           )}
 

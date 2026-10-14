@@ -45,4 +45,21 @@ describe("maintenance reset generations", () => {
     expect(applyMaintenanceVersions(versions)).toBe(false);
     expect(localStorage.getItem("koda_learner_progress_v1")).toBe("new progress");
   });
+
+  it("clears learning when this family's own generation moves, once", async () => {
+    const { applyMaintenanceVersions } = await import("./maintenanceReset");
+    const base = { learningVersion: 0, registrationsVersion: 0, familyId: "fam_1" };
+    expect(applyMaintenanceVersions({ ...base, familyLearningVersion: 0 })).toBe(false);
+
+    localStorage.setItem("koda_learner_progress_v1__l_1", JSON.stringify({ xp: 90 }));
+    localStorage.setItem("koda_skill_registrations_v2", JSON.stringify({ learner: ["counting"] }));
+    expect(applyMaintenanceVersions({ ...base, familyLearningVersion: 1 })).toBe(true);
+    expect(localStorage.getItem("koda_learner_progress_v1__l_1")).toBeNull();
+    // A family XP reset is not a registrations reset.
+    expect(localStorage.getItem("koda_skill_registrations_v2")).not.toBeNull();
+
+    localStorage.setItem("koda_learner_progress_v1__l_1", "new progress");
+    expect(applyMaintenanceVersions({ ...base, familyLearningVersion: 1 })).toBe(false);
+    expect(localStorage.getItem("koda_learner_progress_v1__l_1")).toBe("new progress");
+  });
 });
