@@ -139,6 +139,14 @@ export function LibraryPage({ onAwardXp, onReaderChange, onBookChange, embedded 
           book={book}
           onBack={() => go("book")}
           onReady={() => {
+            // No questions in this book: an empty quiz would be a blank screen
+            // with nothing to press, so reading it to the end finishes it.
+            if (quizOf(book).length === 0) {
+              LibraryProgress.set(book.id, { stage: "done", rev: book.rev, firstTry: 0, total: 0 });
+              playSound("pop");
+              go("book");
+              return;
+            }
             LibraryProgress.set(book.id, { stage: "quiz", rev: book.rev });
             setOutcomes([]);
             go("quiz");
@@ -185,7 +193,7 @@ export function BookPreview({ book, onExit }: { book: Passage; onExit(): void })
       <p className="mb-3 rounded-2xl border border-dashed border-indigo-400 bg-indigo-50 px-3 py-2 text-sm font-bold text-indigo-900 dark:bg-indigo-950 dark:text-indigo-100">
         {tr("library.previewNote")}
       </p>
-      {screen === "read" && <Reader book={book} preview onBack={onExit} onReady={() => setScreen("quiz")} />}
+      {screen === "read" && <Reader book={book} preview onBack={onExit} onReady={() => (quizOf(book).length ? setScreen("quiz") : onExit())} />}
       {screen === "quiz" && <Quiz book={book} preview onLeave={onExit} onFinish={(o) => { setOutcomes(o); setScreen("results"); }} />}
       {screen === "results" && <Results book={book} outcomes={outcomes} earned={null} onShelf={onExit} onAgain={() => setScreen("read")} />}
     </div>

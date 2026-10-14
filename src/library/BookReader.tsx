@@ -9,7 +9,7 @@ import { Picture } from "./Picture";
 import { BANNER, PORTRAIT } from "./pictureShape";
 import { ReadingRecorder } from "./learning";
 import { LibraryProgress } from "./progress";
-import { minutesToRead } from "./session";
+import { minutesToRead, quizOf } from "./session";
 import { canSpeak, say, stop } from "./voice";
 import { prefetchBook, prefetchClips, recordingAudioSupported } from "./clips";
 import { playSound } from "../utils/audio";
@@ -156,6 +156,7 @@ interface Turn { dir: Dir; from: number; to: number }
 export function BookReader({ book, onBack, onReady, preview = false }: { book: Passage; onBack(): void; onReady(): void; preview?: boolean }) {
   const { theme, toggleTheme } = useTheme();
   const { t } = useT();
+  const hasQuiz = useMemo(() => quizOf(book).length > 0, [book]);
   const pages = useMemo(() => layoutBook(book), [book]);
   const reduce = useReducedMotion() ?? false;
   const km = book.language === "km";
@@ -512,6 +513,8 @@ export function BookReader({ book, onBack, onReady, preview = false }: { book: P
         onPrevious={() => turn(page - 1)}
         onNext={() => turn(page + 1)}
         onComplete={() => { hush(); record.finish(); onReady(); }}
+        // A book with no questions has nothing to check: the last page just finishes it.
+        completeLabel={hasQuiz ? undefined : t("reader.finishBook")}
       />}
     >
       <section

@@ -227,6 +227,27 @@ describe("reporting a book", () => {
   });
 });
 
+describe("a book with no questions", () => {
+  it("finishes on the last page instead of opening an empty quiz", () => {
+    BookStore.reset([{ ...MARKET, questions: [], notesInQuiz: undefined }]);
+    try {
+      render(<LibraryPage />);
+      fireEvent.click(screen.getByRole("button", { name: /^At the Market\./ }));
+      fireEvent.click(screen.getByRole("button", { name: "Read" }));
+      fireEvent.click(screen.getByRole("button", { name: "Next page" }));
+      fireEvent.click(screen.getByRole("button", { name: "Next page" }));
+      expect(screen.queryByRole("button", { name: "Check My Learning" })).toBeNull();
+      fireEvent.click(screen.getByRole("button", { name: "I finished!" }));
+
+      expect(screen.queryByLabelText("Progress")).toBeNull();
+      expect(LibraryProgress.get(MARKET.id, MARKET.rev)?.stage).toBe("done");
+      expect(screen.getByRole("button", { name: "Read again" })).toBeTruthy();
+    } finally {
+      BookStore.reset([]);
+    }
+  });
+});
+
 describe("the reader is a book", () => {
   const openBook = () => {
     render(<LibraryPage />);
