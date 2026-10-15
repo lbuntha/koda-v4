@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState, type ReactNode } from "react";
-import { ArrowLeft, BookOpen, Check, ChevronDown, ChevronRight, ChevronUp, CornerLeftUp, Download, Mic, Play, Pencil, RefreshCw, Sparkles, Square, Trash2, Upload } from "lucide-react";
+import { ArrowLeft, BookOpen, Check, ChevronDown, ChevronRight, ChevronUp, CornerLeftUp, Download, Merge, Scissors, Mic, Play, Pencil, RefreshCw, Sparkles, Square, Trash2, Upload } from "lucide-react";
 import { BANDS, bookAges, CHOICES, MATCH_MAX_QUESTIONS, meetsTarget, minimumQuestions, TARGET_MAX, type Band, type Language, type Question, type QuestionCounts, type WordCue } from "../data/passage";
 import { readingLexiconFor, readingWordsFor } from "../data/readingLexicon";
 import { core } from "../data/text";
@@ -25,7 +25,7 @@ import { PICTURE_KEYS } from "../Picture";
 import { BookStore } from "../bookStore";
 import { clipSizes, clipUrl, pcmToWav, uploadClip } from "../clips";
 import { isPhoto, photoSizes, photoDimensions } from "../photos";
-import { layoutBook, pagePicture } from "../bookLayout";
+import { joinPageToPrevious, layoutBook, pagePicture, paginate, withPageBreak } from "../bookLayout";
 import { say, stop } from "../voice";
 import { tutorHeaders } from "../../lib/tutorApi";
 import { aiDefault } from "../../lib/aiDefaults";
@@ -706,6 +706,9 @@ function ReviewStep({ draft, verdict, confirmed, onConfirmed, onEdit, target, so
   const activeQuestions = tab === "splits" || tab === "notes" ? [] : draft.questions.filter((q) => q.kind === tabKind[tab]);
   const [splitTarget, setSplitTarget] = useState<{ sid: string; index: number } | null>(null);
   const [splitText, setSplitText] = useState("");
+  // The book's pages, as sentence ids, and the sentence each one starts at.
+  const pages = paginate(draft).map((page) => page.map((x) => x.id));
+  const pageStarts = new Map(pages.map((ids, i) => [ids[0], { n: i + 1 }]));
   const tabItems: UITabItem<typeof tab>[] = [
     { id: "splits", label: t("studio.col.content") },
     ...strip.map(([name, have, want], index) => {
@@ -752,8 +755,25 @@ function ReviewStep({ draft, verdict, confirmed, onConfirmed, onEdit, target, so
       {tab === "splits" && <details open={km} className="rounded-2xl border border-line p-3">
         <summary className="cursor-pointer font-extrabold text-ink">{t(km ? "studio.review.splitsKm" : "studio.review.splitsEn")}</summary>
         <p className="mt-2 text-sm text-muted">{t("studio.review.splitsHelp")}</p>
-        {draft.sentences.map((s, si) => (
-          <div key={s.id} className="mt-2 flex gap-2">
+        <p className="mt-1 text-sm text-muted">{t("studio.review.pagesHelp")}</p>
+        {draft.sentences.map((s, si) => {
+          const at = pageStarts.get(s.id);
+          return (
+          <div key={s.id}>
+          {at && (
+            <div className="mt-4 flex items-center gap-2 border-t border-line pt-2">
+              <span className="text-xs font-extrabold uppercase tracking-wider text-muted">{t("studio.pages.page", { n: at.n })}</span>
+              {at.n > 1 && (
+                <button type="button" title={t("studio.pages.joinTitle", { n: at.n, before: at.n - 1 })} aria-label={t("studio.pages.joinTitle", { n: at.n, before: at.n - 1 })}
+                  onClick={() => onEdit(joinPageToPrevious(draft, pages[at.n - 2], pages[at.n - 1]))}
+                  className="inline-flex items-center gap-1 rounded-lg px-2 py-0.5 text-xs font-semibold text-muted hover:bg-indigo-50 hover:text-indigo-700 dark:hover:bg-indigo-950 dark:hover:text-indigo-300">
+                  <Merge className="h-3.5 w-3.5" aria-hidden="true" />
+                  {t("studio.pages.join")}
+                </button>
+              )}
+            </div>
+          )}
+          <div className="mt-2 flex gap-2">
             <b className="w-8 shrink-0 pt-2 font-mono text-xs text-muted">{s.id}</b>
             {si > 0 && (
               <button type="button" aria-label={t("studio.review.joinLines", { line: s.id, above: draft.sentences[si - 1].id })} title={t("studio.review.joinLines", { line: s.id, above: draft.sentences[si - 1].id })}
@@ -780,6 +800,13 @@ function ReviewStep({ draft, verdict, confirmed, onConfirmed, onEdit, target, so
                 </div>
               ))}
             </div>
+            {!at && (
+              <button type="button" aria-label={t("studio.review.newPageAt", { line: s.id })} title={t("studio.review.newPageAt", { line: s.id })}
+                onClick={() => onEdit(withPageBreak(draft, s.id, true))}
+                className="ml-auto mt-0.5 grid h-8 w-8 shrink-0 place-items-center self-start rounded-lg border border-line text-muted transition-colors hover:border-indigo-400 hover:text-ink">
+                <Scissors className="h-4 w-4" aria-hidden="true" />
+              </button>
+            )}
             {splitTarget?.sid === s.id && (() => {
               const pieces = splitText.trim().split(/[\s\u200B]+/u).filter(Boolean);
               const unchanged = pieces.length === 1 && pieces[0] === s.words[splitTarget.index];
@@ -805,7 +832,9 @@ function ReviewStep({ draft, verdict, confirmed, onConfirmed, onEdit, target, so
               );
             })()}
           </div>
-        ))}
+          </div>
+          );
+        })}
         {km && (
           <label className="mt-3 flex items-center gap-2 font-bold text-ink">
             <input type="checkbox" className="h-5 w-5 accent-indigo-600" checked={confirmed} onChange={(e) => onConfirmed(e.target.checked)} />

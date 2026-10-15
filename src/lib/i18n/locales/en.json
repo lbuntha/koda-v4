@@ -870,7 +870,9 @@
       "deleteWord": "Delete word",
       "confirmSplits": "A Khmer reader has checked the text and every split",
       "matchFull": "A book can have at most {max} matching sets.",
-      "optional": "optional"
+      "optional": "optional",
+      "pagesHelp": "Pages break by themselves. Use the scissors to start a new page at a line, or Join to put a page back on the one before.",
+      "newPageAt": "Start a new page at {line}"
     },
     "q": {
       "collapse": "Collapse question",
@@ -972,7 +974,14 @@
         "right": "Right"
       },
       "photoLower": "photo",
-      "noPictureLower": "no picture"
+      "noPictureLower": "no picture",
+      "newPage": "New page",
+      "newPageOn": "Start a new page inside page {n}",
+      "newPageFrom": "Start the new page at",
+      "join": "Join",
+      "joinTitle": "Join page {n} to page {before}",
+      "automatic": "Automatic pages",
+      "automaticTitle": "Remove every page break you placed and let the book break its own pages"
     },
     "picture": {
       "note": "Pick one from the library, make one with AI, or upload one.",

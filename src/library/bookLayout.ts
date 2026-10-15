@@ -40,7 +40,8 @@ const PAGE: Record<Band, { sentences: number; chars: number }> = {
 /**
  * Pages of sentences. A page holds up to its band's sentence count and about its
  * band's characters; a sentence is never split, so a single long one gets a page
- * to itself.
+ * to itself. An author's break wins over both: `pageBreak: true` always starts a
+ * page, and `false` never does.
  */
 export function paginate(book: Pick<Passage, "band" | "sentences">): Sentence[][] {
   const { sentences: max, chars } = PAGE[book.band] ?? PAGE.A;
@@ -49,7 +50,8 @@ export function paginate(book: Pick<Passage, "band" | "sentences">): Sentence[][
   let size = 0;
   for (const s of book.sentences) {
     const len = [...s.text].length;
-    if (cur.length && (cur.length >= max || size + len > chars)) {
+    const full = cur.length >= max || size + len > chars;
+    if (cur.length && (s.pageBreak ?? full)) {
       pages.push(cur);
       cur = [];
       size = 0;
@@ -171,6 +173,42 @@ export function withPageChoice<T extends Pick<Passage, "sentences">>(
 /** Set one page's picture: a key, null for none, undefined for automatic. Its place is kept. */
 export const withPagePicture = <T extends Pick<Passage, "sentences">>(book: T, pageIds: readonly string[], key: string | null | undefined): T =>
   withPageChoice(book, pageIds, { picture: key });
+
+/**
+ * Start a new page at sentence `id` (true), keep it on the page before (false),
+ * or leave it to the band's rule (undefined). The first sentence always starts
+ * page 1, so it never carries a break.
+ */
+export function withPageBreak<T extends Pick<Passage, "sentences">>(book: T, id: string, pageBreak: boolean | undefined): T {
+  return {
+    ...book,
+    sentences: book.sentences.map((s, i) => {
+      if (s.id !== id) return s;
+      const { pageBreak: _b, ...rest } = s;
+      return i > 0 && pageBreak !== undefined ? { ...rest, pageBreak } : rest;
+    }),
+  };
+}
+
+/**
+ * A page joined to the one before it. None of its sentences starts a page any
+ * more — the whole page moves, not just its first line — and the two pages'
+ * picture choices become one: the earlier page's, unless it was left automatic,
+ * so the joined page never carries two that disagree.
+ */
+export function joinPageToPrevious<T extends Pick<Passage, "sentences">>(book: T, before: readonly string[], page: readonly string[]): T {
+  if (!before.length || !page.length) return book;
+  const joined = page.reduce((b, id) => withPageBreak(b, id, false), book);
+  return withPageChoice(joined, [...before, ...page], {});
+}
+
+/** Every page break back to the band's rule. */
+export function withAutomaticPages<T extends Pick<Passage, "sentences">>(book: T): T {
+  return { ...book, sentences: book.sentences.map(({ pageBreak: _b, ...rest }) => rest) };
+}
+
+/** Has the author placed any break of their own? */
+export const hasOwnPages = (book: Pick<Passage, "sentences">) => book.sentences.some((s) => s.pageBreak !== undefined);
 
 export interface BookPages {
   /** Page 0 is the cover; pages 1…n hold the story. */

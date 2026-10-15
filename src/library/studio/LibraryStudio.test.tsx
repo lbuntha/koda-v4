@@ -276,7 +276,7 @@ describe("Library Studio", () => {
 
     // The book as the reader lays it out: a cover and two pages, each Automatic.
     const pages = screen.getByRole("list", { name: "Pages" });
-    expect(within(pages).getAllByRole("button")).toHaveLength(3);
+    expect(within(pages).getAllByRole("button", { pressed: false })).toHaveLength(3);
     expect(within(pages).getByRole("button", { name: /^Page 1: market \(Automatic\)/ })).toBeTruthy();
 
     // Page 1 gets a drawing from the Art page's story collection.
@@ -298,6 +298,31 @@ describe("Library Studio", () => {
     const saved = api.saveDraft.mock.calls[0][1] as { picture: string; sentences: Array<{ picture?: string | null }> };
     expect(saved.picture).toBe("banana");
     expect(saved.sentences.map((x) => x.picture)).toEqual(["straw-house", undefined, null, undefined]);
+  });
+
+  it("lets an author start a new page and join it back", async () => {
+    await startBook();
+    fireEvent.click(screen.getByRole("radio", { name: /Offline drafter/ }));
+    fireEvent.click(screen.getByRole("button", { name: "Continue" }));
+    await fillSections();
+    fireEvent.click(screen.getByRole("button", { name: /^3\s*Pages & pictures$/ }));
+    const pages = screen.getByRole("list", { name: "Pages" });
+    const cards = () => within(pages).getAllByRole("button", { pressed: false });
+    expect(cards()).toHaveLength(3);
+
+    // Page 1 holds two sentences: start a new page at the second.
+    fireEvent.click(within(pages).getByRole("button", { name: "Start a new page inside page 1" }));
+    fireEvent.click(screen.getByRole("menuitem", { name: /^s2/ }));
+    expect(cards()).toHaveLength(4);
+
+    // Join page 2 (now s2 alone) back to page 1, and nothing is left marked.
+    fireEvent.click(within(pages).getByRole("button", { name: "Join page 2 to page 1" }));
+    expect(cards()).toHaveLength(3);
+    fireEvent.click(screen.getByRole("button", { name: "Automatic pages" }));
+    fireEvent.click(screen.getByRole("button", { name: "Save draft" }));
+    await waitFor(() => expect(api.saveDraft).toHaveBeenCalled());
+    const saved = api.saveDraft.mock.calls.at(-1)![1] as { sentences: Array<{ pageBreak?: boolean }> };
+    expect(saved.sentences.every((x) => x.pageBreak === undefined)).toBe(true);
   });
 
   it("starts Review with every section empty, and makes one section with AI on request", async () => {

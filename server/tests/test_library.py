@@ -326,6 +326,18 @@ async def test_a_page_photo_and_its_place_are_kept_and_must_exist_to_publish(cli
     assert (await client.put("/library/drafts/photo-book", json=_draft(book), headers=dev)).status_code == 400
 
 
+async def test_an_author_page_break_is_kept_and_must_be_true_or_false(client, db):
+    dev = await _login(client, db, "dev@example.com", platform_role="developer")
+    book = copy.deepcopy(MARKET)
+    book["sentences"][1]["pageBreak"] = True
+    saved = await client.put("/library/drafts/break-book", json=_draft(book), headers=dev)
+    assert saved.status_code == 200, saved.text
+    assert saved.json()["draft"]["sentences"][1]["pageBreak"] is True
+
+    book["sentences"][1]["pageBreak"] = "yes"
+    assert (await client.put("/library/drafts/break-book", json=_draft(book), headers=dev)).status_code == 400
+
+
 async def test_a_unit_name_recording_is_kept_by_unit_and_read_by_every_reader(client, db, signup_body):
     dev = await _login(client, db, "dev@example.com", platform_role="developer")
     clip = (await client.post("/library/audio", json={"mime": "audio/wav", "data": _b64(WAV)}, headers=dev)).json()["id"]

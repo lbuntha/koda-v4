@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import { AlertCircle, Check, ChevronDown, ImageOff, Loader2, Settings2, Sparkles, Square } from "lucide-react";
-import { layoutBook, pagePicture, withPageChoice, withPagePicture } from "../bookLayout";
+import { AlertCircle, Check, ChevronDown, ImageOff, Loader2, Merge, RotateCcw, Scissors, Settings2, Sparkles, Square } from "lucide-react";
+import { hasOwnPages, joinPageToPrevious, layoutBook, pagePicture, withAutomaticPages, withPageBreak, withPageChoice, withPagePicture } from "../bookLayout";
 import { type Passage } from "../data/passage";
 import { isPhoto, photosOf, uploadPhoto } from "../photos";
 import { core } from "../data/text";
@@ -32,6 +32,11 @@ import { useT } from "../../lib/i18n";
  * a painted picture is made for each, one after another, and put on its page as
  * it arrives. One at a time keeps a provider's rate limit from failing the lot,
  * and a page that fails says so and can be tried again on its own.
+ *
+ * Pages break by themselves, by the band's sentences and characters a page, but
+ * an author can break them by hand: under each card, "New page" starts a page at
+ * one of its sentences, and "Join" puts it back on the page before. The break is
+ * kept on the sentence (`pageBreak`), so the reader turns the same pages.
  */
 
 type Draft = Omit<Passage, "rev">;
@@ -47,6 +52,7 @@ function pagesOf(draft: Draft) {
   return layoutBook(draft).story.map((page, i) => ({
     n: i + 1,
     ids: page.map((s) => s.sentence.id),
+    lines: page.map((s) => ({ id: s.sentence.id, text: s.sentence.text })),
     text: page.map((s) => s.sentence.text).join(km ? "" : " "),
     picture: pagePicture(page, draft),
     words: [...new Set(page.flatMap((s) => s.tokens.map((t) => t.word)))],
@@ -91,6 +97,12 @@ export function PagesStep({ draft, onEdit }: { draft: Draft; onEdit(d: Draft): v
    */
   const promptSeed = slotPrompt(current?.text ?? "", draft.title, !current);
   const pick = (slot: Slot) => (batch.selecting ? batch.toggle(slot) : setOpen(slot));
+  // Pages renumber when they are split or joined, so an open drawer would be on
+  // a different page than the one it was opened for.
+  const repage = (next: Draft) => {
+    setOpen(null);
+    onEdit(next);
+  };
 
   return (
     <div className="grid gap-5">
@@ -99,11 +111,18 @@ export function PagesStep({ draft, onEdit }: { draft: Draft; onEdit(d: Draft): v
           <h2 className="text-lg font-extrabold text-ink">{t("studio.step.pages")}</h2>
           <p className="text-sm text-muted">{t("studio.pages.intro", { count: pages.length })}</p>
         </div>
-        {aiAllowed && !batch.selecting && (
-          <UIButton type="button" size="sm" variant="secondary" icon={<Sparkles aria-hidden="true" />} onClick={() => batch.start(slotsOf(draft, pages))}>
-            {t("studio.batch.open")}
-          </UIButton>
-        )}
+        <div className="flex flex-wrap gap-2">
+          {hasOwnPages(draft) && !batch.selecting && (
+            <UIButton type="button" size="sm" variant="ghost" icon={<RotateCcw aria-hidden="true" />} title={t("studio.pages.automaticTitle")} onClick={() => repage(withAutomaticPages(draft))}>
+              {t("studio.pages.automatic")}
+            </UIButton>
+          )}
+          {aiAllowed && !batch.selecting && (
+            <UIButton type="button" size="sm" variant="secondary" icon={<Sparkles aria-hidden="true" />} onClick={() => batch.start(slotsOf(draft, pages))}>
+              {t("studio.batch.open")}
+            </UIButton>
+          )}
+        </div>
       </div>
 
       {batch.selecting && <BatchBar batch={batch} slots={slotsOf(draft, pages)} cambodiaDefault={km} />}
@@ -112,9 +131,18 @@ export function PagesStep({ draft, onEdit }: { draft: Draft; onEdit(d: Draft): v
         <li>
           <PageCard label={t("reader.cover")} selected={batch.selecting ? batch.chosen.has(0) : open === 0} ticking={batch.selecting} state={batch.states[0]} onSelect={() => pick(0)} picture={draft.picture} how="" km={km} text={draft.title} title />
         </li>
-        {pages.map((p) => (
-          <li key={p.n}>
+        {pages.map((p, i) => (
+          <li key={p.n} className="grid content-start gap-1.5">
             <PageCard label={t("studio.pages.page", { n: p.n })} selected={batch.selecting ? batch.chosen.has(p.n) : open === p.n} ticking={batch.selecting} state={batch.states[p.n]} onSelect={() => pick(p.n)} picture={p.picture.key} how={t(`studio.pages.how.${p.picture.how}`)} chosen={p.picture.how === "chosen"} place={p.picture.key && p.picture.at !== "top" ? t(`studio.pages.place.${p.picture.at}`) : ""} km={km} text={p.text} />
+            {!batch.selecting && (
+              <PageBreaks
+                n={p.n}
+                lines={p.lines}
+                km={km}
+                onSplit={(id) => repage(withPageBreak(draft, id, true))}
+                onJoin={i > 0 ? () => repage(joinPageToPrevious(draft, pages[i - 1].ids, p.ids)) : undefined}
+              />
+            )}
           </li>
         ))}
       </ol>
@@ -175,6 +203,43 @@ function PageCard({ label, selected, ticking = false, state, onSelect, picture, 
         <span className={`line-clamp-3 text-sm text-ink ${km ? KHMER : SERIF} ${title ? "font-bold" : ""}`}>{text}</span>
       </span>
     </button>
+  );
+}
+
+/** Under a page card: start a new page at one of its sentences, or join it to the page before. */
+function PageBreaks({ n, lines, km, onSplit, onJoin }: { n: number; lines: { id: string; text: string }[]; km: boolean; onSplit(id: string): void; onJoin?: () => void }) {
+  const { t } = useT();
+  if (lines.length < 2 && !onJoin) return null;
+  return (
+    <div className="flex flex-wrap gap-1.5">
+      {lines.length > 1 && (
+        <UIMenu className="w-72" trigger={({ toggle, isOpen }) => (
+          <UIButton type="button" size="sm" variant="ghost" aria-haspopup="menu" aria-expanded={isOpen} aria-label={t("studio.pages.newPageOn", { n })} icon={<Scissors aria-hidden="true" />} onClick={toggle}>
+            {t("studio.pages.newPage")}
+            <ChevronDown className="ml-1 h-4 w-4" aria-hidden="true" />
+          </UIButton>
+        )}>
+          {({ close }) => (
+            <>
+              <UIMenuLabel>{t("studio.pages.newPageFrom")}</UIMenuLabel>
+              {lines.slice(1).map((l) => (
+                <UIMenuItem key={l.id} onSelect={() => { onSplit(l.id); close(); }}>
+                  <span className="flex items-baseline gap-2 text-left">
+                    <span className="shrink-0 font-mono text-xs text-muted">{l.id}</span>
+                    <span className={`line-clamp-2 ${km ? KHMER : ""}`}>{l.text}</span>
+                  </span>
+                </UIMenuItem>
+              ))}
+            </>
+          )}
+        </UIMenu>
+      )}
+      {onJoin && (
+        <UIButton type="button" size="sm" variant="ghost" icon={<Merge aria-hidden="true" />} aria-label={t("studio.pages.joinTitle", { n, before: n - 1 })} title={t("studio.pages.joinTitle", { n, before: n - 1 })} onClick={onJoin}>
+          {t("studio.pages.join")}
+        </UIButton>
+      )}
+    </div>
   );
 }
 

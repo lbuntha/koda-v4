@@ -101,6 +101,12 @@ export interface Sentence {
   picture?: string | null;
   /** Where that picture sits on its page. Absent means top. Written beside `picture`. */
   pictureAt?: PicturePlace;
+  /**
+   * Where the author put a page break: true starts a new page at this sentence,
+   * false keeps it on the page before. Absent means automatic — the band's
+   * sentences and characters per page decide.
+   */
+  pageBreak?: boolean;
 }
 
 /** What an author adds about one story word. Either part may be missing. */

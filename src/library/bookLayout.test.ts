@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { STARTER_PASSAGES } from "./data/starterPassages";
-import { headingLength, keyWordsOf, layoutBook, pagePicture, paginate, setSentence, withPageChoice, withPagePicture } from "./bookLayout";
+import { hasOwnPages, headingLength, joinPageToPrevious, keyWordsOf, layoutBook, pagePicture, paginate, setSentence, withAutomaticPages, withPageBreak, withPageChoice, withPagePicture } from "./bookLayout";
 import type { Passage, Sentence } from "./data/passage";
 
 const [MARKET, RAINY, MARKET_KM] = STARTER_PASSAGES;
@@ -20,6 +20,37 @@ describe("paginate", () => {
     const long = s("s2", "word ".repeat(40).trim());
     const pages = paginate({ band: "A", sentences: [s("s1", "A cat."), long, s("s3", "The end.")] });
     expect(pages.map((pg) => pg.map((x) => x.id))).toEqual([["s1"], ["s2"], ["s3"]]);
+  });
+});
+
+describe("page breaks an author places", () => {
+  const book = { band: "A" as const, sentences: [s("s1", "A cat."), s("s2", "A dog."), s("s3", "A hen."), s("s4", "The end.")] };
+  const ids = (b: Pick<Passage, "band" | "sentences">) => paginate(b).map((pg) => pg.map((x) => x.id));
+
+  it("start a new page where the author says", () => {
+    expect(ids(book)).toEqual([["s1", "s2"], ["s3", "s4"]]);
+    expect(ids(withPageBreak(book, "s2", true))).toEqual([["s1"], ["s2", "s3"], ["s4"]]);
+  });
+
+  it("keep a sentence on the page before, past the band's count", () => {
+    expect(ids(withPageBreak(book, "s3", false))).toEqual([["s1", "s2", "s3"], ["s4"]]);
+  });
+
+  it("never mark the first sentence, and go back to automatic", () => {
+    expect(withPageBreak(book, "s1", true).sentences[0]).not.toHaveProperty("pageBreak");
+    const split = withPageBreak(book, "s2", true);
+    expect(hasOwnPages(split)).toBe(true);
+    expect(withPageBreak(split, "s2", undefined).sentences[1]).not.toHaveProperty("pageBreak");
+    expect(ids(withAutomaticPages(split))).toEqual(ids(book));
+    expect(hasOwnPages(withAutomaticPages(split))).toBe(false);
+  });
+
+  it("join a page to the one before, keeping one picture choice", () => {
+    const pictured = { ...book, sentences: book.sentences.map((x) => (x.id === "s3" ? { ...x, picture: "hen", pictureAt: "left" as const } : x)) };
+    const joined = joinPageToPrevious(pictured, ["s1", "s2"], ["s3", "s4"]);
+    expect(ids(joined)).toEqual([["s1", "s2", "s3", "s4"]]);
+    expect(joined.sentences[0]).toMatchObject({ picture: "hen", pictureAt: "left" });
+    expect(joined.sentences[2]).not.toHaveProperty("picture");
   });
 });
 

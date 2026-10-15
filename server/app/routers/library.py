@@ -185,6 +185,9 @@ def _clean(passage: dict[str, Any]) -> dict[str, Any]:
             raise AppError(400, "invalid_passage", "A page picture must be a picture key.")
         if "pictureAt" in s and s["pictureAt"] not in PLACES:
             raise AppError(400, "invalid_passage", "A page picture goes top, bottom, left or right.")
+        # The author's page break: True starts a page here, False keeps it on the page before.
+        if "pageBreak" in s and not isinstance(s["pageBreak"], bool):
+            raise AppError(400, "invalid_passage", "A page break is true or false.")
     if not (isinstance(passage.get("picture"), str) and PICTURE_KEY.fullmatch(passage["picture"])):
         raise AppError(400, "invalid_passage", "The cover picture must be a picture key.")
     for q in questions:
