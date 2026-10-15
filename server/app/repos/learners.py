@@ -79,6 +79,8 @@ async def remove(db: AsyncIOMotorDatabase, learner_id: str, family_id: str) -> b
         await db.skill_registrations.delete_many(
             {"ownerType": "learner", "ownerId": learner_id}
         )
+        # A child's recorded voice goes with them.
+        await db.voice_notes.delete_many({"familyId": family_id, "learnerId": learner_id})
     return result.deleted_count == 1
 
 

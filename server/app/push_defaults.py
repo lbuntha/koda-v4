@@ -71,6 +71,8 @@ SENDS: frozenset[str] = frozenset(
         # Phase 4: progress, judged on the server by `services/mastery.py`.
         "learn.mastered",
         "learn.stuck",
+        # A child read a book aloud and sent it, from `routers/voice_notes.py`.
+        "learn.voice_note",
     }
 )
 
@@ -417,6 +419,18 @@ DEFAULT_KINDS: list[dict[str, Any]] = [
         "familyDefault": True,
     },
     {
+        # A child read to their grown-ups. Sent the moment it arrives: it is a
+        # message from a person, not a report, so it is neither capped nor held.
+        "kindId": "learn.voice_note",
+        "title": "{learner} read to you",
+        "body": "A voice message from {book}. Tap to listen.",
+        "placeholders": ["learner", "book"],
+        "class": "courtesy",
+        "label": "Voice message from a child",
+        "settingId": "push.voiceNote",
+        "familyDefault": True,
+    },
+    {
         # Going wrong more often than right, on more than one day. Once per lesson
         # per week, so a hard fortnight is two messages rather than a nag a day.
         "kindId": "learn.stuck",
@@ -479,6 +493,7 @@ SAMPLES = {
     "time": "38 minutes",
     "lessons": "Count On",
     "lesson": "Take Away",
+    "book": "The Rainy Day",
     "minutes": "30 minutes",
     "summary": "• Mia: practised on 4 days — 12 rounds, 38 minutes\n• Leo: practised on 2 days — 5 rounds, 14 minutes",
 }

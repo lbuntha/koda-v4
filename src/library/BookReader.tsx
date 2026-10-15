@@ -1,6 +1,6 @@
 import { memo, useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState, type CSSProperties, type PointerEvent as ReactPointerEvent, type ReactNode, type RefObject } from "react";
 import { animate, motion, useMotionValue, useReducedMotion, useTransform } from "motion/react";
-import { Volume2, X } from "lucide-react";
+import { Mic, Square, Volume2, X } from "lucide-react";
 import { BANDS, noteFor, PAGE_TEXT_SIZES, type Passage, type PicturePlace, type Sentence } from "./data/passage";
 import { layoutBook, type PageText, type SetSentence, type SetToken } from "./bookLayout";
 import { FIT_MAX, nextFit, wordsFit } from "./fitPage";
@@ -16,6 +16,9 @@ import { playSound } from "../utils/audio";
 import { UIReaderFrame, UIReaderPagination, UIReaderToolbar } from "../components/ui";
 import { useTheme } from "../context/ThemeContext";
 import { useT } from "../lib/i18n";
+import { SessionAPI } from "../lib/sync";
+import { canRecordVoice, useVoiceNote } from "./voiceNotes";
+import { VoiceNoteBar } from "./VoiceNoteBar";
 
 /**
  * A story read as a book: one page at a time, turned by a swipe, the arrows or
@@ -211,6 +214,12 @@ export function BookReader({ book, onBack, onReady, preview = false, pageControl
   const [autoTurn, setAutoTurnState] = useState(readAutoTurn);
   const autoTurnRef = useRef(autoTurn);
   autoTurnRef.current = autoTurn;
+  // "Read to my grown-ups": only a child's own session can send, never a preview.
+  const [canRecord] = useState(() => !preview && Boolean(SessionAPI.current()?.learnerId) && canRecordVoice());
+  const voice = useVoiceNote(book, page);
+  const recording = voice.stage === "recording" || voice.stage === "asking";
+  const recordingRef = useRef(recording);
+  recordingRef.current = recording;
   // The cover settles in once, when the book is opened — not every time a
   // reader turns back to it.
   const [opened, setOpened] = useState(false);
@@ -284,7 +293,8 @@ export function BookReader({ book, onBack, onReady, preview = false, pageControl
     setOpened(true);
     setSilent(false);
     if (scrollEl.current) scrollEl.current.scrollTop = 0;
-    playSound("page");
+    // Not into the child's recording.
+    if (!recordingRef.current) playSound("page");
   };
   const setTextStep = (n: number) => {
     const next = Math.max(0, Math.min(TEXT_STEPS.length - 1, n));
@@ -567,7 +577,8 @@ export function BookReader({ book, onBack, onReady, preview = false, pageControl
           playing: reading,
           // A download that failed can be tried again; a browser that cannot play the format cannot.
           // Mid-read (auto turn lands on a page still preparing) it must stay a stop button.
-          disabled: reading ? false : pageAudio === "failed" ? !audioSupported : pageAudio !== "ready",
+          // Koda's voice would end up in the child's recording, so it waits until they stop.
+          disabled: reading ? false : recording || (pageAudio === "failed" ? !audioSupported : pageAudio !== "ready"),
           disabledTitle: pageAudio === "failed" ? t("reader.cannotPlay") : t("reader.preparingAudio"),
           retryTitle: pageAudio === "failed" && audioSupported ? t("reader.audioRetry") : undefined,
           onToggle: () => (pageAudio === "failed" ? setAudioAttempt((n) => n + 1) : void readPage()),
@@ -575,8 +586,29 @@ export function BookReader({ book, onBack, onReady, preview = false, pageControl
         autoTurn={bookRecorded ? { on: autoTurn, onToggle: toggleAutoTurn } : undefined}
         dark={theme === "dark"}
         onToggleDark={toggleTheme}
-      />}
-      controls={pageControls?.(page > 0 && pages.story[page - 1] ? { n: page, ids: pages.story[page - 1].map((s) => s.sentence.id), text: pages.texts[page - 1] } : null)}
+      >
+        {canRecord && (
+          <button
+            type="button"
+            onClick={() => {
+              if (recording) return voice.stop();
+              hush();
+              void voice.start();
+            }}
+            aria-pressed={recording}
+            aria-label={recording ? t("reader.voice.stop") : t("reader.voice.record")}
+            title={recording ? t("reader.voice.stop") : t("reader.voice.record")}
+            className={`grid h-11 w-11 shrink-0 place-items-center rounded-full transition-[background-color,color,transform] duration-150 active:scale-90 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 motion-reduce:transition-none [&>svg]:h-[1.15rem] [&>svg]:w-[1.15rem] ${recording ? "bg-rose-600 text-white" : "text-ink hover:bg-surface-muted"}`}
+          >
+            {recording ? <Square aria-hidden="true" className="fill-current" /> : <Mic aria-hidden="true" />}
+          </button>
+        )}
+      </UIReaderToolbar>}
+      controls={(() => {
+        const authoring = pageControls?.(page > 0 && pages.story[page - 1] ? { n: page, ids: pages.story[page - 1].map((s) => s.sentence.id), text: pages.texts[page - 1] } : null);
+        const reading = canRecord && voice.stage !== "idle" ? <VoiceNoteBar voice={voice} /> : null;
+        return authoring || reading ? <div className="grid gap-2">{authoring}{reading}</div> : undefined;
+      })()}
       footer={<UIReaderPagination
         page={page}
         pageCount={pages.count}

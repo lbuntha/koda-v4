@@ -381,6 +381,15 @@ DEFAULT_SETTINGS: list[dict] = [
         "order": 89,
     },
     {
+        "settingId": "push.voiceNote",
+        "group": "Notifications",
+        "label": "Voice messages",
+        "description": "Tells a parent when a child sends a recording of themselves reading.",
+        "type": "bool",
+        "value": True,
+        "order": 89,
+    },
+    {
         "settingId": "push.stuck",
         "group": "Notifications",
         "label": "Stuck on something",

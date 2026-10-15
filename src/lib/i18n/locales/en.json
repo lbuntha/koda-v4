@@ -17,7 +17,8 @@
     "seeAll": "See all ({count})",
     "showLess": "Show less",
     "scrollBack": "Scroll back",
-    "scrollOn": "Scroll on"
+    "scrollOn": "Scroll on",
+    "ok": "OK"
   },
   "nav": {
     "home": "Home",
@@ -507,7 +508,25 @@
     "tapSpeaker": "Tap the speaker to hear it",
     "autoTurn": "Turn pages by themselves",
     "autoTurnOn": "Auto turn is on: after a page is read, the next page turns and is read",
-    "autoTurnOff": "Auto turn is off: tap to turn pages by themselves after reading"
+    "autoTurnOff": "Auto turn is off: tap to turn pages by themselves after reading",
+    "voice": {
+      "record": "Record my reading for my grown-ups",
+      "region": "Voice message",
+      "asking": "Allow the microphone to start recording…",
+      "recording": "Recording",
+      "recordingHint": "Read aloud. Turn the pages as you go, then press Stop.",
+      "stop": "Stop recording",
+      "listen": "Listen to your reading ({time})",
+      "listenBack": "Your recording",
+      "send": "Send to my grown-ups",
+      "sending": "Sending…",
+      "retry": "Try sending again",
+      "again": "Record again",
+      "discard": "Throw this recording away",
+      "sent": "Sent! Your grown-ups can listen now.",
+      "failed": "It did not send",
+      "blocked": "The microphone is off. Ask a grown-up to allow it for Koda in the browser settings."
+    }
   },
   "library": {
     "tagline": "Read a story, answer questions, then spell words from it.",
@@ -1952,6 +1971,23 @@
     "paintings": {
       "title": "Paintings",
       "subtitle": "Pictures {name} finished colouring, newest first."
+    },
+    "voice": {
+      "title": "Voice messages",
+      "note": "{name} read these aloud and sent them to you.",
+      "new": {
+        "one": "{count} new",
+        "other": "{count} new"
+      },
+      "play": "Play {book}",
+      "pause": "Pause {book}",
+      "page": "Page {n}",
+      "pages": "Pages {from}–{to}",
+      "unheard": "Not heard yet",
+      "delete": "Delete",
+      "deleteOne": "Delete the recording of {book}",
+      "playFailed": "That recording could not be played. Try again.",
+      "deleteFailed": "That recording could not be deleted. Try again."
     }
   },
   "leaderboard": {

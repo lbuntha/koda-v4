@@ -58,6 +58,10 @@ INDEXES: dict[str, list[IndexModel]] = {
         # The list is always "mine, newest first", so it is one compound index.
         IndexModel([("userId", ASCENDING), ("createdAt", DESCENDING)], name="by_person_recent"),
     ],
+    "voice_notes": [
+        # A child's list in the report, newest first; also the per-day send count.
+        IndexModel([("familyId", ASCENDING), ("learnerId", ASCENDING), ("createdAt", DESCENDING)], name="by_learner_recent"),
+    ],
     "notify_schedule": [
         # Keyed by `_id` — one row per person — so there is nothing to index for
         # the read. This is the job's own query: everyone who has told us what

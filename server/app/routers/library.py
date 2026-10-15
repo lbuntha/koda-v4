@@ -443,8 +443,9 @@ async def upload_audio(body: AudioWrite, db: Db, p: CanWrite) -> AudioSaved:
     return await store_audio(body)
 
 
-async def store_audio(body: AudioWrite) -> AudioSaved:
-    """Check and keep one recording. Shared with Trace, whose creators record letter names into the same store."""
+async def store_audio(body: AudioWrite, max_bytes: int = MAX_AUDIO_BYTES) -> AudioSaved:
+    """Check and keep one recording. Shared with Trace, whose creators record letter
+    names into the same store, and with a child's voice messages, which are longer."""
     if body.mime.split(";")[0].strip() not in AUDIO_TYPES:
         raise AppError(415, "unsupported_audio", "Recordings must be WAV, WebM, Ogg, MP4 or MP3 audio.")
     try:
@@ -453,8 +454,8 @@ async def store_audio(body: AudioWrite) -> AudioSaved:
         raise AppError(400, "invalid_audio", "The recording is not valid base64.") from None
     if not data:
         raise AppError(400, "invalid_audio", "The recording is empty.")
-    if len(data) > MAX_AUDIO_BYTES:
-        raise AppError(413, "audio_too_large", "A recording may be at most 2 MB.")
+    if len(data) > max_bytes:
+        raise AppError(413, "audio_too_large", f"A recording may be at most {max_bytes // (1024 * 1024)} MB.")
     try:
         clip_id, stored_bytes = await audio_store.put(data, body.mime.split(";")[0].strip())
     except ValueError as exc:

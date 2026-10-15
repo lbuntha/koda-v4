@@ -38,6 +38,7 @@ import { SKILLS } from "../../skills/registry";
 import { themeSystem } from "../../lib/themeSystem";
 import { UIAvatar, UIBadge, UIButton, UISectionHeader, UIStatGrid, UIStatTile } from "../ui";
 import { NoAccess } from "./NoAccess";
+import { VoiceNotesCard } from "./VoiceNotesCard";
 import { TraceReport } from "../../trace/report/TraceReport";
 import { PaintingsReport } from "../../trace/report/PaintingsReport";
 import { formatDate, translate, useT } from "../../lib/i18n";
@@ -507,6 +508,9 @@ export const ChildReportPage: React.FC<ChildReportPageProps> = ({
         </header>
 
         {error && <p className={themeSystem.flash("error")}>{error}</p>}
+
+        {/* What the child read aloud and sent. Absent until there is one. */}
+        <VoiceNotesCard learnerId={learnerId} learnerName={learnerName} />
 
         {/*
           * A record that exists but is too young to read is its own answer, and

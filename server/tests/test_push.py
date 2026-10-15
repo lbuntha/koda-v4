@@ -406,6 +406,8 @@ async def test_only_kinds_with_a_sender_are_offered(client, parent, seeded):
         "learn.time_limit",
         "learn.mastered",
         "learn.stuck",
+        # Sent the moment a child sends a recording of themselves reading.
+        "learn.voice_note",
     }
 
 
