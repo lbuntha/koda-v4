@@ -1,8 +1,8 @@
 import { memo, useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState, type CSSProperties, type PointerEvent as ReactPointerEvent, type ReactNode, type RefObject } from "react";
 import { animate, motion, useMotionValue, useReducedMotion, useTransform } from "motion/react";
 import { Volume2, X } from "lucide-react";
-import { BANDS, noteFor, type Passage, type PicturePlace, type Sentence } from "./data/passage";
-import { layoutBook, type SetSentence, type SetToken } from "./bookLayout";
+import { BANDS, noteFor, PAGE_TEXT_SIZES, type Passage, type PicturePlace, type Sentence } from "./data/passage";
+import { layoutBook, type PageText, type SetSentence, type SetToken } from "./bookLayout";
 import { FIT_MAX, nextFit, wordsFit } from "./fitPage";
 import { FLAT, SPRING, TURNED, angularVelocity, castOf, completes, curlOf, dragAngle, shadeOf, type Dir } from "./pageTurn";
 import { Picture } from "./Picture";
@@ -165,7 +165,24 @@ export function spokenWordAt(sentence: Pick<Sentence, "words" | "audioCues">, el
 
 interface Turn { dir: Dir; from: number; to: number }
 
-export function BookReader({ book, onBack, onReady, preview = false }: { book: Passage; onBack(): void; onReady(): void; preview?: boolean }) {
+/** The page on screen, as an author's controls in the preview see it. */
+export interface ReaderPage {
+  /** 1-based story page. */
+  n: number;
+  /** Its sentences, in order: what a page choice is written against. */
+  ids: string[];
+  text: PageText;
+}
+
+export function BookReader({ book, onBack, onReady, preview = false, pageControls }: {
+  book: Passage; onBack(): void; onReady(): void; preview?: boolean;
+  /**
+   * Controls for the page on screen, drawn under the toolbar — the studio's
+   * preview sets each page's text there and sees it change in place. Called with
+   * null on the cover. A child's reader never passes it.
+   */
+  pageControls?: (page: ReaderPage | null) => ReactNode;
+}) {
   const { theme, toggleTheme } = useTheme();
   const { t } = useT();
   const hasQuiz = useMemo(() => quizOf(book).length > 0, [book]);
@@ -213,7 +230,10 @@ export function BookReader({ book, onBack, onReady, preview = false }: { book: P
   );
   const pageRecorded = pageSentences.length > 0 && pageAudioIds.length === pageSentences.length;
   // The read-through, in the learning log. An author's preview is marked, as the quiz marks it.
-  const record = useMemo(() => new ReadingRecorder(book, pages.count, preview ? "preview" : "picker"), [book, pages.count, preview]);
+  // Keyed by the book's identity, not the object: an author changing a page's
+  // text in the preview is still the same read-through, not a new one.
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  const record = useMemo(() => new ReadingRecorder(book, pages.count, preview ? "preview" : "picker"), [book.id, book.rev, pages.count, preview]);
   useEffect(() => {
     record.start();
     return () => record.close();
@@ -506,7 +526,7 @@ export function BookReader({ book, onBack, onReady, preview = false }: { book: P
   const sheet = (i: number) => (
     <Sheet index={i} count={pages.count}>
       {i === 0 ? <TitlePage book={book} km={km} fit={fit} intro={!opened && !reduce} /> : (
-        <StoryPage book={book} sentences={pages.story[i - 1]} picture={pages.pictures[i - 1]} at={pages.places[i - 1]} scale={scale * wordsFit(fit)} fit={fit} playing={playing} playingWord={playingWord} peek={peek} onWord={tapWord} end={i === last} />
+        <StoryPage book={book} sentences={pages.story[i - 1]} picture={pages.pictures[i - 1]} at={pages.places[i - 1]} text={pages.texts[i - 1]} scale={scale * wordsFit(fit)} fit={fit} playing={playing} playingWord={playingWord} peek={peek} onWord={tapWord} end={i === last} />
       )}
     </Sheet>
   );
@@ -556,6 +576,7 @@ export function BookReader({ book, onBack, onReady, preview = false }: { book: P
         dark={theme === "dark"}
         onToggleDark={toggleTheme}
       />}
+      controls={pageControls?.(page > 0 && pages.story[page - 1] ? { n: page, ids: pages.story[page - 1].map((s) => s.sentence.id), text: pages.texts[page - 1] } : null)}
       footer={<UIReaderPagination
         page={page}
         pageCount={pages.count}
@@ -730,7 +751,16 @@ const reservedShape = (at: PicturePlace): number =>
  */
 const shapes = new Map<string, number>();
 
-const StoryPage = memo(function StoryPage({ book, sentences, picture, at = "top", scale, fit, playing, playingWord, peek, onWord, end }: {
+const DEFAULT_TEXT: PageText = { size: "normal", align: "left" };
+const ALIGN: Record<PageText["align"], string> = { left: "", center: "text-center", right: "text-right" };
+/**
+ * A page's size on a phone: most of the way there, not all of it. On a narrow
+ * screen a short line set at twice the size already fills the width, and the
+ * page still shrinks to fit if it needs to.
+ */
+const phoneSize = (size: number) => 1 + (size - 1) * 0.6;
+
+const StoryPage = memo(function StoryPage({ book, sentences, picture, at = "top", text = DEFAULT_TEXT, scale, fit, playing, playingWord, peek, onWord, end }: {
   book: Passage;
   sentences: SetSentence[];
   /** The reader's text size and the page's fit, as one multiple of the page's own size. */
@@ -741,6 +771,8 @@ const StoryPage = memo(function StoryPage({ book, sentences, picture, at = "top"
   picture: string | null;
   /** Where the illustration sits. */
   at?: PicturePlace;
+  /** The author's size and alignment for this page's words. */
+  text?: PageText;
   playing: string | null;
   playingWord: { sentence: string; index: number } | null;
   peek: string | null;
@@ -777,9 +809,11 @@ const StoryPage = memo(function StoryPage({ book, sentences, picture, at = "top"
   // own choice of size. Younger readers get the larger type.
   const base = book.band === "A" ? "clamp(1.3rem, 1.05rem + 1.1vw, 1.65rem)" : "clamp(1.15rem, 0.95rem + 0.9vw, 1.45rem)";
   const type = km ? `${KHMER} leading-[2.1]` : `${SERIF} leading-[1.7]`;
+  const size = PAGE_TEXT_SIZES[text.size] ?? 1;
+  const align = ALIGN[text.align] ?? "";
 
   return (
-    <div className="@container flex flex-1 flex-col [--cap:var(--picture-max)] sm:[--cap:var(--picture-max-wide)]" style={{ "--fit": fit, "--picture-max": PICTURE_MAX, "--picture-max-wide": PICTURE_MAX_WIDE, "--shape": shape, "--picture-w": PICTURE_W } as CSSProperties}>
+    <div className="@container flex flex-1 flex-col [--cap:var(--picture-max)] sm:[--cap:var(--picture-max-wide)]" style={{ "--fit": fit, "--picture-max": PICTURE_MAX, "--picture-max-wide": PICTURE_MAX_WIDE, "--shape": shape, "--picture-w": PICTURE_W, "--page-size-phone": phoneSize(size), "--page-size-wide": size } as CSSProperties}>
       <div data-picture-at={picture ? at : undefined} className={`flex gap-6 sm:gap-8 ${picture ? PLACE[at].page : "my-auto flex-col"} ${picture && at !== "top" ? "my-auto" : ""}`}>
       {picture && (
         <div className={`overflow-hidden rounded-lg transition-[width] duration-200 ease-out motion-reduce:transition-none ${PLACE[at].frame}`}>
@@ -790,11 +824,11 @@ const StoryPage = memo(function StoryPage({ book, sentences, picture, at = "top"
         </div>
       )}
       <div ref={wordsEl} className={`relative isolate grid gap-6 px-1 ${picture ? PLACE[at].words : "mx-auto w-full max-w-[34em]"}`}>
-        <ReadMarker box={wordsEl} word={playingWord} scale={scale} />
+        <ReadMarker box={wordsEl} word={playingWord} scale={scale * size} />
         {blocks.map((b, i) => (
           <div key={i}>
             {b.heading && (
-              <h2 className={`mb-3 text-xs font-bold uppercase tracking-[0.2em] text-neutral-500 dark:text-neutral-400 ${km ? KHMER : ""}`}>
+              <h2 className={`mb-3 text-xs font-bold uppercase tracking-[0.2em] text-neutral-500 dark:text-neutral-400 ${align} ${km ? KHMER : ""}`}>
                 {b.sentences[0].sentence.words.slice(0, b.sentences[0].sentence.words.length - b.sentences[0].tokens.length).map((word, wordIndex, heading) => (
                   <span
                     key={wordIndex}
@@ -806,7 +840,7 @@ const StoryPage = memo(function StoryPage({ book, sentences, picture, at = "top"
                 ))}
               </h2>
             )}
-            <p className={`m-0 ${type} text-pretty [overflow-wrap:anywhere] transition-[font-size] duration-200 ease-out motion-reduce:transition-none`} data-text-scale={scale} style={{ fontSize: `calc(${base} * ${scale})` }}>
+            <p className={`m-0 ${type} ${align} text-pretty [overflow-wrap:anywhere] transition-[font-size] duration-200 ease-out motion-reduce:transition-none [--page-size:var(--page-size-phone)] sm:[--page-size:var(--page-size-wide)]`} data-text-scale={scale} data-page-size={text.size} data-page-align={text.align} style={{ fontSize: `calc(${base} * ${scale} * var(--page-size))` }}>
               {b.sentences.map((s, j) => (
                 <span key={s.sentence.id}>
                   <span

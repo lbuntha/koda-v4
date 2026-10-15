@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { STARTER_PASSAGES } from "./data/starterPassages";
-import { hasOwnPages, headingLength, joinPageToPrevious, keyWordsOf, layoutBook, pagePicture, paginate, setSentence, withAutomaticPages, withPageBreak, withPageChoice, withPagePicture } from "./bookLayout";
+import { hasOwnPages, headingLength, pageText, joinPageToPrevious, keyWordsOf, layoutBook, pagePicture, paginate, setSentence, withAutomaticPages, withPageBreak, withPageChoice, withPagePicture } from "./bookLayout";
 import type { Passage, Sentence } from "./data/passage";
 
 const [MARKET, RAINY, MARKET_KM] = STARTER_PASSAGES;
@@ -51,6 +51,26 @@ describe("page breaks an author places", () => {
     expect(ids(joined)).toEqual([["s1", "s2", "s3", "s4"]]);
     expect(joined.sentences[0]).toMatchObject({ picture: "hen", pictureAt: "left" });
     expect(joined.sentences[2]).not.toHaveProperty("picture");
+  });
+});
+
+describe("a page's text size and alignment", () => {
+  const book = { band: "A" as const, sentences: [s("s1", "A cat."), s("s2", "A dog.")] };
+
+  it("live on the page's first sentence, beside its picture, and default to normal and left", () => {
+    const sized = withPageChoice({ ...book, sentences: [book.sentences[0], { ...book.sentences[1], picture: "dog" }] }, ["s1", "s2"], { textSize: "large", textAlign: "center" });
+    expect(sized.sentences[0]).toMatchObject({ picture: "dog", textSize: "large", textAlign: "center" });
+    expect(sized.sentences[1]).not.toHaveProperty("textSize");
+    expect(pageText(sized.sentences.map((sentence) => ({ sentence })))).toEqual({ size: "large", align: "center" });
+    expect(pageText(book.sentences.map((sentence) => ({ sentence })))).toEqual({ size: "normal", align: "left" });
+  });
+
+  it("are kept when the picture changes, and normal and left are not stored", () => {
+    const sized = withPageChoice(book, ["s1", "s2"], { textSize: "huge" });
+    expect(withPagePicture(sized, ["s1", "s2"], "cat").sentences[0]).toMatchObject({ picture: "cat", textSize: "huge" });
+    const back = withPageChoice(sized, ["s1", "s2"], { textSize: "normal", textAlign: "left" });
+    expect(back.sentences[0]).not.toHaveProperty("textSize");
+    expect(back.sentences[0]).not.toHaveProperty("textAlign");
   });
 });
 

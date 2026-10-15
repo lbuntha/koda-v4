@@ -64,6 +64,8 @@ IMAGE_MAGIC = {
 }
 PHOTO_PREFIX = "photo-"
 PLACES = {"top", "bottom", "left", "right"}
+TEXT_SIZES = {"normal", "large", "larger", "huge"}
+TEXT_ALIGNS = {"left", "center", "right"}
 # The shelves every studio starts with. An author may add their own: a new
 # shelf exists once a book sits on it, and is offered for every book after.
 CATEGORIES = {"Animals", "Food", "Family", "Places", "Weather & play", "Everyday"}
@@ -188,6 +190,10 @@ def _clean(passage: dict[str, Any]) -> dict[str, Any]:
         # The author's page break: True starts a page here, False keeps it on the page before.
         if "pageBreak" in s and not isinstance(s["pageBreak"], bool):
             raise AppError(400, "invalid_passage", "A page break is true or false.")
+        if "textSize" in s and s["textSize"] not in TEXT_SIZES:
+            raise AppError(400, "invalid_passage", "A page's text size is normal, large, larger or huge.")
+        if "textAlign" in s and s["textAlign"] not in TEXT_ALIGNS:
+            raise AppError(400, "invalid_passage", "A page's text lines up left, center or right.")
     if not (isinstance(passage.get("picture"), str) and PICTURE_KEY.fullmatch(passage["picture"])):
         raise AppError(400, "invalid_passage", "The cover picture must be a picture key.")
     for q in questions:

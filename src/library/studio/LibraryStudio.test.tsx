@@ -325,6 +325,34 @@ describe("Library Studio", () => {
     expect(saved.sentences.every((x) => x.pageBreak === undefined)).toBe(true);
   });
 
+  it("lets an author set a page's text size and alignment in the live preview", async () => {
+    await startBook();
+    fireEvent.click(screen.getByRole("radio", { name: /Offline drafter/ }));
+    fireEvent.click(screen.getByRole("button", { name: "Continue" }));
+    await fillSections();
+    fireEvent.click(screen.getByRole("button", { name: /^5\s*Preview$/ }));
+
+    // On the cover there is no page to set yet.
+    expect(screen.getByText(/Turn to a page to set/)).toBeTruthy();
+    fireEvent.click(screen.getByRole("button", { name: "Next page" }));
+    const bar = screen.getByRole("group", { name: "Text size and alignment for page 1" });
+    expect(within(bar).getByRole("button", { name: "Normal" }).getAttribute("aria-pressed")).toBe("true");
+
+    // Each choice redraws the page in place.
+    fireEvent.click(within(bar).getByRole("button", { name: "Huge" }));
+    fireEvent.click(within(bar).getByRole("button", { name: "Center" }));
+    const words = document.querySelector("[data-page-size]") as HTMLElement;
+    expect(words.getAttribute("data-page-size")).toBe("huge");
+    expect(words.className).toMatch(/text-center/);
+    expect(screen.getByLabelText("Page 1 of 2")).toBeTruthy();
+
+    fireEvent.click(screen.getByRole("button", { name: "Save draft" }));
+    await waitFor(() => expect(api.saveDraft).toHaveBeenCalled());
+    const saved = api.saveDraft.mock.calls.at(-1)![1] as { sentences: Array<{ textSize?: string; textAlign?: string }> };
+    expect(saved.sentences[0]).toMatchObject({ textSize: "huge", textAlign: "center" });
+    expect(saved.sentences.slice(1).every((x) => !x.textSize && !x.textAlign)).toBe(true);
+  });
+
   it("starts Review with every section empty, and makes one section with AI on request", async () => {
     await startBook();
     fireEvent.click(screen.getByRole("button", { name: "Continue" }));

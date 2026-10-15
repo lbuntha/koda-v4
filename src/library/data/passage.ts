@@ -107,6 +107,10 @@ export interface Sentence {
    * sentences and characters per page decide.
    */
   pageBreak?: boolean;
+  /** How large this page's words are set, against the band's own size. Absent means normal. Written beside `picture`. */
+  textSize?: PageTextSize;
+  /** How this page's words line up. Absent means left (start). Written beside `picture`. */
+  textAlign?: PageTextAlign;
 }
 
 /** What an author adds about one story word. Either part may be missing. */
@@ -125,6 +129,16 @@ export function noteFor(book: Pick<Passage, "wordNotes">, word: string): WordNot
 
 export type PicturePlace = "top" | "bottom" | "left" | "right";
 export const PICTURE_PLACES: readonly PicturePlace[] = ["top", "bottom", "left", "right"];
+
+/**
+ * A page's text size, for a page whose few words would sit small on it. Each is
+ * a multiple of the band's size; the reader still shrinks a page that would not
+ * fit its screen, so a large size never pushes words off a phone.
+ */
+export type PageTextSize = "normal" | "large" | "larger" | "huge";
+export const PAGE_TEXT_SIZES: Record<PageTextSize, number> = { normal: 1, large: 1.35, larger: 1.75, huge: 2.25 };
+export type PageTextAlign = "left" | "center" | "right";
+export const PAGE_TEXT_ALIGNS: readonly PageTextAlign[] = ["left", "center", "right"];
 
 /** "Where did they walk?" — a choice, with the sentence that proves it. */
 export interface ComprehensionQuestion {

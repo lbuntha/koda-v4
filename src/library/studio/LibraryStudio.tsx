@@ -9,6 +9,7 @@ import { baseOf, draftLocally, fromModel, withStoryPictures, joinSentences, merg
 import { BookPreview } from "../LibraryPage";
 import { bookTopics } from "../tags";
 import { PagesStep } from "./PagesStep";
+import { PageTextBar } from "./PageTextBar";
 import { UnitNamesPanel } from "./UnitNamesPanel";
 import { StudioHome } from "./StudioHome";
 import { useRecorder } from "./recorder";
@@ -25,7 +26,7 @@ import { PICTURE_KEYS } from "../Picture";
 import { BookStore } from "../bookStore";
 import { clipSizes, clipUrl, pcmToWav, uploadClip } from "../clips";
 import { isPhoto, photoSizes, photoDimensions } from "../photos";
-import { joinPageToPrevious, layoutBook, pagePicture, paginate, withPageBreak } from "../bookLayout";
+import { joinPageToPrevious, layoutBook, pagePicture, paginate, withPageBreak, withPageChoice } from "../bookLayout";
 import { say, stop } from "../voice";
 import { tutorHeaders } from "../../lib/tutorApi";
 import { aiDefault } from "../../lib/aiDefaults";
@@ -331,7 +332,13 @@ function Editor({ row, categories, reports = [], onResolved, onClose }: { row: B
         {step === 3 && draft && <PagesStep draft={draft} onEdit={edit} />}
         {step === 4 && draft && <VoiceStep draft={draft} onEdit={edit} />}
         {undoStory && <UIButton type="button" variant="secondary" onClick={() => { setInput(undoStory.input); setDraft(undoStory.draft); setConfirmed(undoStory.confirmed); setUndoStory(null); setDirty(true); }}>{t("studio.storyAi.undo")}</UIButton>}
-        {step === 5 && draft && <BookPreview book={{ ...draft, id, rev: status.rev || 1 }} onExit={() => { setPreviewed(true); setStep(6); }} />}
+        {step === 5 && draft && (
+          <BookPreview
+            book={{ ...draft, id, rev: status.rev || 1 }}
+            onExit={() => { setPreviewed(true); setStep(6); }}
+            pageControls={(page) => <PageTextBar page={page} onText={(ids, patch) => edit(withPageChoice(draft, ids, patch))} />}
+          />
+        )}
         {step === 6 && draft && verdict && <SummaryStep source={source} draft={draft} verdict={verdict} confirmed={confirmed} onEdit={edit} onNavigate={setStep} onQuestion={(id) => { setReviewTarget(id); setStep(2); }} />}
         {step === 7 && draft && verdict && (
           <PublishStep

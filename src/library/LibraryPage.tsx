@@ -23,7 +23,7 @@ import { canSpeak, say, sentenceSpeaks, stop } from "./voice";
 import { prefetchBook } from "./clips";
 import { prefetchPhotos } from "./photos";
 import { reportBook, type ReportReason } from "./api";
-import { BookReader } from "./BookReader";
+import { BookReader, type ReaderPage } from "./BookReader";
 import { playSound } from "../utils/audio";
 import { UIButton, UICard, UICarousel, UIMenu, UIMenuItem, UIGuideBubble, UIBookCard, UILinkButton, UIQuizToolbar, UIModal, UIMatchPairs, UIProgressBar, UISearchInput } from "../components/ui";
 import { themeSystem } from "../lib/themeSystem";
@@ -183,7 +183,7 @@ export function LibraryPage({ onAwardXp, onReaderChange, onBookChange, embedded 
  * no XP, and the learning log told "preview", which keeps it out of every child's
  * record.
  */
-export function BookPreview({ book, onExit }: { book: Passage; onExit(): void }) {
+export function BookPreview({ book, onExit, pageControls }: { book: Passage; onExit(): void; pageControls?: (page: ReaderPage | null) => ReactNode }) {
   const { t: tr } = useT();
   const [screen, setScreen] = useState<"read" | "quiz" | "results">("read");
   const [outcomes, setOutcomes] = useState<Outcome[]>([]);
@@ -193,7 +193,7 @@ export function BookPreview({ book, onExit }: { book: Passage; onExit(): void })
       <p className="mb-3 rounded-2xl border border-dashed border-indigo-400 bg-indigo-50 px-3 py-2 text-sm font-bold text-indigo-900 dark:bg-indigo-950 dark:text-indigo-100">
         {tr("library.previewNote")}
       </p>
-      {screen === "read" && <Reader book={book} preview onBack={onExit} onReady={() => (quizOf(book).length ? setScreen("quiz") : onExit())} />}
+      {screen === "read" && <Reader book={book} preview pageControls={pageControls} onBack={onExit} onReady={() => (quizOf(book).length ? setScreen("quiz") : onExit())} />}
       {screen === "quiz" && <Quiz book={book} preview onLeave={onExit} onFinish={(o) => { setOutcomes(o); setScreen("results"); }} />}
       {screen === "results" && <Results book={book} outcomes={outcomes} earned={null} onShelf={onExit} onAgain={() => setScreen("read")} />}
     </div>

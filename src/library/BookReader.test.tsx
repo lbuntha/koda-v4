@@ -164,6 +164,30 @@ describe("a page's picture in the reader", () => {
   });
 });
 
+describe("a page's text size and alignment", () => {
+  it("sets the page's words as the author chose, smaller on a phone than wide", () => {
+    const ids = paginate(MARKET)[0].map((s) => s.id);
+    const book = withPageChoice(MARKET, ids, { textSize: "huge", textAlign: "center" });
+    render(<BookReader book={book} preview onBack={() => {}} onReady={() => {}} />);
+    fireEvent.click(screen.getByRole("button", { name: "Next page" }));
+    const words = document.querySelector("[data-page-size]") as HTMLElement;
+    expect(words.getAttribute("data-page-size")).toBe("huge");
+    expect(words.className).toMatch(/text-center/);
+    expect(words.style.fontSize).toContain("var(--page-size)");
+    const page = words.closest("[style*='--page-size-wide']") as HTMLElement;
+    expect(page.style.getPropertyValue("--page-size-wide")).toBe("2.25");
+    expect(Number(page.style.getPropertyValue("--page-size-phone"))).toBeLessThan(2.25);
+  });
+
+  it("leaves a page the author did not touch at normal size, on the left", () => {
+    render(<BookReader book={MARKET} preview onBack={() => {}} onReady={() => {}} />);
+    fireEvent.click(screen.getByRole("button", { name: "Next page" }));
+    const words = document.querySelector("[data-page-size]") as HTMLElement;
+    expect(words.getAttribute("data-page-size")).toBe("normal");
+    expect(words.className).not.toMatch(/text-center|text-right/);
+  });
+});
+
 describe("turning a page", () => {
   it("plays a page sound each time the page actually changes, and only then", () => {
     playSound.mockClear();

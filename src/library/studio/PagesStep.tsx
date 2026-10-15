@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { AlertCircle, Check, ChevronDown, ImageOff, Loader2, Merge, RotateCcw, Scissors, Settings2, Sparkles, Square } from "lucide-react";
-import { hasOwnPages, joinPageToPrevious, layoutBook, pagePicture, withAutomaticPages, withPageBreak, withPageChoice, withPagePicture } from "../bookLayout";
-import { type Passage } from "../data/passage";
+import { hasOwnPages, joinPageToPrevious, layoutBook, pagePicture, pageText, withAutomaticPages, withPageBreak, withPageChoice, withPagePicture } from "../bookLayout";
+import { type PageTextAlign, type Passage } from "../data/passage";
 import { isPhoto, photosOf, uploadPhoto } from "../photos";
 import { core } from "../data/text";
 import { pictureFor } from "../draft";
@@ -37,6 +37,10 @@ import { useT } from "../../lib/i18n";
  * an author can break them by hand: under each card, "New page" starts a page at
  * one of its sentences, and "Join" puts it back on the page before. The break is
  * kept on the sentence (`pageBreak`), so the reader turns the same pages.
+ *
+ * How large a page's words are, and how they line up, is set in the Preview step
+ * (`PageTextBar`), on the page itself; a card here only lines its words up the
+ * same way.
  */
 
 type Draft = Omit<Passage, "rev">;
@@ -55,6 +59,7 @@ function pagesOf(draft: Draft) {
     lines: page.map((s) => ({ id: s.sentence.id, text: s.sentence.text })),
     text: page.map((s) => s.sentence.text).join(km ? "" : " "),
     picture: pagePicture(page, draft),
+    setting: pageText(page),
     words: [...new Set(page.flatMap((s) => s.tokens.map((t) => t.word)))],
   }));
 }
@@ -133,9 +138,9 @@ export function PagesStep({ draft, onEdit }: { draft: Draft; onEdit(d: Draft): v
         </li>
         {pages.map((p, i) => (
           <li key={p.n} className="grid content-start gap-1.5">
-            <PageCard label={t("studio.pages.page", { n: p.n })} selected={batch.selecting ? batch.chosen.has(p.n) : open === p.n} ticking={batch.selecting} state={batch.states[p.n]} onSelect={() => pick(p.n)} picture={p.picture.key} how={t(`studio.pages.how.${p.picture.how}`)} chosen={p.picture.how === "chosen"} place={p.picture.key && p.picture.at !== "top" ? t(`studio.pages.place.${p.picture.at}`) : ""} km={km} text={p.text} />
+            <PageCard label={t("studio.pages.page", { n: p.n })} selected={batch.selecting ? batch.chosen.has(p.n) : open === p.n} ticking={batch.selecting} state={batch.states[p.n]} onSelect={() => pick(p.n)} picture={p.picture.key} how={t(`studio.pages.how.${p.picture.how}`)} chosen={p.picture.how === "chosen"} place={p.picture.key && p.picture.at !== "top" ? t(`studio.pages.place.${p.picture.at}`) : ""} km={km} text={p.text} align={p.setting.align} />
             {!batch.selecting && (
-              <PageBreaks
+              <PageTools
                 n={p.n}
                 lines={p.lines}
                 km={km}
@@ -167,8 +172,8 @@ export function PagesStep({ draft, onEdit }: { draft: Draft; onEdit(d: Draft): v
   );
 }
 
-function PageCard({ label, selected, ticking = false, state, onSelect, picture, how, chosen = false, place = "", text, km, title = false }: {
-  label: string; selected: boolean; ticking?: boolean; state?: SlotState; onSelect(): void; picture: string | null; how: string; chosen?: boolean; place?: string; text: string; km: boolean; title?: boolean;
+function PageCard({ label, selected, ticking = false, state, onSelect, picture, how, chosen = false, place = "", text, align = "left", km, title = false }: {
+  label: string; selected: boolean; ticking?: boolean; state?: SlotState; onSelect(): void; picture: string | null; how: string; chosen?: boolean; place?: string; text: string; align?: PageTextAlign; km: boolean; title?: boolean;
 }) {
   const { t } = useT();
   const what = picture ? (isPhoto(picture) ? t("studio.pages.photoLower") : picture) : t("studio.pages.noPictureLower");
@@ -200,14 +205,16 @@ function PageCard({ label, selected, ticking = false, state, onSelect, picture, 
           <span>{label}{place && <span className="ml-1 normal-case tracking-normal text-muted">· {place}</span>}</span>
           {how && <span className={`rounded-full px-2 py-0.5 normal-case tracking-normal ${chosen ? "bg-indigo-100 text-indigo-800 dark:bg-indigo-950 dark:text-indigo-200" : "bg-surface-muted text-ink"}`}>{how}</span>}
         </span>
-        <span className={`line-clamp-3 text-sm text-ink ${km ? KHMER : SERIF} ${title ? "font-bold" : ""}`}>{text}</span>
+        <span className={`line-clamp-3 text-sm text-ink ${ALIGN_CLASS[align]} ${km ? KHMER : SERIF} ${title ? "font-bold" : ""}`}>{text}</span>
       </span>
     </button>
   );
 }
 
+const ALIGN_CLASS: Record<PageTextAlign, string> = { left: "text-left", center: "text-center", right: "text-right" };
+
 /** Under a page card: start a new page at one of its sentences, or join it to the page before. */
-function PageBreaks({ n, lines, km, onSplit, onJoin }: { n: number; lines: { id: string; text: string }[]; km: boolean; onSplit(id: string): void; onJoin?: () => void }) {
+function PageTools({ n, lines, km, onSplit, onJoin }: { n: number; lines: { id: string; text: string }[]; km: boolean; onSplit(id: string): void; onJoin?: () => void }) {
   const { t } = useT();
   if (lines.length < 2 && !onJoin) return null;
   return (

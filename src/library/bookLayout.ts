@@ -10,7 +10,7 @@
  * what the author published.
  */
 
-import type { Band, Passage, PicturePlace, Sentence } from "./data/passage";
+import type { Band, PageTextAlign, PageTextSize, Passage, PicturePlace, Sentence } from "./data/passage";
 import { core } from "./data/text";
 
 export type Emphasis = "key" | "name" | null;
@@ -143,29 +143,48 @@ export function pagePicture(page: readonly Pick<SetSentence, "sentence" | "token
   return { key: null, how: "auto", at };
 }
 
+export type PageText = { size: PageTextSize; align: PageTextAlign };
+
+/** How a page's words are set: the first sentence on it that says, else normal and left. */
+export function pageText(page: readonly Pick<SetSentence, "sentence">[]): PageText {
+  return {
+    size: page.find((s) => s.sentence.textSize)?.sentence.textSize ?? "normal",
+    align: page.find((s) => s.sentence.textAlign)?.sentence.textAlign ?? "left",
+  };
+}
+
 /**
- * Change one page's picture choice. `picture`: a key to choose one, null for
- * none, undefined for automatic; `at`: where it sits. Whatever the patch leaves
- * out is kept. Both live on the page's first sentence and are cleared from the
- * rest, so a page never carries two choices that could disagree.
+ * Change one page's choices. `picture`: a key to choose one, null for none,
+ * undefined for automatic; `at`: where it sits; `textSize` and `textAlign`: how
+ * its words are set. Whatever the patch leaves out is kept. All live on the
+ * page's first sentence and are cleared from the rest, so a page never carries
+ * two choices that could disagree.
  */
 export function withPageChoice<T extends Pick<Passage, "sentences">>(
   book: T,
   pageIds: readonly string[],
-  patch: { picture?: string | null | undefined; at?: PicturePlace },
+  patch: { picture?: string | null | undefined; at?: PicturePlace; textSize?: PageTextSize; textAlign?: PageTextAlign },
 ): T {
   const on = new Set(pageIds);
   const page = book.sentences.filter((s) => on.has(s.id));
   const hasPic = page.find((s) => s.picture !== undefined);
   const picture = "picture" in patch ? patch.picture : hasPic?.picture;
   const at = patch.at ?? page.find((s) => s.pictureAt)?.pictureAt;
+  const size = patch.textSize ?? page.find((s) => s.textSize)?.textSize;
+  const align = patch.textAlign ?? page.find((s) => s.textAlign)?.textAlign;
   return {
     ...book,
     sentences: book.sentences.map((s) => {
       if (!on.has(s.id)) return s;
-      const { picture: _p, pictureAt: _a, ...rest } = s;
+      const { picture: _p, pictureAt: _a, textSize: _s, textAlign: _l, ...rest } = s;
       if (s.id !== pageIds[0]) return rest;
-      return { ...rest, ...(picture !== undefined ? { picture } : {}), ...(at && at !== "top" ? { pictureAt: at } : {}) };
+      return {
+        ...rest,
+        ...(picture !== undefined ? { picture } : {}),
+        ...(at && at !== "top" ? { pictureAt: at } : {}),
+        ...(size && size !== "normal" ? { textSize: size } : {}),
+        ...(align && align !== "left" ? { textAlign: align } : {}),
+      };
     }),
   };
 }
@@ -217,6 +236,8 @@ export interface BookPages {
   pictures: (string | null)[];
   /** Where each story page's illustration sits. */
   places: PicturePlace[];
+  /** How each story page's words are set. */
+  texts: PageText[];
   keys: Set<string>;
   count: number;
 }
@@ -225,5 +246,5 @@ export function layoutBook(book: Pick<Passage, "band" | "language" | "sentences"
   const keys = keyWordsOf(book);
   const story = paginate(book).map((page) => page.map((s) => setSentence(s, book, keys)));
   const chosen = story.map((pg) => pagePicture(pg, book));
-  return { story, pictures: chosen.map((c) => c.key), places: chosen.map((c) => c.at), keys, count: story.length + 1 };
+  return { story, pictures: chosen.map((c) => c.key), places: chosen.map((c) => c.at), texts: story.map(pageText), keys, count: story.length + 1 };
 }

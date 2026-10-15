@@ -338,6 +338,21 @@ async def test_an_author_page_break_is_kept_and_must_be_true_or_false(client, db
     assert (await client.put("/library/drafts/break-book", json=_draft(book), headers=dev)).status_code == 400
 
 
+async def test_a_page_text_size_and_alignment_are_kept_and_checked(client, db):
+    dev = await _login(client, db, "dev@example.com", platform_role="developer")
+    book = copy.deepcopy(MARKET)
+    book["sentences"][0].update({"textSize": "huge", "textAlign": "center"})
+    saved = await client.put("/library/drafts/text-book", json=_draft(book), headers=dev)
+    assert saved.status_code == 200, saved.text
+    assert saved.json()["draft"]["sentences"][0]["textSize"] == "huge"
+    assert saved.json()["draft"]["sentences"][0]["textAlign"] == "center"
+
+    book["sentences"][0]["textSize"] = "giant"
+    assert (await client.put("/library/drafts/text-book", json=_draft(book), headers=dev)).status_code == 400
+    book["sentences"][0].update({"textSize": "large", "textAlign": "justify"})
+    assert (await client.put("/library/drafts/text-book", json=_draft(book), headers=dev)).status_code == 400
+
+
 async def test_a_unit_name_recording_is_kept_by_unit_and_read_by_every_reader(client, db, signup_body):
     dev = await _login(client, db, "dev@example.com", platform_role="developer")
     clip = (await client.post("/library/audio", json={"mime": "audio/wav", "data": _b64(WAV)}, headers=dev)).json()["id"]

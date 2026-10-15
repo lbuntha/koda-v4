@@ -11,6 +11,8 @@ export interface UIReaderFrameProps {
   className?: string;
   /** How far through the reader is, 0–1, drawn as a hairline under the toolbar. */
   progress?: number;
+  /** Anything that belongs with the toolbar but is not the reader's own — an author's page controls in a preview. */
+  controls?: React.ReactNode;
 }
 
 /**
@@ -20,7 +22,7 @@ export interface UIReaderFrameProps {
  * The line under the toolbar is the reader's progress rather than a divider: the
  * one rule on the screen may as well say something.
  */
-export const UIReaderFrame: React.FC<UIReaderFrameProps> = ({ toolbar, footer, children, contentRef, className = "", progress }) => (
+export const UIReaderFrame: React.FC<UIReaderFrameProps> = ({ toolbar, footer, children, contentRef, className = "", progress, controls }) => (
   <div className={`ui-reader-frame mx-auto flex w-full max-w-3xl flex-col overflow-hidden ${className}`}>
     <header className="ui-reader-frame-toolbar relative shrink-0 bg-surface">
       {toolbar}
@@ -33,6 +35,7 @@ export const UIReaderFrame: React.FC<UIReaderFrameProps> = ({ toolbar, footer, c
         </span>
       )}
     </header>
+    {controls && <div className="ui-reader-frame-controls shrink-0 bg-surface pt-2">{controls}</div>}
     <div ref={contentRef} className="ui-reader-frame-content min-h-0 flex-1 overflow-y-auto overscroll-contain">
       {children}
     </div>
