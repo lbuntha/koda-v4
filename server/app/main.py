@@ -4,14 +4,15 @@ Routers are mounted under /v1 here and nowhere else, so the version prefix is
 one string rather than a decoration on every route.
 """
 
+import asyncio
 import logging
 from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
+from app import boot, errors
 from app import db as database
-from app import errors
 from app.art_defaults import load_defaults as load_art_defaults
 from app.indexes import ensure_indexes
 from app.menu_defaults import DEFAULT_MENU, LEGACY_ICONS
@@ -90,25 +91,37 @@ def refuse_unsafe_deployment(cfg: Settings) -> None:
         )
 
 
-@asynccontextmanager
-async def lifespan(app: FastAPI):
-    cfg = settings()
-    refuse_unsafe_deployment(cfg)
+async def _each(items, step, limit: int = 16) -> list:
+    """`step` over every item at once, at most `limit` in flight, results in order.
 
-    db = database.connect()
+    Each seed touches its own row, so their order never mattered — only the
+    wait did: one at a time, every item was a full round trip to the database.
+    The limit keeps a cold start from opening a connection per item.
+    """
+    gate = asyncio.Semaphore(limit)
+
+    async def one(item):
+        async with gate:
+            return await step(item)
+
+    return await asyncio.gather(*(one(item) for item in items))
+
+
+async def _prepare(db) -> None:
+    """Indexes and every seeded default. Idempotent; see `app.boot` for when it runs."""
     await ensure_indexes(db)
 
     # The sidebar has to exist for a deployment to be usable, so it is seeded
     # here rather than by a second command somebody has to remember.
-    seeded = sum([await menu_repo.seed_default(db, item) for item in DEFAULT_MENU])
+    seeded = sum(await _each(DEFAULT_MENU, lambda item: menu_repo.seed_default(db, item)))
     if seeded:
         log.info("seeded %s default menu items", seeded)
 
     # Seeding only inserts, so a gate tightened in `menu_defaults.py` would
     # never reach a database that already has the row. Who may see an entry is
-    # the code's decision, so it is re-applied on every boot — except where an
-    # operator has pinned it from the Menu screen.
-    regated = sum([await menu_repo.reconcile_visibility(db, item) for item in DEFAULT_MENU])
+    # the code's decision, so it is re-applied whenever a release first starts
+    # (see `app.boot`) — except where an operator has pinned it from the Menu screen.
+    regated = sum(await _each(DEFAULT_MENU, lambda item: menu_repo.reconcile_visibility(db, item)))
     if regated:
         log.info("re-applied visibility to %s menu items", regated)
 
@@ -133,10 +146,10 @@ async def lifespan(app: FastAPI):
     # Every row moved from a line glyph to drawn artwork. Exact match
     # again, so only an icon nobody has changed follows the code.
     shipped_icons = {item["itemId"]: item["icon"] for item in DEFAULT_MENU}
-    redrawn = sum([
-        await menu_repo.replace_legacy_icon(db, item_id, legacy, shipped_icons[item_id])
-        for item_id, legacy in LEGACY_ICONS.items()
-    ])
+    redrawn = sum(await _each(
+        list(LEGACY_ICONS.items()),
+        lambda pair: menu_repo.replace_legacy_icon(db, pair[0], pair[1], shipped_icons[pair[0]]),
+    ))
     if redrawn:
         log.info("moved %s menu items onto their drawn icons", redrawn)
 
@@ -150,7 +163,7 @@ async def lifespan(app: FastAPI):
     # Art the operator has not touched follows the files it came from, so a
     # redrawn icon ships with the release that redrew it. Said out loud, because
     # "updated" means artwork changed on every screen in every family.
-    art_results = [await art_repo.seed_default(db, item) for item in load_art_defaults()]
+    art_results = await _each(load_art_defaults(), lambda item: art_repo.seed_default(db, item))
     art_seeded = art_results.count("created")
     art_updated = art_results.count("updated")
     if art_seeded:
@@ -158,7 +171,7 @@ async def lifespan(app: FastAPI):
     if art_updated:
         log.info("updated %s art assets to match the bundle", art_updated)
 
-    skill_seeded = sum([await skills_repo.seed_default(db, item) for item in load_skill_defaults()])
+    skill_seeded = sum(await _each(load_skill_defaults(), lambda item: skills_repo.seed_default(db, item)))
     if skill_seeded:
         log.info("registered %s bundled skills", skill_seeded)
 
@@ -167,7 +180,7 @@ async def lifespan(app: FastAPI):
     # Plans have to exist before anyone can be on one — and the free plan is the
     # floor every lapsed subscription falls back to, so a deployment without it
     # would have nothing to refuse a family down to.
-    planned = sum([await plans_repo.seed_default(db, plan) for plan in DEFAULT_PLANS])
+    planned = sum(await _each(DEFAULT_PLANS, lambda plan: plans_repo.seed_default(db, plan)))
     if planned:
         log.info("seeded %s subscription plans", planned)
 
@@ -178,22 +191,36 @@ async def lifespan(app: FastAPI):
     if adopted:
         log.info("adopted %s tuned rule sets as deployment defaults", adopted)
 
-    switches = sum([await system_repo.seed_default(db, item) for item in DEFAULT_SETTINGS])
+    switches = sum(await _each(DEFAULT_SETTINGS, lambda item: system_repo.seed_default(db, item)))
     if switches:
         log.info("seeded %s system settings", switches)
 
     # Who Koda can be. Seeded here for the reason the menu is: a deployment
     # should not need a second command before the assistant has a teacher, and
     # an empty roster would leave every child with no character at all.
-    characters = sum([await personas_repo.seed_default(db, row) for row in DEFAULT_PERSONAS])
+    characters = sum(await _each(DEFAULT_PERSONAS, lambda row: personas_repo.seed_default(db, row)))
     if characters:
         log.info("seeded %s Koda characters", characters)
 
-    roles = sum(
-        [await platform_roles_repo.seed_default(db, role) for role in DEFAULT_PLATFORM_ROLES]
-    )
+    roles = sum(await _each(DEFAULT_PLATFORM_ROLES, lambda role: platform_roles_repo.seed_default(db, role)))
     if roles:
         log.info("seeded %s platform roles", roles)
+
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    cfg = settings()
+    refuse_unsafe_deployment(cfg)
+
+    db = database.connect()
+    # Skipped when this release already prepared this database: a cold start
+    # then costs one read instead of ~400 sequential round trips (app/boot.py).
+    release = boot.fingerprint()
+    if await boot.is_current(db, release):
+        log.info("indexes and defaults already current for this release")
+    else:
+        await _prepare(db)
+        await boot.mark_current(db, release)
 
     log.info("connected to %s", cfg.mongodb_db)
     yield
