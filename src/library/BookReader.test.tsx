@@ -42,6 +42,38 @@ const recorded = () => {
   return { ...MARKET, sentences: MARKET.sentences.map((s) => firstPageIds.has(s.id) ? { ...s, audio: "a".repeat(64) } : s) };
 };
 
+describe("auto turn", () => {
+  const allRecorded = () => ({ ...MARKET, sentences: MARKET.sentences.map((s) => ({ ...s, audio: "a".repeat(64) })) });
+  const perPage = layoutBook(MARKET).story.map((pg) => pg.length);
+  beforeEach(() => localStorage.removeItem("koda_library_auto_turn_v1"));
+
+  it("reads one page and stays there while it is off", async () => {
+    render(<BookReader book={allRecorded()} preview onBack={() => {}} onReady={() => {}} />);
+    fireEvent.click(screen.getByRole("button", { name: "Next page" }));
+    expect(screen.getByRole("button", { name: "Turn pages by themselves" }).getAttribute("aria-pressed")).toBe("false");
+    const play = screen.getByRole("button", { name: "Play page recording" });
+    await waitFor(() => expect(play.hasAttribute("disabled")).toBe(false));
+    await act(async () => { fireEvent.click(play); });
+    await waitFor(() => expect(screen.getByRole("button", { name: "Play page recording" })).toBeTruthy());
+    expect(voice.say).toHaveBeenCalledTimes(perPage[0]);
+    expect(screen.getByRole("button", { name: "Previous page" })).toBeTruthy();
+    expect(screen.getByLabelText("Page 1 of 2")).toBeTruthy();
+  });
+
+  it("turns to the next page and reads it when it is on, and remembers the choice", async () => {
+    render(<BookReader book={allRecorded()} preview onBack={() => {}} onReady={() => {}} />);
+    fireEvent.click(screen.getByRole("button", { name: "Next page" }));
+    fireEvent.click(screen.getByRole("button", { name: "Turn pages by themselves" }));
+    expect(localStorage.getItem("koda_library_auto_turn_v1")).toBe("1");
+    const play = screen.getByRole("button", { name: "Play page recording" });
+    await waitFor(() => expect(play.hasAttribute("disabled")).toBe(false));
+    await act(async () => { fireEvent.click(play); });
+    await waitFor(() => expect(voice.say).toHaveBeenCalledTimes(perPage[0] + perPage[1]), { timeout: 3000 });
+    await waitFor(() => expect(screen.getByLabelText("Page 2 of 2")).toBeTruthy());
+    await waitFor(() => expect(screen.getByRole("button", { name: "Play page recording" })).toBeTruthy());
+  });
+});
+
 describe("a recording that did not arrive", () => {
   it("lets a reader try the download again, and plays once it arrives", async () => {
     // Offline, or a connection that dropped: nothing downloaded.

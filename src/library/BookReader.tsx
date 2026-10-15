@@ -69,6 +69,18 @@ const readTextStep = (): number => {
   }
 };
 
+const AUTO_TURN_KEY = "koda_library_auto_turn_v1";
+/** The breath between the last sentence of a page and the turn to the next. */
+const AUTO_TURN_PAUSE_MS = 900;
+const readAutoTurn = (): boolean => {
+  try {
+    return localStorage.getItem(AUTO_TURN_KEY) === "1";
+  } catch {
+    return false;
+  }
+};
+const pause = (ms: number) => new Promise<void>((done) => setTimeout(done, ms));
+
 /**
  * How tall a page's picture may stand on a phone, before the page's fit factor
  * trims it.
@@ -178,6 +190,10 @@ export function BookReader({ book, onBack, onReady, preview = false }: { book: P
   const [peekPosition, setPeekPosition] = useState<{ left: number; top: number; side: "top" | "bottom" | "left" | "right" } | null>(null);
   const peekRef = useRef<HTMLDivElement>(null);
   const [textStep, setTextStepState] = useState(readTextStep);
+  // Read to the end: when a page's recording finishes, turn and read the next.
+  const [autoTurn, setAutoTurnState] = useState(readAutoTurn);
+  const autoTurnRef = useRef(autoTurn);
+  autoTurnRef.current = autoTurn;
   // The cover settles in once, when the book is opened — not every time a
   // reader turns back to it.
   const [opened, setOpened] = useState(false);
@@ -259,6 +275,18 @@ export function BookReader({ book, onBack, onReady, preview = false }: { book: P
       /* a remembered size is a convenience */
     }
   };
+
+  const toggleAutoTurn = () => {
+    const next = !autoTurn;
+    setAutoTurnState(next);
+    try {
+      localStorage.setItem(AUTO_TURN_KEY, next ? "1" : "0");
+    } catch {
+      /* a remembered choice is a convenience */
+    }
+  };
+  // Any page with a recording makes auto turn worth offering.
+  const bookRecorded = useMemo(() => pages.story.some((pg) => pg.length > 0 && pg.every((s) => s.sentence.audio)), [pages]);
 
   useEffect(() => {
     if (!preview) LibraryProgress.set(book.id, { stage: "read", rev: book.rev });
@@ -361,33 +389,53 @@ export function BookReader({ book, onBack, onReady, preview = false }: { book: P
     return () => window.removeEventListener("keydown", onKey);
   });
 
-  /** Read the current page aloud, using recordings while Koda's voice is off. */
+  /**
+   * Read the current page aloud, using recordings while Koda's voice is off.
+   *
+   * With auto turn on, a page read to its end turns by itself and the next one
+   * is read too, until the last page or a page without its recordings. Any turn
+   * the child makes, or a tap on the speaker, stops it: both bump `run`.
+   */
   const readPage = async () => {
     if (reading) return hush();
-    const current = pageRef.current;
+    let current = pageRef.current;
     if (current < 1 || current > pages.story.length) return;
     const mine = ++run.current;
-    record.readAloud();
     setReading(true);
     setSilent(false);
     setPeek(null);
     setPeekAnchor(null);
     setPeekPosition(null);
-    let spoke = false;
-    for (const s of pages.story[current - 1]) {
+    for (;;) {
+      record.readAloud();
+      let spoke = false;
+      for (const s of pages.story[current - 1]) {
+        if (run.current !== mine) return;
+        if (!s.sentence.audio) continue;
+        setPlaying(s.sentence.id);
+        const played = await say(s.sentence.text, book.language, s.sentence.audio, (elapsedMs, durationMs) => {
+          if (run.current !== mine || elapsedMs === null) return setPlayingWord(null);
+          const index = spokenWordAt(s.sentence, elapsedMs, durationMs);
+          setPlayingWord(index === null ? null : { sentence: s.sentence.id, index });
+        });
+        // Every sentence is tried, whatever the last one reported. One sentence
+        // wrongly called a failure must never cost a child the rest of the page.
+        spoke = spoke || played;
+      }
       if (run.current !== mine) return;
-      if (!s.sentence.audio) continue;
-      setPlaying(s.sentence.id);
-      const played = await say(s.sentence.text, book.language, s.sentence.audio, (elapsedMs, durationMs) => {
-        if (run.current !== mine || elapsedMs === null) return setPlayingWord(null);
-        const index = spokenWordAt(s.sentence, elapsedMs, durationMs);
-        setPlayingWord(index === null ? null : { sentence: s.sentence.id, index });
-      });
-      // Every sentence is tried, whatever the last one reported. One sentence
-      // wrongly called a failure must never cost a child the rest of the page.
-      spoke = spoke || played;
+      if (!spoke) {
+        setSilent(true);
+        break;
+      }
+      const next = pages.story[current];
+      if (!autoTurnRef.current || !next?.length || !next.every((s) => s.sentence.audio)) break;
+      setPlaying(null);
+      setPlayingWord(null);
+      await pause(AUTO_TURN_PAUSE_MS);
+      if (run.current !== mine || !autoTurnRef.current) break;
+      current += 1;
+      turn(current, true);
     }
-    if (run.current === mine && !spoke) setSilent(true);
     if (run.current === mine) {
       setPlaying(null);
       setPlayingWord(null);
@@ -498,11 +546,13 @@ export function BookReader({ book, onBack, onReady, preview = false }: { book: P
         audio={pageRecorded ? {
           playing: reading,
           // A download that failed can be tried again; a browser that cannot play the format cannot.
-          disabled: pageAudio === "failed" ? !audioSupported : pageAudio !== "ready",
+          // Mid-read (auto turn lands on a page still preparing) it must stay a stop button.
+          disabled: reading ? false : pageAudio === "failed" ? !audioSupported : pageAudio !== "ready",
           disabledTitle: pageAudio === "failed" ? t("reader.cannotPlay") : t("reader.preparingAudio"),
           retryTitle: pageAudio === "failed" && audioSupported ? t("reader.audioRetry") : undefined,
           onToggle: () => (pageAudio === "failed" ? setAudioAttempt((n) => n + 1) : void readPage()),
         } : undefined}
+        autoTurn={bookRecorded ? { on: autoTurn, onToggle: toggleAutoTurn } : undefined}
         dark={theme === "dark"}
         onToggleDark={toggleTheme}
       />}

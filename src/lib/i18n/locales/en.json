@@ -504,7 +504,10 @@
     "wordHelper": "Word helper",
     "wordHelperFor": "Word helper: {word}",
     "pictureWordHint": "Picture word · tap the speaker to hear it",
-    "tapSpeaker": "Tap the speaker to hear it"
+    "tapSpeaker": "Tap the speaker to hear it",
+    "autoTurn": "Turn pages by themselves",
+    "autoTurnOn": "Auto turn is on: after a page is read, the next page turns and is read",
+    "autoTurnOff": "Auto turn is off: tap to turn pages by themselves after reading"
   },
   "library": {
     "tagline": "Read a story, answer questions, then spell words from it.",

@@ -1,5 +1,5 @@
 import React from "react";
-import { ArrowLeft, Moon, Pause, Sun, Volume2 } from "lucide-react";
+import { ArrowLeft, ChevronsRight, Moon, Pause, Sun, Volume2 } from "lucide-react";
 import { useT } from "../../lib/i18n";
 
 export interface UIReaderToolbarProps {
@@ -9,6 +9,8 @@ export interface UIReaderToolbarProps {
   onSmallerText(): void;
   onLargerText(): void;
   audio?: { playing: boolean; onToggle(): void; disabled?: boolean; disabledTitle?: string; retryTitle?: string };
+  /** Turn to the next page by itself when a page's recording ends. */
+  autoTurn?: { on: boolean; onToggle(): void };
   dark: boolean;
   onToggleDark(): void;
   backLabel?: string;
@@ -34,6 +36,7 @@ export const UIReaderToolbar: React.FC<UIReaderToolbarProps> = ({
   onSmallerText,
   onLargerText,
   audio,
+  autoTurn,
   dark,
   onToggleDark,
   backLabel,
@@ -69,6 +72,18 @@ export const UIReaderToolbar: React.FC<UIReaderToolbarProps> = ({
             className={`${tool} ${audio.playing ? "!bg-indigo-600 !text-white" : ""}`}
           >
             {audio.playing ? <Pause aria-hidden="true" /> : <Volume2 aria-hidden="true" />}
+          </button>
+        )}
+        {autoTurn && (
+          <button
+            type="button"
+            onClick={autoTurn.onToggle}
+            aria-pressed={autoTurn.on}
+            aria-label={t("reader.autoTurn")}
+            title={autoTurn.on ? t("reader.autoTurnOn") : t("reader.autoTurnOff")}
+            className={`${tool} ${autoTurn.on ? "!bg-indigo-100 !text-indigo-700 dark:!bg-indigo-950 dark:!text-indigo-200" : "text-muted"}`}
+          >
+            <ChevronsRight aria-hidden="true" />
           </button>
         )}
         <button type="button" onClick={onToggleDark} aria-label={dark ? t("reader.lightMode") : t("reader.darkMode")} aria-pressed={dark} title={dark ? t("reader.lightMode") : t("reader.darkMode")} className={tool}>
