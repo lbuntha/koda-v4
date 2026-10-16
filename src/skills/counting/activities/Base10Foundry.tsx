@@ -14,6 +14,8 @@ import {
   useGuide,
 } from "../../kit";
 import { themeSystem } from "../../../lib/themeSystem";
+import { listAnd, tc } from "../internal/i18n";
+import { useT } from "../../../lib/i18n";
 
 /**
  * Build a number out of hundreds, tens and ones — then bundle it.
@@ -137,13 +139,12 @@ function placesOf(n: number, hundreds: boolean): Built {
 /** "1 hundred, 2 tens and 3 ones" — empty places left unsaid. */
 function saidAsPlaces(parts: Built): string {
   const said = [
-    parts.hundreds > 0 && `${parts.hundreds} hundred${parts.hundreds === 1 ? "" : "s"}`,
-    parts.tens > 0 && `${parts.tens} ten${parts.tens === 1 ? "" : "s"}`,
-    parts.ones > 0 && `${parts.ones} one${parts.ones === 1 ? "" : "s"}`,
+    parts.hundreds > 0 && tc("base10.hundreds", { count: parts.hundreds }),
+    parts.tens > 0 && tc("base10.tens", { count: parts.tens }),
+    parts.ones > 0 && tc("base10.ones", { count: parts.ones }),
   ].filter((part): part is string => typeof part === "string");
-  if (said.length === 0) return "nothing at all";
-  if (said.length === 1) return said[0];
-  return `${said.slice(0, -1).join(", ")} and ${said[said.length - 1]}`;
+  if (said.length === 0) return tc("base10.nothing");
+  return listAnd(said);
 }
 
 /**
@@ -164,7 +165,7 @@ function saidAsPlaces(parts: Built): string {
  * ("Make 34. You have 20. Add 14 more!") and so cannot be asked before they
  * have started. This is the question the round is asking underneath that.
  */
-export const promptFor = (q: BuildQuestion): string => `Make ${q.target} out of tens and ones.`;
+export const promptFor = (q: BuildQuestion): string => tc("base10.prompt", { target: q.target });
 
 /**
  * On paper.
@@ -180,11 +181,10 @@ export const printedFor = (q: BuildQuestion): PrintedQuestion => {
 
   /* Named singly or plurally, and zeroes left out: "1 tens and 0 ones" is not
      English and not what a child would write. */
-  const say = (n: number, one: string, many: string) => (n === 1 ? `1 ${one}` : `${n} ${many}`);
   const parts = [
-    hundreds > 0 ? say(hundreds, "hundred", "hundreds") : "",
-    tens > 0 ? say(tens, "ten", "tens") : "",
-    ones > 0 ? say(ones, "one", "ones") : "",
+    hundreds > 0 ? tc("base10.hundreds", { count: hundreds }) : "",
+    tens > 0 ? tc("base10.tens", { count: tens }) : "",
+    ones > 0 ? tc("base10.ones", { count: ones }) : "",
   ].filter(Boolean);
 
   return {
@@ -193,8 +193,8 @@ export const printedFor = (q: BuildQuestion): PrintedQuestion => {
        rods only would be teaching against it. */
     text:
       hundreds > 0
-        ? `Draw ${q.target} using hundreds, tens and ones.`
-        : `Draw ${q.target} using ten-rods and ones.`,
+        ? tc("base10.printedHundreds", { target: q.target })
+        : tc("base10.printedTens", { target: q.target }),
     answer: parts.join(", "),
   };
 };
@@ -202,16 +202,8 @@ export const printedFor = (q: BuildQuestion): PrintedQuestion => {
 /** How the technique goes, in paper words. */
 export const methodFor = (q: BuildQuestion): string[] =>
   q.target >= 100
-    ? [
-        "Take as many whole hundreds as you can.",
-        "Then as many whole tens from what is left.",
-        "Whatever remains is the ones. Ten tens make a hundred — never leave ten loose tens.",
-      ]
-    : [
-        "Take as many whole tens as you can.",
-        "Whatever is left over is the ones.",
-        "Ten ones make one ten — never leave ten loose ones behind.",
-      ];
+    ? [tc("base10.methodHundreds1"), tc("base10.methodHundreds2"), tc("base10.methodHundreds3")]
+    : [tc("base10.methodTens1"), tc("base10.methodTens2"), tc("base10.methodTens3")];
 
 /**
  * Somewhere to draw it.
@@ -222,7 +214,10 @@ export const methodFor = (q: BuildQuestion): string[] =>
  */
 export const figureFor = (q: BuildQuestion): React.ReactNode => (
   <span className="inline-flex">
-    {(q.target >= 100 ? ["Hundreds", "Tens", "Ones"] : ["Tens", "Ones"]).map((label) => (
+    {(q.target >= 100
+      ? [tc("base10.columnHundreds"), tc("base10.columnTens"), tc("base10.columnOnes")]
+      : [tc("base10.columnTens"), tc("base10.columnOnes")]
+    ).map((label) => (
       <span key={label} className="inline-flex w-28 flex-col border border-slate-900">
         <span className="border-b border-slate-900 py-0.5 text-center text-[10px] font-black uppercase tracking-widest text-slate-500">
           {label}
@@ -256,20 +251,20 @@ export function base10Hints(
    */
   const nextMove =
     setup.bundleOnes && built.ones >= 10
-      ? `You have ${built.ones} ones. Ten of them make one ten — press "Make a Ten".`
+      ? tc("base10.hintBundleOnes", { ones: built.ones })
       : setup.bundleTens && built.tens >= 10
-        ? `You have ${built.tens} tens. Ten of them make one hundred — press "Make a Hundred".`
+        ? tc("base10.hintBundleTens", { tens: built.tens })
         : short === 0
-          ? `The columns hold ${saidAsPlaces(built)}. That is ${question.target}. Press Check.`
+          ? tc("base10.hintReady", { places: saidAsPlaces(built), target: question.target })
           : short > 0
             ? value === 0
-              ? `Drag in ${saidAsPlaces(placesOf(question.target, showHundreds))}.`
-              : `You have ${value}. Drag in ${saidAsPlaces(placesOf(short, showHundreds))} more.`
-            : `You have ${value}, which is ${Math.abs(short)} too many. Drag some back out.`;
+              ? tc("base10.hintDragIn", { places: saidAsPlaces(placesOf(question.target, showHundreds)) })
+              : tc("base10.hintDragMore", { value, places: saidAsPlaces(placesOf(short, showHundreds)) })
+            : tc("base10.hintTooMany", { value, over: Math.abs(short) });
 
   return composeHints(
-    state.kidTip ?? "Use the big blocks first, then the small ones.",
-    `Read ${question.target} in places: it is ${saidAsPlaces(want)}.`,
+    state.kidTip ?? tc("base10.hintTip"),
+    tc("base10.hintRead", { target: question.target, places: saidAsPlaces(want) }),
     nextMove,
   );
 }
@@ -295,12 +290,13 @@ interface Place {
 const PLACE_INDEX: Record<PlaceKey, number> = { hundreds: 0, tens: 1, ones: 2 };
 
 const PLACES: Place[] = [
-  { key: "hundreds", label: "Hundreds", one: "hundred flat", worth: 100, max: 9, tone: "text-rose-700 dark:text-rose-400" },
+  /* Getters, so the names follow the language on screen. */
+  { key: "hundreds", get label() { return tc("base10.columnHundreds"); }, get one() { return tc("base10.blockHundreds"); }, worth: 100, max: 9, tone: "text-rose-700 dark:text-rose-400" },
   /* Violet, not amber: the label is small type on the canvas, which is exactly
      where yellow stops being readable, and violet stays clear of both the rose
      hundreds and the cyan ones. */
-  { key: "tens", label: "Tens", one: "ten rod", worth: 10, max: 19, tone: "text-violet-700 dark:text-violet-400" },
-  { key: "ones", label: "Ones", one: "one cube", worth: 1, max: 19, tone: "text-cyan-700 dark:text-cyan-400" },
+  { key: "tens", get label() { return tc("base10.columnTens"); }, get one() { return tc("base10.blockTens"); }, worth: 10, max: 19, tone: "text-violet-700 dark:text-violet-400" },
+  { key: "ones", get label() { return tc("base10.columnOnes"); }, get one() { return tc("base10.blockOnes"); }, worth: 1, max: 19, tone: "text-cyan-700 dark:text-cyan-400" },
 ];
 
 /* -------------------------------------------------------------------------- */
@@ -348,6 +344,8 @@ export const Base10Foundry: React.FC<ActivityProps<Base10FoundryParams>> = ({
   onComplete,
   lesson,
 }) => {
+  // Re-render when the language changes: every line below reads the catalog.
+  useT();
   const setup: Base10Setup = { ...params, ...params.question };
   const total = setup.questionsPerRound ?? 5;
   /** The lesson's own child-facing copy: the spoken intro, and hint rung one. */
@@ -543,7 +541,7 @@ export const Base10Foundry: React.FC<ActivityProps<Base10FoundryParams>> = ({
         : { ...prev, tens: prev.tens - 10, hundreds: prev.hundreds + 1 },
     );
     if (!practising && koda.config.isEnabled("audio_speech", true)) {
-      void koda.speech.say(from === "ones" ? "10 ones make 1 ten" : "10 tens make 1 hundred");
+      void koda.speech.say(tc(from === "ones" ? "base10.saidBundleOnes" : "base10.saidBundleTens"));
     }
   };
 
@@ -564,38 +562,34 @@ export const Base10Foundry: React.FC<ActivityProps<Base10FoundryParams>> = ({
     if (value !== question.target) {
       return say(
         false,
-        "Try a different number",
-        `Your current total is ${value} blocks, but you need to build exactly ${question.target}.`,
+        tc("base10.tryDifferent"),
+        tc("base10.wrongTotal", { value, target: question.target }),
       );
     }
     if (setup.bundleOnes && built.ones >= 10) {
       return say(
         false,
-        "Group your ones",
-        `Great total! But you have ${built.ones} Ones. Put 10 of them together to make a Ten.`,
+        tc("base10.groupOnes"),
+        tc("base10.groupOnesMsg", { ones: built.ones }),
         true,
       );
     }
     if (setup.bundleTens && built.tens >= 10) {
       return say(
         false,
-        "Group your tens",
-        `Great total! But you have ${built.tens} Tens. Put 10 of them together to make a Hundred.`,
+        tc("base10.groupTens"),
+        tc("base10.groupTensMsg", { tens: built.tens }),
         true,
       );
     }
     // Name only the columns this lesson actually shows, so a lesson without a
     // hundreds column never reports "0 Hundreds".
-    const name = (n: number, one: string, many: string) => `${n} ${n === 1 ? one : many}`;
     const parts = [
-      setup.hundreds ? name(built.hundreds, "Hundred", "Hundreds") : null,
-      name(built.tens, "Ten", "Tens"),
-      name(built.ones, "One", "Ones"),
+      setup.hundreds ? tc("base10.builtHundreds", { count: built.hundreds }) : null,
+      tc("base10.builtTens", { count: built.tens }),
+      tc("base10.builtOnes", { count: built.ones }),
     ].filter(Boolean) as string[];
-    const built_as = parts.length > 2
-      ? `${parts.slice(0, -1).join(", ")} and ${parts[parts.length - 1]}`
-      : parts.join(" and ");
-    return say(true, "Great counting!", `Built ${question.target} as ${built_as}.`);
+    return say(true, tc("greatCounting"), tc("base10.builtAs", { target: question.target, parts: listAnd(parts) }));
   };
 
   const short = question.target - value;
@@ -616,23 +610,23 @@ export const Base10Foundry: React.FC<ActivityProps<Base10FoundryParams>> = ({
    */
   const prompt =
     short > 0
-      ? `Make ${question.target}. You have ${value}. Add ${short} more!`
+      ? tc("base10.promptAdd", { target: question.target, value, short })
       : short < 0
-        ? `Make ${question.target}. You have ${value}. Take away ${Math.abs(short)}!`
-        : `You made ${question.target}! Press Check.`;
+        ? tc("base10.promptRemove", { target: question.target, value, over: Math.abs(short) })
+        : tc("base10.promptDone", { target: question.target });
 
   const spokenPrompt =
     short > 0
-      ? "Add more blocks to make the number."
+      ? tc("base10.spokenAdd")
       : short < 0
-        ? "Take some blocks away."
-        : "That's the number! Press Check.";
+        ? tc("base10.spokenRemove")
+        : tc("base10.spokenDone");
 
   return (
     <SkillRound
       koda={koda}
       lesson={lesson}
-      fallbackTitle="Base-10 Foundry"
+      fallbackTitle={tc("base10.title")}
       round={round}
       totalQuestions={total}
       prompt={prompt}
@@ -659,20 +653,20 @@ export const Base10Foundry: React.FC<ActivityProps<Base10FoundryParams>> = ({
         <div className="p-4 rounded-2xl bg-surface/80 border border-line flex items-center justify-between gap-4 flex-wrap">
           <div>
             <span className="text-xs font-bold text-teal-700 dark:text-teal-400">
-              Your job
+              {tc("base10.yourJob")}
             </span>
-            <h3 className="text-sm font-bold text-ink">Make this number: {question.target}</h3>
+            <h3 className="text-sm font-bold text-ink">{tc("base10.makeThis", { target: question.target })}</h3>
           </div>
           <div className="px-4 py-2 bg-teal-500/10 border border-teal-500/30 rounded-xl flex items-center gap-3">
             <div className="text-right">
               <div className="text-[11px] font-bold text-teal-700 dark:text-teal-400">
-                MAKE
+                {tc("base10.make")}
               </div>
               <div className="text-xl font-black text-ink tabular-nums">{question.target}</div>
             </div>
             <div className="h-8 w-px bg-teal-500/20" />
             <div>
-              <div className="text-[11px] font-bold text-muted">You have</div>
+              <div className="text-[11px] font-bold text-muted">{tc("base10.youHave")}</div>
               <div
                 className={`text-xl font-black tabular-nums ${
                   value === question.target
@@ -695,7 +689,7 @@ export const Base10Foundry: React.FC<ActivityProps<Base10FoundryParams>> = ({
           {/* The supply. Blocks are taken from here, never used up. */}
           <div className="bg-canvas rounded-2xl border border-line p-3">
             <div className="text-xs font-bold text-muted mb-2 text-center">
-              Drag a block into its column
+              {tc("base10.dragHint")}
             </div>
             <div className="flex items-end justify-center gap-6 min-h-[72px]">
               {places.map((place) => (
@@ -713,7 +707,7 @@ export const Base10Foundry: React.FC<ActivityProps<Base10FoundryParams>> = ({
                   whileHover={{ scale: 1.1, y: -4 }}
                   whileTap={{ scale: 0.85, y: 2 }}
                   transition={SPRING.tap}
-                  aria-label={`Add one ${place.one}`}
+                  aria-label={tc("base10.addOne", { block: place.one })}
                   // touch-action:none stops iOS scrolling the page instead of
                   // dragging the block.
                   className="flex flex-col items-center gap-1 touch-none select-none cursor-grab active:cursor-grabbing transition"
@@ -749,7 +743,7 @@ export const Base10Foundry: React.FC<ActivityProps<Base10FoundryParams>> = ({
                 }`}
               >
                 {guide.target === PLACE_INDEX[place.key] && (
-                  <span className="sr-only">Work on this column next</span>
+                  <span className="sr-only">{tc("base10.workColumn")}</span>
                 )}
                 <div className={`text-sm font-black ${place.tone}`}>{place.label}</div>
 
@@ -763,7 +757,7 @@ export const Base10Foundry: React.FC<ActivityProps<Base10FoundryParams>> = ({
                       whileHover={{ scale: 1.15 }}
                       whileTap={{ scale: 0.8 }}
                       transition={SPRING.tap}
-                      aria-label={`${place.one} in ${place.label}, drag out to remove`}
+                      aria-label={tc("base10.blockIn", { block: place.one, column: place.label })}
                       className="touch-none select-none cursor-grab active:cursor-grabbing"
                     >
                       <Block kind={place.key} small />
@@ -787,7 +781,7 @@ export const Base10Foundry: React.FC<ActivityProps<Base10FoundryParams>> = ({
                     whileHover={{ scale: 1.1 }}
                     whileTap={{ scale: 0.85 }}
                     transition={SPRING.tap}
-                    aria-label={`One fewer ${place.label}`}
+                    aria-label={tc("base10.oneFewer", { column: place.label })}
                     className={themeSystem.button("secondary", "step")}
                   >
                     −
@@ -798,7 +792,7 @@ export const Base10Foundry: React.FC<ActivityProps<Base10FoundryParams>> = ({
                     whileHover={{ scale: 1.1 }}
                     whileTap={{ scale: 0.85 }}
                     transition={SPRING.tap}
-                    aria-label={`One more ${place.label}`}
+                    aria-label={tc("base10.oneMore", { column: place.label })}
                     className={themeSystem.button("secondary", "step")}
                   >
                     +
@@ -810,8 +804,9 @@ export const Base10Foundry: React.FC<ActivityProps<Base10FoundryParams>> = ({
         </div>
 
         <div className="p-3 rounded-2xl bg-surface-muted/60 text-sm text-center text-muted">
-          {setup.hundreds && `${built.hundreds} Hundreds + `}
-          {built.tens} Tens + {built.ones} Ones ={" "}
+          {setup.hundreds
+            ? tc("base10.summaryHundreds", { hundreds: built.hundreds, tens: built.tens, ones: built.ones })
+            : tc("base10.summary", { tens: built.tens, ones: built.ones })}{" "}
           <strong className="text-emerald-700 dark:text-emerald-400 text-base">{value}</strong>
         </div>
 
@@ -840,7 +835,7 @@ export const Base10Foundry: React.FC<ActivityProps<Base10FoundryParams>> = ({
               transition={SPRING.tap}
               className={themeSystem.button("secondary", "lg")}
             >
-              Make a Ten
+              {tc("base10.makeTen")}
             </motion.button>
           )}
           {setup.bundleTens && (
@@ -852,7 +847,7 @@ export const Base10Foundry: React.FC<ActivityProps<Base10FoundryParams>> = ({
               transition={SPRING.tap}
               className={themeSystem.button("secondary", "lg")}
             >
-              Make a Hundred
+              {tc("base10.makeHundred")}
             </motion.button>
           )}
           <motion.button
@@ -862,7 +857,7 @@ export const Base10Foundry: React.FC<ActivityProps<Base10FoundryParams>> = ({
             transition={SPRING.tap}
             className={themeSystem.button("primary", "lg")}
           >
-            Check
+            {tc("base10.check")}
           </motion.button>
         </div>
       </div>

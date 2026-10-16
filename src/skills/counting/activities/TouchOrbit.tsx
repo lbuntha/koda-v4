@@ -29,6 +29,8 @@ import {
   SCENE,
 } from "../internal/data/countingLayout";
 import { isWander, nextTarget, numberWord } from "../internal/guide/countGuide";
+import { tc, thing } from "../internal/i18n";
+import { useT } from "../../../lib/i18n";
 
 /**
  * Touch each thing and count as you go.
@@ -103,19 +105,12 @@ const rangeOr = (range: [number, number] | undefined, lo: number, hi: number) =>
 const sample = <T,>(items: readonly T[]): T => items[Math.floor(Math.random() * items.length)];
 
 /**
- * "Rockets" → "rocket". Asset names are plural; the prompt says "each".
- *
- * The `-ves` rule is not decoration: without it the app asked a child to "touch
- * every leave", and the prompt is also what the recorded voice says, so a wrong
- * form is wrong out loud as well as on screen.
+ * "rocket", in the language on screen. Each form is written out in the
+ * catalogs rather than derived: a derived English singular once asked a child
+ * to "touch every leave", and the prompt is also what the recorded voice says.
  */
-const singular = (name: string): string => {
-  const n = name.toLowerCase();
-  if (n.endsWith("ies")) return `${n.slice(0, -3)}y`;
-  if (n.endsWith("ves")) return `${n.slice(0, -3)}f`;
-  if (/(ch|sh|s|x|z)es$/.test(n)) return n.slice(0, -2);
-  return n.endsWith("s") ? n.slice(0, -1) : n;
-};
+const singular = (asset: PredefinedAsset): string => thing(asset, "one");
+const plural = (asset: PredefinedAsset): string => thing(asset, "many");
 
 /**
  * Placements that do not overlap, so nothing hides behind anything else.
@@ -259,7 +254,7 @@ const TapGroup: React.FC<{
           initial={{ opacity: 0, scale: 0.6 }}
           animate={{ opacity: 1, scale: 1 }}
           transition={{ ...SPRING.enter, delay: stagger(i) }}
-          aria-label={`${singular(asset.name)} ${i + 1}${on ? ", counted" : ""}`}
+          aria-label={tc(on ? "orbit.objectCounted" : "orbit.object", { thing: singular(asset), n: i + 1 })}
           /* Same treatment as the scattered scene: the object is the target, not
              a chip around it, and 56px is what a small hand can hit reliably in
              a two-column comparison. */
@@ -270,7 +265,7 @@ const TapGroup: React.FC<{
               on ? "opacity-55 saturate-[0.35]" : "drop-shadow-[0_3px_8px_rgba(0,0,0,0.18)]"
             }`}
           >
-            <SvgAsset id={asset.id} size="100%" title={singular(asset.name)} />
+            <SvgAsset id={asset.id} size="100%" title={singular(asset)} />
           </span>
           {on && (
             <motion.span
@@ -305,11 +300,11 @@ const TapGroup: React.FC<{
 export const promptFor = (q: OrbitQuestion): string =>
   q.mode === "compare"
     ? q.compare!.answer === "SAME"
-      ? "Count both groups. Do they have the same?"
-      : "Count both groups. Which one has more?"
+      ? tc("orbit.promptCompareSame")
+      : tc("orbit.promptCompareMore")
     : q.mode === "scatter"
-      ? `Touch every ${singular(q.asset.name)}. Do not miss any!`
-      : `Touch each ${singular(q.asset.name)}. Count as you go!`;
+      ? tc("orbit.promptScatter", { thing: singular(q.asset) })
+      : tc("orbit.promptRow", { thing: singular(q.asset) });
 
 /**
  * On paper.
@@ -324,27 +319,18 @@ export const printedFor = (q: OrbitQuestion): PrintedQuestion => {
   if (q.mode === "compare") {
     const { answer } = q.compare!;
     return {
-      text: "Count both groups. Which has more?",
-      answer:
-        answer === "SAME" ? "They are the same" : answer === "A" ? "The first group" : "The second group",
+      text: tc("orbit.printedCompare"),
+      answer: tc(answer === "SAME" ? "orbit.printedSame" : answer === "A" ? "orbit.printedFirst" : "orbit.printedSecond"),
     };
   }
-  return { text: `How many ${q.asset.name.toLowerCase()} are there?`, answer: String(q.count) };
+  return { text: tc("orbit.printedHowMany", { things: plural(q.asset) }), answer: String(q.count) };
 };
 
 /** How the technique goes, in paper words. */
 export const methodFor = (q: OrbitQuestion): string[] =>
   q.mode === "compare"
-    ? [
-        "Count the first group and write the number down.",
-        "Count the second group.",
-        "The bigger number is the group with more — even if it takes up less room.",
-      ]
-    : [
-        "Count them one at a time, saying each number out loud.",
-        "Cross each one off as you count it, so none is counted twice.",
-        "The last number you say is how many there are.",
-      ];
+    ? [tc("orbit.methodCompare1"), tc("orbit.methodCompare2"), tc("orbit.methodCompare3")]
+    : [tc("orbit.methodCount1"), tc("orbit.methodCount2"), tc("orbit.methodCount3")];
 
 /**
  * The objects, printed to be counted.
@@ -382,21 +368,21 @@ export function orbitHints(
   question: OrbitQuestion,
   state: { tapped: number; tappedA: number; tappedB: number; kidTip?: string },
 ): string[] {
-  const one = singular(question.asset.name);
-  const many = question.asset.name.toLowerCase();
+  const one = singular(question.asset);
+  const many = plural(question.asset);
 
   if (question.mode === "compare") {
     const c = question.compare!;
     const counted = state.tappedA > 0 || state.tappedB > 0;
     return composeHints(
-      state.kidTip ?? "Spreading things out does not make more.",
+      state.kidTip ?? tc("orbit.hintCompareTip"),
       counted
-        ? `You have ${state.tappedA} on the left and ${state.tappedB} on the right. Finish both.`
-        : "Touch the left group one at a time, then do the right.",
+        ? tc("orbit.hintCompareCounted", { a: state.tappedA, b: state.tappedB })
+        : tc("orbit.hintCompareStart"),
       // The two counts, not the verdict: counting is the work and deciding
       // which is bigger is the question. A rung that answered it would leave
       // nothing to answer.
-      `Left has ${c.countA}. Right has ${c.countB}. Which number is bigger?`,
+      tc("orbit.hintCompareCounts", { a: c.countA, b: c.countB }),
     );
   }
 
@@ -405,24 +391,24 @@ export function orbitHints(
 
   if (question.mode === "scatter") {
     return composeHints(
-      state.kidTip ?? "Go in order so you do not miss any.",
+      state.kidTip ?? tc("orbit.hintScatterTip"),
       state.tapped === 0
-        ? `Start at the top and work down. Each ${one} keeps its number.`
-        : `${state.tapped} have numbers now. Touch a plain one and say "${next}".`,
+        ? tc("orbit.hintScatterStart", { thing: one })
+        : tc("orbit.hintScatterGoing", { tapped: state.tapped, next }),
       // Reaching the total is the answer here — the round is scored by touching
       // every one, not by naming a number — so the last rung may say it.
       left === 1
-        ? `One ${one} is still plain. Touch it and say "${numberWord(question.count)}".`
-        : `${left} ${many} still need a number. Keep counting on to ${question.count}.`,
+        ? tc("orbit.hintScatterLastOne", { thing: one, word: numberWord(question.count) })
+        : tc("orbit.hintScatterLeft", { left, things: many, count: question.count }),
     );
   }
 
   return composeHints(
-    state.kidTip ?? "Say one number for each one you touch.",
+    state.kidTip ?? tc("orbit.hintRowTip"),
     state.tapped === 0
-      ? `Start at the far-left ${one}. Touch it and say "one".`
-      : `You have counted ${state.tapped}. Touch the next ${one} and say "${next}".`,
-    `Touch every ${one} in order. The last number, ${question.count}, is how many.`,
+      ? tc("orbit.hintRowStart", { thing: one, word: numberWord(1) })
+      : tc("orbit.hintRowGoing", { tapped: state.tapped, thing: one, next }),
+    tc("orbit.hintRowAll", { thing: one, count: question.count }),
   );
 }
 
@@ -432,6 +418,8 @@ export const TouchOrbit: React.FC<ActivityProps<TouchOrbitParams>> = ({
   onComplete,
   lesson,
 }) => {
+  // Re-render when the language changes: every line below reads the catalog.
+  useT();
   const setup: OrbitSetup = { ...params, ...params.question };
   const total = setup.questionsPerRound ?? 5;
   /** The lesson's own child-facing copy: the spoken intro, and hint rung one. */
@@ -673,11 +661,11 @@ export const TouchOrbit: React.FC<ActivityProps<TouchOrbitParams>> = ({
       correct: true,
       given: String(counted),
       expected: String(question.count),
-      title: "Great counting!",
+      title: tc("greatCounting"),
       message:
         question.mode === "scatter"
-          ? `Terrific tracking! You tagged all ${question.count} scattered objects without missing any.`
-          : `You counted ${question.count} ${question.asset.name.toLowerCase()}. The last number you said is how many!`,
+          ? tc("orbit.finishScatter", { count: question.count })
+          : tc("orbit.finishRow", { count: question.count, things: plural(question.asset) }),
     });
   };
 
@@ -703,13 +691,13 @@ export const TouchOrbit: React.FC<ActivityProps<TouchOrbitParams>> = ({
     // hint is too. "Group A is greater" is the grown-up version.
     const message = correct
       ? c.answer === "SAME"
-        ? `Both groups have ${c.countA}. Moving things around does not change how many!`
+        ? tc("orbit.compareSameRight", { a: c.countA })
         : c.answer === "A"
-          ? `The left group has ${c.countA}. The right group has ${c.countB}. Left has more!`
-          : `The right group has ${c.countB}. The left group has ${c.countA}. Right has more!`
+          ? tc("orbit.compareLeftRight", { a: c.countA, b: c.countB })
+          : tc("orbit.compareRightRight", { a: c.countA, b: c.countB })
       : c.answer === "SAME"
-        ? `They look different, but count one by one. Left has ${c.countA} and right has ${c.countB}. The same!`
-        : `Count one by one. Left has ${c.countA} ${c.assetA.name.toLowerCase()} and right has ${c.countB} ${c.assetB.name.toLowerCase()}.`;
+        ? tc("orbit.compareSameWrong", { a: c.countA, b: c.countB })
+        : tc("orbit.compareWrong", { a: c.countA, b: c.countB, thingsA: plural(c.assetA), thingsB: plural(c.assetB) });
 
     submit({
       correct,
@@ -717,7 +705,7 @@ export const TouchOrbit: React.FC<ActivityProps<TouchOrbitParams>> = ({
       expected: c.answer,
       // Picking the wrong side is a direction error, not an arithmetic slip.
       errorKind: correct ? undefined : "reversed",
-      title: correct ? "Great counting!" : "Count them again",
+      title: correct ? tc("greatCounting") : tc("orbit.countAgain"),
       message,
     });
   };
@@ -728,7 +716,7 @@ export const TouchOrbit: React.FC<ActivityProps<TouchOrbitParams>> = ({
     <SkillRound
       koda={koda}
       lesson={lesson}
-      fallbackTitle="Touch and Count"
+      fallbackTitle={tc("orbit.title")}
       round={round}
       totalQuestions={total}
       prompt={prompt}
@@ -776,10 +764,10 @@ export const TouchOrbit: React.FC<ActivityProps<TouchOrbitParams>> = ({
                   }`}
                 >
                   {guide.target === (isA ? 0 : 1) && (
-                    <span className="sr-only">Count this group next</span>
+                    <span className="sr-only">{tc("orbit.countThisGroup")}</span>
                   )}
                   <span className="text-sm font-extrabold text-ink/70">
-                    {isA ? "Left" : "Right"}
+                    {isA ? tc("orbit.left") : tc("orbit.right")}
                   </span>
                   <TapGroup
                     count={isA ? c.countA : c.countB}
@@ -801,9 +789,9 @@ export const TouchOrbit: React.FC<ActivityProps<TouchOrbitParams>> = ({
           <div className="flex flex-wrap items-center justify-center gap-3">
             {(
               [
-                ["A", "Left has more"],
-                ["SAME", "Same!"],
-                ["B", "Right has more"],
+                ["A", tc("orbit.leftMore")],
+                ["SAME", tc("orbit.same")],
+                ["B", tc("orbit.rightMore")],
               ] as const
             ).map(([choice, label]) => (
               <motion.button
@@ -875,9 +863,10 @@ export const TouchOrbit: React.FC<ActivityProps<TouchOrbitParams>> = ({
                   whileTap={{ scale: 0.85, rotate: i % 2 === 0 ? -6 : 6 }}
                   /* The spotlight is a glow, and a glow is nothing to a screen
                      reader — so the object the coach is pointing at says so. */
-                  aria-label={`${singular(question.asset.name)} ${i + 1}${
-                    on ? ", counted" : lit ? ", touch this one next" : ""
-                  }`}
+                  aria-label={tc(on ? "orbit.objectCounted" : lit ? "orbit.objectNext" : "orbit.object", {
+                    thing: singular(question.asset),
+                    n: i + 1,
+                  })}
                   style={
                     place
                       ? {
@@ -961,7 +950,7 @@ export const TouchOrbit: React.FC<ActivityProps<TouchOrbitParams>> = ({
                     <SvgAsset
                       id={question.asset.id}
                       size="100%"
-                      title={singular(question.asset.name)}
+                      title={singular(question.asset)}
                     />
                   </motion.span>
                   {/*
@@ -1029,7 +1018,7 @@ export const TouchOrbit: React.FC<ActivityProps<TouchOrbitParams>> = ({
                 {tapped.length}
               </motion.span>
             )}
-            <span className="sr-only">{tapped.length} counted</span>
+            <span className="sr-only">{tc("orbit.counted", { count: tapped.length })}</span>
           </div>
         </div>
       )}

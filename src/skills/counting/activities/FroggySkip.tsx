@@ -19,6 +19,8 @@ import {
 import { SvgAsset } from "../../../assets/svg";
 import { SCENE } from "../internal/data/countingLayout";
 import { themeSystem } from "../../../lib/themeSystem";
+import { tc } from "../internal/i18n";
+import { useT } from "../../../lib/i18n";
 
 /**
  * A number line the child moves along.
@@ -146,9 +148,7 @@ export const buildQuestion = (setup: FroggySetup, index: number): LineQuestion =
       answer,
       options: [...Array.from(distractors).slice(0, 3), answer].sort(() => Math.random() - 0.5),
       expected: String(answer),
-      rule: reverse
-        ? `Pattern steps backward by -${step} each jump`
-        : `Pattern steps forward by +${step} each jump`,
+      rule: tc(reverse ? "numberline.ruleDown" : "numberline.ruleUp", { step }),
     };
   }
 
@@ -180,8 +180,8 @@ export const buildQuestion = (setup: FroggySetup, index: number): LineQuestion =
 /** The question in words, as the round says it. */
 export const promptFor = (q: LineQuestion): string =>
   q.mode === "missing"
-    ? "Which number is missing?"
-    : `Hop by ${q.step} to get to ${q.pads?.[q.pads.length - 1]}!`;
+    ? tc("numberline.promptMissing")
+    : tc("numberline.promptHop", { step: q.step, goal: q.pads?.[q.pads.length - 1] ?? 0 });
 
 /**
  * On paper.
@@ -194,11 +194,11 @@ export const promptFor = (q: LineQuestion): string =>
 export const printedFor = (q: LineQuestion): PrintedQuestion => {
   if (q.mode === "missing") {
     const shown = (q.sequence ?? []).map((n) => (n === null ? "___" : String(n))).join(",  ");
-    return { text: `${shown}    Which number is missing?`, answer: String(q.answer ?? "") };
+    return { text: tc("numberline.printedMissing", { shown }), answer: String(q.answer ?? "") };
   }
   const pads = q.pads ?? [];
   return {
-    text: `Start at 0 and hop by ${q.step} to reach ${pads[pads.length - 1]}. Write every number you land on.`,
+    text: tc("numberline.printedHop", { step: q.step, goal: pads[pads.length - 1] ?? 0 }),
     answer: pads.join(", "),
   };
 };
@@ -206,15 +206,11 @@ export const printedFor = (q: LineQuestion): PrintedQuestion => {
 /** How the technique goes, in paper words. */
 export const methodFor = (q: LineQuestion): string[] =>
   q.mode === "missing"
-    ? [
-        "Look at the gap between two numbers you can see.",
-        "That gap is the same all the way along.",
-        "Count on — or back — from the number beside the hole.",
-      ]
+    ? [tc("numberline.methodMissing1"), tc("numberline.methodMissing2"), tc("numberline.methodMissing3")]
     : [
-        `Each hop is the same size: ${q.step}.`,
-        "Start at zero and add that much every time.",
-        "Write each number as you land on it — that is the count.",
+        tc("numberline.methodHop1", { step: q.step }),
+        tc("numberline.methodHop2"),
+        tc("numberline.methodHop3"),
       ];
 
 /**
@@ -240,7 +236,7 @@ export const figureFor = (q: LineQuestion): React.ReactNode | null => {
       width={328}
       height={30}
       role="img"
-      aria-label={`Number line with ${pads.length} pads, hopping by ${q.step}`}
+      aria-label={tc("numberline.lineLabel", { pads: pads.length, step: q.step })}
       className="text-slate-900"
     >
       <line x1={0} y1={12} x2={W} y2={12} stroke="currentColor" strokeWidth="1.5" />
@@ -279,18 +275,18 @@ export function numberLineHints(
     // the sequence rather than assuming a child is counting up.
     const shown = sequence.filter((n): n is number => n !== null);
     const down = shown.length > 1 && shown[1] < shown[0];
-    const jump = `${down ? "down" : "up"} by ${question.step}`;
+    const jump = tc(down ? "numberline.jumpDown" : "numberline.jumpUp", { step: question.step });
 
     return composeHints(
-      state.kidTip ?? "Look at how much it grows each hop.",
-      `Every hop on this line is the same size. It goes ${jump}.`,
+      state.kidTip ?? tc("numberline.hintMissingTip"),
+      tc("numberline.hintMissingSize", { jump }),
       // The child answers by choosing, so the rung gives the move and stops
       // short of the number.
       before !== null
-        ? `Start at ${before} and go ${jump}. That lands on the empty pad.`
+        ? tc("numberline.hintMissingFrom", { before, jump })
         : after !== null
-          ? `Go back ${question.step} from ${after} to reach the empty pad.`
-          : `Count ${jump} along the line until you reach the empty pad.`,
+          ? tc("numberline.hintMissingBack", { step: question.step, after })
+          : tc("numberline.hintMissingCount", { jump }),
     );
   }
 
@@ -300,13 +296,13 @@ export function numberLineHints(
   const next = pads[state.hop + 1];
 
   return composeHints(
-    state.kidTip ?? "Say the numbers out loud as you hop.",
+    state.kidTip ?? tc("numberline.hintHopTip"),
     next === undefined
-      ? `The frog is on ${here}, the last pad. That is your answer.`
-      : `The frog is on ${here}. ${here} + ${question.step} is ${next}. Press Hop.`,
+      ? tc("numberline.hintHopLast", { here })
+      : tc("numberline.hintHopNext", { here, step: question.step, next }),
     // Saying the whole chant is the point of skip counting: the pattern is
     // heard before it is understood, and the pads are on screen anyway.
-    `Chant the pads as you land: ${pads.join(", ")}. The frog stops at ${goal}.`,
+    tc("numberline.hintHopChant", { pads: pads.join(", "), goal }),
   );
 }
 
@@ -316,6 +312,8 @@ export const FroggySkip: React.FC<ActivityProps<FroggySkipParams>> = ({
   onComplete,
   lesson,
 }) => {
+  // Re-render when the language changes: every line below reads the catalog.
+  useT();
   const setup: FroggySetup = { ...params, ...params.question };
   const total = setup.questionsPerRound ?? 5;
   /** The lesson's own child-facing copy: the spoken intro, and hint rung one. */
@@ -455,8 +453,8 @@ export const FroggySkip: React.FC<ActivityProps<FroggySkipParams>> = ({
           correct: true,
           given: String(pads[next]),
           expected: String(pads[next]),
-          title: "Great counting!",
-          message: `Ribbit! The frog leaped by +${question.step} each pad all the way to ${pads[next]}!`,
+          title: tc("greatCounting"),
+          message: tc("numberline.hopDone", { step: question.step, goal: pads[next] }),
         }),
       );
     }
@@ -472,10 +470,10 @@ export const FroggySkip: React.FC<ActivityProps<FroggySkipParams>> = ({
       given: String(choice),
       expected: String(question.answer),
       errorKind: correct ? undefined : "sequence_slip",
-      title: correct ? "Great counting!" : "Check your hops",
+      title: correct ? tc("greatCounting") : tc("numberline.checkHops"),
       message: correct
-        ? `Pattern cracked! ${choice} completes the sequence (${question.rule}).`
-        : "Look at the jump between neighboring pads to find the missing number.",
+        ? tc("numberline.missingRight", { choice, rule: question.rule ?? "" })
+        : tc("numberline.missingWrong"),
     });
   };
 
@@ -485,7 +483,7 @@ export const FroggySkip: React.FC<ActivityProps<FroggySkipParams>> = ({
     <SkillRound
       koda={koda}
       lesson={lesson}
-      fallbackTitle="Froggy Skip"
+      fallbackTitle={tc("numberline.title")}
       round={round}
       totalQuestions={total}
       prompt={prompt}
@@ -555,7 +553,7 @@ export const FroggySkip: React.FC<ActivityProps<FroggySkipParams>> = ({
                          character a child follows along the whole number line. */
                       className="w-12 h-12 sm:w-16 sm:h-16 flex items-center justify-center drop-shadow-[0_4px_10px_rgba(0,0,0,0.2)]"
                     >
-                      <SvgAsset id="counting-frog" size="100%" title="Froggy" />
+                      <SvgAsset id="counting-frog" size="100%" title={tc("numberline.frog")} />
                     </motion.div>
                   ) : (
                     <div
@@ -563,8 +561,8 @@ export const FroggySkip: React.FC<ActivityProps<FroggySkipParams>> = ({
                         reached ? "" : "opacity-70 saturate-[0.65]"
                       } ${lit ? "ring-4 ring-indigo-500 animate-pulse !opacity-100 !saturate-100" : ""}`}
                     >
-                      <SvgAsset id="counting-lily-pad" size="100%" title="Lily pad" />
-                      {lit && <span className="sr-only">Hop to this pad next</span>}
+                      <SvgAsset id="counting-lily-pad" size="100%" title={tc("numberline.lilyPad")} />
+                      {lit && <span className="sr-only">{tc("numberline.hopHere")}</span>}
                     </div>
                   )}
                   <span className="font-black text-base text-ink tabular-nums">{val}</span>
@@ -584,7 +582,7 @@ export const FroggySkip: React.FC<ActivityProps<FroggySkipParams>> = ({
                  12px type, smaller than the numbers it moves between. */
               className={themeSystem.button("primary", "lg")}
             >
-              Hop Forward (+{question.step})
+              {tc("numberline.hopButton", { step: question.step })}
               <ArrowRight />
             </motion.button>
           </div>

@@ -19,6 +19,8 @@ import { SCENE } from "../internal/data/countingLayout";
 import { themeSystem } from "../../../lib/themeSystem";
 import { DUAL_COLOR_PAIRS } from "../internal/data/countingAssets";
 import { numberWord } from "../internal/guide/countGuide";
+import { tc } from "../internal/i18n";
+import { useT } from "../../../lib/i18n";
 
 /**
  * Subitizing: a set is flashed, then named — without counting.
@@ -143,10 +145,10 @@ export function subitizeHints(
   if (question.parts) {
     const { a, b } = question.parts;
     return composeHints(
-      state.kidTip ?? "Count one colour, then keep going with the other.",
-      "Take in one colour as a group, then the other.",
+      state.kidTip ?? tc("subitize.hintColorsTip"),
+      tc("subitize.hintColorsLook"),
       // The two parts, not the total: putting them together is the question.
-      `${a} of one colour, ${b} of the other. Put them together.`,
+      tc("subitize.hintColorsParts", { a, b }),
     );
   }
 
@@ -159,11 +161,11 @@ export function subitizeHints(
     const left = question.points.filter((pt) => pt.x < 50).length;
     const right = total - left;
     return composeHints(
-      state.kidTip ?? "Look for small groups inside the big group.",
-      "Do not chase every dot. Take in one clump, then count on.",
+      state.kidTip ?? tc("subitize.hintPointsTip"),
+      tc("subitize.hintPointsLook"),
       left === 0 || right === 0
-        ? "They were all bunched together. Split them into two smaller groups."
-        : `${left} on the left and ${right} on the right. Put them together.`,
+        ? tc("subitize.hintPointsBunched")
+        : tc("subitize.hintPointsSplit", { left, right }),
     );
   }
 
@@ -172,13 +174,17 @@ export function subitizeHints(
   const spare = total % 3;
   const threes = Array.from({ length: rows }, (_, i) => (i + 1) * 3).join(", ");
   return composeHints(
-    state.kidTip ?? "Try to see the pattern without counting.",
-    "Look at the middle of the box, not at one dot.",
+    state.kidTip ?? tc("subitize.hintGridTip"),
+    tc("subitize.hintGridLook"),
     rows === 0
-      ? `One short row of ${total}. Read it like a domino.`
+      ? tc("subitize.hintGridShort", { total })
       : rows === 1
-        ? `One row of three${spare > 0 ? `, and ${spare} more underneath.` : " and nothing else."}`
-        : `${rows} rows of three: ${threes}${spare > 0 ? `, then ${spare} more.` : "."}`,
+        ? spare > 0
+          ? tc("subitize.hintGridOneRowMore", { spare })
+          : tc("subitize.hintGridOneRow")
+        : spare > 0
+          ? tc("subitize.hintGridRowsMore", { rows, threes, spare })
+          : tc("subitize.hintGridRows", { rows, threes }),
   );
 }
 
@@ -195,7 +201,7 @@ const Dot: React.FC<{ className: string }> = ({ className }) => (
 );
 
 /** The question in words, as the round says it. */
-export const promptFor = (): string => "Look fast! How many did you see?";
+export const promptFor = (): string => tc("subitize.prompt");
 
 /**
  * Not on paper.
@@ -215,6 +221,8 @@ export const SubitizingRush: React.FC<ActivityProps<SubitizingRushParams>> = ({
   onComplete,
   lesson,
 }) => {
+  // Re-render when the language changes: every line below reads the catalog.
+  useT();
   const setup: SubitizingSetup = { ...params, ...params.question };
   const total = setup.questionsPerRound ?? 5;
   const flashMs = setup.flashMs ?? 1000;
@@ -349,12 +357,12 @@ export const SubitizingRush: React.FC<ActivityProps<SubitizingRushParams>> = ({
       correct,
       given: String(choice),
       expected: String(question.total),
-      title: correct ? "Great counting!" : "So close!",
+      title: correct ? tc("greatCounting") : tc("subitize.soClose"),
       message: correct
         ? question.parts
-          ? `${question.parts.a} and ${question.parts.b} makes ${question.total}.`
-          : `Recognised instantly: ${question.total}!`
-        : `You said ${choice}. There were ${question.total}. Have another look!`,
+          ? tc("subitize.rightParts", { a: question.parts.a, b: question.parts.b, total: question.total })
+          : tc("subitize.rightInstant", { total: question.total })
+        : tc("subitize.wrong", { choice, total: question.total }),
     });
   };
 
@@ -362,10 +370,10 @@ export const SubitizingRush: React.FC<ActivityProps<SubitizingRushParams>> = ({
     <SkillRound
       koda={koda}
       lesson={lesson}
-      fallbackTitle="Subitizing Rush"
+      fallbackTitle={tc("subitize.title")}
       round={round}
       totalQuestions={total}
-      prompt="Look fast! How many did you see?"
+      prompt={promptFor()}
       iconName="dice"
       iconTone="purple"
       hints={hints}
@@ -377,7 +385,7 @@ export const SubitizingRush: React.FC<ActivityProps<SubitizingRushParams>> = ({
           ? undefined
           : () => {
             round.useSupport("audio_replay");
-            void koda.speech.say("Look fast! How many did you see?");
+            void koda.speech.say(promptFor());
             }
       }
       recommendation={nextStep}
@@ -387,7 +395,7 @@ export const SubitizingRush: React.FC<ActivityProps<SubitizingRushParams>> = ({
           {phase === "waiting" && (
             <div className="text-center space-y-3">
               <p className="text-base font-bold text-slate-700 dark:text-body">
-                Ready? Watch closely!
+                {tc("subitize.ready")}
               </p>
               <motion.button
                 /* Wrapped, not passed: `flash` now takes a `hold` flag, and
@@ -401,7 +409,7 @@ export const SubitizingRush: React.FC<ActivityProps<SubitizingRushParams>> = ({
                 className={themeSystem.button("primary", "lg")}
                 autoFocus
               >
-                Show me
+                {tc("subitize.showMe")}
               </motion.button>
             </div>
           )}
@@ -412,7 +420,7 @@ export const SubitizingRush: React.FC<ActivityProps<SubitizingRushParams>> = ({
                 ?
               </span>
               <p className="text-sm font-bold text-slate-700 dark:text-body">
-                How many dots did you see?
+                {tc("subitize.howManyDots")}
               </p>
               <motion.button
                 onClick={() => {
@@ -426,7 +434,7 @@ export const SubitizingRush: React.FC<ActivityProps<SubitizingRushParams>> = ({
                 transition={SPRING.tap}
                 className={themeSystem.button("secondary", "sm")}
               >
-                Show me again
+                {tc("subitize.showAgain")}
               </motion.button>
             </div>
           )}
@@ -459,7 +467,7 @@ export const SubitizingRush: React.FC<ActivityProps<SubitizingRushParams>> = ({
                     .map((n, group) => (
                       <React.Fragment key={group}>
                         {group > 0 && (
-                          <span className="text-lg font-black text-ink/60">and</span>
+                          <span className="text-lg font-black text-ink/60">{tc("subitize.and")}</span>
                         )}
                         <span className="flex flex-col items-center gap-1.5">
                           <span className="grid grid-cols-5 gap-2 rounded-2xl border-2 border-indigo-400 bg-indigo-500/10 p-2">

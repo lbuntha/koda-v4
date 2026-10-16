@@ -16,8 +16,10 @@ import {
   useGuide,
 } from "../../kit";
 import { FRAME_CELL, SCENE } from "../internal/data/countingLayout";
-import { nextCell, skippedTopRow } from "../internal/guide/countGuide";
+import { nextCell, numberWord, skippedTopRow } from "../internal/guide/countGuide";
 import { themeSystem } from "../../../lib/themeSystem";
+import { tc } from "../internal/i18n";
+import { useT } from "../../../lib/i18n";
 
 /**
  * Ten-frames: build a number in a frame of ten.
@@ -93,10 +95,10 @@ export const buildQuestion = (setup: TenFrameSetup, index: number): FrameQuestio
 /** The question in words, as the round says it. */
 export const promptFor = (q: FrameQuestion): string =>
   q.mode === "complement"
-    ? `You have ${q.initial}. How many more to make 10?`
+    ? tc("tenframe.promptComplement", { initial: q.initial ?? 0 })
     : q.mode === "teen"
-      ? `Make ${q.target}. Fill one frame with 10, then add more.`
-      : `Make ${q.target} dots. Fill the top row first.`;
+      ? tc("tenframe.promptTeen", { target: q.target })
+      : tc("tenframe.promptFill", { target: q.target });
 
 /**
  * On paper.
@@ -110,20 +112,21 @@ export const printedFor = (q: FrameQuestion): PrintedQuestion => {
   switch (q.mode) {
     case "complement":
       return {
-        text: `The frame holds ${q.initial}. How many more make 10?`,
+        text: tc("tenframe.printedComplement", { initial: q.initial ?? 0 }),
         answer: String(q.target),
       };
     case "teen":
       return {
-        text: `Draw ${q.target}. Fill one frame with ten, then start the next.`,
-        answer: `${q.target} — one full frame and ${q.target - 10} more`,
+        text: tc("tenframe.printedTeen", { target: q.target }),
+        answer: tc("tenframe.printedTeenAnswer", { target: q.target, ones: q.target - 10 }),
       };
     default:
       return {
-        text: `Draw ${q.target} dots. Fill the top row first.`,
-        answer: `${q.target} — ${Math.min(q.target, 5)} on the top row${
-          q.target > 5 ? ` and ${q.target - 5} below` : ""
-        }`,
+        text: tc("tenframe.printedFill", { target: q.target }),
+        answer:
+          q.target > 5
+            ? tc("tenframe.printedFillAnswerBelow", { target: q.target, top: 5, below: q.target - 5 })
+            : tc("tenframe.printedFillAnswer", { target: q.target, top: q.target }),
       };
   }
 };
@@ -132,23 +135,11 @@ export const printedFor = (q: FrameQuestion): PrintedQuestion => {
 export const methodFor = (q: FrameQuestion): string[] => {
   switch (q.mode) {
     case "complement":
-      return [
-        "A full frame holds ten.",
-        "Count the empty cells rather than the full ones.",
-        "That is how many more you need.",
-      ];
+      return [tc("tenframe.methodComplement1"), tc("tenframe.methodComplement2"), tc("tenframe.methodComplement3")];
     case "teen":
-      return [
-        "A teen number is a full ten and some ones.",
-        "Fill one frame completely, then put the rest in the next.",
-        "The full frame is the ten you do not need to count again.",
-      ];
+      return [tc("tenframe.methodTeen1"), tc("tenframe.methodTeen2"), tc("tenframe.methodTeen3")];
     default:
-      return [
-        "Fill the top row first — a full row is five.",
-        "Put the rest in the bottom row.",
-        "A full row is seen without counting, which is the point of the frame.",
-      ];
+      return [tc("tenframe.methodFill1"), tc("tenframe.methodFill2"), tc("tenframe.methodFill3")];
   }
 };
 
@@ -169,7 +160,7 @@ export const figureFor = (q: FrameQuestion): React.ReactNode => {
       width={5 * CELL + 2}
       height={2 * CELL + 2}
       role="img"
-      aria-label={`Ten frame with ${filled} filled`}
+      aria-label={tc("tenframe.frameLabel", { filled })}
       className="text-slate-900"
     >
       <g stroke="currentColor" strokeWidth="1.5" fill="none">
@@ -215,59 +206,44 @@ export function tenFrameHints(
   if (question.mode === "complement") {
     const start = question.initial ?? 0;
     return composeHints(
-      state.kidTip ?? "Count the empty boxes. That is how many more.",
-      `${start} ${start === 1 ? "box is" : "boxes are"} full. A full frame is 10.`,
+      state.kidTip ?? tc("tenframe.hintComplementTip"),
+      tc("tenframe.hintComplementFull", { count: start }),
       // Counting the empty boxes *is* the method, and the child answers by
       // choosing a number — so the rung stops one step short of saying which.
-      "Count the empty boxes one at a time, then tap that number.",
+      tc("tenframe.hintComplementCount"),
     );
   }
 
   if (question.mode === "teen") {
     const ones = question.target - 10;
     return composeHints(
-      state.kidTip ?? "One full frame is 10. Then count the extra ones.",
-      `${question.target} is 10 and ${ones} more. Put ${ones} in the second frame.`,
+      state.kidTip ?? tc("tenframe.hintTeenTip"),
+      tc("tenframe.hintTeenSplit", { target: question.target, ones }),
       filled === ones
-        ? `10 and ${filled} makes ${question.target}. Press "Check Teen Number".`
+        ? tc("tenframe.hintTeenDone", { filled, target: question.target })
         : filled < ones
-          ? `You have 10 and ${filled}. Tap ${ones - filled} more.`
-          : `You have 10 and ${filled}. Take ${filled - ones} back out.`,
+          ? tc("tenframe.hintTeenMore", { filled, more: ones - filled })
+          : tc("tenframe.hintTeenLess", { filled, less: filled - ones }),
     );
   }
 
   const extra = question.target - 5;
   return composeHints(
-    state.kidTip ?? "Fill the top row to 5 first. That makes it easy!",
+    state.kidTip ?? tc("tenframe.hintFillTip"),
     question.target <= 5
-      ? `${question.target} fits in the top row. Fill ${question.target} and stop.`
-      : `${question.target} is a full top row of 5, and ${extra} more below.`,
+      ? tc("tenframe.hintFillFits", { target: question.target })
+      : tc("tenframe.hintFillSplit", { target: question.target, extra }),
     filled === question.target
-      ? `That is ${question.target}. Press Check.`
+      ? tc("tenframe.hintFillDone", { target: question.target })
       : filled === 0
-        ? `Tap ${question.target} boxes, top row first, then press Check.`
+        ? tc("tenframe.hintFillStart", { target: question.target })
         : filled < question.target
-          ? `You have ${filled}. Tap ${question.target - filled} more, then press Check.`
-          : `You have ${filled}. Tap ${filled - question.target} off, then press Check.`,
+          ? tc("tenframe.hintFillMore", { filled, more: question.target - filled })
+          : tc("tenframe.hintFillLess", { filled, less: filled - question.target }),
   );
 }
 
 const EMPTY_FRAME = () => Array<boolean>(10).fill(false);
-
-/** Matches the recorded clips in `audio/numbers`. */
-const NUMBER_WORDS = [
-  "",
-  "one",
-  "two",
-  "three",
-  "four",
-  "five",
-  "six",
-  "seven",
-  "eight",
-  "nine",
-  "ten",
-];
 
 const Cell: React.FC<{
   filled: boolean;
@@ -293,9 +269,10 @@ const Cell: React.FC<{
       transition={SPRING.tap}
       /* The glow is nothing to a screen reader, so the cell the coach points
          at says so in words. */
-      aria-label={`Space ${position ?? ""}${filled ? ", filled" : ", empty"}${
-        lit ? ", fill this one next" : ""
-      }`}
+      aria-label={tc(
+        filled ? (lit ? "tenframe.cellFilledNext" : "tenframe.cellFilled") : lit ? "tenframe.cellEmptyNext" : "tenframe.cellEmpty",
+        { position: position ?? "" },
+      )}
       className={`${height} rounded-2xl border-2 flex items-center justify-center transition-all ${
         filled ? on : off
       } ${lit ? "ring-4 ring-indigo-500 ring-offset-2 ring-offset-transparent animate-pulse" : ""}`}
@@ -327,6 +304,8 @@ export const TenFrameRocket: React.FC<ActivityProps<TenFrameRocketParams>> = ({
   onComplete,
   lesson,
 }) => {
+  // Re-render when the language changes: every line below reads the catalog.
+  useT();
   const setup: TenFrameSetup = { ...params, ...params.question };
   const total = setup.questionsPerRound ?? 5;
   /** The lesson's own child-facing copy: the spoken intro, and hint rung one. */
@@ -439,7 +418,7 @@ export const TenFrameRocket: React.FC<ActivityProps<TenFrameRocketParams>> = ({
        */
       const count = next.filter(Boolean).length;
       if (count > prev.filter(Boolean).length && !practising && koda.config.isEnabled("audio_speech", true)) {
-        void koda.speech.say(NUMBER_WORDS[count] ?? String(count), {
+        void koda.speech.say(numberWord(count), {
           rate: koda.config.get("speechRate", 1.0),
         });
       }
@@ -465,14 +444,14 @@ export const TenFrameRocket: React.FC<ActivityProps<TenFrameRocketParams>> = ({
       ? submit(
           filled,
           true,
-          "Great counting!",
-          `Rocket fueled! You filled 5 on top plus ${question.target - 5} extra ones to make ${question.target}.`,
+          tc("greatCounting"),
+          tc("tenframe.fillRight", { extra: question.target - 5, target: question.target }),
         )
       : submit(
           filled,
           false,
-          "Try again",
-          `Currently filled: ${filled}. We need exactly ${question.target} filled spots.`,
+          tc("tenframe.tryAgain"),
+          tc("tenframe.fillWrong", { filled, target: question.target }),
         );
 
   const answerComplement = (guess: number) =>
@@ -480,14 +459,14 @@ export const TenFrameRocket: React.FC<ActivityProps<TenFrameRocketParams>> = ({
       ? submit(
           guess,
           true,
-          "Great counting!",
-          `Number bond discovered! ${question.initial} + ${guess} = 10. You completed the full ten-frame.`,
+          tc("greatCounting"),
+          tc("tenframe.complementRight", { initial: question.initial ?? 0, guess }),
         )
       : submit(
           guess,
           false,
-          "Try another number",
-          `There are ${question.initial} filled spots. Count the empty ones: we need ${question.target} more to make 10.`,
+          tc("tenframe.tryAnother"),
+          tc("tenframe.complementWrong", { initial: question.initial ?? 0, target: question.target }),
         );
 
   const checkTeen = () => {
@@ -496,14 +475,14 @@ export const TenFrameRocket: React.FC<ActivityProps<TenFrameRocketParams>> = ({
       ? submit(
           built,
           true,
-          "Great counting!",
-          `Teen number mastered! 10 (full frame) + ${filled} (ones) = ${question.target}.`,
+          tc("greatCounting"),
+          tc("tenframe.teenRight", { filled, target: question.target }),
         )
       : submit(
           built,
           false,
-          "Try the second frame",
-          `Currently 10 + ${filled} = ${built}. We need ${question.target - 10} extra ones in Frame 2.`,
+          tc("tenframe.trySecond"),
+          tc("tenframe.teenWrong", { filled, built, ones: question.target - 10 }),
         );
   };
 
@@ -513,7 +492,7 @@ export const TenFrameRocket: React.FC<ActivityProps<TenFrameRocketParams>> = ({
     <SkillRound
       koda={koda}
       lesson={lesson}
-      fallbackTitle="Ten-Frame Rocket"
+      fallbackTitle={tc("tenframe.title")}
       round={round}
       totalQuestions={total}
       prompt={prompt}
@@ -567,7 +546,7 @@ export const TenFrameRocket: React.FC<ActivityProps<TenFrameRocketParams>> = ({
               className={themeSystem.button("primary", "lg")}
             >
               <Rocket />
-              Check
+              {tc("tenframe.check")}
             </motion.button>
           </div>
         </div>
@@ -601,7 +580,7 @@ export const TenFrameRocket: React.FC<ActivityProps<TenFrameRocketParams>> = ({
 
           <div className="text-center space-y-2">
             <p className="text-sm font-bold text-muted">
-              Select how many empty spots are needed to make 10:
+              {tc("tenframe.selectEmpty")}
             </p>
             <div className="flex flex-wrap items-center justify-center gap-2.5">
               {[1, 2, 3, 4, 5, 6, 7, 8].map((num) => (
@@ -626,7 +605,7 @@ export const TenFrameRocket: React.FC<ActivityProps<TenFrameRocketParams>> = ({
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 max-w-2xl mx-auto">
             <div className="bg-canvas p-3.5 rounded-2xl border border-purple-500/40 space-y-2">
               <span className="text-sm text-purple-600 dark:text-purple-300 font-black">
-                Frame 1: 10 (Locked Full)
+                {tc("tenframe.frame1")}
               </span>
               <div className="grid grid-cols-5 gap-2">
                 {Array.from({ length: 10 }, (_, i) => (
@@ -642,7 +621,7 @@ export const TenFrameRocket: React.FC<ActivityProps<TenFrameRocketParams>> = ({
 
             <div className="bg-canvas p-3.5 rounded-2xl border border-cyan-500/40 space-y-2">
               <span className="text-sm text-cyan-700 dark:text-cyan-300 font-black">
-                Frame 2: Extra Ones
+                {tc("tenframe.frame2")}
               </span>
               <div className="grid grid-cols-5 gap-2">
                 {frame.map((on, idx) => (
@@ -662,7 +641,7 @@ export const TenFrameRocket: React.FC<ActivityProps<TenFrameRocketParams>> = ({
 
           <div className="flex items-center justify-center gap-4">
             <span className="text-sm font-bold text-muted">
-              Total: 10 + {filled} = <strong>{10 + filled}</strong>
+              {tc("tenframe.total", { filled })} <strong>{10 + filled}</strong>
             </span>
             <motion.button
               onClick={checkTeen}
@@ -671,7 +650,7 @@ export const TenFrameRocket: React.FC<ActivityProps<TenFrameRocketParams>> = ({
               transition={SPRING.tap}
               className={themeSystem.button("primary", "sm")}
             >
-              Check Teen Number
+              {tc("tenframe.checkTeen")}
             </motion.button>
           </div>
         </div>

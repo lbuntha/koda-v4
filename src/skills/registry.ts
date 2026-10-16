@@ -4,6 +4,8 @@ import { describeSkill } from "./describe";
 import type { AnyActivityDefinition, Lesson, Skill, SkillInfo } from "./types";
 import type { Viewer } from "./viewer";
 import { releaseStatusOf } from "../lib/skillRegistryApi";
+// Every skill's translations, registered at startup — see `kit/i18n.ts`.
+import "./kit/i18n";
 
 /**
  * Every skill in the build, in course order. Adding one is a single entry here

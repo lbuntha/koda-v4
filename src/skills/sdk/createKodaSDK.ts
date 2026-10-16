@@ -1,11 +1,13 @@
 import { SkillStoreAPI } from "../../lib/skillStore";
 import { tutorHeaders } from "../../lib/tutorApi";
 import {
+  isKhmerText,
   isSoundEnabled,
   isVoiceEnabled,
   playBase64Pcm,
   playSound,
   setSoundEnabled,
+  speakKhmer,
   speakWebSpeech,
 } from "../../utils/audio";
 import { playClip, stopClip, voiceFloorHeld } from "../../lib/voiceClips";
@@ -261,6 +263,14 @@ export function createKodaSDK(
         });
         if (playClip(text, opts?.rate ?? 1, spoken)) {
           await finished;
+          return;
+        }
+
+        // Khmer has no server voice: a Khmer device voice, or silence.
+        if (isKhmerText(text)) {
+          await new Promise<void>((resolve) => {
+            speakKhmer(text, opts?.rate ?? 1, resolve);
+          });
           return;
         }
 

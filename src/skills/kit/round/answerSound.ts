@@ -1,5 +1,6 @@
 import type { KodaSDK } from "../../types";
 import { playReaction } from "../../../lib/voiceClips";
+import { BASE_LANGUAGE, currentLanguage } from "../../../lib/i18n";
 
 /**
  * Say something about an answer.
@@ -37,6 +38,9 @@ export const playAnswerSound = (koda: KodaSDK, correct: boolean): boolean => {
   if (!koda.config.isEnabled("audio_speech", true)) return false;
   // Scoped to this skill: a reaction is written for one subject and does not
   // travel. See `registerSkillVoice`.
+  // The recorded reactions are English. A Khmer round praised in English is
+  // the mixed-language noise the rest of the voice rules avoid.
+  if (currentLanguage() !== BASE_LANGUAGE) return false;
   return playReaction(correct ? "correct" : "incorrect", 1, koda.skillId);
 };
 

@@ -6,7 +6,9 @@ import { skillArtId } from "../../../../assets/svg/skillArt";
  */
 export interface PredefinedAsset {
   id: string;
-  /** Plural, for prompts: "Touch each rocket." */
+  /** The `things.*` entry in this skill's catalogs — the name in each language. */
+  key: string;
+  /** Plural English name. On-screen wording reads `key` through the catalog. */
   name: string;
   category: "objects" | "nature" | "space" | "creatures";
 }
@@ -40,14 +42,14 @@ export interface PredefinedAsset {
 const art = (name: string) => skillArtId("counting", name);
 
 export const PREDEFINED_ASSETS: PredefinedAsset[] = [
-  { id: art("rocket"), name: "Rockets", category: "space" },
-  { id: art("butterfly"), name: "Butterflies", category: "creatures" },
-  { id: art("fish"), name: "Fish", category: "creatures" },
-  { id: art("sun"), name: "Suns", category: "nature" },
-  { id: art("leaf"), name: "Leaves", category: "nature" },
-  { id: art("gift"), name: "Gifts", category: "objects" },
-  { id: art("pencil"), name: "Pencils", category: "objects" },
-  { id: art("crown"), name: "Crowns", category: "objects" },
+  { id: art("rocket"), key: "rocket", name: "Rockets", category: "space" },
+  { id: art("butterfly"), key: "butterfly", name: "Butterflies", category: "creatures" },
+  { id: art("fish"), key: "fish", name: "Fish", category: "creatures" },
+  { id: art("sun"), key: "sun", name: "Suns", category: "nature" },
+  { id: art("leaf"), key: "leaf", name: "Leaves", category: "nature" },
+  { id: art("gift"), key: "gift", name: "Gifts", category: "objects" },
+  { id: art("pencil"), key: "pencil", name: "Pencils", category: "objects" },
+  { id: art("crown"), key: "crown", name: "Crowns", category: "objects" },
 ];
 
 export interface DualColorPair {

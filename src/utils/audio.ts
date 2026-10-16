@@ -278,3 +278,38 @@ export function speakWebSpeech(text: string, rateOrOnEnd?: number | (() => void)
   onEnd?.();
   return false;
 }
+
+/** Whether a line is written in Khmer script. */
+export const isKhmerText = (text: string): boolean => /[ក-៿]/.test(text);
+
+/**
+ * Say a Khmer line with a Khmer voice on this device, or not at all.
+ *
+ * Neither the server voice nor an English device voice can read Khmer, and a
+ * Khmer sentence read by one is noise a child will try to imitate — the same
+ * rule the Library follows. Calls `onEnd` either way, so a caller waiting on
+ * the line is never left hanging; returns whether anything spoke.
+ */
+export function speakKhmer(text: string, rate = 1, onEnd?: () => void): boolean {
+  try {
+    const voice = window.speechSynthesis?.getVoices().find((v) => v.lang.toLowerCase().startsWith("km"));
+    if (!voice) {
+      onEnd?.();
+      return false;
+    }
+    window.speechSynthesis.cancel();
+    const utterance = new SpeechSynthesisUtterance(text);
+    utterance.voice = voice;
+    utterance.lang = voice.lang;
+    utterance.rate = Math.max(0.6, Math.min(1.6, rate));
+    if (onEnd) {
+      utterance.onend = onEnd;
+      utterance.onerror = onEnd;
+    }
+    window.speechSynthesis.speak(utterance);
+    return true;
+  } catch {
+    onEnd?.();
+    return false;
+  }
+}

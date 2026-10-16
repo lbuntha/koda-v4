@@ -22,3 +22,4 @@ export {
   type RenderActivityOptions,
 } from "./renderActivity";
 export { describeActivitySmoke } from "./activitySmoke";
+export { describeSkillLocales } from "./skillLocales";

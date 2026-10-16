@@ -11,6 +11,8 @@
  * button now share: one set of words, however the help arrived.
  */
 
+import { currentLanguage } from "../../../../lib/i18n";
+
 const NUMBER_WORDS = [
   "",
   "one",
@@ -25,8 +27,26 @@ const NUMBER_WORDS = [
   "ten",
 ];
 
-/** A number as a child hears it. Digits past ten — nobody counts that far here. */
-export const numberWord = (n: number): string => NUMBER_WORDS[n] ?? String(n);
+const KHMER_NUMBER_WORDS = [
+  "",
+  "មួយ",
+  "ពីរ",
+  "បី",
+  "បួន",
+  "ប្រាំ",
+  "ប្រាំមួយ",
+  "ប្រាំពីរ",
+  "ប្រាំបី",
+  "ប្រាំបួន",
+  "ដប់",
+];
+
+/**
+ * A number as a child hears it, in the language on screen. Digits past ten —
+ * nobody counts that far here. English words match the recorded clips.
+ */
+export const numberWord = (n: number, language = currentLanguage()): string =>
+  (language === "km" ? KHMER_NUMBER_WORDS : NUMBER_WORDS)[n] ?? String(n);
 
 /**
  * The object to point at: the next one along the route the child is taking.

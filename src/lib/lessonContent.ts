@@ -1,5 +1,6 @@
 import type { Lesson } from "../skills/types";
 import { queueLocalSkillConfiguration } from "./skillRegistryApi";
+import { localizeLesson } from "./lessonText";
 
 /**
  * Lesson wording, editable in the app.
@@ -132,7 +133,9 @@ export const LessonContentAPI = {
  * Applied wherever a lesson is resolved rather than at each display, so the
  * Learn page, the round and the log cannot disagree about what a lesson says.
  */
-export function withLessonEdits<T extends Lesson>(skillId: string, lesson: T): T {
+export function withLessonEdits<T extends Lesson>(skillId: string, source: T): T {
+  // The skill's own translation first; a teacher's wording edit still wins.
+  const lesson = localizeLesson(skillId, source);
   const edit = LessonContentAPI.get(skillId, lesson.id);
   if (!edit) return lesson;
 

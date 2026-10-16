@@ -62,7 +62,7 @@ interface Row {
   override: CatalogMessage | undefined;
 }
 
-const RowEditor: React.FC<{ row: Row; lang: string; dir: "ltr" | "rtl" }> = ({ row, lang, dir }) => {
+const RowEditor: React.FC<{ row: Row; label: string; lang: string; dir: "ltr" | "rtl" }> = ({ row, label, lang, dir }) => {
   const { t } = useT();
   const plural = typeof row.english === "object";
   const forms = plural ? pluralForms(lang) : null;
@@ -124,7 +124,7 @@ const RowEditor: React.FC<{ row: Row; lang: string; dir: "ltr" | "rtl" }> = ({ r
   return (
     <li className="rounded-2xl border-2 border-line bg-surface p-3 sm:p-4">
       <div className="mb-2 flex flex-wrap items-center gap-2">
-        <code className="min-w-0 break-all text-xs text-muted">{row.key}</code>
+        <code className="min-w-0 break-all text-xs text-muted">{label}</code>
         {row.override !== undefined && (
           <span className="rounded-full bg-indigo-50 px-2 py-0.5 text-[11px] font-bold text-indigo-700 dark:bg-indigo-950 dark:text-indigo-300">
             {t("admin.translations.edited")}
@@ -211,6 +211,39 @@ const RowEditor: React.FC<{ row: Row; lang: string; dir: "ltr" | "rtl" }> = ({ r
 export function TranslationsPage() {
   const { can } = usePermissions();
   const { t } = useT();
+
+  if (!can("content:write")) {
+    return <NoAccess title={t("nav.translations")} permission="content:write" what={t("admin.translations.who")} />;
+  }
+
+  return (
+    <div className="mx-auto max-w-5xl space-y-4">
+      <div>
+        <h1 className="koda-admin-page-title">{t("nav.translations")}</h1>
+        <p className="koda-admin-label mt-1 text-muted">{t("admin.translations.intro")}</p>
+      </div>
+      <TranslationEditor />
+    </div>
+  );
+}
+
+/**
+ * The language picker, filters and rows — the whole page, or one corner of it.
+ *
+ * `prefix` narrows it to keys under one namespace: a skill's page passes
+ * `skills.<id>.` and gets that skill's lines only, with its sections (one per
+ * activity, plus `lessons`) in the section picker and the prefix left off each
+ * key. Same rows, same save, so an edit made in either place is the same edit.
+ */
+export function TranslationEditor({
+  prefix = "",
+  sectionLabel,
+}: {
+  prefix?: string;
+  /** A friendlier name for a section than its key — a lesson's title, say. */
+  sectionLabel?: (section: string) => string | undefined;
+}) {
+  const { t } = useT();
   const languages = availableLanguages();
   const others = languages.filter((lang) => lang.code !== BASE_LANGUAGE);
   const [lang, setLang] = useState(others[0]?.code ?? BASE_LANGUAGE);
@@ -226,16 +259,33 @@ export function TranslationsPage() {
 
   const rows: Row[] = useMemo(
     () =>
-      [...english.entries()].map(([key, message]) => ({
-        key,
-        english: message,
-        bundled: bundled.get(key),
-        override: overrides.get(key),
-      })),
-    [english, bundled, overrides],
+      [...english.entries()]
+        .filter(([key]) => key.startsWith(prefix))
+        .map(([key, message]) => ({
+          key,
+          english: message,
+          bundled: bundled.get(key),
+          override: overrides.get(key),
+        })),
+    [english, bundled, overrides, prefix],
   );
 
-  const sections = useMemo(() => [...new Set(rows.map((row) => row.key.split(".")[0]))].sort(), [rows]);
+  /** The part of a key that is not the shared prefix. */
+  const local = (key: string) => key.slice(prefix.length);
+  /*
+   * Which section a key is filed under: its first segment — except lesson copy,
+   * which goes one deeper, so a skill's lessons can be translated one at a time.
+   */
+  const sectionOf = (key: string) => {
+    const parts = local(key).split(".");
+    return parts[0] === "lessons" && parts.length > 2 ? `lessons.${parts[1]}` : parts[0];
+  };
+  /* Alphabetical for the whole app; in catalog order for one skill, which puts
+     its activities first and its lessons in course order. */
+  const sections = useMemo(() => {
+    const found = [...new Set(rows.map((row) => sectionOf(row.key)))];
+    return prefix ? found : found.sort();
+  }, [rows]); // eslint-disable-line react-hooks/exhaustive-deps
   const counts = {
     all: rows.length,
     missing: rows.filter((row) => row.bundled === undefined && row.override === undefined).length,
@@ -244,17 +294,13 @@ export function TranslationsPage() {
 
   const needle = query.trim().toLowerCase();
   const visible = rows.filter((row) => {
-    if (section !== "all" && row.key.split(".")[0] !== section) return false;
+    if (section !== "all" && sectionOf(row.key) !== section) return false;
     if (filter === "missing" && (row.bundled !== undefined || row.override !== undefined)) return false;
     if (filter === "edited" && row.override === undefined) return false;
     if (!needle) return true;
     return [row.key, ...textsOf(row.english), ...textsOf(row.override ?? row.bundled)]
       .some((text) => text.toLowerCase().includes(needle));
   });
-
-  if (!can("content:write")) {
-    return <NoAccess title={t("nav.translations")} permission="content:write" what={t("admin.translations.who")} />;
-  }
 
   const filters: [Filter, string][] = [
     ["all", t("admin.translations.filterAll", { count: counts.all })],
@@ -264,12 +310,7 @@ export function TranslationsPage() {
   const resetPaging = () => setShown(PAGE);
 
   return (
-    <div className="mx-auto max-w-5xl space-y-4">
-      <div>
-        <h1 className="koda-admin-page-title">{t("nav.translations")}</h1>
-        <p className="koda-admin-label mt-1 text-muted">{t("admin.translations.intro")}</p>
-      </div>
-
+    <div className="space-y-4">
       <div className="space-y-3 rounded-2xl border-2 border-line bg-surface p-3 sm:p-4">
         <div className="grid gap-3 sm:grid-cols-2">
           <label className="block">
@@ -299,7 +340,7 @@ export function TranslationsPage() {
             >
               <option value="all">{t("admin.translations.allSections")}</option>
               {sections.map((name) => (
-                <option key={name} value={name}>{name}</option>
+                <option key={name} value={name}>{sectionLabel?.(name) ?? name}</option>
               ))}
             </UISelect>
           </label>
@@ -343,7 +384,7 @@ export function TranslationsPage() {
       ) : (
         <ul className="space-y-3">
           {visible.slice(0, shown).map((row) => (
-            <RowEditor key={`${lang}:${row.key}`} row={row} lang={lang} dir={meta?.dir ?? "ltr"} />
+            <RowEditor key={`${lang}:${row.key}`} row={row} label={local(row.key)} lang={lang} dir={meta?.dir ?? "ltr"} />
           ))}
         </ul>
       )}

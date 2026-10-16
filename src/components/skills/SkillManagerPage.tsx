@@ -62,7 +62,8 @@ import {
 } from "../../lib/skillRegistryApi";
 import { usePermissions, useSession } from "../../lib/sync";
 
-import { translate } from "../../lib/i18n";
+import { catalogMessages, hasMessage, translate } from "../../lib/i18n";
+import { TranslationEditor } from "../account/TranslationsPage";
 import { PicturePanel } from "../../library/studio/PicturePanel";
 import { isPhoto } from "../../library/photos";
 const STATUS_TONE: Record<string, "success" | "warning" | "neutral"> = {
@@ -755,7 +756,7 @@ export const ActivityTrail: React.FC<{ skillId: string }> = ({ skillId }) => {
 };
 
 /** The sections of one skill's page, each independent of the others. */
-type DetailTab = "features" | "listing" | "settings" | "lessons" | "practice" | "trail";
+type DetailTab = "features" | "listing" | "settings" | "lessons" | "practice" | "trail" | "translations";
 
 /**
  * The lessons of one section, as rows you can play or reword.
@@ -896,6 +897,18 @@ const SkillDetail: React.FC<{
    * child works through, and the practice ones are a pool that mixes techniques
    * already taught. Sixty-four rows in one scroll hid both.
    */
+  const translationPrefix = `skills.${manifest.id}.`;
+  const translationCount = [...catalogMessages("en").keys()].filter((key) => key.startsWith(translationPrefix)).length;
+  const canTranslate = translationCount > 0 && can("content:write");
+  /** "Touch and Count" for `orbit`, a lesson's title for `lessons.<id>`. */
+  const translationSection = (section: string): string | undefined => {
+    if (section.startsWith("lessons.")) {
+      const lesson = skill.lessons.find((l) => `lessons.${l.id}` === section);
+      return lesson ? `${translate("admin.skillManagerPage.lessons")} · ${lesson.title}` : undefined;
+    }
+    const title = `${translationPrefix}${section}.title`;
+    return hasMessage(title) ? translate(title) : undefined;
+  };
   const teaching = skill.lessons.filter((lesson) => !isPracticeLesson(lesson));
   const practice = skill.lessons.filter(isPracticeLesson);
   const tabs: UITabItem<DetailTab>[] = [
@@ -919,6 +932,11 @@ const SkillDetail: React.FC<{
       ? [{ id: "practice" as const, label: translate("admin.skillManagerPage.practice"), count: practice.length }]
       : []),
     { id: "trail", label: translate("admin.skillManagerPage.activity") },
+    /* Only for a skill that ships its own catalogs (`<skill>/locales/*.json`),
+       and only for someone who may change the app's wording. */
+    ...(canTranslate
+      ? [{ id: "translations" as const, label: translate("nav.translations"), count: translationCount }]
+      : []),
   ];
 
   return (
@@ -1119,6 +1137,10 @@ const SkillDetail: React.FC<{
 
       {/* Diagnostics, so it sits after everything you can actually change. */}
       {tab === "trail" && <ActivityTrail skillId={manifest.id} />}
+
+      {tab === "translations" && canTranslate && (
+        <TranslationEditor prefix={translationPrefix} sectionLabel={translationSection} />
+      )}
     </div>
   );
 };
