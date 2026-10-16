@@ -38,6 +38,7 @@ describe("a child nobody has configured", () => {
       sessionMinutes: null,
       allowedHours: null,
       aiHelpEnabled: true,
+      photoPagesEnabled: false,
       goalCadence: "daily",
       // The one default that is not "do nothing": a child is placed by the age
       // bands the curriculum carries rather than started at lesson one whatever
@@ -64,6 +65,7 @@ describe("setting one thing", () => {
       sessionMinutes: 30,
       allowedHours: null,
       aiHelpEnabled: false,
+      photoPagesEnabled: false,
       goalCadence: "daily",
       startingPoint: "age",
       personaId: null,
@@ -80,6 +82,7 @@ describe("setting one thing", () => {
         sessionMinutes: null,
         allowedHours: null,
         aiHelpEnabled: true,
+        photoPagesEnabled: false,
         goalCadence: "weekly",
         startingPoint: "age",
         personaId: null,
@@ -138,6 +141,15 @@ describe("a document that arrived damaged", () => {
     expect((await store()).for("l_mia").aiHelpEnabled).toBe(true);
   });
 
+  it("sends no photos to the AI until a grown-up explicitly says yes", async () => {
+    // The opposite rule to Koda's help: a photo leaving the device needs a literal `true`.
+    localStorage.setItem(KEY, JSON.stringify({ photoPagesEnabled: "yes" }));
+    expect((await store()).for("l_mia").photoPagesEnabled).toBe(false);
+
+    localStorage.setItem(KEY, JSON.stringify({ photoPagesEnabled: true }));
+    expect((await store()).for("l_mia").photoPagesEnabled).toBe(true);
+  });
+
   it("survives a body that is not JSON at all", async () => {
     localStorage.setItem(KEY, "{oh no");
 
@@ -145,6 +157,7 @@ describe("a document that arrived damaged", () => {
       sessionMinutes: null,
       allowedHours: null,
       aiHelpEnabled: true,
+      photoPagesEnabled: false,
       goalCadence: "daily",
       startingPoint: "age",
       personaId: null,

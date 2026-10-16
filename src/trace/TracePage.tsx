@@ -23,6 +23,8 @@ import { activityOf, hasArt, modeOf } from "./geometry/types";
 import { ColorPlayer } from "./paint/ColorPlayer";
 import { crayonHex } from "./paint/palette";
 import { PaintingTile, PaintingViewer, usePaintings } from "./paint/MyPictures";
+import { PhotoPageMaker } from "./paint/PhotoPageMaker";
+import { PhotoPages, isPhotoPage } from "./paint/photoPages";
 import type { StepPlan } from "./progress/ladder";
 import { defaultPlan, isRecheckDue } from "./progress/ladder";
 import { homeRows, isFinished, needsColoring, uniqueById, type RowId } from "./home";
@@ -74,14 +76,16 @@ export function TracePage({ onAwardXp, canCreate = false, onGoHome, onDeepChange
   });
   /** The collection whose cover was tapped: its page, until the child goes back. */
   const [shelfId, setShelfId] = useState<string | null>(null);
-  const deep = Boolean(open || shelfId);
+  /** A page made from the child's own photo, open to paint. */
+  const [photoItem, setPhotoItem] = useState<TraceItem | null>(null);
+  const deep = Boolean(open || shelfId || photoItem);
   useEffect(() => {
     onDeepChange?.(deep);
   }, [onDeepChange, deep]);
   useEffect(() => {
-    onPlayingChange?.(Boolean(open));
+    onPlayingChange?.(Boolean(open || photoItem));
     return () => onPlayingChange?.(false);
-  }, [onPlayingChange, open]);
+  }, [onPlayingChange, open, photoItem]);
   const shelf = useTraceShelf();
   const todayContext = useTodayContext();
   // A Today pick from Home: open its collection once, then let the host forget it.
@@ -101,6 +105,8 @@ export function TracePage({ onAwardXp, canCreate = false, onGoHome, onDeepChange
   const [viewing, setViewing] = useState<string | null>(null);
 
   const collections = shelf.collections.flatMap((c) => (shelf.bundles[c.id] ? [shelf.bundles[c.id]] : []));
+
+  if (photoItem) return <ColorPlayer key={photoItem.id} item={photoItem} freePaint onExit={() => setPhotoItem(null)} onGoHome={onGoHome} />;
 
   if (open) {
     const place = placeOf(open, collections, setOpen);
@@ -223,6 +229,7 @@ export function TracePage({ onAwardXp, canCreate = false, onGoHome, onDeepChange
           {due.map((e) => <Tile key={e.item.id} entry={e} onOpen={() => setOpen(e)} />)}
         </UICarousel>
       )}
+      <PhotoPageMaker onMade={setPhotoItem} />
       {paintings.length > 0 && (
         <UICarousel title={t("paint.myPictures")} subtitle={t("paint.myPicturesNote")} icon={<Images className="h-5 w-5 text-indigo-600" />} count={paintings.length} {...PICTURES}>
           {paintings.map((p) => (
@@ -234,8 +241,10 @@ export function TracePage({ onAwardXp, canCreate = false, onGoHome, onDeepChange
         p={paintings.find((p) => p.key === viewing) ?? null}
         onClose={() => setViewing(null)}
         onColourAgain={(itemId) => {
-          const e = everything.find((x) => x.item.id === itemId);
           setViewing(null);
+          // A photo page lives on the device that made it; elsewhere there is only the painting.
+          if (isPhotoPage(itemId)) return void PhotoPages.get(itemId).then((item) => item && setPhotoItem(item));
+          const e = everything.find((x) => x.item.id === itemId);
           if (e) setOpen(e);
         }}
       />

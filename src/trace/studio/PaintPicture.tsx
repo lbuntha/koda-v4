@@ -3,11 +3,12 @@
  * page (black lines) or a coloured example; Koda finds its lines and the parts
  * between them, shown here each in its own soft tint so a missing line (two
  * parts run together) is easy to see. Line strength moves the cut between
- * line and paper; extra lines can be drawn to close a gap.
+ * line and paper; extra lines can be drawn to close a gap. On a plan with AI,
+ * a photo can be sent to the AI, which redraws it as a colouring page.
  */
 
 import { useEffect, useMemo, useRef, useState } from "react";
-import { ArrowRight, Eraser, Eye, ImageUp, PenLine, RefreshCw, Scissors, Trash2, Undo2, Wand2 } from "lucide-react";
+import { ArrowRight, Eraser, Eye, ImageUp, PenLine, RefreshCw, Scissors, Sparkles, Trash2, Undo2, Wand2 } from "lucide-react";
 import { useT } from "../../lib/i18n";
 import { UIButton } from "../../components/ui";
 import type { EraseMark, Point, Stroke, TraceItem } from "../geometry/types";
@@ -16,10 +17,14 @@ import { GRID, labelAreas, seamSources } from "../paint/areas";
 import { strokePolyline } from "../geometry/bezier";
 import { LINE, lineOf } from "../paint/areas";
 import { DEFAULT_GAP, DEFAULT_STRENGTH, SPECK, pictureWalls, smoothLines, fittedPixels, loadImage, partCount, pictureFrom, readFile } from "../paint/picture";
+import { AI_PAGE_ERRORS, AiPageError, askForColouringPage, dataUrlFile } from "../paint/aiPage";
+import { canUseAi } from "./autoStrokes";
 import type { History } from "./ui";
-import { IconButton, Section, Slider, UndoRedo } from "./ui";
+import { IconButton, Section, Slider, TextSegment, UndoRedo } from "./ui";
 
 const uid = () => `s${Date.now().toString(36)}${Math.random().toString(36).slice(2, 6)}`;
+
+type AiDetail = "simple" | "patterns";
 
 /** Eraser radius, in units. */
 const ERASE = { xs: 4, s: 10, m: 22, l: 45 } as const;
@@ -77,11 +82,43 @@ export function PaintPicture({ item, onChange, history, onDrawLines, onNext }: {
     return () => window.clearTimeout(h);
   }, [strength, gap]); // eslint-disable-line react-hooks/exhaustive-deps -- only the sliders trigger this
 
-  const upload = async (file: File) => {
+  /* ------------------------------------------------------ AI from photo
+   * The photo goes to the AI and comes back as a colouring page, which is then
+   * read like any upload. Only the page is kept, not the photo.
+   */
+  const [aiAllowed, setAiAllowed] = useState<boolean | null>(null);
+  useEffect(() => {
+    let live = true;
+    void canUseAi().then((ok) => live && setAiAllowed(ok));
+    return () => {
+      live = false;
+    };
+  }, []);
+  const [aiDetail, setAiDetail] = useState<AiDetail>("patterns");
+  const [drawing, setDrawing] = useState(false);
+  const [aiError, setAiError] = useState<string | null>(null);
+  const aiNext = useRef(false);
+  const pick = (ai: boolean) => {
+    aiNext.current = ai;
+    fileRef.current?.click();
+  };
+  const aiErrorText = (code: string) => t(`traceStudio.picture.aiError.${(AI_PAGE_ERRORS as readonly string[]).includes(code) ? code : "ai_failed"}`);
+
+  const upload = async (file: File, ai = false) => {
     setBusy(true);
     setError(false);
+    setAiError(null);
+    if (ai) setDrawing(true);
     try {
-      const src = await readFile(file);
+      let src = await readFile(file);
+      if (ai) {
+        try {
+          src = await readFile(dataUrlFile(await askForColouringPage(src, aiDetail)));
+        } catch (e) {
+          setAiError(e instanceof AiPageError ? e.code : "ai_failed");
+          return;
+        }
+      }
       const base: TraceItem = { ...item, guide: { ...item.guide, image: { src, x: 0, y: 0, w: 1000, h: 1000, opacity: 0.5 } } };
       setStrength(DEFAULT_STRENGTH);
       setGap(DEFAULT_GAP);
@@ -90,6 +127,7 @@ export function PaintPicture({ item, onChange, history, onDrawLines, onNext }: {
       setError(true);
     } finally {
       setBusy(false);
+      setDrawing(false);
     }
   };
   /** The magic pen: the picture's lines redrawn as smooth strokes (replacing any drawn ones). */
@@ -260,10 +298,34 @@ export function PaintPicture({ item, onChange, history, onDrawLines, onNext }: {
       onChange={(e) => {
         const f = e.target.files?.[0];
         e.target.value = "";
-        if (f) void upload(f);
+        if (f) void upload(f, aiNext.current);
       }}
     />
   );
+
+  const aiBox = aiAllowed ? (
+    <div className="flex w-full flex-col gap-2.5 rounded-2xl border-2 border-indigo-200 bg-indigo-50/60 p-4 text-left dark:border-indigo-900 dark:bg-indigo-950/30">
+      <span className="flex items-center gap-2 text-sm font-semibold text-ink">
+        <Sparkles className="h-4 w-4 text-indigo-600 dark:text-indigo-300" />
+        {t("traceStudio.picture.aiTitle")}
+      </span>
+      <p className="text-xs text-muted">{t("traceStudio.picture.aiHint")}</p>
+      <TextSegment<AiDetail>
+        label={t("traceStudio.picture.aiDetail")}
+        value={aiDetail}
+        onChange={setAiDetail}
+        disabled={busy}
+        options={[
+          { value: "simple", label: t("traceStudio.picture.aiSimple") },
+          { value: "patterns", label: t("traceStudio.picture.aiPatterns") },
+        ]}
+      />
+      <UIButton size="sm" icon={<Sparkles className="h-4 w-4" />} onClick={() => pick(true)} isLoading={drawing} disabled={busy}>
+        {drawing ? t("traceStudio.picture.aiDrawing") : t("traceStudio.picture.aiUpload")}
+      </UIButton>
+      {aiError && <p className="text-xs text-rose-700 dark:text-rose-300">{aiErrorText(aiError)}</p>}
+    </div>
+  ) : null;
 
   if (!picture) {
     return (
@@ -286,10 +348,11 @@ export function PaintPicture({ item, onChange, history, onDrawLines, onNext }: {
             <span className="mt-0.5 block text-xs text-muted">{t("traceStudio.picture.kindColourNote")}</span>
           </li>
         </ul>
-        <UIButton icon={<ImageUp className="h-4 w-4" />} onClick={() => fileRef.current?.click()} disabled={busy}>
-          {busy ? t("traceStudio.picture.reading") : t("traceStudio.picture.upload")}
+        <UIButton icon={<ImageUp className="h-4 w-4" />} onClick={() => pick(false)} disabled={busy}>
+          {busy && !drawing ? t("traceStudio.picture.reading") : t("traceStudio.picture.upload")}
         </UIButton>
         {error && <p className="text-sm text-rose-700 dark:text-rose-300">{t("traceStudio.picture.error")}</p>}
+        {aiBox && <div className="w-full max-w-md">{aiBox}</div>}
       </div>
     );
   }
@@ -394,7 +457,7 @@ export function PaintPicture({ item, onChange, history, onDrawLines, onNext }: {
           <Slider label={t("traceStudio.picture.gap")} value={gap} min={0} max={4} step={1} onChange={setGap} />
           <p className="text-xs text-muted">{t("traceStudio.picture.gapHint")}</p>
           <div className="flex flex-wrap items-center gap-2">
-            <UIButton size="sm" variant="secondary" icon={<RefreshCw className="h-4 w-4" />} onClick={() => fileRef.current?.click()} disabled={busy}>
+            <UIButton size="sm" variant="secondary" icon={<RefreshCw className="h-4 w-4" />} onClick={() => pick(false)} disabled={busy}>
               {t("traceStudio.picture.replace")}
             </UIButton>
             <UIButton size="sm" variant="ghost" icon={<PenLine className="h-4 w-4" />} onClick={onDrawLines}>
@@ -406,6 +469,7 @@ export function PaintPicture({ item, onChange, history, onDrawLines, onNext }: {
           </div>
           <p className="text-xs text-muted">{t("traceStudio.picture.drawLinesHint")}</p>
         </Section>
+        {aiBox}
         <UIButton icon={<ArrowRight className="h-4 w-4" />} onClick={onNext}>
           {t("traceStudio.picture.next")}
         </UIButton>

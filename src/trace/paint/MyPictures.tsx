@@ -11,6 +11,7 @@ import { useT } from "../../lib/i18n";
 import { UIButton, UIModal } from "../../components/ui";
 import type { Painting } from "./gallery";
 import { Gallery, sharePicture } from "./gallery";
+import { PhotoPages, isPhotoPage } from "./photoPages";
 
 export interface Shown extends Painting {
   /** An object URL for the PNG, revoked when the list changes. */
@@ -109,6 +110,7 @@ export function PaintingViewer({ p, onClose, onColourAgain }: { p: Shown | null;
               icon={<Trash2 />}
               onClick={async () => {
                 await Gallery.remove(p.itemId, p.learnerId);
+                if (isPhotoPage(p.itemId)) await PhotoPages.remove(p.itemId, p.learnerId);
                 onClose();
               }}
             >

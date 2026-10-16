@@ -47,6 +47,8 @@ interface Props {
   ages?: AgeRange | null;
   /** The colour step of a traced item: finishing it completes the item; the tracing ladder is left as it is. */
   afterTrace?: boolean;
+  /** A child's own photo page (photoPages.ts): always their own colours, nothing counted towards lessons or XP. The painting is still kept. */
+  freePaint?: boolean;
 }
 
 /** Brush sizes, in units: a sharp tip for small details, then small, medium and large. */
@@ -114,7 +116,7 @@ const INK_LINE = "#1f2544";
 
 type Message = { tone: "correct" | "hint" | "nudge"; title: string; text?: string; action?: { label: string; run(): void }; /** Stays this long (ms) instead of its tone's usual time. */ hold?: number };
 
-export function ColorPlayer({ item, onExit, onAwardXp, sandbox = false, source, place, xpPerStep, onGoHome, afterTrace = false }: Props) {
+export function ColorPlayer({ item, onExit, onAwardXp, sandbox = false, source, place, xpPerStep, onGoHome, afterTrace = false, freePaint = false }: Props) {
   const { t } = useT();
   useSyncExternalStore(TraceProgress.subscribe, TraceProgress.version);
   const areas = useMemo(() => labelAreas(item), [item]);
@@ -138,7 +140,7 @@ export function ColorPlayer({ item, onExit, onAwardXp, sandbox = false, source, 
   const [size, setSize] = useState<Size>(() => item.paint?.brush ?? "m");
   const [inside, setInside] = useState(true);
   /** My own colours: the child picks the colours; any colour completes a step and none is "wrong". */
-  const [own, setOwn] = useState(false);
+  const [own, setOwn] = useState(freePaint);
   const ownRef = useRef(own);
   ownRef.current = own;
   const [message, setMessage] = useState<Message | null>(null);
@@ -764,7 +766,7 @@ export function ColorPlayer({ item, onExit, onAwardXp, sandbox = false, source, 
   const finish = () => {
     const score = scorePainting(paintRef.current, areas, steps, own);
     let xp = 0;
-    if (!sandbox) {
+    if (!sandbox && !freePaint) {
       const prev = TraceProgress.get(item.id);
       const passed = score.stars >= 2;
       // After tracing, the picture is already drawn: colouring it adds `coloredAt`, never a ladder status.
@@ -995,6 +997,7 @@ export function ColorPlayer({ item, onExit, onAwardXp, sandbox = false, source, 
         </span>
         <input type="checkbox" role="switch" checked={inside} onChange={(e) => setInside(e.target.checked)} className="h-5 w-5 accent-indigo-600" />
       </label>
+      {!freePaint && (
       <label className="flex cursor-pointer items-center gap-3 rounded-2xl bg-surface p-3.5 ring-1 ring-line">
         <Palette className="h-5 w-5 shrink-0 text-indigo-600 dark:text-indigo-300" />
         <span className="flex min-w-0 flex-1 flex-col">
@@ -1003,6 +1006,7 @@ export function ColorPlayer({ item, onExit, onAwardXp, sandbox = false, source, 
         </span>
         <input type="checkbox" role="switch" checked={own} disabled={Boolean(result)} onChange={(e) => toggleOwn(e.target.checked)} className="h-5 w-5 accent-indigo-600" />
       </label>
+      )}
     </>
   );
 

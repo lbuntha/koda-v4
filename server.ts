@@ -748,6 +748,118 @@ Reply with JSON only:
   }
 });
 
+/** A photo the browser sent, as `data:image/…;base64,…`: its type and data, or null if it is not one or is too big. */
+function readPhoto(image: unknown): { mimeType: string; data: string } | null {
+  if (typeof image !== "string" || image.length > 3_000_000) return null;
+  const m = /^data:(image\/(?:jpeg|png|webp));base64,(.+)$/.exec(image);
+  return m ? { mimeType: m[1], data: m[2] } : null;
+}
+
+/**
+ * A photo redrawn as a colouring page by the image model: clean black
+ * outlines on white, closed shapes a child can fill, the clutter behind the
+ * subject left out. Answers the request itself, with the page as a data URL.
+ */
+async function sendColouringPage(res: express.Response, ai: GoogleGenAI, photo: { mimeType: string; data: string }, detail: unknown, route: string, model = process.env.GEMINI_IMAGE_MODEL ?? "gemini-3.1-flash-image"): Promise<boolean> {
+  const patterns =
+    detail === "simple"
+      ? "Keep it simple for ages 4 to 6: big shapes, few lines, and leave out small patterns on clothes."
+      : "Keep the main patterns on clothes and objects as simple outlined shapes a child can colour, for ages 6 to 10.";
+  const brief = `Redraw this photo as a page from a children's colouring book.
+- Clean, smooth, even black outlines on a pure white background. No shading, no grey, no hatching, no filled black areas, no colour.
+- Every shape closed, so each part can be filled with one colour.
+- Keep the main subject and keep it recognisable: the same pose, clothes, objects and, for a person, the same face, hair and expression.
+- Leave out the busy background: other people, crowds, signs and clutter. A simple ground line is fine.
+- ${patterns}
+- Show the whole subject, not cropped. No text, letters, labels, watermark or border.`;
+  try {
+    const response = await ai.models.generateContent({
+      model,
+      contents: [{ parts: [{ inlineData: photo }, { text: brief }] }],
+      // 1K pinned, not left to the model's default: it is what the price is reckoned on, and plenty for a page.
+      config: { responseModalities: ["IMAGE"], imageConfig: { imageSize: "1K" } },
+    });
+    const part = response.candidates?.[0]?.content?.parts?.find((p) => p.inlineData?.data);
+    if (!part?.inlineData?.data) {
+      res.status(502).json({ error: { code: "no_image", message: "No page came back. Try again." } });
+      return false;
+    }
+    res.json({ image: `data:${part.inlineData.mimeType ?? "image/png"};base64,${part.inlineData.data}` });
+    return true;
+  } catch (error) {
+    console.error(`Error in ${route}:`, error);
+    res.status(502).json({ error: { code: "ai_failed", message: "The AI could not draw the page this time." } });
+    return false;
+  }
+}
+
+/** The image models an operator may pick for pictures from photos (`paint.photoModel`). */
+const PHOTO_MODELS = ["gemini-3.1-flash-lite-image", "gemini-3.1-flash-image", "gemini-3-pro-image"];
+
+/**
+ * One of the family's monthly pictures, taken (or given back) at the data
+ * service, which counts them and checks the plan. Unlike the plan check this
+ * fails closed: an allowance nobody can count is not an allowance.
+ */
+async function photoCredit(authorization: string, action: "spend" | "refund"): Promise<{ ok: true } | { ok: false; status: number; body: unknown }> {
+  try {
+    const r = await fetch(`${API_URL}/v1/paint/photo-credits/${action}`, { method: "POST", headers: { Authorization: authorization } });
+    if (r.ok) return { ok: true };
+    const data = (await r.json().catch(() => ({}))) as { error?: { code?: string; message?: string } };
+    const code = data.error?.code ?? `http_${r.status}`;
+    return { ok: false, status: r.status, body: { error: { code, message: data.error?.message ?? "Pictures from photos are not available." }, code } };
+  } catch {
+    return { ok: false, status: 503, body: { error: { code: "unavailable", message: "Could not check this month's pictures. Try again in a moment." }, code: "unavailable" } };
+  }
+}
+
+/** The Studio: an author's photo redrawn as a colouring page to publish. Paid (`trace.ai`), like the other Trace AI. */
+app.post("/api/trace/colouring-page", async (req, res) => {
+  const authorization = req.headers.authorization;
+  if (!authorization) {
+    return res.status(401).json({ error: { code: "sign_in", message: "Sign in to make colouring pages with AI." } });
+  }
+  if (!(await traceAiAllowed(authorization, res, "AI colouring pages"))) return;
+  const photo = readPhoto(req.body?.image);
+  if (!photo) {
+    return res.status(400).json({ error: { code: "bad_request", message: "Send the photo as a JPG, PNG or WebP under 2 MB." } });
+  }
+  const ai = getGeminiClient(await systemApiKey(authorization));
+  if (!ai) {
+    return res.status(503).json({ error: { code: "no_ai_key", message: "No AI key is set up for this Koda. Ask an admin." } });
+  }
+  await sendColouringPage(res, ai, photo, req.body?.detail, "/api/trace/colouring-page");
+});
+
+/**
+ * A child's own photo redrawn as a colouring page for them to paint. Part of
+ * the family's AI plan (`ai.koda`), and counted against the family's monthly
+ * allowance (`paint.photoCreditsPerMonth`): one is taken before the model is
+ * called and given back if it fails. The grown-up's yes (`photoPagesEnabled`)
+ * is the device's to enforce, as `aiHelpEnabled` is. Nothing is stored: the
+ * photo goes to the model and only the page comes back.
+ */
+app.post("/api/paint/photo-page", async (req, res) => {
+  const authorization = req.headers.authorization;
+  if (!authorization) {
+    return res.status(401).json({ error: { code: "sign_in", message: "Sign in to make a picture from a photo." } });
+  }
+  const photo = readPhoto(req.body?.image);
+  if (!photo) {
+    return res.status(400).json({ error: { code: "bad_request", message: "Send the photo as a JPG, PNG or WebP under 2 MB." } });
+  }
+  const ai = getGeminiClient(await systemApiKey(authorization));
+  if (!ai) {
+    return res.status(503).json({ error: { code: "no_ai_key", message: "No AI key is set up for this Koda. Ask an admin." } });
+  }
+  // The plan and this month's allowance, both at the data service; a picture is taken before the model is paid.
+  const credit = await photoCredit(authorization, "spend");
+  if (!credit.ok) return res.status(credit.status).json(credit.body);
+  const picked = (await systemSettings(authorization))["paint.photoModel"];
+  const model = typeof picked === "string" && PHOTO_MODELS.includes(picked) ? picked : PHOTO_MODELS[0];
+  if (!(await sendColouringPage(res, ai, photo, req.body?.detail, "/api/paint/photo-page", model))) await photoCredit(authorization, "refund");
+});
+
 /**
  * What a model is allowed to hand back when asked for artwork.
  *

@@ -132,6 +132,35 @@ DEFAULT_SETTINGS: list[dict] = [
         "value": True,
         "order": 46,
     },
+    # ---- Pictures from a child's own photo (Trace → My pictures). Each one is
+    # ---- a paid image-model call, so a family gets a monthly allowance and
+    # ---- the operator picks the model, which is most of the cost.
+    {
+        "settingId": "paint.photoCreditsPerMonth",
+        "group": "Artwork",
+        "label": "Pictures from photos — per family per month",
+        "description": (
+            "How many photos a family on a plan with AI may turn into colouring pictures each "
+            "calendar month (UTC), shared by all their children. 0 switches it off. Uploading "
+            "a colouring page of their own is free and does not count."
+        ),
+        "type": "text",
+        "value": "30",
+        "order": 47,
+    },
+    {
+        "settingId": "paint.photoModel",
+        "group": "Artwork",
+        "label": "Pictures from photos — model",
+        "description": (
+            "Which Gemini image model draws them. Flash Lite costs about $0.034 a picture, "
+            "Flash about $0.068, Pro about $0.136 (1K pictures, list prices)."
+        ),
+        "type": "text",
+        "value": "gemini-3.1-flash-lite-image",
+        "options": ["gemini-3.1-flash-lite-image", "gemini-3.1-flash-image", "gemini-3-pro-image"],
+        "order": 48,
+    },
     # ---- AI providers. Every credential a model is called with, one per
     # ---- company, whatever feature spends it — the key behind Ask Koda is the
     # ---- same key that drafts a book's questions. Blank falls back to the

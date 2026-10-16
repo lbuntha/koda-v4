@@ -525,7 +525,11 @@
       "discard": "Throw this recording away",
       "sent": "Sent! Your grown-ups can listen now.",
       "failed": "It did not send",
-      "blocked": "The microphone is off. Ask a grown-up to allow it for Koda in the browser settings."
+      "blocked": "The microphone is off. Ask a grown-up to allow it for Koda in the browser settings.",
+      "unsentTitle": "You haven't sent your reading yet.",
+      "sendAndLeave": "Send, then leave",
+      "stay": "Stay here",
+      "leaveWithout": "Leave without sending"
     }
   },
   "library": {
@@ -1639,6 +1643,11 @@
       "title": "Koda's help",
       "hint": "Allow hints and voice help.",
       "notInPlan": "Not included in your plan."
+    },
+    "photoPages": {
+      "title": "Pictures from photos",
+      "hint": "Let them turn their own photos into colouring pictures. The photo is sent to Google's AI to be redrawn and is not kept; only the drawing is saved.",
+      "notInPlan": "Part of the AI plan. Turning photos into colouring pictures uses Koda's AI."
     },
     "cadence": {
       "hint": "Count streaks by days or weeks.",
@@ -4421,6 +4430,21 @@
       "kindLinesNote": "Black lines on white. You choose the colours.",
       "kindColour": "A coloured example",
       "kindColourNote": "Koda reads its colours and makes the steps for you.",
+      "aiTitle": "From a photo, with AI",
+      "aiHint": "Upload a photo and Koda's AI redraws it as a colouring page: clean outlines, closed shapes, busy background left out. Takes up to a minute.",
+      "aiDetail": "How detailed",
+      "aiSimple": "Simple (ages 4–6)",
+      "aiPatterns": "With patterns (ages 6–10)",
+      "aiUpload": "Upload a photo for AI",
+      "aiDrawing": "Drawing the page… (up to a minute)",
+      "aiError": {
+        "not_a_trace_creator": "AI colouring pages are for Trace Studio creators.",
+        "no_ai_key": "No AI key is set up for this Koda. Ask an admin.",
+        "offline": "Couldn't reach the AI. Check the internet and try again.",
+        "plan_required": "AI colouring pages are part of a paid plan.",
+        "no_image": "The AI didn't send a page back. Try again, or try another photo.",
+        "ai_failed": "The AI couldn't draw the page this time. Try again in a moment."
+      },
       "upload": "Upload a picture",
       "reading": "Reading the picture…",
       "error": "That picture could not be read. Try a JPG or PNG.",
@@ -4679,6 +4703,44 @@
     "saved": "Saved",
     "myPictures": "My pictures",
     "myPicturesNote": "Every picture you finish is kept here.",
+    "photo": {
+      "usedUp": "None left this month. More on {date}.",
+      "left": "{left} of {limit} left this month",
+      "reading": "Getting it ready…",
+      "ownTitle": "My colouring page",
+      "ownChoose": "Choose my colouring page",
+      "ownPageNote": "Take a photo of a colouring page or tracing. Black lines on white work best.",
+      "ownPage": "My own colouring page",
+      "fromPhoto": "From a photo",
+      "cta": "Make my own picture",
+      "ctaNote": "From a photo or your own colouring page.",
+      "locked": "Ask a grown-up",
+      "needPlan": "Needs Koda's AI plan. Ask a grown-up.",
+      "needGrownUp": "Ask a grown-up to turn on \"Pictures from photos\" for you.",
+      "ok": "OK",
+      "how": "Pick a photo of you, your pet or a toy. Koda turns it into a picture to colour.",
+      "detail": "What kind of picture",
+      "simple": "Easy",
+      "simpleNote": "Big shapes",
+      "patterns": "Detailed",
+      "patternsNote": "More patterns",
+      "choose": "Choose a photo",
+      "drawing": "Drawing… (up to a minute)",
+      "title": "My photo",
+      "instruction": "Colour it your way!",
+      "privacy": "Your photo isn't kept. Only the drawing is saved.",
+      "error": {
+        "own_failed": "Couldn't read that picture. Try one with clear black lines.",
+        "unavailable": "Couldn't check what's left. Try again soon.",
+        "no_credits": "None left this month.",
+        "not_a_trace_creator": "This isn't available on this account.",
+        "no_ai_key": "AI isn't set up yet. Ask a grown-up.",
+        "offline": "No internet. Try again.",
+        "plan_required": "Needs Koda's AI plan. Ask a grown-up.",
+        "no_image": "Couldn't draw that photo. Try another.",
+        "ai_failed": "Something went wrong. Try again."
+      }
+    },
     "keptInGallery": "Kept in My pictures.",
     "accuracyIs": "{n}% accuracy",
     "colourAgain": "Colour again",

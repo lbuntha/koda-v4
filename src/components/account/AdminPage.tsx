@@ -145,8 +145,12 @@ const SystemPanel: React.FC<{
         body: { value },
       });
       setSettings((prev) => prev?.map((s) => (s.id === updated.id ? updated : s)) ?? null);
-      // Never leave a credential sitting in a React state field either.
-      setDrafts((d) => ({ ...d, [setting.id]: "" }));
+      // Never leave a credential sitting in a React state field either. Drop the
+      // draft rather than blanking it, so a text setting shows what was saved.
+      setDrafts((d) => {
+        const { [setting.id]: _saved, ...rest } = d;
+        return rest;
+      });
       // This device is subject to the ceiling too — adopt it immediately rather
       // than keeping a stale copy until the next load.
       void refreshSystem();

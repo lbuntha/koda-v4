@@ -102,6 +102,15 @@ export type ChildSettings = {
    */
   aiHelpEnabled: boolean;
   /**
+   * Whether this child may turn their own photos into colouring pages.
+   *
+   * The photo goes to the AI (Google's Gemini) to be redrawn, so a grown-up
+   * says yes first: off until they do, which is also today's behaviour. Like
+   * `aiHelpEnabled` it composes with the plan — the family needs `ai.koda` too.
+   * Only the redrawn page is kept, never the photo.
+   */
+  photoPagesEnabled: boolean;
+  /**
    * Whether the streak counts days or weeks.
    *
    * `weekly` exists because for a four-to-eight-year-old a daily streak is a
@@ -148,6 +157,7 @@ export const CHILD_SETTINGS_DEFAULTS: ChildSettings = {
   sessionMinutes: null,
   allowedHours: null,
   aiHelpEnabled: true,
+  photoPagesEnabled: false,
   goalCadence: "daily",
   startingPoint: "age",
   personaId: null,
@@ -219,6 +229,8 @@ const sanitise = (raw: Partial<ChildSettings> | null): ChildSettings => ({
   // `!== false`, not `?? true`: anything that is not an explicit "off" leaves
   // help on, because losing it to a malformed document is the worse failure.
   aiHelpEnabled: raw?.aiHelpEnabled !== false,
+  // The other way round: only an explicit yes from a grown-up sends photos to the AI.
+  photoPagesEnabled: raw?.photoPagesEnabled === true,
   goalCadence: raw?.goalCadence === "weekly" ? "weekly" : "daily",
   startingPoint: clampStart(raw?.startingPoint),
   // A string or nothing. Not checked against the roster here: this runs before

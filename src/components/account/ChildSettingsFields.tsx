@@ -1,5 +1,5 @@
 import React from "react";
-import { Clock, Flag, Flame, GraduationCap, Moon, Sparkles } from "lucide-react";
+import { Camera, Clock, Flag, Flame, GraduationCap, Moon, Sparkles } from "lucide-react";
 
 import type {
   AllowedHours,
@@ -433,6 +433,22 @@ export const ChildSettingsFields: React.FC<ChildSettingsFieldsProps> = ({
             onChange({ aiHelpEnabled: !value.aiHelpEnabled });
           }}
           label={t("childSettings.help.title")}
+        />
+      </Row>
+
+      <Row
+        icon={<Camera className="h-5 w-5" />}
+        tint="text-indigo-500"
+        title={t("childSettings.photoPages.title")}
+        hint={planHasAi ? t("childSettings.photoPages.hint") : t("childSettings.photoPages.notInPlan")}
+      >
+        <UIToggle
+          checked={value.photoPagesEnabled}
+          onChange={() => {
+            playSound("pop");
+            onChange({ photoPagesEnabled: !value.photoPagesEnabled });
+          }}
+          label={t("childSettings.photoPages.title")}
         />
       </Row>
 
