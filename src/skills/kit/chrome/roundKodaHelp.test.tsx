@@ -100,13 +100,14 @@ describe("spoken lesson audio", () => {
     running();
     const koda = drawBar();
 
+    // One control at every width — the bar no longer draws a phone copy.
     const offButtons = screen.getAllByLabelText("Turn Koda’s voice off");
-    expect(offButtons).toHaveLength(2);
+    expect(offButtons).toHaveLength(1);
     expect(offButtons[0].getAttribute("aria-pressed")).toBe("true");
 
     fireEvent.click(offButtons[0]);
 
-    expect(screen.getAllByLabelText("Turn Koda’s voice on")).toHaveLength(2);
+    expect(screen.getAllByLabelText("Turn Koda’s voice on")).toHaveLength(1);
     expect(PreferencesAPI.current().voiceEnabled).toBe(false);
     expect(JSON.parse(localStorage.getItem("koda_preferences_v1") ?? "{}").voiceEnabled).toBe(false);
     expect(koda.count("speech.stop")).toBe(1);

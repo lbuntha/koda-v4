@@ -15,7 +15,6 @@ import { KodaFace } from "../../../components/KodaFace";
 import { KodaAskModal } from "../../../components/KodaAskModal";
 import { LiveVoiceCoachModal } from "../../../components/LiveVoiceCoachModal";
 import { useKoda } from "../../../lib/useKoda";
-import { themeSystem } from "../../../lib/themeSystem";
 import { playChrome } from "../round/answerSound";
 import { SvgAsset } from "../../../assets/svg";
 import { PreferencesAPI } from "../../../lib/preferences";
@@ -198,259 +197,183 @@ export const SkillRoundTopBar: React.FC<SkillRoundTopBarProps> = ({
     else void document.documentElement.requestFullscreen().catch(() => undefined);
   };
 
+  /*
+   * One button shape for every control on the bar.
+   *
+   * The bar used to mix a filled tile, a bordered tile, a labelled pill and a
+   * rose block, and on a phone it rendered a second copy of each control. Now
+   * there is one set, one shape — round, quiet until hovered — and the width
+   * decides only how many of them fit. 44px on a phone, where a child aims
+   * with a thumb; 40px once there is a pointer.
+   */
   const iconButton =
-    "p-2 min-w-[40px] min-h-[40px] rounded-xl text-muted hover:text-ink hover:bg-surface-muted transition shrink-0 flex items-center justify-center cursor-pointer";
-  /** Bigger target, because on a phone a child is aiming with a thumb. */
-  const compactButton =
-    "p-2 min-w-[44px] min-h-[44px] rounded-xl bg-surface border border-line text-muted flex items-center justify-center shrink-0 cursor-pointer";
+    "grid place-items-center shrink-0 rounded-full min-w-11 min-h-11 sm:min-w-10 sm:min-h-10 text-muted hover:text-ink hover:bg-surface-muted transition active:scale-90 cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500";
+
+  const progress = (
+    <div className="flex items-center gap-2.5 min-w-0">
+      <span className="shrink-0 rounded-full bg-indigo-500 px-2.5 py-1 text-xs font-black tabular-nums text-white">
+        {questionIndex}
+        <span className="opacity-70">/{totalQuestions}</span>
+      </span>
+      <UIProgressBar
+        size="lg"
+        className="flex-1"
+        value={percent}
+        max={100}
+        label={t("lessonCard.questionOf", { answered: questionIndex, total: totalQuestions })}
+      />
+    </div>
+  );
 
   return (
     <>
       {/*
-        Two shapes, one bar.
+        One bar, two rows on a phone.
 
-        Narrow: identity on top with only the controls a child needs mid-round
-        (sound, leave), and the progress bar spanning the full width below it,
-        where a thumb is not covering it. Wide: everything on one row, with the
-        adult controls — settings, fullscreen — appearing only once there is
-        room for them. A five-year-old on a phone should not be one mis-tap from
-        the Skill Manager.
+        Narrow: the lesson and the controls share the top row, and the progress
+        bar spans the full width beneath them, where a thumb is not covering it.
+        From `sm`: one row — lesson, progress in the middle, controls. The adult
+        controls (the "more" menu) appear only once there is a pointer and room;
+        a five-year-old on a phone should not be one mis-tap from the activity
+        log. Standing appears at `lg`, where it no longer crowds the question.
+
+        The status bar's inset is this header's padding, because this header is
+        what touches the top of the glass. Opaque `bg-surface`, matching the
+        column behind it, so the strip under the OS clock never shimmers.
       */}
-      {/* The status bar's inset is this header's padding, because this header is
-          what touches the top of the glass. A `sticky top-0` bar sticks to the
-          viewport, not to the body's padding box, so on an installed app the
-          lesson title and the leave button were drawn straight through the
-          clock and the battery. Opaque rather than translucent for the same
-          reason the tab bar is: at this width the strip behind the OS clock is
-          the one part of the page that must not shimmer. `bg-surface` and not
-          `bg-canvas` for the same reason the feedback bar below uses it — the
-          column paints the page `bg-surface`, and a bar a shade off it reads as
-          a second background rather than as the top of this one. */}
-      <header className="px-2.5 sm:px-4 pt-[calc(0.5rem+env(safe-area-inset-top))] sm:pt-[calc(0.625rem+env(safe-area-inset-top))] pb-2 sm:pb-2.5 bg-surface sticky top-0 z-30">
-        <div className="max-w-5xl mx-auto flex flex-col gap-1.5 sm:gap-3 sm:flex-row sm:items-center sm:justify-between">
-          {/* Top row on narrow screens: which lesson, and the way out */}
-          <div className="flex items-center justify-between gap-2 min-w-0 sm:flex-initial sm:justify-start">
-            {identity ?? (
-              <div className="flex items-center gap-2 min-w-0">
-                <UILessonIcon name={iconName} tone={iconTone} variant="bare" size="sm" />
-                <div className="min-w-0">
+      <header className="sticky top-0 z-30 bg-surface px-3 sm:px-4 pt-[calc(0.5rem+env(safe-area-inset-top))] pb-2 sm:pt-[calc(0.625rem+env(safe-area-inset-top))] sm:pb-2.5">
+        <div className="max-w-5xl mx-auto">
+          <div className="flex items-center gap-2 sm:gap-4">
+            {/* Which lesson. Takes what is left, and truncates before anything else gives. */}
+            <div className="flex-1 min-w-0 sm:flex-initial sm:max-w-[34%]">
+              {identity ?? (
+                <div className="flex items-center gap-2 min-w-0">
+                  <UILessonIcon name={iconName} tone={iconTone} variant="bare" size="sm" />
                   {/*
-                   * The child's title, and the adult's underneath.
-                   *
-                   * "L3: Comparing Two Groups (Conservat…" was a filename: a
-                   * level number nobody says out loud, a teacher's phrasing, and
-                   * a bracket clipped mid-word. The level moves into its own
-                   * small chip where it stays useful for navigation without
-                   * eating the title, and the concept line below is where the
-                   * pedagogy belongs — it is already written for a grown-up.
+                   * The child's title, and the adult's underneath — the concept
+                   * line, written for a grown-up, only where there is room.
                    */}
-                  <span className="flex items-baseline gap-1.5 min-w-0">
-                    {levelNumber ? (
-                      <span className="shrink-0 text-[10px] font-black text-muted tabular-nums">
-                        {levelNumber}
+                  <div className="min-w-0">
+                    <span className="flex items-baseline gap-1.5 min-w-0">
+                      {levelNumber ? (
+                        <span className="shrink-0 text-[10px] font-black text-muted tabular-nums">
+                          {levelNumber}
+                        </span>
+                      ) : null}
+                      <span className="block truncate text-sm font-extrabold text-ink">{title}</span>
+                    </span>
+                    {subtitle && (
+                      <span className="hidden md:block truncate text-[11px] font-medium text-muted">
+                        {subtitle}
                       </span>
-                    ) : null}
-                    <span className="block text-sm font-extrabold text-ink truncate max-w-[150px] xs:max-w-[210px] sm:max-w-[300px]">
-                      {title}
-                    </span>
-                  </span>
-                  {subtitle && (
-                    <span className="hidden md:block text-[10px] text-muted font-medium truncate max-w-[280px]">
-                      {subtitle}
-                    </span>
-                  )}
+                    )}
+                  </div>
                 </div>
-              </div>
-            )}
+              )}
+            </div>
 
-            {/* The controls a child uses, kept reachable on every width */}
-            <div className="flex items-center gap-1 shrink-0 sm:hidden">
-              <button
-                type="button"
-                onClick={toggleVoice}
-                className={compactButton}
-                title={voiceEnabled ? t("round.voiceOff") : t("round.voiceOn")}
-                aria-label={voiceEnabled ? t("round.voiceOff") : t("round.voiceOn")}
-                aria-pressed={voiceEnabled}
-              >
-                {voiceEnabled ? <Volume2 className="w-4 h-4" /> : <VolumeX className="w-4 h-4" />}
-              </button>
+            {/* Progress, in the middle once it fits on the same row. */}
+            <div className="hidden sm:block flex-1 min-w-[140px] max-w-sm mx-auto">{progress}</div>
+
+            <div className="flex items-center gap-0.5 sm:gap-1 shrink-0">
+              {/*
+                * Standing: one quiet pill, two figures. Two separate tinted
+                * chips beside a labelled Koda pill made the right of the bar
+                * louder than the question.
+                */}
+              <div className="hidden lg:flex items-center gap-2 mr-1 rounded-full bg-surface-muted px-3 py-1.5">
+                <span
+                  className="flex items-center gap-1 text-orange-700 dark:text-orange-300"
+                  aria-label={t("streak.daysChip", { count: standing?.streakDays ?? 0 })}
+                >
+                  <SvgAsset id="streak" size={18} fallback={<Flame className="w-4 h-4 fill-orange-400" />} />
+                  <span className="text-sm font-black tabular-nums">{standing?.streakDays ?? 0}</span>
+                </span>
+                <span className="h-4 w-px bg-line" aria-hidden="true" />
+                <span
+                  className="flex items-center gap-1 text-indigo-700 dark:text-indigo-300"
+                  aria-label={t("round.xpPoints", { count: standing?.xp ?? 0 })}
+                >
+                  <SvgAsset id="points" size={18} fallback={<Zap className="w-4 h-4" />} />
+                  <span className="text-sm font-black tabular-nums">{formatXp(standing?.xp ?? 0)}</span>
+                </span>
+              </div>
+
               {mode && (
                 <button
+                  type="button"
                   onClick={() => {
                     playChrome(koda, "pop");
                     askKoda();
                   }}
-                  /*
-                   * On a phone the character is the whole button — no tile.
-                   *
-                   * It was an amber square, which on this bar was the loudest
-                   * thing on a screen whose subject is the question, and amber
-                   * is the tone this product uses for "try again". A 390px
-                   * toolbar has room for the character or for packaging round
-                   * it, not both, and the character is the part a child reads.
-                   * The 44px box stays: the target does not shrink with the
-                   * chrome.
-                   */
-                  className="min-w-[44px] min-h-[44px] grid place-items-center shrink-0 cursor-pointer rounded-xl transition active:scale-90 focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500"
+                  /* The character is the whole button, at every width. A word
+                     beside it said what the face already says, and in English
+                     on a Khmer screen. The name stays for a screen reader. */
+                  className={iconButton}
                   title={t("round.askKoda")}
                   aria-label={t("round.askKoda")}
                 >
-                  <KodaFace size={34} />
+                  <KodaFace size={30} />
                 </button>
               )}
+
               <button
+                type="button"
+                onClick={toggleVoice}
+                className={iconButton}
+                title={voiceEnabled ? t("round.voiceOff") : t("round.voiceOn")}
+                aria-label={voiceEnabled ? t("round.voiceOff") : t("round.voiceOn")}
+                aria-pressed={voiceEnabled}
+              >
+                {voiceEnabled ? <Volume2 className="w-5 h-5" /> : <VolumeX className="w-5 h-5" />}
+              </button>
+
+              {extras}
+
+              {/* Everything that is not the lesson, behind one button, for
+                  whoever is supervising. */}
+              <div className="hidden sm:block">
+                <UIMenu
+                  align="end"
+                  trigger={({ toggle }) => (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        playChrome(koda, "pop");
+                        toggle();
+                      }}
+                      className={iconButton}
+                      title={t("round.more")}
+                      aria-label={t("round.moreOptions")}
+                    >
+                      <MoreHorizontal className="w-5 h-5" />
+                    </button>
+                  )}
+                >
+                  <UIMenuItem icon={<ScrollText />} onSelect={() => setShowSettings(true)}>
+                    {t("round.activityLog")}
+                  </UIMenuItem>
+                  <UIMenuItem icon={isFullscreen ? <Minimize2 /> : <Maximize2 />} onSelect={toggleFullscreen}>
+                    {isFullscreen ? t("round.exitFullscreen") : t("round.fullscreen")}
+                  </UIMenuItem>
+                </UIMenu>
+              </div>
+
+              {/* Leaving: the same shape as the rest, told apart by colour alone. */}
+              <button
+                type="button"
                 onClick={onExit}
-                className="p-2 min-w-[44px] min-h-[44px] rounded-xl bg-rose-50 dark:bg-rose-950/40 text-rose-600 dark:text-rose-400 flex items-center justify-center shrink-0 cursor-pointer"
+                className={`${iconButton} !text-rose-600 dark:!text-rose-400 hover:!bg-rose-500/10`}
                 title={t("round.leave")}
                 aria-label={t("round.leave")}
               >
-                <X className="w-4 h-4" />
+                <X className="w-5 h-5" />
               </button>
             </div>
           </div>
 
-          {/*
-            * Progress: the round's one progress indicator.
-            *
-            * Sized up because this is now the only one — the step header used to
-            * carry a second, and two of them three inches apart is worse than
-            * either alone. A 2px hairline with "20%" beside it is a dashboard
-            * widget; a child reads a chunky bar filling up, and the pill says
-            * which question they are on in the words they would use.
-            */}
-          <div className="flex items-center gap-2.5 w-full sm:w-auto sm:min-w-[190px] shrink-0">
-            <span className="shrink-0 rounded-full bg-indigo-500 px-2.5 py-1 text-xs font-black tabular-nums text-white shadow-sm">
-              {questionIndex}
-              <span className="opacity-70">/{totalQuestions}</span>
-            </span>
-            <UIProgressBar
-              size="lg"
-              className="flex-1"
-              value={percent}
-              max={100}
-              label={t("lessonCard.questionOf", { answered: questionIndex, total: totalQuestions })}
-            />
-          </div>
-
-          {/* Wide only: standing, then every control */}
-          <div className="hidden sm:flex items-center gap-1 sm:gap-2 shrink-0">
-            {/*
-              * Standing: two figures a child is proud of, so they are legible
-              * rather than squeezed.
-              *
-              * They were 12px monospace in a translucent pill, reading as a
-              * debug readout. Each is now its own chip with the number as the
-              * loud part and the icon supporting it — and they are labelled for
-              * a screen reader, which `title` alone does not do.
-              */}
-            <div className="hidden lg:flex items-center gap-1.5">
-              <span
-                className="flex items-center gap-1.5 rounded-xl bg-orange-500/10 px-2.5 py-1.5 text-orange-700 dark:text-orange-300"
-                aria-label={t("streak.daysChip", { count: standing?.streakDays ?? 0 })}
-              >
-                <SvgAsset
-                  id="streak"
-                  size={20}
-                  fallback={<Flame className="w-4 h-4 fill-orange-400" />}
-                />
-                <span className="text-sm font-black tabular-nums">{standing?.streakDays ?? 0}</span>
-              </span>
-              <span
-                className="flex items-center gap-1.5 rounded-xl bg-indigo-500/10 px-2.5 py-1.5 text-indigo-700 dark:text-indigo-300"
-                aria-label={t("round.xpPoints", { count: standing?.xp ?? 0 })}
-              >
-                <SvgAsset id="points" size={20} fallback={<Zap className="w-4 h-4" />} />
-                <span className="text-sm font-black tabular-nums">
-                  {formatXp(standing?.xp ?? 0)}
-                </span>
-              </span>
-            </div>
-
-            {mode && (
-              <button
-                onClick={() => {
-                  playChrome(koda, "pop");
-                  askKoda();
-                }}
-                /* Amber-on-white was the loudest thing on a screen whose subject is the
-   question. Help should be findable, not the focal point. */
-                className="flex items-center gap-2 pl-1.5 pr-3 py-1.5 min-h-[40px] rounded-xl bg-surface-muted hover:bg-indigo-500/10 text-indigo-700 dark:text-indigo-300 font-bold text-sm transition active:scale-95 shrink-0 cursor-pointer"
-                title={t("round.askKoda")}
-                aria-label={t("round.askKoda")}
-              >
-                {/* The same character the floating buddy is, and the same one a
-                    tablet sees — one Koda across every width, which is what
-                    makes it read as somebody rather than as three icons. The
-                    mode is no longer drawn: a mic and a speech bubble asked a
-                    child to know which kind of conversation they were about to
-                    have, which is not a choice they make or care about. */}
-                <KodaFace size={26} />
-                <span className="hidden md:inline">Ask Koda</span>
-              </button>
-            )}
-
-            <button
-              type="button"
-              onClick={toggleVoice}
-              className={iconButton}
-              title={voiceEnabled ? t("round.voiceOff") : t("round.voiceOn")}
-              aria-label={voiceEnabled ? t("round.voiceOff") : t("round.voiceOn")}
-              aria-pressed={voiceEnabled}
-            >
-              {voiceEnabled ? <Volume2 className="w-4 h-4" /> : <VolumeX className="w-4 h-4" />}
-            </button>
-
-            {extras}
-
-            {/*
-              * Everything that is not the lesson, behind one button.
-              *
-              * The activity log and the fullscreen toggle are for whoever is
-              * supervising, not for the child answering the question — and each
-              * sitting in the bar as its own unlabelled icon added weight to the
-              * one strip that should stay quiet. `UIMenu` already exists and is
-              * used elsewhere, so this groups rather than invents.
-              */}
-            <UIMenu
-              align="end"
-              trigger={({ toggle }) => (
-                <button
-                  onClick={() => {
-                    playChrome(koda, "pop");
-                    toggle();
-                  }}
-                  className={iconButton}
-                  title={t("round.more")}
-                  aria-label={t("round.moreOptions")}
-                >
-                  <MoreHorizontal className="w-4 h-4" />
-                </button>
-              )}
-            >
-              <UIMenuItem icon={<ScrollText />} onSelect={() => setShowSettings(true)}>
-                {t("round.activityLog")}
-              </UIMenuItem>
-              <UIMenuItem
-                icon={isFullscreen ? <Minimize2 /> : <Maximize2 />}
-                onSelect={toggleFullscreen}
-              >
-                {isFullscreen ? t("round.exitFullscreen") : t("round.fullscreen")}
-              </UIMenuItem>
-            </UIMenu>
-
-            <button
-              onClick={onExit}
-              /* Leaving is the one destructive-ish action here, and the design
-                 system already has a tone for that — a bespoke rose block was a
-                 second opinion about the same thing. */
-              className={themeSystem.button("ghost", "icon", "text-rose-600 dark:text-rose-400 hover:bg-rose-500/10 min-w-[40px] min-h-[40px]")}
-              title={t("round.leave")}
-              aria-label={t("round.leave")}
-            >
-              <X className="w-4 h-4" />
-            </button>
-          </div>
+          {/* Phone: progress gets its own full-width row. */}
+          <div className="sm:hidden mt-1.5">{progress}</div>
         </div>
       </header>
 
