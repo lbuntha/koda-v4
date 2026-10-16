@@ -106,6 +106,35 @@ export const PATIENCE: Record<string, number> = {
   quick: 0.6,
 };
 
+/**
+ * How often the coach speaks up on its own — an admin's setting, per skill.
+ *
+ *  - `ladder`: the coach above. It keeps watching after a cue, climbs a rung
+ *    each time the child stays still, and comes back after being put away.
+ *  - `once`: one cue per question, and only after `coachIdleSeconds` with
+ *    nothing happening. No climbing, no reacting to odd moves, no return after
+ *    being put away. A child who wants more presses Hint, and each press then
+ *    goes one rung further — the button does the climbing the clock no longer
+ *    does.
+ *
+ * `ladder` when a skill does not say, so a skill that never heard of this keeps
+ * the coach it was tuned with.
+ */
+export type CoachMode = "ladder" | "once";
+
+export const COACH_IDLE_DEFAULT_S = 15;
+
+export function coachMode(value: unknown): CoachMode {
+  return value === "once" ? "once" : "ladder";
+}
+
+/** Seconds of stillness before a `once` cue, kept within a sensible range. */
+export function coachIdleMs(value: unknown): number {
+  const s = Number(value);
+  const seconds = Number.isFinite(s) && s > 0 ? s : COACH_IDLE_DEFAULT_S;
+  return Math.min(120, Math.max(3, seconds)) * 1000;
+}
+
 /** The lesson's `guide` block, if it authored one. */
 export function guideSetup(params: unknown): GuideSetup {
   const guide = (params as { guide?: unknown } | null | undefined)?.guide;
@@ -243,6 +272,11 @@ export function useGuide({
   const spokenRef = useRef(0);
   /** The deepest rung reached on this question, open or not. */
   const deepestRef = useRef(0);
+  /** Cues raised on the open question without being asked for. */
+  const unaskedRef = useRef(0);
+
+  const mode = coachMode(koda.config.get("coachMode", "ladder"));
+  const idleMs = coachIdleMs(koda.config.get("coachIdleSeconds", COACH_IDLE_DEFAULT_S));
 
   /*
    * The lesson's timings, stretched or shortened by the family's dial.
@@ -277,6 +311,7 @@ export function useGuide({
     ) as GuideLevel;
 
     shownRef.current += 1;
+    if (why !== "asked") unaskedRef.current += 1;
     dismissedRef.current = false;
     deepestRef.current = Math.max(deepestRef.current, next);
     setReason(why);
@@ -290,6 +325,7 @@ export function useGuide({
     shownRef.current = 0;
     spokenRef.current = 0;
     deepestRef.current = 0;
+    unaskedRef.current = 0;
     dismissedRef.current = false;
     setLevel(0);
   }, [questionId]);
@@ -327,6 +363,15 @@ export function useGuide({
      */
     if (level >= Math.min(3, rungs.length)) return;
 
+    /* `once`: the single cue, after a flat stretch of stillness. Anything on
+       screen — that cue, or one the child asked for — already is the help, so
+       the clock has nothing to add to it. */
+    if (mode === "once") {
+      if (level > 0 || unaskedRef.current > 0) return;
+      const timer = window.setTimeout(() => raise("stalled"), idleMs);
+      return () => window.clearTimeout(timer);
+    }
+
     const wait = waitMs(patient, {
       started: progress > 0,
       shown: dismissedRef.current ? 0 : shownRef.current,
@@ -334,7 +379,7 @@ export function useGuide({
     const timer = window.setTimeout(() => raise("stalled"), wait);
     return () => window.clearTimeout(timer);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [enabled, paused, done, level, rungs.length, progress, questionId, raise, scale]);
+  }, [enabled, paused, done, level, rungs.length, progress, questionId, raise, scale, mode, idleMs]);
 
   /*
    * Said once per rung, not once per render.
@@ -394,8 +439,10 @@ export function useGuide({
        bottom: a child who has read the nudge and then seen the light should not
        have to climb past the nudge again, and the log should not record a
        second first-rung hint for the same question. */
-    raise("asked", Math.max(1, deepestRef.current));
-  }, [level, raise]);
+    /* In `once` mode nothing climbs on its own, so asking again is how a child
+       gets the stronger rung. */
+    raise("asked", mode === "once" ? deepestRef.current + 1 : Math.max(1, deepestRef.current));
+  }, [level, raise, mode]);
 
   const dismiss = useCallback(() => {
     dismissedRef.current = true;
@@ -412,8 +459,10 @@ export function useGuide({
 
   const stumbled = useCallback(() => {
     if (!enabled) return;
+    /* `once` promises an idle cue and nothing else unasked-for. */
+    if (mode === "once") return;
     raise("stumbled");
-  }, [enabled, raise]);
+  }, [enabled, raise, mode]);
 
   const text = level > 0 ? rungs[level - 1] : undefined;
   const cue: GuideCue | null =

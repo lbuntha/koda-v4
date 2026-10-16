@@ -326,6 +326,89 @@ describe("the coach on screen", () => {
   });
 });
 
+describe("the coach set to speak up once", () => {
+  beforeEach(() => {
+    vi.useFakeTimers();
+    vi.spyOn(Math, "random").mockReturnValue(0);
+  });
+  afterEach(() => {
+    vi.useRealTimers();
+    vi.restoreAllMocks();
+  });
+
+  const once = (settings: Record<string, unknown> = {}) =>
+    renderActivity(orbit, {
+      params: lessonParams("count-in-a-row", { countRange: [4, 4], settleMs: 0 }),
+      level: 1,
+      settings: { coachMode: "once", coachIdleSeconds: 15, ...settings },
+    });
+
+  it("waits the admin's idle time, then shows one hint", () => {
+    const h = once();
+
+    wait(14_500);
+    expect(coaching(), "not before the idle time").toBeNull();
+    wait(1000);
+    expect(coaching()).toContain(kidTipOf("count-in-a-row"));
+    expect(cues(h)).toEqual([1]);
+    h.unmount();
+  });
+
+  it("counts idle from the last tap", () => {
+    const h = once();
+
+    wait(10_000);
+    tap(0);
+    wait(10_000);
+    expect(coaching(), "a tap restarts the idle clock").toBeNull();
+    wait(5_500);
+    expect(cues(h)).toEqual([1]);
+    h.unmount();
+  });
+
+  it("does not climb, and does not come back once put away", () => {
+    const h = once();
+
+    wait(15_000);
+    wait(60_000);
+    expect(cues(h), "left showing, it stays on the first rung").toEqual([1]);
+
+    press(/Got it/i);
+    wait(60_000);
+    expect(coaching()).toBeNull();
+    expect(cues(h), "put away, it stays away").toEqual([1]);
+    h.unmount();
+  });
+
+  it("does not jump in on an odd move", () => {
+    const h = once();
+
+    tap(0);
+    tap(0);
+    expect(coaching()).toBeNull();
+    expect(cues(h)).toEqual([]);
+    h.unmount();
+  });
+
+  it("goes one rung further each time the child asks", () => {
+    const h = once();
+
+    press(/^Hint$/);
+    press(/Got it/i);
+    press(/^Hint$/);
+    expect(cues(h, "hint")).toEqual([1, 2]);
+    h.unmount();
+  });
+
+  it("uses whatever idle time the admin set", () => {
+    const h = once({ coachIdleSeconds: 5 });
+
+    wait(5_100);
+    expect(cues(h)).toEqual([1]);
+    h.unmount();
+  });
+});
+
 describe("every technique is coached the same way", () => {
   beforeEach(() => {
     vi.useFakeTimers();
