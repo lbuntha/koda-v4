@@ -79,6 +79,57 @@ describe("reading to my grown-ups", () => {
     expect(fetchMock).not.toHaveBeenCalled();
   });
 
+  it("asks before leaving the book with a reading not sent", async () => {
+    const onBack = vi.fn();
+    render(<BookReader book={MARKET} onBack={onBack} onReady={() => {}} />);
+    fireEvent.click(screen.getByRole("button", { name: "Next page" }));
+    await act(async () => { fireEvent.click(screen.getByRole("button", { name: "Record my reading for my grown-ups" })); });
+
+    // Back while still recording: the recording stops and the reader asks.
+    await act(async () => { fireEvent.click(screen.getByRole("button", { name: "Back to book" })); });
+    expect(onBack).not.toHaveBeenCalled();
+    expect(screen.getByRole("alertdialog", { name: "You haven't sent your reading yet." })).toBeTruthy();
+
+    fireEvent.click(screen.getByRole("button", { name: "Stay here" }));
+    expect(screen.queryByRole("alertdialog")).toBeNull();
+    expect(screen.getByRole("button", { name: "Send to my grown-ups" })).toBeTruthy();
+
+    // Send, then leave: it goes, and only then does the book close.
+    fireEvent.click(screen.getByRole("button", { name: "Back to book" }));
+    await act(async () => { fireEvent.click(screen.getByRole("button", { name: "Send, then leave" })); });
+    await waitFor(() => expect(onBack).toHaveBeenCalledTimes(1));
+    expect(fetchMock).toHaveBeenCalledTimes(1);
+  });
+
+  it("lets a child leave without sending when they choose to, and leaves at once with nothing recorded", async () => {
+    const onBack = vi.fn();
+    render(<BookReader book={MARKET} onBack={onBack} onReady={() => {}} />);
+    fireEvent.click(screen.getByRole("button", { name: "Back to book" }));
+    expect(onBack).toHaveBeenCalledTimes(1);
+
+    await act(async () => { fireEvent.click(screen.getByRole("button", { name: "Record my reading for my grown-ups" })); });
+    await act(async () => { fireEvent.click(screen.getAllByRole("button", { name: "Stop recording" })[0]); });
+    fireEvent.click(screen.getByRole("button", { name: "Back to book" }));
+    fireEvent.click(screen.getByRole("button", { name: "Leave without sending" }));
+    expect(onBack).toHaveBeenCalledTimes(2);
+    expect(fetchMock).not.toHaveBeenCalled();
+  });
+
+  it("has the browser warn before the tab closes on a reading not sent", async () => {
+    render(<BookReader book={MARKET} onBack={() => {}} onReady={() => {}} />);
+    const unload = () => {
+      const e = new Event("beforeunload", { cancelable: true });
+      window.dispatchEvent(e);
+      return e.defaultPrevented;
+    };
+    expect(unload()).toBe(false);
+    await act(async () => { fireEvent.click(screen.getByRole("button", { name: "Record my reading for my grown-ups" })); });
+    await act(async () => { fireEvent.click(screen.getAllByRole("button", { name: "Stop recording" })[0]); });
+    expect(unload()).toBe(true);
+    fireEvent.click(screen.getByRole("button", { name: "Throw this recording away" }));
+    expect(unload()).toBe(false);
+  });
+
   it("says so when the microphone is blocked", async () => {
     (navigator.mediaDevices.getUserMedia as ReturnType<typeof vi.fn>).mockRejectedValueOnce(new Error("denied"));
     render(<BookReader book={MARKET} onBack={() => {}} onReady={() => {}} />);

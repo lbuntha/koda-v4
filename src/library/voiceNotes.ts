@@ -118,6 +118,20 @@ export function useVoiceNote(book: { id: string; title: string }, page: number) 
     if (stage === "recording" && page > 0) pages.current.add(page);
   }, [stage, page]);
 
+  // A reading recorded but not yet sent is easy to lose: one tap on Back, or a
+  // closed tab. The tab gets the browser's own "Leave site?"; the reader asks
+  // its own question (see `BookReader`).
+  const unsent = stage === "asking" || stage === "recording" || stage === "review" || stage === "sending" || stage === "failed";
+  useEffect(() => {
+    if (!unsent) return;
+    const warn = (e: BeforeUnloadEvent) => {
+      e.preventDefault();
+      e.returnValue = "";
+    };
+    window.addEventListener("beforeunload", warn);
+    return () => window.removeEventListener("beforeunload", warn);
+  }, [unsent]);
+
   const release = () => {
     const r = rec.current;
     if (!r) return;
@@ -202,26 +216,29 @@ export function useVoiceNote(book: { id: string; title: string }, page: number) 
     setStage("idle");
   };
 
-  const send = async () => {
+  /** Send the take. True once it is on the server. */
+  const send = async (): Promise<boolean> => {
     const t = take.current;
-    if (!t) return;
+    if (!t) return false;
     setStage("sending");
     setError("");
     try {
       await sendVoiceNote(t.blob, book, t.pages, t.durationMs);
-      if (!live.current) return;
+      if (!live.current) return true;
       take.current = null;
       setPlayable(null);
       setStage("sent");
       setTimeout(() => live.current && setStage((s) => (s === "sent" ? "idle" : s)), 3500);
+      return true;
     } catch (e) {
-      if (!live.current) return;
+      if (!live.current) return false;
       setError(e instanceof Error ? e.message : "");
       setStage("failed");
+      return false;
     }
   };
 
-  return { stage, elapsed, url, error, start, stop, discard, send, again: start, dismiss: () => setStage("idle") };
+  return { stage, elapsed, url, error, unsent, start, stop, discard, send, again: start, dismiss: () => setStage("idle") };
 }
 
 export type VoiceNoteRecorder = ReturnType<typeof useVoiceNote>;

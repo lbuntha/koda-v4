@@ -220,6 +220,18 @@ export function BookReader({ book, onBack, onReady, preview = false, pageControl
   const recording = voice.stage === "recording" || voice.stage === "asking";
   const recordingRef = useRef(recording);
   recordingRef.current = recording;
+  // Where the child was going when they tried to leave with a reading unsent.
+  const [leaving, setLeaving] = useState<null | (() => void)>(null);
+  /** Leave the book — unless there is a reading to send first, which asks. */
+  const leaveBy = (go: () => void) => {
+    if (!canRecord || !voice.unsent) return go();
+    if (recording) voice.stop();
+    setLeaving(() => go);
+  };
+  useEffect(() => {
+    // Sent or thrown away from the strip itself: nothing left to ask about.
+    if (leaving && !voice.unsent) setLeaving(null);
+  }, [leaving, voice.unsent]);
   // The cover settles in once, when the book is opened — not every time a
   // reader turns back to it.
   const [opened, setOpened] = useState(false);
@@ -568,7 +580,7 @@ export function BookReader({ book, onBack, onReady, preview = false, pageControl
       contentRef={scrollEl}
       progress={last > 0 ? page / last : 1}
       toolbar={<UIReaderToolbar
-        onBack={onBack}
+        onBack={() => leaveBy(onBack)}
         onSmallerText={() => setTextStep(textStep - 1)}
         onLargerText={() => setTextStep(textStep + 1)}
         smallerDisabled={textStep === 0}
@@ -606,7 +618,16 @@ export function BookReader({ book, onBack, onReady, preview = false, pageControl
       </UIReaderToolbar>}
       controls={(() => {
         const authoring = pageControls?.(page > 0 && pages.story[page - 1] ? { n: page, ids: pages.story[page - 1].map((s) => s.sentence.id), text: pages.texts[page - 1] } : null);
-        const reading = canRecord && voice.stage !== "idle" ? <VoiceNoteBar voice={voice} /> : null;
+        const reading = canRecord && voice.stage !== "idle" ? (
+          <VoiceNoteBar
+            voice={voice}
+            leaving={leaving ? {
+              sendAndLeave: () => void voice.send().then((sent) => { if (sent) { setLeaving(null); leaving(); } }),
+              leave: () => { const go = leaving; setLeaving(null); voice.discard(); go(); },
+              stay: () => setLeaving(null),
+            } : undefined}
+          />
+        ) : null;
         return authoring || reading ? <div className="grid gap-2">{authoring}{reading}</div> : undefined;
       })()}
       footer={<UIReaderPagination
@@ -615,7 +636,7 @@ export function BookReader({ book, onBack, onReady, preview = false, pageControl
         storyPageCount={pages.story.length}
         onPrevious={() => turn(page - 1)}
         onNext={() => turn(page + 1)}
-        onComplete={() => { hush(); record.finish(); onReady(); }}
+        onComplete={() => leaveBy(() => { hush(); record.finish(); onReady(); })}
         // A book with no questions has nothing to check: the last page just finishes it.
         completeLabel={hasQuiz ? undefined : t("reader.finishBook")}
       />}

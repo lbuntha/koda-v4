@@ -1,4 +1,4 @@
-import { Check, Loader2, MicOff, RotateCcw, Send, Square, Trash2 } from "lucide-react";
+import { AlertTriangle, Check, Loader2, MicOff, RotateCcw, Send, Square, Trash2 } from "lucide-react";
 import { clock, MAX_RECORDING_MS, type VoiceNoteRecorder } from "./voiceNotes";
 import { useT } from "../lib/i18n";
 
@@ -14,7 +14,11 @@ import { useT } from "../lib/i18n";
 
 const big = "inline-flex min-h-11 items-center justify-center gap-2 rounded-full px-4 text-sm font-bold transition-[background-color,transform] active:scale-95 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 disabled:opacity-50";
 
-export function VoiceNoteBar({ voice }: { voice: VoiceNoteRecorder }) {
+/**
+ * `leaving` is set while the child is on the way out of the book with a reading
+ * not yet sent: the strip asks first, so a tap on Back cannot throw it away.
+ */
+export function VoiceNoteBar({ voice, leaving }: { voice: VoiceNoteRecorder; leaving?: { sendAndLeave(): void; leave(): void; stay(): void } }) {
   const { t } = useT();
   const { stage } = voice;
   if (stage === "idle") return null;
@@ -48,7 +52,28 @@ export function VoiceNoteBar({ voice }: { voice: VoiceNoteRecorder }) {
         </div>
       )}
 
-      {(stage === "review" || stage === "sending" || stage === "failed") && (
+      {leaving && (stage === "review" || stage === "sending" || stage === "failed") && (
+        <div role="alertdialog" aria-label={t("reader.voice.unsentTitle")} className="grid gap-2">
+          <p className="flex items-start gap-2 text-sm font-bold text-ink">
+            <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0 text-amber-600" aria-hidden="true" /> {t("reader.voice.unsentTitle")}
+          </p>
+          {stage === "failed" && <p className="text-sm font-semibold text-rose-700 dark:text-rose-300">{t("reader.voice.failed")}{voice.error ? ` — ${voice.error}` : ""}</p>}
+          <div className="flex flex-wrap items-center gap-2">
+            <button type="button" autoFocus onClick={leaving.sendAndLeave} disabled={stage === "sending"} className={`${big} flex-1 bg-indigo-600 text-white hover:bg-indigo-700 sm:flex-none`}>
+              {stage === "sending" ? <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" /> : <Send className="h-4 w-4" aria-hidden="true" />}
+              {stage === "sending" ? t("reader.voice.sending") : t("reader.voice.sendAndLeave")}
+            </button>
+            <button type="button" onClick={leaving.stay} disabled={stage === "sending"} className={`${big} bg-white text-ink hover:bg-indigo-100 dark:bg-slate-900 dark:hover:bg-slate-800`}>
+              {t("reader.voice.stay")}
+            </button>
+            <button type="button" onClick={leaving.leave} disabled={stage === "sending"} className={`${big} text-rose-700 hover:bg-rose-50 dark:text-rose-300 dark:hover:bg-rose-950`}>
+              {t("reader.voice.leaveWithout")}
+            </button>
+          </div>
+        </div>
+      )}
+
+      {!leaving && (stage === "review" || stage === "sending" || stage === "failed") && (
         <div className="grid gap-2">
           <p className="text-sm font-bold text-ink">{t("reader.voice.listen", { time: clock(voice.elapsed) })}</p>
           {voice.url && <audio controls src={voice.url} className="h-10 w-full" aria-label={t("reader.voice.listenBack")} />}
