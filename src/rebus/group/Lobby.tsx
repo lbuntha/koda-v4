@@ -7,7 +7,7 @@
  */
 
 import React, { useState } from "react";
-import { Check, Copy, Crown, Lock, LogOut, Play, Share2, Unlock, UserMinus } from "lucide-react";
+import { Check, Copy, Crown, X, Lock, LogOut, Play, Share2, Unlock, UserMinus } from "lucide-react";
 import { useT } from "../../lib/i18n";
 import { themeSystem } from "../../lib/themeSystem";
 import { UIBadge, UIButton } from "../../components/ui";
@@ -25,6 +25,8 @@ export interface LobbyProps {
   onStart(): void;
   onLock(locked: boolean): void;
   onKick(pid: string): void;
+  onAccept(pid: string): void;
+  onDecline(pid: string): void;
   onLeave(): void;
 }
 
@@ -37,7 +39,7 @@ const copyText = async (text: string): Promise<boolean> => {
   }
 };
 
-export const Lobby: React.FC<LobbyProps> = ({ room, busy = false, error, reconnecting = false, onStart, onLock, onKick, onLeave }) => {
+export const Lobby: React.FC<LobbyProps> = ({ room, busy = false, error, reconnecting = false, onStart, onLock, onKick, onAccept, onDecline, onLeave }) => {
   const { t } = useT();
   const show = useNickname();
   const [copied, setCopied] = useState<"code" | "link" | null>(null);
@@ -81,6 +83,27 @@ export const Lobby: React.FC<LobbyProps> = ({ room, busy = false, error, reconne
         </div>
         <p className={themeSystem.typography("caption")}>{t("rebus.group.codeHint")}</p>
       </div>
+
+      {host && (room.requests?.length ?? 0) > 0 && (
+        <section className={themeSystem.spacing.stack} aria-label={t("rebus.group.requests")}>
+          <h3 className={themeSystem.typography("h4")}>{t("rebus.group.requests")}</h3>
+          <ul className="flex flex-col gap-2">
+            {room.requests?.map((r) => (
+              <li key={r.pid} className={themeSystem.card("default", "flex items-center gap-3 px-3 py-2")}>
+                <RoomAvatar avatar={r.avatar} />
+                <div className="flex min-w-0 flex-1 flex-col">
+                  <span className="truncate text-base font-black text-ink">{show(r.name)}</span>
+                  {r.isKodaUser && <UIBadge variant="info">{t("rebus.group.kodaUser")}</UIBadge>}
+                </div>
+                <UIButton size="sm" variant="ghost" aria-label={t("rebus.group.declineName", { name: show(r.name) })} icon={<X />} disabled={busy} onClick={() => onDecline(r.pid)} />
+                <UIButton size="sm" icon={<Check />} aria-label={t("rebus.group.acceptName", { name: show(r.name) })} disabled={busy} onClick={() => onAccept(r.pid)}>
+                  {t("rebus.group.accept")}
+                </UIButton>
+              </li>
+            ))}
+          </ul>
+        </section>
+      )}
 
       <section className={themeSystem.spacing.stack} aria-label={t("rebus.group.players")}>
         <div className="flex items-center justify-between">

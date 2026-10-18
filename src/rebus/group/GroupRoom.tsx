@@ -16,24 +16,31 @@ import { GroupPlay } from "./GroupPlay";
 import { Lobby } from "./Lobby";
 import { clearSeat } from "./seatStore";
 import type { RoomView } from "./types";
+import { useGroupLearning } from "./useGroupLearning";
 import { useRoom } from "./useRoom";
+import type { RebusSettings } from "../settings";
 
 export interface GroupRoomProps {
   code: string;
   token: string;
   /** The room as the join or open call returned it, so the lobby is on screen at once. */
   initial?: RoomView | null;
+  /** The owner's settings, for what a finished game pays. */
+  settings: RebusSettings;
+  /** A signed-in player earned this much XP for the game. */
+  onAwardXp?(xp: number): void;
   /** Back out of the room, to wherever the player came from. */
   onLeft(): void;
 }
 
-export const GroupRoom: React.FC<GroupRoomProps> = ({ code, token, initial = null, onLeft }) => {
+export const GroupRoom: React.FC<GroupRoomProps> = ({ code, token, initial = null, settings, onAwardXp, onLeft }) => {
   const { t } = useT();
   const feed = useRoom(code, token, initial);
   const { room, link, goneBecause, apply } = feed;
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
   const left = useRef(false);
+  const reward = useGroupLearning(room, { settings, onAwardXp });
 
   // A removed or closed room is over: forget the seat so a refresh does not come back to it.
   useEffect(() => {
@@ -64,11 +71,13 @@ export const GroupRoom: React.FC<GroupRoomProps> = ({ code, token, initial = nul
     onLeft();
   };
 
+  const turnedAway = link === "gone" && room?.status === "pending";
+
   if (link === "gone") {
     return (
       <div className="mx-auto flex w-full max-w-xl flex-col items-center gap-4 pb-20 text-center">
         <p role="status" className={themeSystem.flash("info")}>
-          {goneBecause === "removed" ? t("rebus.group.removed") : t("rebus.group.closed")}
+          {turnedAway ? t("rebus.group.declined") : goneBecause === "removed" ? t("rebus.group.removed") : t("rebus.group.closed")}
         </p>
         <UIButton size="lg" onClick={onLeft}>
           {t("rebus.group.back")}
@@ -85,6 +94,20 @@ export const GroupRoom: React.FC<GroupRoomProps> = ({ code, token, initial = nul
     );
   }
 
+  if (room.status === "pending") {
+    return (
+      <div className="mx-auto flex w-full max-w-xl flex-col items-center gap-4 pb-20 text-center">
+        <p role="status" className={themeSystem.flash("info")}>
+          {t("rebus.group.door")}
+        </p>
+        <p className={themeSystem.typography("caption")}>{t("rebus.group.doorHint")}</p>
+        <UIButton variant="ghost" onClick={() => void leave()}>
+          {t("rebus.group.leave")}
+        </UIButton>
+      </div>
+    );
+  }
+
   if (room.status === "playing" && room.puzzle) {
     return <GroupPlay room={room} token={token} skewMs={feed.skewMs} apply={apply} />;
   }
@@ -98,7 +121,7 @@ export const GroupRoom: React.FC<GroupRoomProps> = ({ code, token, initial = nul
   }
 
   if (room.status === "finished") {
-    return <GroupFinal room={room} busy={busy} error={error} onAgain={() => void act(() => GroupAPI.rematch(code, token))} onLeave={() => void leave()} />;
+    return <GroupFinal room={room} busy={busy} error={error} reward={reward} onAgain={() => void act(() => GroupAPI.rematch(code, token))} onLeave={() => void leave()} />;
   }
 
   return (
@@ -110,6 +133,8 @@ export const GroupRoom: React.FC<GroupRoomProps> = ({ code, token, initial = nul
       onStart={() => void act(() => GroupAPI.start(code, token))}
       onLock={(locked) => void act(() => GroupAPI.lock(code, token, locked))}
       onKick={(pid) => void act(() => GroupAPI.kick(code, token, pid))}
+      onAccept={(pid) => void act(() => GroupAPI.accept(code, token, pid))}
+      onDecline={(pid) => void act(() => GroupAPI.decline(code, token, pid))}
       onLeave={() => void leave()}
     />
   );

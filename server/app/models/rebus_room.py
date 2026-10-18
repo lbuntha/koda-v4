@@ -34,3 +34,9 @@ class LockIn(Model):
 
 class KickIn(Model):
     pid: str = Field(min_length=2, max_length=20)
+
+
+class AnswerIn(Model):
+    """The host's answer to someone at the door."""
+
+    pid: str = Field(min_length=2, max_length=20)

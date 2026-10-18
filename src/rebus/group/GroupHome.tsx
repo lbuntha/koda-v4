@@ -27,6 +27,8 @@ export interface GroupHomeProps {
   counts?: Readonly<Record<string, number>>;
   /** A code from an invitation link: goes straight to joining it. */
   initialCode?: string | null;
+  /** A signed-in player earned this much XP for a finished game. */
+  onAwardXp?(xp: number): void;
   /** Back out of group play. */
   onExit(): void;
   /** A guest who has an account: go to sign in (the link is kept so they come back to the room). */
@@ -35,7 +37,7 @@ export interface GroupHomeProps {
 
 type View = "choose" | "host" | "join" | "room";
 
-export const GroupHome: React.FC<GroupHomeProps> = ({ userToken, settings, counts, initialCode = null, onExit, onSignIn }) => {
+export const GroupHome: React.FC<GroupHomeProps> = ({ userToken, settings, counts, initialCode = null, onAwardXp, onExit, onSignIn }) => {
   const { t } = useT();
   const stored = initialCode ? null : loadSeat();
   const [seat, setSeat] = useState<{ code: string; token: string; initial: Seat["room"] | null } | null>(stored ? { ...stored, initial: null } : null);
@@ -54,7 +56,7 @@ export const GroupHome: React.FC<GroupHomeProps> = ({ userToken, settings, count
     setView("choose");
   };
 
-  if (view === "room" && seat) return <GroupRoom code={seat.code} token={seat.token} initial={seat.initial} onLeft={leftRoom} />;
+  if (view === "room" && seat) return <GroupRoom code={seat.code} token={seat.token} initial={seat.initial} settings={settings} onAwardXp={onAwardXp} onLeft={leftRoom} />;
 
   const back = view === "choose" ? onExit : () => setView("choose");
 

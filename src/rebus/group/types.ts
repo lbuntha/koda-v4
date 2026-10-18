@@ -2,7 +2,8 @@
 
 import type { Puzzle } from "../types";
 
-export type RoomStatus = "lobby" | "playing" | "finished";
+/** "pending": at the door, waiting for the host to accept. */
+export type RoomStatus = "pending" | "lobby" | "playing" | "finished";
 
 export interface RoomPlayer {
   pid: string;
@@ -14,6 +15,14 @@ export interface RoomPlayer {
   /** Signed in to Koda. The only thing a room says about anyone's account. */
   isKodaUser: boolean;
   connected: boolean;
+}
+
+/** Someone at the door, as the host sees them. */
+export interface RoomRequest {
+  pid: string;
+  name: string;
+  avatar: string;
+  isKodaUser: boolean;
 }
 
 export interface RoomSettings {
@@ -51,6 +60,8 @@ export interface RoomView {
   me: { pid: string; isHost: boolean; isKodaUser: boolean };
   /** The server's clock when this was sent, so a device can tell how far its own is off. */
   nowMs: number;
+  /** Only the host gets this: who is waiting to be let in. */
+  requests?: RoomRequest[];
   // While playing or finished:
   total?: number;
   results?: PuzzleResult[];

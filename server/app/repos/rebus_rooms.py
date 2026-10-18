@@ -61,6 +61,7 @@ async def create(
             "expiresAt": _expires(now_ms),
             "settings": settings,
             "players": [host],
+            "requests": [],
             "puzzles": [],
             "index": 0,
             "puzzleStartMs": 0,
@@ -82,25 +83,37 @@ def _expires(now_ms: int):
     return datetime.fromtimestamp((now_ms + rules.ROOM_LIFETIME_MS) / 1000, tz=UTC)
 
 
+#: Most people who may be waiting at the door of one room at once.
+MAX_REQUESTS = 10
+#: A request not heard from for this long is a child who closed the page, not someone waiting.
+REQUEST_STALE_MS = rules.REQUEST_FRESH_MS
+
+
 async def join(
     db: AsyncIOMotorDatabase, code: str, *, name: str, avatar: str, user_id: str | None, now_ms: int
 ) -> tuple[str, dict[str, Any] | None, str]:
-    """Take a seat. Returns (outcome, room, token): outcome is "ok" or why not."""
+    """Ask for a seat. The host decides: this only puts a request at the door.
+
+    Returns (outcome, room, token): outcome is "ok" or why not. The token names
+    the request now and the seat once the host accepts, so the same device
+    carries on without joining a second time.
+    """
     room = await get(db, code)
     if not room or room["status"] == "closed":
         return "not_found", None, ""
     token = rules.new_token()
     player = _player(name=name, avatar=avatar, user_id=user_id, token=token, now_ms=now_ms)
-    limit = int(room["settings"]["maxPlayers"])
+    fresh = now_ms - REQUEST_STALE_MS
     updated = await _col(db).find_one_and_update(
         {
             "_id": code,
             "status": "lobby",
             "locked": False,
             "players.name": {"$ne": name},
-            "$expr": {"$lt": [{"$size": "$players"}, limit]},
+            "requests": {"$not": {"$elemMatch": {"name": name, "seenMs": {"$gte": fresh}}}},
+            "$expr": {"$lt": [{"$size": {"$ifNull": ["$requests", []]}}, MAX_REQUESTS]},
         },
-        {"$push": {"players": player}},
+        {"$push": {"requests": player}},
         return_document=True,
     )
     if updated:
@@ -111,9 +124,50 @@ async def join(
         return "started", room, ""
     if room["locked"]:
         return "locked", room, ""
-    if any(p["name"] == name for p in room["players"]):
+    if any(p["name"] == name for p in room["players"]) or any(r["name"] == name and r["seenMs"] >= fresh for r in room.get("requests", [])):
         return "name_taken", room, ""
     return "full", room, ""
+
+
+async def accept(db: AsyncIOMotorDatabase, code: str, pid: str) -> str:
+    """Move a request into the players. Returns "ok", "gone" (no such request) or "full"."""
+    room = await get(db, code)
+    request = next((r for r in (room or {}).get("requests", []) if r["pid"] == pid), None)
+    if not room or not request or room["status"] != "lobby":
+        return "gone"
+    limit = int(room["settings"]["maxPlayers"])
+    done = await _col(db).update_one(
+        {
+            "_id": code,
+            "status": "lobby",
+            "requests.pid": pid,
+            "players.name": {"$ne": request["name"]},
+            "$expr": {"$lt": [{"$size": "$players"}, limit]},
+        },
+        {"$push": {"players": request}, "$pull": {"requests": {"pid": pid}}},
+    )
+    if done.modified_count:
+        return "ok"
+    room = await get(db, code) or room
+    if not any(r["pid"] == pid for r in room.get("requests", [])):
+        return "gone"
+    return "full"
+
+
+async def decline(db: AsyncIOMotorDatabase, code: str, pid: str) -> None:
+    await _col(db).update_one({"_id": code}, {"$pull": {"requests": {"pid": pid}}})
+
+
+def request_of(room: dict[str, Any], token: str | None) -> dict[str, Any] | None:
+    """The request this token holds, while the host has not yet answered."""
+    if not token:
+        return None
+    wanted = rules.hash_token(token)
+    return next((r for r in room.get("requests", []) if r["tokenHash"] == wanted), None)
+
+
+async def touch_request(db: AsyncIOMotorDatabase, code: str, pid: str, now_ms: int) -> None:
+    await _col(db).update_one({"_id": code, "requests.pid": pid}, {"$set": {"requests.$.seenMs": now_ms}})
 
 
 def seat_of(room: dict[str, Any], token: str | None) -> dict[str, Any] | None:
@@ -157,6 +211,7 @@ async def start(db: AsyncIOMotorDatabase, code: str, *, puzzles: list[dict[str, 
             "$set": {
                 "status": "playing",
                 "locked": True,
+                "requests": [],
                 "puzzles": puzzles,
                 "index": 0,
                 "puzzleStartMs": now_ms + rules.COUNTDOWN_MS,

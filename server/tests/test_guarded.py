@@ -47,6 +47,8 @@ PUBLIC = {
     ("POST", "/v1/rebus/rooms/{code}/solve"),
     ("POST", "/v1/rebus/rooms/{code}/lock"),
     ("POST", "/v1/rebus/rooms/{code}/kick"),
+    ("POST", "/v1/rebus/rooms/{code}/accept"),
+    ("POST", "/v1/rebus/rooms/{code}/decline"),
     ("POST", "/v1/rebus/rooms/{code}/leave"),
     ("POST", "/v1/rebus/rooms/{code}/rematch"),
 }

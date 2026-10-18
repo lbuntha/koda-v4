@@ -1,7 +1,7 @@
 # Rebus Rush — proposed build plan
 
 **Skill id:** `rebus` · **Name:** Rebus Rush · **Proposed ages:** 7–18 (hint depth and word difficulty scale with age) ·
-**Category:** `logic` (shown under Learn → **Think**) · **Status: Phases 0 and 1 built 2026-10-17 (`src/rebus/`, 94 tests). Phase 1 was checked in the running app (desktop, 390px phone frame, dark mode) on 2026-10-17. Phases 2, 3, 4, 4a and 4b built the same day (see their records below). Group play (Phase 5) waits for the owner's confirmation; voice recording (Phase 6) is not started.**
+**Category:** `logic` (shown under Learn → **Think**) · **Status (2026-10-18): Phases 0–4b, the Studio and group play 5a–5c are built. Phase 5d built. Next: 5e (admin settings and reporting), then Phase 6 (voice and polish).**
 **Structure decided 2026-10-17: its own module `src/rebus/` (not a skill under `src/skills/`), with the Studio at `src/rebus/studio/` and the API in `server/app/routers/rebus.py`; read "skill" in §2 and §9 as "module". Real screens use `themeSystem`, the `UI*` components and semantic tokens from `docs/THEME.md`; the HTML mocks only imitate the look.**
 
 The reference is the "Solve this puzzle. Family games" reels: a picture-sum such as
@@ -377,3 +377,22 @@ Built in `src/rebus/group/`: `GroupPlay` (countdown on the server's clock, the s
 - The device checks the answer and sends one claim; the first to arrive wins the points. A player who was too late is told who was first. A claim that fails to send can be tried again.
 - Verified live with two browsers (host signed in, guest with no session): shared puzzle, guest won the first puzzle +3, the host saw "Clever Fox got it first!", the race ran to the end and both saw the final screen.
 - Next, 5d: a creative podium, "ask a grown-up to sign up" for guests, XP and the learning log for signed-in players (a replay pays no XP). 5e: admin settings and reporting.
+
+
+## Join needs the host's OK (2026-10-18)
+
+Owner decision: nobody enters a room until the host accepts them.
+
+- `POST /rebus/rooms/{code}/join` now only puts a **request** at the door (`requests` on the room) and returns the seat's token with a `pending` room view that says nothing about who is inside. The same token becomes the player's seat when the host accepts.
+- Host-only `POST .../accept` and `.../decline` (`{pid}`). The host's poll carries `requests`. Accept is atomic and is where "room full" and "name taken" are decided. A request not heard from for 30 s drops off the host's list and frees its nickname; a waiting child can withdraw with Leave; at most 10 may wait at once. Starting the game clears the requests.
+- Client: a waiting screen for the child ("Waiting for the host to let you in…", and "The host did not let you in." if declined), and a "Waiting to join" list with Accept / Decline in the host's lobby. Strings are in `en` and `km`.
+
+
+## Phase 5d — podium, ask a grown-up, XP (2026-10-18)
+
+Built in `src/rebus/group/`:
+
+- `Podium`: the top three on steps (second, first, third) that rise into place (motion-reduce turns the rise off); players who share a place share a step; fourth place and below are listed under it. No yellow.
+- `AskGrownUp` (guests only, i.e. `!me.isKodaUser`): a card on the results screen with "Ask a grown-up", which shows a short note with Koda's address to copy or share. The child types and sends nothing; nothing is collected.
+- `useGroupLearning` (signed-in players only): once per game, records the game in the learning log with the same `RebusRecorder` as a solo round, files outcomes in the per-puzzle memory, and pays stars and XP with the same rule (`rebusReward`, owner's `xpPerRound`). A game of puzzles the player has all played before is logged as practice and pays no XP, and the results screen says so. A friend winning a puzzle is logged as an unanswered puzzle ("machine"), never as a mistake. Puzzles are collected as they are shown, so one a device never saw is left out.
+- Verified in Chrome: host (signed in) and a guest over the API played five puzzles; the podium showed Clever Fox first and Brave Tiger second, and the replay note appeared (those puzzles had been played on this browser before).

@@ -10,7 +10,7 @@ import { loadSeat } from "./seatStore";
 import type { RoomPlayer, RoomView, Seat } from "./types";
 
 vi.mock("./groupApi", () => ({
-  GroupAPI: { choices: vi.fn(), open: vi.fn(), join: vi.fn(), poll: vi.fn(), start: vi.fn(), lock: vi.fn(), kick: vi.fn(), leave: vi.fn(), rematch: vi.fn(), solve: vi.fn() },
+  GroupAPI: { choices: vi.fn(), open: vi.fn(), join: vi.fn(), poll: vi.fn(), start: vi.fn(), lock: vi.fn(), kick: vi.fn(), accept: vi.fn(), decline: vi.fn(), leave: vi.fn(), rematch: vi.fn(), solve: vi.fn() },
 }));
 const api = vi.mocked(GroupAPI);
 
@@ -68,20 +68,42 @@ describe("joining as a guest", () => {
     expect(screen.getByRole("button", { name: /Join a room/ })).toBeTruthy();
   });
 
-  it("joins with the code and a nickname from the list, never a typed name, and remembers the seat", async () => {
-    api.join.mockResolvedValue(seat(room({ players: [player(), player({ pid: "p2", name: "Clever Fox", avatar: "fox", isHost: false, isKodaUser: false })] }, { pid: "p2", isHost: false, isKodaUser: false })));
+  const lobbyForFox = () =>
+    room({ players: [player(), player({ pid: "p2", name: "Clever Fox", avatar: "fox", isHost: false, isKodaUser: false })] }, { pid: "p2", isHost: false, isKodaUser: false });
+  const atTheDoor = () => room({ status: "pending", players: [] }, { pid: "p2", isHost: false, isKodaUser: false });
+
+  it("asks to join with the code and a nickname from the list, never a typed name, and waits for the host", async () => {
+    api.join.mockResolvedValue(seat(atTheDoor()));
     render(<GroupHome userToken={null} settings={DEFAULT_SETTINGS} initialCode="abc234" onExit={() => {}} />);
     expect(screen.queryByRole("textbox", { name: /name/i })).toBeNull();
     // Not until the player has picked who to be.
     expect((screen.getByRole("button", { name: "Join" }) as HTMLButtonElement).disabled).toBe(true);
     pickWho();
     fireEvent.click(screen.getByRole("button", { name: "Join" }));
-    await screen.findByText("ABC 234");
+    await screen.findByText("Waiting for the host to let you in…");
     expect(api.join).toHaveBeenCalledWith("ABC234", { name: "Clever Fox", avatar: "fox" }, null);
     expect(loadSeat()).toEqual({ code: "ABC234", token: "tok" });
-    // A guest waits for the host, and cannot start or remove anyone.
+    expect(screen.queryByText("ABC 234")).toBeNull();
+  });
+
+  it("comes into the lobby once the host accepts, and then cannot start or remove anyone", async () => {
+    api.join.mockResolvedValue(seat(atTheDoor()));
+    api.poll.mockResolvedValue(lobbyForFox());
+    render(<GroupHome userToken={null} settings={DEFAULT_SETTINGS} initialCode="abc234" onExit={() => {}} />);
+    pickWho();
+    fireEvent.click(screen.getByRole("button", { name: "Join" }));
+    await screen.findByText("ABC 234", {}, { timeout: 4000 });
     expect(screen.getByText("Waiting for the host to start the game…")).toBeTruthy();
     expect(screen.queryByRole("button", { name: "Start the game" })).toBeNull();
+  });
+
+  it("tells a child the host did not let them in when the door is shut on them", async () => {
+    api.join.mockResolvedValue(seat(atTheDoor()));
+    api.poll.mockRejectedValue(new ApiError(403, "not_in_room", "no"));
+    render(<GroupHome userToken={null} settings={DEFAULT_SETTINGS} initialCode="abc234" onExit={() => {}} />);
+    pickWho();
+    fireEvent.click(screen.getByRole("button", { name: "Join" }));
+    await screen.findByText("The host did not let you in.", {}, { timeout: 4000 });
   });
 
   it("greys out a nickname that someone already took and asks for another", async () => {
@@ -126,6 +148,17 @@ describe("the host", () => {
     fireEvent.click(screen.getByRole("button", { name: "Open a room" }));
     await screen.findByText("ABC 234");
   };
+
+  it("shows who is waiting at the door and lets the host accept or decline", async () => {
+    const knocking = room({ requests: [{ pid: "p9", name: "Clever Fox", avatar: "fox", isKodaUser: false }] });
+    api.open.mockResolvedValue(seat(knocking));
+    api.accept.mockResolvedValue(twoPlayers());
+    await openAs();
+    expect(screen.getByText("Waiting to join")).toBeTruthy();
+    fireEvent.click(screen.getByRole("button", { name: "Let Clever Fox in" }));
+    await waitFor(() => expect(api.accept).toHaveBeenCalledWith("ABC234", "tok", "p9"));
+    await waitFor(() => expect(screen.queryByText("Waiting to join")).toBeNull());
+  });
 
   it("starts the game once a friend has joined", async () => {
     api.open.mockResolvedValue(seat(twoPlayers()));

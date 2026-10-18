@@ -3,9 +3,10 @@
 Who may do what:
 
 * **Open a room** needs a signed-in Koda user. Guests cannot create rooms.
-* **Join** takes a code, and nothing else. A signed-in Koda user who joins is
-  recorded as themselves (so their play can count); anyone else joins as a
-  guest, with a preset nickname and avatar and no account, name or free text.
+* **Join** takes a code and a preset nickname and avatar, and puts a request at
+  the door. Nobody sits down until the host accepts. A signed-in Koda user who is
+  accepted is recorded as themselves (so their play can count); anyone else is a
+  guest, with no account, name or free text.
 * Every later call carries the seat's own token (`X-Player-Token`), handed back
   when the seat was taken. It is stored only as a hash.
 
@@ -27,7 +28,7 @@ from app.deps import Db, require
 from app.errors import AppError, Conflict, Forbidden, NotFound
 from app.models.auth import Principal
 from app.models.rebus import RebusSettings
-from app.models.rebus_room import KickIn, LockIn, RoomCreateIn, RoomJoinIn, SolveIn
+from app.models.rebus_room import AnswerIn, KickIn, LockIn, RoomCreateIn, RoomJoinIn, SolveIn
 from app.repos import rebus as puzzles_repo
 from app.repos import rebus_rooms as repo
 from app.repos import system as system_repo
@@ -101,6 +102,11 @@ def _view(room: dict[str, Any], me: dict[str, Any], now_ms: int, **extra: Any) -
         }
         for p in room["players"]
     ]
+    waiting = [
+        {"pid": r["pid"], "name": r["name"], "avatar": r["avatar"], "isKodaUser": r.get("userId") is not None}
+        for r in room.get("requests", [])
+        if now_ms - r["seenMs"] < rules.REQUEST_FRESH_MS
+    ]
     out: dict[str, Any] = {
         "code": room["_id"],
         "status": room["status"],
@@ -111,6 +117,8 @@ def _view(room: dict[str, Any], me: dict[str, Any], now_ms: int, **extra: Any) -
         "nowMs": now_ms,
         **extra,
     }
+    if me["pid"] == room["hostPid"]:
+        out["requests"] = waiting
     if room["status"] in ("playing", "finished"):
         total = len(room["puzzles"])
         out["total"] = total
@@ -147,6 +155,11 @@ async def _seat(db, code: str, token: str | None, now_ms: int) -> tuple[dict[str
     if not me:
         raise Forbidden("You are not in this room.", "not_in_room")
     return room, me
+
+
+def _waiting_view(room: dict[str, Any], request: dict[str, Any], now_ms: int) -> dict[str, Any]:
+    """What someone at the door sees: that they are waiting, and nothing about who is inside."""
+    return _view(room, request, now_ms, status="pending", players=[], settings=room["settings"])
 
 
 def _host_only(room: dict[str, Any], me: dict[str, Any]) -> None:
@@ -204,14 +217,19 @@ async def join_room(code: str, body: RoomJoinIn, db: Db, request: Request, user:
         raise Conflict("Someone already picked that nickname. Pick another.", "name_taken")
     if outcome == "full" or room is None:
         raise Conflict("This room is full.", "room_full")
-    me = repo.seat_of(room, token)
+    me = repo.request_of(room, token)
     assert me is not None
-    return {"playerToken": token, "room": _view(room, me, now_ms)}
+    return {"playerToken": token, "room": _waiting_view(room, me, now_ms)}
 
 
 @router.get("/{code}")
 async def poll_room(code: str, db: Db, x_player_token: Annotated[str | None, Header()] = None) -> dict[str, Any]:
     now_ms = _now_ms()
+    room = await repo.get(db, rules.normalize_code(code))
+    waiting = repo.request_of(room, x_player_token) if room and room["status"] == "lobby" else None
+    if room and waiting:
+        await repo.touch_request(db, room["_id"], waiting["pid"], now_ms)
+        return _waiting_view(room, waiting, now_ms)
     room, me = await _seat(db, code, x_player_token, now_ms)
     return _view(room, me, now_ms)
 
@@ -277,9 +295,38 @@ async def kick(code: str, body: KickIn, db: Db, x_player_token: Annotated[str | 
     return _view(room, me, now_ms)
 
 
+@router.post("/{code}/accept")
+async def accept(code: str, body: AnswerIn, db: Db, x_player_token: Annotated[str | None, Header()] = None) -> dict[str, Any]:
+    now_ms = _now_ms()
+    room, me = await _seat(db, code, x_player_token, now_ms)
+    _host_only(room, me)
+    if room["status"] != "lobby":
+        raise Conflict("The game has already started.", "room_started")
+    outcome = await repo.accept(db, room["_id"], body.pid)
+    if outcome == "full":
+        raise Conflict("This room is full.", "room_full")
+    room = await repo.get(db, room["_id"]) or room
+    return _view(room, me, now_ms)
+
+
+@router.post("/{code}/decline")
+async def decline(code: str, body: AnswerIn, db: Db, x_player_token: Annotated[str | None, Header()] = None) -> dict[str, Any]:
+    now_ms = _now_ms()
+    room, me = await _seat(db, code, x_player_token, now_ms)
+    _host_only(room, me)
+    await repo.decline(db, room["_id"], body.pid)
+    room = await repo.get(db, room["_id"]) or room
+    return _view(room, me, now_ms)
+
+
 @router.post("/{code}/leave")
 async def leave(code: str, db: Db, x_player_token: Annotated[str | None, Header()] = None) -> dict[str, str]:
     now_ms = _now_ms()
+    door = await repo.get(db, rules.normalize_code(code))
+    waiting = repo.request_of(door, x_player_token) if door else None
+    if door and waiting:
+        await repo.decline(db, door["_id"], waiting["pid"])
+        return {"status": "left"}
     room, me = await _seat(db, code, x_player_token, now_ms)
     await repo.remove_player(db, room["_id"], me["pid"])
     after = await repo.get(db, room["_id"])

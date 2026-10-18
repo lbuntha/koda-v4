@@ -58,6 +58,8 @@ REVEAL_MS = 5_000
 ROOM_LIFETIME_MS = 2 * 60 * 60 * 1000
 #: Heard from within this long counts as connected.
 PRESENT_MS = 10_000
+#: A request at the door still shows to the host if its owner polled within this long.
+REQUEST_FRESH_MS = 30_000
 
 CATEGORIES = ("countries", "food", "sayings", "animals", "sports", "school", "science")
 

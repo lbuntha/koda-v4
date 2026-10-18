@@ -1,9 +1,11 @@
-import { act, fireEvent, render, screen } from "@testing-library/react";
+import { act, fireEvent, render, renderHook, screen } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { SAMPLE_PUZZLES } from "../fixtures/samplePuzzles";
 import { GroupAPI } from "./groupApi";
 import { GroupFinal } from "./GroupFinal";
 import { GroupPlay } from "./GroupPlay";
+import { DEFAULT_SETTINGS } from "../settings";
+import { useGroupLearning } from "./useGroupLearning";
 import type { RoomPlayer, RoomView } from "./types";
 
 vi.mock("./groupApi", () => ({ GroupAPI: { solve: vi.fn() } }));
@@ -151,5 +153,82 @@ describe("the end of a race", () => {
     expect(screen.getByText("You won!")).toBeTruthy();
     expect(screen.queryByRole("button", { name: "Play again" })).toBeNull();
     expect(screen.getByText("Waiting for the host to play again…")).toBeTruthy();
+  });
+});
+
+describe("the podium and what follows", () => {
+  const three = (over: Partial<RoomView> = {}): RoomView =>
+    room({
+      status: "finished",
+      puzzle: undefined,
+      players: [player("me", "Brave Tiger", { score: 4 }), player("fox", "Clever Fox", { score: 7 }), player("owl", "Quiet Owl", { score: 4 }), player("bear", "Mighty Bear", { score: 1 }), player("deer", "Gentle Deer", { score: 0 })],
+      standings: [
+        { pid: "fox", place: 1, score: 7 },
+        { pid: "me", place: 2, score: 4 },
+        { pid: "owl", place: 2, score: 4 },
+        { pid: "bear", place: 4, score: 1 },
+        { pid: "deer", place: 5, score: 0 },
+      ],
+      ...over,
+    });
+
+  it("stands the top three on steps, a tie on the same step, and lists the rest below", () => {
+    render(<GroupFinal room={three()} onAgain={() => {}} onLeave={() => {}} />);
+    const podium = screen.getByRole("list", { name: "The podium" });
+    expect(podium.textContent).toContain("Clever Fox");
+    expect(podium.querySelectorAll("[aria-label='Place 2']")).toHaveLength(1);
+    expect(podium.textContent).toContain("Quiet Owl");
+    expect(podium.textContent).not.toContain("Mighty Bear");
+    expect(screen.getByRole("list", { name: "Final results" }).textContent).toContain("Mighty Bear");
+  });
+
+  it("offers a guest a note to show a grown-up, and a signed-in player nothing to ask", () => {
+    const { unmount } = render(<GroupFinal room={three()} onAgain={() => {}} onLeave={() => {}} />);
+    fireEvent.click(screen.getByRole("button", { name: "Ask a grown-up" }));
+    expect(screen.getByText(/I played Rebus Rush on Koda/)).toBeTruthy();
+    expect(screen.queryByRole("textbox")).toBeNull();
+    unmount();
+    render(<GroupFinal room={three({ me: { pid: "me", isHost: true, isKodaUser: true } })} onAgain={() => {}} onLeave={() => {}} />);
+    expect(screen.queryByRole("button", { name: "Ask a grown-up" })).toBeNull();
+  });
+
+  describe("the learning log and XP", () => {
+    beforeEach(() => localStorage.clear());
+    const playing = (index: number, p = puzzle) => room({ me: { pid: "me", isHost: true, isKodaUser: true }, index, puzzle: p });
+    const finished = (): RoomView =>
+      room({
+        status: "finished",
+        puzzle: undefined,
+        me: { pid: "me", isHost: true, isKodaUser: true },
+        results: [{ index: 0, winnerPid: "me", points: 3, hints: 0, atMs: 9000 }],
+        standings: [{ pid: "me", place: 1, score: 3 }],
+      });
+
+    it("pays a signed-in player once for a new game, and nothing for a game of puzzles already played", () => {
+      const award = vi.fn();
+      const { rerender, result } = renderHook(({ r }) => useGroupLearning(r, { settings: DEFAULT_SETTINGS, onAwardXp: award }), { initialProps: { r: playing(0) } });
+      rerender({ r: finished() });
+      rerender({ r: finished() });
+      expect(award).toHaveBeenCalledTimes(1);
+      expect(award.mock.calls[0][0]).toBeGreaterThan(0);
+      expect(result.current?.replay).toBe(false);
+
+      // The same puzzle again, in a new game: practice, so no XP.
+      rerender({ r: { ...playing(0), status: "lobby", puzzle: undefined } });
+      rerender({ r: playing(0) });
+      rerender({ r: finished() });
+      expect(award).toHaveBeenCalledTimes(1);
+      expect(result.current?.replay).toBe(true);
+      expect(result.current?.xp).toBe(0);
+    });
+
+    it("records nothing for a guest", () => {
+      const award = vi.fn();
+      const guest = (r: RoomView): RoomView => ({ ...r, me: { ...r.me, isKodaUser: false } });
+      const { rerender, result } = renderHook(({ r }) => useGroupLearning(r, { settings: DEFAULT_SETTINGS, onAwardXp: award }), { initialProps: { r: guest(playing(0)) } });
+      rerender({ r: guest(finished()) });
+      expect(award).not.toHaveBeenCalled();
+      expect(result.current).toBeNull();
+    });
   });
 });

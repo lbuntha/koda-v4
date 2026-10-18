@@ -123,6 +123,7 @@ export const RebusPage: React.FC<RebusPageProps> = ({ age: ageOverride, settings
         settings={settings}
         counts={fullBank.counts}
         initialCode={joinCode}
+        onAwardXp={onAwardXp}
         onExit={() => {
           setGroup(false);
           onJoinCodeUsed?.();
