@@ -4894,7 +4894,7 @@
    {
     "kind": "icon",
     "id": "rebus-sun",
-    "name": "sun"
+    "name": "ព្រះអាទិត្យ"
    }
   ],
   "answer": "ព្រះអាទិត្យ",
@@ -4917,7 +4917,7 @@
    {
     "kind": "icon",
     "id": "rebus-moon",
-    "name": "moon"
+    "name": "ព្រះច័ន្ទ"
    }
   ],
   "answer": "ព្រះច័ន្ទ",
@@ -4940,7 +4940,7 @@
    {
     "kind": "icon",
     "id": "rebus-star",
-    "name": "star"
+    "name": "ផ្កាយ"
    }
   ],
   "answer": "ផ្កាយ",
@@ -4961,7 +4961,7 @@
    {
     "kind": "icon",
     "id": "rebus-fish",
-    "name": "fish"
+    "name": "ត្រី"
    }
   ],
   "answer": "ត្រី",
@@ -4982,7 +4982,7 @@
    {
     "kind": "icon",
     "id": "rebus-bird",
-    "name": "bird"
+    "name": "បក្សី"
    }
   ],
   "answer": "បក្សី",
@@ -5006,7 +5006,7 @@
    {
     "kind": "icon",
     "id": "rebus-dog",
-    "name": "dog"
+    "name": "ឆ្កែ"
    }
   ],
   "answer": "ឆ្កែ",
@@ -5029,7 +5029,7 @@
    {
     "kind": "icon",
     "id": "rebus-cat",
-    "name": "cat"
+    "name": "ឆ្មា"
    }
   ],
   "answer": "ឆ្មា",
@@ -5052,7 +5052,7 @@
    {
     "kind": "icon",
     "id": "rebus-egg",
-    "name": "egg"
+    "name": "ពង"
    }
   ],
   "answer": "ពងមាន់",
@@ -5075,7 +5075,7 @@
    {
     "kind": "icon",
     "id": "rebus-house",
-    "name": "house"
+    "name": "ផ្ទះ"
    }
   ],
   "answer": "ផ្ទះ",
@@ -5096,7 +5096,7 @@
    {
     "kind": "icon",
     "id": "rebus-flower",
-    "name": "flower"
+    "name": "ផ្កា"
    }
   ],
   "answer": "ផ្កា",
@@ -5117,7 +5117,7 @@
    {
     "kind": "icon",
     "id": "rebus-book",
-    "name": "book"
+    "name": "សៀវភៅ"
    }
   ],
   "answer": "សៀវភៅ",
@@ -5138,7 +5138,7 @@
    {
     "kind": "icon",
     "id": "rebus-water",
-    "name": "water"
+    "name": "ទឹក"
    }
   ],
   "answer": "ទឹក",
@@ -5159,7 +5159,7 @@
    {
     "kind": "icon",
     "id": "rebus-fire",
-    "name": "fire"
+    "name": "ភ្លើង"
    }
   ],
   "answer": "ភ្លើង",
@@ -5180,7 +5180,7 @@
    {
     "kind": "icon",
     "id": "rebus-rain",
-    "name": "rain"
+    "name": "ភ្លៀង"
    }
   ],
   "answer": "ភ្លៀង",
@@ -5201,7 +5201,7 @@
    {
     "kind": "icon",
     "id": "rebus-leaf",
-    "name": "leaf"
+    "name": "ស្លឹក"
    }
   ],
   "answer": "ស្លឹក",
@@ -5222,7 +5222,7 @@
    {
     "kind": "icon",
     "id": "rebus-key",
-    "name": "key"
+    "name": "កូនសោ"
    }
   ],
   "answer": "កូនសោ",
@@ -5246,7 +5246,7 @@
    {
     "kind": "icon",
     "id": "rebus-horse",
-    "name": "horse"
+    "name": "សេះ"
    }
   ],
   "answer": "សេះ",
@@ -5269,7 +5269,7 @@
    {
     "kind": "icon",
     "id": "rebus-sheep",
-    "name": "sheep"
+    "name": "ចៀម"
    }
   ],
   "answer": "ចៀម",
@@ -5292,7 +5292,7 @@
    {
     "kind": "icon",
     "id": "rebus-frog",
-    "name": "frog"
+    "name": "កង្កែប"
    }
   ],
   "answer": "កង្កែប",
@@ -5315,7 +5315,7 @@
    {
     "kind": "icon",
     "id": "rebus-monkey",
-    "name": "monkey"
+    "name": "ស្វា"
    }
   ],
   "answer": "ស្វា",
@@ -5338,7 +5338,7 @@
    {
     "kind": "icon",
     "id": "rebus-pencil",
-    "name": "pencil"
+    "name": "ខ្មៅដៃ"
    }
   ],
   "answer": "ខ្មៅដៃ",
@@ -5359,7 +5359,7 @@
    {
     "kind": "icon",
     "id": "rebus-cloud",
-    "name": "cloud"
+    "name": "ពពក"
    }
   ],
   "answer": "ពពក",
@@ -5380,7 +5380,7 @@
    {
     "kind": "icon",
     "id": "rebus-wind",
-    "name": "wind"
+    "name": "ខ្យល់"
    }
   ],
   "answer": "ខ្យល់",
@@ -5401,7 +5401,7 @@
    {
     "kind": "icon",
     "id": "rebus-sea",
-    "name": "sea"
+    "name": "សមុទ្រ"
    }
   ],
   "answer": "សមុទ្រ",
@@ -5422,7 +5422,7 @@
    {
     "kind": "icon",
     "id": "rebus-bee",
-    "name": "bee"
+    "name": "ឃ្មុំ"
    }
   ],
   "answer": "ឃ្មុំ",
@@ -5445,7 +5445,7 @@
    {
     "kind": "icon",
     "id": "rebus-corn",
-    "name": "corn"
+    "name": "ពោត"
    }
   ],
   "answer": "ពោត",
@@ -5466,7 +5466,7 @@
    {
     "kind": "icon",
     "id": "rebus-water",
-    "name": "water"
+    "name": "ទឹក"
    },
    {
     "kind": "op",
@@ -5475,7 +5475,7 @@
    {
     "kind": "icon",
     "id": "rebus-ice",
-    "name": "ice"
+    "name": "កក"
    }
   ],
   "answer": "ទឹកកក",
@@ -5496,7 +5496,7 @@
    {
     "kind": "icon",
     "id": "rebus-water",
-    "name": "water"
+    "name": "ទឹក"
    },
    {
     "kind": "op",
@@ -5505,7 +5505,7 @@
    {
     "kind": "icon",
     "id": "rebus-fish",
-    "name": "fish"
+    "name": "ត្រី"
    }
   ],
   "answer": "ទឹកត្រី",
@@ -5526,7 +5526,7 @@
    {
     "kind": "icon",
     "id": "rebus-water",
-    "name": "water"
+    "name": "ទឹក"
    },
    {
     "kind": "op",
@@ -5535,7 +5535,7 @@
    {
     "kind": "icon",
     "id": "rebus-sea",
-    "name": "sea"
+    "name": "សមុទ្រ"
    }
   ],
   "answer": "ទឹកសមុទ្រ",
@@ -5556,7 +5556,7 @@
    {
     "kind": "icon",
     "id": "rebus-water",
-    "name": "water"
+    "name": "ទឹក"
    },
    {
     "kind": "op",
@@ -5565,7 +5565,7 @@
    {
     "kind": "icon",
     "id": "rebus-bee",
-    "name": "bee"
+    "name": "ឃ្មុំ"
    }
   ],
   "answer": "ទឹកឃ្មុំ",
@@ -5586,7 +5586,7 @@
    {
     "kind": "icon",
     "id": "rebus-water",
-    "name": "water"
+    "name": "ទឹក"
    },
    {
     "kind": "op",
@@ -5595,7 +5595,7 @@
    {
     "kind": "icon",
     "id": "rebus-rain",
-    "name": "rain"
+    "name": "ភ្លៀង"
    }
   ],
   "answer": "ទឹកភ្លៀង",
@@ -5616,7 +5616,7 @@
    {
     "kind": "icon",
     "id": "rebus-tree",
-    "name": "tree"
+    "name": "ដើម"
    },
    {
     "kind": "op",
@@ -5625,7 +5625,7 @@
    {
     "kind": "icon",
     "id": "rebus-wood",
-    "name": "wood"
+    "name": "ឈើ"
    }
   ],
   "answer": "ដើមឈើ",
@@ -5646,7 +5646,7 @@
    {
     "kind": "icon",
     "id": "rebus-leaf",
-    "name": "leaf"
+    "name": "ស្លឹក"
    },
    {
     "kind": "op",
@@ -5655,7 +5655,7 @@
    {
     "kind": "icon",
     "id": "rebus-wood",
-    "name": "wood"
+    "name": "ឈើ"
    }
   ],
   "answer": "ស្លឹកឈើ",
@@ -5676,7 +5676,7 @@
    {
     "kind": "icon",
     "id": "rebus-wind",
-    "name": "wind"
+    "name": "ខ្យល់"
    },
    {
     "kind": "op",
@@ -5685,7 +5685,7 @@
    {
     "kind": "icon",
     "id": "rebus-storm",
-    "name": "storm"
+    "name": "ព្យុះ"
    }
   ],
   "answer": "ខ្យល់ព្យុះ",
@@ -5706,7 +5706,7 @@
    {
     "kind": "icon",
     "id": "rebus-earth",
-    "name": "earth"
+    "name": "ដី"
    },
    {
     "kind": "op",
@@ -5715,7 +5715,7 @@
    {
     "kind": "icon",
     "id": "rebus-sand",
-    "name": "sand"
+    "name": "ខ្សាច់"
    }
   ],
   "answer": "ដីខ្សាច់",
@@ -5736,7 +5736,7 @@
    {
     "kind": "icon",
     "id": "rebus-water",
-    "name": "water"
+    "name": "ទឹក"
    },
    {
     "kind": "op",
@@ -5745,7 +5745,7 @@
    {
     "kind": "icon",
     "id": "rebus-earth",
-    "name": "earth"
+    "name": "ដី"
    }
   ],
   "answer": "ទឹកដី",

@@ -4785,6 +4785,7 @@
     "soon": "Soon",
     "puzzlesCount": "{count} puzzles",
     "mixed": "Mixed",
+    "hint": {"category": "Category: {name}", "letters": "Letters: {mask}", "pieces": "The pieces: {names}", "count": "({n} letters)"},
     "turns": {"openCard": "Take turns on this device", "title": "Take turns", "subtitle": "Pass the device back and forth. No internet needed.", "players": "Players", "add": "Add a player", "change": "Change {name}", "remove": "Remove {name}", "each": "Puzzles each", "total": "{total} puzzles in all.", "start": "Start", "offline": "Works with no internet. Nothing is saved to anyone's account.", "passTo": "Pass to {name}", "passHint": "Hand over the device. The timer starts when they press the button.", "ready": "I'm ready", "turnOf": "{name}'s turn", "solved": "{name} got it!", "leave": "Done"},
     "categories": {
       "countries": "Countries",

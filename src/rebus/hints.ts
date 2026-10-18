@@ -12,7 +12,7 @@
  */
 
 import { compactAnswer, normalizeAnswer } from "./answer";
-import { categoryOf } from "./categories";
+import { translate } from "../lib/i18n";
 import { meaningfulPieces, pieceName } from "./puzzle";
 import type { RebusSettings } from "./settings";
 import type { Puzzle } from "./types";
@@ -72,14 +72,14 @@ export const lettersMask = (answer: string): string => {
       return [first.toLocaleUpperCase(), ...rest.map(() => "_")].join(" ");
     })
     .join("   ");
-  return `${mask}  (${graphemes(compactAnswer(answer)).length} letters)`;
+  return `${mask}  ${translate("rebus.hint.count", { n: graphemes(compactAnswer(answer)).length })}`;
 };
 
 export const hintFor = (puzzle: Puzzle, rung: HintRung): Hint => {
-  if (rung === 1) return { rung, kind: "category", text: `Category: ${categoryOf(puzzle.category).name.toLowerCase()}` };
-  if (rung === 2) return { rung, kind: "letters", text: `Letters: ${lettersMask(puzzle.answer)}` };
+  if (rung === 1) return { rung, kind: "category", text: translate("rebus.hint.category", { name: translate(`rebus.categories.${puzzle.category}`).toLowerCase() }) };
+  if (rung === 2) return { rung, kind: "letters", text: translate("rebus.hint.letters", { mask: lettersMask(puzzle.answer) }) };
   const names = meaningfulPieces(puzzle.pieces).map(pieceName).filter(Boolean);
-  return { rung, kind: "pieces", text: `The pieces: ${names.join(" · ")}` };
+  return { rung, kind: "pieces", text: translate("rebus.hint.pieces", { names: names.join(" · ") }) };
 };
 
 export type HintState =
