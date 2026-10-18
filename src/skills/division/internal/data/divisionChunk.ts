@@ -13,6 +13,7 @@
  * the skill worth having is *choosing a big chunk you are sure of*.
  */
 
+import { catalogRecord } from "../i18n";
 import { drawQuotient, quotientKey, withoutRepeat, type QuotientSpec } from "./divisionNumbers";
 
 export type ChunkMode =
@@ -128,8 +129,8 @@ export function chunkBlockedBecause(
   return null;
 }
 
-export const CHUNK_REFUSALS: Record<Exclude<ChunkBlock, null>, string> = {
-  "more-fits": "Another whole one still fits. Keep taking them away.",
-  "too-many-steps": "That works, but it took too many goes. Undo some and take bigger chunks.",
-  overshot: "You have taken away more than there was. Undo the last one.",
-};
+export const CHUNK_REFUSALS: Record<Exclude<ChunkBlock, null>, string> = catalogRecord("chunk.refusals", [
+  "more-fits",
+  "too-many-steps",
+  "overshot",
+]);

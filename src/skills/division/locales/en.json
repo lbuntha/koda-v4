@@ -1,0 +1,735 @@
+{
+  "listAnd": "{a} and {b}",
+  "array": {
+    "prompt": {
+      "total_and_side": "Put all {n} into {d} equal rows. How many in each row?",
+      "two_divisions": "Which pair of sentences does this array show?",
+      "partial_row": "Make rows of {d}. How many full rows can you make?"
+    },
+    "refusals": {
+      "wrong-row-count": "Make the number of rows the question asked for.",
+      "not-all-placed": "Every one of them has to go into the array.",
+      "rows-unequal": "The rows are not all the same length."
+    },
+    "title": "The Array Knows",
+    "and": "and",
+    "hint": {
+      "side1": "The question wants {d} rows, all the same length.",
+      "side2": "Add rows until you have that many, then share the counters between them.",
+      "side3": "Now count along one row. That is the answer.",
+      "pair1": "Count the rows, then count along one row.",
+      "pair2": "One sentence divides by the rows. The other divides by the length of a row.",
+      "pair3": "Read both halves of every pair before you choose. The second half is where they differ.",
+      "partial1": "Every full row holds {d}.",
+      "partial3": "The short row at the end is what is left over. It is not a row.",
+      "look": "Look at the array."
+    },
+    "onlyFull": "Count only the rows that are completely full.",
+    "fullRows": "{q} full rows, and {r} left over.",
+    "eachRow": "Each row has {q}.",
+    "countAgain": "Count along one row again.",
+    "bothTrue": "Both sentences are true.",
+    "secondHalf": "Read the second half again.",
+    "rowsOfLabel": "{d} rows of {q}",
+    "stillToPlace": "{left} still to place",
+    "rows": {
+      "one": "{count} row",
+      "other": "{count} rows"
+    },
+    "arrayLabel": "Array with {rows} rows and {placed} placed",
+    "nothingPlaced": "Nothing placed yet.",
+    "addRow": "Add a row",
+    "removeRow": "Take a row away",
+    "placeOne": "Place one",
+    "placeRest": "Place the rest",
+    "plusRow": "+ row",
+    "minusRow": "− row",
+    "printed": {
+      "pair": "This array has {d} rows of {q}. Write both divisions it shows.",
+      "partial": "Put all {n} into rows of {d}. How many full rows, and how many left?",
+      "partialAnswer": "{q} full rows, {r} left over"
+    },
+    "countersLabel": "{n} counters and an empty frame",
+    "rowsOf": "rows of {d}",
+    "equalRows": "{d} equal rows",
+    "method": {
+      "partial1": "Draw rows of the size the question names, filling each before starting the next.",
+      "partial3": "The short row at the end is what is left over.",
+      "side1": "Make the number of rows the question asks for.",
+      "side2": "Share the counters between them so the rows are all the same length.",
+      "side3": "Count along one row."
+    }
+  },
+  "chunk": {
+    "refusals": {
+      "more-fits": "Another whole one still fits. Keep taking them away.",
+      "too-many-steps": "That works, but it took too many goes. Undo some and take bigger chunks.",
+      "overshot": "You have taken away more than there was. Undo the last one."
+    },
+    "title": "Take Away Chunks",
+    "hint": {
+      "big1": "Start with the biggest chunk you are sure of. Ten lots of {d} is {ten}.",
+      "big2": "Would twenty lots fit? That is {twenty}.",
+      "big3": "You can get there in {goes} goes. Take the big one first.",
+      "lots1": "Every chunk takes away some whole lots of {d}.",
+      "lots2": "Ten lots of {d} is {ten}. Start there if it fits.",
+      "lots3": "Stop when what is left is smaller than {d}."
+    },
+    "taken": {
+      "one": "{count} chunk: {steps} lots of {d}.",
+      "other": "{count} chunks: {steps} lots of {d}."
+    },
+    "countAgain": "Count the tally again.",
+    "left": "Left",
+    "lotsSoFar": "Lots so far",
+    "takeLabel": "Take away {step} lots of {d}",
+    "next": ", this chunk next",
+    "nothingFits": "Nothing more will fit.",
+    "undoLabel": "Undo the last chunk",
+    "allOfThem": "That is all of them",
+    "printed": "take away lots of {d} and keep a tally",
+    "method1": "Take away a lot you are sure of — ten of them is always easy to work out.",
+    "method2": "Write down how many lots you took, and carry on with what is left.",
+    "method3": "Stop when what is left is too small for another lot. Add up your lots."
+  },
+  "column": {
+    "refusals": {
+      "too-big": "That is more than there is. Try a smaller digit.",
+      "too-small": "Another whole one still fits there. Try a bigger digit."
+    },
+    "title": "The Written Method",
+    "hint": {
+      "exact1": "Start at the left. Division is the method that begins big.",
+      "exact2": "Each digit of {n} divides by {d} exactly, so every column gives a clean answer.",
+      "exact3": "One column at a time, rightwards. Every digit gets an answer above.",
+      "exchange1": "Start at the left. How many {d}s fit into {first}?",
+      "exchange2": "It will not go evenly. Write what is left small, in front of the next digit.",
+      "exchange3": "Then divide that whole new number — the small carry and the digit read together.",
+      "remainder1": "Start at the left and carry leftovers along as usual.",
+      "remainder2": "Keep going all the way to the last digit.",
+      "remainder3": "Nothing left to carry into, so what remains is the remainder.",
+      "zero1": "Take the places one at a time. Never skip a small-looking one.",
+      "zero2": "When {d} will not go into a place, that place gets zero.",
+      "zero3": "A zero above the line holds the place. Leaving it out shrinks the answer.",
+      "long1": "{d} will not fit one digit, so take two together.",
+      "long2": "Guess how many {d}s fit, then multiply your guess out to check it.",
+      "longRemainder3": "Too much left, guess bigger. What is left at the end is the remainder.",
+      "longExact3": "Too much left, guess bigger. Gone past, guess smaller.",
+      "decimal1": "Work out the whole part first, and see what is left.",
+      "decimal2": "Point after the answer, zero after the total, then carry on.",
+      "decimal3": "What was left becomes tenths, then hundredths. Nothing about the method changes at the point."
+    },
+    "checkRemainder": "The digits above the line are right. Check what is left at the end.",
+    "workBack": "Work back along the places and check each one.",
+    "howManyIn": "How many {d}s in {working}?",
+    "leftOver": "left over",
+    "somethingLeft": "Something is left over — check your digits.",
+    "method": {
+      "decimal1": "Divide the whole part first and see what is left.",
+      "decimal2": "Put a point in the answer, and a zero after the total.",
+      "decimal3": "Carry on exactly as before: what was left becomes tenths.",
+      "long1": "Guess how many fit into the first part, then check by multiplying.",
+      "long2": "Take it away, and bring the next digit down.",
+      "long3": "Keep going to the last digit. What is left at the end is the remainder.",
+      "short1": "Start at the left-hand digit and work right.",
+      "short2": "Write what is left over small, in front of the next digit.",
+      "short3": "Every place gets a digit above the line, even when that digit is zero."
+    }
+  },
+  "estimate": {
+    "prompt": {
+      "compatible": "About how much is {n} ÷ {d}?",
+      "reasonable": "Somebody says {n} ÷ {d} = {claim}. Could that be right?",
+      "checkBack": "{n} ÷ {d} = {q}. Which sum checks it?",
+      "checkBackRemainder": "{n} ÷ {d} = {q} r {r}. Which sum checks it?"
+    },
+    "title": "About How Much?",
+    "hint": {
+      "compatible1": "Leave the {d} alone. Move the big number instead.",
+      "compatible2": "Find a number near {n} that {d} goes into exactly.",
+      "compatible3": "Take the one that is easiest to divide, not the one that is nearest.",
+      "reasonable1": "Do not work it out. Just think about how big the answer should be.",
+      "reasonable2": "Roughly how many {d}s are in {n}?",
+      "reasonable3": "An answer ten times too big or too small is the commonest slip there is.",
+      "check1": "To check a division, multiply back.",
+      "check2": "Your answer, times the number you divided by, should give the total back.",
+      "check3": "If there was a remainder, add it on at the end."
+    },
+    "aboutRight": "{total} ÷ {d} = {q}. That is about right.",
+    "easier": "{total} works too, but {best} is easier to divide by {d}.",
+    "fault": {
+      "right": "It is about the right size.",
+      "tooBig": "Ten times too big — a digit has ended up in the wrong column.",
+      "tooSmall": "Ten times too small — a place has been lost.",
+      "droppedZero": "A zero has been dropped out of the middle."
+    },
+    "howManyFit": "About how many {d}s fit into {n}?",
+    "rebuilds": "That rebuilds the total.",
+    "multiplyBack": "Multiply your answer by the number you divided by.",
+    "whichTotal": "Which total is easier to divide by {d}?",
+    "couldBe": "Could be",
+    "noChance": "No chance",
+    "printedClaim": "Somebody says {n} ÷ {d} = {claim}. Could that be right?   yes / no",
+    "printedCheck": "{n} ÷ {d} = {q}. Write the sum that checks it.",
+    "printedCheckRemainder": "{n} ÷ {d} = {q} r {r}. Write the sum that checks it.",
+    "method1": "Leave the number you are dividing by alone, and move the total instead.",
+    "method2": "Divide that instead. The answer is about right.",
+    "method3": "To check a division for real, multiply the answer back and add any remainder."
+  },
+  "factors": {
+    "evidence": {
+      "lastDigit": "The last digit is {digit}.",
+      "digitSum": "The digits add up to {sum}.",
+      "lastTwo": "The last two digits are {digits}.",
+      "evenAndSum": "{value} is even: {even}. Its digits add to {sum}."
+    },
+    "yes": "yes",
+    "no": "no",
+    "prompt": {
+      "divides": "Does {tester} divide into {value} exactly?",
+      "factor_pairs": "Find every number that divides into {value} exactly.",
+      "common_factors": "Which numbers divide into both {value} and {other}?",
+      "prime_factors": "Break {value} apart until only primes are left."
+    },
+    "title": "Does It Go?",
+    "hint": {
+      "last1": "You do not need to divide. Look at the last digit.",
+      "last2": "Even last digits mean it divides by 2.",
+      "last5": "A last digit of 0 or 5 means it divides by 5.",
+      "last10": "Only a last digit of 0 means it divides by 10.",
+      "sum1": "Add all the digits up.",
+      "sum3": "If that total divides by 3, so does the whole number.",
+      "sum9": "If that total divides by 9, so does the whole number.",
+      "four1": "Look at just the last two digits.",
+      "six1": "Test it twice: by 2, and by 3.",
+      "four2": "If those two digits make a number that divides by 4, the whole thing does.",
+      "six2": "A number divides by 6 only if it divides by both 2 and 3.",
+      "pairs1": "Try dividing by 1, then 2, then 3, and so on.",
+      "pairs2": "Every time one goes exactly, you have found a pair — that number and its partner.",
+      "pairs3": "You can stop at {stop}. Past there you only meet the partners again.",
+      "common1": "A number has to divide into both, not just one.",
+      "common2": "Test each candidate against both numbers before you tap it.",
+      "prime1": "Split it into any two numbers that multiply to make it.",
+      "prime2": "Keep splitting the parts that can still be split.",
+      "prime3": "A prime cannot be split. When they are all prime, you are finished."
+    },
+    "soItDoes": "{evidence} So it does.",
+    "soItDoesNot": "{evidence} So it does not.",
+    "useTest": "Use the test: {evidence}",
+    "allOfThem": "All of them: {values}.",
+    "notExact": "{value} does not go exactly. Check it again.",
+    "stillToFind": {
+      "one": "There is one still to find.",
+      "other": "There are {count} still to find."
+    },
+    "allPrimesDone": "All primes.",
+    "keepSplitting": "Keep splitting until nothing can be split.",
+    "nothingNewPast": "Nothing new past {stop} — after that you only meet the partners again.",
+    "primeLabel": "{value}, prime",
+    "splitLabel": "Split {value}",
+    "yesButton": "Yes",
+    "noButton": "No",
+    "allPrimes": "All primes",
+    "printed": {
+      "pairs": "Write every factor of {value}.",
+      "common": "Write every number that divides into both {value} and {other}.",
+      "prime": "Write {value} as a product of primes.",
+      "divides": "Does {tester} divide into {value} exactly?   yes / no"
+    },
+    "method": {
+      "last1": "Look at the last digit.",
+      "last2": "Even means 2. A 0 or 5 means 5. Only a 0 means 10.",
+      "sum1": "Add all the digits together.",
+      "sum2": "If that total divides by 3 or 9, so does the whole number.",
+      "combined1": "For 4, look at the last two digits.",
+      "combined2": "For 6, test by 2 and by 3. Both have to pass.",
+      "pairs1": "Divide by 1, then 2, then 3, and keep going.",
+      "pairs2": "Each one that goes exactly gives you a pair.",
+      "pairs3": "Stop where the two halves of a pair meet.",
+      "common1": "Find the factors of the first number.",
+      "common2": "Keep only the ones that divide the second as well.",
+      "prime1": "Split the number into two factors.",
+      "prime2": "Keep splitting until every part is prime."
+    }
+  },
+  "facts": {
+    "prompt": {
+      "family": "Which of these are true for {d}, {q} and {n}?",
+      "table_divide": "Find {n} in the {d} row. Which column is it in?",
+      "missing_factor": "{d} × ? = {n}. What is {n} ÷ {d}?"
+    },
+    "halveTwice": "Halve it, then halve again",
+    "title": "Facts You Know",
+    "hint": {
+      "family1": "Three numbers make four true sentences — two multiplications and two divisions.",
+      "family2": "{n} stands alone in the times facts, and leads the divides.",
+      "table1": "Run along the {d} row until you find {n}.",
+      "table2": "The column it is sitting in is the answer.",
+      "missing1": "The two questions on the card are the same question.",
+      "missing2": "Whatever fills the gap in {d} × ? = {n} is the answer to the division.",
+      "halve4": "Dividing by 4 is halving twice.",
+      "halve8": "Dividing by 8 is halving three times.",
+      "halve2": "Do one halving at a time and write down what you get.",
+      "known1": "Which multiplication would give you this total?",
+      "known2": "You want one whose answer is {n}, with a {d} in it.",
+      "ask1": "Ask yourself: {d} times what makes {n}?",
+      "ask2": "Count up in {d}s if you need to. You want to land on {n}.",
+      "underTen": "Ten {d}s is {ten}, so the answer is under ten.",
+      "overTen": "Ten {d}s is {ten}, so the answer is over ten."
+    },
+    "soRight": "{d} × {q} = {n}, so that is right.",
+    "countUp": "Try counting up in {d}s.",
+    "allFour": "All four, and only those four.",
+    "exactlyFour": "There are exactly four true ones. Check each again.",
+    "checkThese": "Check these",
+    "checkTheseCount": "Check these ({count})",
+    "columnLabel": "Column {column}, holding {value}",
+    "nowUse": "Now use it.",
+    "whichHelps": "Which fact would help?",
+    "rowLabel": "The {d} times table row",
+    "printed": {
+      "family": "Write the four facts that use {d}, {q} and {n}.",
+      "table": "Find {n} in the {d} times table. Which column is it in?"
+    },
+    "method": {
+      "family1": "The biggest of the three numbers is the total.",
+      "family2": "The other two multiply to make it, in either order.",
+      "family3": "The total divided by one of them gives the other.",
+      "table1": "Run along the row until you find the total.",
+      "table2": "Read the column number above it.",
+      "halve1": "Halve the number.",
+      "halve2": "Halve it again — and once more if you are dividing by 8.",
+      "fact1": "Ask what the number you are dividing by, times something, makes the total.",
+      "fact2": "The number that fills that gap is the answer."
+    }
+  },
+  "line": {
+    "prompt": {
+      "back_to_zero": "Start at {n} and hop back {d} at a time. How many hops to reach 0?",
+      "count_hops": "These hops are {d} each. How many hops are there?",
+      "forward_to_total": "Count up from 0 in {d}s. How many hops to reach {n}?"
+    },
+    "refusals": {
+      "not-finished": "Keep hopping until you get all the way there.",
+      "overshot": "That is too far. Come back one hop."
+    },
+    "title": "Hop Back",
+    "hint": {
+      "back1": "Every hop takes away {d}.",
+      "back2": "Keep hopping until the marker is sitting on 0. Do not stop part way.",
+      "back3": "Now count the hops you made — not the numbers you landed on.",
+      "count1": "Count the arrows, not the numbers under them.",
+      "count2": "Where you finished is not the answer. How many jumps it took is.",
+      "forward1": "Count on in {d}s: {d}, {d2}, {d3}…",
+      "look": "Look at the line."
+    },
+    "landOnTotal": "Stop when you land exactly on the total.",
+    "countedOn": "The answer is how many times you counted on.",
+    "exactly": "{d} goes into {n} exactly {q} times.",
+    "landedOn": "That is a number you landed on. The answer is how many hops it took.",
+    "countAgain": "Count the hops once more.",
+    "markerLabel": "Marker on {position}, {count} hops made",
+    "hopsOf": {
+      "one": "{count} hop of {d}",
+      "other": "{count} hops of {d}"
+    },
+    "hopBack": "Hop back {d}",
+    "hopOn": "Hop on {d}",
+    "undoLabel": "Undo the last hop",
+    "printed": {
+      "count": "Each hop is {d}. How many hops are drawn?",
+      "forward": "Count on from 0 in {d}s to {n}. How many hops?"
+    },
+    "figureLabel": "Number line from 0 to {n} in steps of {d}",
+    "method": {
+      "back1": "Start at the total and jump back by the same amount each time.",
+      "back2": "Keep going until you land exactly on zero.",
+      "back3": "Count the jumps, not the numbers you land on.",
+      "forward1": "Start at zero and count on by the same amount each time."
+    }
+  },
+  "place": {
+    "prompt": {
+      "tens_quotient": "{n} ÷ {d}. How many tens is that, and how many altogether?",
+      "split_exact": "{n} ÷ {d}, one place at a time.",
+      "split_exchange": "{n} ÷ {d}. The tens will not divide on their own."
+    },
+    "title": "Place by Place",
+    "hint": {
+      "tens1": "{n} is {tens} tens.",
+      "tens2": "Share {tens} tens between {d}. How many tens each?",
+      "tens3": "Then say how many that is altogether.",
+      "scale1": "Dividing by {d} asks how many {d}s are inside.",
+      "scale2": "Every digit moves one place to the right for a ten, two for a hundred.",
+      "scale3": "The digits move a place right. The zero goes because nothing holds it.",
+      "tensTens1": "Both numbers are a whole number of tens.",
+      "tensTens2": "{a} tens divided by {b} tens is just {a} ÷ {b}.",
+      "tensTens3": "The tens on each side cancel out.",
+      "split1": "Split {n} into its places: {places}.",
+      "split2": "Divide each part by {d} on its own.",
+      "split3": "Add what you get. That is the answer.",
+      "exchange1": "Try splitting {n} by its digits. Does each part divide by {d}?",
+      "exchange2": "It does not — so take the biggest lot of {d} tens that fits instead.",
+      "exchange3": "{parts} both divide by {d}. That is the split you want."
+    },
+    "together": "{sums}. Together that is {q}.",
+    "partWrong": "The total is right, but one of the parts is not.",
+    "checkParts": "Check each part on its own first.",
+    "eachPlace": "Each place divides on its own.",
+    "digitsDoNot": "The digits do not split here. {parts} do.",
+    "slotLabel": "Answer for {part} divided by {d}: {value}",
+    "empty": "empty",
+    "fillNext": ", fill this one next",
+    "altogether": "Altogether: {value}",
+    "method": {
+      "split1": "Split the total into parts that each divide exactly.",
+      "split2": "Divide each part on its own.",
+      "split3": "Add the answers together.",
+      "tens1": "Read the total as a number of tens or hundreds.",
+      "tens2": "Divide those, then say what it is altogether."
+    }
+  },
+  "remainder": {
+    "situations": {
+      "bus": {
+        "setup": "{total} children are going on a trip. Each bus holds {size}.",
+        "ask": {
+          "round-up": "How many buses are needed so that everybody goes?",
+          "round-down": "How many buses will be completely full?",
+          "the-remainder": "How many children are left after the full buses have gone?",
+          "both": "How many full buses, and how many children left over?"
+        },
+        "written": {
+          "round-up": "{q} buses",
+          "round-down": "{q} buses",
+          "the-remainder": "{r} children left over",
+          "both": "{q} buses, {r} children left over"
+        }
+      },
+      "egg": {
+        "setup": "{total} eggs are being packed into boxes of {size}.",
+        "ask": {
+          "round-up": "How many boxes are needed to hold every egg?",
+          "round-down": "How many boxes can be filled completely?",
+          "the-remainder": "How many eggs will not fit into a full box?",
+          "both": "How many full boxes, and how many eggs left over?"
+        },
+        "written": {
+          "round-up": "{q} boxes",
+          "round-down": "{q} boxes",
+          "the-remainder": "{r} eggs left over",
+          "both": "{q} boxes, {r} eggs left over"
+        }
+      },
+      "pencil": {
+        "setup": "{total} pencils are shared between {size} children.",
+        "ask": {
+          "round-up": "How many would each need if every pencil had to go to somebody?",
+          "round-down": "How many pencils does each child get?",
+          "the-remainder": "How many pencils are left over?",
+          "both": "How many each, and how many left over?"
+        },
+        "written": {
+          "round-up": "{q} pencils each",
+          "round-down": "{q} pencils each",
+          "the-remainder": "{r} pencils left over",
+          "both": "{q} pencils each, {r} pencils left over"
+        }
+      }
+    },
+    "refusals": {
+      "remainder-too-big": "The leftover has to be smaller than the number you are dividing by.",
+      "incomplete": "Fill in both parts."
+    },
+    "title": "What Is Left",
+    "hint": {
+      "record1": "How many whole {d}s fit inside {n}?",
+      "record2": "Take those away. What is left is the remainder.",
+      "record3": "The remainder is always smaller than {d}.",
+      "tooBig1": "Look at the leftover. Could another whole group still come out of it?",
+      "tooBig2": "If the leftover is {d} or more, one more group fits.",
+      "tooBig3": "Move the extra groups across, and the answer fixes itself.",
+      "form1": "Work the division out first. Then read the question again.",
+      "form2": "Does the question want the full ones, one more, what is left, or both?",
+      "story1": "Do the division. Then decide which part of it the question wants.",
+      "roundUp": "Nobody can be left behind, so the leftover still needs one of its own.",
+      "theRemainder": "The question is about what did not fit.",
+      "roundDown": "The question is about the ones that are complete."
+    },
+    "pairRight": "{q} whole {d}s, and {r} over.",
+    "pairWrong": "Check how many whole {d}s fit first.",
+    "asked": "That is what the question asked for.",
+    "oneMore": "That many would leave some behind. One more is needed.",
+    "readAgain": "Read the question once more. Which part of the answer does it want?",
+    "optionRight": "That is the one the question wants.",
+    "optionWrong": "Which part of the answer was asked for?",
+    "somebodyWrote": "Somebody wrote:",
+    "wholeLabel": "How many whole groups: {value}",
+    "leftLabel": "Left over: {value}",
+    "printedWrong": "Somebody wrote {n} ÷ {d} = {q} r {r}. Write it properly.",
+    "method1": "Work out how many whole groups fit.",
+    "method2": "What is left over is the remainder, and it is always smaller than the number you divided by.",
+    "method3": "Read the question again to see which part of the answer it wants."
+  },
+  "story": {
+    "names": {
+      "Ana": "Ana",
+      "Ben": "Ben",
+      "Cleo": "Cleo",
+      "Dev": "Dev",
+      "Esi": "Esi",
+      "Finn": "Finn",
+      "Gia": "Gia",
+      "Hal": "Hal"
+    },
+    "things": {
+      "stickers": "stickers",
+      "marbles": "marbles",
+      "conkers": "conkers",
+      "beads": "beads",
+      "cards": "cards",
+      "shells": "shells"
+    },
+    "size_unknown": "{who} has {whole} {thing} to share equally between {parts} friends.",
+    "count_unknown": "{who} puts {whole} {thing} into bags of {size}.",
+    "remainder_context": "{whole} {thing} are being put into boxes of {size}.",
+    "unit_rate": "{count} identical boxes of {thing} hold {whole} altogether.",
+    "times_comparison": "{who} has {big} {thing}. {other} has {small}.",
+    "multi_step": "{who} has {whole} {thing}. After keeping {extra}, the rest are shared equally between {parts} friends.",
+    "mean": "{who} counted {thing} on {count} days: {values}.",
+    "ask": {
+      "eachFriend": "How many does each friend get?",
+      "bags": "How many bags are there?",
+      "boxesNeeded": "How many boxes are needed so that none are left out?",
+      "boxesFull": "How many boxes can be filled completely?",
+      "oneBox": "How many are in one box?",
+      "timesAsMany": "How many times as many does {who} have?",
+      "eachDay": "If the days had all been the same, how many would that be each day?"
+    },
+    "title": "In Words",
+    "hint": {
+      "size1": "The story tells you how many people are sharing.",
+      "size2": "Cut the bar into that many equal parts.",
+      "size3": "One of those parts is the answer.",
+      "count1": "The story tells you how big each bag is, not how many bags.",
+      "count2": "Ask how many of that size fit into the total.",
+      "rem1": "Divide first, and see what is left.",
+      "rem2": "Now read the question: does it want the full ones, or does everything have to fit?",
+      "rate1": "Every box holds the same amount.",
+      "rate2": "Share the total between the boxes to find what one holds.",
+      "times1": "This is not asking how many more.",
+      "times2": "It is asking how many of the smaller amount fit into the bigger one.",
+      "times3": "Try it: how many lots of the small number make the big one?",
+      "multi1": "There are two things to do, and the order matters.",
+      "multi3": "Only then share out what is left.",
+      "mean1": "Imagine the days were all the same.",
+      "mean2": "Add every day together, then share the total between the days."
+    },
+    "keptBackFirst": "Take away what is kept back first.",
+    "cutFirst": "Cut the bar into the right number of parts first.",
+    "asked": "That is what the story asked for.",
+    "howManyMore": "That is how many MORE. The question asks how many TIMES as many.",
+    "readAgain": "Read the story once more, slowly.",
+    "inParts": {
+      "one": "{whole} in {count} part",
+      "other": "{whole} in {count} parts"
+    },
+    "fewer": "One part fewer",
+    "more": "One part more",
+    "columnsLabel": "{count} columns to level off",
+    "barLabel": {
+      "one": "A bar in {count} part",
+      "other": "A bar in {count} parts"
+    },
+    "method": {
+      "times1": "Draw both amounts as bars, one under the other.",
+      "times2": "Ask how many of the short bar fit along the long one.",
+      "times3": "That is how many times as many — not the difference.",
+      "multi1": "Read the whole story before writing anything.",
+      "multi3": "Then share out what is left.",
+      "mean1": "Add every value together.",
+      "mean2": "Share the total between however many values there were.",
+      "bar1": "Draw the total as one bar.",
+      "bar2": "Cut it into the parts the story describes.",
+      "bar3": "One part, or the number of parts, is the answer."
+    }
+  },
+  "tray": {
+    "subjects": {
+      "apples": {
+        "things": "apples",
+        "holders": "plates"
+      },
+      "marbles": {
+        "things": "marbles",
+        "holders": "jars"
+      },
+      "stickers": {
+        "things": "stickers",
+        "holders": "books"
+      },
+      "pencils": {
+        "things": "pencils",
+        "holders": "pots"
+      },
+      "cherries": {
+        "things": "cherries",
+        "holders": "bowls"
+      },
+      "shells": {
+        "things": "shells",
+        "holders": "buckets"
+      }
+    },
+    "story": {
+      "size": "{n} {things} are shared equally between {d} {holders}.",
+      "count": "{n} {things} are put into {holders} of {d}."
+    },
+    "prompt": {
+      "share": "Share all {n} between the {d} plates. How many on each?",
+      "shareHolders": "Share all {n} between the {d} holders. How many on each?",
+      "group_by_size": "Make groups of {d}. How many groups can you make?",
+      "which_meaning": "What is this question asking for?",
+      "to_equation": "Which sentence says what happened?",
+      "onePlate": "Put all {n} onto the 1 plate. How many are on it?",
+      "zeroPlates": "Can you share {n} between 0 plates?",
+      "nothingToShare": "There is nothing to share. How many does each of the {d} plates get?",
+      "see_leftover": "Share as many as you can between the {d} plates. How many on each?"
+    },
+    "refusals": {
+      "deal-them-all": "Deal them all out first.",
+      "not-equal": "Every plate needs the same number.",
+      "another-group-fits": "There are still enough left to make another group.",
+      "plate-not-full": "Fill every group before you count them.",
+      "another-round-fits": "There are still enough left to give one more to every plate."
+    },
+    "hint": {
+      "share1": "There are {d} plates to fill.",
+      "share2": "One to each plate, then round again, until the pile is empty.",
+      "share3": "When the pile is empty, count what is on just one plate. That is the answer.",
+      "halve1": "Halving means sharing between exactly two. There are always two plates.",
+      "halve2": "One to this plate, one to that one, over and over, until the pile is empty.",
+      "halve3": "Check it when you are done: does your answer, doubled, give you back {n}?",
+      "group1": "Each group needs exactly {d}.",
+      "group2": "Fill one group completely before you start the next.",
+      "group3": "When nothing is left, count the groups — not the counters.",
+      "meaning1": "Read it again, slowly. The two numbers in it are telling you different kinds of thing.",
+      "meaningSize": "“Shared between” gives the groups. What is missing is each share.",
+      "meaningCount": "“Groups of” gives the size. What is missing is how many groups.",
+      "lookSize": "You are looking for the size of one share.",
+      "lookCount": "You are looking for the number of shares.",
+      "equation1": "The number you started with comes first.",
+      "equation2": "You started with {n}, so the sentence starts with {n}.",
+      "onePlate1": "There is only one plate. Nobody else is sharing.",
+      "onePlate2": "Nothing is being shared away, so everything stays where it is.",
+      "same1": "Count the plates. Now count the counters.",
+      "same2": "There is exactly one counter for every plate, so each plate gets one.",
+      "zero1": "Look for the plates. How many are there?",
+      "zero2": "There is nowhere to put them. A share you cannot start has no answer at all.",
+      "nothing1": "There is nothing in the pile to share.",
+      "nothing2": "The plates stay empty, however many plates there are.",
+      "leftover1": "Go round again while every plate can still have one.",
+      "leftover3": "What is left over goes in the box, not on a plate.",
+      "look": "Look at the tray."
+    },
+    "notEnough": "Stop when there are not enough left to give one to every plate.",
+    "eachHas": "Each one has {q}.",
+    "youMade": "You made {q} groups.",
+    "zeroPlates": "Zero plates is not somewhere to put them. Look again at the question.",
+    "countAgain": "Count again, carefully.",
+    "meaningRight": "Yes — that is the part the question leaves out.",
+    "meaningWrong": "Look at what the sentence already tells you.",
+    "cannotRight": "Right. There is nowhere to put them, so there is no answer.",
+    "cannotWrong": "There are plates here. It can be done — work it out.",
+    "equationRight": "That is the sentence.",
+    "equationWrong": "Which number did you start with?",
+    "pileLabel": "{pile} left to deal",
+    "pileEmpty": "The pile is empty.",
+    "groupLabel": "Group {group}, holding {count}. Add one.",
+    "dealNext": " Deal to this one next.",
+    "takeBack": "Take one back from group {group}",
+    "newGroup": "Start a new group",
+    "leftoverLabel": "Leftover box, holding {count}. Put one in.",
+    "leftOver": "Left over",
+    "takeLeftover": "Take one back out of the leftover box",
+    "noPlates": "There are no plates.",
+    "cannot": "This cannot be done",
+    "inEachOne": "How many go in each one?",
+    "howManyGroups": "How many groups are there?",
+    "printed": {
+      "impossible": "Can {n} be shared between 0 plates?",
+      "impossibleAnswer": "No — there is nowhere to put them.",
+      "meaning": "What is the question asking for?   how many in each / how many groups",
+      "inEach": "how many in each",
+      "groups": "how many groups",
+      "equation": "Write the division sentence.",
+      "ring": "Ring groups of {d}. How many groups?",
+      "leftover": "Share these between {d} plates. How many each, and how many left over?",
+      "leftoverAnswer": "{q} each, {r} left over",
+      "share": "Share these between {d} plates. How many on each?"
+    },
+    "figurePlates": "{n} counters and {plates} empty plates",
+    "figureCounters": "{n} counters",
+    "method": {
+      "group1": "Ring the same number of them at a time, as the question says.",
+      "group2": "Keep going while there are enough left for a whole ring.",
+      "group3": "Count the rings, not the counters.",
+      "leftover1": "Give one to each plate, then go round again.",
+      "leftover3": "What is left over is not on a plate. Write it separately.",
+      "share1": "Give one to each plate, then start again at the first.",
+      "share2": "Keep going until they are all shared out.",
+      "share3": "Count what is on one plate."
+    }
+  },
+  "yes": "Yes!",
+  "notQuite": "Not quite",
+  "notYet": "Not yet",
+  "strategy": {
+    "title": "Which Way?",
+    "prompt": "{n} ÷ {d}. Which way would you do it?",
+    "routes": {
+      "halve": {
+        "label": "Halve it, maybe more than once",
+        "whyOnce": "Dividing by {d} is halving once.",
+        "whyTwice": "Dividing by {d} is halving twice.",
+        "whyThrice": "Dividing by {d} is halving three times."
+      },
+      "known-fact": {
+        "label": "Use a times-table fact",
+        "why": "{d} × {q} = {n} is a fact you already know."
+      },
+      "place-split": {
+        "label": "Split it by place value",
+        "why": "Every place of {n} divides by {d} on its own."
+      },
+      "chunk": {
+        "label": "Take away big chunks",
+        "why": "The answer is big, so take away tens of {d}s at a time."
+      },
+      "scale": {
+        "label": "Cancel the zeros first",
+        "why": "A zero on each side cancels, and what is left is much smaller."
+      },
+      "written": {
+        "label": "Use the written method",
+        "why": "It always works, and this one is big enough to be worth writing out."
+      }
+    },
+    "works": "That works",
+    "notThatOne": "Not that one",
+    "doesNotSuit": "That one does not suit these numbers. Look at them again.",
+    "hint1": "Look at the numbers before you look at the choices.",
+    "hint2": "Is it a number you can halve by? Do all the places divide?",
+    "hint3": "More than one way is right. Pick the one these numbers suit.",
+    "orJoin": " — or — ",
+    "method1": "Look at the numbers before you look at the choices.",
+    "method2": "Ask whether the divisor is one you can halve by, and whether every place divides.",
+    "method3": "More than one way can be right. Pick one that suits these numbers."
+  },
+  "undo": "Undo",
+  "check": "Check",
+  "pad": {
+    "digit": "Digit {digit}",
+    "delete": "Delete the last digit"
+  }
+}

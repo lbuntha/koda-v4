@@ -18,6 +18,8 @@ import {
   type FactQuestion,
   type FactSetup,
 } from "../internal/data/divisionFacts";
+import { td } from "../internal/i18n";
+import { useT } from "../../../lib/i18n";
 
 /**
  * The fact deck — division answered from a multiplication already known.
@@ -62,28 +64,28 @@ function factHintsRungs(question: FactQuestion): string[] {
   switch (question.mode) {
     case "family":
       return composeHints(
-        "Three numbers make four true sentences — two multiplications and two divisions.",
-        `${dividend} stands alone in the times facts, and leads the divides.`,
+        td("facts.hint.family1"),
+        td("facts.hint.family2", { n: dividend }),
       );
     case "table_divide":
       return composeHints(
-        `Run along the ${divisor} row until you find ${dividend}.`,
-        "The column it is sitting in is the answer.",
+        td("facts.hint.table1", { n: dividend, d: divisor }),
+        td("facts.hint.table2"),
       );
     case "missing_factor":
       return composeHints(
-        "The two questions on the card are the same question.",
-        `Whatever fills the gap in ${divisor} × ? = ${dividend} is the answer to the division.`,
+        td("facts.hint.missing1"),
+        td("facts.hint.missing2", { n: dividend, d: divisor }),
       );
     case "repeated_halving":
       return composeHints(
-        divisor === 4 ? "Dividing by 4 is halving twice." : "Dividing by 8 is halving three times.",
-        "Do one halving at a time and write down what you get.",
+        divisor === 4 ? td("facts.hint.halve4") : td("facts.hint.halve8"),
+        td("facts.hint.halve2"),
       );
     case "known_fact":
       return composeHints(
-        "Which multiplication would give you this total?",
-        `You want one whose answer is ${dividend}, with a ${divisor} in it.`,
+        td("facts.hint.known1"),
+        td("facts.hint.known2", { n: dividend, d: divisor }),
       );
     default:
       /*
@@ -94,14 +96,16 @@ function factHintsRungs(question: FactQuestion): string[] {
        * multiple they never have to work out.
        */
       return composeHints(
-        `Ask yourself: ${divisor} times what makes ${dividend}?`,
-        `Count up in ${divisor}s if you need to. You want to land on ${dividend}.`,
-        `Ten ${divisor}s is ${divisor * 10}, so the answer is ${divisor * 10 > dividend ? "under" : "over"} ten.`,
+        td("facts.hint.ask1", { n: dividend, d: divisor }),
+        td("facts.hint.ask2", { n: dividend, d: divisor }),
+        td(divisor * 10 > dividend ? "facts.hint.underTen" : "facts.hint.overTen", { d: divisor, ten: divisor * 10 }),
       );
   }
 }
 
 export const FactDeck: React.FC<ActivityProps<FactParams>> = ({ params, koda, onComplete, lesson }) => {
+  // Re-render when the language changes: every line below reads the catalog.
+  useT();
   const setup: FactSetup = useMemo(() => ({ ...params, ...params.question }), [params]);
   const practising = isPractice(setup);
   const total = setup.questionsPerRound ?? 5;
@@ -183,7 +187,7 @@ export const FactDeck: React.FC<ActivityProps<FactParams>> = ({ params, koda, on
 
   const submit = (given: string, correct: boolean, message: string): void => {
     chime(correct);
-    round.submit({ correct, given, expected: question.expected, title: correct ? "Yes!" : "Not yet", message });
+    round.submit({ correct, given, expected: question.expected, title: correct ? td("yes") : td("notYet"), message });
   };
 
   const answerWith = (value: number): void => {
@@ -192,8 +196,8 @@ export const FactDeck: React.FC<ActivityProps<FactParams>> = ({ params, koda, on
       String(value),
       correct,
       correct
-        ? `${question.divisor} × ${question.quotient} = ${question.dividend}, so that is right.`
-        : `Try counting up in ${question.divisor}s.`,
+        ? td("facts.soRight", { d: question.divisor, q: question.quotient, n: question.dividend })
+        : td("facts.countUp", { d: question.divisor }),
     );
   };
 
@@ -209,7 +213,7 @@ export const FactDeck: React.FC<ActivityProps<FactParams>> = ({ params, koda, on
     submit(
       ticked.join(" | "),
       correct,
-      correct ? "All four, and only those four." : "There are exactly four true ones. Check each again.",
+      correct ? td("facts.allFour") : td("facts.exactlyFour"),
     );
   };
 
@@ -238,7 +242,7 @@ export const FactDeck: React.FC<ActivityProps<FactParams>> = ({ params, koda, on
     <SkillRound
       koda={koda}
       lesson={lesson}
-      fallbackTitle="Facts You Know"
+      fallbackTitle={td("facts.title")}
       round={round}
       totalQuestions={total}
       prompt={promptFor(question)}
@@ -291,7 +295,7 @@ export const FactDeck: React.FC<ActivityProps<FactParams>> = ({ params, koda, on
               disabled={ticked.length === 0 || !!round.feedback}
               className="min-h-11 rounded-2xl bg-violet-600 px-5 py-3 text-base font-bold text-white shadow-sm disabled:opacity-40"
             >
-              Check these {ticked.length === 0 ? "" : `(${ticked.length})`}
+              {ticked.length === 0 ? td("facts.checkThese") : td("facts.checkTheseCount", { count: ticked.length })}
             </button>
           </>
         ) : (
@@ -316,7 +320,7 @@ export const FactDeck: React.FC<ActivityProps<FactParams>> = ({ params, koda, on
                       type="button"
                       onClick={() => tapCell(i)}
                       disabled={!!round.feedback}
-                      aria-label={`Column ${i + 1}, holding ${value}`}
+                      aria-label={td("facts.columnLabel", { column: i + 1, value })}
                       className={`min-h-11 min-w-10 rounded-lg px-1 text-sm font-semibold shadow-sm ${
                         found === value && value === question.dividend
                           ? "bg-emerald-500 text-white"
@@ -349,7 +353,7 @@ export const FactDeck: React.FC<ActivityProps<FactParams>> = ({ params, koda, on
             {question.helperChoices ? (
               <div className="flex flex-col gap-2">
                 <p className="text-center text-sm text-muted">
-                  {helper ? "Now use it." : "Which fact would help?"}
+                  {helper ? td("facts.nowUse") : td("facts.whichHelps")}
                 </p>
                 {question.helperChoices.map((text) => (
                   <button
@@ -409,13 +413,13 @@ export function printedFor(question: FactQuestion): { text: string; answer: stri
    */
   if (question.mode === "family") {
     return {
-      text: `Write the four facts that use ${question.divisor}, ${question.quotient} and ${question.dividend}.`,
+      text: td("facts.printed.family", { d: question.divisor, q: question.quotient, n: question.dividend }),
       answer: (question.trueEquations ?? []).join(",  "),
     };
   }
   if (question.mode === "table_divide") {
     return {
-      text: `Find ${question.dividend} in the ${question.divisor} times table. Which column is it in?`,
+      text: td("facts.printed.table", { n: question.dividend, d: question.divisor }),
       answer: String(question.quotient),
     };
   }
@@ -433,7 +437,7 @@ export const figureFor = (question: FactQuestion): React.ReactNode | null => {
       width={w}
       height={44}
       role="img"
-      aria-label={`The ${question.divisor} times table row`}
+      aria-label={td("facts.rowLabel", { d: question.divisor })}
       className="text-slate-900"
     >
       {question.row.map((value, i) => (
@@ -463,18 +467,18 @@ export const figureFor = (question: FactQuestion): React.ReactNode | null => {
 export function methodFor(question: FactQuestion): string[] {
   if (question.mode === "family") {
     return [
-      "The biggest of the three numbers is the total.",
-      "The other two multiply to make it, in either order.",
-      "The total divided by one of them gives the other.",
+      td("facts.method.family1"),
+      td("facts.method.family2"),
+      td("facts.method.family3"),
     ];
   }
   if (question.mode === "table_divide") {
-    return ["Run along the row until you find the total.", "Read the column number above it."];
+    return [td("facts.method.table1"), td("facts.method.table2")];
   }
   return question.mode === "repeated_halving"
-    ? ["Halve the number.", "Halve it again — and once more if you are dividing by 8."]
+    ? [td("facts.method.halve1"), td("facts.method.halve2")]
     : [
-        "Ask what the number you are dividing by, times something, makes the total.",
-        "The number that fills that gap is the answer.",
+        td("facts.method.fact1"),
+        td("facts.method.fact2"),
       ];
 }

@@ -24,6 +24,8 @@ import {
   type LineSetup,
 } from "../internal/data/divisionLine";
 import { TONE_CLASS } from "../internal/data/divisionTray";
+import { td } from "../internal/i18n";
+import { useT } from "../../../lib/i18n";
 
 /**
  * Division as repeated subtraction, walked along a line.
@@ -67,27 +69,29 @@ function lineHintsRungs(question: LineQuestion): string[] {
   switch (question.mode) {
     case "back_to_zero":
       return composeHints(
-        `Every hop takes away ${question.divisor}.`,
-        "Keep hopping until the marker is sitting on 0. Do not stop part way.",
-        "Now count the hops you made — not the numbers you landed on.",
+        td("line.hint.back1", { d: question.divisor }),
+        td("line.hint.back2"),
+        td("line.hint.back3"),
       );
     case "count_hops":
       return composeHints(
-        "Count the arrows, not the numbers under them.",
-        "Where you finished is not the answer. How many jumps it took is.",
+        td("line.hint.count1"),
+        td("line.hint.count2"),
       );
     case "forward_to_total":
       return composeHints(
-        `Count on in ${question.divisor}s: ${question.divisor}, ${question.divisor * 2}, ${question.divisor * 3}…`,
-        "Stop when you land exactly on the total.",
-        "The answer is how many times you counted on.",
+        td("line.hint.forward1", { d: question.divisor, d2: question.divisor * 2, d3: question.divisor * 3 }),
+        td("line.landOnTotal"),
+        td("line.countedOn"),
       );
     default:
-      return composeHints("Look at the line.");
+      return composeHints(td("line.hint.look"));
   }
 }
 
 export const HopBack: React.FC<ActivityProps<LineParams>> = ({ params, koda, onComplete, lesson }) => {
+  // Re-render when the language changes: every line below reads the catalog.
+  useT();
   const setup: LineSetup = useMemo(() => ({ ...params, ...params.question }), [params]);
   const practising = isPractice(setup);
   const total = setup.questionsPerRound ?? 5;
@@ -201,12 +205,12 @@ export const HopBack: React.FC<ActivityProps<LineParams>> = ({ params, koda, onC
       correct,
       given: String(value),
       expected: question.expected,
-      title: correct ? "Yes!" : "Not yet",
+      title: correct ? td("yes") : td("notYet"),
       message: correct
-        ? `${question.divisor} goes into ${question.dividend} exactly ${question.quotient} times.`
+        ? td("line.exactly", { n: question.dividend, d: question.divisor, q: question.quotient })
         : value === question.dividend || value === question.dividend - question.divisor
-          ? "That is a number you landed on. The answer is how many hops it took."
-          : "Count the hops once more.",
+          ? td("line.landedOn")
+          : td("line.countAgain"),
     });
   };
 
@@ -221,7 +225,7 @@ export const HopBack: React.FC<ActivityProps<LineParams>> = ({ params, koda, onC
     <SkillRound
       koda={koda}
       lesson={lesson}
-      fallbackTitle="Hop Back"
+      fallbackTitle={td("line.title")}
       round={round}
       totalQuestions={total}
       prompt={promptFor(question)}
@@ -252,7 +256,7 @@ export const HopBack: React.FC<ActivityProps<LineParams>> = ({ params, koda, onC
       <div className="mx-auto flex w-full max-w-xl flex-col gap-3">
         <div
           data-testid="line"
-          aria-label={`Marker on ${position}, ${hops} hops made`}
+          aria-label={td("line.markerLabel", { position, count: hops })}
           className="flex flex-col gap-2 rounded-2xl bg-surface p-3"
         >
           <div className="flex items-end justify-between gap-1 overflow-x-auto">
@@ -273,7 +277,7 @@ export const HopBack: React.FC<ActivityProps<LineParams>> = ({ params, koda, onC
           </div>
           {badgesEnabled ? (
             <p className="text-center text-xs text-muted">
-              {hops} hop{hops === 1 ? "" : "s"} of {question.divisor}
+              {td("line.hopsOf", { count: hops, d: question.divisor })}
             </p>
           ) : null}
         </div>
@@ -284,7 +288,7 @@ export const HopBack: React.FC<ActivityProps<LineParams>> = ({ params, koda, onC
               type="button"
               onClick={hop}
               disabled={!!round.feedback}
-              aria-label={question.direction === "back" ? `Hop back ${question.divisor}` : `Hop on ${question.divisor}`}
+              aria-label={td(question.direction === "back" ? "line.hopBack" : "line.hopOn", { d: question.divisor })}
               className="min-h-11 rounded-2xl bg-surface px-5 py-2 text-base font-semibold text-ink shadow-sm"
             >
               {question.direction === "back" ? `− ${question.divisor}` : `+ ${question.divisor}`}
@@ -293,11 +297,11 @@ export const HopBack: React.FC<ActivityProps<LineParams>> = ({ params, koda, onC
               type="button"
               onClick={undoHop}
               disabled={landings.length === 0 || !!round.feedback}
-              aria-label="Undo the last hop"
+              aria-label={td("line.undoLabel")}
               className="inline-flex min-h-11 items-center justify-center gap-1.5 rounded-2xl bg-surface px-4 py-2 text-sm font-semibold text-muted shadow-sm disabled:opacity-30"
             >
               <Undo2 className="h-4 w-4" aria-hidden="true" />
-              Undo
+              {td("undo")}
             </button>
           </div>
         )}
@@ -334,17 +338,17 @@ export function printedFor(question: LineQuestion): { text: string; answer: stri
   switch (question.mode) {
     case "count_hops":
       return {
-        text: `Each hop is ${question.divisor}. How many hops are drawn?`,
+        text: td("line.printed.count", { d: question.divisor }),
         answer: String(question.quotient),
       };
     case "forward_to_total":
       return {
-        text: `Count on from 0 in ${question.divisor}s to ${question.dividend}. How many hops?`,
+        text: td("line.printed.forward", { n: question.dividend, d: question.divisor }),
         answer: String(question.quotient),
       };
     default:
       return {
-        text: `Start at ${question.dividend} and hop back ${question.divisor} at a time. How many hops to reach 0?`,
+        text: td("line.prompt.back_to_zero", { n: question.dividend, d: question.divisor }),
         answer: String(question.quotient),
       };
   }
@@ -369,7 +373,7 @@ export const figureFor = (question: LineQuestion): React.ReactNode | null => {
       width={312}
       height={40}
       role="img"
-      aria-label={`Number line from 0 to ${question.dividend} in steps of ${question.divisor}`}
+      aria-label={td("line.figureLabel", { n: question.dividend, d: question.divisor })}
       className="text-slate-900"
     >
       <line x1={0} y1={16} x2={W} y2={16} stroke="currentColor" strokeWidth="1.5" />
@@ -404,13 +408,9 @@ export function methodFor(question: LineQuestion): string[] {
    */
   return question.direction === "back"
     ? [
-        "Start at the total and jump back by the same amount each time.",
-        "Keep going until you land exactly on zero.",
-        "Count the jumps, not the numbers you land on.",
+        td("line.method.back1"),
+        td("line.method.back2"),
+        td("line.method.back3"),
       ]
-    : [
-        "Start at zero and count on by the same amount each time.",
-        "Stop when you land exactly on the total.",
-        "The answer is how many times you counted on.",
-      ];
+    : [td("line.method.forward1"), td("line.landOnTotal"), td("line.countedOn")];
 }

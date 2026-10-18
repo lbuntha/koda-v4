@@ -16,6 +16,8 @@ import {
   differenceKey, drawDifference, randInt, shuffle, withoutRepeat,
   type Difference, type DifferenceSpec,
 } from "../internal/data/subtractionNumbers";
+import { ts } from "../internal/i18n";
+import { useT } from "../../../lib/i18n";
 
 export type FactMode = "family" | "missing_addend" | "doubles" | "known_fact";
 
@@ -150,48 +152,50 @@ export const buildQuestion = (setup: FactSetup, index: number, seen: Set<string>
 export const promptFor = (q: FactQuestion, template?: string): string => {
   const filled = template?.replaceAll("{a}", String(q.minuend)).replaceAll("{b}", String(q.subtrahend)).replaceAll("{difference}", String(q.difference));
   if (filled) return filled;
-  if (q.mode === "family") return `${q.subtrahend}, ${q.difference}, and ${q.minuend} make a fact family. Complete all four facts.`;
-  if (q.mode === "missing_addend") return `${q.minuend} minus ${q.subtrahend}. Which addition equation finds the missing part?`;
-  if (q.mode === "doubles") return `Use the double to solve ${q.minuend} minus ${q.subtrahend}.`;
-  return `${q.minuend} minus ${q.subtrahend}. Which nearby fact helps?`;
+  if (q.mode === "family") return ts("fact.promptFamily", { b: q.subtrahend, difference: q.difference, a: q.minuend });
+  if (q.mode === "missing_addend") return ts("fact.promptAddend", { a: q.minuend, b: q.subtrahend });
+  if (q.mode === "doubles") return ts("fact.promptDouble", { a: q.minuend, b: q.subtrahend });
+  return ts("fact.prompt", { a: q.minuend, b: q.subtrahend });
 };
 
 export const printedFor = (q: FactQuestion): PrintedQuestion => {
-  if (q.mode === "family") return { text: `Use ${q.subtrahend}, ${q.difference}, and ${q.minuend} to write two addition and two subtraction facts.`, answer: q.members!.map((m) => `${m.text}${m.answer}`).join("; ") };
-  if (q.mode === "missing_addend") return { text: `${q.minuend} − ${q.subtrahend}. Complete ${q.subtrahend} + □ = ${q.minuend}.`, answer: String(q.difference) };
-  if (q.mode === "doubles") return { text: `${q.subtrahend} + ${q.subtrahend} = ${q.minuend}, so ${q.minuend} − ${q.subtrahend} =`, answer: String(q.difference) };
-  return { text: `${q.minuend} − ${q.subtrahend}. Use the nearby fact ${q.helper!.minuend} − ${q.helper!.subtrahend} = ${q.helper!.difference}.`, answer: String(q.difference) };
+  if (q.mode === "family") return { text: ts("fact.printedFamily", { b: q.subtrahend, difference: q.difference, a: q.minuend }), answer: q.members!.map((m) => `${m.text}${m.answer}`).join("; ") };
+  if (q.mode === "missing_addend") return { text: ts("fact.printedAddend", { a: q.minuend, b: q.subtrahend }), answer: String(q.difference) };
+  if (q.mode === "doubles") return { text: ts("fact.printedDouble", { a: q.minuend, b: q.subtrahend }), answer: String(q.difference) };
+  return { text: ts("fact.printed", { a: q.minuend, b: q.subtrahend, helper: factText(q.helper!) }), answer: String(q.difference) };
 };
 
 export const methodFor = (q: FactQuestion): string[] => {
-  if (q.mode === "family") return ["Use the same three numbers each time.", "Write two addition facts and two subtraction facts.", "Keep the whole first in both subtraction facts."];
-  if (q.mode === "missing_addend") return ["Turn whole minus part into part plus missing part.", "Count on from the known part to the whole.", "The missing addend is the difference."];
-  if (q.mode === "doubles") return ["Recall the equal-addends fact.", "The whole minus either equal part leaves the other part."];
-  return ["Choose a subtraction fact one step from the target.", "Adjust the helper answer by one in the opposite direction."];
+  if (q.mode === "family") return [ts("fact.methodFamily1"), ts("fact.methodFamily2"), ts("fact.methodFamily3")];
+  if (q.mode === "missing_addend") return [ts("fact.methodAddend1"), ts("fact.methodAddend2"), ts("fact.methodAddend3")];
+  if (q.mode === "doubles") return [ts("fact.methodDouble1"), ts("fact.methodDouble2")];
+  return [ts("fact.method1"), ts("fact.method2")];
 };
 
 export function factHints(q: FactQuestion, state: { helperChosen: boolean; filled: number; kidTip?: string }): string[] {
   if (q.mode === "family") return composeHints(
-    state.kidTip ?? "The same three numbers make two additions and two subtractions.",
-    `${state.filled} of 4 facts are filled. In subtraction, ${q.minuend} stays first because it is the whole.`,
-    `${q.subtrahend} and ${q.difference} are parts of ${q.minuend}.`,
+    state.kidTip ?? ts("fact.hintFamilyTip"),
+    ts("fact.hintFilled", { filled: state.filled, a: q.minuend }),
+    ts("fact.hintParts", { b: q.subtrahend, difference: q.difference, a: q.minuend }),
   );
   if (q.mode === "missing_addend") return composeHints(
-    state.kidTip ?? "Think: known part plus what makes the whole?",
+    state.kidTip ?? ts("fact.hintAddendTip"),
     state.helperChosen
-      ? `Use ${q.subtrahend} + ? = ${q.minuend}. Count up from ${q.subtrahend}.`
-      : `Pick the addition that starts at ${q.subtrahend} and ends at ${q.minuend}.`,
-    `The missing addend is the same number as ${q.minuend} minus ${q.subtrahend}.`,
+      ? ts("fact.hintUse", { b: q.subtrahend, a: q.minuend })
+      : ts("fact.hintPick", { b: q.subtrahend, a: q.minuend }),
+    ts("fact.hintSame", { a: q.minuend, b: q.subtrahend }),
   );
   if (q.mode === "doubles") return composeHints(
-    state.kidTip ?? "A double has two equal parts.",
-    `${q.subtrahend} plus ${q.subtrahend} makes the whole ${q.minuend}. Taking one equal part away leaves the other.`,
-    `The remaining equal part has the same value as ${q.subtrahend}.`,
+    state.kidTip ?? ts("fact.hintDoubleTip"),
+    ts("fact.hintDouble", { b: q.subtrahend, a: q.minuend }),
+    ts("fact.hintEqual", { b: q.subtrahend }),
   );
   return composeHints(
-    state.kidTip ?? "Use a nearby fact, then adjust by one.",
-    state.helperChosen ? `${q.helper!.minuend} minus ${q.helper!.subtrahend} is ${q.helper!.difference}. Compare its removed part with ${q.subtrahend}.` : `Choose the fact with the same whole and a removed part one away from ${q.subtrahend}.`,
-    `Removing one more makes the answer one less; removing one less makes the answer one more.`,
+    state.kidTip ?? ts("fact.hintTip"),
+    state.helperChosen
+      ? ts("fact.hintCompare", { ha: q.helper!.minuend, hb: q.helper!.subtrahend, hd: q.helper!.difference, b: q.subtrahend })
+      : ts("fact.hintChoose", { b: q.subtrahend }),
+    ts("fact.hintAdjust"),
   );
 }
 
@@ -200,14 +204,16 @@ export const choicesFor = (answer: number, seed: string): number[] => answerChoi
 
 const NumberPad: React.FC<{ onDigit: (digit: string) => void; onDelete: () => void; disabled: boolean }> = ({ onDigit, onDelete, disabled }) => (
   <div className="grid grid-cols-6 gap-1.5 max-w-md mx-auto">
-    {Array.from({ length: 10 }, (_, n) => <button key={n} type="button" onClick={() => onDigit(String(n))} disabled={disabled} aria-label={`Digit ${n}`} className={`${TOUCH_TARGET} ${themeSystem.button("secondary", "sm")}`}>{n}</button>)}
-    <button type="button" onClick={onDelete} disabled={disabled} aria-label="Delete digit" className={`col-span-2 ${TOUCH_TARGET} ${themeSystem.button("ghost", "sm")}`}>Delete</button>
+    {Array.from({ length: 10 }, (_, n) => <button key={n} type="button" onClick={() => onDigit(String(n))} disabled={disabled} aria-label={ts("pad.digit", { digit: n })} className={`${TOUCH_TARGET} ${themeSystem.button("secondary", "sm")}`}>{n}</button>)}
+    <button type="button" onClick={onDelete} disabled={disabled} aria-label={ts("pad.deleteDigit")} className={`col-span-2 ${TOUCH_TARGET} ${themeSystem.button("ghost", "sm")}`}>{ts("pad.delete")}</button>
   </div>
 );
 
 const factText = (value: SubtractionFact) => `${value.minuend} − ${value.subtrahend} = ${value.difference}`;
 
 export const FactDeck: React.FC<ActivityProps<FactDeckParams>> = ({ params, koda, onComplete, lesson }) => {
+  // Re-render when the language changes: every line below reads the catalog.
+  useT();
   const setup: FactSetup = { ...params, ...params.question };
   const totalQuestions = setup.questionsPerRound ?? 5;
   const practising = isPractice(setup);
@@ -259,17 +265,17 @@ export const FactDeck: React.FC<ActivityProps<FactDeckParams>> = ({ params, koda
     chime(koda, correct ? "right" : "wrong");
     if (correct) koda.haptics.success(); else koda.haptics.tap();
     round.submit({ correct, given: String(value), expected: q.expected, errorKind: correct ? undefined : Math.abs(value - q.difference) === 1 ? "off_by_one" : "off_by_more",
-      title: correct ? "That fact works!" : "Check the relationship",
-      message: practising ? undefined : `${q.minuend} minus ${q.subtrahend} is ${q.difference}.` });
+      title: correct ? ts("fact.rightTitle") : ts("fact.wrongTitle"),
+      message: practising ? undefined : ts("aMinusBIs", { a: q.minuend, b: q.subtrahend, difference: q.difference }) });
   };
   const checkMembers = () => {
     const values = q.members!.map((_, i) => members[i] ?? "");
-    if (values.some((value) => value === "")) { nudge.refuse(`${values.filter((value) => value === "").length} facts are still empty.`); return; }
+    if (values.some((value) => value === "")) { nudge.refuse(ts("fact.refuseEmpty", { count: values.filter((value) => value === "").length })); return; }
     const correct = values.join(",") === q.expected;
     chime(koda, correct ? "right" : "wrong");
     if (correct) koda.haptics.success(); else koda.haptics.tap();
     round.submit({ correct, given: values.join(","), expected: q.expected, errorKind: correct ? undefined : "off_by_more",
-      title: correct ? "The whole fact family!" : "Check all four facts", message: practising ? undefined : `All four facts use ${q.subtrahend}, ${q.difference}, and ${q.minuend}.` });
+      title: correct ? ts("fact.familyTitle") : ts("fact.checkFour"), message: practising ? undefined : ts("fact.familyMessage", { b: q.subtrahend, difference: q.difference, a: q.minuend }) });
   };
   const readyForAnswer = q.mode === "family" || q.mode === "doubles" || helperChosen;
 
@@ -298,7 +304,7 @@ export const FactDeck: React.FC<ActivityProps<FactDeckParams>> = ({ params, koda
     useSupport: round.useSupport,
   });
 
-  return <SkillRound koda={koda} lesson={lesson} fallbackTitle="Subtraction Fact Deck" round={round}
+  return <SkillRound koda={koda} lesson={lesson} fallbackTitle={ts("fact.title")} round={round}
     totalQuestions={totalQuestions} prompt={prompt} iconName={q.mode === "family" ? "gem" : "zap"} iconTone="pink"
     tagLabels={tagLabelsFrom(koda)} nudge={nudge.message}
     hints={hints}
@@ -322,12 +328,12 @@ export const FactDeck: React.FC<ActivityProps<FactDeckParams>> = ({ params, koda
                 `w-full`, which beats a `w-16` passed after it. */}
             <span className="w-16 shrink-0"><input inputMode="numeric" pattern="[0-9]*" value={members[i] ?? ""} disabled={Boolean(round.feedback)}
               onChange={(event) => setMembers((current) => ({ ...current, [i]: event.target.value.replace(/[^0-9]/g, "").slice(0, 2) }))}
-              aria-label={`Answer for family fact ${i + 1}`} className={themeSystem.field("md", "w-full text-center text-xl font-black tabular-nums")} /></span>
+              aria-label={ts("fact.answerFor", { n: i + 1 })} className={themeSystem.field("md", "w-full text-center text-xl font-black tabular-nums")} /></span>
           </label>)}
         </div>}
 
         {q.mode === "missing_addend" && !helperChosen && <div className="flex flex-wrap justify-center gap-2.5">{q.relations!.map((relation) => <button key={relation} type="button"
-          onClick={() => chooseRoute(relation === q.correctRelation, "That equation changes the operand roles. Start with the known part and add the missing part to reach the whole.")}
+          onClick={() => chooseRoute(relation === q.correctRelation, ts("fact.refuseRoles"))}
           className={themeSystem.button("secondary", "md")}>{relation}</button>)}</div>}
 
         {q.mode === "missing_addend" && helperChosen && <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className={`text-2xl font-black ${COMPARISON.text}`}>{q.correctRelation}</motion.div>}
@@ -335,20 +341,20 @@ export const FactDeck: React.FC<ActivityProps<FactDeckParams>> = ({ params, koda
         {q.mode === "doubles" && <div className={`${DIFFERENCE.soft} ${DIFFERENCE.border} border-2 rounded-2xl px-5 py-3 text-xl sm:text-2xl font-black tabular-nums ${DIFFERENCE.text}`}>{q.subtrahend} + {q.subtrahend} = {q.minuend}</div>}
 
         {q.mode === "known_fact" && !helperChosen && <div className="flex flex-wrap justify-center gap-2.5">{q.helpers!.map((helper) => <button key={`${helper.minuend}-${helper.subtrahend}`} type="button"
-          onClick={() => chooseRoute(isOneStepHelper(helper, q), `${factText(helper)} is true, but it is not the one-step helper with the same whole.`)}
-          aria-label={`Helper fact ${factText(helper)}`} className={themeSystem.button("secondary", "md")}>{factText(helper)}</button>)}</div>}
+          onClick={() => chooseRoute(isOneStepHelper(helper, q), ts("fact.refuseHelper", { fact: factText(helper) }))}
+          aria-label={ts("fact.helperLabel", { fact: factText(helper) })} className={themeSystem.button("secondary", "md")}>{factText(helper)}</button>)}</div>}
 
         {q.mode === "known_fact" && helperChosen && <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className={`text-xl sm:text-2xl font-black tabular-nums ${DIFFERENCE.text}`}>{factText(q.helper!)}</motion.div>}
 
-        {scaffold && !practising && q.mode !== "family" && <div className="text-center text-sm font-bold text-ink/60">{q.mode === "doubles" ? "Equal parts undo each other." : helperChosen ? "Now use the relationship to find the difference." : "Choose the relationship before answering."}</div>}
+        {scaffold && !practising && q.mode !== "family" && <div className="text-center text-sm font-bold text-ink/60">{q.mode === "doubles" ? ts("fact.helpDouble") : helperChosen ? ts("fact.helpUse") : ts("fact.helpChoose")}</div>}
       </div>
 
-      {q.mode === "family" && <div className="flex justify-center"><button type="button" onClick={checkMembers} className={themeSystem.button("primary", "lg")}>Check all four</button></div>}
+      {q.mode === "family" && <div className="flex justify-center"><button type="button" onClick={checkMembers} className={themeSystem.button("primary", "lg")}>{ts("fact.checkAllFour")}</button></div>}
 
       {q.mode !== "family" && readyForAnswer && (answerInput === "pad" ? <div className="space-y-3">
         <div className="mx-auto w-20 h-14 rounded-2xl border-2 border-dashed border-violet-400 flex items-center justify-center text-3xl font-black">{entry || "?"}</div>
         <NumberPad disabled={Boolean(round.feedback)} onDigit={(digit) => setEntry((value) => `${value}${digit}`.slice(0, 2))} onDelete={() => setEntry((value) => value.slice(0, -1))} />
-        <div className="flex justify-center"><button type="button" onClick={() => entry ? submitNumber(Number(entry)) : nudge.refuse("Type your answer first.")} className={themeSystem.button("primary", "lg")}>Check</button></div>
+        <div className="flex justify-center"><button type="button" onClick={() => entry ? submitNumber(Number(entry)) : nudge.refuse(ts("typeFirst"))} className={themeSystem.button("primary", "lg")}>{ts("check")}</button></div>
       </div> : <div className="flex flex-wrap justify-center gap-2.5">{choicesFor(q.difference, q.id).map((value) => <button key={value} type="button" onClick={() => submitNumber(value)} disabled={Boolean(round.feedback)} className={themeSystem.button("secondary", "choice")}>{value}</button>)}</div>)}
     </div>
   </SkillRound>;

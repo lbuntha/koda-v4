@@ -7,6 +7,7 @@
  * without mounting a grid.
  */
 
+import { catalogRecord, td } from "../i18n";
 import {
   drawQuotient,
   pick,
@@ -81,10 +82,10 @@ const TONES: readonly Tone[] = ["sky", "violet", "emerald", "rose"] as const;
 
 const PROMPTS: Record<ArrayMode, (q: Omit<ArrayQuestion, "prompt">) => string> = {
   total_and_side: (q) =>
-    `Put all ${q.dividend} into ${q.divisor} equal rows. How many in each row?`,
-  two_divisions: () => "Which pair of sentences does this array show?",
+    td("array.prompt.total_and_side", { n: q.dividend, d: q.divisor }),
+  two_divisions: () => td("array.prompt.two_divisions"),
   partial_row: (q) =>
-    `Make rows of ${q.divisor}. How many full rows can you make?`,
+    td("array.prompt.partial_row", { d: q.divisor }),
 };
 
 /**
@@ -96,7 +97,8 @@ const PROMPTS: Record<ArrayMode, (q: Omit<ArrayQuestion, "prompt">) => string> =
  */
 export function pairOptions(value: Quotient): string[] {
   const { dividend, divisor, quotient } = value;
-  const truth = `${dividend} ÷ ${divisor} = ${quotient}   and   ${dividend} ÷ ${quotient} = ${divisor}`;
+  const and = td("array.and");
+  const truth = `${dividend} ÷ ${divisor} = ${quotient}   ${and}   ${dividend} ÷ ${quotient} = ${divisor}`;
   /*
    * The miscounted side must not be the *right* side.
    *
@@ -112,11 +114,11 @@ export function pairOptions(value: Quotient): string[] {
     truth,
     // The second sentence turned round: the commonest error, and it needs the
     // first sentence read to be caught.
-    `${dividend} ÷ ${divisor} = ${quotient}   and   ${quotient} ÷ ${dividend} = ${divisor}`,
+    `${dividend} ÷ ${divisor} = ${quotient}   ${and}   ${quotient} ÷ ${dividend} = ${divisor}`,
     // One side miscounted, in the second sentence only.
-    `${dividend} ÷ ${divisor} = ${quotient}   and   ${dividend} ÷ ${quotient} = ${near.value}`,
+    `${dividend} ÷ ${divisor} = ${quotient}   ${and}   ${dividend} ÷ ${quotient} = ${near.value}`,
     // Multiplication wearing division's clothes.
-    `${dividend} ÷ ${divisor} = ${quotient}   and   ${divisor} ÷ ${quotient} = ${dividend}`,
+    `${dividend} ÷ ${divisor} = ${quotient}   ${and}   ${divisor} ÷ ${quotient} = ${dividend}`,
   ];
 }
 
@@ -201,11 +203,11 @@ export function arrayBlockedBecause(
   return null;
 }
 
-export const ARRAY_REFUSALS: Record<Exclude<ArrayBlock, null>, string> = {
-  "wrong-row-count": "Make the number of rows the question asked for.",
-  "not-all-placed": "Every one of them has to go into the array.",
-  "rows-unequal": "The rows are not all the same length.",
-};
+export const ARRAY_REFUSALS: Record<Exclude<ArrayBlock, null>, string> = catalogRecord("array.refusals", [
+  "wrong-row-count",
+  "not-all-placed",
+  "rows-unequal",
+]);
 
 /**
  * How the cells fall into rows.

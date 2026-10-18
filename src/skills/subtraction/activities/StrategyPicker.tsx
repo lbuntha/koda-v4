@@ -19,6 +19,8 @@ import {
   differenceKey, drawDifference, shuffle, withoutRepeat,
   type Difference, type DifferenceSpec,
 } from "../internal/data/subtractionNumbers";
+import { listAnd, ts } from "../internal/i18n";
+import { useT } from "../../../lib/i18n";
 
 export type StrategyMode = "compare_paths";
 
@@ -76,18 +78,18 @@ export const buildQuestion = (setup: StrategySetup, index: number, seen: Set<str
 
 export const promptFor = (q: StrategyQuestion, template?: string): string => {
   const filled = template?.replaceAll("{a}", String(q.minuend)).replaceAll("{b}", String(q.subtrahend)).replaceAll("{difference}", String(q.difference));
-  return filled ?? `${q.minuend} minus ${q.subtrahend}. Which way would you do it?`;
+  return filled ?? ts("strategyPicker.prompt", { a: q.minuend, b: q.subtrahend });
 };
 
 export const printedFor = (q: StrategyQuestion): PrintedQuestion => ({
-  text: `${q.minuend} − ${q.subtrahend} = □. Name a strategy that suits these numbers and say why.`,
-  answer: `${q.difference} — any of: ${q.fits.map((id) => cardFor(id).name).join(", ")}`,
+  text: ts("strategyPicker.printed", { a: q.minuend, b: q.subtrahend }),
+  answer: ts("strategyPicker.printedAnswer", { difference: q.difference, names: q.fits.map((id) => cardFor(id).name).join(", ") }),
 });
 
 export const methodFor = (q: StrategyQuestion): string[] => [
-  "Look at the numbers before choosing a method.",
-  `Here, ${cardFor(q.pair[0].id).name.toLowerCase()} takes about ${q.pair[0].steps(q)} steps.`,
-  "More than one way is right; prefer the one with fewer steps.",
+  ts("strategyPicker.method1"),
+  ts("strategyPicker.method2", { name: cardFor(q.pair[0].id).name.toLowerCase(), steps: q.pair[0].steps(q) }),
+  ts("strategyPicker.method3"),
 ];
 
 export function strategyHints(
@@ -95,12 +97,12 @@ export function strategyHints(
   state: { chosen?: StrategyId; kidTip?: string },
 ): string[] {
   return composeHints(
-    state.kidTip ?? "Look at the numbers before you choose a method.",
+    state.kidTip ?? ts("strategyPicker.hintTip"),
     state.chosen
-      ? `${cardFor(state.chosen).name} fits. Now compare it with another way that also works.`
+      ? ts("strategyPicker.hintFits", { name: cardFor(state.chosen).name })
       : q.difference <= 5
-        ? `${q.subtrahend} and ${q.minuend} are close together, so counting up is short.`
-        : `${q.subtrahend} is the part being taken away. Ask what shape it has before you start.`,
+        ? ts("strategyPicker.hintClose", { b: q.subtrahend, a: q.minuend })
+        : ts("strategyPicker.hintShape", { b: q.subtrahend }),
     /*
      * Two named, not all of them.
      *
@@ -110,12 +112,14 @@ export function strategyHints(
      * that more than one works, which is the lesson.
      */
     q.fits.length > 2
-      ? `Several fit, including ${q.fits.slice(0, 2).map((id) => cardFor(id).name).join(" and ")}.`
-      : `More than one fits: ${q.fits.map((id) => cardFor(id).name).join(", ")}.`,
+      ? ts("strategyPicker.hintSeveral", { names: listAnd(q.fits.slice(0, 2).map((id) => cardFor(id).name)) })
+      : ts("strategyPicker.hintMore", { names: q.fits.map((id) => cardFor(id).name).join(", ") }),
   );
 }
 
 export const StrategyPicker: React.FC<ActivityProps<StrategyPickerParams>> = ({ params, koda, onComplete, lesson }) => {
+  // Re-render when the language changes: every line below reads the catalog.
+  useT();
   const setup: StrategySetup = { ...params, ...params.question };
   const totalQuestions = setup.questionsPerRound ?? 5;
   const practising = isPractice(setup);
@@ -154,11 +158,19 @@ export const StrategyPicker: React.FC<ActivityProps<StrategyPickerParams>> = ({ 
     if (correct) koda.haptics.success(); else koda.haptics.tap();
     round.submit({
       correct, given: id, expected: q.expected, errorKind: correct ? undefined : "off_by_more",
-      title: correct ? "That way works here!" : "That one fights the numbers",
+      title: correct ? ts("strategyPicker.rightTitle") : ts("strategyPicker.wrongTitle"),
       message: practising ? undefined
         : correct
-          ? `${cardFor(id).name} suits ${q.minuend} minus ${q.subtrahend}. So would: ${q.fits.filter((other) => other !== id).map((other) => cardFor(other).name).join(", ") || "nothing else here"}.`
-          : `${cardFor(id).name} works in general, but not well here. These numbers suit ${q.fits.map((other) => cardFor(other).name).join(" or ")}.`,
+          ? ts("strategyPicker.right", {
+              name: cardFor(id).name,
+              a: q.minuend,
+              b: q.subtrahend,
+              others: q.fits.filter((other) => other !== id).map((other) => cardFor(other).name).join(", ") || ts("strategyPicker.nothingElse"),
+            })
+          : ts("strategyPicker.wrong", {
+              name: cardFor(id).name,
+              names: q.fits.map((other) => cardFor(other).name).join(` ${ts("orWord")} `),
+            }),
     });
   };
 
@@ -187,7 +199,7 @@ export const StrategyPicker: React.FC<ActivityProps<StrategyPickerParams>> = ({ 
     useSupport: round.useSupport,
   });
 
-  return <SkillRound koda={koda} lesson={lesson} fallbackTitle="Choose a Strategy" round={round}
+  return <SkillRound koda={koda} lesson={lesson} fallbackTitle={ts("strategyPicker.title")} round={round}
     totalQuestions={totalQuestions} prompt={prompt} iconName="scale" iconTone="emerald"
     tagLabels={tagLabelsFrom(koda)} nudge={nudge.message}
     hints={hints}
@@ -202,16 +214,16 @@ export const StrategyPicker: React.FC<ActivityProps<StrategyPickerParams>> = ({ 
         </div>
 
         {round.feedback && <motion.div initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} transition={SPRING.enter}
-          className="mx-auto max-w-md space-y-2" role="group" aria-label="Two worked paths compared">
+          className="mx-auto max-w-md space-y-2" role="group" aria-label={ts("strategyPicker.compared")}>
           {q.pair.map((card, i) => <div key={card.id} className={`rounded-2xl border-2 p-3 ${i === 0 ? `${DIFFERENCE.soft} ${DIFFERENCE.border}` : `${COMPARISON.soft} ${COMPARISON.border}`}`}>
-            <div className={`text-sm font-black ${i === 0 ? DIFFERENCE.text : COMPARISON.text}`}>{card.name} · about {card.steps(q)} steps</div>
+            <div className={`text-sm font-black ${i === 0 ? DIFFERENCE.text : COMPARISON.text}`}>{ts("strategyPicker.aboutSteps", { name: card.name, steps: card.steps(q) })}</div>
             <div className="text-xs font-bold text-ink/60">{card.how}</div>
           </div>)}
-          <p className="text-center text-xs font-bold text-ink/55">Both are correct. The shorter path is not the only right one — it is the one these numbers reward.</p>
+          <p className="text-center text-xs font-bold text-ink/55">{ts("strategyPicker.bothCorrect")}</p>
         </motion.div>}
 
         {scaffold && !practising && !round.feedback && <div className="text-center text-sm font-bold text-ink/60">
-          More than one of these fits. Choose the one the numbers suit.
+          {ts("strategyPicker.help")}
         </div>}
       </div>
 
@@ -219,7 +231,7 @@ export const StrategyPicker: React.FC<ActivityProps<StrategyPickerParams>> = ({ 
         {q.offered.map((id) => {
           const card = cardFor(id);
           return <button key={id} type="button" onClick={() => choose(id)} disabled={Boolean(round.feedback)}
-            aria-label={`${card.name}: ${card.how}`}
+            aria-label={ts("strategyPicker.cardLabel", { name: card.name, how: card.how })}
             className={`${TOUCH_TARGET} text-left ${themeSystem.button("secondary", "md")} ${chosen === id ? "ring-4 ring-violet-400/60" : ""}`}>
             {/* One column inside the button, not two `block` children of it:
                 `themeSystem.button` is `inline-flex … justify-center`, so the

@@ -13,6 +13,7 @@
  * for 18. The additive answer is offered every single time.
  */
 
+import { td } from "../i18n";
 import { pick, shuffle } from "./divisionNumbers";
 
 export type StoryMode =
@@ -79,9 +80,10 @@ export function buildStoryQuestion(
   mode: StoryMode,
   index: number,
 ): StoryQuestion {
-  const who = pick(NAMES);
-  const other = pick(NAMES.filter((n) => n !== who));
-  const thing = pick(THINGS);
+  const whoId = pick(NAMES);
+  const who = td(`story.names.${whoId}`);
+  const other = td(`story.names.${pick(NAMES.filter((n) => n !== whoId))}`);
+  const thing = td(`story.things.${pick(THINGS)}`);
   const id = `division-${mode}-${index}`;
 
   const base = { mode, taskKind: `division_${mode}`, setsParts: false, itemCount: 1 };
@@ -93,8 +95,8 @@ export function buildStoryQuestion(
     return {
       ...base,
       id: `${id}-${whole}-${parts}`,
-      story: `${who} has ${whole} ${thing} to share equally between ${parts} friends.`,
-      prompt: "How many does each friend get?",
+      story: td("story.size_unknown", { who, whole, thing, parts }),
+      prompt: td("story.ask.eachFriend"),
       expected: String(each),
       answer: each,
       choices: options(each, parts, whole - parts),
@@ -111,8 +113,8 @@ export function buildStoryQuestion(
     return {
       ...base,
       id: `${id}-${whole}-${size}`,
-      story: `${who} puts ${whole} ${thing} into bags of ${size}.`,
-      prompt: "How many bags are there?",
+      story: td("story.count_unknown", { who, whole, thing, size }),
+      prompt: td("story.ask.bags"),
       expected: String(groups),
       answer: groups,
       choices: options(groups, size, whole - size),
@@ -132,10 +134,8 @@ export function buildStoryQuestion(
     return {
       ...base,
       id: `${id}-${whole}-${size}`,
-      story: `${whole} ${thing} are being put into boxes of ${size}.`,
-      prompt: wantsMore
-        ? "How many boxes are needed so that none are left out?"
-        : "How many boxes can be filled completely?",
+      story: td("story.remainder_context", { whole, thing, size }),
+      prompt: td(wantsMore ? "story.ask.boxesNeeded" : "story.ask.boxesFull"),
       expected: String(answer),
       answer,
       choices: options(answer, wantsMore ? groups : groups + 1, left),
@@ -151,8 +151,8 @@ export function buildStoryQuestion(
     return {
       ...base,
       id: `${id}-${whole}-${count}`,
-      story: `${count} identical boxes of ${thing} hold ${whole} altogether.`,
-      prompt: "How many are in one box?",
+      story: td("story.unit_rate", { count, thing, whole }),
+      prompt: td("story.ask.oneBox"),
       expected: String(each),
       answer: each,
       choices: options(each, count, whole),
@@ -169,8 +169,8 @@ export function buildStoryQuestion(
     return {
       ...base,
       id: `${id}-${big}-${small}`,
-      story: `${who} has ${big} ${thing}. ${other} has ${small}.`,
-      prompt: `How many times as many does ${who} have?`,
+      story: td("story.times_comparison", { who, big, thing, other, small }),
+      prompt: td("story.ask.timesAsMany", { who }),
       expected: String(times),
       answer: times,
       /*
@@ -194,8 +194,8 @@ export function buildStoryQuestion(
     return {
       ...base,
       id: `${id}-${whole}-${parts}`,
-      story: `${who} has ${whole} ${thing}. After keeping ${extra}, the rest are shared equally between ${parts} friends.`,
-      prompt: "How many does each friend get?",
+      story: td("story.multi_step", { who, whole, thing, extra, parts }),
+      prompt: td("story.ask.eachFriend"),
       expected: String(each),
       answer: each,
       // Dividing before subtracting is the whole error, so it is offered.
@@ -221,8 +221,8 @@ export function buildStoryQuestion(
   return {
     ...base,
     id: `${id}-${values.join("-")}`,
-    story: `${who} counted ${thing} on ${count} days: ${values.join(", ")}.`,
-    prompt: "If the days had all been the same, how many would that be each day?",
+    story: td("story.mean", { who, thing, count, values: values.join(", ") }),
+    prompt: td("story.ask.eachDay"),
     expected: String(each),
     answer: each,
     choices: options(each, count, Math.max(...values)),

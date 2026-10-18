@@ -9,6 +9,7 @@
  * mounting anything.
  */
 
+import { catalogRecord, td } from "../i18n";
 import {
   drawQuotient,
   pick,
@@ -200,38 +201,27 @@ export interface StoryLine {
   unknown: Unknown;
 }
 
-interface Subject {
-  /** Plural noun for the things being divided. */
-  things: string;
-  /** Plural noun for what they go into or onto. */
-  holders: string;
-  /** Singular of `holders`, for the sentence that names one. */
-  holder: string;
-}
+/**
+ * What is divided, and what it goes into or onto. Each one's nouns are in the
+ * catalog under `tray.subjects.<id>` — `things` and `holders`, both plural.
+ */
+type Subject = "apples" | "marbles" | "stickers" | "pencils" | "cherries" | "shells";
 
-const SUBJECTS: readonly Subject[] = [
-  { things: "apples", holders: "plates", holder: "plate" },
-  { things: "marbles", holders: "jars", holder: "jar" },
-  { things: "stickers", holders: "books", holder: "book" },
-  { things: "pencils", holders: "pots", holder: "pot" },
-  { things: "cherries", holders: "bowls", holder: "bowl" },
-  { things: "shells", holders: "buckets", holder: "bucket" },
-] as const;
+const SUBJECTS: readonly Subject[] = ["apples", "marbles", "stickers", "pencils", "cherries", "shells"];
 
 export const storyFor = (
   subject: Subject,
   value: Quotient,
   unknown: Unknown,
-): StoryLine =>
-  unknown === "size"
-    ? {
-        text: `${value.dividend} ${subject.things} are shared equally between ${value.divisor} ${subject.holders}.`,
-        unknown,
-      }
-    : {
-        text: `${value.dividend} ${subject.things} are put into ${subject.holders} of ${value.divisor}.`,
-        unknown,
-      };
+): StoryLine => ({
+  text: td(unknown === "size" ? "tray.story.size" : "tray.story.count", {
+    n: value.dividend,
+    d: value.divisor,
+    things: td(`tray.subjects.${subject}.things`),
+    holders: td(`tray.subjects.${subject}.holders`),
+  }),
+  unknown,
+});
 
 /**
  * Which meaning a mode is asking about.
@@ -257,21 +247,20 @@ export const unknownFor = (mode: ShareMode, meaning: Meaning): Unknown => {
 
 const PROMPTS: Record<ShareMode, (q: Omit<ShareQuestion, "prompt">) => string> = {
   share_out: (q) =>
-    `Share all ${q.dividend} between the ${q.divisor} ${q.story ? "holders" : "plates"}. How many on each?`,
-  halve: (q) => `Share all ${q.dividend} between the 2 plates. How many on each?`,
-  group_by_size: (q) => `Make groups of ${q.divisor}. How many groups can you make?`,
-  which_meaning: () => "What is this question asking for?",
-  to_equation: () => "Which sentence says what happened?",
+    td(q.story ? "tray.prompt.shareHolders" : "tray.prompt.share", { n: q.dividend, d: q.divisor }),
+  halve: (q) => td("tray.prompt.share", { n: q.dividend, d: 2 }),
+  group_by_size: (q) => td("tray.prompt.group_by_size", { d: q.divisor }),
+  which_meaning: () => td("tray.prompt.which_meaning"),
+  to_equation: () => td("tray.prompt.to_equation"),
   identity: (q) =>
     q.divisor === 1
-      ? `Put all ${q.dividend} onto the 1 plate. How many are on it?`
-      : `Share all ${q.dividend} between the ${q.divisor} plates. How many on each?`,
+      ? td("tray.prompt.onePlate", { n: q.dividend })
+      : td("tray.prompt.share", { n: q.dividend, d: q.divisor }),
   zero_rules: (q) =>
     q.impossible
-      ? `Can you share ${q.dividend} between 0 plates?`
-      : `There is nothing to share. How many does each of the ${q.divisor} plates get?`,
-  see_leftover: (q) =>
-    `Share as many as you can between the ${q.divisor} plates. How many on each?`,
+      ? td("tray.prompt.zeroPlates", { n: q.dividend })
+      : td("tray.prompt.nothingToShare", { d: q.divisor }),
+  see_leftover: (q) => td("tray.prompt.see_leftover", { d: q.divisor }),
 };
 
 /**
@@ -384,7 +373,7 @@ export function buildTrayQuestion(
     return {
       id: `division-zero_rules-${index}-${dividend}-0`,
       taskKind: "division_zero_rules",
-      prompt: `Can you share ${dividend} between 0 plates?`,
+      prompt: td("tray.prompt.zeroPlates", { n: dividend }),
       expected: "cannot",
       itemCount: dividend,
       mode,
@@ -515,10 +504,10 @@ export function blockedBecause(
   return null;
 }
 
-export const REFUSALS: Record<Exclude<TrayBlock, null>, string> = {
-  "deal-them-all": "Deal them all out first.",
-  "not-equal": "Every plate needs the same number.",
-  "another-group-fits": "There are still enough left to make another group.",
-  "plate-not-full": "Fill every group before you count them.",
-  "another-round-fits": "There are still enough left to give one more to every plate.",
-};
+export const REFUSALS: Record<Exclude<TrayBlock, null>, string> = catalogRecord("tray.refusals", [
+  "deal-them-all",
+  "not-equal",
+  "another-group-fits",
+  "plate-not-full",
+  "another-round-fits",
+]);

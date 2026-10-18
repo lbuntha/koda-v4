@@ -14,6 +14,8 @@ import { BASE_LANGUAGE, currentLanguage, hasMessage, translate } from "./i18n";
 export const LESSON_TEXT_FIELDS = ["title", "concept", "pedagogyTip"] as const;
 /** Fields on `params.play`. `stepByStep` is handled alongside, as `steps.<n>`. */
 export const LESSON_PLAY_FIELDS = ["kidTip", "audioPrompt", "targetObjective", "shortDesc", "category"] as const;
+/** Sentence lists on `params.question` — word-problem wording — keyed `question.<list>.<n>`. */
+export const LESSON_QUESTION_LISTS = ["stories", "templates"] as const;
 
 export function localizeLesson<T extends Lesson>(skillId: string, lesson: T, language = currentLanguage()): T {
   if (language === BASE_LANGUAGE) return lesson;
@@ -31,7 +33,23 @@ export function localizeLesson<T extends Lesson>(skillId: string, lesson: T, lan
     if (Array.isArray(play.stepByStep)) {
       play.stepByStep = (play.stepByStep as unknown[]).map((step, i) => pick(`steps.${i}`, step));
     }
+    // The question's own wording, by the key the activity asks for ("default", "add"…).
+    if (play.prompts && typeof play.prompts === "object") {
+      play.prompts = Object.fromEntries(
+        Object.entries(play.prompts as Record<string, unknown>).map(([name, line]) => [name, pick(`prompts.${name}`, line)]),
+      );
+    }
     out.params = { ...params, play };
+  }
+
+  const question = (out.params as { question?: Record<string, unknown> } | undefined)?.question;
+  if (question) {
+    const localized = { ...question };
+    for (const list of LESSON_QUESTION_LISTS) {
+      if (!Array.isArray(question[list])) continue;
+      localized[list] = (question[list] as unknown[]).map((line, i) => pick(`question.${list}.${i}`, line));
+    }
+    out.params = { ...(out.params as object), question: localized };
   }
   return out as unknown as T;
 }

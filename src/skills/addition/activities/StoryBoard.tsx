@@ -21,6 +21,8 @@ import { isPractice, modeAt, type PracticeSetup } from "../../kit";
 import { NumberPad } from "../internal/ui/NumberPad";
 import { THINGS, twoNames, type Thing } from "../internal/data/storyCast";
 import { drawStory, pick, type StoryKind, type StoryNumbers } from "../internal/data/additionNumbers";
+import { ta } from "../internal/i18n";
+import { useT } from "../../../lib/i18n";
 
 /**
  * A story, a bar model, and an answer — in that order.
@@ -91,16 +93,14 @@ export interface StoryQuestion extends RoundQuestion {
 /* The sentence                                                                */
 /* -------------------------------------------------------------------------- */
 
-/** Wording of last resort. A lesson that authors none still plays. */
-const FALLBACK: Record<StoryMode, string> = {
-  join: "{name} had {a} {thing}. Then {name} found {b} more. How many {thing} now?",
-  ppw: "{name} has {a} red {thing} and {b} blue {thing}. How many {thing} altogether?",
-  change_unknown: "{name} had {a} {thing}. Now {name} has {b}. How many more did {name} get?",
-  start_unknown:
-    "{name} found {a} more {thing}. Now {name} has {b}. How many {thing} did {name} start with?",
-  compare: "{name} has {a} {thing}. {other} has {b} more than {name}. How many does {other} have?",
-  multi_step:
-    "{name} had {a} {thing}. {other} gave {name} {b} more, and then {c} more. How many now?",
+/** Wording of last resort, in the language on screen. A lesson that authors none still plays. */
+const FALLBACK_KEY: Record<StoryMode, string> = {
+  join: "story.fallbackJoin",
+  ppw: "story.fallbackPpw",
+  change_unknown: "story.fallbackChangeUnknown",
+  start_unknown: "story.fallbackStartUnknown",
+  compare: "story.fallbackCompare",
+  multi_step: "story.fallbackMultiStep",
 };
 
 const fill = (
@@ -140,7 +140,7 @@ const barFor = (
   switch (mode) {
     case "ppw":
       return {
-        rows: [{ slots: [{ id: "p1", value: v0, label: "first part" }, { id: "p2", value: v1, label: "second part" }] }],
+        rows: [{ slots: [{ id: "p1", value: v0, label: ta("story.slotFirstPart") }, { id: "p2", value: v1, label: ta("story.slotSecondPart") }] }],
         chips: [v0, v1],
         answer: numbers.answer,
       };
@@ -151,7 +151,7 @@ const barFor = (
         rows: [
           {
             whole: v1,
-            slots: [{ id: "start", value: v0, label: "what there was" }, { id: "change", label: "what was added" }],
+            slots: [{ id: "start", value: v0, label: ta("story.slotStart") }, { id: "change", label: ta("story.slotAdded") }],
           },
         ],
         chips: [v0],
@@ -164,7 +164,7 @@ const barFor = (
         rows: [
           {
             whole: v1,
-            slots: [{ id: "start", label: "what there was" }, { id: "change", value: v0, label: "what was added" }],
+            slots: [{ id: "start", label: ta("story.slotStart") }, { id: "change", value: v0, label: ta("story.slotAdded") }],
           },
         ],
         chips: [v0],
@@ -174,12 +174,12 @@ const barFor = (
     case "compare":
       return {
         rows: [
-          { label: names[0], slots: [{ id: "small", value: v0, label: "the smaller amount" }] },
+          { label: names[0], slots: [{ id: "small", value: v0, label: ta("story.slotSmaller") }] },
           {
             label: names[1],
             slots: [
-              { id: "same", value: v0, label: "the same as the smaller amount" },
-              { id: "more", value: v1, label: "how many more" },
+              { id: "same", value: v0, label: ta("story.slotSame") },
+              { id: "more", value: v1, label: ta("story.slotMore") },
             ],
           },
         ],
@@ -190,7 +190,7 @@ const barFor = (
     case "multi_step":
       return step === 1
         ? {
-            rows: [{ slots: [{ id: "s1", value: v0, label: "to start with" }, { id: "s2", value: v1, label: "the first lot added" }] }],
+            rows: [{ slots: [{ id: "s1", value: v0, label: ta("story.slotToStart") }, { id: "s2", value: v1, label: ta("story.slotFirstLot") }] }],
             chips: [v0, v1],
             answer: numbers.intermediate!,
           }
@@ -198,8 +198,8 @@ const barFor = (
             rows: [
               {
                 slots: [
-                  { id: "sofar", value: numbers.intermediate!, label: "what there was after the first lot" },
-                  { id: "s3", value: v2, label: "the second lot added" },
+                  { id: "sofar", value: numbers.intermediate!, label: ta("story.slotSoFar") },
+                  { id: "s3", value: v2, label: ta("story.slotSecondLot") },
                 ],
               },
             ],
@@ -210,7 +210,7 @@ const barFor = (
     case "join":
     default:
       return {
-        rows: [{ slots: [{ id: "start", value: v0, label: "to start with" }, { id: "change", value: v1, label: "what was added" }] }],
+        rows: [{ slots: [{ id: "start", value: v0, label: ta("story.slotToStart") }, { id: "change", value: v1, label: ta("story.slotAdded") }] }],
         chips: [v0, v1],
         answer: numbers.answer,
       };
@@ -264,7 +264,7 @@ export const buildQuestion = (
     });
     const names = twoNames(pick);
     const thing = pick(THINGS);
-    const template = setup.stories?.length ? pick(setup.stories) : FALLBACK[mode];
+    const template = setup.stories?.length ? pick(setup.stories) : ta(FALLBACK_KEY[mode]);
     memo = {
       mode,
       numbers,
@@ -294,7 +294,7 @@ export const buildQuestion = (
 };
 
 export const promptFor = (q: StoryQuestion): string =>
-  q.step === 2 ? `${q.text} — and after the second lot?` : q.text;
+  q.step === 2 ? ta("story.secondStep", { text: q.text }) : q.text;
 
 /**
  * What the child is being asked to work out, per story type.
@@ -307,14 +307,15 @@ export const promptFor = (q: StoryQuestion): string =>
  * lessons taught their technique in the prompt and then helped with somebody
  * else's.
  */
-const STORY_MOVE: Record<StoryMode, string> = {
-  join: "It grows. Add what arrived to what there was.",
-  ppw: "Two parts, one whole. Put the parts together.",
-  change_unknown: "You know the start and the end. Count on from the start.",
-  start_unknown: "Work backwards. Take what was added off the end.",
-  compare: "Line them up. The gap is what the smaller one needs.",
-  multi_step: "Two changes. Do the first, then use that answer for the second.",
+const STORY_MOVE_KEY: Record<StoryMode, string> = {
+  join: "story.moveJoin",
+  ppw: "story.movePpw",
+  change_unknown: "story.moveChangeUnknown",
+  start_unknown: "story.moveStartUnknown",
+  compare: "story.moveCompare",
+  multi_step: "story.moveMultiStep",
 };
+const storyMove = (mode: StoryMode): string => ta(STORY_MOVE_KEY[mode]);
 
 export function storyHints(
   q: StoryQuestion,
@@ -326,22 +327,22 @@ export function storyHints(
 
   if (left.length > 0) {
     return composeHints(
-      state.kidTip ?? "Put each number the story gives you into the box it belongs in.",
+      state.kidTip ?? ta("story.hintPlaceTip"),
       /* Named, not described: "the box for to start with" is what reading the
          label into a sentence produced, and it is not English. */
-      `Which number is the "${left[0].label}" box?`,
+      ta("story.hintWhichBox", { label: left[0].label }),
       // Even while the bar is still being filled, the rung names this story's
       // own shape — two lessons that place numbers the same way do not teach
       // the same thing once the numbers are down.
-      `Put ${left[0].value} there. ${STORY_MOVE[q.mode]}`,
+      ta("story.hintPutThere", { value: left[0].value ?? 0, move: storyMove(q.mode) }),
     );
   }
 
   return composeHints(
-    state.kidTip ?? "The bar shows what you know. The empty box is what you are asked for.",
-    unknown ? `The bar is built. The empty box is ${unknown.label}.` : "The bar is built.",
+    state.kidTip ?? ta("story.hintBuiltTip"),
+    unknown ? ta("story.hintBuiltEmpty", { label: unknown.label }) : ta("story.hintBuilt"),
     // The technique, not the number: the child produces the answer by doing it.
-    STORY_MOVE[q.mode],
+    storyMove(q.mode),
   );
 }
 
@@ -366,7 +367,11 @@ const SlotBox: React.FC<{
       layout
       whileTap={onTap ? { scale: 0.96 } : undefined}
       transition={SPRING.tap}
-      aria-label={`Bar box for ${slot.label}${placed !== undefined ? `, holding ${placed}` : unknown ? ", unknown" : ", empty"}`}
+      aria-label={
+        placed !== undefined
+          ? ta("story.boxHolding", { label: slot.label, value: placed })
+          : ta(unknown ? "story.boxUnknown" : "story.boxEmpty", { label: slot.label })
+      }
       aria-pressed={held}
       className={`flex-1 min-w-[4.5rem] h-14 sm:h-16 rounded-xl border-2 flex items-center justify-center text-2xl font-black tabular-nums ${
         unknown
@@ -390,7 +395,7 @@ const SlotBox: React.FC<{
  * carries its own question, exactly as the round asks it.
  */
 export const printedFor = (q: StoryQuestion): PrintedQuestion => ({
-  text: q.step === 2 ? `${q.text} — and after the second lot?` : q.text,
+  text: promptFor(q),
   answer: q.expected ?? "",
 });
 
@@ -400,6 +405,8 @@ export const StoryBoard: React.FC<ActivityProps<StoryBoardParams>> = ({
   onComplete,
   lesson,
 }) => {
+  // Re-render when the language changes: every line below reads the catalog.
+  useT();
   const setup: StorySetup = { ...params, ...params.question };
   const totalQuestions = setup.questionsPerRound ?? 5;
   const copy = playCopy(params);
@@ -490,14 +497,14 @@ export const StoryBoard: React.FC<ActivityProps<StoryBoardParams>> = ({
     const value = question.chips[held];
     if (slot.value === undefined) {
       guide.stumbled();
-      nudge.refuse("That box is what the question is asking for. It is not one of the numbers you were told.");
+      nudge.refuse(ta("story.refuseUnknown"));
       return;
     }
     if (slot.value !== value) {
       // Putting a number where it does not belong is the mistake the model
       // exists to prevent, so it is answered rather than silently accepted.
       guide.stumbled();
-      nudge.refuse(`${value} is not ${slot.label}. Read the story again and see which number that is.`);
+      nudge.refuse(ta("story.refuseWrong", { value, label: slot.label }));
       return;
     }
     setPlaced((prev) => ({ ...prev, [slot.id]: value }));
@@ -511,12 +518,12 @@ export const StoryBoard: React.FC<ActivityProps<StoryBoardParams>> = ({
     if (round.feedback) return;
     if (!built) {
       guide.stumbled();
-      nudge.refuse("Build the bar first — every number the story gives you has a box.");
+      nudge.refuse(ta("story.refuseBuild"));
       return;
     }
     if (entry === "") {
       guide.stumbled();
-      nudge.refuse("Now type what the empty box should be.");
+      nudge.refuse(ta("story.refuseType"));
       return;
     }
     const given = Number(entry);
@@ -527,10 +534,10 @@ export const StoryBoard: React.FC<ActivityProps<StoryBoardParams>> = ({
       correct,
       given: entry,
       errorKind: correct ? undefined : Math.abs(given - question.answer) === 1 ? "off_by_one" : "off_by_more",
-      title: correct ? "That is the answer!" : "Not quite",
+      title: correct ? ta("story.rightTitle") : ta("notQuite"),
       message: correct
-        ? `The bar adds up to ${question.answer}.`
-        : `Look at the bar again: it comes to ${question.answer}.`,
+        ? ta("story.right", { answer: question.answer })
+        : ta("story.wrong", { answer: question.answer }),
     });
   };
 
@@ -575,7 +582,7 @@ export const StoryBoard: React.FC<ActivityProps<StoryBoardParams>> = ({
     <SkillRound
       koda={koda}
       lesson={lesson}
-      fallbackTitle="Story Problems"
+      fallbackTitle={ta("story.title")}
       round={round}
       totalQuestions={totalQuestions}
       prompt={prompt}
@@ -611,7 +618,7 @@ export const StoryBoard: React.FC<ActivityProps<StoryBoardParams>> = ({
               <div key={r} className="space-y-1">
                 {row.whole !== undefined && (
                   <p className={`text-center text-sm font-bold ${TOTAL.text} tabular-nums`}>
-                    {row.whole} altogether
+                    {ta("story.altogether", { whole: row.whole })}
                   </p>
                 )}
                 <div className="flex items-center gap-2">
@@ -639,7 +646,7 @@ export const StoryBoard: React.FC<ActivityProps<StoryBoardParams>> = ({
 
           {scaffold && !built && (
             <p className="text-center text-sm font-bold text-ink/55">
-              Tap a number, then the box it belongs in.
+              {ta("story.tapHelp")}
             </p>
           )}
         </div>
@@ -657,7 +664,7 @@ export const StoryBoard: React.FC<ActivityProps<StoryBoardParams>> = ({
                   whileHover={{ scale: 1.06, y: -2 }}
                   whileTap={{ scale: 0.9 }}
                   transition={SPRING.tap}
-                  aria-label={`Number ${i + 1} from the story, ${value}`}
+                  aria-label={ta("story.chip", { n: i + 1, value })}
                   aria-pressed={held === i}
                   className={themeSystem.button(
                     held === i ? "success" : "secondary",
@@ -675,10 +682,10 @@ export const StoryBoard: React.FC<ActivityProps<StoryBoardParams>> = ({
         {built && (
           <div className="space-y-3">
             <div className="flex items-center justify-center gap-3">
-              <span className="text-sm font-bold uppercase tracking-wide text-ink/50">Answer</span>
+              <span className="text-sm font-bold uppercase tracking-wide text-ink/50">{ta("answer")}</span>
               <span
                 className={`min-w-[5rem] h-14 px-4 rounded-2xl border-2 border-dashed ${CHANGE.border} flex items-center justify-center text-3xl font-black tabular-nums text-ink`}
-                aria-label={`Answer ${entry || "empty"}`}
+                aria-label={entry ? ta("answerIs", { value: entry }) : ta("answerEmpty")}
               >
                 {entry || <span className="text-ink/25">?</span>}
               </span>
@@ -700,7 +707,7 @@ export const StoryBoard: React.FC<ActivityProps<StoryBoardParams>> = ({
             transition={SPRING.tap}
             className={themeSystem.button("primary", "lg")}
           >
-            Check
+            {ta("check")}
           </motion.button>
         </div>
       </div>
@@ -715,8 +722,4 @@ export const StoryBoard: React.FC<ActivityProps<StoryBoardParams>> = ({
  * something a child could do with a pencil or in their head. See `method` on
  * `WorksheetSource` for why this is not the lesson's own `stepByStep`.
  */
-export const methodFor = (): string[] => [
-  "Read the story and find the numbers it gives you.",
-  "Work out what the question is asking for.",
-  "The number you are missing is the one to write.",
-];
+export const methodFor = (): string[] => [ta("story.method1"), ta("story.method2"), ta("story.method3")];

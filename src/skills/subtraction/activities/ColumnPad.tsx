@@ -15,6 +15,8 @@ import {
   differenceKey, digitsOf, drawDifference, withoutRepeat,
   type Difference, type DifferenceSpec,
 } from "../internal/data/subtractionNumbers";
+import { ts } from "../internal/i18n";
+import { useT } from "../../../lib/i18n";
 
 export type ColumnMode = "standard" | "cascade" | "across_zero";
 
@@ -59,6 +61,8 @@ export const specFor = (mode: ColumnMode, setup: ColumnSetup): DifferenceSpec =>
 });
 
 const PLACES = ["ones", "tens", "hundreds"] as const;
+/** "tens", in the language on screen. */
+const placeName = (i: number): string => ts(`place.${PLACES[i]}`);
 
 /** Digits ones-first, padded to the width the question needs. */
 const columnsOf = (value: number, width: number): number[] => {
@@ -86,22 +90,20 @@ export const buildQuestion = (setup: ColumnSetup, index: number, seen: Set<strin
 export const promptFor = (q: ColumnQuestion, template?: string): string => {
   const filled = template?.replaceAll("{a}", String(q.minuend)).replaceAll("{b}", String(q.subtrahend)).replaceAll("{difference}", String(q.difference));
   if (filled) return filled;
-  if (q.mode === "cascade") return `${q.minuend} minus ${q.subtrahend}. This one needs two exchanges.`;
-  if (q.mode === "across_zero") return `${q.minuend} minus ${q.subtrahend}. Exchange through the zero.`;
-  return `${q.minuend} minus ${q.subtrahend}. Write it in columns and exchange once.`;
+  if (q.mode === "cascade") return ts("column.promptCascade", { a: q.minuend, b: q.subtrahend });
+  if (q.mode === "across_zero") return ts("column.promptZero", { a: q.minuend, b: q.subtrahend });
+  return ts("column.prompt", { a: q.minuend, b: q.subtrahend });
 };
 
 export const printedFor = (q: ColumnQuestion): PrintedQuestion => ({
-  text: `${q.minuend} − ${q.subtrahend} = (set it out in columns and show every exchange)`,
+  text: ts("column.printed", { a: q.minuend, b: q.subtrahend }),
   answer: String(q.difference),
 });
 
 export const methodFor = (q: ColumnQuestion): string[] => [
-  "Line the digits up by place.",
-  q.mode === "across_zero"
-    ? "There is nothing to take from the tens, so open a hundred into ten tens first, then one of those tens into ten ones."
-    : "Where the top digit is too small, exchange one from the column to its left.",
-  "Subtract each column from the ones end.",
+  ts("column.method1"),
+  q.mode === "across_zero" ? ts("column.method2Zero") : ts("column.method2"),
+  ts("column.hintAllTip"),
 ];
 
 /** How an exchange is written: the old value struck out, the new one above it. */
@@ -120,32 +122,37 @@ export function columnHints(
 ): string[] {
   const owed = q.top.map((_, i) => i).find((i) => state.top[i] < q.bottom[i]);
   if (owed !== undefined) {
-    const name = PLACES[owed];
+    const name = placeName(owed);
     const mark = markFor(state.top, owed);
     return composeHints(
-      state.kidTip ?? "When the top digit is too small, exchange from the left.",
-      `The ${name} column has ${state.top[owed]} and needs to give ${q.bottom[owed]}.`,
+      state.kidTip ?? ts("column.hintTip"),
+      ts("column.hintNeeds", { place: name, has: state.top[owed], give: q.bottom[owed] }),
       mark && mark.oldValue === 0
-        ? `The next column is empty, so open the one beyond it first, then take a ten from there.`
-        : `Exchange one from the ${PLACES[(mark?.from ?? owed + 1)]} column: it becomes ${mark?.newValue}, and the ${name} become ${mark?.toValue}.`,
+        ? ts("column.hintEmptyNext")
+        : ts("column.hintExchange", {
+            from: placeName(mark?.from ?? owed + 1),
+            newValue: mark?.newValue ?? "",
+            place: name,
+            toValue: mark?.toValue ?? "",
+          }),
     );
   }
   /* Which written method this is — see BlockExchange for why the bare
      difference cannot be the last word on six different lessons. */
   return composeHints(
-    state.kidTip ?? "Subtract each column from the ones end.",
-    `${state.filled} of ${q.answer.length} columns are written. Every column can pay now.`,
+    state.kidTip ?? ts("column.hintAllTip"),
+    ts("column.hintWritten", { filled: state.filled, total: q.answer.length }),
     q.mode === "cascade"
-      ? `Each exchange paid for the next: the columns read ${q.difference}.`
+      ? ts("column.hintCascade", { difference: q.difference })
       : q.mode === "across_zero"
-        ? `Opened from the far left, the columns come out as ${q.difference}.`
-        : `Column by column from the right, the answer reads ${q.difference}.`,
+        ? ts("column.hintZero", { difference: q.difference })
+        : ts("column.hintReads", { difference: q.difference }),
   );
 }
 
 export const figureFor = (q: ColumnQuestion): React.ReactNode => (
   <span className="inline-flex flex-col items-end text-slate-900 font-bold" role="img"
-    aria-label={`Column subtraction ${q.minuend} minus ${q.subtrahend} with room to show exchanges`}>
+    aria-label={ts("column.figure", { a: q.minuend, b: q.subtrahend })}>
     <span className="inline-flex gap-0.5 h-4" />
     <span className="inline-flex gap-0.5">{[...q.top].reverse().map((digit, i) => <span key={i} className="inline-flex h-7 w-7 items-center justify-center">{digit}</span>)}</span>
     <span className="inline-flex gap-0.5 border-b-2 border-slate-900 pb-0.5">
@@ -157,6 +164,8 @@ export const figureFor = (q: ColumnQuestion): React.ReactNode => (
 );
 
 export const ColumnPad: React.FC<ActivityProps<ColumnPadParams>> = ({ params, koda, onComplete, lesson }) => {
+  // Re-render when the language changes: every line below reads the catalog.
+  useT();
   const setup: ColumnSetup = { ...params, ...params.question };
   const totalQuestions = setup.questionsPerRound ?? 5;
   const practising = isPractice(setup);
@@ -228,7 +237,7 @@ export const ColumnPad: React.FC<ActivityProps<ColumnPadParams>> = ({ params, ko
   };
 
   const check = () => {
-    if (filled < width) { nudge.refuse(`Write the ${PLACES[nextColumn]} column before you check.`); return; }
+    if (filled < width) { nudge.refuse(ts("column.refuseWrite", { place: placeName(nextColumn) })); return; }
     const given = q.answer.map((_, i) => written[i]).reverse().join("").replace(/^0+(?=\d)/, "");
     const correct = given === String(q.difference);
     chime(koda, correct ? "right" : "wrong");
@@ -239,12 +248,12 @@ export const ColumnPad: React.FC<ActivityProps<ColumnPadParams>> = ({ params, ko
     round.submit({
       correct, given, expected: q.expected,
       errorKind: correct ? undefined : droppedExchange ? "place_value" : "off_by_more",
-      title: correct ? "Every column balances!" : droppedExchange ? "An exchange is missing" : "Check the columns again",
-      message: practising ? undefined : `${q.minuend} minus ${q.subtrahend} is ${q.difference}.`,
+      title: correct ? ts("column.rightTitle") : droppedExchange ? ts("column.missingExchange") : ts("column.wrongTitle"),
+      message: practising ? undefined : ts("aMinusBIs", { a: q.minuend, b: q.subtrahend, difference: q.difference }),
     });
   };
 
-  const label = (i: number) => `${PLACES[i]} column`;
+  const label = (i: number) => ts("column.columnLabel", { place: placeName(i) });
 
   /*
    * The coach: the same ladder, offered rather than waited for.
@@ -278,7 +287,7 @@ export const ColumnPad: React.FC<ActivityProps<ColumnPadParams>> = ({ params, ko
     useSupport: round.useSupport,
   });
 
-  return <SkillRound koda={koda} lesson={lesson} fallbackTitle="Column Subtraction" round={round}
+  return <SkillRound koda={koda} lesson={lesson} fallbackTitle={ts("column.title")} round={round}
     totalQuestions={totalQuestions} prompt={prompt} iconName="layers" iconTone="indigo"
     tagLabels={tagLabelsFrom(koda)} nudge={nudge.message}
     hints={hints}
@@ -339,7 +348,7 @@ export const ColumnPad: React.FC<ActivityProps<ColumnPadParams>> = ({ params, ko
                     else guide.moved();
                     setWritten((current) => ({ ...current, [column]: event.target.value.replace(/[^0-9]/g, "").slice(-1) }));
                   }}
-                  aria-label={`${label(column)}${guide.target === column ? ", write this one next" : ""}`}
+                  aria-label={guide.target === column ? ts("column.writeNext", { label: label(column) }) : label(column)}
                   className={themeSystem.field("md", `w-full text-center text-2xl font-black tabular-nums${
                     guide.target === column ? " ring-4 ring-indigo-500" : ""
                   }`)} />
@@ -350,8 +359,8 @@ export const ColumnPad: React.FC<ActivityProps<ColumnPadParams>> = ({ params, ko
 
         {scaffold && !practising && <div className="mt-3 text-center text-sm font-bold text-ink/60">
           {owed !== undefined
-            ? `The ${PLACES[owed]} column cannot pay yet. Exchange one from the left.`
-            : filled < width ? `Write the ${PLACES[nextColumn]} column next.` : "Every column is written."}
+            ? ts("column.helpCannotPay", { place: placeName(owed) })
+            : filled < width ? ts("column.helpWriteNext", { place: placeName(nextColumn) }) : ts("column.helpDone")}
         </div>}
       </div>
 
@@ -361,12 +370,12 @@ export const ColumnPad: React.FC<ActivityProps<ColumnPadParams>> = ({ params, ko
           const possible = markFor(top, column) !== undefined && top[column] < 10;
           return possible ? <button key={column} type="button" onClick={() => exchangeInto(column)}
             className={`${TOUCH_TARGET} ${themeSystem.button("secondary", "md")}`}>
-            Exchange into the {PLACES[column]}
+            {ts("column.exchangeInto", { place: placeName(column) })}
           </button> : null;
         })}
       </div>
 
-      <div className="flex justify-center"><button type="button" onClick={check} className={themeSystem.button("primary", "lg")}>Check</button></div>
+      <div className="flex justify-center"><button type="button" onClick={check} className={themeSystem.button("primary", "lg")}>{ts("check")}</button></div>
     </div>
   </SkillRound>;
 };

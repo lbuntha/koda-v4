@@ -9,6 +9,7 @@
  * skill from `rounding-estimator`, which is why it gets its own concept key.
  */
 
+import { td } from "../i18n";
 import { digitsOf, pick, shuffle, type Quotient } from "./divisionNumbers";
 
 export type EstimateMode =
@@ -134,7 +135,7 @@ export function buildEstimateQuestion(
     return {
       id: `division-compatible-${index}-${dividend}-${divisor}`,
       taskKind: "division_compatible",
-      prompt: `About how much is ${dividend} ÷ ${divisor}?`,
+      prompt: td("estimate.prompt.compatible", { n: dividend, d: divisor }),
       expected: String(friendliestTotal(dividend, divisor) / divisor),
       itemCount: 2,
       mode,
@@ -156,7 +157,7 @@ export function buildEstimateQuestion(
     return {
       id: `division-reasonable-${index}-${dividend}-${divisor}`,
       taskKind: "division_reasonable",
-      prompt: `Somebody says ${dividend} ÷ ${divisor} = ${claim}. Could that be right?`,
+      prompt: td("estimate.prompt.reasonable", { n: dividend, d: divisor, claim }),
       expected: fault === "right" ? "yes" : "no",
       itemCount: 1,
       mode,
@@ -188,8 +189,8 @@ export function buildEstimateQuestion(
     taskKind: "division_check_back",
     prompt:
       remainder === 0
-        ? `${dividend} ÷ ${divisor} = ${quotient}. Which sum checks it?`
-        : `${dividend} ÷ ${divisor} = ${quotient} r ${remainder}. Which sum checks it?`,
+        ? td("estimate.prompt.checkBack", { n: dividend, d: divisor, q: quotient })
+        : td("estimate.prompt.checkBackRemainder", { n: dividend, d: divisor, q: quotient, r: remainder }),
     expected: truth,
     itemCount: 1,
     mode,

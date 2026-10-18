@@ -7,6 +7,7 @@ import voiceJson from "./voice.json";
 import commonVoice from "../../voice/common/voice.json";
 import audioManifest from "./audio/manifest.json";
 import { isPracticeLesson } from "../../curriculum";
+import { translate } from "../../lib/i18n";
 import type { Lesson } from "../types";
 
 /**
@@ -67,6 +68,11 @@ describe("the subtraction speech inventory", () => {
       // Only literal strings: a template or a variable is question copy, which
       // the lesson owns, not a fixed line the inventory has to carry.
       for (const match of code.matchAll(/speech\.say\(\s*"([^"]+)"/g)) spoken.push(match[1]);
+      // A fixed line moved into the catalog is still a fixed line: its English
+      // is what gets recorded.
+      for (const match of code.matchAll(/speech\.say\(\s*ts\("([\w.]+)"\)/g)) {
+        spoken.push(translate(`skills.subtraction.${match[1]}`, undefined, "en"));
+      }
     }
     expect(spoken.length, "no fixed spoken lines found — has the call shape changed?").toBeGreaterThan(0);
     for (const line of spoken) {

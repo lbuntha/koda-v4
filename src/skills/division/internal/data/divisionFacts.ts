@@ -16,6 +16,7 @@
  * question, and no lesson claiming to teach something it does not.
  */
 
+import { td } from "../i18n";
 import {
   drawQuotient,
   pick,
@@ -112,9 +113,9 @@ export interface FactQuestion {
 }
 
 const PROMPTS: Record<FactMode, (q: Omit<FactQuestion, "prompt">) => string> = {
-  family: (q) => `Which of these are true for ${q.divisor}, ${q.quotient} and ${q.dividend}?`,
-  table_divide: (q) => `Find ${q.dividend} in the ${q.divisor} row. Which column is it in?`,
-  missing_factor: (q) => `${q.divisor} × ? = ${q.dividend}. What is ${q.dividend} ÷ ${q.divisor}?`,
+  family: (q) => td("facts.prompt.family", { d: q.divisor, q: q.quotient, n: q.dividend }),
+  table_divide: (q) => td("facts.prompt.table_divide", { n: q.dividend, d: q.divisor }),
+  missing_factor: (q) => td("facts.prompt.missing_factor", { n: q.dividend, d: q.divisor }),
   easy_divisors: (q) => `${q.dividend} ÷ ${q.divisor}`,
   repeated_halving: (q) => `${q.dividend} ÷ ${q.divisor}`,
   known_multiple: (q) => `${q.dividend} ÷ ${q.divisor}`,
@@ -147,7 +148,7 @@ export function familyEquations(value: Triple): { all: string[]; correct: string
 
 /** The helper, written as the question it answers rather than as its answer. */
 const helperFor = (value: Quotient, mode: FactMode): string => {
-  if (mode === "repeated_halving") return `Halve it, then halve again`;
+  if (mode === "repeated_halving") return td("facts.halveTwice");
   return `${value.divisor} × ? = ${value.dividend}`;
 };
 

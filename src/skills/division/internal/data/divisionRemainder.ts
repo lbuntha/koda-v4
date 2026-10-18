@@ -15,6 +15,7 @@
  * *question* is the variable.
  */
 
+import { catalogRecord, td } from "../i18n";
 import {
   drawQuotient,
   pick,
@@ -68,52 +69,16 @@ const DEFAULTS: Record<RemainderMode, ModeDefaults> = {
  * that changes. A different story for each reading would let a child sort them
  * by subject rather than by what is being asked.
  */
-interface Situation {
-  /** The shared opening: "There are 17 children and each bus holds 5." */
-  setup(total: number, size: number): string;
-  /** The four endings, by what they want back. */
-  ask: Record<Reading, string>;
-  /** The unit the answer is counted in, for the wording of the options. */
-  unit: string;
-  /** What is left over is counted in. */
-  leftUnit: string;
-}
+/*
+ * Each situation's words are in the catalog under `remainder.situations.<id>`:
+ * the shared opening ("17 children are going on a trip. Each bus holds 5."),
+ * the four endings by what they want back, and the four written answers. The
+ * answers are whole sentences rather than a number and a unit, because not
+ * every language puts the unit after the number.
+ */
+type Situation = "bus" | "egg" | "pencil";
 
-const SITUATIONS: readonly Situation[] = [
-  {
-    setup: (total, size) => `${total} children are going on a trip. Each bus holds ${size}.`,
-    ask: {
-      "round-up": "How many buses are needed so that everybody goes?",
-      "round-down": "How many buses will be completely full?",
-      "the-remainder": "How many children are left after the full buses have gone?",
-      both: "How many full buses, and how many children left over?",
-    },
-    unit: "buses",
-    leftUnit: "children",
-  },
-  {
-    setup: (total, size) => `${total} eggs are being packed into boxes of ${size}.`,
-    ask: {
-      "round-up": "How many boxes are needed to hold every egg?",
-      "round-down": "How many boxes can be filled completely?",
-      "the-remainder": "How many eggs will not fit into a full box?",
-      both: "How many full boxes, and how many eggs left over?",
-    },
-    unit: "boxes",
-    leftUnit: "eggs",
-  },
-  {
-    setup: (total, size) => `${total} pencils are shared between ${size} children.`,
-    ask: {
-      "round-up": "How many would each need if every pencil had to go to somebody?",
-      "round-down": "How many pencils does each child get?",
-      "the-remainder": "How many pencils are left over?",
-      both: "How many each, and how many left over?",
-    },
-    unit: "pencils each",
-    leftUnit: "pencils",
-  },
-];
+const SITUATIONS: readonly Situation[] = ["bus", "egg", "pencil"];
 
 const READINGS: readonly Reading[] = ["round-up", "round-down", "the-remainder", "both"] as const;
 
@@ -219,8 +184,9 @@ export function buildRemainderQuestion(
   }
 
   const situation = pick(SITUATIONS);
-  const story = situation.setup(value.dividend, value.divisor);
-  const prompt = situation.ask[reading];
+  const words = (key: string, vars?: Record<string, number>) => td(`remainder.situations.${situation}.${key}`, vars);
+  const story = words("setup", { total: value.dividend, size: value.divisor });
+  const prompt = words(`ask.${reading}`);
 
   if (mode === "choose_form") {
     /*
@@ -232,10 +198,10 @@ export function buildRemainderQuestion(
      * only ever picks digits never has to notice that.
      */
     const written: Record<Reading, string> = {
-      "round-up": `${value.quotient + 1} ${situation.unit}`,
-      "round-down": `${value.quotient} ${situation.unit}`,
-      "the-remainder": `${value.remainder} ${situation.leftUnit} left over`,
-      both: `${value.quotient} ${situation.unit}, ${value.remainder} ${situation.leftUnit} left over`,
+      "round-up": words("written.round-up", { q: value.quotient + 1 }),
+      "round-down": words("written.round-down", { q: value.quotient }),
+      "the-remainder": words("written.the-remainder", { r: value.remainder }),
+      both: words("written.both", { q: value.quotient, r: value.remainder }),
     };
     return {
       ...base,
@@ -270,7 +236,7 @@ export function pairBlockedBecause(
   return null;
 }
 
-export const PAIR_REFUSALS: Record<Exclude<PairBlock, null>, string> = {
-  "remainder-too-big": "The leftover has to be smaller than the number you are dividing by.",
-  incomplete: "Fill in both parts.",
-};
+export const PAIR_REFUSALS: Record<Exclude<PairBlock, null>, string> = catalogRecord("remainder.refusals", [
+  "remainder-too-big",
+  "incomplete",
+]);

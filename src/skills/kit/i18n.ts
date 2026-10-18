@@ -1,5 +1,5 @@
 import { BASE_LANGUAGE, registerMessages, translate, type TranslateVars } from "../../lib/i18n";
-import { LESSON_PLAY_FIELDS, LESSON_TEXT_FIELDS } from "../../lib/lessonText";
+import { LESSON_PLAY_FIELDS, LESSON_QUESTION_LISTS, LESSON_TEXT_FIELDS } from "../../lib/lessonText";
 
 /**
  * A skill's own words, in every language it ships a catalog for.
@@ -51,6 +51,24 @@ export function lessonCatalog(lessons: readonly LessonLike[]): Tree {
       if (typeof step === "string" && step.trim()) stepTree[String(i)] = step;
     });
     if (Object.keys(stepTree).length) entry.steps = stepTree;
+
+    const prompts: Tree = {};
+    for (const [name, line] of Object.entries((play.prompts as Record<string, unknown> | undefined) ?? {})) {
+      if (typeof line === "string" && line.trim()) prompts[name] = line;
+    }
+    if (Object.keys(prompts).length) entry.prompts = prompts;
+
+    const question = (lesson.params as { question?: Record<string, unknown> } | undefined)?.question ?? {};
+    const lists: Tree = {};
+    for (const list of LESSON_QUESTION_LISTS) {
+      const lines = Array.isArray(question[list]) ? (question[list] as unknown[]) : [];
+      const tree: Tree = {};
+      lines.forEach((line, i) => {
+        if (typeof line === "string" && line.trim()) tree[String(i)] = line;
+      });
+      if (Object.keys(tree).length) lists[list] = tree;
+    }
+    if (Object.keys(lists).length) entry.question = lists;
     out[lesson.id] = entry;
   }
   return out;

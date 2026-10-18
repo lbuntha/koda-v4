@@ -29,6 +29,8 @@ import {
   withoutRepeat,
   type PairSpec,
 } from "../internal/data/additionNumbers";
+import { ta } from "../internal/i18n";
+import { useT } from "../../../lib/i18n";
 
 /**
  * Facts, and the facts that get you to them.
@@ -221,15 +223,15 @@ export const promptFor = (q: FactQuestion, template?: string): string => {
   switch (q.mode) {
     case "near_up":
     case "near_down":
-      return `${q.a} plus ${q.b}. It is one away from a double you know.`;
+      return ta("fact.promptNear", { a: q.a, b: q.b });
     case "known_fact":
-      return `${q.a} plus ${q.b}. Which fact would help?`;
+      return ta("fact.promptKnown", { a: q.a, b: q.b });
     case "family":
-      return `${q.a}, ${q.b} and ${q.sum} make a family. Fill in all four.`;
+      return ta("fact.promptFamily", { a: q.a, b: q.b, sum: q.sum });
     case "commute":
-      return `${q.a} plus ${q.b}. Which is the same fact the other way round?`;
+      return ta("fact.promptCommute", { a: q.a, b: q.b });
     default:
-      return `Double ${q.a}. What is the total?`;
+      return ta("fact.promptDouble", { a: q.a });
   }
 };
 
@@ -245,24 +247,24 @@ export const printedFor = (q: FactQuestion): PrintedQuestion => {
   switch (q.mode) {
     case "commute":
       return {
-        text: `${q.a} + ${q.b}. Write the same fact the other way round.`,
+        text: ta("fact.printedCommute", { a: q.a, b: q.b }),
         answer: `${q.b} + ${q.a} = ${q.sum}`,
       };
     case "family":
       return {
-        text: `${q.a}, ${q.b} and ${q.sum} make a fact family. Write all four facts.`,
+        text: ta("fact.printedFamily", { a: q.a, b: q.b, sum: q.sum }),
         answer: `${q.a}+${q.b}=${q.sum}; ${q.b}+${q.a}=${q.sum}; ${q.sum}-${q.a}=${q.b}; ${q.sum}-${q.b}=${q.a}`,
       };
     case "near_up":
     case "near_down":
       return {
-        text: `${q.a} + ${q.b}. Use the double you know.`,
+        text: ta("fact.printedNear", { a: q.a, b: q.b }),
         answer: String(q.sum),
       };
     case "known_fact":
-      return { text: `${q.a} + ${q.b}. Which fact helps?`, answer: String(q.sum) };
+      return { text: ta("fact.printedKnown", { a: q.a, b: q.b }), answer: String(q.sum) };
     default:
-      return { text: `Double ${q.a}.`, answer: String(q.sum) };
+      return { text: ta("fact.printedDouble", { a: q.a }), answer: String(q.sum) };
   }
 };
 
@@ -277,18 +279,15 @@ export const methodFor = (q: FactQuestion): string[] => {
   switch (q.mode) {
     case "near_up":
     case "near_down":
-      return [
-        "Find the double you already know.",
-        "This fact is one away from it, so the answer is one more or one less.",
-      ];
+      return [ta("fact.methodNear1"), ta("fact.methodNear2")];
     case "known_fact":
-      return ["Look for a fact you already know inside this one.", "Use it, then adjust."];
+      return [ta("fact.methodKnown1"), ta("fact.methodKnown2")];
     case "family":
-      return ["The same three numbers make four facts.", "Two adds, and two takeaways."];
+      return [ta("fact.methodFamily1"), ta("fact.methodFamily2")];
     case "commute":
-      return ["Adding is the same in either order.", "Swapping the numbers gives the same total."];
+      return [ta("fact.methodCommute1"), ta("fact.methodCommute2")];
     default:
-      return ["A double is the same number twice.", "These are the facts worth knowing by heart."];
+      return [ta("fact.hintDoubleTip"), ta("fact.methodDouble2")];
   }
 };
 
@@ -309,39 +308,37 @@ export function factHints(
        */
       const up = q.mode === "near_up";
       return composeHints(
-        state.kidTip ?? "A near double is one step from a double you already know.",
+        state.kidTip ?? ta("fact.hintNearTip"),
         state.revealed
-          ? `The double ${q.a} and ${q.a} is ${q.helper!.sum}. This one is ${up ? "one more" : "one less"}.`
-          : up
-            ? `Tap the double ${q.a} and ${q.a}. This fact is one bigger.`
-            : `Tap the double ${q.a} and ${q.a}. This fact is one smaller.`,
-        `${q.helper!.sum} ${up ? "and one more" : "take one away"} is ${q.sum}.`,
+          ? ta(up ? "fact.hintRevealedUp" : "fact.hintRevealedDown", { a: q.a, double: q.helper!.sum })
+          : ta(up ? "fact.hintTapUp" : "fact.hintTapDown", { a: q.a }),
+        ta(up ? "fact.hintOneMore" : "fact.hintOneLess", { double: q.helper!.sum, sum: q.sum }),
       );
     }
     case "known_fact":
       return composeHints(
-        state.kidTip ?? "Pick a fact you already know that is close to this one.",
-        `The double ${q.a} and ${q.a} is the closest fact you already hold.`,
-        `The double is ${q.helper!.sum}. Count on from there to ${q.a} plus ${q.b}.`,
+        state.kidTip ?? ta("fact.hintKnownTip"),
+        ta("fact.hintClosest", { a: q.a }),
+        ta("fact.hintCountFrom", { double: q.helper!.sum, a: q.a, b: q.b }),
       );
     case "family":
       return composeHints(
-        state.kidTip ?? "The same three numbers make four different facts.",
-        `${q.a}, ${q.b} and ${q.sum} are the family. Two of the facts add and two take away.`,
-        `${q.a} and ${q.b} is ${q.sum}, and ${q.sum} take away ${q.a} is ${q.b}.`,
+        state.kidTip ?? ta("fact.hintFamilyTip"),
+        ta("fact.hintFamily", { a: q.a, b: q.b, sum: q.sum }),
+        ta("fact.hintFamilyExample", { a: q.a, b: q.b, sum: q.sum }),
       );
     case "commute":
       return composeHints(
-        state.kidTip ?? "You can add in either order and the total does not change.",
-        `The same fact the other way round starts with the other number: it begins with ${q.b}.`,
+        state.kidTip ?? ta("fact.hintCommuteTip"),
+        ta("fact.hintStartsWith", { b: q.b }),
         // Stops short of pointing at a tile: choosing is the question.
-        `Swapping the two numbers never changes the total.`,
+        ta("fact.hintSwap"),
       );
     default:
       return composeHints(
-        state.kidTip ?? "A double is the same number twice.",
-        `Two rows of ${q.a}. Count one row, then the other.`,
-        `Two rows of ${q.a} make ${q.sum}. That is the double.`,
+        state.kidTip ?? ta("fact.hintDoubleTip"),
+        ta("fact.hintTwoRows", { a: q.a }),
+        ta("fact.hintTwoRowsMake", { a: q.a, sum: q.sum }),
       );
   }
 }
@@ -365,6 +362,8 @@ export const FactDeck: React.FC<ActivityProps<FactDeckParams>> = ({
   onComplete,
   lesson,
 }) => {
+  // Re-render when the language changes: every line below reads the catalog.
+  useT();
   const setup: FactSetup = { ...params, ...params.question };
   const totalQuestions = setup.questionsPerRound ?? 5;
   const copy = playCopy(params);
@@ -458,7 +457,7 @@ export const FactDeck: React.FC<ActivityProps<FactDeckParams>> = ({
       // total is, so nothing may be filed against them for it.
       guide.stumbled();
       nudge.refuse(
-        `${fact.a} and ${fact.b} is a real fact, but it is not close to ${question.a} plus ${question.b}. Look for a double.`,
+        ta("fact.refuseNotClose", { fa: fact.a, fb: fact.b, a: question.a, b: question.b }),
       );
       return;
     }
@@ -476,10 +475,10 @@ export const FactDeck: React.FC<ActivityProps<FactDeckParams>> = ({
       correct,
       given: String(value),
       errorKind: correct ? undefined : Math.abs(value - question.sum) === 1 ? "off_by_one" : "off_by_more",
-      title: correct ? "That is the fact!" : "Not quite",
+      title: correct ? ta("fact.rightTitle") : ta("notQuite"),
       message: correct && question.helper
-        ? `${question.helper.a} and ${question.helper.a} is ${question.helper.sum}, so ${question.a} and ${question.b} is ${question.sum}.`
-        : `${question.a} and ${question.b} is ${question.sum}.`,
+        ? ta("fact.rightNear", { h: question.helper.a, double: question.helper.sum, a: question.a, b: question.b, sum: question.sum })
+        : ta("aAndBIs", { a: question.a, b: question.b, sum: question.sum }),
     });
   };
 
@@ -495,12 +494,12 @@ export const FactDeck: React.FC<ActivityProps<FactDeckParams>> = ({
       correct,
       given: `${fact.a}+${fact.b}`,
       errorKind: correct ? undefined : restated ? "reversed" : "off_by_more",
-      title: correct ? "Same fact, other way round!" : "Look again",
+      title: correct ? ta("fact.commuteTitle") : ta("lookAgain"),
       message: correct
-        ? `${question.b} and ${question.a} is the same as ${question.a} and ${question.b}. Both make ${question.sum}.`
+        ? ta("fact.commuteRight", { a: question.a, b: question.b, sum: question.sum })
         : restated
-          ? "That is the fact you started with. The other way round begins with the other number."
-          : `The other way round is ${question.b} plus ${question.a}.`,
+          ? ta("fact.restated")
+          : ta("fact.otherWay", { a: question.a, b: question.b }),
     });
   };
 
@@ -509,7 +508,7 @@ export const FactDeck: React.FC<ActivityProps<FactDeckParams>> = ({
     const missing = question.members!.filter((_, i) => (members[i] ?? "") === "");
     if (missing.length > 0) {
       guide.stumbled();
-      nudge.refuse(`${missing.length} ${missing.length === 1 ? "fact is" : "facts are"} still empty.`);
+      nudge.refuse(ta("fact.refuseEmpty", { count: missing.length }));
       return;
     }
     const given = question.members!.map((_, i) => members[i] ?? "");
@@ -520,8 +519,8 @@ export const FactDeck: React.FC<ActivityProps<FactDeckParams>> = ({
       correct,
       given: given.join(","),
       errorKind: correct ? undefined : "off_by_more",
-      title: correct ? "The whole family!" : "Check them again",
-      message: `${question.a}, ${question.b} and ${question.sum} make all four facts.`,
+      title: correct ? ta("fact.familyTitle") : ta("checkAgain"),
+      message: ta("fact.familyMessage", { a: question.a, b: question.b, sum: question.sum }),
     });
   };
 
@@ -568,7 +567,7 @@ export const FactDeck: React.FC<ActivityProps<FactDeckParams>> = ({
     <SkillRound
       koda={koda}
       lesson={lesson}
-      fallbackTitle="Fact Deck"
+      fallbackTitle={ta("fact.title")}
       round={round}
       totalQuestions={totalQuestions}
       prompt={prompt}
@@ -605,8 +604,8 @@ export const FactDeck: React.FC<ActivityProps<FactDeckParams>> = ({
 
           {question.mode === "doubles" && scaffold && (
             <div className="flex flex-col gap-2 items-center">
-              <DotRow count={question.a} tone={ADDEND_A.solid} label={`${question.a} in the first row`} />
-              <DotRow count={question.b} tone={ADDEND_B.solid} label={`${question.b} in the second row`} />
+              <DotRow count={question.a} tone={ADDEND_A.solid} label={ta("fact.firstRow", { a: question.a })} />
+              <DotRow count={question.b} tone={ADDEND_B.solid} label={ta("fact.secondRow", { b: question.b })} />
             </div>
           )}
 
@@ -627,10 +626,10 @@ export const FactDeck: React.FC<ActivityProps<FactDeckParams>> = ({
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.94 }}
                 transition={SPRING.tap}
-                aria-label={`Show the double, ${question.a} plus ${question.a}`}
+                aria-label={ta("fact.showDouble", { a: question.a })}
                 className={themeSystem.button("secondary", "md")}
               >
-                I know {question.a} + {question.a}
+                {ta("fact.iKnow", { a: question.a })}
               </motion.button>
             ))}
 
@@ -644,7 +643,7 @@ export const FactDeck: React.FC<ActivityProps<FactDeckParams>> = ({
                   whileHover={{ scale: 1.06 }}
                   whileTap={{ scale: 0.92 }}
                   transition={SPRING.tap}
-                  aria-label={`Helper fact ${fact.a} plus ${fact.b}`}
+                  aria-label={ta("fact.helperLabel", { a: fact.a, b: fact.b })}
                   className={themeSystem.button("secondary", "choice", "min-w-[6rem]")}
                 >
                   {fact.a} + {fact.b}
@@ -675,7 +674,7 @@ export const FactDeck: React.FC<ActivityProps<FactDeckParams>> = ({
                       }))
                     }
                     disabled={Boolean(round.feedback)}
-                    aria-label={`Answer for ${m.text.replace("−", "minus").replace("+", "plus")}`}
+                    aria-label={ta("fact.answerFor", { fact: m.text.replace("−", ta("minusWord")).replace("+", ta("plusWord")) })}
                     className={themeSystem.field("md", "w-16 text-center text-xl font-black tabular-nums")}
                   />
                 </label>
@@ -695,7 +694,7 @@ export const FactDeck: React.FC<ActivityProps<FactDeckParams>> = ({
                 whileHover={{ scale: 1.06, y: -2 }}
                 whileTap={{ scale: 0.9 }}
                 transition={SPRING.tap}
-                aria-label={`${fact.a} plus ${fact.b}`}
+                aria-label={ta("aPlusB", { a: fact.a, b: fact.b })}
                 className={themeSystem.button("secondary", "choice", "min-w-[6.5rem]")}
               >
                 {fact.a} + {fact.b}
@@ -714,7 +713,7 @@ export const FactDeck: React.FC<ActivityProps<FactDeckParams>> = ({
               transition={SPRING.tap}
               className={themeSystem.button("primary", "lg")}
             >
-              Check
+              {ta("check")}
             </motion.button>
           </div>
         )}
@@ -742,7 +741,7 @@ export const FactDeck: React.FC<ActivityProps<FactDeckParams>> = ({
               <div className="flex items-center justify-center gap-3">
                 <span
                   className={`min-w-[5rem] h-14 px-4 rounded-2xl border-2 border-dashed ${CHANGE.border} flex items-center justify-center text-3xl font-black tabular-nums text-ink`}
-                  aria-label={`Answer ${entry || "empty"}`}
+                  aria-label={entry ? ta("answerIs", { value: entry }) : ta("answerEmpty")}
                 >
                   {entry || <span className="text-ink/25">?</span>}
                 </span>
@@ -755,13 +754,13 @@ export const FactDeck: React.FC<ActivityProps<FactDeckParams>> = ({
               <div className="flex justify-center">
                 <motion.button
                   type="button"
-                  onClick={() => (entry === "" ? nudge.refuse("Type your answer first.") : submitNumber(Number(entry)))}
+                  onClick={() => (entry === "" ? nudge.refuse(ta("typeFirst")) : submitNumber(Number(entry)))}
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.94 }}
                   transition={SPRING.tap}
                   className={themeSystem.button("primary", "lg")}
                 >
-                  Check
+                  {ta("check")}
                 </motion.button>
               </div>
             </div>

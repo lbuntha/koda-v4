@@ -15,6 +15,8 @@ import { chime } from "../internal/data/subtractionSound";
 import {
   differenceKey, drawDifference, withoutRepeat, type Difference, type DifferenceSpec,
 } from "../internal/data/subtractionNumbers";
+import { ts } from "../internal/i18n";
+import { useT } from "../../../lib/i18n";
 
 export type FrameMode = "five" | "ten" | "from_five" | "from_ten";
 
@@ -83,8 +85,8 @@ export const promptFor = (q: FrameQuestion, template?: string): string => {
   const filled = template?.replaceAll("{a}", String(q.minuend)).replaceAll("{b}", String(q.subtrahend)).replaceAll("{difference}", String(q.difference));
   if (filled) return filled;
   return isRecall(q.mode)
-    ? `${q.minuend} take away ${q.subtrahend}. How many are left?`
-    : `Take ${q.subtrahend} counters out of the ${q.size}-frame. How many remain?`;
+    ? ts("frame.promptRecall", { a: q.minuend, b: q.subtrahend })
+    : ts("frame.prompt", { b: q.subtrahend, size: q.size });
 };
 
 export const printedFor = (q: FrameQuestion): PrintedQuestion => ({
@@ -92,33 +94,33 @@ export const printedFor = (q: FrameQuestion): PrintedQuestion => ({
   // question again, so on paper the fact comes first and the frame checks it.
   text: isRecall(q.mode)
     ? `${q.minuend} − ${q.subtrahend} =`
-    : `Cross out ${q.subtrahend} counters. ${q.minuend} − ${q.subtrahend} =`,
+    : ts("frame.printed", { a: q.minuend, b: q.subtrahend }),
   answer: String(q.difference),
 });
 
 export const methodFor = (q: FrameQuestion): string[] => isRecall(q.mode) ? [
-  `Recall the partners that make ${q.minuend}.`,
-  `Name the partner of ${q.subtrahend}.`,
-  `Check it against the ${q.size}-frame.`,
+  ts("frame.methodRecall1", { a: q.minuend }),
+  ts("frame.methodRecall2", { b: q.subtrahend }),
+  ts("frame.methodRecall3", { size: q.size }),
 ] : [
-  `See ${q.minuend} in the ${q.size}-frame.`,
-  `Cross out ${q.subtrahend} counters without rearranging the frame.`,
-  "Read how many counters remain.",
+  ts("frame.method1", { a: q.minuend, size: q.size }),
+  ts("frame.method2", { b: q.subtrahend }),
+  ts("frame.method3"),
 ];
 
 export function frameHints(q: FrameQuestion, state: { removed: number; kidTip?: string }): string[] {
   if (isRecall(q.mode)) return composeHints(
-    state.kidTip ?? `Remember the partners that make ${q.minuend}.`,
-    `The frame holds ${q.minuend}. Take ${q.subtrahend} out and count what is left.`,
-    `${q.subtrahend} and ${q.difference} are the partners that make ${q.minuend}.`,
+    state.kidTip ?? ts("frame.hintRecallTip", { a: q.minuend }),
+    ts("frame.hintHolds", { a: q.minuend, b: q.subtrahend }),
+    ts("frame.hintPartners", { b: q.subtrahend, difference: q.difference, a: q.minuend }),
   );
   const left = q.subtrahend - state.removed;
   return composeHints(
-    state.kidTip ?? "Keep the frame in its rows. Take counters out without moving the others.",
+    state.kidTip ?? ts("frame.hintTip"),
     state.removed === 0
-      ? `The frame starts with ${q.minuend}. Take out ${q.subtrahend} counters.`
-      : `You have taken out ${state.removed}. Take out ${left} more, then read the counters still filled.`,
-    `${q.minuend} counters with ${q.subtrahend} taken out leaves ${q.difference}.`,
+      ? ts("frame.hintStart", { a: q.minuend, b: q.subtrahend })
+      : ts("frame.hintMore", { removed: state.removed, left }),
+    ts("frame.hintLeaves", { a: q.minuend, b: q.subtrahend, difference: q.difference }),
   );
 }
 
@@ -127,8 +129,8 @@ export const figureFor = (q: FrameQuestion): React.ReactNode => {
   const cell = 26;
   return <svg viewBox={`0 0 ${5 * cell + 2} ${rows * cell + 2}`} width={5 * cell + 2} height={rows * cell + 2}
     role="img" aria-label={isRecall(q.mode)
-      ? `${q.size} frame holding ${q.minuend} counters, to check ${q.minuend} minus ${q.subtrahend}`
-      : `${q.size} frame with ${q.minuend} counters; cross out ${q.subtrahend}`} className="text-slate-900">
+      ? ts("frame.figureRecall", { size: q.size, a: q.minuend, b: q.subtrahend })
+      : ts("frame.figure", { size: q.size, a: q.minuend, b: q.subtrahend })} className="text-slate-900">
     <g stroke="currentColor" strokeWidth="1.5" fill="none">
       {Array.from({ length: q.size }, (_, i) => <rect key={i} x={(i % 5) * cell + 1} y={Math.floor(i / 5) * cell + 1} width={cell} height={cell} />)}
     </g>
@@ -140,6 +142,8 @@ export const figureFor = (q: FrameQuestion): React.ReactNode => {
 const choicesFor = (answer: number, seed: string): number[] => answerChoices(answer, seed);
 
 export const FrameTakeaway: React.FC<ActivityProps<FrameTakeawayParams>> = ({ params, koda, onComplete, lesson }) => {
+  // Re-render when the language changes: every line below reads the catalog.
+  useT();
   const setup: FrameSetup = { ...params, ...params.question };
   const totalQuestions = setup.questionsPerRound ?? 5;
   const practising = isPractice(setup);
@@ -180,7 +184,7 @@ export const FrameTakeaway: React.FC<ActivityProps<FrameTakeawayParams>> = ({ pa
   const scaffold = koda.config.isEnabled("strategy_scaffold", true);
   const take = (i: number) => {
     if (removed.includes(i) || round.feedback) return;
-    if (removed.length >= q.subtrahend) { nudge.refuse(`You have already taken out ${q.subtrahend}. Read what remains.`); return; }
+    if (removed.length >= q.subtrahend) { nudge.refuse(ts("frame.refuseEnough", { b: q.subtrahend })); return; }
     setRemoved((current) => [...current, i]);
     chime(koda, "moved");
     koda.haptics.tap();
@@ -192,7 +196,7 @@ export const FrameTakeaway: React.FC<ActivityProps<FrameTakeawayParams>> = ({ pa
     koda.haptics.tap();
   };
   const check = () => {
-    if (removed.length !== q.subtrahend) { nudge.refuse(`Take out ${q.subtrahend - removed.length} more before you check.`); return; }
+    if (removed.length !== q.subtrahend) { nudge.refuse(ts("frame.refuseMore", { left: q.subtrahend - removed.length })); return; }
   };
   const choose = (value: number) => {
     // The frame answers back: recall reveals the partner the child just named.
@@ -201,8 +205,8 @@ export const FrameTakeaway: React.FC<ActivityProps<FrameTakeawayParams>> = ({ pa
     chime(koda, correct ? "right" : "wrong");
     if (correct) koda.haptics.success(); else koda.haptics.tap();
     round.submit({ correct, given: String(value), expected: q.expected, errorKind: correct ? undefined : "miscounted_items",
-      title: correct ? "You read the frame!" : "Look at the filled counters",
-      message: practising ? undefined : `${q.minuend} minus ${q.subtrahend} is ${q.difference}.` });
+      title: correct ? ts("frame.rightTitle") : ts("frame.wrongTitle"),
+      message: practising ? undefined : ts("aMinusBIs", { a: q.minuend, b: q.subtrahend, difference: q.difference }) });
   };
   const ready = removed.length === q.subtrahend;
   const prompt = promptFor(q, copy.prompts?.default);
@@ -237,7 +241,7 @@ export const FrameTakeaway: React.FC<ActivityProps<FrameTakeawayParams>> = ({ pa
     useSupport: round.useSupport,
   });
 
-  return <SkillRound koda={koda} lesson={lesson} fallbackTitle="Take Away in a Frame" round={round}
+  return <SkillRound koda={koda} lesson={lesson} fallbackTitle={ts("frame.title")} round={round}
     totalQuestions={totalQuestions} prompt={prompt} iconName="boxes" iconTone="purple"
     tagLabels={tagLabelsFrom(koda)} nudge={nudge.message}
     hints={hints}
@@ -253,7 +257,9 @@ export const FrameTakeaway: React.FC<ActivityProps<FrameTakeawayParams>> = ({ pa
         <div className={`grid grid-cols-5 gap-1.5 sm:gap-2 w-full max-w-[430px] ${q.size === 5 ? "grid-rows-1" : "grid-rows-2"}`}
           role={recall ? "img" : undefined}
           aria-label={recall
-            ? `${q.size}-frame holding ${q.minuend} counters${removed.length ? `, ${removed.length} crossed out` : ""}`
+            ? removed.length
+              ? ts("frame.holdingCrossed", { size: q.size, a: q.minuend, crossed: removed.length })
+              : ts("frame.holding", { size: q.size, a: q.minuend })
             : undefined}>
           {Array.from({ length: q.size }, (_, i) => {
             const filled = i < q.minuend;
@@ -272,23 +278,24 @@ export const FrameTakeaway: React.FC<ActivityProps<FrameTakeawayParams>> = ({ pa
               : <motion.button key={i} type="button" onClick={interactive ? () => take(i) : undefined} disabled={!interactive}
                 /* The glow is nothing to a screen reader, so the space the
                    coach points at says so in words. */
-                aria-label={`Frame space ${i + 1}, ${gone ? "removed" : filled ? "filled" : "empty"}${
-                  guide.target === i ? ", take this one out next" : ""
-                }`}
+                aria-label={ts(guide.target === i ? "frame.spaceNext" : "frame.space", {
+                  n: i + 1,
+                  state: ts(gone ? "frame.stateRemoved" : filled ? "frame.stateFilled" : "frame.stateEmpty"),
+                })}
                 className={`${cell} ${
                   guide.target === i ? "ring-4 ring-indigo-500 animate-pulse rounded-2xl" : ""
                 }`} {...enter}>{contents}</motion.button>;
           })}
         </div>
-        {showsDifference && removed.length > 0 && <div aria-live="polite" className={`text-4xl font-black tabular-nums ${DIFFERENCE.text}`}>{q.minuend - removed.length}<span className="ml-2 text-xs uppercase text-ink/50">remain</span></div>}
+        {showsDifference && removed.length > 0 && <div aria-live="polite" className={`text-4xl font-black tabular-nums ${DIFFERENCE.text}`}>{q.minuend - removed.length}<span className="ml-2 text-xs uppercase text-ink/50">{ts("frame.remain")}</span></div>}
         {scaffold && !practising && <div className="text-sm font-bold text-ink/60">{recall
           ? removed.length > 0
-            ? `${q.subtrahend} and ${q.difference} make ${q.minuend}.`
-            : `Answer from memory; the frame will show the partner.`
-          : `Take out ${Math.max(0, q.subtrahend - removed.length)} more; keep the frame pattern.`}</div>}
+            ? ts("frame.helpMake", { b: q.subtrahend, difference: q.difference, a: q.minuend })
+            : ts("frame.helpMemory")
+          : ts("frame.helpTakeOut", { left: Math.max(0, q.subtrahend - removed.length) })}</div>}
       </div>
-      {!recall && removed.length > 0 && !round.feedback && <div className="flex justify-center"><button type="button" onClick={putBackLast} className={themeSystem.button("ghost", "sm")}>Put back the last counter</button></div>}
-      {!recall && !ready && <div className="flex justify-center"><button type="button" onClick={check} className={themeSystem.button("primary", "lg")}>Check</button></div>}
+      {!recall && removed.length > 0 && !round.feedback && <div className="flex justify-center"><button type="button" onClick={putBackLast} className={themeSystem.button("ghost", "sm")}>{ts("frame.putBack")}</button></div>}
+      {!recall && !ready && <div className="flex justify-center"><button type="button" onClick={check} className={themeSystem.button("primary", "lg")}>{ts("check")}</button></div>}
       {(recall || ready) && <div className="flex flex-wrap justify-center gap-2.5">{choicesFor(q.difference, q.id).map((value) => <button key={value} type="button" onClick={() => choose(value)} disabled={Boolean(round.feedback)} className={themeSystem.button("secondary", "choice")}>{value}</button>)}</div>}
     </div>
   </SkillRound>;

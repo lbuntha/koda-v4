@@ -16,6 +16,8 @@ import { fillTemplate, sceneAt, type StoryScene } from "../internal/data/storyCa
 import {
   drawSubtractionStory, type StoryKind, type StoryNumbers, type StorySpec,
 } from "../internal/data/subtractionNumbers";
+import { listAnd, ts } from "../internal/i18n";
+import { useT } from "../../../lib/i18n";
 
 export type StoryMode = StoryKind;
 
@@ -48,25 +50,9 @@ export interface StoryQuestion extends RoundQuestion, StoryNumbers {
   firstAnswer?: number;
 }
 
-const DEFAULT_TEMPLATE: Record<StoryMode, string> = {
-  remove_result: "{who} had {v0} {item}. {who} gave {v1} away.",
-  remove_change: "{who} had {v0} {item}. Now {who} has {v1}.",
-  remove_start: "{who} gave away {v0} {item} and has {v1} left.",
-  compare_difference: "{who} has {v0} {item}. {other} has {v1}.",
-  compare_bigger: "{who} has {v0} {item}. {other} has {v1} more than {who}.",
-  compare_smaller: "{who} has {v0} {item}. {other} has {v1} fewer than {who}.",
-  multi_step: "{who} had {v0} {item}, then found {v1} more, then gave {v2} away.",
-};
-
-const QUESTION: Record<StoryMode, string> = {
-  remove_result: "How many are left?",
-  remove_change: "How many were given away?",
-  remove_start: "How many were there to start with?",
-  compare_difference: "How many more does one have than the other?",
-  compare_bigger: "How many does {other} have?",
-  compare_smaller: "How many does {other} have?",
-  multi_step: "How many are left at the end?",
-};
+/** Wording of last resort and the question asked, in the language on screen (`story.template.*`, `story.question.*`). */
+const defaultTemplate = (mode: StoryMode): string => ts(`story.template.${mode}`);
+const questionFor = (mode: StoryMode): string => ts(`story.question.${mode}`);
 
 const COMPARISON_KINDS: StoryMode[] = ["compare_difference", "compare_bigger", "compare_smaller"];
 
@@ -82,46 +68,46 @@ const barsFor = (kind: StoryMode, numbers: StoryNumbers): StoryBar[] => {
   switch (kind) {
     case "remove_result":
       return [
-        { key: "whole", label: "started with", value: v0, role: "whole" },
-        { key: "removed", label: "given away", value: v1, role: "removed" },
-        { key: "left", label: "left", role: "remaining", unknown: true },
+        { key: "whole", label: ts("story.bar.startedWith"), value: v0, role: "whole" },
+        { key: "removed", label: ts("story.bar.givenAway"), value: v1, role: "removed" },
+        { key: "left", label: ts("story.bar.left"), role: "remaining", unknown: true },
       ];
     case "remove_change":
       return [
-        { key: "whole", label: "started with", value: v0, role: "whole" },
-        { key: "removed", label: "given away", role: "removed", unknown: true },
-        { key: "left", label: "left", value: v1, role: "remaining" },
+        { key: "whole", label: ts("story.bar.startedWith"), value: v0, role: "whole" },
+        { key: "removed", label: ts("story.bar.givenAway"), role: "removed", unknown: true },
+        { key: "left", label: ts("story.bar.left"), value: v1, role: "remaining" },
       ];
     case "remove_start":
       return [
-        { key: "whole", label: "started with", role: "whole", unknown: true },
-        { key: "removed", label: "given away", value: v0, role: "removed" },
-        { key: "left", label: "left", value: v1, role: "remaining" },
+        { key: "whole", label: ts("story.bar.startedWith"), role: "whole", unknown: true },
+        { key: "removed", label: ts("story.bar.givenAway"), value: v0, role: "removed" },
+        { key: "left", label: ts("story.bar.left"), value: v1, role: "remaining" },
       ];
     case "compare_difference":
       return [
-        { key: "smaller", label: "first group", value: v0, role: "other" },
-        { key: "bigger", label: "second group", value: v1, role: "whole" },
-        { key: "gap", label: "difference", role: "remaining", unknown: true },
+        { key: "smaller", label: ts("story.bar.firstGroup"), value: v0, role: "other" },
+        { key: "bigger", label: ts("story.bar.secondGroup"), value: v1, role: "whole" },
+        { key: "gap", label: ts("story.bar.difference"), role: "remaining", unknown: true },
       ];
     case "compare_bigger":
       return [
-        { key: "smaller", label: "first group", value: v0, role: "other" },
-        { key: "gap", label: "more than the first", value: v1, role: "remaining" },
-        { key: "bigger", label: "second group", role: "whole", unknown: true },
+        { key: "smaller", label: ts("story.bar.firstGroup"), value: v0, role: "other" },
+        { key: "gap", label: ts("story.bar.moreThanFirst"), value: v1, role: "remaining" },
+        { key: "bigger", label: ts("story.bar.secondGroup"), role: "whole", unknown: true },
       ];
     case "compare_smaller":
       return [
-        { key: "bigger", label: "first group", value: v0, role: "whole" },
-        { key: "gap", label: "fewer than the first", value: v1, role: "remaining" },
-        { key: "smaller", label: "second group", role: "other", unknown: true },
+        { key: "bigger", label: ts("story.bar.firstGroup"), value: v0, role: "whole" },
+        { key: "gap", label: ts("story.bar.fewerThanFirst"), value: v1, role: "remaining" },
+        { key: "smaller", label: ts("story.bar.secondGroup"), role: "other", unknown: true },
       ];
     default:
       return [
-        { key: "start", label: "started with", value: numbers.values[0], role: "whole" },
-        { key: "found", label: "found", value: numbers.values[1], role: "other" },
-        { key: "gave", label: "gave away", value: numbers.values[2], role: "removed" },
-        { key: "left", label: "left", role: "remaining", unknown: true },
+        { key: "start", label: ts("story.bar.startedWith"), value: numbers.values[0], role: "whole" },
+        { key: "found", label: ts("story.bar.found"), value: numbers.values[1], role: "other" },
+        { key: "gave", label: ts("story.bar.gaveAway"), value: numbers.values[2], role: "removed" },
+        { key: "left", label: ts("story.bar.left"), role: "remaining", unknown: true },
       ];
   }
 };
@@ -136,12 +122,12 @@ export const buildQuestion = (setup: StorySetup, index: number, seen: Set<string
   const scene = sceneAt(index, seen.size);
   const numbers = drawSubtractionStory(mode, specFrom(setup));
   seen.add(`${mode}-${numbers.values.join("-")}`);
-  const template = setup.templates?.[index % (setup.templates.length || 1)] ?? DEFAULT_TEMPLATE[mode];
+  const template = setup.templates?.[index % (setup.templates.length || 1)] ?? defaultTemplate(mode);
   return {
     id: `q${index}-${Date.now().toString(36)}`, taskKind: `subtract_story_${mode}`,
     mode, ...numbers, scene,
     sentence: fillTemplate(template, scene, numbers.values),
-    question: fillTemplate(QUESTION[mode], scene, numbers.values),
+    question: fillTemplate(questionFor(mode), scene, numbers.values),
     comparison: COMPARISON_KINDS.includes(mode),
     bars: barsFor(mode, numbers),
     firstAnswer: numbers.intermediate,
@@ -159,14 +145,14 @@ export const promptFor = (q: StoryQuestion, template?: string): string => {
 
 export const printedFor = (q: StoryQuestion): PrintedQuestion => ({
   text: `${q.sentence} ${q.question}`,
-  answer: q.mode === "multi_step" ? `${q.intermediate}, then ${q.answer}` : String(q.answer),
+  answer: q.mode === "multi_step" ? ts("story.thenAnswer", { first: q.intermediate ?? 0, answer: q.answer }) : String(q.answer),
 });
 
 export const methodFor = (q: StoryQuestion): string[] => q.comparison
-  ? ["Draw one bar for each group, lined up at the left.", "The gap between their ends is the difference.", "Nothing is taken away — the bars are only compared."]
+  ? [ts("story.methodCompare1"), ts("story.methodCompare2"), ts("story.methodCompare3")]
   : q.mode === "multi_step"
-    ? ["Work out what happened after the first change.", "Apply the second change to that answer.", "Only the final amount answers the question."]
-    : ["Draw one bar for the amount at the start.", "Mark the part that changed.", "The unknown is whichever part the story does not state."];
+    ? [ts("story.methodMulti1"), ts("story.methodMulti2"), ts("story.methodMulti3")]
+    : [ts("story.method1"), ts("story.method2"), ts("story.method3")];
 
 export function storyHints(
   q: StoryQuestion,
@@ -174,30 +160,33 @@ export function storyHints(
 ): string[] {
   const unknown = q.bars.find((bar) => bar.unknown)!;
   if (q.mode === "multi_step") return composeHints(
-    state.kidTip ?? "Take the changes one at a time, in the order they happened.",
+    state.kidTip ?? ts("story.hintMultiTip"),
     state.answered === 0
-      ? `First: ${q.values[0]} and ${q.values[1]} more.`
-      : `Now take ${q.values[2]} away from ${q.intermediate}.`,
+      ? ts("story.hintFirst", { a: q.values[0], b: q.values[1] })
+      : ts("story.hintNowTake", { c: q.values[2], first: q.intermediate ?? 0 }),
     state.answered === 0
-      ? `After the first change there are ${q.intermediate}.`
-      : `Then the second change leaves ${q.answer}.`,
+      ? ts("story.hintAfterFirst", { first: q.intermediate ?? 0 })
+      : ts("story.hintThen", { answer: q.answer }),
   );
   if (q.comparison) return composeHints(
-    state.kidTip ?? "Line the two groups up and look at the gap.",
-    `Both groups keep everything they have. The unknown is the ${unknown.label}.`,
+    state.kidTip ?? ts("story.hintCompareTip"),
+    ts("story.hintKeep", { label: unknown.label }),
     /* Which bar is missing *is* the technique: one lesson grows the shorter
        bar by the gap, the other shortens the longer one by it. Both used to
        end on the same sentence. */
     q.mode === "compare_bigger"
-      ? `The shorter bar plus the gap of ${q.values[1]} reaches ${q.answer}.`
+      ? ts("story.hintShorter", { gap: q.values[1], answer: q.answer })
       : q.mode === "compare_smaller"
-        ? `The longer bar less the gap of ${q.values[1]} leaves ${q.answer}.`
-        : `The bars differ by ${q.answer}, so the ${unknown.label} is ${q.answer}.`,
+        ? ts("story.hintLonger", { gap: q.values[1], answer: q.answer })
+        : ts("story.hintDiffer", { answer: q.answer, label: unknown.label }),
   );
   return composeHints(
-    state.kidTip ?? "Find which part of the story is missing, then work out that part.",
-    `The story states ${q.bars.filter((bar) => !bar.unknown).map((bar) => `${bar.label} ${bar.value}`).join(" and ")}. The ${unknown.label} is unknown.`,
-    `That makes the ${unknown.label} ${q.answer}.`,
+    state.kidTip ?? ts("story.hintTip"),
+    ts("story.hintStates", {
+      known: listAnd(q.bars.filter((bar) => !bar.unknown).map((bar) => ts("story.barValue", { label: bar.label, value: bar.value ?? 0 }))),
+      label: unknown.label,
+    }),
+    ts("story.hintMakes", { label: unknown.label, answer: q.answer }),
   );
 }
 
@@ -206,7 +195,7 @@ const BAR_TONE = { whole: WHOLE, removed: REMOVED_PART, remaining: DIFFERENCE, o
 export const figureFor = (q: StoryQuestion): React.ReactNode => {
   const widest = Math.max(...q.bars.map((bar) => bar.value ?? q.answer), 1);
   return <span className="inline-flex flex-col gap-1 text-slate-900" role="img"
-    aria-label={`${q.comparison ? "Comparison" : "Removal"} bar model with the ${q.bars.find((bar) => bar.unknown)!.label} unknown`}>
+    aria-label={ts(q.comparison ? "story.figureCompare" : "story.figureRemove", { label: q.bars.find((bar) => bar.unknown)!.label })}>
     {q.bars.map((bar) => <span key={bar.key} className="inline-flex items-center gap-1.5 text-[9px]">
       <span className="inline-block w-20 text-right">{bar.label}</span>
       <span className="inline-block h-4 border-2 border-slate-900" style={{ width: `${Math.max(8, ((bar.value ?? q.answer) / widest) * 120)}px` }} />
@@ -219,6 +208,8 @@ export const figureFor = (q: StoryQuestion): React.ReactNode => {
 const choicesFor = (answer: number, seed: string): number[] => answerChoices(answer, seed);
 
 export const StoryBoard: React.FC<ActivityProps<StoryBoardParams>> = ({ params, koda, onComplete, lesson }) => {
+  // Re-render when the language changes: every line below reads the catalog.
+  useT();
   const setup: StorySetup = { ...params, ...params.question };
   const totalQuestions = setup.questionsPerRound ?? 5;
   const practising = isPractice(setup);
@@ -262,7 +253,7 @@ export const StoryBoard: React.FC<ActivityProps<StoryBoardParams>> = ({ params, 
   const answer = (value: number) => {
     if (multi && step === 0) {
       if (value !== q.intermediate) {
-        nudge.refuse(`Not yet — that is not what ${q.scene.who.name} had after the first change.`);
+        nudge.refuse(ts("story.refuseFirst", { who: q.scene.who.name }));
         return;
       }
       setStep(1);
@@ -276,7 +267,7 @@ export const StoryBoard: React.FC<ActivityProps<StoryBoardParams>> = ({ params, 
     round.submit({
       correct, given: multi ? `${q.intermediate},${value}` : String(value), expected: q.expected,
       errorKind: correct ? undefined : value === q.values[0] - q.values[1] && q.mode === "remove_start" ? "reversed" : "off_by_more",
-      title: correct ? "That is the story!" : "Read the story again",
+      title: correct ? ts("story.rightTitle") : ts("story.readAgain"),
       message: practising ? undefined : `${q.sentence} ${q.question} ${q.answer}.`,
     });
   };
@@ -306,7 +297,7 @@ export const StoryBoard: React.FC<ActivityProps<StoryBoardParams>> = ({ params, 
     useSupport: round.useSupport,
   });
 
-  return <SkillRound koda={koda} lesson={lesson} fallbackTitle="Subtraction Stories" round={round}
+  return <SkillRound koda={koda} lesson={lesson} fallbackTitle={ts("story.title")} round={round}
     totalQuestions={totalQuestions} prompt={prompt} iconName="search" iconTone="cyan"
     tagLabels={tagLabelsFrom(koda)} nudge={nudge.message}
     hints={hints}
@@ -322,7 +313,7 @@ export const StoryBoard: React.FC<ActivityProps<StoryBoardParams>> = ({ params, 
         <p className="text-center text-lg sm:text-xl font-bold text-ink">{q.sentence}</p>
 
         {built ? <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={SPRING.enter}
-          className="space-y-2 mx-auto max-w-sm" role="group" aria-label={`${q.comparison ? "Comparison" : "Removal"} bar model`}>
+          className="space-y-2 mx-auto max-w-sm" role="group" aria-label={ts(q.comparison ? "story.modelCompare" : "story.modelRemove")}>
           {q.bars.map((bar) => {
             const tone = BAR_TONE[bar.role];
             const value = bar.value ?? q.answer;
@@ -342,16 +333,16 @@ export const StoryBoard: React.FC<ActivityProps<StoryBoardParams>> = ({ params, 
           })}
         </motion.div> : <div className="flex justify-center">
           <button type="button" onClick={() => { setBuilt(true); round.useSupport("walkthrough"); chime(koda, "changed"); }}
-            className={`${TOUCH_TARGET} ${themeSystem.button("secondary", "md")}`}>Draw the bars</button>
+            className={`${TOUCH_TARGET} ${themeSystem.button("secondary", "md")}`}>{ts("story.drawBars")}</button>
         </div>}
 
-        <p className="text-center text-base font-black text-ink">{multi && step === 0 ? `First, how many did ${q.scene.who.name} have after finding more?` : q.question}</p>
+        <p className="text-center text-base font-black text-ink">{multi && step === 0 ? ts("story.firstQuestion", { who: q.scene.who.name }) : q.question}</p>
 
         {scaffold && !practising && <div className="text-center text-sm font-bold text-ink/60">
           {q.comparison
-            ? "Nobody gives anything away here — the bars are only compared."
-            : multi ? "One change at a time, in the order they happened."
-              : "The unknown is whichever part the story does not tell you."}
+            ? ts("story.helpCompare")
+            : multi ? ts("story.helpMulti")
+              : ts("story.help")}
         </div>}
       </div>
 

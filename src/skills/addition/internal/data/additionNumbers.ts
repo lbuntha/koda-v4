@@ -26,6 +26,8 @@
  *     put through the same judge.
  */
 
+import { currentLanguage } from "../../../../lib/i18n";
+
 /* -------------------------------------------------------------------------- */
 /* Primitives                                                                  */
 /* -------------------------------------------------------------------------- */
@@ -70,7 +72,15 @@ const NUMBER_WORDS = [
   "seventeen", "eighteen", "nineteen", "twenty",
 ];
 
-export const numberWord = (n: number): string => NUMBER_WORDS[n] ?? String(n);
+const KHMER_NUMBER_WORDS = [
+  "សូន្យ", "មួយ", "ពីរ", "បី", "បួន", "ប្រាំ", "ប្រាំមួយ", "ប្រាំពីរ", "ប្រាំបី", "ប្រាំបួន",
+  "ដប់", "ដប់មួយ", "ដប់ពីរ", "ដប់បី", "ដប់បួន", "ដប់ប្រាំ", "ដប់ប្រាំមួយ",
+  "ដប់ប្រាំពីរ", "ដប់ប្រាំបី", "ដប់ប្រាំបួន", "ម្ភៃ",
+];
+
+/** In the language on screen. English words match the recorded clips. */
+export const numberWord = (n: number, language = currentLanguage()): string =>
+  (language === "km" ? KHMER_NUMBER_WORDS : NUMBER_WORDS)[n] ?? String(n);
 
 /* -------------------------------------------------------------------------- */
 /* Place value — what "regrouping" actually means                              */

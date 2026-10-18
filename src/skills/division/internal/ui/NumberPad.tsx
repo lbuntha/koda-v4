@@ -1,4 +1,5 @@
 import React from "react";
+import { td } from "../i18n";
 
 /**
  * Digits, for the answers that are not a choice between four numbers.
@@ -32,7 +33,7 @@ export const NumberPad: React.FC<NumberPadProps> = ({
   onSubmit,
   disabled,
   canSubmit = true,
-  submitLabel = "Check",
+  submitLabel,
 }) => (
   <div className="mx-auto flex w-full max-w-xs flex-col gap-2">
     <div className="grid grid-cols-5 gap-2">
@@ -42,7 +43,7 @@ export const NumberPad: React.FC<NumberPadProps> = ({
           type="button"
           onClick={() => onDigit(key)}
           disabled={disabled}
-          aria-label={`Digit ${key}`}
+          aria-label={td("pad.digit", { digit: key })}
           className="min-h-11 rounded-xl bg-surface py-2 text-lg font-bold text-ink shadow-sm focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 disabled:opacity-30"
         >
           {key}
@@ -54,7 +55,7 @@ export const NumberPad: React.FC<NumberPadProps> = ({
         type="button"
         onClick={onBackspace}
         disabled={disabled}
-        aria-label="Delete the last digit"
+        aria-label={td("pad.delete")}
         className="min-h-11 flex-1 rounded-xl bg-surface py-2 text-base text-muted shadow-sm disabled:opacity-30"
       >
         ⌫
@@ -65,7 +66,7 @@ export const NumberPad: React.FC<NumberPadProps> = ({
         disabled={disabled || !canSubmit}
         className="min-h-11 flex-[2] rounded-xl bg-indigo-600 py-2 text-base font-bold text-white shadow-sm disabled:opacity-40"
       >
-        {submitLabel}
+        {submitLabel ?? td("check")}
       </button>
     </div>
   </div>

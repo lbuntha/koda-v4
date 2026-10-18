@@ -25,6 +25,8 @@ import {
   withoutRepeat,
   type PairSpec,
 } from "../internal/data/additionNumbers";
+import { ta } from "../internal/i18n";
+import { useT } from "../../../lib/i18n";
 
 /**
  * The chart, where a number is written down one column at a time.
@@ -163,7 +165,7 @@ export const buildQuestion = (
           ],
         },
         {
-          label: "Add each column",
+          label: ta("desk.rowAddEach"),
           total: true,
           cells: [{ blank: "h" }, { blank: "t" }, { blank: "o" }],
         },
@@ -210,10 +212,10 @@ export const buildQuestion = (
       rows: [
         { label: String(a), cells: [...lead, ...digitsFor(a, places).map((value) => ({ value }))] },
         { label: String(b), cells: [...lead, ...digitsFor(b, places).map((value) => ({ value }))] },
-        { label: "Tens", total: true, cells: [...lead, { blank: "tens" }, { text: "" }] },
-        { label: "Ones", cells: [...lead, { text: "" }, { blank: "ones" }] },
+        { label: ta("desk.rowTens"), total: true, cells: [...lead, { blank: "tens" }, { text: "" }] },
+        { label: ta("desk.rowOnes"), cells: [...lead, { text: "" }, { blank: "ones" }] },
         {
-          label: "Altogether",
+          label: ta("desk.rowAltogether"),
           total: true,
           cells: hundred
             ? [{ blank: "sum-h" }, { blank: "sum-t" }, { blank: "sum-o" }]
@@ -299,8 +301,8 @@ export const buildQuestion = (
          * splitting 67 into 60 and 7 *is* the technique, and the arithmetic —
          * 77 and 60 — is still the child's to do.
          */
-        { label: `After +${db.tens * 10}`, total: true, span: true, cells: [{ blank: "run-1" }] },
-        { label: `After +${db.ones}`, total: true, span: true, cells: [{ blank: "run-2" }] },
+        { label: ta("desk.rowAfter", { n: db.tens * 10 }), total: true, span: true, cells: [{ blank: "run-1" }] },
+        { label: ta("desk.rowAfter", { n: db.ones }), total: true, span: true, cells: [{ blank: "run-2" }] },
       ],
       blanks: ["run-1", "run-2"],
       answers: [afterTens, sum],
@@ -319,7 +321,7 @@ export const buildQuestion = (
     rows: [
       { label: String(a), cells: digitsFor(a, places).map((value) => ({ value })) },
       { label: String(b), cells: digitsFor(b, places).map((value) => ({ value })) },
-      { label: "Total", total: true, cells: blanks.map((blank) => ({ blank })) },
+      { label: ta("desk.rowTotal"), total: true, cells: blanks.map((blank) => ({ blank })) },
     ],
     blanks,
     answers,
@@ -337,13 +339,13 @@ export const promptFor = (q: DeskQuestion, template?: string): string => {
 
   switch (q.mode) {
     case "expanded":
-      return `${q.a} plus ${q.b}, written out in hundreds, tens and ones.`;
+      return ta("desk.promptExpanded", { a: q.a, b: q.b });
     case "partial_sums":
-      return `${q.a} plus ${q.b}. Add the tens, add the ones, then put them together.`;
+      return ta("desk.promptPartial", { a: q.a, b: q.b });
     case "left_right":
-      return `${q.a} plus ${q.b}. Start with the biggest column and work right.`;
+      return ta("desk.promptLeftRight", { a: q.a, b: q.b });
     default:
-      return `${q.a} plus ${q.b}. Fill in the total, one column at a time.`;
+      return ta("desk.prompt", { a: q.a, b: q.b });
   }
 };
 
@@ -360,13 +362,13 @@ export const printedFor = (q: DeskQuestion): PrintedQuestion => {
   const answer = String(q.sum);
   switch (q.mode) {
     case "expanded":
-      return { text: `${q.a} + ${q.b}. Write each number out in hundreds, tens and ones, then add.`, answer };
+      return { text: ta("desk.printedExpanded", { a: q.a, b: q.b }), answer };
     case "partial_sums":
-      return { text: `${q.a} + ${q.b}. Add the tens, add the ones, then put them together.`, answer };
+      return { text: ta("desk.printedPartial", { a: q.a, b: q.b }), answer };
     case "left_right":
-      return { text: `${q.a} + ${q.b}. Start with the biggest column and work right.`, answer };
+      return { text: ta("desk.printedLeftRight", { a: q.a, b: q.b }), answer };
     default:
-      return { text: `${q.a} + ${q.b}. Add one column at a time.`, answer };
+      return { text: ta("desk.printed", { a: q.a, b: q.b }), answer };
   }
 };
 
@@ -380,24 +382,13 @@ export const printedFor = (q: DeskQuestion): PrintedQuestion => {
 export const methodFor = (q: DeskQuestion): string[] => {
   switch (q.mode) {
     case "expanded":
-      return [
-        "Write each number as hundreds, tens and ones.",
-        "Add each place on its own.",
-        "Put the places back together.",
-      ];
+      return [ta("desk.methodExpanded1"), ta("desk.methodExpanded2"), ta("desk.methodExpanded3")];
     case "partial_sums":
-      return [
-        "Add the tens and write that answer down.",
-        "Add the ones and write that one down too.",
-        "Add your two answers for the total.",
-      ];
+      return [ta("desk.methodPartial1"), ta("desk.methodPartial2"), ta("desk.methodPartial3")];
     case "left_right":
-      return [
-        "Start with the biggest place and work right.",
-        "Keep a running total, adjusting it as you go.",
-      ];
+      return [ta("desk.methodLeftRight1"), ta("desk.methodLeftRight2")];
     default:
-      return ["Line the numbers up by place.", "Add one column at a time, ones first."];
+      return [ta("desk.method1"), ta("desk.method2")];
   }
 };
 
@@ -413,7 +404,7 @@ export const methodFor = (q: DeskQuestion): string[] => {
  */
 export const figureFor = (q: DeskQuestion): React.ReactNode => {
   const width = Math.max(String(q.a).length, String(q.b).length, String(q.sum).length);
-  const heads = ["H", "T", "O"].slice(-width);
+  const heads = [ta("place.hundredsShort"), ta("place.tensShort"), ta("place.onesShort")].slice(-width);
   const cells = (n?: number) => {
     const digits = n === undefined ? [] : String(n).split("");
     return Array.from({ length: width }, (_, i) => digits[digits.length - width + i] ?? "");
@@ -461,11 +452,19 @@ export function deskHints(
 
   if (q.mode === "partial_sums") {
     return composeHints(
-      state.kidTip ?? "Add one column at a time, and keep each answer before putting them together.",
+      state.kidTip ?? ta("desk.hintPartialTip"),
       empty > 2
-        ? `Tens first: ${da.tens * 10} and ${db.tens * 10}. Write that on the Tens row.`
-        : `You have both parts. Put them together for the last row.`,
-      `${da.tens * 10} and ${db.tens * 10} is ${(da.tens + db.tens) * 10}. ${da.ones} and ${db.ones} is ${da.ones + db.ones}. Together that is ${q.sum}.`,
+        ? ta("desk.hintTensFirst", { a: da.tens * 10, b: db.tens * 10 })
+        : ta("desk.hintBothParts"),
+      ta("desk.hintPartialAll", {
+        at: da.tens * 10,
+        bt: db.tens * 10,
+        tens: (da.tens + db.tens) * 10,
+        ao: da.ones,
+        bo: db.ones,
+        ones: da.ones + db.ones,
+        sum: q.sum,
+      }),
     );
   }
 
@@ -474,34 +473,44 @@ export function deskHints(
     // `buildQuestion` for why it is not the sum of the tens column.
     const afterTens = q.a + db.tens * 10;
     return composeHints(
-      state.kidTip ?? "Hold the first number. Each column after it adjusts what you hold.",
+      state.kidTip ?? ta("desk.hintLeftRightTip"),
       empty > 1
-        ? `Hold ${q.a}. Add the tens of ${q.b}, which is ${db.tens * 10}.`
-        : `You are holding ${afterTens}. Now add the ones, ${db.ones}.`,
+        ? ta("desk.hintHold", { a: q.a, b: q.b, tens: db.tens * 10 })
+        : ta("desk.hintHolding", { held: afterTens, ones: db.ones }),
       /*
        * "50 and 11 is 61" is partial-sums language: two parts, put together.
        * Here there is one number being adjusted, and the sentence has to keep
        * that shape — otherwise the most helpful rung on the ladder is the one
        * that teaches the other lesson.
        */
-      `${q.a} and ${db.tens * 10} is ${afterTens}; ${afterTens} and ${db.ones} is ${q.sum}.`,
+      ta("desk.hintLeftRightAll", { a: q.a, tens: db.tens * 10, held: afterTens, ones: db.ones, sum: q.sum }),
     );
   }
 
   if (q.mode === "expanded") {
     return composeHints(
-      state.kidTip ?? "Every number is some hundreds, some tens and some ones.",
-      `Add each column on its own: the hundreds with the hundreds, the tens with the tens.`,
-      `${da.hundreds * 100} and ${db.hundreds * 100} is ${(da.hundreds + db.hundreds) * 100}; ${da.tens * 10} and ${db.tens * 10} is ${(da.tens + db.tens) * 10}; ${da.ones} and ${db.ones} is ${da.ones + db.ones}.`,
+      state.kidTip ?? ta("desk.hintExpandedTip"),
+      ta("desk.hintEachColumn"),
+      ta("desk.hintExpandedAll", {
+        ah: da.hundreds * 100,
+        bh: db.hundreds * 100,
+        hundreds: (da.hundreds + db.hundreds) * 100,
+        at: da.tens * 10,
+        bt: db.tens * 10,
+        tens: (da.tens + db.tens) * 10,
+        ao: da.ones,
+        bo: db.ones,
+        ones: da.ones + db.ones,
+      }),
     );
   }
 
   return composeHints(
-    state.kidTip ?? "Add each column on its own. Ones with ones, tens with tens.",
+    state.kidTip ?? ta("desk.hintTip"),
     empty === q.blanks.length
-      ? `Start with the ones column on the right: ${da.ones} and ${db.ones}.`
-      : `${empty} ${empty === 1 ? "column is" : "columns are"} still empty. Add the digits that sit above each one.`,
-    `Ones: ${da.ones} and ${db.ones} is ${da.ones + db.ones}. Tens: ${da.tens} and ${db.tens} is ${da.tens + db.tens}.`,
+      ? ta("desk.hintStartOnes", { a: da.ones, b: db.ones })
+      : ta("desk.hintColumnsEmpty", { count: empty }),
+    ta("desk.hintOnesTens", { ao: da.ones, bo: db.ones, ones: da.ones + db.ones, at: da.tens, bt: db.tens, tens: da.tens + db.tens }),
   );
 }
 
@@ -509,7 +518,8 @@ export function deskHints(
 /* The chart                                                                   */
 /* -------------------------------------------------------------------------- */
 
-const HEADING: Record<Place, string> = { hundreds: "H", tens: "T", ones: "O" };
+/** "H", "T", "O", in the language on screen. */
+const heading = (p: Place | undefined): string => (p ? ta(`place.${p}Short`) : ta("desk.column"));
 
 export const PlaceValueDesk: React.FC<ActivityProps<PlaceValueDeskParams>> = ({
   params,
@@ -517,6 +527,8 @@ export const PlaceValueDesk: React.FC<ActivityProps<PlaceValueDeskParams>> = ({
   onComplete,
   lesson,
 }) => {
+  // Re-render when the language changes: every line below reads the catalog.
+  useT();
   const setup: DeskSetup = { ...params, ...params.question };
   const totalQuestions = setup.questionsPerRound ?? 5;
   const copy = playCopy(params);
@@ -586,8 +598,8 @@ export const PlaceValueDesk: React.FC<ActivityProps<PlaceValueDeskParams>> = ({
       guide.stumbled();
       nudge.refuse(
         missing.length === question.blanks.length
-          ? "Fill in the boxes, then check."
-          : `${missing.length} ${missing.length === 1 ? "box is" : "boxes are"} still empty.`,
+          ? ta("desk.refuseStart")
+          : ta("bond.refuseEmpty", { count: missing.length }),
       );
       return;
     }
@@ -627,17 +639,17 @@ export const PlaceValueDesk: React.FC<ActivityProps<PlaceValueDeskParams>> = ({
             ? "place_value"
             : "off_by_more",
       title: correct
-        ? "Every column is right!"
+        ? ta("desk.rightTitle")
         : wroteThePart
-          ? "That is the part, not the total"
-          : "Check the columns",
+          ? ta("desk.partTitle")
+          : ta("column.wrongTitle"),
       message: correct
-        ? `${question.a} and ${question.b} is ${question.sum}.`
+        ? ta("aAndBIs", { a: question.a, b: question.b, sum: question.sum })
         : rightDigitsWrongOrder
-          ? "The right digits, in the wrong columns. Ones go under ones."
+          ? ta("desk.shuffled")
           : wroteThePart
-            ? `Add the ones to what you were holding: ${question.answers[0]} and ${digitsOf(question.b).ones}.`
-            : `${question.a} and ${question.b} is ${question.sum}.`,
+            ? ta("desk.wrotePart", { held: question.answers[0], ones: digitsOf(question.b).ones })
+            : ta("aAndBIs", { a: question.a, b: question.b, sum: question.sum }),
     });
   };
 
@@ -683,7 +695,7 @@ export const PlaceValueDesk: React.FC<ActivityProps<PlaceValueDeskParams>> = ({
     <SkillRound
       koda={koda}
       lesson={lesson}
-      fallbackTitle="Place-Value Chart"
+      fallbackTitle={ta("desk.title")}
       round={round}
       totalQuestions={totalQuestions}
       prompt={prompt}
@@ -720,7 +732,7 @@ export const PlaceValueDesk: React.FC<ActivityProps<PlaceValueDeskParams>> = ({
                     scope="col"
                     className="px-2 pb-2 text-sm font-black uppercase tracking-wide text-ink/50"
                   >
-                    {HEADING[p]}
+                    {heading(p)}
                   </th>
                 ))}
               </tr>
@@ -755,11 +767,12 @@ export const PlaceValueDesk: React.FC<ActivityProps<PlaceValueDeskParams>> = ({
                           /* A spanning row has no column, so it must not claim
                              one: "After +40, Hundreds" described a box that
                              wants a whole number as a hundreds digit. */
-                          aria-label={`${
-                            row.span
+                          aria-label={(() => {
+                            const where = row.span
                               ? question.rows[r].label
-                              : `${question.rows[r].label}, ${HEADING[question.places[c]] ?? "column"}`
-                          }${question.blanks[guide.target] === cell.blank ? ", fill this one next" : ""}`}
+                              : ta("desk.cellIn", { row: question.rows[r].label ?? "", column: heading(question.places[c]) });
+                            return question.blanks[guide.target] === cell.blank ? ta("desk.cellNext", { where }) : where;
+                          })()}
                           className={themeSystem.field(
                             "lg",
                             `w-16 sm:w-20 text-center text-2xl font-black tabular-nums${
@@ -791,12 +804,12 @@ export const PlaceValueDesk: React.FC<ActivityProps<PlaceValueDeskParams>> = ({
             transition={SPRING.tap}
             className={themeSystem.button("primary", "lg")}
           >
-            Check
+            {ta("check")}
           </motion.button>
         </div>
 
         <p className={`text-center text-xs font-semibold ${TOTAL.text}`} aria-hidden="true">
-          Ones go under ones. Tens go under tens.
+          {ta("desk.help")}
         </p>
       </div>
     </SkillRound>

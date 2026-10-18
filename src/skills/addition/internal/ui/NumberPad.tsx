@@ -1,3 +1,4 @@
+import { ta } from "../i18n";
 import React from "react";
 import { motion } from "motion/react";
 import { SPRING } from "../../../kit";
@@ -35,7 +36,7 @@ export const NumberPad: React.FC<NumberPadProps> = ({ onDigit, onDelete, disable
         whileHover={disabled ? undefined : { scale: 1.08, y: -2 }}
         whileTap={disabled ? undefined : { scale: 0.9, y: 2 }}
         transition={SPRING.tap}
-        aria-label={`Digit ${digit}`}
+        aria-label={ta("pad.digit", { digit })}
         className={themeSystem.button("secondary", "choice")}
       >
         {digit}
@@ -48,7 +49,7 @@ export const NumberPad: React.FC<NumberPadProps> = ({ onDigit, onDelete, disable
       whileHover={disabled ? undefined : { scale: 1.06 }}
       whileTap={disabled ? undefined : { scale: 0.92 }}
       transition={SPRING.tap}
-      aria-label="Delete"
+      aria-label={ta("pad.delete")}
       className={themeSystem.button("secondary", "choice")}
     >
       ⌫

@@ -32,6 +32,8 @@ import {
   type Pair,
   type PairSpec,
 } from "../internal/data/additionNumbers";
+import { ta } from "../internal/i18n";
+import { useT } from "../../../lib/i18n";
 
 /**
  * Two groups, and every way of counting them that does not yet need a fact.
@@ -193,18 +195,18 @@ export const promptFor = (q: TrayQuestion, template?: string): string => {
 
   switch (q.mode) {
     case "combine":
-      return "Put the groups together, then count them all.";
+      return ta("tray.promptCombine");
     case "count_on":
-      return `Start at ${q.a} and count on.`;
+      return ta("tray.promptCountOn", { a: q.a });
     case "count_on_larger":
-      return "Start with the bigger number, then count on.";
+      return ta("tray.promptLarger");
     case "add_zero":
     case "add_one":
-      return `What is ${q.a} plus ${q.b}?`;
+      return ta("tray.promptWhatIs", { a: q.a, b: q.b });
     case "fingers":
-      return `Show ${q.a} on one hand and ${q.b} on the other. How many fingers altogether?`;
+      return ta("tray.promptFingers", { a: q.a, b: q.b });
     default:
-      return "Count them all. How many altogether?";
+      return ta("tray.prompt");
   }
 };
 
@@ -236,20 +238,14 @@ export const printedFor = (q: TrayQuestion): PrintedQuestion | null => {
   const answer = String(q.sum);
   switch (q.mode) {
     case "count_on":
-      return { text: `Start at ${q.a} and count on ${q.b}. What number do you reach?`, answer };
+      return { text: ta("tray.printedCountOn", { a: q.a, b: q.b }), answer };
     case "count_on_larger":
-      return {
-        text: `${q.a} and ${q.b}. Start from the bigger number and count on. How many altogether?`,
-        answer,
-      };
+      return { text: ta("tray.printedLarger", { a: q.a, b: q.b }), answer };
     case "add_zero":
     case "add_one":
       return { text: `${q.a} + ${q.b} =`, answer };
     case "fingers":
-      return {
-        text: `Show ${q.a} on one hand and ${q.b} on the other. How many fingers altogether?`,
-        answer,
-      };
+      return { text: ta("tray.promptFingers", { a: q.a, b: q.b }), answer };
     default:
       return null;
   }
@@ -265,27 +261,15 @@ export const printedFor = (q: TrayQuestion): PrintedQuestion | null => {
 export const methodFor = (q: TrayQuestion): string[] | null => {
   switch (q.mode) {
     case "count_on":
-      return [
-        "Say the first number out loud. You do not need to count it.",
-        "Count on the second number, one at a time.",
-        "The last number you say is the answer.",
-      ];
+      return [ta("tray.methodCountOn1"), ta("tray.methodCountOn2"), ta("tray.methodCountOn3")];
     case "count_on_larger":
-      return [
-        "Find the bigger of the two numbers.",
-        "Say it, then count on the smaller one.",
-        "Starting from the bigger number leaves less to count.",
-      ];
+      return [ta("tray.methodLarger1"), ta("tray.methodLarger2"), ta("tray.methodLarger3")];
     case "add_zero":
-      return ["Zero means nothing was added.", "The answer is the number you started with."];
+      return [ta("tray.methodZero1"), ta("tray.methodZero2")];
     case "add_one":
-      return ["One more is the next counting number.", "Say the number, then say the one after it."];
+      return [ta("tray.methodOne1"), ta("tray.methodOne2")];
     case "fingers":
-      return [
-        "Hold up the first number on one hand.",
-        "Hold up the second number on the other.",
-        "Count every raised finger.",
-      ];
+      return [ta("tray.methodFingers1"), ta("tray.methodFingers2"), ta("tray.methodFingers3")];
     default:
       return null;
   }
@@ -319,7 +303,6 @@ export const choicesFor = (answer: number, seed: string): number[] => answerChoi
  * and wrong for the eighth, which is exactly the kind of thing that only ever
  * shows up on a child's screen.
  */
-const an = (noun: string) => `${/^[aeiou]/i.test(noun) ? "an" : "a"} ${noun}`;
 
 export function trayHints(
   q: TrayQuestion,
@@ -337,23 +320,23 @@ export function trayHints(
   switch (q.mode) {
     case "combine":
       return composeHints(
-        state.kidTip ?? "Adding means putting groups together. Then you count once.",
+        state.kidTip ?? ta("tray.hintCombineTip"),
         state.merged
           ? state.counted === 0
-            ? `One pile now. Touch each ${one} and say the numbers out loud.`
-            : `You have ${state.counted}. Carry on with the ones still plain.`
-          : `Tap "Put them together" first. That is what adding does.`,
-        `${q.a} and ${q.b} poured together make one pile of ${q.sum}.`,
+            ? ta("tray.hintOnePile", { one })
+            : ta("tray.hintCarryOn", { counted: state.counted })
+          : ta("tray.hintMergeFirst"),
+        ta("tray.hintPoured", { a: q.a, b: q.b, sum: q.sum }),
       );
 
     case "count_on": {
       const left = q.b - state.counted;
       return composeHints(
-        state.kidTip ?? "The closed box is already counted. Start from its number.",
+        state.kidTip ?? ta("tray.hintBoxTip"),
         state.counted === 0
-          ? `The box is ${q.a} already. Say "${say(q.a)}", then "${say(q.a + 1)}" for the first loose one.`
-          : `You are at ${q.a + state.counted}. ${left === 1 ? "One" : left} still to touch.`,
-        `Count on ${q.b} from ${q.a}: ${Array.from({ length: q.b }, (_, i) => q.a + i + 1).join(", ")}.`,
+          ? ta("tray.hintBoxSay", { a: q.a, word: say(q.a), next: say(q.a + 1) })
+          : ta("tray.hintStillToTouch", { at: q.a + state.counted, count: left }),
+        ta("tray.hintCountOnRun", { a: q.a, b: q.b, run: Array.from({ length: q.b }, (_, i) => q.a + i + 1).join(", ") }),
       );
     }
 
@@ -361,7 +344,7 @@ export function trayHints(
       const bigger = Math.max(q.a, q.b);
       const smaller = Math.min(q.a, q.b);
       return composeHints(
-        state.kidTip ?? "You can add in any order, so start from the bigger number.",
+        state.kidTip ?? ta("tray.hintLargerTip"),
         /*
          * The choice is the technique, so the rung makes the choice and stops.
          *
@@ -371,49 +354,53 @@ export function trayHints(
          * the better move is a page of the method, behind the bubble.
          */
         state.startPicked === null
-          ? `${bigger} is the bigger one. Start there, not at ${smaller}.`
-          : `You started at ${state.startPicked}. Now count the other group on.`,
-        `From the bigger, ${bigger}, count on ${smaller}: ${Array.from({ length: smaller }, (_, i) => bigger + i + 1).join(", ")}.`,
+          ? ta("tray.hintBigger", { bigger, smaller })
+          : ta("tray.hintStarted", { start: state.startPicked }),
+        ta("tray.hintFromBigger", {
+          bigger,
+          smaller,
+          run: Array.from({ length: smaller }, (_, i) => bigger + i + 1).join(", "),
+        }),
       );
     }
 
     case "add_zero": {
       const some = q.a === 0 ? q.b : q.a;
       return composeHints(
-        state.kidTip ?? "Zero means none. The number stays the same.",
-        `One group is empty, so nothing joins the ${some} ${many}.`,
+        state.kidTip ?? ta("tray.hintZeroTip"),
+        ta("tray.hintEmptyGroup", { some, many }),
         // Stops at the rule rather than the number: the child is choosing
         // between answers here, so saying the total would answer it for them.
-        `Adding zero always leaves a number exactly as it was.`,
+        ta("tray.hintZeroRule"),
       );
     }
 
     case "add_one": {
       const some = q.b === 1 ? q.a : q.b;
       return composeHints(
-        state.kidTip ?? "Adding one is just saying the next number.",
-        `You have ${some}, and one more joins it. Count on once.`,
-        `The number straight after ${some} is the answer.`,
+        state.kidTip ?? ta("tray.hintOneTip"),
+        ta("tray.hintOneMore", { some }),
+        ta("tray.hintStraightAfter", { some }),
       );
     }
 
     case "fingers":
       return composeHints(
-        state.kidTip ?? "One number on each hand. Then count every finger that is up.",
+        state.kidTip ?? ta("tray.hintFingersTip"),
         state.fingers.left + state.fingers.right === 0
-          ? `Put ${q.a} up on the left hand and ${q.b} on the right.`
-          : `Left has ${state.fingers.left}, right has ${state.fingers.right}. You need ${q.a} and ${q.b}.`,
-        `Count every raised finger from the left, ending at ${q.sum}.`,
+          ? ta("tray.hintPutUp", { a: q.a, b: q.b })
+          : ta("tray.hintHands", { left: state.fingers.left, right: state.fingers.right, a: q.a, b: q.b }),
+        ta("tray.hintCountFingers", { sum: q.sum }),
       );
 
     default: {
       const left = q.sum - state.counted;
       return composeHints(
-        state.kidTip ?? "Do not start again at the second group. Keep counting on.",
+        state.kidTip ?? ta("tray.hintAllTip"),
         state.counted === 0
-          ? `Start at the left group. Touch ${an(one)} and say "one".`
-          : `You have ${state.counted}. ${left === 1 ? "One" : left} left — say ${say(state.counted + 1)} next.`,
-        `Counted straight through both groups, ${q.a} and ${q.b} make ${q.sum}.`,
+          ? ta("tray.hintStartLeft", { aOne: q.asset.aOne, word: say(1) })
+          : ta("tray.hintLeftSay", { counted: state.counted, count: left, next: say(state.counted + 1) }),
+        ta("tray.hintStraightThrough", { a: q.a, b: q.b, sum: q.sum }),
       );
     }
   }
@@ -462,7 +449,7 @@ const Token: React.FC<{
     initial={{ opacity: 0, scale: 0.6 }}
     animate={{ opacity: 1, scale: 1 }}
     transition={{ ...SPRING.enter, delay }}
-    aria-label={`${label}${lit ? ", touch this one next" : ""}`}
+    aria-label={lit ? ta("tray.touchNext", { label }) : label}
     className={`relative ${TOKEN_COMPACT} flex items-center justify-center rounded-2xl${
       lit ? " ring-4 ring-indigo-500 animate-pulse" : ""
     }`}
@@ -537,7 +524,7 @@ const GroupTile: React.FC<{
       whileHover={{ scale: 1.04 }}
       whileTap={{ scale: 0.94 }}
       transition={SPRING.tap}
-      aria-label={`Start from ${value}`}
+      aria-label={ta("tray.startFrom", { value })}
       aria-pressed={Boolean(picked)}
       className={shell}
     >
@@ -572,7 +559,7 @@ const Hand: React.FC<{
             onClick={() => onSet(up === n ? n - 1 : n)}
             whileTap={{ scale: 0.92 }}
             transition={SPRING.tap}
-            aria-label={`${side} finger ${n}`}
+            aria-label={ta(side === "Left" ? "tray.leftFinger" : "tray.rightFinger", { n })}
             aria-pressed={raised}
             className={`w-7 sm:w-8 rounded-t-full border-2 transition-all ${
               raised
@@ -585,7 +572,7 @@ const Hand: React.FC<{
     </div>
     <div className="w-full h-9 sm:h-11 rounded-2xl bg-ink/10" />
     <span className="text-xs font-bold uppercase tracking-wide text-ink/55">
-      {side} · <span className="tabular-nums">{up}</span>
+      {ta(side === "Left" ? "tray.left" : "tray.right")} · <span className="tabular-nums">{up}</span>
     </span>
   </div>
 );
@@ -600,6 +587,8 @@ export const CountTray: React.FC<ActivityProps<CountTrayParams>> = ({
   onComplete,
   lesson,
 }) => {
+  // Re-render when the language changes: every line below reads the catalog.
+  useT();
   const setup: TraySetup = { ...params, ...params.question };
   const totalQuestions = setup.questionsPerRound ?? 5;
   /** The lesson's own child-facing copy: the spoken intro, and hint rung one. */
@@ -734,7 +723,7 @@ export const CountTray: React.FC<ActivityProps<CountTrayParams>> = ({
       given: String(given),
       expected: String(question.sum),
       errorKind: correct ? undefined : given === question.sum ? undefined : "miscounted_items",
-      title: correct ? "That is the total!" : "Count them again",
+      title: correct ? ta("chain.totalTitle") : ta("countAgain"),
       message,
     });
   };
@@ -757,8 +746,8 @@ export const CountTray: React.FC<ActivityProps<CountTrayParams>> = ({
           reached,
           reached === question.sum,
           question.mode === "count_on" || question.mode === "count_on_larger"
-            ? `You started at ${base} and counted on ${toTap}. That makes ${question.sum}.`
-            : `${question.a} and ${question.b} counted straight through is ${question.sum}.`,
+            ? ta("tray.countedOn", { base, toTap, sum: question.sum })
+            : ta("tray.countedThrough", { a: question.a, b: question.b, sum: question.sum }),
         ),
       );
     }
@@ -772,7 +761,7 @@ export const CountTray: React.FC<ActivityProps<CountTrayParams>> = ({
          total is yet, so scoring this would file an answer they never gave. */
       guide.stumbled();
       nudge.refuse(
-        `Starting at ${value} means counting ${bigger} more. Start at ${bigger} and there are only ${value} to count.`,
+        ta("tray.refuseSmaller", { value, bigger }),
       );
       return;
     }
@@ -792,12 +781,12 @@ export const CountTray: React.FC<ActivityProps<CountTrayParams>> = ({
       given: String(value),
       expected: String(question.sum),
       errorKind: correct ? undefined : Math.abs(value - question.sum) === 1 ? "off_by_one" : "off_by_more",
-      title: correct ? "That is the total!" : "Not quite",
+      title: correct ? ta("chain.totalTitle") : ta("notQuite"),
       message: correct
         ? question.mode === "add_zero"
-          ? `Adding zero left it exactly as it was: ${question.sum}.`
-          : `One more than ${question.b === 1 ? question.a : question.b} is ${question.sum}.`
-        : `${question.a} plus ${question.b} is ${question.sum}.`,
+          ? ta("tray.rightZero", { sum: question.sum })
+          : ta("tray.rightOne", { n: question.b === 1 ? question.a : question.b, sum: question.sum })
+        : ta("tray.aPlusBIs", { a: question.a, b: question.b, sum: question.sum }),
     });
   };
 
@@ -806,7 +795,7 @@ export const CountTray: React.FC<ActivityProps<CountTrayParams>> = ({
     const raised = fingers.left + fingers.right;
     if (raised === 0) {
       guide.stumbled();
-      nudge.refuse(`No fingers are up yet. Put ${question.a} on one hand and ${question.b} on the other.`);
+      nudge.refuse(ta("tray.refuseNoFingers", { a: question.a, b: question.b }));
       return;
     }
     const correct = raised === question.sum;
@@ -816,8 +805,8 @@ export const CountTray: React.FC<ActivityProps<CountTrayParams>> = ({
       raised,
       correct,
       correct
-        ? `${fingers.left} on one hand and ${fingers.right} on the other — ${question.sum} fingers.`
-        : `You have ${raised} fingers up. Put ${question.a} on one hand and ${question.b} on the other.`,
+        ? ta("tray.rightFingers", { left: fingers.left, right: fingers.right, sum: question.sum })
+        : ta("tray.wrongFingers", { raised, a: question.a, b: question.b }),
     );
   };
 
@@ -825,7 +814,7 @@ export const CountTray: React.FC<ActivityProps<CountTrayParams>> = ({
     setMerged(true);
     playChrome(koda, "clink");
     buzz("tap");
-    if (speaks) void koda.speech.say("Put them together!", speechRate(koda));
+    if (speaks) void koda.speech.say(ta("tray.saidMerge"), speechRate(koda));
   };
 
   const prompt = promptFor(question, copy.prompts?.default);
@@ -862,9 +851,12 @@ export const CountTray: React.FC<ActivityProps<CountTrayParams>> = ({
           <Token
             key={key}
             asset={question.asset}
-            label={`${side === "a" ? "First" : "Second"} group ${question.asset.one} ${i + 1}${
-              orderOf(key) !== null ? ", counted" : ""
-            }`}
+            label={ta(
+              side === "a"
+                ? orderOf(key) !== null ? "tray.firstCounted" : "tray.first"
+                : orderOf(key) !== null ? "tray.secondCounted" : "tray.second",
+              { one: question.asset.one, n: i + 1 },
+            )}
             lit={guide.target === counted.length && orderOf(key) === null && counted.length === i && side === (counted.length < question.a ? "a" : "b")}
             order={orderOf(key)}
             badges={badges}
@@ -926,7 +918,7 @@ export const CountTray: React.FC<ActivityProps<CountTrayParams>> = ({
     <SkillRound
       koda={koda}
       lesson={lesson}
-      fallbackTitle="Count and Combine"
+      fallbackTitle={ta("tray.title")}
       round={round}
       totalQuestions={totalQuestions}
       prompt={prompt}
@@ -970,7 +962,7 @@ export const CountTray: React.FC<ActivityProps<CountTrayParams>> = ({
                   <Token
                     key={key}
                     asset={question.asset}
-                    label={`Pile ${question.asset.one} ${i + 1}${orderOf(key) !== null ? ", counted" : ""}`}
+                    label={ta(orderOf(key) !== null ? "tray.pileCounted" : "tray.pile", { one: question.asset.one, n: i + 1 })}
                     order={orderOf(key)}
                     badges={badges}
                     tone={side}
@@ -984,12 +976,12 @@ export const CountTray: React.FC<ActivityProps<CountTrayParams>> = ({
             <div className="flex items-center justify-center gap-4 sm:gap-7">
               <div className="min-h-[104px] flex items-center justify-center">
                 {question.mode === "count_on" ? (
-                  <GroupTile value={question.a} tone="a" caption="in the box" />
+                  <GroupTile value={question.a} tone="a" caption={ta("tray.inBox")} />
                 ) : closedForStart("a") ? (
                   <GroupTile
                     value={question.a}
                     tone="a"
-                    caption={startSide === "a" ? "counted" : "in the box"}
+                    caption={ta(startSide === "a" ? "tray.counted" : "tray.inBox")}
                     picked={startSide === "a"}
                     onPick={startSide === null ? () => pickStart("a") : undefined}
                   />
@@ -1013,7 +1005,7 @@ export const CountTray: React.FC<ActivityProps<CountTrayParams>> = ({
                   <GroupTile
                     value={question.b}
                     tone="b"
-                    caption={startSide === "b" ? "counted" : "in the box"}
+                    caption={ta(startSide === "b" ? "tray.counted" : "tray.inBox")}
                     picked={startSide === "b"}
                     onPick={startSide === null ? () => pickStart("b") : undefined}
                   />
@@ -1052,7 +1044,7 @@ export const CountTray: React.FC<ActivityProps<CountTrayParams>> = ({
               transition={SPRING.tap}
               className={themeSystem.button("primary", "lg")}
             >
-              Put them together
+              {ta("tray.merge")}
             </motion.button>
           </div>
         )}
@@ -1067,7 +1059,7 @@ export const CountTray: React.FC<ActivityProps<CountTrayParams>> = ({
               transition={SPRING.tap}
               className={themeSystem.button("primary", "lg")}
             >
-              Check
+              {ta("check")}
             </motion.button>
           </div>
         )}

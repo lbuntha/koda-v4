@@ -27,6 +27,8 @@ import {
   numberWord,
   total as sumOf,
 } from "../internal/data/additionNumbers";
+import { ta } from "../internal/i18n";
+import { useT } from "../../../lib/i18n";
 
 /**
  * More than two numbers, and the freedom to take them in any order.
@@ -134,13 +136,13 @@ export const promptFor = (q: ChainQuestion, template?: string): string => {
 
   switch (q.mode) {
     case "pairs":
-      return `Two of these make ${q.target}. Put those together first.`;
+      return ta("chain.promptPairs", { target: q.target ?? 10 });
     case "compatible":
-      return `Find the pairs that make ${q.target}, then add the rest.`;
+      return ta("chain.promptCompatible", { target: q.target ?? 10 });
     case "running":
-      return "Add them one at a time, keeping the total as you go.";
+      return ta("chain.promptRunning");
     default:
-      return "Add these in whatever order is easiest.";
+      return ta("chain.prompt");
   }
 };
 
@@ -158,11 +160,11 @@ export const printedFor = (q: ChainQuestion): PrintedQuestion => {
   const answer = String(q.sum);
   switch (q.mode) {
     case "pairs":
-      return { text: `${chain} =   (two of these make ${q.target ?? 10})`, answer };
+      return { text: ta("chain.printedPairs", { chain, target: q.target ?? 10 }), answer };
     case "compatible":
-      return { text: `${chain} =   (find the pairs that make ${q.target ?? 10} first)`, answer };
+      return { text: ta("chain.printedCompatible", { chain, target: q.target ?? 10 }), answer };
     case "running":
-      return { text: `${chain} =   (add them one at a time)`, answer };
+      return { text: ta("chain.printedRunning", { chain }), answer };
     default:
       return { text: `${chain} =`, answer };
   }
@@ -179,13 +181,13 @@ export const methodFor = (q: ChainQuestion): string[] => {
   const target = q.target ?? 10;
   switch (q.mode) {
     case "pairs":
-      return [`Look for two numbers that make ${target}.`, "Add those first.", "Then add what is left."];
+      return [ta("chain.methodPairs1", { target }), ta("chain.methodPairs2"), ta("chain.methodPairs3")];
     case "compatible":
-      return [`Find every pair that makes ${target}.`, "Add the pairs, then whatever is left over."];
+      return [ta("chain.methodCompatible1", { target }), ta("chain.methodCompatible2")];
     case "running":
-      return ["Add the numbers one at a time, left to right.", "Keep the total as you go."];
+      return [ta("chain.methodRunning1"), ta("chain.methodRunning2")];
     default:
-      return ["Add them in whatever order is easiest.", "Friendly pairs first, then the rest."];
+      return [ta("chain.method1"), ta("chain.method2")];
   }
 };
 
@@ -200,33 +202,36 @@ export function chainHints(
     case "pairs":
     case "compatible":
       return composeHints(
-        state.kidTip ?? `Look for two that make ${q.target} and put those together first.`,
+        state.kidTip ?? ta("chain.hintPairsTip", { target: q.target ?? 10 }),
         friendly > 0
-          ? `There ${friendly === 1 ? "is still a pair" : `are still ${friendly} pairs`} that make ${q.target}. Tap one number, then the number that finishes it.`
+          ? ta("chain.hintPairsLeft", { count: friendly, target: q.target ?? 10 })
           : left > 1
-            ? `No pairs left to find. Add what is on the board in any order.`
-            : `One chip left. That is the total.`,
+            ? ta("chain.hintNoPairs")
+            : ta("chain.hintOneChip"),
         // The pairs are the technique, and the two lessons want different
         // things of them: one pair to spot, or every pair on the board.
         q.mode === "compatible"
-          ? `Join every pair making ${q.target}, then add what is left: ${q.sum}.`
-          : `Join the pair that makes ${q.target} first. The rest adds to ${q.sum}.`,
+          ? ta("chain.hintJoinEvery", { target: q.target ?? 10, sum: q.sum })
+          : ta("chain.hintJoinPair", { target: q.target ?? 10, sum: q.sum }),
       );
     case "running":
       return composeHints(
-        state.kidTip ?? "Keep the total in your head and add the next one to it.",
+        state.kidTip ?? ta("chain.hintRunningTip"),
         state.step === 0
-          ? `Start with ${q.values[0]}, then add ${q.values[1]}.`
-          : `You are at ${q.values.slice(0, state.step + 1).reduce((t, n) => t + n, 0)}. Add ${q.values[state.step + 1] ?? 0} to that.`,
-        `Running on: ${q.values.map((_, i) => q.values.slice(0, i + 1).reduce((t, n) => t + n, 0)).join(", ")}.`,
+          ? ta("chain.hintStart", { first: q.values[0], second: q.values[1] })
+          : ta("chain.hintAt", {
+              at: q.values.slice(0, state.step + 1).reduce((t, n) => t + n, 0),
+              next: q.values[state.step + 1] ?? 0,
+            }),
+        ta("chain.hintRunningOn", {
+          run: q.values.map((_, i) => q.values.slice(0, i + 1).reduce((t, n) => t + n, 0)).join(", "),
+        }),
       );
     default:
       return composeHints(
-        state.kidTip ?? "Add them in whatever order is easiest — the total is the same.",
-        left > 1
-          ? `Tap two numbers to put them together. ${left} chips left.`
-          : `One chip left, and it holds the total.`,
-        `Joined two at a time, in any order, the list makes ${q.sum}.`,
+        state.kidTip ?? ta("chain.hintTip"),
+        left > 1 ? ta("chain.hintTapTwo", { left }) : ta("chain.hintHoldsTotal"),
+        ta("chain.hintJoined", { sum: q.sum }),
       );
   }
 }
@@ -254,7 +259,7 @@ const ChipButton: React.FC<{
     /* Position as well as value: a board can hold two fives, and "Chip 5"
        twice leaves a screen-reader user with no way to say which one they
        mean — nor any way to pick the second. */
-    aria-label={`Chip ${position}, value ${chip.value}`}
+    aria-label={ta("chain.chipLabel", { position, value: chip.value })}
     aria-pressed={held}
     className={`${CHIP} rounded-2xl text-2xl font-black tabular-nums flex items-center justify-center border-2 ${
       held
@@ -274,6 +279,8 @@ export const ChainBoard: React.FC<ActivityProps<ChainBoardParams>> = ({
   onComplete,
   lesson,
 }) => {
+  // Re-render when the language changes: every line below reads the catalog.
+  useT();
   const setup: ChainSetup = { ...params, ...params.question };
   const totalQuestions = setup.questionsPerRound ?? 5;
   const copy = playCopy(params);
@@ -394,8 +401,8 @@ export const ChainBoard: React.FC<ActivityProps<ChainBoardParams>> = ({
       correct,
       given: String(given),
       errorKind: correct ? undefined : Math.abs(given - question.sum) === 1 ? "off_by_one" : "off_by_more",
-      title: correct ? "That is the total!" : "Not quite",
-      message: `${question.values.join(" + ")} is ${question.sum}.`,
+      title: correct ? ta("chain.totalTitle") : ta("notQuite"),
+      message: ta("chain.listIs", { list: question.values.join(" + "), sum: question.sum }),
     });
   };
 
@@ -404,7 +411,7 @@ export const ChainBoard: React.FC<ActivityProps<ChainBoardParams>> = ({
     if (chips.length > 1) {
       guide.stumbled();
       nudge.refuse(
-        `${chips.length} numbers are still on the board. Tap two at a time to put them together.`,
+        ta("chain.refuseBoard", { count: chips.length }),
       );
       return;
     }
@@ -417,7 +424,7 @@ export const ChainBoard: React.FC<ActivityProps<ChainBoardParams>> = ({
     const missing = entries.findIndex((e) => e === "");
     if (missing !== -1) {
       guide.stumbled();
-      nudge.refuse(`Step ${missing + 1} is still empty. Add each number in turn.`);
+      nudge.refuse(ta("chain.refuseStep", { step: missing + 1 }));
       return;
     }
     const wanted = question.values
@@ -432,10 +439,10 @@ export const ChainBoard: React.FC<ActivityProps<ChainBoardParams>> = ({
       // Every step, so the log holds where a long chain actually went wrong.
       given: entries.join(","),
       errorKind: correct ? undefined : "off_by_more",
-      title: correct ? "You kept the total!" : "Check the steps",
+      title: correct ? ta("chain.keptTitle") : ta("chain.checkSteps"),
       message: correct
-        ? `${question.values.join(" + ")} is ${question.sum}.`
-        : `Step ${firstWrong + 1} should be ${wanted[firstWrong]}.`,
+        ? ta("chain.listIs", { list: question.values.join(" + "), sum: question.sum })
+        : ta("chain.stepShould", { step: firstWrong + 1, value: wanted[firstWrong] ?? 0 }),
     });
   };
 
@@ -481,7 +488,7 @@ export const ChainBoard: React.FC<ActivityProps<ChainBoardParams>> = ({
     <SkillRound
       koda={koda}
       lesson={lesson}
-      fallbackTitle="Chains and Pairs"
+      fallbackTitle={ta("chain.title")}
       round={round}
       totalQuestions={totalQuestions}
       prompt={prompt}
@@ -529,7 +536,7 @@ export const ChainBoard: React.FC<ActivityProps<ChainBoardParams>> = ({
                           setStep(i - 1);
                         }}
                         disabled={Boolean(round.feedback)}
-                        aria-label={`Total after adding ${value}`}
+                        aria-label={ta("chain.totalAfter", { value })}
                         className={themeSystem.field("md", "w-20 text-center text-xl font-black tabular-nums")}
                       />
                     </>
@@ -561,8 +568,8 @@ export const ChainBoard: React.FC<ActivityProps<ChainBoardParams>> = ({
           {scaffold && question.target && chips.length > 1 && (
             <p className="text-center text-sm font-bold text-ink/55">
               {friendlyPairCount(chips.map((c) => c.value), question.target) > 0
-                ? `There is still a pair that makes ${question.target}.`
-                : `No pairs left — add what is on the board.`}
+                ? ta("chain.stillPair", { target: question.target })
+                : ta("chain.noPairsLeft")}
             </p>
           )}
 
@@ -575,7 +582,7 @@ export const ChainBoard: React.FC<ActivityProps<ChainBoardParams>> = ({
               aria-live="polite"
               className={`text-center text-sm font-bold ${TOTAL.text}`}
             >
-              {chips.length === 1 ? "One number left" : `${chips.length} numbers on the board`}
+              {ta("chain.onBoard", { count: chips.length })}
             </motion.p>
           )}
         </div>
@@ -601,7 +608,7 @@ export const ChainBoard: React.FC<ActivityProps<ChainBoardParams>> = ({
             transition={SPRING.tap}
             className={themeSystem.button("primary", "lg")}
           >
-            Check
+            {ta("check")}
           </motion.button>
         </div>
       </div>

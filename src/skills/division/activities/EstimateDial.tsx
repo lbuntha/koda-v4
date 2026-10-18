@@ -19,6 +19,8 @@ import {
   type EstimateQuestion,
   type EstimateSetup,
 } from "../internal/data/divisionEstimate";
+import { td } from "../internal/i18n";
+import { useT } from "../../../lib/i18n";
 
 /**
  * Estimating, judging, and checking.
@@ -59,21 +61,21 @@ function estimateHintsRungs(question: EstimateQuestion): string[] {
   switch (question.mode) {
     case "compatible":
       return composeHints(
-        `Leave the ${question.divisor} alone. Move the big number instead.`,
-        `Find a number near ${question.dividend} that ${question.divisor} goes into exactly.`,
-        "Take the one that is easiest to divide, not the one that is nearest.",
+        td("estimate.hint.compatible1", { d: question.divisor }),
+        td("estimate.hint.compatible2", { n: question.dividend, d: question.divisor }),
+        td("estimate.hint.compatible3"),
       );
     case "reasonable":
       return composeHints(
-        "Do not work it out. Just think about how big the answer should be.",
-        `Roughly how many ${question.divisor}s are in ${question.dividend}?`,
-        "An answer ten times too big or too small is the commonest slip there is.",
+        td("estimate.hint.reasonable1"),
+        td("estimate.hint.reasonable2", { n: question.dividend, d: question.divisor }),
+        td("estimate.hint.reasonable3"),
       );
     default:
       return composeHints(
-        "To check a division, multiply back.",
-        "Your answer, times the number you divided by, should give the total back.",
-        "If there was a remainder, add it on at the end.",
+        td("estimate.hint.check1"),
+        td("estimate.hint.check2"),
+        td("estimate.hint.check3"),
       );
   }
 }
@@ -84,6 +86,8 @@ export const EstimateDial: React.FC<ActivityProps<EstimateParams>> = ({
   onComplete,
   lesson,
 }) => {
+  // Re-render when the language changes: every line below reads the catalog.
+  useT();
   const setup: EstimateSetup = useMemo(() => ({ ...params, ...params.question }), [params]);
   const practising = isPractice(setup);
   const total = setup.questionsPerRound ?? 5;
@@ -145,7 +149,7 @@ export const EstimateDial: React.FC<ActivityProps<EstimateParams>> = ({
       if (correct) koda.haptics.success();
       else koda.haptics.pulse("error");
     }
-    round.submit({ correct, given, expected: question.expected, title: correct ? "Yes!" : "Not quite", message });
+    round.submit({ correct, given, expected: question.expected, title: correct ? td("yes") : td("notQuite"), message });
   };
 
   const chooseTotal = (candidate: number): void => {
@@ -155,8 +159,8 @@ export const EstimateDial: React.FC<ActivityProps<EstimateParams>> = ({
       String(candidate / question.divisor),
       correct,
       correct
-        ? `${candidate} ÷ ${question.divisor} = ${candidate / question.divisor}. That is about right.`
-        : `${candidate} works too, but ${best} is easier to divide by ${question.divisor}.`,
+        ? td("estimate.aboutRight", { total: candidate, d: question.divisor, q: candidate / question.divisor })
+        : td("estimate.easier", { total: candidate, best, d: question.divisor }),
     );
   };
 
@@ -167,26 +171,26 @@ export const EstimateDial: React.FC<ActivityProps<EstimateParams>> = ({
       correct,
       correct
         ? question.fault === "right"
-          ? "It is about the right size."
+          ? td("estimate.fault.right")
           : question.fault === "ten-times-too-big"
-            ? "Ten times too big — a digit has ended up in the wrong column."
+            ? td("estimate.fault.tooBig")
             : question.fault === "ten-times-too-small"
-              ? "Ten times too small — a place has been lost."
-              : "A zero has been dropped out of the middle."
-        : `About how many ${question.divisor}s fit into ${question.dividend}?`,
+              ? td("estimate.fault.tooSmall")
+              : td("estimate.fault.droppedZero")
+        : td("estimate.howManyFit", { n: question.dividend, d: question.divisor }),
     );
   };
 
   const checkWith = (text: string): void => {
     const correct = text === question.expected;
-    submit(text, correct, correct ? "That rebuilds the total." : "Multiply your answer by the number you divided by.");
+    submit(text, correct, correct ? td("estimate.rebuilds") : td("estimate.multiplyBack"));
   };
 
   return (
     <SkillRound
       koda={koda}
       lesson={lesson}
-      fallbackTitle="About How Much?"
+      fallbackTitle={td("estimate.title")}
       round={round}
       totalQuestions={total}
       prompt={promptFor(question)}
@@ -209,7 +213,7 @@ export const EstimateDial: React.FC<ActivityProps<EstimateParams>> = ({
         {question.mode === "compatible" ? (
           <>
             <p className="text-center text-sm text-muted">
-              Which total is easier to divide by {question.divisor}?
+              {td("estimate.whichTotal", { d: question.divisor })}
             </p>
             <div className="flex justify-center gap-3">
               {(question.neighbours ?? []).map((candidate, i) => (
@@ -238,7 +242,7 @@ export const EstimateDial: React.FC<ActivityProps<EstimateParams>> = ({
               disabled={!!round.feedback}
               className="min-h-11 min-w-28 rounded-2xl bg-surface px-6 py-3 text-lg font-bold text-ink shadow-sm focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500"
             >
-              Could be
+              {td("estimate.couldBe")}
             </button>
             <button
               type="button"
@@ -246,7 +250,7 @@ export const EstimateDial: React.FC<ActivityProps<EstimateParams>> = ({
               disabled={!!round.feedback}
               className="min-h-11 min-w-28 rounded-2xl bg-surface px-6 py-3 text-lg font-bold text-ink shadow-sm focus:outline-none focus-visible:ring-2 focus-visible:ring-rose-500"
             >
-              No chance
+              {td("estimate.noChance")}
             </button>
           </div>
         ) : null}
@@ -279,17 +283,22 @@ export function printedFor(question: EstimateQuestion): { text: string; answer: 
   switch (question.mode) {
     case "compatible":
       return {
-        text: `About how much is ${question.dividend} ÷ ${question.divisor}?`,
+        text: td("estimate.prompt.compatible", { n: question.dividend, d: question.divisor }),
         answer: question.expected,
       };
     case "reasonable":
       return {
-        text: `Somebody says ${question.dividend} ÷ ${question.divisor} = ${question.claim}. Could that be right?   yes / no`,
+        text: td("estimate.printedClaim", { n: question.dividend, d: question.divisor, claim: question.claim ?? "" }),
         answer: question.expected,
       };
     default:
       return {
-        text: `${question.dividend} ÷ ${question.divisor} = ${question.quotient}${question.remainder ? ` r ${question.remainder}` : ""}. Write the sum that checks it.`,
+        text: td(question.remainder ? "estimate.printedCheckRemainder" : "estimate.printedCheck", {
+          n: question.dividend,
+          d: question.divisor,
+          q: question.quotient,
+          r: question.remainder,
+        }),
         answer: question.expected,
       };
   }
@@ -297,8 +306,8 @@ export function printedFor(question: EstimateQuestion): { text: string; answer: 
 
 export function methodFor(): string[] {
   return [
-    "Leave the number you are dividing by alone, and move the total instead.",
-    "Divide that instead. The answer is about right.",
-    "To check a division for real, multiply the answer back and add any remainder.",
+    td("estimate.method1"),
+    td("estimate.method2"),
+    td("estimate.method3"),
   ];
 }

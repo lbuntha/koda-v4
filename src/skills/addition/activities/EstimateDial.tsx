@@ -26,6 +26,8 @@ import {
   shuffle,
   withoutRepeat,
 } from "../internal/data/additionNumbers";
+import { ta } from "../internal/i18n";
+import { useT } from "../../../lib/i18n";
 
 /**
  * About how many — and whether an answer could possibly be right.
@@ -135,8 +137,8 @@ export const promptFor = (q: EstimateQuestion, template?: string): string => {
   if (filled) return filled;
 
   return q.mode === "reasonable"
-    ? `Someone says ${q.a} plus ${q.b} is ${q.claim}. Could that be right?`
-    : `About how many is ${q.a} plus ${q.b}?`;
+    ? ta("estimate.promptClaim", { a: q.a, b: q.b, claim: q.claim ?? "" })
+    : ta("estimate.prompt", { a: q.a, b: q.b });
 };
 
 
@@ -150,19 +152,19 @@ export const promptFor = (q: EstimateQuestion, template?: string): string => {
 export const printedFor = (q: EstimateQuestion): PrintedQuestion =>
   q.mode === "reasonable"
     ? {
-        text: `Someone says ${q.a} + ${q.b} is ${q.claim}. Could that be right?`,
+        text: ta("estimate.printedClaim", { a: q.a, b: q.b, claim: q.claim ?? "" }),
         /* The verdict in words. `expected` is `too_big`, which is the right key
            for the learning log and wrong on a sheet of paper a parent reads —
            an answer key is the one place an internal token cannot appear. */
         answer:
           q.verdict === "right"
-            ? `Yes — about ${q.sum}`
+            ? ta("estimate.keyRight", { sum: q.sum })
             : q.verdict === "too_big"
-              ? `No — far too big (about ${q.sum})`
-              : `No — far too small (about ${q.sum})`,
+              ? ta("estimate.keyTooBig", { sum: q.sum })
+              : ta("estimate.keyTooSmall", { sum: q.sum }),
       }
     : {
-        text: `About how many is ${q.a} + ${q.b}? Round each number first.`,
+        text: ta("estimate.printed", { a: q.a, b: q.b }),
         answer: q.expected ?? "",
       };
 
@@ -173,21 +175,25 @@ export function estimateHints(
   if (q.mode === "reasonable") {
     const near = roundTo(q.a, q.unit) + roundTo(q.b, q.unit);
     return composeHints(
-      state.kidTip ?? "You do not need the exact answer. Ask whether it is anywhere near.",
-      `Rounded, they are about ${roundTo(q.a, q.unit)} and ${roundTo(q.b, q.unit)}. So look near ${near}.`,
+      state.kidTip ?? ta("estimate.hintClaimTip"),
+      ta("estimate.hintRounded", { a: roundTo(q.a, q.unit), b: roundTo(q.b, q.unit), near }),
       // Stops at the comparison: judging it is the question.
-      `Compare ${q.claim} with about ${near}. Is it close, far too big, or far too small?`,
+      ta("estimate.hintCompare", { claim: q.claim ?? "", near }),
     );
   }
 
   const undone = state.rounded.findIndex((r) => r === null);
   const which = undone === 0 ? q.a : q.b;
   return composeHints(
-    state.kidTip ?? "Round each number to the nearest one, then add the round numbers.",
+    state.kidTip ?? ta("estimate.hintTip"),
     undone === -1
-      ? `Both are rounded. Add the two round numbers — that is the estimate.`
-      : `${which} sits between ${Math.floor(which / q.unit) * q.unit} and ${Math.floor(which / q.unit) * q.unit + q.unit}. Which is it nearer to?`,
-    `About ${roundTo(q.a, q.unit)} and about ${roundTo(q.b, q.unit)}.`,
+      ? ta("estimate.hintBothRounded")
+      : ta("estimate.hintBetween", {
+          n: which,
+          low: Math.floor(which / q.unit) * q.unit,
+          high: Math.floor(which / q.unit) * q.unit + q.unit,
+        }),
+    ta("estimate.hintAbout", { a: roundTo(q.a, q.unit), b: roundTo(q.b, q.unit) }),
   );
 }
 
@@ -226,7 +232,7 @@ const Dial: React.FC<{
                perfectly good question, and "Round 47 to 50" twice leaves a
                screen-reader user unable to say which dial they mean — or to
                reach the second one at all. */
-            aria-label={`${which} number: round ${around.value} to ${v}`}
+            aria-label={ta(which === "First" ? "estimate.dialFirst" : "estimate.dialSecond", { value: around.value, to: v })}
             aria-pressed={chosen === v}
             className={themeSystem.button(
               chosen === v ? "success" : "secondary",
@@ -250,21 +256,13 @@ const Dial: React.FC<{
  * `WorksheetSource` for why this is not the lesson's own `stepByStep`.
  */
 export const methodFor = (q: EstimateQuestion): string[] => q.mode === "reasonable"
-  ? [
-      "Round both numbers to something easy.",
-      "Add the round numbers for a rough answer.",
-      "Compare that with the answer you were given.",
-    ]
-  : [
-      "Round each number to the nearest ten.",
-      "Add the round numbers.",
-      "That is roughly the answer — close, not exact.",
-    ];
+  ? [ta("estimate.methodClaim1"), ta("estimate.methodClaim2"), ta("estimate.methodClaim3")]
+  : [ta("estimate.method1"), ta("estimate.method2"), ta("estimate.method3")];
 
-const VERDICTS: { key: Verdict; label: string }[] = [
-  { key: "too_small", label: "Far too small" },
-  { key: "right", label: "About right" },
-  { key: "too_big", label: "Far too big" },
+const VERDICTS: { key: Verdict; readonly label: string }[] = [
+  { key: "too_small", get label() { return ta("estimate.tooSmall"); } },
+  { key: "right", get label() { return ta("estimate.aboutRight"); } },
+  { key: "too_big", get label() { return ta("estimate.tooBig"); } },
 ];
 
 export const EstimateDial: React.FC<ActivityProps<EstimateDialParams>> = ({
@@ -273,6 +271,8 @@ export const EstimateDial: React.FC<ActivityProps<EstimateDialParams>> = ({
   onComplete,
   lesson,
 }) => {
+  // Re-render when the language changes: every line below reads the catalog.
+  useT();
   const setup: EstimateSetup = { ...params, ...params.question };
   const totalQuestions = setup.questionsPerRound ?? 5;
   const copy = playCopy(params);
@@ -344,7 +344,7 @@ export const EstimateDial: React.FC<ActivityProps<EstimateDialParams>> = ({
       // not said what the estimate is yet.
       const nearer = roundTo(value, question.unit);
       guide.stumbled();
-      nudge.refuse(`${value} is nearer to ${nearer} than to ${to}. Look at how far it is to each.`);
+      nudge.refuse(ta("estimate.refuseNearer", { value, nearer, to }));
       return;
     }
     setRounded((prev) => prev.map((v, i) => (i === index ? to : v)));
@@ -356,7 +356,7 @@ export const EstimateDial: React.FC<ActivityProps<EstimateDialParams>> = ({
     if (round.feedback) return;
     if (rounded.some((r) => r === null)) {
       guide.stumbled();
-      nudge.refuse("Round both numbers first, then choose the estimate.");
+      nudge.refuse(ta("estimate.refuseRoundFirst"));
       return;
     }
     const correct = String(value) === question.expected;
@@ -366,10 +366,21 @@ export const EstimateDial: React.FC<ActivityProps<EstimateDialParams>> = ({
       correct,
       given: String(value),
       errorKind: correct ? undefined : "off_by_more",
-      title: correct ? "About right!" : "Not the nearest",
+      title: correct ? ta("estimate.rightTitle") : ta("estimate.notNearest"),
       message: correct
-        ? `${roundTo(question.a, question.unit)} and ${roundTo(question.b, question.unit)} is ${question.expected}. The real answer is ${question.sum}, which is close.`
-        : `${question.a} rounds to ${roundTo(question.a, question.unit)} and ${question.b} to ${roundTo(question.b, question.unit)}, so the estimate is ${question.expected}.`,
+        ? ta("estimate.right", {
+            a: roundTo(question.a, question.unit),
+            b: roundTo(question.b, question.unit),
+            estimate: question.expected ?? "",
+            sum: question.sum,
+          })
+        : ta("estimate.wrong", {
+            a: question.a,
+            ra: roundTo(question.a, question.unit),
+            b: question.b,
+            rb: roundTo(question.b, question.unit),
+            estimate: question.expected ?? "",
+          }),
     });
   };
 
@@ -383,13 +394,13 @@ export const EstimateDial: React.FC<ActivityProps<EstimateDialParams>> = ({
       correct,
       given: verdict,
       errorKind: correct ? undefined : "off_by_more",
-      title: correct ? "Good judgement!" : "Look again",
+      title: correct ? ta("estimate.goodJudgement") : ta("lookAgain"),
       message:
         question.verdict === "right"
-          ? `${question.claim} is close to about ${near}, so it could well be right.`
+          ? ta("estimate.claimRight", { claim: question.claim ?? "", near })
           : question.verdict === "too_big"
-            ? `${question.claim} is ten times bigger than about ${near}. A digit has slipped a place.`
-            : `${question.claim} is ten times smaller than about ${near}. A digit has been lost.`,
+            ? ta("estimate.claimTooBig", { claim: question.claim ?? "", near })
+            : ta("estimate.claimTooSmall", { claim: question.claim ?? "", near }),
     });
   };
 
@@ -435,7 +446,7 @@ export const EstimateDial: React.FC<ActivityProps<EstimateDialParams>> = ({
     <SkillRound
       koda={koda}
       lesson={lesson}
-      fallbackTitle="Estimate and Check"
+      fallbackTitle={ta("estimate.title")}
       round={round}
       totalQuestions={totalQuestions}
       prompt={prompt}
@@ -480,8 +491,8 @@ export const EstimateDial: React.FC<ActivityProps<EstimateDialParams>> = ({
               {scaffold && (
                 <p className="text-center text-sm font-bold text-ink/55 tabular-nums">
                   {rounded.every((r) => r !== null)
-                    ? `About ${rounded[0]} and about ${rounded[1]}`
-                    : "Round each number to the nearer one"}
+                    ? ta("estimate.aboutBoth", { a: rounded[0] ?? 0, b: rounded[1] ?? 0 })
+                    : ta("estimate.roundEach")}
                 </p>
               )}
             </>
@@ -512,7 +523,7 @@ export const EstimateDial: React.FC<ActivityProps<EstimateDialParams>> = ({
                   whileHover={{ scale: 1.06, y: -2 }}
                   whileTap={{ scale: 0.9 }}
                   transition={SPRING.tap}
-                  aria-label={`About ${value}`}
+                  aria-label={ta("estimate.about", { value })}
                   className={themeSystem.button("secondary", "choice", "min-w-[5.5rem]")}
                 >
                   {value}
@@ -536,7 +547,7 @@ export const EstimateDial: React.FC<ActivityProps<EstimateDialParams>> = ({
 
         {estimating && (
           <p className={`text-center text-xs font-semibold ${TOTAL.text}`}>
-            These are estimates. None of them is the exact answer.
+            {ta("estimate.help")}
           </p>
         )}
       </div>

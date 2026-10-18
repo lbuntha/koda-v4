@@ -26,6 +26,8 @@ import {
   type TrayBlock,
   TONE_CLASS,
 } from "../internal/data/divisionTray";
+import { td } from "../internal/i18n";
+import { useT } from "../../../lib/i18n";
 
 /**
  * The dealing tray — division's first engine, and the one that decides whether
@@ -95,9 +97,9 @@ function trayHintsRungs(question: ShareQuestion): string[] {
   switch (question.mode) {
     case "share_out":
       return composeHints(
-        `There are ${question.divisor} plates to fill.`,
-        "One to each plate, then round again, until the pile is empty.",
-        "When the pile is empty, count what is on just one plate. That is the answer.",
+        td("tray.hint.share1", { d: question.divisor }),
+        td("tray.hint.share2"),
+        td("tray.hint.share3"),
       );
     /*
      * Halving had `share_out`'s ladder word for word, which told a child to
@@ -108,61 +110,61 @@ function trayHintsRungs(question: ShareQuestion): string[] {
      */
     case "halve":
       return composeHints(
-        "Halving means sharing between exactly two. There are always two plates.",
-        "One to this plate, one to that one, over and over, until the pile is empty.",
-        `Check it when you are done: does your answer, doubled, give you back ${question.dividend}?`,
+        td("tray.hint.halve1"),
+        td("tray.hint.halve2"),
+        td("tray.hint.halve3", { n: question.dividend }),
       );
     case "group_by_size":
       return composeHints(
-        `Each group needs exactly ${question.divisor}.`,
-        "Fill one group completely before you start the next.",
-        "When nothing is left, count the groups — not the counters.",
+        td("tray.hint.group1", { d: question.divisor }),
+        td("tray.hint.group2"),
+        td("tray.hint.group3"),
       );
     case "which_meaning":
       return composeHints(
         // "Holders" was jargon: it appears on no screen a child ever sees. The
         // sentence in front of them says plates, jars or buckets, and the two
         // phrases that actually distinguish the meanings are quoted instead.
-        "Read it again, slowly. The two numbers in it are telling you different kinds of thing.",
+        td("tray.hint.meaning1"),
         question.unknown === "size"
-          ? "\u201cShared between\u201d gives the groups. What is missing is each share."
-          : "\u201cGroups of\u201d gives the size. What is missing is how many groups.",
+          ? td("tray.hint.meaningSize")
+          : td("tray.hint.meaningCount"),
         question.unknown === "size"
-          ? "You are looking for the size of one share."
-          : "You are looking for the number of shares.",
+          ? td("tray.hint.lookSize")
+          : td("tray.hint.lookCount"),
       );
     case "to_equation":
       return composeHints(
-        "The number you started with comes first.",
-        `You started with ${question.dividend}, so the sentence starts with ${question.dividend}.`,
+        td("tray.hint.equation1"),
+        td("tray.hint.equation2", { n: question.dividend }),
       );
     case "identity":
       return composeHints(
         question.divisor === 1
-          ? "There is only one plate. Nobody else is sharing."
-          : "Count the plates. Now count the counters.",
+          ? td("tray.hint.onePlate1")
+          : td("tray.hint.same1"),
         question.divisor === 1
-          ? "Nothing is being shared away, so everything stays where it is."
-          : "There is exactly one counter for every plate, so each plate gets one.",
+          ? td("tray.hint.onePlate2")
+          : td("tray.hint.same2"),
       );
     case "zero_rules":
       return question.impossible
         ? composeHints(
-            "Look for the plates. How many are there?",
-            "There is nowhere to put them. A share you cannot start has no answer at all.",
+            td("tray.hint.zero1"),
+            td("tray.hint.zero2"),
           )
         : composeHints(
-            "There is nothing in the pile to share.",
-            "The plates stay empty, however many plates there are.",
+            td("tray.hint.nothing1"),
+            td("tray.hint.nothing2"),
           );
     case "see_leftover":
       return composeHints(
-        "Go round again while every plate can still have one.",
-        "Stop when there are not enough left to give one to every plate.",
-        "What is left over goes in the box, not on a plate.",
+        td("tray.hint.leftover1"),
+        td("tray.notEnough"),
+        td("tray.hint.leftover3"),
       );
     default:
-      return composeHints("Look at the tray.");
+      return composeHints(td("tray.hint.look"));
   }
 }
 
@@ -181,6 +183,8 @@ export const ShareTray: React.FC<ActivityProps<ShareParams>> = ({
   onComplete,
   lesson,
 }) => {
+  // Re-render when the language changes: every line below reads the catalog.
+  useT();
   const setup: ShareSetup = useMemo(() => ({ ...params, ...params.question }), [params]);
   const practising = isPractice(setup);
   const total = setup.questionsPerRound ?? 5;
@@ -343,7 +347,7 @@ export const ShareTray: React.FC<ActivityProps<ShareParams>> = ({
       correct,
       given,
       expected: question.expected,
-      title: correct ? "Yes!" : "Not yet",
+      title: correct ? td("yes") : td("notYet"),
       message,
     });
   };
@@ -370,11 +374,11 @@ export const ShareTray: React.FC<ActivityProps<ShareParams>> = ({
       correct,
       correct
         ? question.unknown === "size"
-          ? `Each one has ${question.quotient}.`
-          : `You made ${question.quotient} groups.`
+          ? td("tray.eachHas", { q: question.quotient })
+          : td("tray.youMade", { q: question.quotient })
         : question.impossible
-          ? "Zero plates is not somewhere to put them. Look again at the question."
-          : "Count again, carefully.",
+          ? td("tray.zeroPlates")
+          : td("tray.countAgain"),
     );
   };
 
@@ -384,8 +388,8 @@ export const ShareTray: React.FC<ActivityProps<ShareParams>> = ({
       value,
       correct,
       correct
-        ? "Yes — that is the part the question leaves out."
-        : "Look at what the sentence already tells you.",
+        ? td("tray.meaningRight")
+        : td("tray.meaningWrong"),
     );
   };
 
@@ -396,14 +400,14 @@ export const ShareTray: React.FC<ActivityProps<ShareParams>> = ({
       "cannot",
       correct,
       correct
-        ? "Right. There is nowhere to put them, so there is no answer."
-        : "There are plates here. It can be done — work it out.",
+        ? td("tray.cannotRight")
+        : td("tray.cannotWrong"),
     );
   };
 
   const answerEquation = (value: string): void => {
     const correct = value === question.expected;
-    submit(value, correct, correct ? "That is the sentence." : "Which number did you start with?");
+    submit(value, correct, correct ? td("tray.equationRight") : td("tray.equationWrong"));
   };
 
   const choices = useMemo(
@@ -462,14 +466,14 @@ export const ShareTray: React.FC<ActivityProps<ShareParams>> = ({
                 answerable until it is empty. */}
             <div
               data-testid="pile"
-              aria-label={`${pile} left to deal`}
+              aria-label={td("tray.pileLabel", { pile })}
               className="flex min-h-12 flex-wrap items-center justify-center gap-1 rounded-2xl bg-surface p-2"
             >
               {Array.from({ length: pile }, (_, i) => (
                 <Counter key={i} tone={question.tone} small={small} />
               ))}
               {pile === 0 ? (
-                <span className="text-sm text-muted">The pile is empty.</span>
+                <span className="text-sm text-muted">{td("tray.pileEmpty")}</span>
               ) : null}
             </div>
 
@@ -480,8 +484,8 @@ export const ShareTray: React.FC<ActivityProps<ShareParams>> = ({
                     type="button"
                     onClick={() => addTo(i)}
                     disabled={!!round.feedback}
-                    aria-label={`Group ${i + 1}, holding ${count}. Add one.${
-                      guide.target === i ? " Deal to this one next." : ""
+                    aria-label={`${td("tray.groupLabel", { group: i + 1, count })}${
+                      guide.target === i ? td("tray.dealNext") : ""
                     }`}
                     className={`flex min-h-16 min-w-16 max-w-24 flex-wrap content-start items-start justify-center gap-1 rounded-2xl border-2 border-dashed border-line/40 bg-surface p-2 focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500${guide.target === i ? ' ring-4 ring-indigo-500' : ''}`}
                   >
@@ -496,7 +500,7 @@ export const ShareTray: React.FC<ActivityProps<ShareParams>> = ({
                     type="button"
                     onClick={() => takeFrom(i)}
                     disabled={count === 0 || !!round.feedback}
-                    aria-label={`Take one back from group ${i + 1}`}
+                    aria-label={td("tray.takeBack", { group: i + 1 })}
                     className="inline-flex min-h-11 min-w-11 items-center justify-center rounded-xl px-3 text-muted disabled:opacity-30"
                   >
                     <Undo2 className="h-4 w-4" aria-hidden="true" />
@@ -509,7 +513,7 @@ export const ShareTray: React.FC<ActivityProps<ShareParams>> = ({
                   type="button"
                   onClick={addPlate}
                   disabled={pile <= 0 || !!round.feedback}
-                  aria-label="Start a new group"
+                  aria-label={td("tray.newGroup")}
                   className="min-h-16 min-w-16 rounded-2xl border-2 border-dashed border-indigo-400 text-3xl text-indigo-500 disabled:opacity-30"
                 >
                   +
@@ -523,21 +527,21 @@ export const ShareTray: React.FC<ActivityProps<ShareParams>> = ({
                   type="button"
                   onClick={addLeftover}
                   disabled={pile <= 0 || !!round.feedback}
-                  aria-label={`Leftover box, holding ${leftover}. Put one in.`}
+                  aria-label={td("tray.leftoverLabel", { count: leftover })}
                   className="flex min-h-12 w-full max-w-xs flex-wrap items-center justify-center gap-1 rounded-2xl border-2 border-dashed border-rose-400/70 bg-surface p-2 focus:outline-none focus-visible:ring-2 focus-visible:ring-rose-500 disabled:opacity-60"
                 >
                   {Array.from({ length: leftover }, (_, j) => (
                     <Counter key={j} tone={question.tone} small={small} />
                   ))}
                   {leftover === 0 ? (
-                    <span className="text-sm text-muted">Left over</span>
+                    <span className="text-sm text-muted">{td("tray.leftOver")}</span>
                   ) : null}
                 </button>
                 <button
                   type="button"
                   onClick={takeLeftover}
                   disabled={leftover === 0 || !!round.feedback}
-                  aria-label="Take one back out of the leftover box"
+                  aria-label={td("tray.takeLeftover")}
                   className="inline-flex min-h-11 min-w-11 items-center justify-center rounded-xl px-3 text-muted disabled:opacity-30"
                 >
                   <Undo2 className="h-4 w-4" aria-hidden="true" />
@@ -569,7 +573,7 @@ export const ShareTray: React.FC<ActivityProps<ShareParams>> = ({
 
         {question.impossible ? (
           <div className="flex flex-col gap-3">
-            <p className="text-center text-sm text-muted">There are no plates.</p>
+            <p className="text-center text-sm text-muted">{td("tray.noPlates")}</p>
             <div className="flex flex-wrap justify-center gap-3">
               {choices.map((value) => (
                 <button
@@ -589,7 +593,7 @@ export const ShareTray: React.FC<ActivityProps<ShareParams>> = ({
               disabled={!!round.feedback}
               className="min-h-11 rounded-2xl bg-surface px-4 py-3 text-base font-semibold text-ink shadow-sm focus:outline-none focus-visible:ring-2 focus-visible:ring-rose-500"
             >
-              This cannot be done
+              {td("tray.cannot")}
             </button>
           </div>
         ) : null}
@@ -602,7 +606,7 @@ export const ShareTray: React.FC<ActivityProps<ShareParams>> = ({
               disabled={!!round.feedback}
               className="min-h-11 rounded-2xl bg-surface px-4 py-3 text-base font-semibold text-ink shadow-sm focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500"
             >
-              How many go in each one?
+              {td("tray.inEachOne")}
             </button>
             <button
               type="button"
@@ -610,7 +614,7 @@ export const ShareTray: React.FC<ActivityProps<ShareParams>> = ({
               disabled={!!round.feedback}
               className="min-h-11 rounded-2xl bg-surface px-4 py-3 text-base font-semibold text-ink shadow-sm focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500"
             >
-              How many groups are there?
+              {td("tray.howManyGroups")}
             </button>
           </div>
         ) : null}
@@ -651,32 +655,32 @@ export const ShareTray: React.FC<ActivityProps<ShareParams>> = ({
  */
 export function printedFor(question: ShareQuestion): { text: string; answer: string } | null {
   if (question.impossible) {
-    return { text: `Can ${question.dividend} be shared between 0 plates?`, answer: "No — there is nowhere to put them." };
+    return { text: td("tray.printed.impossible", { n: question.dividend }), answer: td("tray.printed.impossibleAnswer") };
   }
   switch (question.mode) {
     case "which_meaning":
       return {
-        text: `${question.story?.text ?? ""} What is the question asking for?   how many in each / how many groups`,
-        answer: question.unknown === "size" ? "how many in each" : "how many groups",
+        text: `${question.story?.text ?? ""} ${td("tray.printed.meaning")}`,
+        answer: td(question.unknown === "size" ? "tray.printed.inEach" : "tray.printed.groups"),
       };
     case "to_equation":
       return {
-        text: `${question.story?.text ?? ""} Write the division sentence.`,
+        text: `${question.story?.text ?? ""} ${td("tray.printed.equation")}`,
         answer: question.expected,
       };
     case "group_by_size":
       return {
-        text: `Ring groups of ${question.divisor}. How many groups?`,
+        text: td("tray.printed.ring", { d: question.divisor }),
         answer: String(question.quotient),
       };
     case "see_leftover":
       return {
-        text: `Share these between ${question.divisor} plates. How many each, and how many left over?`,
-        answer: `${question.quotient} each, ${question.remainder} left over`,
+        text: td("tray.printed.leftover", { d: question.divisor }),
+        answer: td("tray.printed.leftoverAnswer", { q: question.quotient, r: question.remainder }),
       };
     default:
       return {
-        text: `Share these between ${question.divisor} plates. How many on each?`,
+        text: td("tray.printed.share", { d: question.divisor }),
         answer: String(question.quotient),
       };
   }
@@ -719,7 +723,7 @@ export const figureFor = (question: ShareQuestion): React.ReactNode | null => {
       width={220}
       height={height}
       role="img"
-      aria-label={`${question.dividend} counters${plates ? ` and ${plates} empty plates` : ""}`}
+      aria-label={td(plates ? "tray.figurePlates" : "tray.figureCounters", { n: question.dividend, plates })}
       className="text-slate-900"
     >
       {countersFigure(question.dividend, 10)}
@@ -750,7 +754,7 @@ export const figureFor = (question: ShareQuestion): React.ReactNode | null => {
             strokeDasharray="5 4"
           />
           <text x={12} y={plateY + 75} fontSize="11" fill="currentColor">
-            left over
+            {td("column.leftOver")}
           </text>
         </>
       ) : null}
@@ -762,21 +766,21 @@ export function methodFor(question: ShareQuestion): string[] {
   switch (question.mode) {
     case "group_by_size":
       return [
-        "Ring the same number of them at a time, as the question says.",
-        "Keep going while there are enough left for a whole ring.",
-        "Count the rings, not the counters.",
+        td("tray.method.group1"),
+        td("tray.method.group2"),
+        td("tray.method.group3"),
       ];
     case "see_leftover":
       return [
-        "Give one to each plate, then go round again.",
-        "Stop when there are not enough left to give one to every plate.",
-        "What is left over is not on a plate. Write it separately.",
+        td("tray.method.leftover1"),
+        td("tray.notEnough"),
+        td("tray.method.leftover3"),
       ];
     default:
       return [
-        "Give one to each plate, then start again at the first.",
-        "Keep going until they are all shared out.",
-        "Count what is on one plate.",
+        td("tray.method.share1"),
+        td("tray.method.share2"),
+        td("tray.method.share3"),
       ];
   }
 }

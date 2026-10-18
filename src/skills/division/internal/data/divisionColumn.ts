@@ -14,6 +14,7 @@
  * revise — and not because the method changes.
  */
 
+import { catalogRecord } from "../i18n";
 import {
   digitsOf,
   drawQuotient,
@@ -226,10 +227,10 @@ export function judgeDigit(working: number, divisor: number, digit: number): Dig
   return "ok";
 }
 
-export const DIGIT_REFUSALS: Record<Exclude<DigitVerdict, "ok">, string> = {
-  "too-big": "That is more than there is. Try a smaller digit.",
-  "too-small": "Another whole one still fits there. Try a bigger digit.",
-};
+export const DIGIT_REFUSALS: Record<Exclude<DigitVerdict, "ok">, string> = catalogRecord("column.refusals", [
+  "too-big",
+  "too-small",
+]);
 
 /** Confirms the built answer is the one the question wanted. */
 export const answerMatches = (

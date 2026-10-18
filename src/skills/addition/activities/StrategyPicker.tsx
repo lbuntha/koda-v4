@@ -20,6 +20,8 @@ import { speechRate, tagLabelsFrom } from "../internal/data/additionChrome";
 import { isPractice, type PracticeSetup } from "../../kit";
 import { STRATEGIES, byId, fittingFor, type Strategy } from "../internal/data/strategyCards";
 import { drawPair, pairKey, shuffle, withoutRepeat, type PairSpec } from "../internal/data/additionNumbers";
+import { listAnd, ta } from "../internal/i18n";
+import { useT } from "../../../lib/i18n";
 
 /**
  * The last lesson, and the only one with more than one right answer.
@@ -181,8 +183,8 @@ export const promptFor = (q: StrategyQuestion, template?: string): string => {
     .replaceAll("{sum}", String(q.sum));
   if (filled && q.step === 1) return filled;
   return q.step === 2
-    ? `Both of these get to ${q.sum}. Which one took fewer steps?`
-    : `${q.a} plus ${q.b}. Which strategy would you use?`;
+    ? ta("strategyPicker.promptPaths", { sum: q.sum })
+    : ta("strategyPicker.prompt", { a: q.a, b: q.b });
 };
 
 
@@ -207,18 +209,18 @@ export function strategyHints(
 ): string[] {
   if (q.step === 2) {
     return composeHints(
-      state.kidTip ?? "More than one way is right. Some ways are shorter than others.",
-      "Count the lines in each one. The shorter list is the shorter way.",
+      state.kidTip ?? ta("strategyPicker.hintPathsTip"),
+      ta("strategyPicker.hintPathsCount"),
       // Stops at the method: counting them is the question.
-      "Both reach the same answer, so the only difference is how much work it took.",
+      ta("strategyPicker.hintPathsSame"),
     );
   }
   const fits = q.fitting.map(byId);
   return composeHints(
-    state.kidTip ?? "Look at the numbers before you choose. Some strategies only suit some numbers.",
+    state.kidTip ?? ta("strategyPicker.hintTip"),
     fits.length > 1
-      ? `More than one of these would work here. Ask what is special about ${q.a} and ${q.b}.`
-      : `Ask what is special about ${q.a} and ${q.b}.`,
+      ? ta("strategyPicker.hintSeveral", { a: q.a, b: q.b })
+      : ta("strategyPicker.hintSpecial", { a: q.a, b: q.b }),
     fits[0]!.why(q.a, q.b),
   );
 }
@@ -229,6 +231,8 @@ export const StrategyPicker: React.FC<ActivityProps<StrategyPickerParams>> = ({
   onComplete,
   lesson,
 }) => {
+  // Re-render when the language changes: every line below reads the catalog.
+  useT();
   const setup: StrategySetup = { ...params, ...params.question };
   const totalQuestions = setup.questionsPerRound ?? 6;
   const copy = playCopy(params);
@@ -289,14 +293,20 @@ export const StrategyPicker: React.FC<ActivityProps<StrategyPickerParams>> = ({
       correct,
       given: s.id,
       errorKind: correct ? undefined : "unknown",
-      title: correct ? "That is a good choice" : "Not for these numbers",
+      title: correct ? ta("strategyPicker.goodChoice") : ta("strategyPicker.notThese"),
       message: correct
-        ? `${s.why(question.a, question.b)}${
-            others.length > 0
-              ? ` ${others.map((o) => o.name).join(" and ")} would work too.`
-              : ""
-          }`
-        : `${s.name} does not suit ${question.a} and ${question.b}. ${byId(question.fitting[0]).why(question.a, question.b)}`,
+        ? others.length > 0
+          ? ta("strategyPicker.rightOthers", {
+              why: s.why(question.a, question.b),
+              others: listAnd(others.map((o) => o.name)),
+            })
+          : s.why(question.a, question.b)
+        : ta("strategyPicker.wrong", {
+            name: s.name,
+            a: question.a,
+            b: question.b,
+            why: byId(question.fitting[0]).why(question.a, question.b),
+          }),
     });
   };
 
@@ -311,8 +321,14 @@ export const StrategyPicker: React.FC<ActivityProps<StrategyPickerParams>> = ({
       correct,
       given: id,
       errorKind: correct ? undefined : "unknown",
-      title: correct ? "Fewer steps!" : "Count them again",
-      message: `${short.name} took ${short.lines.length} ${short.lines.length === 1 ? "step" : "steps"}; ${long.name} took ${long.lines.length}. Both reach ${question.sum}.`,
+      title: correct ? ta("strategyPicker.fewer") : ta("countAgain"),
+      message: ta("strategyPicker.pathsMessage", {
+        count: short.lines.length,
+        short: short.name,
+        long: long.name,
+        longSteps: long.lines.length,
+        sum: question.sum,
+      }),
     });
   };
 
@@ -357,7 +373,7 @@ export const StrategyPicker: React.FC<ActivityProps<StrategyPickerParams>> = ({
     <SkillRound
       koda={koda}
       lesson={lesson}
-      fallbackTitle="Which Strategy?"
+      fallbackTitle={ta("strategyPicker.title")}
       round={round}
       totalQuestions={totalQuestions}
       prompt={prompt}
@@ -404,7 +420,7 @@ export const StrategyPicker: React.FC<ActivityProps<StrategyPickerParams>> = ({
                   whileHover={{ scale: 1.02 }}
                   whileTap={{ scale: 0.98 }}
                   transition={SPRING.tap}
-                  aria-label={`${path.name}, ${path.lines.length} steps`}
+                  aria-label={ta("strategyPicker.pathLabel", { name: path.name, count: path.lines.length })}
                   className={`${themeSystem.card("bordered")} text-left space-y-1.5`}
                 >
                   <span className="block text-sm font-black uppercase tracking-wide text-ink/60">
@@ -428,7 +444,7 @@ export const StrategyPicker: React.FC<ActivityProps<StrategyPickerParams>> = ({
           ) : (
             scaffold && (
               <p className="text-center text-sm font-bold text-ink/55">
-                More than one of these can be right. Pick the one that suits these numbers.
+                {ta("strategyPicker.help")}
               </p>
             )
           )}

@@ -20,6 +20,8 @@ import {
   type FactorQuestion,
   type FactorSetup,
 } from "../internal/data/divisionFactors";
+import { td } from "../internal/i18n";
+import { useT } from "../../../lib/i18n";
 
 /**
  * Does it go? — division answering a yes-or-no question.
@@ -63,48 +65,50 @@ function factorHintsRungs(question: FactorQuestion): string[] {
   switch (question.mode) {
     case "last_digit":
       return composeHints(
-        "You do not need to divide. Look at the last digit.",
+        td("factors.hint.last1"),
         question.tester === 2
-          ? "Even last digits mean it divides by 2."
+          ? td("factors.hint.last2")
           : question.tester === 5
-            ? "A last digit of 0 or 5 means it divides by 5."
-            : "Only a last digit of 0 means it divides by 10.",
+            ? td("factors.hint.last5")
+            : td("factors.hint.last10"),
       );
     case "digit_sum":
       return composeHints(
-        "Add all the digits up.",
+        td("factors.hint.sum1"),
         question.tester === 3
-          ? "If that total divides by 3, so does the whole number."
-          : "If that total divides by 9, so does the whole number.",
+          ? td("factors.hint.sum3")
+          : td("factors.hint.sum9"),
       );
     case "combined_test":
       return composeHints(
-        question.tester === 4 ? "Look at just the last two digits." : "Test it twice: by 2, and by 3.",
+        question.tester === 4 ? td("factors.hint.four1") : td("factors.hint.six1"),
         question.tester === 4
-          ? "If those two digits make a number that divides by 4, the whole thing does."
-          : "A number divides by 6 only if it divides by both 2 and 3.",
+          ? td("factors.hint.four2")
+          : td("factors.hint.six2"),
       );
     case "factor_pairs":
       return composeHints(
-        "Try dividing by 1, then 2, then 3, and so on.",
-        "Every time one goes exactly, you have found a pair — that number and its partner.",
-        `You can stop at ${question.stopAt}. Past there you only meet the partners again.`,
+        td("factors.hint.pairs1"),
+        td("factors.hint.pairs2"),
+        td("factors.hint.pairs3", { stop: question.stopAt ?? 0 }),
       );
     case "common_factors":
       return composeHints(
-        "A number has to divide into both, not just one.",
-        "Test each candidate against both numbers before you tap it.",
+        td("factors.hint.common1"),
+        td("factors.hint.common2"),
       );
     default:
       return composeHints(
-        "Split it into any two numbers that multiply to make it.",
-        "Keep splitting the parts that can still be split.",
-        "A prime cannot be split. When they are all prime, you are finished.",
+        td("factors.hint.prime1"),
+        td("factors.hint.prime2"),
+        td("factors.hint.prime3"),
       );
   }
 }
 
 export const FactorLab: React.FC<ActivityProps<FactorParams>> = ({ params, koda, onComplete, lesson }) => {
+  // Re-render when the language changes: every line below reads the catalog.
+  useT();
   const setup: FactorSetup = useMemo(() => ({ ...params, ...params.question }), [params]);
   const practising = isPractice(setup);
   const total = setup.questionsPerRound ?? 5;
@@ -187,7 +191,7 @@ export const FactorLab: React.FC<ActivityProps<FactorParams>> = ({ params, koda,
       if (correct) koda.haptics.success();
       else koda.haptics.pulse("error");
     }
-    round.submit({ correct, given, expected: question.expected, title: correct ? "Yes!" : "Not yet", message });
+    round.submit({ correct, given, expected: question.expected, title: correct ? td("yes") : td("notYet"), message });
   };
 
   const answerYesNo = (said: boolean): void => {
@@ -196,8 +200,8 @@ export const FactorLab: React.FC<ActivityProps<FactorParams>> = ({ params, koda,
       said ? "yes" : "no",
       correct,
       correct
-        ? `${question.evidence} So it ${question.divides ? "does" : "does not"}.`
-        : `Use the test: ${question.evidence}`,
+        ? td(question.divides ? "factors.soItDoes" : "factors.soItDoesNot", { evidence: question.evidence ?? "" })
+        : td("factors.useTest", { evidence: question.evidence ?? "" }),
     );
   };
 
@@ -217,10 +221,10 @@ export const FactorLab: React.FC<ActivityProps<FactorParams>> = ({ params, koda,
       [...picked].sort((a, b) => a - b).join(", "),
       correct,
       correct
-        ? `All of them: ${wanted.join(", ")}.`
+        ? td("factors.allOfThem", { values: wanted.join(", ") })
         : extra.length > 0
-          ? `${extra[0]} does not go exactly. Check it again.`
-          : `There ${missed.length === 1 ? "is one" : `are ${missed.length}`} still to find.`,
+          ? td("factors.notExact", { value: extra[0] })
+          : td("factors.stillToFind", { count: missed.length }),
     );
   };
 
@@ -238,7 +242,7 @@ export const FactorLab: React.FC<ActivityProps<FactorParams>> = ({ params, koda,
   const submitTree = (): void => {
     const sorted = [...leaves].sort((a, b) => a - b);
     const correct = treeDone && sorted.join(" × ") === question.expected;
-    submit(sorted.join(" × "), correct, correct ? "All primes." : "Keep splitting until nothing can be split.");
+    submit(sorted.join(" × "), correct, correct ? td("factors.allPrimesDone") : td("factors.keepSplitting"));
   };
 
   const testing = question.mode === "last_digit" || question.mode === "digit_sum" || question.mode === "combined_test";
@@ -248,7 +252,7 @@ export const FactorLab: React.FC<ActivityProps<FactorParams>> = ({ params, koda,
     <SkillRound
       koda={koda}
       lesson={lesson}
-      fallbackTitle="Does It Go?"
+      fallbackTitle={td("factors.title")}
       round={round}
       totalQuestions={total}
       prompt={promptFor(question)}
@@ -291,7 +295,7 @@ export const FactorLab: React.FC<ActivityProps<FactorParams>> = ({ params, koda,
                 disabled={!!round.feedback}
                 className="min-h-11 min-w-24 rounded-2xl bg-surface px-6 py-3 text-lg font-bold text-ink shadow-sm focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500"
               >
-                Yes
+                {td("factors.yesButton")}
               </button>
               <button
                 type="button"
@@ -299,7 +303,7 @@ export const FactorLab: React.FC<ActivityProps<FactorParams>> = ({ params, koda,
                 disabled={!!round.feedback}
                 className="min-h-11 min-w-24 rounded-2xl bg-surface px-6 py-3 text-lg font-bold text-ink shadow-sm focus:outline-none focus-visible:ring-2 focus-visible:ring-rose-500"
               >
-                No
+                {td("factors.noButton")}
               </button>
             </div>
           </>
@@ -309,7 +313,7 @@ export const FactorLab: React.FC<ActivityProps<FactorParams>> = ({ params, koda,
           <>
             {question.stopAt && scaffoldEnabled && !practising ? (
               <p className="text-center text-sm text-muted">
-                Nothing new past {question.stopAt} — after that you only meet the partners again.
+                {td("factors.nothingNewPast", { stop: question.stopAt })}
               </p>
             ) : null}
             <div className="flex flex-wrap justify-center gap-2">
@@ -334,7 +338,7 @@ export const FactorLab: React.FC<ActivityProps<FactorParams>> = ({ params, koda,
               disabled={picked.length === 0 || !!round.feedback}
               className="mx-auto min-h-11 rounded-2xl bg-emerald-600 px-6 py-2 text-base font-bold text-white shadow-sm disabled:opacity-40"
             >
-              That is all of them
+              {td("chunk.allOfThem")}
             </button>
           </>
         ) : null}
@@ -348,7 +352,7 @@ export const FactorLab: React.FC<ActivityProps<FactorParams>> = ({ params, koda,
                   type="button"
                   onClick={() => setSplitting(isPrime(leaf) ? null : leaf)}
                   disabled={isPrime(leaf) || !!round.feedback}
-                  aria-label={isPrime(leaf) ? `${leaf}, prime` : `Split ${leaf}`}
+                  aria-label={td(isPrime(leaf) ? "factors.primeLabel" : "factors.splitLabel", { value: leaf })}
                   className={`min-h-11 min-w-11 rounded-xl px-3 py-2 text-base font-bold shadow-sm ${
                     isPrime(leaf) ? "bg-emerald-500 text-white" : "bg-surface text-ink"
                   }`}
@@ -379,7 +383,7 @@ export const FactorLab: React.FC<ActivityProps<FactorParams>> = ({ params, koda,
               disabled={!treeDone || !!round.feedback}
               className="mx-auto min-h-11 rounded-2xl bg-emerald-600 px-6 py-2 text-base font-bold text-white shadow-sm disabled:opacity-40"
             >
-              All primes
+              {td("factors.allPrimes")}
             </button>
           </>
         ) : null}
@@ -395,17 +399,17 @@ export const FactorLab: React.FC<ActivityProps<FactorParams>> = ({ params, koda,
 export function printedFor(question: FactorQuestion): { text: string; answer: string } | null {
   switch (question.mode) {
     case "factor_pairs":
-      return { text: `Write every factor of ${question.value}.`, answer: question.wanted.join(", ") };
+      return { text: td("factors.printed.pairs", { value: question.value }), answer: question.wanted.join(", ") };
     case "common_factors":
       return {
-        text: `Write every number that divides into both ${question.value} and ${question.other}.`,
+        text: td("factors.printed.common", { value: question.value, other: question.other ?? 0 }),
         answer: question.wanted.join(", "),
       };
     case "prime_factors":
-      return { text: `Write ${question.value} as a product of primes.`, answer: question.expected };
+      return { text: td("factors.printed.prime", { value: question.value }), answer: question.expected };
     default:
       return {
-        text: `Does ${question.tester} divide into ${question.value} exactly?   yes / no`,
+        text: td("factors.printed.divides", { tester: question.tester ?? 0, value: question.value }),
         answer: question.expected,
       };
   }
@@ -414,20 +418,20 @@ export function printedFor(question: FactorQuestion): { text: string; answer: st
 export function methodFor(question: FactorQuestion): string[] {
   switch (question.mode) {
     case "last_digit":
-      return ["Look at the last digit.", "Even means 2. A 0 or 5 means 5. Only a 0 means 10."];
+      return [td("factors.method.last1"), td("factors.method.last2")];
     case "digit_sum":
-      return ["Add all the digits together.", "If that total divides by 3 or 9, so does the whole number."];
+      return [td("factors.method.sum1"), td("factors.method.sum2")];
     case "combined_test":
-      return ["For 4, look at the last two digits.", "For 6, test by 2 and by 3. Both have to pass."];
+      return [td("factors.method.combined1"), td("factors.method.combined2")];
     case "factor_pairs":
       return [
-        "Divide by 1, then 2, then 3, and keep going.",
-        "Each one that goes exactly gives you a pair.",
-        "Stop where the two halves of a pair meet.",
+        td("factors.method.pairs1"),
+        td("factors.method.pairs2"),
+        td("factors.method.pairs3"),
       ];
     case "common_factors":
-      return ["Find the factors of the first number.", "Keep only the ones that divide the second as well."];
+      return [td("factors.method.common1"), td("factors.method.common2")];
     default:
-      return ["Split the number into two factors.", "Keep splitting until every part is prime."];
+      return [td("factors.method.prime1"), td("factors.method.prime2")];
   }
 }

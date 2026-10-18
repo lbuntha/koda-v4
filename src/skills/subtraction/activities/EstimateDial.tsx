@@ -15,6 +15,8 @@ import {
   differenceKey, digitsOf, drawRoundingDifference, roundTo, shuffle, withoutRepeat,
   type Difference,
 } from "../internal/data/subtractionNumbers";
+import { ts } from "../internal/i18n";
+import { useT } from "../../../lib/i18n";
 
 export type EstimateMode = "round_estimate" | "reasonable";
 
@@ -43,6 +45,17 @@ export const REASONS: Record<ClaimKind, string> = {
 };
 
 export const isReasonable = (kind: ClaimKind): boolean => kind === "exact" || kind === "estimate";
+
+/*
+ * What a child reads. `REASONS` stays the record — it is what `expected` and
+ * the learning log hold, whatever language the round was played in — and the
+ * button shows the same reason in the language on screen.
+ */
+const reasonText = (kind: ClaimKind): string => ts(`estimate.reason.${kind}`);
+const shownReason = (recorded: string): string => {
+  const kind = (Object.keys(REASONS) as ClaimKind[]).find((k) => REASONS[k] === recorded);
+  return kind ? reasonText(kind) : recorded;
+};
 
 export interface EstimateQuestion extends RoundQuestion {
   mode: EstimateMode;
@@ -114,36 +127,38 @@ export const buildQuestion = (setup: EstimateSetup, index: number, seen: Set<str
 export const promptFor = (q: EstimateQuestion, template?: string): string => {
   const filled = template?.replaceAll("{a}", String(q.minuend)).replaceAll("{b}", String(q.subtrahend)).replaceAll("{difference}", String(q.difference)).replaceAll("{claim}", String(q.claim ?? ""));
   if (filled) return filled;
-  if (q.mode === "reasonable") return `Someone says ${q.minuend} minus ${q.subtrahend} is ${q.claim}. Is that reasonable?`;
-  return `About how much is ${q.minuend} minus ${q.subtrahend}?`;
+  if (q.mode === "reasonable") return ts("estimate.promptClaim", { a: q.minuend, b: q.subtrahend, claim: q.claim ?? "" });
+  return ts("estimate.prompt", { a: q.minuend, b: q.subtrahend });
 };
 
 export const printedFor = (q: EstimateQuestion): PrintedQuestion => q.mode === "reasonable"
-  ? { text: `${q.minuend} − ${q.subtrahend} = ${q.claim}. Reasonable? Circle yes or no and say why.`, answer: `${isReasonable(q.claimKind!) ? "yes" : "no"} — ${REASONS[q.claimKind!]}` }
-  : { text: `Estimate: ${q.minuend} − ${q.subtrahend} is about □`, answer: `about ${q.estimate}` };
+  ? {
+      text: ts("estimate.printedClaim", { a: q.minuend, b: q.subtrahend, claim: q.claim ?? "" }),
+      answer: ts(isReasonable(q.claimKind!) ? "estimate.keyYes" : "estimate.keyNo", { reason: reasonText(q.claimKind!) }),
+    }
+  : { text: ts("estimate.printed", { a: q.minuend, b: q.subtrahend }), answer: ts("estimate.about", { value: q.estimate }) };
 
 export const methodFor = (q: EstimateQuestion): string[] => q.mode === "reasonable"
-  ? ["Round both numbers and estimate the answer.", "Compare the claim with your estimate.", "Say which mistake would explain the gap."]
-  : [`Round each number to the nearest ${q.unit === 10 ? "ten" : "hundred"}.`, "Subtract the rounded numbers.", "The answer is an estimate, so say 'about'."];
+  ? [ts("estimate.methodClaim1"), ts("estimate.methodClaim2"), ts("estimate.methodClaim3")]
+  : [ts(q.unit === 10 ? "estimate.method1Ten" : "estimate.method1Hundred"), ts("estimate.method2"), ts("estimate.method3")];
 
 export function estimateHints(
   q: EstimateQuestion,
   state: { rounded: boolean; verdict?: string; kidTip?: string },
 ): string[] {
-  const unitName = q.unit === 10 ? "ten" : "hundred";
   if (q.mode === "reasonable") return composeHints(
-    state.kidTip ?? "Estimate first, then judge the claim.",
-    `Rounded, this is about ${q.roundedMinuend} minus ${q.roundedSubtrahend}, which is about ${q.estimate}.`,
+    state.kidTip ?? ts("estimate.hintClaimTip"),
+    ts("estimate.hintRounded", { a: q.roundedMinuend, b: q.roundedSubtrahend, estimate: q.estimate }),
     isReasonable(q.claimKind!)
-      ? `${q.claim} sits close to ${q.estimate}, so it is worth believing.`
-      : `${q.claim} is nowhere near ${q.estimate}. ${REASONS[q.claimKind!]}`,
+      ? ts("estimate.hintClose", { claim: q.claim ?? "", estimate: q.estimate })
+      : ts("estimate.hintFar", { claim: q.claim ?? "", estimate: q.estimate, reason: reasonText(q.claimKind!) }),
   );
   return composeHints(
-    state.kidTip ?? `Round both numbers to the nearest ${unitName} first.`,
+    state.kidTip ?? ts(q.unit === 10 ? "estimate.hintTipTen" : "estimate.hintTipHundred"),
     state.rounded
-      ? `You have ${q.roundedMinuend} minus ${q.roundedSubtrahend}. Subtract those.`
-      : `${q.minuend} rounds to ${q.roundedMinuend}, and ${q.subtrahend} rounds to ${q.roundedSubtrahend}.`,
-    `${q.roundedMinuend} minus ${q.roundedSubtrahend} is about ${q.estimate}.`,
+      ? ts("estimate.hintSubtract", { a: q.roundedMinuend, b: q.roundedSubtrahend })
+      : ts("estimate.hintRounds", { a: q.minuend, ra: q.roundedMinuend, b: q.subtrahend, rb: q.roundedSubtrahend }),
+    ts("estimate.aboutIs", { a: q.roundedMinuend, b: q.roundedSubtrahend, estimate: q.estimate }),
   );
 }
 
@@ -164,6 +179,8 @@ const estimateChoices = (estimate: number, unit: 10 | 100): number[] => {
 };
 
 export const EstimateDial: React.FC<ActivityProps<EstimateDialParams>> = ({ params, koda, onComplete, lesson }) => {
+  // Re-render when the language changes: every line below reads the catalog.
+  useT();
   const setup: EstimateSetup = { ...params, ...params.question };
   const totalQuestions = setup.questionsPerRound ?? 5;
   const practising = isPractice(setup);
@@ -195,14 +212,14 @@ export const EstimateDial: React.FC<ActivityProps<EstimateDialParams>> = ({ para
     round.submit({
       correct, given: String(value), expected: q.expected,
       errorKind: correct ? undefined : Math.abs(value - q.estimate) === q.unit ? "off_by_one" : "off_by_more",
-      title: correct ? "A good estimate!" : "Round again",
-      message: practising ? undefined : `${q.roundedMinuend} minus ${q.roundedSubtrahend} is about ${q.estimate}.`,
+      title: correct ? ts("estimate.goodTitle") : ts("estimate.roundAgain"),
+      message: practising ? undefined : ts("estimate.aboutIs", { a: q.roundedMinuend, b: q.roundedSubtrahend, estimate: q.estimate }),
     });
   };
 
   const submitJudgement = () => {
-    if (!verdict) { nudge.refuse("Say whether the answer is reasonable first."); return; }
-    if (!reason) { nudge.refuse("Choose the reason that explains it."); return; }
+    if (!verdict) { nudge.refuse(ts("estimate.refuseVerdict")); return; }
+    if (!reason) { nudge.refuse(ts("estimate.refuseReason")); return; }
     const given = `${verdict},${reason}`;
     const correct = given === q.expected;
     chime(koda, correct ? "right" : "wrong");
@@ -210,8 +227,12 @@ export const EstimateDial: React.FC<ActivityProps<EstimateDialParams>> = ({ para
     round.submit({
       correct, given, expected: q.expected,
       errorKind: correct ? undefined : q.claimKind === "reversed" ? "reversed" : q.claimKind === "place_value" ? "place_value" : "off_by_more",
-      title: correct ? "Well judged!" : "Estimate it again",
-      message: practising ? undefined : `About ${q.estimate}, so ${q.claim} is ${isReasonable(q.claimKind!) ? "reasonable" : "not"}. ${REASONS[q.claimKind!]}`,
+      title: correct ? ts("estimate.judgedTitle") : ts("estimate.estimateAgain"),
+      message: practising ? undefined : ts(isReasonable(q.claimKind!) ? "estimate.verdictYes" : "estimate.verdictNo", {
+        estimate: q.estimate,
+        claim: q.claim ?? "",
+        reason: reasonText(q.claimKind!),
+      }),
     });
   };
 
@@ -240,7 +261,7 @@ export const EstimateDial: React.FC<ActivityProps<EstimateDialParams>> = ({ para
     useSupport: round.useSupport,
   });
 
-  return <SkillRound koda={koda} lesson={lesson} fallbackTitle="Estimate and Judge" round={round}
+  return <SkillRound koda={koda} lesson={lesson} fallbackTitle={ts("estimate.title")} round={round}
     totalQuestions={totalQuestions} prompt={prompt} iconName="scale" iconTone="cyan"
     tagLabels={tagLabelsFrom(koda)} nudge={nudge.message}
     hints={hints}
@@ -257,36 +278,36 @@ export const EstimateDial: React.FC<ActivityProps<EstimateDialParams>> = ({ para
 
         {q.mode === "round_estimate" && (rounded
           ? <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className={`text-2xl font-black tabular-nums ${DIFFERENCE.text}`}>
-            about {q.roundedMinuend} − {q.roundedSubtrahend}
+            {ts("estimate.aboutDiff", { a: q.roundedMinuend, b: q.roundedSubtrahend })}
           </motion.div>
           : <button type="button" className={`${TOUCH_TARGET} ${themeSystem.button("secondary", "md")}`}
             onClick={() => { setRounded(true); round.useSupport("walkthrough"); chime(koda, "changed"); }}>
-            Round both to the nearest {q.unit === 10 ? "ten" : "hundred"}
+            {ts(q.unit === 10 ? "estimate.roundTen" : "estimate.roundHundred")}
           </button>)}
 
         {q.mode === "reasonable" && <div className="flex gap-2.5">
           {["yes", "no"].map((option) => <button key={option} type="button" onClick={() => setVerdict(option)} aria-pressed={verdict === option}
-            className={`${themeSystem.button("secondary", "choice")} ${verdict === option ? "ring-4 ring-violet-400/60" : ""}`}>{option === "yes" ? "Reasonable" : "Not reasonable"}</button>)}
+            className={`${themeSystem.button("secondary", "choice")} ${verdict === option ? "ring-4 ring-violet-400/60" : ""}`}>{option === "yes" ? ts("estimate.reasonable") : ts("estimate.notReasonable")}</button>)}
         </div>}
 
         {scaffold && !practising && <div className="text-center text-sm font-bold text-ink/60">
           {q.mode === "reasonable"
-            ? "Estimate in your head, then judge the claim."
-            : rounded ? "Now subtract the rounded numbers." : "An estimate is about, not exact."}
+            ? ts("estimate.helpClaim")
+            : rounded ? ts("estimate.helpSubtract") : ts("estimate.helpAbout")}
         </div>}
       </div>
 
       {q.mode === "round_estimate" && rounded && <div className="flex flex-wrap justify-center gap-2.5">
         {estimateChoices(q.estimate, q.unit).map((value) => <button key={value} type="button" onClick={() => answerEstimate(value)}
-          disabled={Boolean(round.feedback)} className={themeSystem.button("secondary", "choice")}>about {value}</button>)}
+          disabled={Boolean(round.feedback)} className={themeSystem.button("secondary", "choice")}>{ts("estimate.about", { value })}</button>)}
       </div>}
 
       {q.mode === "reasonable" && <>
         <div className="space-y-2 mx-auto max-w-md">
           {q.reasons!.map((option) => <button key={option} type="button" onClick={() => setReason(option)} aria-pressed={reason === option}
-            className={`w-full text-left ${themeSystem.button("secondary", "md")} ${reason === option ? "ring-4 ring-violet-400/60" : ""}`}>{option}</button>)}
+            className={`w-full text-left ${themeSystem.button("secondary", "md")} ${reason === option ? "ring-4 ring-violet-400/60" : ""}`}>{shownReason(option)}</button>)}
         </div>
-        <div className="flex justify-center"><button type="button" onClick={submitJudgement} className={themeSystem.button("primary", "lg")}>Check</button></div>
+        <div className="flex justify-center"><button type="button" onClick={submitJudgement} className={themeSystem.button("primary", "lg")}>{ts("check")}</button></div>
       </>}
     </div>
   </SkillRound>;

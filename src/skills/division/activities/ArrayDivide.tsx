@@ -24,6 +24,8 @@ import {
   type ArraySetup,
 } from "../internal/data/divisionArray";
 import { TONE_CLASS } from "../internal/data/divisionTray";
+import { td } from "../internal/i18n";
+import { useT } from "../../../lib/i18n";
 
 /**
  * The array, read as a division.
@@ -73,24 +75,24 @@ function arrayHintsRungs(question: ArrayQuestion): string[] {
   switch (question.mode) {
     case "total_and_side":
       return composeHints(
-        `The question wants ${question.divisor} rows, all the same length.`,
-        "Add rows until you have that many, then share the counters between them.",
-        "Now count along one row. That is the answer.",
+        td("array.hint.side1", { d: question.divisor }),
+        td("array.hint.side2"),
+        td("array.hint.side3"),
       );
     case "two_divisions":
       return composeHints(
-        "Count the rows, then count along one row.",
-        "One sentence divides by the rows. The other divides by the length of a row.",
-        "Read both halves of every pair before you choose. The second half is where they differ.",
+        td("array.hint.pair1"),
+        td("array.hint.pair2"),
+        td("array.hint.pair3"),
       );
     case "partial_row":
       return composeHints(
-        `Every full row holds ${question.divisor}.`,
-        "Count only the rows that are completely full.",
-        "The short row at the end is what is left over. It is not a row.",
+        td("array.hint.partial1", { d: question.divisor }),
+        td("array.onlyFull"),
+        td("array.hint.partial3"),
       );
     default:
-      return composeHints("Look at the array.");
+      return composeHints(td("array.hint.look"));
   }
 }
 
@@ -100,6 +102,8 @@ export const ArrayDivide: React.FC<ActivityProps<ArrayParams>> = ({
   onComplete,
   lesson,
 }) => {
+  // Re-render when the language changes: every line below reads the catalog.
+  useT();
   const setup: ArraySetup = useMemo(() => ({ ...params, ...params.question }), [params]);
   const practising = isPractice(setup);
   const total = setup.questionsPerRound ?? 5;
@@ -240,7 +244,7 @@ export const ArrayDivide: React.FC<ActivityProps<ArrayParams>> = ({
       if (correct) koda.haptics.success();
       else koda.haptics.pulse("error");
     }
-    round.submit({ correct, given, expected: question.expected, title: correct ? "Yes!" : "Not yet", message });
+    round.submit({ correct, given, expected: question.expected, title: correct ? td("yes") : td("notYet"), message });
   };
 
   const answerWith = (value: number): void => {
@@ -256,15 +260,15 @@ export const ArrayDivide: React.FC<ActivityProps<ArrayParams>> = ({
       correct,
       correct
         ? question.mode === "partial_row"
-          ? `${question.quotient} full rows, and ${question.remainder} left over.`
-          : `Each row has ${question.quotient}.`
-        : "Count along one row again.",
+          ? td("array.fullRows", { q: question.quotient, r: question.remainder })
+          : td("array.eachRow", { q: question.quotient })
+        : td("array.countAgain"),
     );
   };
 
   const answerPair = (value: string): void => {
     const correct = value === question.expected;
-    submit(value, correct, correct ? "Both sentences are true." : "Read the second half again.");
+    submit(value, correct, correct ? td("array.bothTrue") : td("array.secondHalf"));
   };
 
   const choices = useMemo(
@@ -276,7 +280,7 @@ export const ArrayDivide: React.FC<ActivityProps<ArrayParams>> = ({
     <SkillRound
       koda={koda}
       lesson={lesson}
-      fallbackTitle="The Array Knows"
+      fallbackTitle={td("array.title")}
       round={round}
       totalQuestions={total}
       prompt={promptFor(question)}
@@ -300,7 +304,7 @@ export const ArrayDivide: React.FC<ActivityProps<ArrayParams>> = ({
           <>
             <div
               data-testid="array"
-              aria-label={`${question.divisor} rows of ${question.quotient}`}
+              aria-label={td("array.rowsOfLabel", { d: question.divisor, q: question.quotient })}
               className="mx-auto flex flex-col items-center gap-1 rounded-2xl bg-surface p-3"
             >
               {Array.from({ length: question.divisor }, (_, r) => (
@@ -328,13 +332,13 @@ export const ArrayDivide: React.FC<ActivityProps<ArrayParams>> = ({
         ) : (
           <>
             <p className="text-center text-sm text-muted">
-              {question.dividend - placed} still to place
-              {fixedWidth ? null : ` · ${rows} row${rows === 1 ? "" : "s"}`}
+              {td("array.stillToPlace", { left: question.dividend - placed })}
+              {fixedWidth ? null : ` · ${td("array.rows", { count: rows })}`}
             </p>
 
             <div
               data-testid="array"
-              aria-label={`Array with ${rows} rows and ${placed} placed`}
+              aria-label={td("array.arrayLabel", { rows, placed })}
               className="mx-auto flex min-h-20 flex-col items-center justify-center gap-1 rounded-2xl bg-surface p-3"
             >
               {layout.map((count, r) => (
@@ -351,7 +355,7 @@ export const ArrayDivide: React.FC<ActivityProps<ArrayParams>> = ({
                 </div>
               ))}
               {layout.length === 0 ? (
-                <span className="text-sm text-muted">Nothing placed yet.</span>
+                <span className="text-sm text-muted">{td("array.nothingPlaced")}</span>
               ) : null}
             </div>
 
@@ -362,19 +366,19 @@ export const ArrayDivide: React.FC<ActivityProps<ArrayParams>> = ({
                     type="button"
                     onClick={addRow}
                     disabled={!!round.feedback}
-                    aria-label="Add a row"
+                    aria-label={td("array.addRow")}
                     className="min-h-11 rounded-2xl bg-surface px-4 py-2 text-sm font-semibold text-ink shadow-sm"
                   >
-                    + row
+                    {td("array.plusRow")}
                   </button>
                   <button
                     type="button"
                     onClick={removeRow}
                     disabled={rows === 0 || !!round.feedback}
-                    aria-label="Take a row away"
+                    aria-label={td("array.removeRow")}
                     className="min-h-11 rounded-2xl bg-surface px-4 py-2 text-sm font-semibold text-ink shadow-sm disabled:opacity-30"
                   >
-                    − row
+                    {td("array.minusRow")}
                   </button>
                 </>
               )}
@@ -382,19 +386,19 @@ export const ArrayDivide: React.FC<ActivityProps<ArrayParams>> = ({
                 type="button"
                 onClick={place}
                 disabled={placed >= question.dividend || !!round.feedback}
-                aria-label="Place one"
+                aria-label={td("array.placeOne")}
                 className="min-h-11 rounded-2xl bg-surface px-4 py-2 text-sm font-semibold text-ink shadow-sm disabled:opacity-30"
               >
-                Place one
+                {td("array.placeOne")}
               </button>
               <button
                 type="button"
                 onClick={placeAll}
                 disabled={placed >= question.dividend || !!round.feedback}
-                aria-label="Place the rest"
+                aria-label={td("array.placeRest")}
                 className="min-h-11 rounded-2xl bg-surface px-4 py-2 text-sm font-semibold text-ink shadow-sm disabled:opacity-30"
               >
-                Place the rest
+                {td("array.placeRest")}
               </button>
             </div>
 
@@ -432,17 +436,17 @@ export function printedFor(question: ArrayQuestion): { text: string; answer: str
   switch (question.mode) {
     case "two_divisions":
       return {
-        text: `This array has ${question.divisor} rows of ${question.quotient}. Write both divisions it shows.`,
-        answer: `${question.dividend} ÷ ${question.divisor} = ${question.quotient} and ${question.dividend} ÷ ${question.quotient} = ${question.divisor}`,
+        text: td("array.printed.pair", { d: question.divisor, q: question.quotient }),
+        answer: `${question.dividend} ÷ ${question.divisor} = ${question.quotient} ${td("array.and")} ${question.dividend} ÷ ${question.quotient} = ${question.divisor}`,
       };
     case "partial_row":
       return {
-        text: `Put all ${question.dividend} into rows of ${question.divisor}. How many full rows, and how many left?`,
-        answer: `${question.quotient} full rows, ${question.remainder} left over`,
+        text: td("array.printed.partial", { n: question.dividend, d: question.divisor }),
+        answer: td("array.printed.partialAnswer", { q: question.quotient, r: question.remainder }),
       };
     default:
       return {
-        text: `Put all ${question.dividend} into ${question.divisor} equal rows. How many in each row?`,
+        text: td("array.prompt.total_and_side", { n: question.dividend, d: question.divisor }),
         answer: String(question.quotient),
       };
   }
@@ -467,7 +471,7 @@ export const figureFor = (question: ArrayQuestion): React.ReactNode | null => {
         width={w}
         height={h}
         role="img"
-        aria-label={`${question.divisor} rows of ${question.quotient}`}
+        aria-label={td("array.rowsOfLabel", { d: question.divisor, q: question.quotient })}
         className="text-slate-900"
       >
         {Array.from({ length: question.divisor }, (_, r) =>
@@ -498,7 +502,7 @@ export const figureFor = (question: ArrayQuestion): React.ReactNode | null => {
       width={220}
       height={height}
       role="img"
-      aria-label={`${question.dividend} counters and an empty frame`}
+      aria-label={td("array.countersLabel", { n: question.dividend })}
       className="text-slate-900"
     >
       {Array.from({ length: question.dividend }, (_, i) => (
@@ -527,8 +531,8 @@ export const figureFor = (question: ArrayQuestion): React.ReactNode | null => {
       />
       <text x={12} y={pile + 36} fontSize="10" fill="currentColor">
         {question.mode === "partial_row"
-          ? `rows of ${question.divisor}`
-          : `${question.divisor} equal rows`}
+          ? td("array.rowsOf", { d: question.divisor })
+          : td("array.equalRows", { d: question.divisor })}
       </text>
     </svg>
   );
@@ -537,13 +541,13 @@ export const figureFor = (question: ArrayQuestion): React.ReactNode | null => {
 export function methodFor(question: ArrayQuestion): string[] {
   return question.mode === "partial_row"
     ? [
-        "Draw rows of the size the question names, filling each before starting the next.",
-        "Count only the rows that are completely full.",
-        "The short row at the end is what is left over.",
+        td("array.method.partial1"),
+        td("array.onlyFull"),
+        td("array.method.partial3"),
       ]
     : [
-        "Make the number of rows the question asks for.",
-        "Share the counters between them so the rows are all the same length.",
-        "Count along one row.",
+        td("array.method.side1"),
+        td("array.method.side2"),
+        td("array.method.side3"),
       ];
 }

@@ -24,6 +24,8 @@ import {
   type RemainderQuestion,
   type RemainderSetup,
 } from "../internal/data/divisionRemainder";
+import { td } from "../internal/i18n";
+import { useT } from "../../../lib/i18n";
 
 /**
  * The remainder: written down, bounded, and read for what it means.
@@ -70,29 +72,29 @@ function remainderHintsRungs(question: RemainderQuestion): string[] {
   switch (question.mode) {
     case "record":
       return composeHints(
-        `How many whole ${question.divisor}s fit inside ${question.dividend}?`,
-        "Take those away. What is left is the remainder.",
-        `The remainder is always smaller than ${question.divisor}.`,
+        td("remainder.hint.record1", { n: question.dividend, d: question.divisor }),
+        td("remainder.hint.record2"),
+        td("remainder.hint.record3", { d: question.divisor }),
       );
     case "too_big":
       return composeHints(
-        "Look at the leftover. Could another whole group still come out of it?",
-        `If the leftover is ${question.divisor} or more, one more group fits.`,
-        "Move the extra groups across, and the answer fixes itself.",
+        td("remainder.hint.tooBig1"),
+        td("remainder.hint.tooBig2", { d: question.divisor }),
+        td("remainder.hint.tooBig3"),
       );
     case "choose_form":
       return composeHints(
-        "Work the division out first. Then read the question again.",
-        "Does the question want the full ones, one more, what is left, or both?",
+        td("remainder.hint.form1"),
+        td("remainder.hint.form2"),
       );
     default:
       return composeHints(
-        "Do the division. Then decide which part of it the question wants.",
+        td("remainder.hint.story1"),
         question.reading === "round-up"
-          ? "Nobody can be left behind, so the leftover still needs one of its own."
+          ? td("remainder.hint.roundUp")
           : question.reading === "the-remainder"
-            ? "The question is about what did not fit."
-            : "The question is about the ones that are complete.",
+            ? td("remainder.hint.theRemainder")
+            : td("remainder.hint.roundDown"),
       );
   }
 }
@@ -103,6 +105,8 @@ export const RemainderYard: React.FC<ActivityProps<RemainderParams>> = ({
   onComplete,
   lesson,
 }) => {
+  // Re-render when the language changes: every line below reads the catalog.
+  useT();
   const setup: RemainderSetup = useMemo(() => ({ ...params, ...params.question }), [params]);
   const practising = isPractice(setup);
   const total = setup.questionsPerRound ?? 5;
@@ -189,7 +193,7 @@ export const RemainderYard: React.FC<ActivityProps<RemainderParams>> = ({
 
   const submit = (given: string, correct: boolean, message: string): void => {
     chime(correct);
-    round.submit({ correct, given, expected: question.expected, title: correct ? "Yes!" : "Not yet", message });
+    round.submit({ correct, given, expected: question.expected, title: correct ? td("yes") : td("notYet"), message });
   };
 
   const digit = (n: number): void => {
@@ -216,8 +220,8 @@ export const RemainderYard: React.FC<ActivityProps<RemainderParams>> = ({
       `${quotient} ${notation} ${remainder}`,
       correct,
       correct
-        ? `${question.quotient} whole ${question.divisor}s, and ${question.remainder} over.`
-        : `Check how many whole ${question.divisor}s fit first.`,
+        ? td("remainder.pairRight", { q: question.quotient, d: question.divisor, r: question.remainder })
+        : td("remainder.pairWrong", { d: question.divisor }),
     );
   };
 
@@ -228,16 +232,16 @@ export const RemainderYard: React.FC<ActivityProps<RemainderParams>> = ({
       String(value),
       correct,
       correct
-        ? "That is what the question asked for."
+        ? td("remainder.asked")
         : value === question.quotient && question.reading === "round-up"
-          ? "That many would leave some behind. One more is needed."
-          : "Read the question once more. Which part of the answer does it want?",
+          ? td("remainder.oneMore")
+          : td("remainder.readAgain"),
     );
   };
 
   const answerOption = (text: string): void => {
     const correct = text === question.expected;
-    submit(text, correct, correct ? "That is the one the question wants." : "Which part of the answer was asked for?");
+    submit(text, correct, correct ? td("remainder.optionRight") : td("remainder.optionWrong"));
   };
 
   const choices = useMemo(
@@ -249,7 +253,7 @@ export const RemainderYard: React.FC<ActivityProps<RemainderParams>> = ({
     <SkillRound
       koda={koda}
       lesson={lesson}
-      fallbackTitle="What Is Left"
+      fallbackTitle={td("remainder.title")}
       round={round}
       totalQuestions={total}
       prompt={promptFor(question)}
@@ -277,7 +281,7 @@ export const RemainderYard: React.FC<ActivityProps<RemainderParams>> = ({
 
         {question.wrong ? (
           <p className="rounded-2xl bg-surface px-4 py-3 text-center text-lg text-ink">
-            Somebody wrote:{" "}
+            {td("remainder.somebodyWrote")}{" "}
             <span className="font-bold">
               {question.dividend} ÷ {question.divisor} = {question.wrong.quotient} {notation}{" "}
               {question.wrong.remainder}
@@ -291,9 +295,9 @@ export const RemainderYard: React.FC<ActivityProps<RemainderParams>> = ({
               <button
                 type="button"
                 onClick={() => setSlot("quotient")}
-                aria-label={`How many whole groups: ${quotient || "empty"}${
-            guide.target === 0 ? ", fill this one next" : ""
-          }`}
+                aria-label={`${td("remainder.wholeLabel", { value: quotient || td("place.empty") })}${
+                  guide.target === 0 ? td("place.fillNext") : ""
+                }`}
                 className={`min-h-14 min-w-16 rounded-xl border-2 px-3 py-2 ${
                   slot === "quotient" ? "border-indigo-500 bg-surface" : "border-line/30 bg-surface"
                 }`}
@@ -304,9 +308,9 @@ export const RemainderYard: React.FC<ActivityProps<RemainderParams>> = ({
               <button
                 type="button"
                 onClick={() => setSlot("remainder")}
-                aria-label={`Left over: ${remainder || "empty"}${
-            guide.target === 1 ? ", fill this one next" : ""
-          }`}
+                aria-label={`${td("remainder.leftLabel", { value: remainder || td("place.empty") })}${
+                  guide.target === 1 ? td("place.fillNext") : ""
+                }`}
                 className={`min-h-14 min-w-16 rounded-xl border-2 px-3 py-2 ${
                   slot === "remainder" ? "border-rose-500 bg-surface" : "border-line/30 bg-surface"
                 }`}
@@ -376,7 +380,12 @@ export function printedFor(question: RemainderQuestion): { text: string; answer:
   }
   if (question.wrong) {
     return {
-      text: `Somebody wrote ${question.dividend} ÷ ${question.divisor} = ${question.wrong.quotient} r ${question.wrong.remainder}. Write it properly.`,
+      text: td("remainder.printedWrong", {
+        n: question.dividend,
+        d: question.divisor,
+        q: question.wrong.quotient,
+        r: question.wrong.remainder,
+      }),
       answer: question.expected,
     };
   }
@@ -385,8 +394,8 @@ export function printedFor(question: RemainderQuestion): { text: string; answer:
 
 export function methodFor(): string[] {
   return [
-    "Work out how many whole groups fit.",
-    "What is left over is the remainder, and it is always smaller than the number you divided by.",
-    "Read the question again to see which part of the answer it wants.",
+    td("remainder.method1"),
+    td("remainder.method2"),
+    td("remainder.method3"),
   ];
 }

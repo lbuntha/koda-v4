@@ -156,6 +156,8 @@
     "milestoneLabel": "",
     "speechRate": 0.95,
     "coachPatience": "normal",
+    "coachMode": "once",
+    "coachIdleSeconds": 15,
     "answerInput": "pad",
     "freeLessons": 10
   },
@@ -205,7 +207,7 @@
     {
       "key": "coachPatience",
       "label": "Smart guide patience",
-      "help": "How long a child is left to think before the Smart guide steps in. Relaxed waits about eleven seconds, Quick about four.",
+      "help": "How long a child is left to think before the Smart guide steps in, when it keeps helping. Relaxed waits about eleven seconds, Quick about four. Not used by “Once, after idle”.",
       "type": "choice",
       "options": [
         {
@@ -221,6 +223,32 @@
           "label": "Quick"
         }
       ]
+    },
+    {
+      "key": "coachMode",
+      "label": "Smart guide hints",
+      "help": "Once, after idle: one hint per question, only after the child has done nothing for the idle time below; more help only when they press Hint. Keep helping: the guide keeps stepping in and gets more specific while the child is stuck.",
+      "type": "choice",
+      "options": [
+        {
+          "value": "once",
+          "label": "Once, after idle"
+        },
+        {
+          "value": "ladder",
+          "label": "Keep helping"
+        }
+      ]
+    },
+    {
+      "key": "coachIdleSeconds",
+      "label": "Idle time before a hint",
+      "help": "Seconds with no taps before the one hint appears. Only used by “Once, after idle”.",
+      "type": "number",
+      "min": 3,
+      "max": 120,
+      "step": 1,
+      "unit": "s"
     },
     {
       "key": "answerInput",

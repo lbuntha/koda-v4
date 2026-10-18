@@ -26,6 +26,8 @@ import {
   withoutRepeat,
   type PairSpec,
 } from "../internal/data/additionNumbers";
+import { ta } from "../internal/i18n";
+import { useT } from "../../../lib/i18n";
 
 /**
  * A five- or ten-frame: the first structure a child adds inside.
@@ -144,8 +146,8 @@ export const promptFor = (q: FrameQuestion, template?: string): string => {
   if (filled) return filled;
 
   return q.asks === "added"
-    ? `You have ${q.given}. How many more to make ${q.size}?`
-    : `Fill in ${q.added} more. How many are there altogether?`;
+    ? ta("frame.promptAdded", { given: q.given, size: q.size })
+    : ta("frame.promptTotal", { added: q.added });
 };
 
 
@@ -161,7 +163,7 @@ export const printedFor = (q: FrameQuestion): PrintedQuestion => {
   if (q.asks === "added") {
     // Make five, make ten: the whole is known and a part is missing.
     return {
-      text: `${q.given} and how many more make ${q.size}?`,
+      text: ta("frame.printedAdded", { given: q.given, size: q.size }),
       answer: String(q.added),
     };
   }
@@ -176,16 +178,8 @@ export const printedFor = (q: FrameQuestion): PrintedQuestion => {
  * `WorksheetSource` for why this is not the lesson's own `stepByStep`.
  */
 export const methodFor = (q: FrameQuestion): string[] => q.asks === "added"
-  ? [
-      `A full frame holds ${q.size}.`,
-      "Count how many spaces are still empty.",
-      "That is how many more you need.",
-    ]
-  : [
-      "Start from the number already in the frame.",
-      "Count on the ones you are adding.",
-      "A full row of five helps you see the total without counting.",
-    ];
+  ? [ta("frame.methodAdded1", { size: q.size }), ta("frame.methodAdded2"), ta("frame.methodAdded3")]
+  : [ta("frame.methodTotal1"), ta("frame.methodTotal2"), ta("frame.methodTotal3")];
 
 export function frameHints(
   q: FrameQuestion,
@@ -196,22 +190,25 @@ export function frameHints(
 
   if (q.asks === "added") {
     return composeHints(
-      state.kidTip ?? `Fill the frame right up. Count only the ones you put in.`,
+      state.kidTip ?? ta("frame.hintAddedTip"),
       placed <= 0
-        ? `${q.given} spaces are taken. Fill the other ${empty} to the top.`
-        : `You have added ${placed}. ${empty === 1 ? "One space" : `${empty} spaces`} still empty.`,
+        ? ta("frame.hintTaken", { given: q.given, empty })
+        : ta("frame.hintAddedSoFar", { placed, count: empty }),
       // Stops at the method: the child produces this answer by filling, so
       // naming it would do the filling for them.
-      `A full frame is ${q.size}. Count only the ones you added.`,
+      ta("frame.hintFull", { size: q.size }),
     );
   }
 
   return composeHints(
-    state.kidTip ?? "The frame is already counted. Count on from the number in it.",
+    state.kidTip ?? ta("frame.hintTotalTip"),
     state.filled <= q.given
-      ? `The frame holds ${q.given}. Tap ${q.added} more empty ${q.added === 1 ? "space" : "spaces"}.`
-      : `${placed} of ${q.added} added. Carry on from ${q.given}, do not recount.`,
-    `The frame is ${q.given} already. Count on: ${Array.from({ length: q.added }, (_, i) => q.given + i + 1).join(", ")}.`,
+      ? ta("frame.hintHolds", { given: q.given, count: q.added })
+      : ta("frame.hintProgress", { placed, added: q.added, given: q.given }),
+    ta("frame.hintCountOn", {
+      given: q.given,
+      run: Array.from({ length: q.added }, (_, i) => q.given + i + 1).join(", "),
+    }),
   );
 }
 
@@ -246,9 +243,10 @@ const Cell: React.FC<{
       initial={{ opacity: 0, scale: 0.7 }}
       animate={{ opacity: 1, scale: 1 }}
       transition={{ ...SPRING.enter, delay }}
-      aria-label={`Space ${position}${filled ? ", filled" : ", empty"}${
-        lit ? ", fill this one next" : ""
-      }`}
+      aria-label={ta(
+        filled ? (lit ? "frame.cellFilledNext" : "frame.cellFilled") : lit ? "frame.cellEmptyNext" : "frame.cellEmpty",
+        { position },
+      )}
       className={`${FRAME_CELL} rounded-2xl border-2 flex items-center justify-center transition-colors ${
         filled ? `${role.solid} ${role.border} shadow-lg` : "bg-surface/70 border-line"
       } ${lit ? "ring-4 ring-indigo-500 animate-pulse" : ""}`}
@@ -292,7 +290,7 @@ export const figureFor = (q: FrameQuestion): React.ReactNode => {
       width={width + 2}
       height={height + 2}
       role="img"
-      aria-label={`${q.size} frame with ${q.given} counters`}
+      aria-label={ta("frame.figureLabel", { size: q.size, given: q.given })}
       className="text-slate-900"
     >
       <g stroke="currentColor" strokeWidth="1.5" fill="none">
@@ -327,6 +325,8 @@ export const FrameFill: React.FC<ActivityProps<FrameFillParams>> = ({
   onComplete,
   lesson,
 }) => {
+  // Re-render when the language changes: every line below reads the catalog.
+  useT();
   const setup: FrameSetup = { ...params, ...params.question };
   const totalQuestions = setup.questionsPerRound ?? 5;
   const copy = playCopy(params);
@@ -429,8 +429,8 @@ export const FrameFill: React.FC<ActivityProps<FrameFillParams>> = ({
       guide.stumbled();
       nudge.refuse(
         question.asks === "added"
-          ? `Nothing has been added yet. Tap the empty spaces until the frame is full.`
-          : `Tap ${question.added} empty ${question.added === 1 ? "space" : "spaces"} to add ${question.added === 1 ? "it" : "them"} to the frame.`,
+          ? ta("frame.refuseNothing")
+          : ta("frame.refuseTap", { count: question.added }),
       );
       return;
     }
@@ -448,14 +448,14 @@ export const FrameFill: React.FC<ActivityProps<FrameFillParams>> = ({
         : Math.abs(given - Number(question.expected)) === 1
           ? "off_by_one"
           : "off_by_more",
-      title: correct ? "That is right!" : "Not quite",
+      title: correct ? ta("thatIsRight") : ta("notQuite"),
       message: correct
         ? question.asks === "added"
-          ? `${question.given} and ${question.added} fill the frame — ${question.given} needs ${question.added} more to make ${question.size}.`
-          : `${question.given} and ${question.added} altogether is ${filled}.`
+          ? ta("frame.rightAdded", { given: question.given, added: question.added, size: question.size })
+          : ta("frame.rightTotal", { given: question.given, added: question.added, total: filled })
         : question.asks === "added"
-          ? `The frame holds ${question.size}. With ${question.given} already in it, ${question.added} more fill it.`
-          : `${question.given} and ${question.added} is ${question.given + question.added}.`,
+          ? ta("frame.wrongAdded", { given: question.given, added: question.added, size: question.size })
+          : ta("aAndBIs", { a: question.given, b: question.added, sum: question.given + question.added }),
     });
   };
 
@@ -508,7 +508,7 @@ export const FrameFill: React.FC<ActivityProps<FrameFillParams>> = ({
     <SkillRound
       koda={koda}
       lesson={lesson}
-      fallbackTitle="Five and Ten Frames"
+      fallbackTitle={ta("frame.title")}
       round={round}
       totalQuestions={totalQuestions}
       prompt={prompt}
@@ -568,9 +568,9 @@ export const FrameFill: React.FC<ActivityProps<FrameFillParams>> = ({
             /* What the frame is showing, in numbers, under the frame it is
                showing it in. Off, the child answers from the counters alone. */
             <p className="text-sm font-bold text-ink/60 tabular-nums">
-              {question.given} in the frame
-              {filled > question.given ? ` · ${filled - question.given} added` : ""}
-              {emptyLeft > 0 ? ` · ${emptyLeft} empty` : " · full"}
+              {ta("frame.inFrame", { given: question.given })}
+              {filled > question.given ? ` · ${ta("frame.added", { added: filled - question.given })}` : ""}
+              {` · ${emptyLeft > 0 ? ta("frame.empty", { empty: emptyLeft }) : ta("frame.full")}`}
             </p>
           )}
 
@@ -597,7 +597,7 @@ export const FrameFill: React.FC<ActivityProps<FrameFillParams>> = ({
             transition={SPRING.tap}
             className={themeSystem.button("primary", "lg")}
           >
-            Check
+            {ta("check")}
           </motion.button>
           {filled > question.given && !round.feedback && (
             /* The way out of a mis-tap that does not need the child to work out
@@ -607,10 +607,10 @@ export const FrameFill: React.FC<ActivityProps<FrameFillParams>> = ({
               onClick={() => takeBackTo(filled - 1)}
               whileTap={{ scale: 0.92 }}
               transition={SPRING.tap}
-              aria-label="Take back the last counter"
+              aria-label={ta("frame.undoLabel")}
               className={themeSystem.button("ghost", "sm")}
             >
-              Undo
+              {ta("undo")}
             </motion.button>
           )}
         </div>

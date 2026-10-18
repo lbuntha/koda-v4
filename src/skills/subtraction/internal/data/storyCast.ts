@@ -1,4 +1,5 @@
 import { COUNTABLES, type Countable } from "./subtractionAssets";
+import { ts } from "../i18n";
 
 /**
  * The fixed cast every subtraction story is told about.
@@ -12,18 +13,28 @@ import { COUNTABLES, type Countable } from "./subtractionAssets";
  * needs one, and repeating the name costs a word and guesses nothing.
  */
 export interface StoryCharacter {
-  name: string;
+  readonly name: string;
   /** Where this character's stories happen, for template variety. */
-  place: string;
+  readonly place: string;
 }
 
+/** Named through the catalog (`cast.<n>`), so a Khmer story is about Khmer names. */
+const character = (n: number): StoryCharacter => ({
+  get name() {
+    return ts(`cast.${n}.name`);
+  },
+  get place() {
+    return ts(`cast.${n}.place`);
+  },
+});
+
 export const CAST: readonly StoryCharacter[] = [
-  { name: "Mila", place: "the beach" },
-  { name: "Theo", place: "the garden" },
-  { name: "Ada", place: "the market" },
-  { name: "Kofi", place: "the park" },
-  { name: "Ines", place: "the library" },
-  { name: "Ravi", place: "the workshop" },
+  character(0),
+  character(1),
+  character(2),
+  character(3),
+  character(4),
+  character(5),
 ] as const;
 
 /** Stories count the same six things the manipulatives use. */

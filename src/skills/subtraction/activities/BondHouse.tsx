@@ -15,6 +15,8 @@ import { chime } from "../internal/data/subtractionSound";
 import {
   differenceKey, drawDifference, withoutRepeat, type Difference, type DifferenceSpec,
 } from "../internal/data/subtractionNumbers";
+import { ts } from "../internal/i18n";
+import { useT } from "../../../lib/i18n";
 
 export type BondMode = "part_unknown" | "subtrahend_unknown" | "minuend_unknown";
 
@@ -66,9 +68,9 @@ export const buildQuestion = (setup: BondSetup, index: number, seen: Set<string>
 export const promptFor = (q: BondQuestion, template?: string): string => {
   const filled = template?.replaceAll("{a}", String(q.minuend)).replaceAll("{b}", String(q.subtrahend)).replaceAll("{difference}", String(q.difference));
   if (filled) return filled;
-  if (q.mode === "subtrahend_unknown") return `${q.minuend} is the whole and ${q.difference} remains. What part was taken away?`;
-  if (q.mode === "minuend_unknown") return `One part is ${q.subtrahend} and the other is ${q.difference}. What is the whole?`;
-  return `${q.minuend} is the whole. One part is ${q.subtrahend}. What is the missing part?`;
+  if (q.mode === "subtrahend_unknown") return ts("bond.promptRemoved", { a: q.minuend, difference: q.difference });
+  if (q.mode === "minuend_unknown") return ts("bond.promptWhole", { b: q.subtrahend, difference: q.difference });
+  return ts("bond.prompt", { a: q.minuend, b: q.subtrahend });
 };
 
 export const printedFor = (q: BondQuestion): PrintedQuestion => {
@@ -78,24 +80,24 @@ export const printedFor = (q: BondQuestion): PrintedQuestion => {
 };
 
 export const methodFor = (q: BondQuestion): string[] => q.mode === "minuend_unknown"
-  ? ["The two parts join to make the whole.", "Add the removed and remaining parts.", "Put that total in the whole box."]
-  : ["Start from the whole.", `Use the known ${q.mode === "part_unknown" ? "removed" : "remaining"} part.`, "The other part completes the bond."];
+  ? [ts("bond.methodWhole1"), ts("bond.methodWhole2"), ts("bond.methodWhole3")]
+  : [ts("bond.method1"), ts(q.mode === "part_unknown" ? "bond.method2Removed" : "bond.method2Remaining"), ts("bond.method3")];
 
 export function bondHints(q: BondQuestion, state: { selected?: number; kidTip?: string }): string[] {
   if (q.mode === "minuend_unknown") return composeHints(
-    state.kidTip ?? "The whole is both parts together.",
-    `Put the removed part ${q.subtrahend} and remaining part ${q.difference} back together.`,
-    `${q.subtrahend} plus ${q.difference} makes the whole ${q.minuend}.`,
+    state.kidTip ?? ts("bond.hintWholeTip"),
+    ts("bond.hintPutBack", { b: q.subtrahend, difference: q.difference }),
+    ts("bond.hintMakesWhole", { b: q.subtrahend, difference: q.difference, a: q.minuend }),
   );
   if (q.mode === "subtrahend_unknown") return composeHints(
-    state.kidTip ?? "Find the gap between the whole and the part that remains.",
-    `Start at ${q.difference} and count up to the whole ${q.minuend}.`,
-    `The missing removed part is the amount between ${q.difference} and ${q.minuend}.`,
+    state.kidTip ?? ts("bond.hintRemovedTip"),
+    ts("bond.hintCountUp", { difference: q.difference, a: q.minuend }),
+    ts("bond.hintBetween", { difference: q.difference, a: q.minuend }),
   );
   return composeHints(
-    state.kidTip ?? "The two parts must make the whole.",
-    `The whole is ${q.minuend}. One part is ${q.subtrahend}; find the part that completes it.`,
-    `${q.minuend} minus ${q.subtrahend} gives the missing remaining part.`,
+    state.kidTip ?? ts("bond.hintTip"),
+    ts("bond.hintComplete", { a: q.minuend, b: q.subtrahend }),
+    ts("bond.hintMinus", { a: q.minuend, b: q.subtrahend }),
   );
 }
 
@@ -105,13 +107,13 @@ const choicesFor = (answer: number, seed: string): number[] => answerChoices(ans
 
 export const figureFor = (q: BondQuestion): React.ReactNode => {
   const text = (role: BondQuestion["blankRole"]) => q.blankRole === role ? "" : String(valueFor(q, role));
-  return <span className="inline-flex flex-col items-center gap-1 text-slate-900" role="img" aria-label={`Part-whole bond with ${q.blankRole} missing`}>
-    <span className="text-[9px] uppercase tracking-wide">whole</span>
+  return <span className="inline-flex flex-col items-center gap-1 text-slate-900" role="img" aria-label={ts(`bond.figure.${q.blankRole}`)}>
+    <span className="text-[9px] uppercase tracking-wide">{ts("bond.whole")}</span>
     <span className="inline-flex h-8 w-12 items-center justify-center border-2 border-slate-900 font-bold">{text("whole")}</span>
     <span className="h-3 w-20 border-l-2 border-r-2 border-t-2 border-slate-900" />
     <span className="inline-flex gap-3">
-      <span className="inline-flex flex-col items-center"><span className="inline-flex h-8 w-12 items-center justify-center border-2 border-slate-900 font-bold">{text("removed")}</span><span className="text-[9px]">removed</span></span>
-      <span className="inline-flex flex-col items-center"><span className="inline-flex h-8 w-12 items-center justify-center border-2 border-slate-900 font-bold">{text("remaining")}</span><span className="text-[9px]">remaining</span></span>
+      <span className="inline-flex flex-col items-center"><span className="inline-flex h-8 w-12 items-center justify-center border-2 border-slate-900 font-bold">{text("removed")}</span><span className="text-[9px]">{ts("bond.removed")}</span></span>
+      <span className="inline-flex flex-col items-center"><span className="inline-flex h-8 w-12 items-center justify-center border-2 border-slate-900 font-bold">{text("remaining")}</span><span className="text-[9px]">{ts("bond.remaining")}</span></span>
     </span>
   </span>;
 };
@@ -126,6 +128,8 @@ const Node: React.FC<{ label: string; value?: number; role: "whole" | "removed" 
 };
 
 export const BondHouse: React.FC<ActivityProps<BondHouseParams>> = ({ params, koda, onComplete, lesson }) => {
+  // Re-render when the language changes: every line below reads the catalog.
+  useT();
   const setup: BondSetup = { ...params, ...params.question };
   const totalQuestions = setup.questionsPerRound ?? 5;
   const practising = isPractice(setup);
@@ -147,13 +151,13 @@ export const BondHouse: React.FC<ActivityProps<BondHouseParams>> = ({ params, ko
   const prompt = promptFor(q, copy.prompts?.default);
   const answer = Number(q.expected);
   const submit = () => {
-    if (selected === undefined) { nudge.refuse("Choose the number for the empty box before you check."); return; }
+    if (selected === undefined) { nudge.refuse(ts("bond.refuseChoose")); return; }
     const correct = selected === answer;
     chime(koda, correct ? "right" : "wrong");
     if (correct) koda.haptics.success(); else koda.haptics.tap();
     round.submit({ correct, given: String(selected), expected: q.expected, errorKind: correct ? undefined : "off_by_more",
-      title: correct ? "The bond is complete!" : "Check the whole and its parts",
-      message: practising ? undefined : `${q.subtrahend} and ${q.difference} are the two parts of ${q.minuend}.` });
+      title: correct ? ts("bond.rightTitle") : ts("bond.wrongTitle"),
+      message: practising ? undefined : ts("bond.message", { b: q.subtrahend, difference: q.difference, a: q.minuend }) });
   };
   const value = (role: BondQuestion["blankRole"]) => q.blankRole === role ? undefined : valueFor(q, role);
 
@@ -182,7 +186,7 @@ export const BondHouse: React.FC<ActivityProps<BondHouseParams>> = ({ params, ko
     useSupport: round.useSupport,
   });
 
-  return <SkillRound koda={koda} lesson={lesson} fallbackTitle="Subtraction Number Bonds" round={round}
+  return <SkillRound koda={koda} lesson={lesson} fallbackTitle={ts("bond.title")} round={round}
     totalQuestions={totalQuestions} prompt={prompt} iconName="gem" iconTone="emerald"
     tagLabels={tagLabelsFrom(koda)} nudge={nudge.message}
     hints={hints}
@@ -192,19 +196,19 @@ export const BondHouse: React.FC<ActivityProps<BondHouseParams>> = ({ params, ko
     onReadAloud={practising ? undefined : () => { round.useSupport("audio_replay"); void koda.speech.say(prompt, speechRate(koda)); }}>
     <div className="space-y-5">
       <div className={`${SCENE} p-5 sm:p-8 min-h-[250px] flex flex-col items-center justify-center`}>
-        <Node label="whole" role="whole" value={value("whole")} selected={q.blankRole === "whole" ? selected : undefined} />
+        <Node label={ts("bond.whole")} role="whole" value={value("whole")} selected={q.blankRole === "whole" ? selected : undefined} />
         <div className="h-8 w-32 border-l-4 border-r-4 border-t-4 border-ink/25 rounded-t-2xl" aria-hidden="true" />
         <div className="flex gap-8 sm:gap-16">
-          <Node label="removed part" role="removed" value={value("removed")} selected={q.blankRole === "removed" ? selected : undefined} />
-          <Node label="remaining part" role="remaining" value={value("remaining")} selected={q.blankRole === "remaining" ? selected : undefined} />
+          <Node label={ts("bond.removedPart")} role="removed" value={value("removed")} selected={q.blankRole === "removed" ? selected : undefined} />
+          <Node label={ts("bond.remainingPart")} role="remaining" value={value("remaining")} selected={q.blankRole === "remaining" ? selected : undefined} />
         </div>
-        {scaffold && !practising && <div className="mt-5 text-sm font-bold text-ink/60">Whole = removed part + remaining part</div>}
+        {scaffold && !practising && <div className="mt-5 text-sm font-bold text-ink/60">{ts("bond.equation")}</div>}
       </div>
       <div className="flex flex-wrap justify-center gap-2.5">
         {choicesFor(answer, q.id).map((choice) => <motion.button key={choice} type="button" onClick={() => setSelected(choice)} aria-pressed={selected === choice}
           className={`${themeSystem.button("secondary", "choice")} ${selected === choice ? "ring-4 ring-violet-400/60" : ""}`} whileTap={{ scale: 0.9 }}>{choice}</motion.button>)}
       </div>
-      <div className="flex justify-center"><button type="button" onClick={submit} className={themeSystem.button("primary", "lg")}>Check</button></div>
+      <div className="flex justify-center"><button type="button" onClick={submit} className={themeSystem.button("primary", "lg")}>{ts("check")}</button></div>
     </div>
   </SkillRound>;
 };

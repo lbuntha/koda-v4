@@ -20,6 +20,8 @@ import {
   type PlaceQuestion,
   type PlaceSetup,
 } from "../internal/data/divisionPlace";
+import { listAnd, td } from "../internal/i18n";
+import { useT } from "../../../lib/i18n";
 
 /**
  * Division by place value — the year before the algorithm.
@@ -63,33 +65,33 @@ function placeHintsRungs(question: PlaceQuestion): string[] {
   switch (question.mode) {
     case "tens_quotient":
       return composeHints(
-        `${question.dividend} is ${question.dividend / 10} tens.`,
-        `Share ${question.dividend / 10} tens between ${question.divisor}. How many tens each?`,
-        "Then say how many that is altogether.",
+        td("place.hint.tens1", { n: question.dividend, tens: question.dividend / 10 }),
+        td("place.hint.tens2", { tens: question.dividend / 10, d: question.divisor }),
+        td("place.hint.tens3"),
       );
     case "scale_down":
       return composeHints(
-        `Dividing by ${question.divisor} asks how many ${question.divisor}s are inside.`,
-        "Every digit moves one place to the right for a ten, two for a hundred.",
-        "The digits move a place right. The zero goes because nothing holds it.",
+        td("place.hint.scale1", { d: question.divisor }),
+        td("place.hint.scale2"),
+        td("place.hint.scale3"),
       );
     case "tens_into_tens":
       return composeHints(
-        "Both numbers are a whole number of tens.",
-        `${question.dividend / 10} tens divided by ${question.divisor / 10} tens is just ${question.dividend / 10} ÷ ${question.divisor / 10}.`,
-        "The tens on each side cancel out.",
+        td("place.hint.tensTens1"),
+        td("place.hint.tensTens2", { a: question.dividend / 10, b: question.divisor / 10 }),
+        td("place.hint.tensTens3"),
       );
     case "split_exact":
       return composeHints(
-        `Split ${question.dividend} into its places: ${placeSplit(question.dividend).join(" + ")}.`,
-        `Divide each part by ${question.divisor} on its own.`,
-        "Add what you get. That is the answer.",
+        td("place.hint.split1", { n: question.dividend, places: placeSplit(question.dividend).join(" + ") }),
+        td("place.hint.split2", { d: question.divisor }),
+        td("place.hint.split3"),
       );
     default:
       return composeHints(
-        `Try splitting ${question.dividend} by its digits. Does each part divide by ${question.divisor}?`,
-        `It does not — so take the biggest lot of ${question.divisor} tens that fits instead.`,
-        `${question.parts.join(" and ")} both divide by ${question.divisor}. That is the split you want.`,
+        td("place.hint.exchange1", { n: question.dividend, d: question.divisor }),
+        td("place.hint.exchange2", { d: question.divisor }),
+        td("place.hint.exchange3", { parts: listAnd(question.parts.map(String)), d: question.divisor }),
       );
   }
 }
@@ -100,6 +102,8 @@ export const PlaceValueDesk: React.FC<ActivityProps<PlaceParams>> = ({
   onComplete,
   lesson,
 }) => {
+  // Re-render when the language changes: every line below reads the catalog.
+  useT();
   const setup: PlaceSetup = useMemo(() => ({ ...params, ...params.question }), [params]);
   const practising = isPractice(setup);
   const total = setup.questionsPerRound ?? 5;
@@ -193,14 +197,17 @@ export const PlaceValueDesk: React.FC<ActivityProps<PlaceParams>> = ({
       correct,
       given: entries.join(" + "),
       expected: question.expected,
-      title: correct ? "Yes!" : "Not yet",
+      title: correct ? td("yes") : td("notYet"),
       message: correct
         ? question.parts.length > 1
-          ? `${question.parts.map((p, i) => `${p} ÷ ${question.divisor} = ${question.partQuotients[i]}`).join(", ")}. Together that is ${question.quotient}.`
+          ? td("place.together", {
+              sums: question.parts.map((p, i) => `${p} ÷ ${question.divisor} = ${question.partQuotients[i]}`).join(", "),
+              q: question.quotient,
+            })
           : `${question.dividend} ÷ ${question.divisor} = ${question.quotient}.`
         : running === question.quotient
-          ? "The total is right, but one of the parts is not."
-          : "Check each part on its own first.",
+          ? td("place.partWrong")
+          : td("place.checkParts"),
     });
   };
 
@@ -208,7 +215,7 @@ export const PlaceValueDesk: React.FC<ActivityProps<PlaceParams>> = ({
     <SkillRound
       koda={koda}
       lesson={lesson}
-      fallbackTitle="Place by Place"
+      fallbackTitle={td("place.title")}
       round={round}
       totalQuestions={total}
       prompt={promptFor(question)}
@@ -239,8 +246,8 @@ export const PlaceValueDesk: React.FC<ActivityProps<PlaceParams>> = ({
         {question.parts.length > 1 && scaffoldEnabled && !practising ? (
           <p className="text-center text-sm text-muted">
             {question.placeSplitWorks
-              ? "Each place divides on its own."
-              : `The digits do not split here. ${question.parts.join(" and ")} do.`}
+              ? td("place.eachPlace")
+              : td("place.digitsDoNot", { parts: listAnd(question.parts.map(String)) })}
           </p>
         ) : null}
 
@@ -254,9 +261,9 @@ export const PlaceValueDesk: React.FC<ActivityProps<PlaceParams>> = ({
               <button
                 type="button"
                 onClick={() => setSlot(i)}
-                aria-label={`Answer for ${part} divided by ${question.divisor}: ${
-              entries[i] || "empty"
-            }${guide.target === i ? ", fill this one next" : ""}`}
+                aria-label={`${td("place.slotLabel", { part, d: question.divisor, value: entries[i] || td("place.empty") })}${
+                  guide.target === i ? td("place.fillNext") : ""
+                }`}
                 className={`min-h-11 min-w-16 rounded-xl border-2 px-3 py-1 font-bold ${
                   slot === i ? "border-emerald-500 bg-surface" : "border-line/30 bg-surface"
                 }`}
@@ -269,7 +276,7 @@ export const PlaceValueDesk: React.FC<ActivityProps<PlaceParams>> = ({
 
         {question.parts.length > 1 ? (
           <p className="text-center text-base font-semibold text-ink" data-testid="running">
-            Altogether: {complete ? running : "—"}
+            {td("place.altogether", { value: complete ? running : "—" })}
           </p>
         ) : null}
 
@@ -311,9 +318,9 @@ export function methodFor(question: PlaceQuestion): string[] {
   const splitting = question.mode === "split_exact" || question.mode === "split_exchange";
   return splitting
     ? [
-        "Split the total into parts that each divide exactly.",
-        "Divide each part on its own.",
-        "Add the answers together.",
+        td("place.method.split1"),
+        td("place.method.split2"),
+        td("place.method.split3"),
       ]
-    : ["Read the total as a number of tens or hundreds.", "Divide those, then say what it is altogether."];
+    : [td("place.method.tens1"), td("place.method.tens2")];
 }

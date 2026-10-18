@@ -1,4 +1,5 @@
 import { crossesBoundary, digitsOf, isRegrouping, type Difference } from "./subtractionNumbers";
+import { ts } from "../i18n";
 
 /**
  * The strategies this skill has actually taught, as choosable cards.
@@ -17,21 +18,35 @@ export type StrategyId =
 
 export interface StrategyCard {
   id: StrategyId;
-  name: string;
+  readonly name: string;
   /** What the child would actually do, in one line. */
-  how: string;
+  readonly how: string;
   /** Roughly how many moves it takes, for the comparison step. */
   steps: (value: Difference) => number;
 }
 
+/** Name and one-line method come from the catalog (`strategy.<id>`). */
+function card(id: StrategyId, steps: StrategyCard["steps"]): StrategyCard {
+  return {
+    id,
+    get name() {
+      return ts(`strategy.${id}.name`);
+    },
+    get how() {
+      return ts(`strategy.${id}.how`);
+    },
+    steps,
+  };
+}
+
 export const STRATEGY_CARDS: readonly StrategyCard[] = [
-  { id: "count_back", name: "Count back", how: "Step back one at a time from the bigger number.", steps: (v) => v.subtrahend },
-  { id: "count_up", name: "Count up", how: "Start at the smaller number and count on to the bigger one.", steps: (v) => v.difference },
-  { id: "bridge_ten", name: "Bridge through ten", how: "Jump back to the nearest ten, then take the rest.", steps: () => 2 },
-  { id: "constant_difference", name: "Keep the same difference", how: "Slide both numbers up until the smaller one is a ten.", steps: () => 2 },
-  { id: "compensate", name: "Subtract a friendly number", how: "Take a whole ten, then give the extra back.", steps: () => 2 },
-  { id: "place_value_jumps", name: "Take the tens, then the ones", how: "Split the part by place and jump twice.", steps: () => 2 },
-  { id: "written_column", name: "Write it in columns", how: "Set it out by place and exchange where you need to.", steps: (v) => (isRegrouping(v.minuend, v.subtrahend) ? 3 : 2) },
+  card("count_back", (v) => v.subtrahend),
+  card("count_up", (v) => v.difference),
+  card("bridge_ten", () => 2),
+  card("constant_difference", () => 2),
+  card("compensate", () => 2),
+  card("place_value_jumps", () => 2),
+  card("written_column", (v) => (isRegrouping(v.minuend, v.subtrahend) ? 3 : 2)),
 ] as const;
 
 export const cardFor = (id: StrategyId): StrategyCard =>

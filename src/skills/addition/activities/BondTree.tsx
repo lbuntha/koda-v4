@@ -26,6 +26,8 @@ import {
   withoutRepeat,
   type PairSpec,
 } from "../internal/data/additionNumbers";
+import { ta } from "../internal/i18n";
+import { useT } from "../../../lib/i18n";
 
 /**
  * A whole above its parts.
@@ -138,8 +140,8 @@ export const buildQuestion = (
     return {
       ...base,
       bonds: [
-        { whole: { value: a }, parts: [{ blank: "a-tens" }, { blank: "a-ones" }], caption: "First number" },
-        { whole: { value: b }, parts: [{ blank: "b-tens" }, { blank: "b-ones" }], caption: "Second number" },
+        { whole: { value: a }, parts: [{ blank: "a-tens" }, { blank: "a-ones" }], get caption() { return ta("firstNumber"); } },
+        { whole: { value: b }, parts: [{ blank: "b-tens" }, { blank: "b-ones" }], get caption() { return ta("secondNumber"); } },
       ],
       blanks: ["a-tens", "a-ones", "b-tens", "b-ones"],
       answers: [da.tens * 10, da.ones, db.tens * 10, db.ones],
@@ -185,13 +187,13 @@ export const promptFor = (q: BondQuestion, template?: string): string => {
 
   switch (q.mode) {
     case "split_one":
-      return `Break ${q.b} apart so ${q.a} can reach ten.`;
+      return ta("bond.promptSplitOne", { a: q.a, b: q.b });
     case "split_both":
-      return "Split each number into its tens and its ones.";
+      return ta("bond.promptSplitBoth");
     case "part_unknown":
-      return `${q.sum} is the whole. What is the missing part?`;
+      return ta("bond.promptPartUnknown", { sum: q.sum });
     default:
-      return `What do ${q.a} and ${q.b} make altogether?`;
+      return ta("bond.prompt", { a: q.a, b: q.b });
   }
 };
 
@@ -208,20 +210,20 @@ export const printedFor = (q: BondQuestion): PrintedQuestion => {
     case "split_one": {
       const toTen = 10 - q.a;
       return {
-        text: `${q.a} + ${q.b}. Break ${q.b} into ${toTen} and what, so ${q.a} makes ten?`,
+        text: ta("bond.printedSplitOne", { a: q.a, b: q.b, toTen }),
         answer: `${toTen},${q.b - toTen}`,
       };
     }
     case "split_both":
       return {
-        text: `Split ${q.a} and ${q.b} into their tens and ones.`,
+        text: ta("bond.printedSplitBoth", { a: q.a, b: q.b }),
         answer: q.expected ?? "",
       };
     case "part_unknown": {
       // Either part may be the hidden one; the visible one is what is left.
       const hidden = Number(q.expected);
       return {
-        text: `${q.sum} is the whole. One part is ${q.sum - hidden}. What is the other part?`,
+        text: ta("bond.printedPartUnknown", { sum: q.sum, part: q.sum - hidden }),
         answer: String(hidden),
       };
     }
@@ -240,20 +242,13 @@ export const printedFor = (q: BondQuestion): PrintedQuestion => {
 export const methodFor = (q: BondQuestion): string[] => {
   switch (q.mode) {
     case "split_one":
-      return [
-        "See how much the first number needs to reach ten.",
-        "Break the second number into that much, and the rest.",
-        "Make ten first, then add what is left over.",
-      ];
+      return [ta("bond.methodSplitOne1"), ta("bond.methodSplitOne2"), ta("bond.methodSplitOne3")];
     case "split_both":
-      return ["Split each number into its tens and its ones.", "Tens go with tens, ones with ones."];
+      return [ta("bond.promptSplitBoth"), ta("bond.methodSplitBoth2")];
     case "part_unknown":
-      return [
-        "You know the whole and one of its parts.",
-        "Take the part away from the whole to find the other part.",
-      ];
+      return [ta("bond.methodPart1"), ta("bond.methodPart2")];
     default:
-      return ["The two parts go together to make the whole.", "Add them."];
+      return [ta("bond.method1"), ta("bond.method2")];
   }
 };
 
@@ -310,31 +305,36 @@ export function bondHints(
     case "split_one": {
       const toTen = 10 - q.a;
       return composeHints(
-        state.kidTip ?? "Give the first number just enough to reach ten, then add what is left.",
-        `${q.a} needs ${toTen} to reach ten. Take ${toTen} out of ${q.b}.`,
-        `${q.b} splits into ${toTen} and ${q.b - toTen}.`,
+        state.kidTip ?? ta("bond.hintSplitOneTip"),
+        ta("bond.hintNeeds", { a: q.a, toTen, b: q.b }),
+        ta("bond.hintSplits", { b: q.b, toTen, rest: q.b - toTen }),
       );
     }
     case "split_both":
       return composeHints(
-        state.kidTip ?? "Every two-digit number is some tens and some ones.",
-        left === 0
-          ? "All four boxes are filled. Check that each pair adds back up to the number above it."
-          : `${left} still empty. The left box is a whole ten, like 40, not 4.`,
-        `${q.a} is ${digitsOf(q.a).tens * 10} and ${digitsOf(q.a).ones}. ${q.b} is ${digitsOf(q.b).tens * 10} and ${digitsOf(q.b).ones}.`,
+        state.kidTip ?? ta("bond.hintSplitBothTip"),
+        left === 0 ? ta("bond.hintAllFilled") : ta("bond.hintStillEmpty", { left }),
+        ta("bond.hintBothParts", {
+          a: q.a,
+          aTens: digitsOf(q.a).tens * 10,
+          aOnes: digitsOf(q.a).ones,
+          b: q.b,
+          bTens: digitsOf(q.b).tens * 10,
+          bOnes: digitsOf(q.b).ones,
+        }),
       );
     case "part_unknown":
       return composeHints(
-        state.kidTip ?? "The two parts have to make the whole. One is missing.",
-        `The whole is ${q.sum}. Count on from the part you have until you reach it.`,
+        state.kidTip ?? ta("bond.hintPartTip"),
+        ta("bond.hintCountOn", { sum: q.sum }),
         // Stops short: counting on is how the child produces this answer.
-        `Ask yourself: what goes with that part to make ${q.sum}?`,
+        ta("bond.hintAsk", { sum: q.sum }),
       );
     default:
       return composeHints(
-        state.kidTip ?? "The two parts underneath make the whole on top.",
-        `Put ${q.a} and ${q.b} together. Start at ${q.a} and count on ${q.b}.`,
-        `The two parts ${q.a} and ${q.b} fill the whole box: ${q.sum}.`,
+        state.kidTip ?? ta("bond.hintTip"),
+        ta("bond.hintTogether", { a: q.a, b: q.b }),
+        ta("bond.hintFill", { a: q.a, b: q.b, sum: q.sum }),
       );
   }
 }
@@ -366,9 +366,10 @@ const Box: React.FC<{
       onClick={onSelect}
       whileTap={{ scale: 0.95 }}
       transition={SPRING.tap}
-      aria-label={`Box ${slot.blank}${entry ? `, ${entry}` : ", empty"}${
-        lit ? ", fill this one next" : ""
-      }`}
+      aria-label={ta(
+        entry ? (lit ? "bond.boxHoldingNext" : "bond.boxHolding") : lit ? "bond.boxEmptyNext" : "bond.boxEmpty",
+        { box: slot.blank, value: entry ?? "" },
+      )}
       aria-pressed={Boolean(active)}
       /* Being selected is about now; the coach's light is about next, so the
          selection ring wins where both apply. */
@@ -435,6 +436,8 @@ export const BondTree: React.FC<ActivityProps<BondTreeParams>> = ({
   onComplete,
   lesson,
 }) => {
+  // Re-render when the language changes: every line below reads the catalog.
+  useT();
   const setup: BondSetup = { ...params, ...params.question };
   const totalQuestions = setup.questionsPerRound ?? 5;
   const copy = playCopy(params);
@@ -525,8 +528,8 @@ export const BondTree: React.FC<ActivityProps<BondTreeParams>> = ({
       guide.stumbled();
       nudge.refuse(
         missing.length === question.blanks.length
-          ? "Tap a box, then use the numbers below to fill it in."
-          : `${missing.length} ${missing.length === 1 ? "box is" : "boxes are"} still empty.`,
+          ? ta("bond.refuseStart")
+          : ta("bond.refuseEmpty", { count: missing.length }),
       );
       return;
     }
@@ -545,14 +548,14 @@ export const BondTree: React.FC<ActivityProps<BondTreeParams>> = ({
       correct,
       given: given.join(","),
       errorKind: correct ? undefined : swapped ? "reversed" : "off_by_more",
-      title: correct ? "That is right!" : "Not quite",
+      title: correct ? ta("thatIsRight") : ta("notQuite"),
       message: correct
         ? question.mode === "split_one"
-          ? `${question.b} splits into ${question.answers[0]} and ${question.answers[1]}, so ${question.a} reaches ten first.`
-          : `The parts make ${question.sum}.`
+          ? ta("bond.rightSplitOne", { b: question.b, p1: question.answers[0], p2: question.answers[1], a: question.a })
+          : ta("bond.rightParts", { sum: question.sum })
         : swapped
-          ? "The right two numbers, the other way round. Read the boxes left to right."
-          : `The answer is ${question.answers.join(" and ")}.`,
+          ? ta("bond.swapped")
+          : ta("bond.answerIs", { answers: question.answers.join(` ${ta("and")} `) }),
     });
   };
 
@@ -598,7 +601,7 @@ export const BondTree: React.FC<ActivityProps<BondTreeParams>> = ({
     <SkillRound
       koda={koda}
       lesson={lesson}
-      fallbackTitle="Number Bonds"
+      fallbackTitle={ta("bond.title")}
       round={round}
       totalQuestions={totalQuestions}
       prompt={prompt}
@@ -651,7 +654,7 @@ export const BondTree: React.FC<ActivityProps<BondTreeParams>> = ({
             transition={SPRING.tap}
             className={themeSystem.button("primary", "lg")}
           >
-            Check
+            {ta("check")}
           </motion.button>
         </div>
       </div>

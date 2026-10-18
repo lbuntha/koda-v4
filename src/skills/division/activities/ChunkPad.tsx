@@ -23,6 +23,8 @@ import {
   type ChunkQuestion,
   type ChunkSetup,
 } from "../internal/data/divisionChunk";
+import { td } from "../internal/i18n";
+import { useT } from "../../../lib/i18n";
 
 /**
  * Take away lots you are sure of, and keep the tally.
@@ -63,18 +65,20 @@ function chunkHintsRungs(question: ChunkQuestion): string[] {
   const ten = question.divisor * 10;
   return question.mode === "big_chunks"
     ? composeHints(
-        `Start with the biggest chunk you are sure of. Ten lots of ${question.divisor} is ${ten}.`,
-        `Would twenty lots fit? That is ${question.divisor * 20}.`,
-        `You can get there in ${question.maxChunks ?? 3} goes. Take the big one first.`,
+        td("chunk.hint.big1", { d: question.divisor, ten }),
+        td("chunk.hint.big2", { twenty: question.divisor * 20 }),
+        td("chunk.hint.big3", { goes: question.maxChunks ?? 3 }),
       )
     : composeHints(
-        `Every chunk takes away some whole lots of ${question.divisor}.`,
-        `Ten lots of ${question.divisor} is ${ten}. Start there if it fits.`,
-        `Stop when what is left is smaller than ${question.divisor}.`,
+        td("chunk.hint.lots1", { d: question.divisor }),
+        td("chunk.hint.lots2", { d: question.divisor, ten }),
+        td("chunk.hint.lots3", { d: question.divisor }),
       );
 }
 
 export const ChunkPad: React.FC<ActivityProps<ChunkParams>> = ({ params, koda, onComplete, lesson }) => {
+  // Re-render when the language changes: every line below reads the catalog.
+  useT();
   const setup: ChunkSetup = useMemo(() => ({ ...params, ...params.question }), [params]);
   const practising = isPractice(setup);
   const total = setup.questionsPerRound ?? 5;
@@ -188,10 +192,10 @@ export const ChunkPad: React.FC<ActivityProps<ChunkParams>> = ({ params, koda, o
       correct,
       given: question.remainder === 0 ? String(tally) : `${tally} ${notation} ${remaining}`,
       expected: question.expected,
-      title: correct ? "Yes!" : "Not yet",
+      title: correct ? td("yes") : td("notYet"),
       message: correct
-        ? `${taken.length} chunk${taken.length === 1 ? "" : "s"}: ${taken.join(" + ")} lots of ${question.divisor}.`
-        : "Count the tally again.",
+        ? td("chunk.taken", { count: taken.length, steps: taken.join(" + "), d: question.divisor })
+        : td("chunk.countAgain"),
     });
   };
 
@@ -199,7 +203,7 @@ export const ChunkPad: React.FC<ActivityProps<ChunkParams>> = ({ params, koda, o
     <SkillRound
       koda={koda}
       lesson={lesson}
-      fallbackTitle="Take Away Chunks"
+      fallbackTitle={td("chunk.title")}
       round={round}
       totalQuestions={total}
       prompt={promptFor(question)}
@@ -229,13 +233,13 @@ export const ChunkPad: React.FC<ActivityProps<ChunkParams>> = ({ params, koda, o
       <div className="mx-auto flex w-full max-w-xl flex-col gap-3">
         <div className="flex items-center justify-around rounded-2xl bg-surface p-3 text-center">
           <div>
-            <p className="text-xs uppercase tracking-wide text-muted">Left</p>
+            <p className="text-xs uppercase tracking-wide text-muted">{td("chunk.left")}</p>
             <p data-testid="remaining" className="text-2xl font-bold text-ink">
               {remaining}
             </p>
           </div>
           <div>
-            <p className="text-xs uppercase tracking-wide text-muted">Lots so far</p>
+            <p className="text-xs uppercase tracking-wide text-muted">{td("chunk.lotsSoFar")}</p>
             <p data-testid="tally" className="text-2xl font-bold text-emerald-600">
               {tally}
             </p>
@@ -259,8 +263,8 @@ export const ChunkPad: React.FC<ActivityProps<ChunkParams>> = ({ params, koda, o
               type="button"
               onClick={() => take(step)}
               disabled={!!round.feedback}
-              aria-label={`Take away ${step} lots of ${question.divisor}${
-                guide.target === step ? ", this chunk next" : ""
+              aria-label={`${td("chunk.takeLabel", { step, d: question.divisor })}${
+                guide.target === step ? td("chunk.next") : ""
               }`}
               className={`min-h-11 rounded-2xl bg-surface px-4 py-2 text-base font-semibold text-ink shadow-sm focus:outline-none focus-visible:ring-2 focus-visible:ring-violet-500${guide.target === step ? ' ring-4 ring-indigo-500' : ''}`}
             >
@@ -268,7 +272,7 @@ export const ChunkPad: React.FC<ActivityProps<ChunkParams>> = ({ params, koda, o
             </button>
           ))}
           {fits.length === 0 ? (
-            <p className="text-sm text-muted">Nothing more will fit.</p>
+            <p className="text-sm text-muted">{td("chunk.nothingFits")}</p>
           ) : null}
         </div>
 
@@ -283,11 +287,11 @@ export const ChunkPad: React.FC<ActivityProps<ChunkParams>> = ({ params, koda, o
             type="button"
             onClick={undo}
             disabled={taken.length === 0 || !!round.feedback}
-            aria-label="Undo the last chunk"
+            aria-label={td("chunk.undoLabel")}
             className="inline-flex min-h-11 items-center justify-center gap-1.5 rounded-2xl bg-surface px-4 py-2 text-sm font-semibold text-muted shadow-sm disabled:opacity-30"
           >
             <Undo2 className="h-4 w-4" aria-hidden="true" />
-            Undo
+            {td("undo")}
           </button>
           <button
             type="button"
@@ -295,7 +299,7 @@ export const ChunkPad: React.FC<ActivityProps<ChunkParams>> = ({ params, koda, o
             disabled={taken.length === 0 || !!round.feedback}
             className="min-h-11 rounded-2xl bg-violet-600 px-6 py-2 text-base font-bold text-white shadow-sm disabled:opacity-40"
           >
-            That is all of them
+            {td("chunk.allOfThem")}
           </button>
         </div>
       </div>
@@ -309,15 +313,15 @@ export const ChunkPad: React.FC<ActivityProps<ChunkParams>> = ({ params, koda, o
 
 export function printedFor(question: ChunkQuestion): { text: string; answer: string } | null {
   return {
-    text: `${question.dividend} ÷ ${question.divisor} =        (take away lots of ${question.divisor} and keep a tally)`,
+    text: `${question.dividend} ÷ ${question.divisor} =        (${td("chunk.printed", { d: question.divisor })})`,
     answer: question.expected,
   };
 }
 
 export function methodFor(): string[] {
   return [
-    "Take away a lot you are sure of — ten of them is always easy to work out.",
-    "Write down how many lots you took, and carry on with what is left.",
-    "Stop when what is left is too small for another lot. Add up your lots.",
+    td("chunk.method1"),
+    td("chunk.method2"),
+    td("chunk.method3"),
   ];
 }

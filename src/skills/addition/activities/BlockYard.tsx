@@ -25,6 +25,8 @@ import {
   withoutRepeat,
   type PairSpec,
 } from "../internal/data/additionNumbers";
+import { ta } from "../internal/i18n";
+import { useT } from "../../../lib/i18n";
 
 /**
  * Flats, rods and units — the size of a number, made of things you can move.
@@ -166,15 +168,15 @@ export const promptFor = (q: BlockQuestion, template?: string): string => {
 
   switch (q.mode) {
     case "trade_ones":
-      return `${q.a} plus ${q.b}. Bundle ten ones into a ten, then read the answer.`;
+      return ta("blocks.promptTradeOnes", { a: q.a, b: q.b });
     case "trade_tens":
-      return `${q.a} plus ${q.b}. Bundle ten tens into a hundred, then read the answer.`;
+      return ta("blocks.promptTradeTens", { a: q.a, b: q.b });
     case "multiples_ten":
-      return `${q.a} plus ${q.b}. Build the answer out of tens.`;
+      return ta("blocks.promptTens", { a: q.a, b: q.b });
     case "multiples_hundred":
-      return `${q.a} plus ${q.b}. Build the answer out of hundreds.`;
+      return ta("blocks.promptHundreds", { a: q.a, b: q.b });
     default:
-      return `Build ${q.a} plus ${q.b} out of blocks.`;
+      return ta("blocks.prompt", { a: q.a, b: q.b });
   }
 };
 
@@ -189,13 +191,13 @@ export const printedFor = (q: BlockQuestion): PrintedQuestion => {
   const answer = String(q.sum);
   switch (q.mode) {
     case "trade_ones":
-      return { text: `${q.a} + ${q.b}. Bundle ten ones into a ten.`, answer };
+      return { text: ta("blocks.printedTradeOnes", { a: q.a, b: q.b }), answer };
     case "trade_tens":
-      return { text: `${q.a} + ${q.b}. Bundle ten tens into a hundred.`, answer };
+      return { text: ta("blocks.printedTradeTens", { a: q.a, b: q.b }), answer };
     case "multiples_ten":
-      return { text: `${q.a} + ${q.b}. Count in tens.`, answer };
+      return { text: ta("blocks.printedTens", { a: q.a, b: q.b }), answer };
     case "multiples_hundred":
-      return { text: `${q.a} + ${q.b}. Count in hundreds.`, answer };
+      return { text: ta("blocks.printedHundreds", { a: q.a, b: q.b }), answer };
     default:
       return { text: `${q.a} + ${q.b} =`, answer };
   }
@@ -211,21 +213,15 @@ export const printedFor = (q: BlockQuestion): PrintedQuestion => {
 export const methodFor = (q: BlockQuestion): string[] => {
   switch (q.mode) {
     case "trade_ones":
-      return [
-        "Add the ones. Ten ones make one ten, so bundle them.",
-        "Add the tens, including the one you just made.",
-      ];
+      return [ta("blocks.methodTradeOnes1"), ta("blocks.methodTradeOnes2")];
     case "trade_tens":
-      return [
-        "Add the tens. Ten tens make one hundred, so bundle them.",
-        "Add the hundreds, including the one you just made.",
-      ];
+      return [ta("blocks.methodTradeTens1"), ta("blocks.methodTradeTens2")];
     case "multiples_ten":
-      return ["Count in tens: three tens and four tens is seven tens.", "Seven tens is 70."];
+      return [ta("blocks.methodTens1"), ta("blocks.methodTens2")];
     case "multiples_hundred":
-      return ["Count in hundreds, the same way you count in tens.", "Four hundreds and three hundreds is seven hundreds."];
+      return [ta("blocks.methodHundreds1"), ta("blocks.methodHundreds2")];
     default:
-      return ["Build each number out of tens and ones.", "Put them together, then count the tens and the ones."];
+      return [ta("blocks.method1"), ta("blocks.method2")];
   }
 };
 
@@ -288,15 +284,15 @@ export function blockHints(
 
   if (q.trades) {
     return composeHints(
-      state.kidTip ?? "Ten of one block always becomes one of the next block up.",
+      state.kidTip ?? ta("blocks.hintTradeTip"),
       bundle === "ones"
-        ? `There are ${state.built.ones} ones in the yard, and a column only holds nine. Bundle ten of them into a single ten.`
+        ? ta("blocks.hintBundleOnes", { ones: state.built.ones })
         : bundle === "tens"
-          ? `There are ${state.built.tens} tens in the yard. Bundle ten of them into one hundred.`
-          : `Nothing left to bundle. Read the blocks as they now stand.`,
+          ? ta("blocks.hintBundleTens", { tens: state.built.tens })
+          : ta("blocks.hintNothing"),
       // The trade is the technique, so the last rung is the trade — not the
       // total, which these lessons reach by tidying rather than by adding.
-      `Traded up, ${q.a} and ${q.b} sit as ${q.sum} with no column over nine.`,
+      ta("blocks.hintTraded", { a: q.a, b: q.b, sum: q.sum }),
     );
   }
 
@@ -307,20 +303,20 @@ export function blockHints(
   const unit = q.mode === "multiples_hundred" ? 100 : 10;
 
   return composeHints(
-    state.kidTip ?? "Build each number out of blocks, then read what you have.",
+    state.kidTip ?? ta("blocks.hintTip"),
     have === 0
       ? asUnits
-        ? `Drop in ${q.a / unit} ${unit === 100 ? "hundreds" : "tens"} first, then ${q.b / unit} more.`
-        : `Start with ${q.a}. Tap blocks in the tray to drop them into the yard.`
+        ? ta(unit === 100 ? "blocks.hintDropHundreds" : "blocks.hintDropTens", { a: q.a / unit, b: q.b / unit })
+        : ta("blocks.hintStart", { a: q.a })
       : have < q.sum
-        ? `The yard holds ${have}. You need ${q.sum - have} more.`
+        ? ta("blocks.hintNeedMore", { have, more: q.sum - have })
         : have > q.sum
-          ? `The yard holds ${have}, which is ${have - q.sum} too many. Tap a block in the yard to take it back.`
-          : `The yard holds ${q.sum}. That is the answer — check it.`,
+          ? ta("blocks.hintTooMany", { have, over: have - q.sum })
+          : ta("blocks.hintThatIs", { sum: q.sum }),
     asUnits
-      ? `${q.a / unit} and ${q.b / unit} is ${q.sum / unit}, so the answer is ${q.sum}.`
+      ? ta("blocks.hintUnits", { a: q.a / unit, b: q.b / unit, units: q.sum / unit, sum: q.sum })
       // Read off the blocks, place by place: that is what building them was for.
-      : `Count the tens, then the ones. The yard reads ${q.sum}.`,
+      : ta("blocks.hintReads", { sum: q.sum }),
   );
 }
 
@@ -334,11 +330,8 @@ const BLOCK_CLASS: Record<Place, string> = {
   ones: BLOCK_UNIT,
 };
 
-const BLOCK_NAME: Record<Place, string> = {
-  hundreds: "Hundred flat",
-  tens: "Ten rod",
-  ones: "One unit",
-};
+/** "Hundred flat", in the language on screen. */
+const blockName = (p: Place): string => ta(`blocks.name.${p}`);
 
 /**
  * One block, drawn so its value can be counted rather than taken on trust.
@@ -363,7 +356,7 @@ const Block: React.FC<{
     initial={{ opacity: 0, scale: 0.6 }}
     animate={{ opacity: 1, scale: 1 }}
     transition={SPRING.enter}
-    aria-label={`${label}${lit ? ", add this one next" : ""}`}
+    aria-label={lit ? ta("blocks.addNext", { label }) : label}
     className={`${BLOCK_CLASS[place]} rounded-md border-2 ${tone} relative overflow-hidden shrink-0${
       lit ? " ring-4 ring-indigo-500 animate-pulse" : ""
     }`}
@@ -393,6 +386,8 @@ export const BlockYard: React.FC<ActivityProps<BlockYardParams>> = ({
   onComplete,
   lesson,
 }) => {
+  // Re-render when the language changes: every line below reads the catalog.
+  useT();
   const setup: BlockSetup = { ...params, ...params.question };
   const totalQuestions = setup.questionsPerRound ?? 5;
   const copy = playCopy(params);
@@ -484,7 +479,7 @@ export const BlockYard: React.FC<ActivityProps<BlockYardParams>> = ({
     koda.haptics.success();
     if (speaks) {
       void koda.speech.say(
-        ready === "ones" ? "10 ones make 1 ten" : "10 tens make 1 hundred",
+        ta(ready === "ones" ? "blocks.saidOnes" : "blocks.saidTens"),
         speechRate(koda),
       );
     }
@@ -503,8 +498,8 @@ export const BlockYard: React.FC<ActivityProps<BlockYardParams>> = ({
       guide.stumbled();
       nudge.refuse(
         ready === "ones"
-          ? `There are ${built.ones} ones in the yard. Bundle ten of them into a ten first.`
-          : `There are ${built.tens} tens in the yard. Bundle ten of them into a hundred first.`,
+          ? ta("blocks.refuseOnes", { ones: built.ones })
+          : ta("blocks.refuseTens", { tens: built.tens }),
       );
       return;
     }
@@ -512,7 +507,7 @@ export const BlockYard: React.FC<ActivityProps<BlockYardParams>> = ({
     const have = valueOf(built);
     if (have === 0) {
       guide.stumbled();
-      nudge.refuse("The yard is empty. Tap blocks in the tray to build the answer.");
+      nudge.refuse(ta("blocks.refuseEmpty"));
       return;
     }
 
@@ -527,10 +522,10 @@ export const BlockYard: React.FC<ActivityProps<BlockYardParams>> = ({
         : Math.abs(have - question.sum) % 10 === 0
           ? "place_value"
           : "off_by_more",
-      title: correct ? "That is the number!" : "Not quite",
+      title: correct ? ta("blocks.rightTitle") : ta("notQuite"),
       message: correct
-        ? `${question.a} and ${question.b} is ${question.sum}.`
-        : `The yard holds ${have}. ${question.a} and ${question.b} is ${question.sum}.`,
+        ? ta("aAndBIs", { a: question.a, b: question.b, sum: question.sum })
+        : ta("blocks.wrong", { have, a: question.a, b: question.b, sum: question.sum }),
     });
   };
 
@@ -601,7 +596,7 @@ export const BlockYard: React.FC<ActivityProps<BlockYardParams>> = ({
     <SkillRound
       koda={koda}
       lesson={lesson}
-      fallbackTitle="Base-Ten Blocks"
+      fallbackTitle={ta("blocks.title")}
       round={round}
       totalQuestions={totalQuestions}
       prompt={prompt}
@@ -660,7 +655,7 @@ export const BlockYard: React.FC<ActivityProps<BlockYardParams>> = ({
                             ? "bg-sky-500 border-sky-300"
                             : "bg-emerald-500 border-emerald-300"
                       }
-                      label={`${BLOCK_NAME[p]} ${i + 1} in the yard`}
+                      label={ta("blocks.inYard", { block: blockName(p), n: i + 1 })}
                       onTap={round.feedback ? undefined : () => takeBack(p)}
                     />
                   ))}
@@ -700,7 +695,7 @@ export const BlockYard: React.FC<ActivityProps<BlockYardParams>> = ({
                         ? "bg-sky-400 border-sky-200"
                         : "bg-emerald-400 border-emerald-200"
                   }
-                  label={`Add a ${BLOCK_NAME[p].toLowerCase()}`}
+                  label={ta(`blocks.add.${p}`)}
                   lit={guide.target === question.offers.indexOf(p)}
                   onTap={round.feedback ? undefined : () => place(p)}
                 />
@@ -718,10 +713,10 @@ export const BlockYard: React.FC<ActivityProps<BlockYardParams>> = ({
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.94 }}
               transition={SPRING.tap}
-              aria-label={ready === "ones" ? "Bundle ten ones" : "Bundle ten tens"}
+              aria-label={ta(ready === "ones" ? "blocks.bundleOnes" : "blocks.bundleTens")}
               className={themeSystem.button("success", "lg", CHANGE.border)}
             >
-              {ready === "ones" ? "Bundle ten ones" : "Bundle ten tens"}
+              {ta(ready === "ones" ? "blocks.bundleOnes" : "blocks.bundleTens")}
             </motion.button>
           )}
           <motion.button
@@ -732,7 +727,7 @@ export const BlockYard: React.FC<ActivityProps<BlockYardParams>> = ({
             transition={SPRING.tap}
             className={themeSystem.button("primary", "lg")}
           >
-            Check
+            {ta("check")}
           </motion.button>
         </div>
       </div>

@@ -9,6 +9,7 @@
  * child that the divisor is always the size of a step.
  */
 
+import { catalogRecord, td } from "../i18n";
 import { drawGroupQuotient, pick, quotientKey, withoutRepeat, type GroupQuotient, type QuotientSpec } from "./divisionNumbers";
 import type { Tone } from "./divisionTray";
 
@@ -68,9 +69,9 @@ export interface LineQuestion {
 const TONES: readonly Tone[] = ["sky", "violet", "emerald", "rose"] as const;
 
 const PROMPTS: Record<LineMode, (q: Omit<LineQuestion, "prompt">) => string> = {
-  back_to_zero: (q) => `Start at ${q.dividend} and hop back ${q.divisor} at a time. How many hops to reach 0?`,
-  count_hops: (q) => `These hops are ${q.divisor} each. How many hops are there?`,
-  forward_to_total: (q) => `Count up from 0 in ${q.divisor}s. How many hops to reach ${q.dividend}?`,
+  back_to_zero: (q) => td("line.prompt.back_to_zero", { n: q.dividend, d: q.divisor }),
+  count_hops: (q) => td("line.prompt.count_hops", { d: q.divisor }),
+  forward_to_total: (q) => td("line.prompt.forward_to_total", { n: q.dividend, d: q.divisor }),
 };
 
 export function buildLineQuestion(
@@ -153,7 +154,7 @@ export function lineBlockedBecause(question: LineQuestion, position: number): Li
   return overshot ? "overshot" : "not-finished";
 }
 
-export const LINE_REFUSALS: Record<Exclude<LineBlock, null>, string> = {
-  "not-finished": "Keep hopping until you get all the way there.",
-  overshot: "That is too far. Come back one hop.",
-};
+export const LINE_REFUSALS: Record<Exclude<LineBlock, null>, string> = catalogRecord("line.refusals", [
+  "not-finished",
+  "overshot",
+]);

@@ -32,6 +32,8 @@ You don't need any registration code. `kit/i18n.ts` finds every `src/skills/*/lo
 - In pure functions (hints, `promptFor`, `printedFor`, `methodFor`), call `t("orbit.promptRow", { thing })`.
 - In each activity component, call `useT()` once at the top. That makes the component re-render when the family switches language.
 - Number words, object names and anything else that varies by language belong in the catalog too. See `things.*` in counting and `numberWord()` in `internal/guide/countGuide.ts`.
+- A fixed table of lines, such as a refusal for each reason, must read the catalog each time it is looked up, not once when the module loads. Division's `catalogRecord("tray.refusals", [...keys])` in `internal/i18n.ts` builds one.
+- Question wording built in the data files (`prompt`, story sentences) goes through the catalog too. Write whole sentences with placeholders rather than gluing a number to a unit, because Khmer puts the unit first.
 
 ## 4. Translate the lessons
 
@@ -43,10 +45,17 @@ You don't need any registration code. `kit/i18n.ts` finds every `src/skills/*/lo
     "title": "…", "concept": "…", "pedagogyTip": "…",
     "kidTip": "…", "audioPrompt": "…", "targetObjective": "…",
     "shortDesc": "…", "category": "…",
-    "steps": { "0": "…", "1": "…", "2": "…" }
+    "steps": { "0": "…", "1": "…", "2": "…" },
+    "prompts": { "default": "…" },
+    "question": { "stories": { "0": "…" } }
   }
 }
 ```
+
+- `prompts` is the question wording (`play.prompts`).
+- `question.stories` / `question.templates` are word-problem sentences.
+- Keep their `{a}`, `{name}`, `{thing}` placeholders, but put them wherever the sentence needs them. Khmer puts the noun before the number: `{name}មាន{thing} {a}`.
+- Names and object nouns used to fill a story belong in the catalog too (see addition's `names.*` and `things.*`), so a Khmer story is about ដារ៉ា and ផ្លែប៉ោម.
 
 `withLessonEdits` applies these for every skill (`src/lib/lessonText.ts`). A missing field falls back to English. A teacher's wording edit in the Skill Manager still overrides the translation.
 

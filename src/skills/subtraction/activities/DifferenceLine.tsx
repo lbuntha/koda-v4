@@ -16,6 +16,8 @@ import {
   differenceKey, digitsOf, drawConstantDifference, drawDifference, numberWord,
   shuffle, withoutRepeat, type ConstantDifference, type Difference, type DifferenceSpec,
 } from "../internal/data/subtractionNumbers";
+import { ts } from "../internal/i18n";
+import { useT } from "../../../lib/i18n";
 
 export type LineMode =
   | "path_back"
@@ -163,35 +165,35 @@ export const promptFor = (q: LineQuestion, template?: string): string => {
   const filled = template?.replaceAll("{a}", String(q.minuend)).replaceAll("{b}", String(q.subtrahend)).replaceAll("{difference}", String(q.difference));
   if (filled) return filled;
   switch (q.mode) {
-    case "open_back": return `Start at ${q.minuend}. Jump back ${q.subtrahend}. Where do you land?`;
-    case "count_up": return `Start at ${q.subtrahend}. Count up to ${q.minuend}. How big is the difference?`;
-    case "bridge_ten": return `${q.minuend} minus ${q.subtrahend}. Jump back through ten.`;
-    case "bridge_hundred": return `${q.minuend} minus ${q.subtrahend}. Jump back through one hundred.`;
-    case "compensate_subtrahend": return `${q.minuend} minus ${q.subtrahend}. Subtract a friendly ten, then adjust.`;
-    case "constant_difference": return `${q.minuend} minus ${q.subtrahend}. Shift both numbers to keep the same difference.`;
-    case "jump_tens_ones": return `${q.minuend} minus ${q.subtrahend}. Jump back the tens and the ones.`;
-    default: return `Start at ${q.minuend} and move back ${q.subtrahend}.`;
+    case "open_back": return ts("line.promptOpen", { a: q.minuend, b: q.subtrahend });
+    case "count_up": return ts("line.promptCountUp", { a: q.minuend, b: q.subtrahend });
+    case "bridge_ten": return ts("line.promptTen", { a: q.minuend, b: q.subtrahend });
+    case "bridge_hundred": return ts("line.promptHundred", { a: q.minuend, b: q.subtrahend });
+    case "compensate_subtrahend": return ts("line.promptCompensate", { a: q.minuend, b: q.subtrahend });
+    case "constant_difference": return ts("line.promptConstant", { a: q.minuend, b: q.subtrahend });
+    case "jump_tens_ones": return ts("line.promptTensOnes", { a: q.minuend, b: q.subtrahend });
+    default: return ts("line.prompt", { a: q.minuend, b: q.subtrahend });
   }
 };
 
 export const printedFor = (q: LineQuestion): PrintedQuestion => ({
   text: q.mode === "count_up"
-    ? `Count up from ${q.subtrahend} to ${q.minuend}. What is the difference?`
+    ? ts("line.printedCountUp", { a: q.minuend, b: q.subtrahend })
     : q.mode === "constant_difference"
-      ? `Shift both operands by ${q.offset}: ${q.minuend} − ${q.subtrahend} =`
+      ? ts("line.printedConstant", { offset: q.offset ?? 0, a: q.minuend, b: q.subtrahend })
       : `${q.minuend} − ${q.subtrahend} =`,
   answer: String(q.difference),
 });
 
 export const methodFor = (q: LineQuestion): string[] => {
   switch (q.mode) {
-    case "count_up": return ["Start at the smaller number.", "Count forward until the larger number.", "The distance travelled is the difference."];
-    case "bridge_ten": return ["Jump back to ten first.", "Subtract the rest of the subtrahend.", "Read where you land."];
-    case "bridge_hundred": return ["Jump back to one hundred first.", "Subtract the remaining part.", "Read where you land."];
-    case "compensate_subtrahend": return ["Round the subtrahend up to the next ten.", "Subtract that friendly number.", "Add back the one or two extra you subtracted."];
-    case "constant_difference": return ["Add the same offset to both operands.", "The distance between them stays equal.", "Subtract the new friendly pair."];
-    case "jump_tens_ones": return ["Split the subtrahend into tens and ones.", "Jump both parts backward.", "Either order reaches the same difference."];
-    default: return ["Start at the minuend.", "Make backward jumps for the subtrahend.", "Where you land is the difference."];
+    case "count_up": return [ts("line.mCountUp1"), ts("line.mCountUp2"), ts("line.mCountUp3")];
+    case "bridge_ten": return [ts("line.mTen1"), ts("line.mTen2"), ts("line.mRead")];
+    case "bridge_hundred": return [ts("line.mHundred1"), ts("line.mHundred2"), ts("line.mRead")];
+    case "compensate_subtrahend": return [ts("line.mComp1"), ts("line.mComp2"), ts("line.mComp3")];
+    case "constant_difference": return [ts("line.mConst1"), ts("line.mConst2"), ts("line.mConst3")];
+    case "jump_tens_ones": return [ts("line.mTO1"), ts("line.mTO2"), ts("line.mTO3")];
+    default: return [ts("line.m1"), ts("line.m2"), ts("line.m3")];
   }
 };
 
@@ -199,24 +201,56 @@ export function lineHints(q: LineQuestion, state: { at: number; made: number[]; 
   const next = q.required[state.made.length];
   switch (q.mode) {
     case "count_up":
-      return composeHints(state.kidTip ?? "Count the distance, not the number you land on.", `You are at ${state.at}. You have counted up ${state.made.length} of ${q.difference}.`, `From ${q.subtrahend} to ${q.minuend} is a distance of ${q.difference}.`);
+      return composeHints(
+        state.kidTip ?? ts("line.hCountUpTip"),
+        ts("line.hCountedUp", { at: state.at, made: state.made.length, difference: q.difference }),
+        ts("line.hDistance", { b: q.subtrahend, a: q.minuend, difference: q.difference }),
+      );
     case "bridge_ten":
     case "bridge_hundred": {
       const boundary = q.mode === "bridge_ten" ? 10 : 100;
-      return composeHints(state.kidTip ?? `Land exactly on ${boundary} before continuing.`, state.made.length === 0 ? `The first jump is from ${q.minuend} back to ${boundary}.` : `You reached ${boundary}. Now subtract the part still left.`, `Stopping at ${boundary} on the way makes the rest easy: ${q.difference}.`);
+      return composeHints(
+        state.kidTip ?? ts("line.hBridgeTip", { boundary }),
+        state.made.length === 0 ? ts("line.hFirstJump", { a: q.minuend, boundary }) : ts("line.hReached", { boundary }),
+        ts("line.hStopping", { boundary, difference: q.difference }),
+      );
     }
     case "compensate_subtrahend": {
       const rounded = Math.ceil(q.subtrahend / 10) * 10;
-      return composeHints(state.kidTip ?? "Subtract a little too much, then add that little bit back.", state.made.length === 0 ? `${q.subtrahend} is close to ${rounded}. Subtract ${rounded} first.` : `You subtracted ${rounded}, which was ${rounded - q.subtrahend} too much. Add it back.`, `${q.minuend} minus ${rounded}, then plus ${rounded - q.subtrahend}, is ${q.difference}.`);
+      return composeHints(
+        state.kidTip ?? ts("line.hCompTip"),
+        state.made.length === 0
+          ? ts("line.hClose", { b: q.subtrahend, rounded })
+          : ts("line.hTooMuch", { rounded, extra: rounded - q.subtrahend }),
+        ts("line.hCompAll", { a: q.minuend, rounded, extra: rounded - q.subtrahend, difference: q.difference }),
+      );
     }
     case "constant_difference":
-      return composeHints(state.kidTip ?? "Move both numbers by the same amount; the gap does not change.", state.made.length === 0 ? `Add ${q.offset} to both ${q.minuend} and ${q.subtrahend}.` : `Now subtract the friendly pair ${q.adjustedMinuend} minus ${q.adjustedSubtrahend}.`, `Both pairs have the same difference, ${q.difference}.`);
+      return composeHints(
+        state.kidTip ?? ts("line.hConstTip"),
+        state.made.length === 0
+          ? ts("line.hAddBoth", { offset: q.offset ?? 0, a: q.minuend, b: q.subtrahend })
+          : ts("line.hFriendly", { a: q.adjustedMinuend ?? 0, b: q.adjustedSubtrahend ?? 0 }),
+        ts("line.hSameDiff", { difference: q.difference }),
+      );
     case "jump_tens_ones":
-      return composeHints(state.kidTip ?? "Split the number being subtracted into tens and ones.", `You are at ${state.at}. ${next === undefined ? "Both parts are done." : `A jump of ${Math.abs(next)} is still available.`}`, `Split ${q.subtrahend} into ${digitsOf(q.subtrahend).tens * 10} and ${digitsOf(q.subtrahend).ones}, then jump both back.`);
+      return composeHints(
+        state.kidTip ?? ts("line.hTOTip"),
+        next === undefined ? ts("line.hBothDone", { at: state.at }) : ts("line.hStillJump", { at: state.at, n: Math.abs(next) }),
+        ts("line.hSplit", { b: q.subtrahend, tens: digitsOf(q.subtrahend).tens * 10, ones: digitsOf(q.subtrahend).ones }),
+      );
     default:
       /* A marked path is counted pad by pad; an open line is not, and the
          last rung has to say which the child is on. */
-      return composeHints(state.kidTip ?? "Backward jumps make the number smaller.", state.made.length === 0 ? `Start at ${q.from}. The first jump goes left.` : `You are at ${state.at}. ${q.required.length - state.made.length} jumps remain.`, q.mode === "open_back" ? `Held in your head, the jumps back from ${q.minuend} end at ${q.difference}.` : `Counted back pad by pad, ${q.minuend} lands on ${q.difference}.`);
+      return composeHints(
+        state.kidTip ?? ts("line.hTip"),
+        state.made.length === 0
+          ? ts("line.hStartLeft", { from: q.from })
+          : ts("line.hRemain", { at: state.at, left: q.required.length - state.made.length }),
+        q.mode === "open_back"
+          ? ts("line.hHeld", { a: q.minuend, difference: q.difference })
+          : ts("line.hPadByPad", { a: q.minuend, difference: q.difference }),
+      );
   }
 }
 
@@ -230,7 +264,7 @@ export const figureFor = (q: LineQuestion): React.ReactNode => {
   const marks = [...new Set([...regularMarks, q.from])].sort((a, b) => a - b);
   const pad = Math.max(14, Math.max(...marks.map((m) => String(m).length)) * 4);
   return <svg viewBox={`${-pad} 0 ${width + pad * 2} 36`} width={width + pad * 2} height="36" role="img"
-    aria-label={`Subtraction number line starting at ${q.from}`} className="text-slate-900">
+    aria-label={ts("line.figure", { from: q.from })} className="text-slate-900">
     <defs><marker id={`print-arrow-${q.id}`} markerWidth="5" markerHeight="5" refX="4" refY="2.5" orient="auto"><path d="M0,0 L5,2.5 L0,5 z" fill="currentColor" /></marker></defs>
     <line x1="0" y1="13" x2={width} y2="13" stroke="currentColor" strokeWidth="1.5" />
     {marks.map((value) => <g key={value}><line x1={x(value)} y1="8" x2={x(value)} y2="18" stroke="currentColor" strokeWidth={value === q.from ? 2.5 : 1} /><text x={x(value)} y="31" textAnchor="middle" fontSize="10" fill="currentColor">{value}</text></g>)}
@@ -290,6 +324,8 @@ const Arc: React.FC<{ x1: number; x2: number; step: number; id: string }> = ({ x
 };
 
 export const DifferenceLine: React.FC<ActivityProps<DifferenceLineParams>> = ({ params, koda, onComplete, lesson }) => {
+  // Re-render when the language changes: every line below reads the catalog.
+  useT();
   const setup: LineSetup = { ...params, ...params.question };
   const totalQuestions = setup.questionsPerRound ?? 5;
   const practising = isPractice(setup);
@@ -335,7 +371,11 @@ export const DifferenceLine: React.FC<ActivityProps<DifferenceLineParams>> = ({ 
     const expectedNext = q.required[made.length];
     if (q.ordered && step !== expectedNext) {
       const boundary = q.mode === "bridge_ten" ? 10 : q.mode === "bridge_hundred" ? 100 : undefined;
-      nudge.refuse(boundary ? `Land on ${boundary} first. Take the ${Math.abs(expectedNext)} jump.` : `Take the ${expectedNext < 0 ? "backward" : "forward"} ${Math.abs(expectedNext)} move first.`);
+      nudge.refuse(
+        boundary
+          ? ts("line.refuseBoundary", { boundary, n: Math.abs(expectedNext) })
+          : ts(expectedNext < 0 ? "line.refuseBack" : "line.refuseForward", { n: Math.abs(expectedNext) }),
+      );
       return;
     }
     if (!q.ordered && consumed(step) >= allowedCount(step)) return;
@@ -348,7 +388,7 @@ export const DifferenceLine: React.FC<ActivityProps<DifferenceLineParams>> = ({ 
     if (q.mode === "path_back" && made.length + 1 === q.required.length) {
       chime(koda, "reached");
       koda.haptics.success();
-      round.submit({ correct: true, given: String(q.difference), expected: q.expected, title: "You landed on the difference!", message: `${q.minuend} minus ${q.subtrahend} is ${q.difference}.` });
+      round.submit({ correct: true, given: String(q.difference), expected: q.expected, title: ts("line.landedTitle"), message: ts("aMinusBIs", { a: q.minuend, b: q.subtrahend, difference: q.difference }) });
     }
   };
   const choose = (value: number) => {
@@ -356,8 +396,8 @@ export const DifferenceLine: React.FC<ActivityProps<DifferenceLineParams>> = ({ 
     chime(koda, correct ? "right" : "wrong");
     if (correct) koda.haptics.success(); else koda.haptics.tap();
     round.submit({ correct, given: String(value), expected: q.expected, errorKind: correct ? undefined : "off_by_more",
-      title: correct ? "That is the difference!" : "Check the distance",
-      message: practising ? undefined : `${q.minuend} minus ${q.subtrahend} is ${q.difference}.` });
+      title: correct ? ts("line.rightTitle") : ts("line.wrongTitle"),
+      message: practising ? undefined : ts("aMinusBIs", { a: q.minuend, b: q.subtrahend, difference: q.difference }) });
   };
   const undo = () => {
     const last = made.at(-1);
@@ -406,7 +446,7 @@ export const DifferenceLine: React.FC<ActivityProps<DifferenceLineParams>> = ({ 
     useSupport: round.useSupport,
   });
 
-  return <SkillRound koda={koda} lesson={lesson} fallbackTitle="Subtraction Number Lines" round={round}
+  return <SkillRound koda={koda} lesson={lesson} fallbackTitle={ts("line.title")} round={round}
     totalQuestions={totalQuestions} prompt={prompt} iconName="footprints" iconTone="cyan"
     tagLabels={tagLabelsFrom(koda)} nudge={nudge.message}
     hints={hints}
@@ -420,7 +460,7 @@ export const DifferenceLine: React.FC<ActivityProps<DifferenceLineParams>> = ({ 
     <div className="space-y-4">
       <div className={`${SCENE} p-3 sm:p-6 overflow-hidden`}>
         {q.mode === "constant_difference" && scaffold && !practising && <div className="mb-2 text-center text-sm font-bold text-ink/60 tabular-nums">{q.minuend} − {q.subtrahend} = {q.adjustedMinuend} − {q.adjustedSubtrahend}</div>}
-        <svg viewBox={`${-LABEL_PAD} 0 ${WIDTH + LABEL_PAD * 2} ${(crowded ? SECOND_ROW : LABEL_ROW) + 12}`} className="w-full h-auto" role="img" aria-label={`Number line starting at ${q.from}`}>
+        <svg viewBox={`${-LABEL_PAD} 0 ${WIDTH + LABEL_PAD * 2} ${(crowded ? SECOND_ROW : LABEL_ROW) + 12}`} className="w-full h-auto" role="img" aria-label={ts("line.lineLabel", { from: q.from })}>
           <ArrowMarkers id={arrowId} />
           <line x1="0" y1={BASE} x2={WIDTH} y2={BASE} stroke="currentColor" strokeWidth="4" className="text-ink/25" />
           {tickValues.map((value) => <g key={value}><line x1={x(value)} y1={BASE - 9} x2={x(value)} y2={BASE + 9} stroke="currentColor" strokeWidth="3" className="text-ink/30" /><text x={x(value)} y={labelY(value)} textAnchor="middle" className="text-[23px] font-bold fill-current text-ink/60">{value}</text></g>)}
@@ -428,8 +468,8 @@ export const DifferenceLine: React.FC<ActivityProps<DifferenceLineParams>> = ({ 
           {made.map((step, i) => { const start = travelled; travelled += step; return <Arc key={i} x1={x(start)} x2={x(travelled)} step={step} id={arrowId} />; })}
           <motion.circle animate={{ cx: x(at) }} transition={SPRING.enter} cy={BASE} r="14" className="fill-emerald-500" />
         </svg>
-        {showsDifference && <div aria-live="polite" className={`text-center text-2xl font-black tabular-nums ${q.mode === "count_up" ? COMPARISON.text : DIFFERENCE.text}`}>{q.mode === "count_up" ? made.length : at}<span className="ml-2 text-[10px] uppercase text-ink/50">{q.mode === "count_up" ? "distance" : "current"}</span></div>}
-        {scaffold && !practising && made.length > 0 && <div className="mt-1 text-center text-sm font-bold text-ink/60">{made.map((step) => `${step < 0 ? "back" : "forward"} ${Math.abs(step)}`).join(" · ")}</div>}
+        {showsDifference && <div aria-live="polite" className={`text-center text-2xl font-black tabular-nums ${q.mode === "count_up" ? COMPARISON.text : DIFFERENCE.text}`}>{q.mode === "count_up" ? made.length : at}<span className="ml-2 text-[10px] uppercase text-ink/50">{ts(q.mode === "count_up" ? "line.distance" : "line.current")}</span></div>}
+        {scaffold && !practising && made.length > 0 && <div className="mt-1 text-center text-sm font-bold text-ink/60">{made.map((step) => ts(step < 0 ? "line.back" : "line.forward", { n: Math.abs(step) })).join(" · ")}</div>}
       </div>
       <div className="flex flex-wrap justify-center gap-2.5">
         {q.offered.map((step, i) => {
@@ -437,17 +477,18 @@ export const DifferenceLine: React.FC<ActivityProps<DifferenceLineParams>> = ({ 
           const unavailable = spent >= allowedCount(step) || Boolean(round.feedback);
           const shift = q.mode === "constant_difference" && i === 0;
           return <motion.button key={`${step}-${i}`} type="button" onClick={() => jump(step)} disabled={unavailable}
-            aria-label={`${shift ? `Shift both by ${step}` : `${step < 0 ? "Jump back" : "Jump forward"} ${Math.abs(step)}`}${
-              guide.target === i ? ", take this jump next" : ""
-            }`}
+            aria-label={(() => {
+              const name = shift ? ts("line.shiftBoth", { n: step }) : ts(step < 0 ? "line.jumpBack" : "line.jumpForward", { n: Math.abs(step) });
+              return guide.target === i ? ts("line.takeNext", { name }) : name;
+            })()}
             className={`${themeSystem.button(step < 0 ? "secondary" : "primary", "lg")}${
               guide.target === i ? " ring-4 ring-indigo-500 animate-pulse" : ""
             }`} whileTap={{ scale: 0.9 }}>
-            {shift ? `Shift both by ${step}` : `${step < 0 ? "Jump back" : "Jump forward"} ${Math.abs(step)}`}
+            {shift ? ts("line.shiftBoth", { n: step }) : ts(step < 0 ? "line.jumpBack" : "line.jumpForward", { n: Math.abs(step) })}
           </motion.button>;
         })}
       </div>
-      {made.length > 0 && !round.feedback && <div className="flex justify-center"><button type="button" onClick={undo} className={themeSystem.button("ghost", "sm")}>Undo last jump</button></div>}
+      {made.length > 0 && !round.feedback && <div className="flex justify-center"><button type="button" onClick={undo} className={themeSystem.button("ghost", "sm")}>{ts("line.undo")}</button></div>}
       {complete && q.mode !== "path_back" && <div className="flex flex-wrap justify-center gap-2.5">{choicesFor(q.difference, q.id).map((value) => <button key={value} type="button" onClick={() => choose(value)} disabled={Boolean(round.feedback)} className={themeSystem.button("secondary", "choice")}>{value}</button>)}</div>}
     </div>
   </SkillRound>;

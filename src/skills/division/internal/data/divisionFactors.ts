@@ -9,6 +9,7 @@
  * applied to the wrong number a year later.
  */
 
+import { td } from "../i18n";
 import { pick } from "./divisionNumbers";
 
 export type FactorMode =
@@ -99,15 +100,19 @@ export const splitOptions = (n: number): [number, number][] =>
  */
 export function evidenceFor(value: number, tester: number): string {
   if (tester === 2 || tester === 5 || tester === 10) {
-    return `The last digit is ${value % 10}.`;
+    return td("factors.evidence.lastDigit", { digit: value % 10 });
   }
   if (tester === 3 || tester === 9) {
-    return `The digits add up to ${digitSum(value)}.`;
+    return td("factors.evidence.digitSum", { sum: digitSum(value) });
   }
   if (tester === 4) {
-    return `The last two digits are ${String(value).slice(-2)}.`;
+    return td("factors.evidence.lastTwo", { digits: String(value).slice(-2) });
   }
-  return `${value} is even: ${value % 2 === 0 ? "yes" : "no"}. Its digits add to ${digitSum(value)}.`;
+  return td("factors.evidence.evenAndSum", {
+    value,
+    even: td(value % 2 === 0 ? "factors.yes" : "factors.no"),
+    sum: digitSum(value),
+  });
 }
 
 export interface FactorQuestion {
@@ -175,7 +180,7 @@ export function buildFactorQuestion(
     return {
       id: `${id}-${value}-${tester}`,
       taskKind: `division_${mode}`,
-      prompt: `Does ${tester} divide into ${value} exactly?`,
+      prompt: td("factors.prompt.divides", { tester, value }),
       expected: divides ? "yes" : "no",
       itemCount: 1,
       mode,
@@ -194,7 +199,7 @@ export function buildFactorQuestion(
     return {
       id: `${id}-${value}`,
       taskKind: "division_factor_pairs",
-      prompt: `Find every number that divides into ${value} exactly.`,
+      prompt: td("factors.prompt.factor_pairs", { value }),
       expected: wanted.join(", "),
       itemCount: wanted.length,
       mode,
@@ -226,7 +231,7 @@ export function buildFactorQuestion(
     return {
       id: `${id}-${value}-${other}`,
       taskKind: "division_common_factors",
-      prompt: `Which numbers divide into both ${value} and ${other}?`,
+      prompt: td("factors.prompt.common_factors", { value, other }),
       expected: wanted.join(", "),
       itemCount: wanted.length,
       mode,
@@ -247,7 +252,7 @@ export function buildFactorQuestion(
   return {
     id: `${id}-${value}`,
     taskKind: "division_prime_factors",
-    prompt: `Break ${value} apart until only primes are left.`,
+    prompt: td("factors.prompt.prime_factors", { value }),
     expected: primes.join(" × "),
     itemCount: primes.length,
     mode,

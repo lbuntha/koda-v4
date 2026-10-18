@@ -28,6 +28,8 @@ import {
   withoutRepeat,
   type PairSpec,
 } from "../internal/data/additionNumbers";
+import { ta } from "../internal/i18n";
+import { useT } from "../../../lib/i18n";
 
 /**
  * A number line you jump along, and the arcs stay where you put them.
@@ -257,17 +259,17 @@ export const promptFor = (q: JumpQuestion, template?: string): string => {
 
   switch (q.mode) {
     case "open":
-      return `Start at ${q.a} and jump ${q.b}. Where do you land?`;
+      return ta("jump.promptOpen", { a: q.a, b: q.b });
     case "bridge_ten":
-      return `Which jump takes ${q.a} to the next ten?`;
+      return ta("jump.promptBridgeTen", { a: q.a });
     case "bridge_hundred":
-      return `Which jump takes ${q.a} to the next hundred?`;
+      return ta("jump.promptBridgeHundred", { a: q.a });
     case "compensate":
-      return `${q.a} plus ${q.b}. Jump a round number, then give back what you overshot.`;
+      return ta("jump.promptCompensate", { a: q.a, b: q.b });
     case "jump_tens_ones":
-      return `${q.a} plus ${q.b}. Jump the tens, then the ones.`;
+      return ta("jump.promptTensOnes", { a: q.a, b: q.b });
     default:
-      return `Start at ${q.a} and hop forward ${q.b}.`;
+      return ta("jump.prompt", { a: q.a, b: q.b });
   }
 };
 
@@ -282,18 +284,15 @@ export const promptFor = (q: JumpQuestion, template?: string): string => {
 export const printedFor = (q: JumpQuestion): PrintedQuestion => {
   switch (q.mode) {
     case "bridge_ten":
-      return { text: `What jump takes ${q.a} to the next ten?`, answer: q.expected ?? "" };
+      return { text: ta("jump.printedBridgeTen", { a: q.a }), answer: q.expected ?? "" };
     case "bridge_hundred":
-      return { text: `What jump takes ${q.a} to the next hundred?`, answer: q.expected ?? "" };
+      return { text: ta("jump.printedBridgeHundred", { a: q.a }), answer: q.expected ?? "" };
     case "compensate":
-      return {
-        text: `${q.a} + ${q.b}. Jump a round number, then give back what you overshot.`,
-        answer: String(q.sum),
-      };
+      return { text: ta("jump.printedCompensate", { a: q.a, b: q.b }), answer: String(q.sum) };
     case "jump_tens_ones":
-      return { text: `${q.a} + ${q.b}. Jump the tens, then the ones.`, answer: String(q.sum) };
+      return { text: ta("jump.printedTensOnes", { a: q.a, b: q.b }), answer: String(q.sum) };
     default:
-      return { text: `Start at ${q.a} and jump ${q.b}. Where do you land?`, answer: String(q.sum) };
+      return { text: ta("jump.promptOpen", { a: q.a, b: q.b }), answer: String(q.sum) };
   }
 };
 
@@ -307,19 +306,15 @@ export const printedFor = (q: JumpQuestion): PrintedQuestion => {
 export const methodFor = (q: JumpQuestion): string[] => {
   switch (q.mode) {
     case "bridge_ten":
-      return ["Look at the ones digit.", "Count how many more it needs to reach the next ten."];
+      return [ta("jump.methodTen1"), ta("jump.methodTen2")];
     case "bridge_hundred":
-      return ["Look at the tens and ones.", "Count how many more they need to reach the next hundred."];
+      return [ta("jump.methodHundred1"), ta("jump.methodHundred2")];
     case "compensate":
-      return [
-        "Round the second number up to a friendly one.",
-        "Add that instead — it is easier.",
-        "Then give back the extra you added.",
-      ];
+      return [ta("jump.methodCompensate1"), ta("jump.methodCompensate2"), ta("jump.methodCompensate3")];
     case "jump_tens_ones":
-      return ["Jump the tens first.", "Then jump the ones.", "Two easy jumps instead of one hard one."];
+      return [ta("jump.methodTensOnes1"), ta("jump.methodTensOnes2"), ta("jump.methodTensOnes3")];
     default:
-      return ["Start at the first number.", "Jump forward the second number.", "Where you land is the answer."];
+      return [ta("jump.method1"), ta("jump.method2"), ta("jump.method3")];
   }
 };
 
@@ -366,7 +361,7 @@ export const figureFor = (q: JumpQuestion): React.ReactNode => {
       width={W + pad * 2}
       height={34}
       role="img"
-      aria-label={`Number line from ${q.min} to ${q.max}, starting at ${q.from}`}
+      aria-label={ta("jump.lineLabel", { min: q.min, max: q.max, from: q.from })}
       className="text-slate-900"
     >
       <line x1={0} y1={12} x2={W} y2={12} stroke="currentColor" strokeWidth="1.5" />
@@ -408,52 +403,52 @@ export function jumpHints(
       const unit = q.mode === "bridge_ten" ? 10 : 100;
       const target = nextMultiple(q.a, unit);
       return composeHints(
-        state.kidTip ?? `Jump to the round number, not past it.`,
-        `${q.a} is between ${target - unit} and ${target}. You want to land exactly on ${target}.`,
+        state.kidTip ?? ta("jump.hintBridgeTip"),
+        ta("jump.hintBetween", { a: q.a, low: target - unit, target }),
         // Stops one step short: the child is choosing between jumps.
-        `Count on from ${q.a} to ${target} and that is the jump you need.`,
+        ta("jump.hintCountTo", { a: q.a, target }),
       );
     }
     case "compensate": {
       const rounded = nextMultiple(q.b, 10);
       return composeHints(
-        state.kidTip ?? "Jump a round number, then give back what you took too much of.",
+        state.kidTip ?? ta("jump.hintCompensateTip"),
         state.made.length === 0
-          ? `${q.b} is nearly ${rounded}, and ${rounded} is an easy jump. Take that jump first.`
+          ? ta("jump.hintNearly", { b: q.b, rounded })
           : left > 0
-            ? `You jumped ${rounded}, which is ${rounded - q.b} too far. Now jump back ${rounded - q.b}.`
-            : `You are at ${state.at}. Say that number to answer.`,
-        `${q.a} and ${rounded} is ${q.a + rounded}. Give back ${rounded - q.b} and you have ${q.sum}.`,
+            ? ta("jump.hintTooFar", { rounded, back: rounded - q.b })
+            : ta("jump.hintSayIt", { at: state.at }),
+        ta("jump.hintGiveBack", { a: q.a, rounded, total: q.a + rounded, back: rounded - q.b, sum: q.sum }),
       );
     }
     case "jump_tens_ones": {
       const { tens, ones } = digitsOf(q.b);
       return composeHints(
-        state.kidTip ?? "Add the tens first, then the ones.",
+        state.kidTip ?? ta("jump.hintTensOnesTip"),
         state.made.length === 0
-          ? `${q.b} splits into ${tens * 10} and ${ones}. Jump the ${tens * 10} first.`
+          ? ta("jump.hintSplit", { b: q.b, tens: tens * 10, ones })
           : left > 0
-            ? `You are at ${state.at}. There ${left === 1 ? "is one jump" : `are ${left} jumps`} left.`
-            : `You landed on ${state.at}. Say that number to answer.`,
-        `${q.a} and ${tens * 10} is ${q.a + tens * 10}, and ${ones} more is ${q.sum}.`,
+            ? ta("jump.hintJumpsLeft", { at: state.at, count: left })
+            : ta("jump.hintLanded", { at: state.at }),
+        ta("jump.hintTensOnesAll", { a: q.a, tens: tens * 10, total: q.a + tens * 10, ones, sum: q.sum }),
       );
     }
     case "open":
       return composeHints(
-        state.kidTip ?? "There are no numbers on this line, so keep the count in your head.",
+        state.kidTip ?? ta("jump.hintOpenTip"),
         state.made.length === 0
-          ? `Take the jump first. It goes forward ${q.b} from ${q.a}.`
-          : `You jumped ${q.b} from ${q.a}. Nothing on the line will tell you where that is — count on from ${q.a}.`,
-        `Start at ${q.a} and count on ${q.b}.`,
+          ? ta("jump.hintTakeJump", { a: q.a, b: q.b })
+          : ta("jump.hintJumped", { a: q.a, b: q.b }),
+        ta("jump.hintStartAt", { a: q.a, b: q.b }),
       );
     default: {
       const remaining = q.sum - state.at;
       return composeHints(
-        state.kidTip ?? "One hop is one number. Say each number as you land on it.",
+        state.kidTip ?? ta("jump.hintHopTip"),
         remaining <= 0
-          ? `You have arrived at ${q.sum}.`
-          : `You are on ${state.at}. ${remaining === 1 ? "One more hop" : `${remaining} more hops`} to go — the next one lands on ${numberWord(state.at + 1)}.`,
-        `From ${q.a}, hop ${q.b} times: ${Array.from({ length: q.b }, (_, i) => q.a + i + 1).join(", ")}.`,
+          ? ta("jump.hintArrived", { sum: q.sum })
+          : ta("jump.hintHopsLeft", { at: state.at, count: remaining, next: numberWord(state.at + 1) }),
+        ta("jump.hintHopRun", { a: q.a, b: q.b, run: Array.from({ length: q.b }, (_, i) => q.a + i + 1).join(", ") }),
       );
     }
   }
@@ -504,6 +499,8 @@ export const JumpLine: React.FC<ActivityProps<JumpLineParams>> = ({
   onComplete,
   lesson,
 }) => {
+  // Re-render when the language changes: every line below reads the catalog.
+  useT();
   const setup: JumpSetup = { ...params, ...params.question };
   const totalQuestions = setup.questionsPerRound ?? 5;
   const copy = playCopy(params);
@@ -586,10 +583,10 @@ export const JumpLine: React.FC<ActivityProps<JumpLineParams>> = ({
       correct,
       given: String(given),
       errorKind: correct ? undefined : Math.abs(given - question.sum) === 1 ? "off_by_one" : "off_by_more",
-      title: correct ? "That is where you land!" : "Not quite",
+      title: correct ? ta("jump.landTitle") : ta("notQuite"),
       message: correct
-        ? `${question.a} and ${question.b} lands on ${question.sum}.`
-        : `Count the jumps again from ${question.a} — they land on ${question.sum}.`,
+        ? ta("jump.lands", { a: question.a, b: question.b, sum: question.sum })
+        : ta("jump.countAgain", { a: question.a, sum: question.sum }),
     });
   };
 
@@ -610,10 +607,10 @@ export const JumpLine: React.FC<ActivityProps<JumpLineParams>> = ({
         correct,
         given: String(size),
         errorKind: correct ? undefined : "off_by_more",
-        title: correct ? "Straight onto the ten!" : "That jump misses",
+        title: correct ? ta("jump.ontoTen") : ta("jump.misses"),
         message: correct
-          ? `${question.a} and ${size} lands exactly on ${target}.`
-          : `${question.a} and ${size} lands on ${question.a + size}. You want ${target}.`,
+          ? ta("jump.exactly", { a: question.a, size, target })
+          : ta("jump.missedBy", { a: question.a, size, landed: question.a + size, target }),
       });
       return;
     }
@@ -634,8 +631,8 @@ export const JumpLine: React.FC<ActivityProps<JumpLineParams>> = ({
       submit({
         correct: true,
         given: String(next),
-        title: "You landed on it!",
-        message: `${question.a} and ${question.b} hops lands on ${question.sum}.`,
+        title: ta("jump.landedTitle"),
+        message: ta("jump.hopsLand", { a: question.a, b: question.b, sum: question.sum }),
       });
     }
   };
@@ -654,14 +651,14 @@ export const JumpLine: React.FC<ActivityProps<JumpLineParams>> = ({
       guide.stumbled();
       nudge.refuse(
         made.length === 0
-          ? "Take the jumps first, then say where you landed."
-          : `One more jump to take before you answer.`,
+          ? ta("jump.refuseJumpFirst")
+          : ta("jump.refuseOneMore"),
       );
       return;
     }
     if (entry === "") {
       guide.stumbled();
-      nudge.refuse("Type where you landed, using the numbers below.");
+      nudge.refuse(ta("jump.refuseType"));
       return;
     }
     submitTotal(Number(entry));
@@ -717,7 +714,7 @@ export const JumpLine: React.FC<ActivityProps<JumpLineParams>> = ({
     <SkillRound
       koda={koda}
       lesson={lesson}
-      fallbackTitle="Number Line Jumps"
+      fallbackTitle={ta("jump.title")}
       round={round}
       totalQuestions={totalQuestions}
       prompt={prompt}
@@ -791,12 +788,16 @@ export const JumpLine: React.FC<ActivityProps<JumpLineParams>> = ({
           </svg>
 
           <p aria-live="polite" className="sr-only">
-            {question.ticks > 0 ? `On ${at}` : `${made.length} jumps taken`}
+            {question.ticks > 0 ? ta("jump.on", { at }) : ta("jump.taken", { count: made.length })}
           </p>
 
           {scaffold && question.ticks === 0 && made.length > 0 && (
             <p className="text-center text-sm font-bold text-ink/60 tabular-nums">
-              Jumped {made.map((m) => (m < 0 ? `back ${-m}` : `on ${m}`)).join(", then ")}
+              {ta("jump.jumped", {
+                list: made
+                  .map((m) => (m < 0 ? ta("jump.back", { n: -m }) : ta("jump.onBy", { n: m })))
+                  .join(ta("jump.then")),
+              })}
             </p>
           )}
         </div>
@@ -815,7 +816,7 @@ export const JumpLine: React.FC<ActivityProps<JumpLineParams>> = ({
                 whileHover={done ? undefined : { scale: 1.06, y: -2 }}
                 whileTap={done ? undefined : { scale: 0.9 }}
                 transition={SPRING.tap}
-                aria-label={size < 0 ? `Jump back ${-size}` : `Jump forward ${size}`}
+                aria-label={size < 0 ? ta("jump.jumpBack", { n: -size }) : ta("jump.jumpForward", { n: size })}
                 className={themeSystem.button(size < 0 ? "secondary" : "primary", "choice")}
               >
                 {size < 0 ? `−${-size}` : `+${size}`}
@@ -828,10 +829,10 @@ export const JumpLine: React.FC<ActivityProps<JumpLineParams>> = ({
               onClick={undo}
               whileTap={{ scale: 0.92 }}
               transition={SPRING.tap}
-              aria-label="Undo last jump"
+              aria-label={ta("jump.undoLabel")}
               className={themeSystem.button("ghost", "sm")}
             >
-              Undo
+              {ta("undo")}
             </motion.button>
           )}
         </div>
@@ -840,11 +841,11 @@ export const JumpLine: React.FC<ActivityProps<JumpLineParams>> = ({
           <div className="space-y-3">
             <div className="flex items-center justify-center gap-3">
               <span className="text-sm font-bold uppercase tracking-wide text-ink/50">
-                Landed on
+                {ta("jump.landedOn")}
               </span>
               <span
                 className={`min-w-[5rem] h-14 px-4 rounded-2xl border-2 border-dashed ${CHANGE.border} ${ADDEND_B.soft} flex items-center justify-center text-3xl font-black tabular-nums text-ink`}
-                aria-label={`Landed on ${entry || "empty"}`}
+                aria-label={ta("jump.landedOnValue", { value: entry || ta("emptyWord") })}
               >
                 {entry || <span className="text-ink/25">?</span>}
               </span>
@@ -863,7 +864,7 @@ export const JumpLine: React.FC<ActivityProps<JumpLineParams>> = ({
                 transition={SPRING.tap}
                 className={themeSystem.button("primary", "lg")}
               >
-                Check
+                {ta("check")}
               </motion.button>
             </div>
           </div>

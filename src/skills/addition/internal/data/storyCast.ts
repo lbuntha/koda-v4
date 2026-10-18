@@ -11,29 +11,37 @@
  *
  * Names are short, easy to read, and deliberately drawn from several places.
  */
-export const NAMES = ["Mia", "Sam", "Ava", "Leo", "Zoe", "Kai"] as const;
+import { ta } from "../i18n";
+
+/** In the language on screen: Khmer stories are about Khmer names. See `names.*`. */
+export const NAMES = (): string[] => Array.from({ length: 6 }, (_, i) => ta(`names.${i}`));
 
 export interface Thing {
+  /** The `things.*` entry in this skill's catalogs. */
+  key: string;
   /** As it appears after a number: "7 shells". */
-  many: string;
+  readonly many: string;
   /** For a sentence that needs the singular. */
-  one: string;
+  readonly one: string;
 }
 
-export const THINGS: Thing[] = [
-  { one: "shell", many: "shells" },
-  { one: "sticker", many: "stickers" },
-  { one: "marble", many: "marbles" },
-  { one: "apple", many: "apples" },
-  { one: "card", many: "cards" },
-  { one: "block", many: "blocks" },
-  { one: "button", many: "buttons" },
-  { one: "acorn", many: "acorns" },
-];
+/** Named through the catalog, so each form is written per language rather than derived. */
+const thing = (key: string): Thing => ({
+  key,
+  get one() {
+    return ta(`things.${key}.one`);
+  },
+  get many() {
+    return ta(`things.${key}.many`);
+  },
+});
+
+export const THINGS: Thing[] = ["shell", "sticker", "marble", "apple", "card", "block", "button", "acorn"].map(thing);
 
 /** Two different names, for the comparison stories. */
 export const twoNames = (pick: <T>(items: readonly T[]) => T): [string, string] => {
-  const first = pick(NAMES);
-  const rest = NAMES.filter((n) => n !== first);
+  const names = NAMES();
+  const first = pick(names);
+  const rest = names.filter((n) => n !== first);
   return [first, pick(rest)];
 };

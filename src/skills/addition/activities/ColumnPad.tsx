@@ -27,6 +27,8 @@ import {
   type PairSpec,
   type Place,
 } from "../internal/data/additionNumbers";
+import { ta } from "../internal/i18n";
+import { useT } from "../../../lib/i18n";
 
 /**
  * The vertical algorithm, with the carry written down.
@@ -47,7 +49,10 @@ export type ColumnMode = "standard" | "cascade";
 
 /** Columns, widest first. Only ever as many as the numbers need. */
 const ORDER: Place[] = ["hundreds", "tens", "ones"];
-const HEADING: Record<Place, string> = { hundreds: "H", tens: "T", ones: "O" };
+/** "H", "T", "O" — the column letters, in the language on screen. */
+const heading = (p: Place): string => ta(`place.${p}Short`);
+/** "tens", in a sentence. */
+const placeName = (p: Place): string => ta(`place.${p}`);
 /** Where a carry out of this column lands. */
 const CARRIES_INTO: Partial<Record<Place, Place>> = { ones: "tens", tens: "hundreds" };
 
@@ -168,8 +173,8 @@ export const promptFor = (q: ColumnQuestion, template?: string): string => {
     .replaceAll("{sum}", String(q.sum));
   if (filled) return filled;
   return q.mode === "cascade"
-    ? `${q.a} plus ${q.b}. Two columns carry — write each one down.`
-    : `${q.a} plus ${q.b}. Add each column, and write the carry.`;
+    ? ta("column.promptCascade", { a: q.a, b: q.b })
+    : ta("column.prompt", { a: q.a, b: q.b });
 };
 
 
@@ -183,8 +188,8 @@ export const promptFor = (q: ColumnQuestion, template?: string): string => {
 export const printedFor = (q: ColumnQuestion): PrintedQuestion => ({
   text:
     q.mode === "cascade"
-      ? `${q.a} + ${q.b}. Two columns carry.`
-      : `${q.a} + ${q.b}. Write the carry.`,
+      ? ta("column.printedCascade", { a: q.a, b: q.b })
+      : ta("column.printed", { a: q.a, b: q.b }),
   answer: String(q.sum),
 });
 
@@ -209,19 +214,17 @@ export function columnHints(
   const chains = q.carryInto.length > 1;
 
   return composeHints(
-    state.kidTip ?? "Start at the ones. Ten or more means carry to the next column.",
+    state.kidTip ?? ta("column.hintTip"),
     filled === 0
       ? onesSum >= 10
-        ? `Ones first: ${da.ones} and ${db.ones} is ${onesSum}. Write ${onesSum % 10}, carry one.`
-        : `Ones first: ${da.ones} and ${db.ones} is ${onesSum}. Write it underneath.`
+        ? ta("column.hintOnesCarry", { a: da.ones, b: db.ones, sum: onesSum, write: onesSum % 10 })
+        : ta("column.hintOnes", { a: da.ones, b: db.ones, sum: onesSum })
       : missingCarry
-        ? `A column made ten or more. Write its carry above the ${missingCarry} first.`
+        ? ta("column.hintMissingCarry", { place: placeName(missingCarry) })
         : chains
-          ? `Keep going left. A carry can push the next column over ten too.`
-          : `Keep going left. Add the carry in as well as the two digits.`,
-    chains
-      ? `Each carry joins the next column, which may then carry again.`
-      : `Column by column from the right, the answer reads ${q.sum}.`,
+          ? ta("column.hintLeftChain")
+          : ta("column.hintLeft"),
+    chains ? ta("column.hintChain") : ta("column.hintReads", { sum: q.sum }),
   );
 }
 
@@ -241,7 +244,7 @@ const Cell: React.FC<{
     value={value}
     onChange={(e) => onChange(e.target.value.replace(/[^0-9]/g, "").slice(0, 1))}
     disabled={disabled}
-    aria-label={`${label}${lit ? ", write this one next" : ""}`}
+    aria-label={lit ? ta("column.cellNext", { label }) : label}
     className={themeSystem.field(
       carry ? "sm" : "lg",
       `${
@@ -259,6 +262,8 @@ export const ColumnPad: React.FC<ActivityProps<ColumnPadParams>> = ({
   onComplete,
   lesson,
 }) => {
+  // Re-render when the language changes: every line below reads the catalog.
+  useT();
   const setup: ColumnSetup = { ...params, ...params.question };
   const totalQuestions = setup.questionsPerRound ?? 5;
   const copy = playCopy(params);
@@ -331,7 +336,7 @@ export const ColumnPad: React.FC<ActivityProps<ColumnPadParams>> = ({
     const emptyDigit = question.places.find((p) => (digits[p] ?? "") === "");
     if (emptyDigit) {
       guide.stumbled();
-      nudge.refuse("Every column needs an answer underneath it.");
+      nudge.refuse(ta("column.refuseEmpty"));
       return;
     }
 
@@ -346,7 +351,7 @@ export const ColumnPad: React.FC<ActivityProps<ColumnPadParams>> = ({
     if (emptyCarry) {
       guide.stumbled();
       nudge.refuse(
-        `One column made ten or more. Write its carry in the small box above the ${emptyCarry}.`,
+        ta("column.refuseCarry", { place: placeName(emptyCarry) }),
       );
       return;
     }
@@ -370,14 +375,14 @@ export const ColumnPad: React.FC<ActivityProps<ColumnPadParams>> = ({
       // A right digit in the wrong column is the mistake this layout exists to
       // expose; everything else here is a miscount, carry included.
       errorKind: correct ? undefined : shuffledDigits ? "place_value" : "off_by_more",
-      title: correct ? "Every column, and every carry!" : "Check the columns",
+      title: correct ? ta("column.rightTitle") : ta("column.wrongTitle"),
       message: correct
-        ? `${question.a} and ${question.b} is ${question.sum}.`
+        ? ta("aAndBIs", { a: question.a, b: question.b, sum: question.sum })
         : shuffledDigits
-          ? "The right digits, in the wrong columns."
+          ? ta("column.shuffled")
           : !carriesRight
-            ? "A carry is wrong. A column that reaches ten carries exactly one."
-            : `${question.a} and ${question.b} is ${question.sum}.`,
+            ? ta("column.carryWrong")
+            : ta("aAndBIs", { a: question.a, b: question.b, sum: question.sum }),
     });
   };
 
@@ -433,7 +438,7 @@ export const ColumnPad: React.FC<ActivityProps<ColumnPadParams>> = ({
     <SkillRound
       koda={koda}
       lesson={lesson}
-      fallbackTitle="Column Add"
+      fallbackTitle={ta("column.title")}
       round={round}
       totalQuestions={totalQuestions}
       prompt={prompt}
@@ -473,7 +478,7 @@ export const ColumnPad: React.FC<ActivityProps<ColumnPadParams>> = ({
                     carry
                     value={carries[p] ?? ""}
                     onChange={(v) => setCarries((prev) => ({ ...prev, [p]: v }))}
-                    label={`Carry into ${p}`}
+                    label={ta("column.carryInto", { place: placeName(p) })}
                     lit={guide.target === question.places.indexOf(p) + question.places.length}
                     disabled={Boolean(round.feedback)}
                   />
@@ -482,11 +487,11 @@ export const ColumnPad: React.FC<ActivityProps<ColumnPadParams>> = ({
             ))}
 
             <span className="text-sm font-bold uppercase tracking-wide text-ink/40 text-right pr-1">
-              {cols.map((p) => HEADING[p]).join("")}
+              {cols.map(heading).join("")}
             </span>
             {cols.map((p) => (
               <span key={`head-${p}`} className="text-center text-xs font-black uppercase text-ink/40">
-                {HEADING[p]}
+                {heading(p)}
               </span>
             ))}
 
@@ -521,7 +526,7 @@ export const ColumnPad: React.FC<ActivityProps<ColumnPadParams>> = ({
                 <Cell
                   value={digits[p] ?? ""}
                   onChange={(v) => setDigits((prev) => ({ ...prev, [p]: v }))}
-                  label={`Answer, ${p}`}
+                  label={ta("column.answerIn", { place: placeName(p) })}
                   lit={guide.target === question.places.indexOf(p)}
                   disabled={Boolean(round.feedback)}
                 />
@@ -532,7 +537,7 @@ export const ColumnPad: React.FC<ActivityProps<ColumnPadParams>> = ({
 
         {scaffold && (
           <p className="text-center text-xs font-semibold text-ink/50">
-            Start at the right. A column that reaches ten carries one to the next.
+            {ta("column.help")}
           </p>
         )}
 
@@ -545,7 +550,7 @@ export const ColumnPad: React.FC<ActivityProps<ColumnPadParams>> = ({
             transition={SPRING.tap}
             className={themeSystem.button("primary", "lg")}
           >
-            Check
+            {ta("check")}
           </motion.button>
         </div>
       </div>
@@ -561,15 +566,8 @@ export const ColumnPad: React.FC<ActivityProps<ColumnPadParams>> = ({
  * `WorksheetSource` for why this is not the lesson's own `stepByStep`.
  */
 export const methodFor = (q: ColumnQuestion): string[] => q.mode === "cascade"
-  ? [
-      "Work right to left, one column at a time.",
-      "Carry from the ones into the tens, then again from the tens into the hundreds.",
-    ]
-  : [
-      "Add the ones column first.",
-      "If it reaches ten, write the carry above the tens.",
-      "Add the tens, including the carry.",
-    ];
+  ? [ta("column.methodCascade1"), ta("column.methodCascade2")]
+  : [ta("column.method1"), ta("column.method2"), ta("column.method3")];
 
 
 /**

@@ -23,6 +23,8 @@ import {
   type ColumnSetup,
   type DigitVerdict,
 } from "../internal/data/divisionColumn";
+import { td } from "../internal/i18n";
+import { useT } from "../../../lib/i18n";
 
 /**
  * Short division, long division, and the first step past the point.
@@ -84,51 +86,53 @@ function columnHintsRungs(question: ColumnQuestion): string[] {
   switch (question.mode) {
     case "short_exact":
       return composeHints(
-        "Start at the left. Division is the method that begins big.",
-        `Each digit of ${dividend} divides by ${divisor} exactly, so every column gives a clean answer.`,
-        "One column at a time, rightwards. Every digit gets an answer above.",
+        td("column.hint.exact1"),
+        td("column.hint.exact2", { n: dividend, d: divisor }),
+        td("column.hint.exact3"),
       );
     case "short_exchange":
       return composeHints(
-        `Start at the left. How many ${divisor}s fit into ${first}?`,
-        `It will not go evenly. Write what is left small, in front of the next digit.`,
-        "Then divide that whole new number — the small carry and the digit read together.",
+        td("column.hint.exchange1", { d: divisor, first }),
+        td("column.hint.exchange2"),
+        td("column.hint.exchange3"),
       );
     case "short_remainder":
       return composeHints(
-        `Start at the left and carry leftovers along as usual.`,
-        "Keep going all the way to the last digit.",
-        `Nothing left to carry into, so what remains is the remainder.`,
+        td("column.hint.remainder1"),
+        td("column.hint.remainder2"),
+        td("column.hint.remainder3"),
       );
     case "zero_digit":
       return composeHints(
-        "Take the places one at a time. Never skip a small-looking one.",
-        `When ${divisor} will not go into a place, that place gets zero.`,
-        "A zero above the line holds the place. Leaving it out shrinks the answer.",
+        td("column.hint.zero1"),
+        td("column.hint.zero2", { d: divisor }),
+        td("column.hint.zero3"),
       );
     case "long_exact":
     case "long_remainder":
       return composeHints(
-        `${divisor} will not fit one digit, so take two together.`,
-        `Guess how many ${divisor}s fit, then multiply your guess out to check it.`,
+        td("column.hint.long1", { d: divisor }),
+        td("column.hint.long2", { d: divisor }),
         question.mode === "long_remainder"
           /* The two long-division lessons share their first two rungs and part
              company here, which is the honest relationship between them: one
              ends on nothing left, the other on what is left. Trimming both to
              the same sentence lost that. */
-          ? `Too much left, guess bigger. What is left at the end is the remainder.`
-          : "Too much left, guess bigger. Gone past, guess smaller.",
+          ? td("column.hint.longRemainder3")
+          : td("column.hint.longExact3"),
       );
     default:
       return composeHints(
-        "Work out the whole part first, and see what is left.",
-        "Point after the answer, zero after the total, then carry on.",
-        "What was left becomes tenths, then hundredths. Nothing about the method changes at the point.",
+        td("column.hint.decimal1"),
+        td("column.hint.decimal2"),
+        td("column.hint.decimal3"),
       );
   }
 }
 
 export const DivisionPad: React.FC<ActivityProps<ColumnParams>> = ({ params, koda, onComplete, lesson }) => {
+  // Re-render when the language changes: every line below reads the catalog.
+  useT();
   const setup: ColumnSetup = useMemo(() => ({ ...params, ...params.question }), [params]);
   const practising = isPractice(setup);
   const total = setup.questionsPerRound ?? 5;
@@ -280,12 +284,12 @@ export const DivisionPad: React.FC<ActivityProps<ColumnParams>> = ({ params, kod
       correct,
       given,
       expected: question.expected,
-      title: correct ? "Yes!" : "Not yet",
+      title: correct ? td("yes") : td("notYet"),
       message: correct
         ? `${question.dividend} ÷ ${question.divisor} = ${question.expected}.`
         : question.wantsRemainder && Number(remainder) !== question.remainder
-          ? "The digits above the line are right. Check what is left at the end."
-          : "Work back along the places and check each one.",
+          ? td("column.checkRemainder")
+          : td("column.workBack"),
     });
   };
 
@@ -295,7 +299,7 @@ export const DivisionPad: React.FC<ActivityProps<ColumnParams>> = ({ params, kod
     <SkillRound
       koda={koda}
       lesson={lesson}
-      fallbackTitle="The Written Method"
+      fallbackTitle={td("column.title")}
       round={round}
       totalQuestions={total}
       prompt={promptFor(question)}
@@ -369,16 +373,16 @@ export const DivisionPad: React.FC<ActivityProps<ColumnParams>> = ({ params, kod
 
         {working && scaffoldEnabled && !practising ? (
           <p className="text-center text-sm text-muted" data-testid="working">
-            How many {question.divisor}s in {working.working}?
+            {td("column.howManyIn", { d: question.divisor, working: working.working })}
           </p>
         ) : null}
 
         {question.wantsRemainder && wholeDone ? (
           <div className="flex items-center justify-center gap-2 text-lg">
-            <span className="text-muted">left over</span>
+            <span className="text-muted">{td("column.leftOver")}</span>
             <span
               data-testid="remainder-slot"
-              aria-label={`Left over: ${remainder || "empty"}`}
+              aria-label={td("remainder.leftLabel", { value: remainder || td("place.empty") })}
               className="min-h-11 min-w-14 rounded-xl border-2 border-rose-500 px-3 py-1 text-center font-bold text-ink"
             >
               {remainder || " "}
@@ -401,7 +405,7 @@ export const DivisionPad: React.FC<ActivityProps<ColumnParams>> = ({ params, kod
         />
 
         {leftOver > 0 && !question.wantsRemainder && !question.hasDecimal && wholeDone ? (
-          <p className="text-center text-xs text-muted">Something is left over — check your digits.</p>
+          <p className="text-center text-xs text-muted">{td("column.somethingLeft")}</p>
         ) : null}
       </div>
     </SkillRound>
@@ -426,20 +430,20 @@ export function methodFor(question: ColumnQuestion): string[] {
    */
   if (question.mode === "decimal_tail") {
     return [
-      "Divide the whole part first and see what is left.",
-      "Put a point in the answer, and a zero after the total.",
-      "Carry on exactly as before: what was left becomes tenths.",
+      td("column.method.decimal1"),
+      td("column.method.decimal2"),
+      td("column.method.decimal3"),
     ];
   }
   return question.mode === "long_exact" || question.mode === "long_remainder"
     ? [
-        "Guess how many fit into the first part, then check by multiplying.",
-        "Take it away, and bring the next digit down.",
-        "Keep going to the last digit. What is left at the end is the remainder.",
+        td("column.method.long1"),
+        td("column.method.long2"),
+        td("column.method.long3"),
       ]
     : [
-        "Start at the left-hand digit and work right.",
-        "Write what is left over small, in front of the next digit.",
-        "Every place gets a digit above the line, even when that digit is zero.",
+        td("column.method.short1"),
+        td("column.method.short2"),
+        td("column.method.short3"),
       ];
 }

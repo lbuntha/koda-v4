@@ -11,6 +11,8 @@ import {
   useSkillRound,
 } from "../../kit";
 import { drawQuotient, shuffle, type Quotient } from "../internal/data/divisionNumbers";
+import { td } from "../internal/i18n";
+import { useT } from "../../../lib/i18n";
 
 /**
  * Which route, and why.
@@ -47,42 +49,54 @@ interface Route {
 export const ROUTES: readonly Route[] = [
   {
     id: "halve",
-    label: "Halve it, maybe more than once",
+    get label() {
+      return td("strategy.routes.halve.label");
+    },
     fits: (_, d) => [2, 4, 8].includes(d),
-    why: (_, d) => `Dividing by ${d} is halving ${d === 2 ? "once" : d === 4 ? "twice" : "three times"}.`,
+    why: (_, d) => td(d === 2 ? "strategy.routes.halve.whyOnce" : d === 4 ? "strategy.routes.halve.whyTwice" : "strategy.routes.halve.whyThrice", { d }),
   },
   {
     id: "known-fact",
-    label: "Use a times-table fact",
+    get label() {
+      return td("strategy.routes.known-fact.label");
+    },
     fits: (n, d) => n / d <= 12 && Number.isInteger(n / d) && d <= 12,
-    why: (n, d) => `${d} × ${n / d} = ${n} is a fact you already know.`,
+    why: (n, d) => td("strategy.routes.known-fact.why", { n, d, q: n / d }),
   },
   {
     id: "place-split",
-    label: "Split it by place value",
+    get label() {
+      return td("strategy.routes.place-split.label");
+    },
     fits: (n, d) =>
       String(n)
         .split("")
         .every((digit, i, all) => (Number(digit) * 10 ** (all.length - 1 - i)) % d === 0 || digit === "0"),
-    why: (n, d) => `Every place of ${n} divides by ${d} on its own.`,
+    why: (n, d) => td("strategy.routes.place-split.why", { n, d }),
   },
   {
     id: "chunk",
-    label: "Take away big chunks",
+    get label() {
+      return td("strategy.routes.chunk.label");
+    },
     fits: (n, d) => n / d > 12,
-    why: (_n, d) => `The answer is big, so take away tens of ${d}s at a time.`,
+    why: (_n, d) => td("strategy.routes.chunk.why", { d }),
   },
   {
     id: "scale",
-    label: "Cancel the zeros first",
+    get label() {
+      return td("strategy.routes.scale.label");
+    },
     fits: (n, d) => n % 10 === 0 && d % 10 === 0,
-    why: () => "A zero on each side cancels, and what is left is much smaller.",
+    why: () => td("strategy.routes.scale.why"),
   },
   {
     id: "written",
-    label: "Use the written method",
+    get label() {
+      return td("strategy.routes.written.label");
+    },
     fits: (n) => n > 100,
-    why: () => "It always works, and this one is big enough to be worth writing out.",
+    why: () => td("strategy.routes.written.why"),
   },
 ] as const;
 
@@ -129,7 +143,7 @@ export function buildQuestion(_params: StrategyParams, index: number): StrategyQ
   return {
     id: `division-strategy-${index}-${value.dividend}-${value.divisor}`,
     taskKind: "division_compare_paths",
-    prompt: `${value.dividend} ÷ ${value.divisor}. Which way would you do it?`,
+    prompt: td("strategy.prompt", { n: value.dividend, d: value.divisor }),
     expected: fitting.map((r) => r.id).join(" | "),
     itemCount: offered.length,
     dividend: value.dividend,
@@ -148,6 +162,8 @@ export const StrategyPicker: React.FC<ActivityProps<StrategyParams>> = ({
   onComplete,
   lesson,
 }) => {
+  // Re-render when the language changes: every line below reads the catalog.
+  useT();
   const setup = useMemo(() => ({ ...params, ...params.question }), [params]);
   const practising = isPractice(setup);
   const total = setup.questionsPerRound ?? 5;
@@ -189,11 +205,11 @@ export const StrategyPicker: React.FC<ActivityProps<StrategyParams>> = ({
       correct,
       given: id,
       expected: question.expected,
-      title: correct ? "That works" : "Not that one",
+      title: correct ? td("strategy.works") : td("strategy.notThatOne"),
       message:
         correct && route
           ? route.why(question.dividend, question.divisor)
-          : "That one does not suit these numbers. Look at them again.",
+          : td("strategy.doesNotSuit"),
     });
   };
 
@@ -207,9 +223,9 @@ export const StrategyPicker: React.FC<ActivityProps<StrategyParams>> = ({
   const hints = practising
     ? []
     : composeHints(
-        copy.kidTip ?? "Look at the numbers before you look at the choices.",
-        "Is it a number you can halve by? Do all the places divide?",
-        "More than one way is right. Pick the one these numbers suit.",
+        copy.kidTip ?? td("strategy.hint1"),
+        td("strategy.hint2"),
+        td("strategy.hint3"),
       );
   const guideCfg = guideSetup(params);
   const guided =
@@ -231,7 +247,7 @@ export const StrategyPicker: React.FC<ActivityProps<StrategyParams>> = ({
     <SkillRound
       koda={koda}
       lesson={lesson}
-      fallbackTitle="Which Way?"
+      fallbackTitle={td("strategy.title")}
       round={round}
       totalQuestions={total}
       prompt={promptFor(question)}
@@ -290,18 +306,18 @@ export const routeLabel = (id: string): string => ROUTES.find((r) => r.id === id
 export function printedFor(question: StrategyQuestion): { text: string; answer: string } | null {
   const offered = question.offered.map((id, i) => `${"abcdef"[i]}) ${routeLabel(id)}`).join("   ");
   return {
-    text: `${question.dividend} ÷ ${question.divisor}. Which way would you do it?   ${offered}`,
+    text: `${td("strategy.prompt", { n: question.dividend, d: question.divisor })}   ${offered}`,
     answer: question.fitting
       .filter((id) => question.offered.includes(id))
       .map((id) => routeLabel(id))
-      .join(" — or — "),
+      .join(td("strategy.orJoin")),
   };
 }
 
 export function methodFor(): string[] {
   return [
-    "Look at the numbers before you look at the choices.",
-    "Ask whether the divisor is one you can halve by, and whether every place divides.",
-    "More than one way can be right. Pick one that suits these numbers.",
+    td("strategy.method1"),
+    td("strategy.method2"),
+    td("strategy.method3"),
   ];
 }

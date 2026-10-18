@@ -35,6 +35,8 @@ import {
   type Difference,
   type DifferenceSpec,
 } from "../internal/data/subtractionNumbers";
+import { ts } from "../internal/i18n";
+import { useT } from "../../../lib/i18n";
 
 export type TrayMode =
   | "remove"
@@ -127,37 +129,37 @@ export const promptFor = (q: TrayQuestion, template?: string): string => {
     .replaceAll("{item}", q.asset.name);
   if (filled) return filled;
   switch (q.mode) {
-    case "remainder": return "Count only the objects that remain.";
-    case "separate": return `Move ${q.subtrahend} ${q.asset.name} into the separated part.`;
-    case "match_groups": return "Match one object from each group. How many are unmatched?";
-    case "equation_match": return "Choose the equation that matches the picture.";
-    case "count_back": return `Start at ${q.minuend} and count back ${q.subtrahend}.`;
-    case "subtract_zero": return `What is ${q.minuend} minus zero?`;
-    case "subtract_all": return `What is ${q.minuend} minus ${q.minuend}?`;
-    case "subtract_one": return `What is one less than ${q.minuend}?`;
-    case "fingers": return `Show ${q.minuend} fingers. Lower ${q.subtrahend}. How many stay up?`;
-    default: return `Take away ${q.subtrahend}. How many ${q.asset.name} are left?`;
+    case "remainder": return ts("tray.promptRemainder");
+    case "separate": return ts("tray.promptSeparate", { b: q.subtrahend, items: q.asset.name });
+    case "match_groups": return ts("tray.promptMatch");
+    case "equation_match": return ts("tray.promptEquation");
+    case "count_back": return ts("tray.promptCountBack", { a: q.minuend, b: q.subtrahend });
+    case "subtract_zero": return ts("tray.promptZero", { a: q.minuend });
+    case "subtract_all": return ts("tray.promptAll", { a: q.minuend });
+    case "subtract_one": return ts("tray.promptOne", { a: q.minuend });
+    case "fingers": return ts("tray.promptFingers", { a: q.minuend, b: q.subtrahend });
+    default: return ts("tray.prompt", { b: q.subtrahend, items: q.asset.name });
   }
 };
 
 export const printedFor = (q: TrayQuestion): PrintedQuestion => ({
   text: q.mode === "match_groups"
-    ? `Draw matching lines between groups of ${q.minuend} and ${q.subtrahend}. How many are unmatched?`
+    ? ts("tray.printedMatch", { a: q.minuend, b: q.subtrahend })
     : q.mode === "fingers"
-      ? `Show ${q.minuend} fingers and lower ${q.subtrahend}. How many remain?`
+      ? ts("tray.printedFingers", { a: q.minuend, b: q.subtrahend })
       : `${q.minuend} − ${q.subtrahend} =`,
   answer: String(q.difference),
 });
 
 export const methodFor = (q: TrayQuestion): string[] => {
   switch (q.mode) {
-    case "match_groups": return ["Pair one object from each group.", "Stop when one group has no objects left.", "Count the unmatched objects."];
-    case "count_back": return ["Say the starting number.", `Count backward ${q.subtrahend} steps.`, "The number you land on is the difference."];
-    case "subtract_zero": return ["Zero means nothing is taken away.", "The starting number stays the same."];
-    case "subtract_all": return ["Take away the whole amount.", "Nothing remains, so the difference is zero."];
-    case "subtract_one": return ["Taking away one moves back once.", "The previous counting number is the answer."];
-    case "fingers": return ["Raise the starting number of fingers.", "Lower the number being taken away.", "Count the fingers still raised."];
-    default: return ["Start with the whole amount.", `Take away ${q.subtrahend}.`, "Count what remains."];
+    case "match_groups": return [ts("tray.mMatch1"), ts("tray.mMatch2"), ts("tray.mMatch3")];
+    case "count_back": return [ts("tray.mBack1"), ts("tray.mBack2", { b: q.subtrahend }), ts("tray.mBack3")];
+    case "subtract_zero": return [ts("tray.mZero1"), ts("tray.mZero2")];
+    case "subtract_all": return [ts("tray.mAll1"), ts("tray.mAll2")];
+    case "subtract_one": return [ts("tray.mOne1"), ts("tray.mOne2")];
+    case "fingers": return [ts("tray.mFingers1"), ts("tray.mFingers2"), ts("tray.mFingers3")];
+    default: return [ts("tray.m1"), ts("tray.m2", { b: q.subtrahend }), ts("tray.m3")];
   }
 };
 
@@ -183,43 +185,47 @@ export function trayHints(q: TrayQuestion, state: {
   switch (q.mode) {
     case "remainder":
       return composeHints(
-        state.kidTip ?? "The crossed-out objects are gone. Count only what is still here.",
-        state.counted === 0 ? `Start with an ${one} that is not crossed out.` : `You have counted ${state.counted}. Keep going only through the objects that remain.`,
-        `${q.subtrahend} were taken from ${q.minuend}, leaving ${q.difference}.`,
+        state.kidTip ?? ts("tray.hRemainderTip"),
+        state.counted === 0 ? ts("tray.hStartWith", { one }) : ts("tray.hCountedSoFar", { counted: state.counted }),
+        ts("tray.hTakenFrom", { b: q.subtrahend, a: q.minuend, difference: q.difference }),
       );
     case "separate":
       return composeHints(
-        state.kidTip ?? "Move the named part away from the whole.",
-        `You have separated ${state.removed}; move ${q.subtrahend - state.removed} more.`,
-        `The whole ${q.minuend} separates into ${q.subtrahend} and ${q.difference}.`,
+        state.kidTip ?? ts("tray.hSeparateTip"),
+        ts("tray.hSeparated", { removed: state.removed, left: q.subtrahend - state.removed }),
+        ts("tray.hSeparates", { a: q.minuend, b: q.subtrahend, difference: q.difference }),
       );
     case "match_groups":
       return composeHints(
-        state.kidTip ?? "A matched pair uses one object from each group.",
-        `You have made ${state.paired} pairs. Keep matching until the smaller group is used.`,
-        `${q.subtrahend} pairs leave ${q.difference} unmatched in the larger group.`,
+        state.kidTip ?? ts("tray.hMatchTip"),
+        ts("tray.hPairs", { paired: state.paired }),
+        ts("tray.hUnmatched", { b: q.subtrahend, difference: q.difference }),
       );
     case "count_back":
       return composeHints(
-        state.kidTip ?? "Each tap is one step backward, never forward.",
-        `You are at ${state.countValue}. You have moved ${q.minuend - state.countValue} of ${q.subtrahend} steps.`,
-        `Count back from ${q.minuend}: ${Array.from({ length: q.subtrahend }, (_, i) => q.minuend - i - 1).join(", ")}.`,
+        state.kidTip ?? ts("tray.hBackTip"),
+        ts("tray.hMoved", { at: state.countValue, moved: q.minuend - state.countValue, b: q.subtrahend }),
+        ts("tray.hBackRun", { a: q.minuend, run: Array.from({ length: q.subtrahend }, (_, i) => q.minuend - i - 1).join(", ") }),
       );
     case "subtract_zero":
-      return composeHints(state.kidTip ?? "Taking away zero changes nothing.", "No object leaves the group.", "Choose the number you started with.");
+      return composeHints(state.kidTip ?? ts("tray.hZeroTip"), ts("tray.hZero2"), ts("tray.hZero3"));
     case "subtract_all":
-      return composeHints(state.kidTip ?? "Taking away all leaves none.", "The removed part is the same size as the whole.", "A group with nothing remaining has zero objects.");
+      return composeHints(state.kidTip ?? ts("tray.hAllTip"), ts("tray.hAll2"), ts("tray.hAll3"));
     case "subtract_one":
-      return composeHints(state.kidTip ?? "One less is the previous number.", `Count back once from ${q.minuend}.`, "Choose the number immediately before the starting number.");
+      return composeHints(state.kidTip ?? ts("tray.hOneTip"), ts("tray.hOne2", { a: q.minuend }), ts("tray.hOne3"));
     case "fingers":
-      return composeHints(state.kidTip ?? "Lower only the fingers being taken away.", `You have ${state.fingersUp} fingers still raised.`, `${q.minuend} fingers with ${q.subtrahend} lowered leaves ${q.difference} raised.`);
+      return composeHints(
+        state.kidTip ?? ts("tray.hFingersTip"),
+        ts("tray.hRaised", { up: state.fingersUp }),
+        ts("tray.hLowered", { a: q.minuend, b: q.subtrahend, difference: q.difference }),
+      );
     case "equation_match":
-      return composeHints(state.kidTip ?? "The first number is the whole; the second is what left.", `Look for ${q.minuend} minus ${q.subtrahend}.`, "The number after the equals sign must say how many remain.");
+      return composeHints(state.kidTip ?? ts("tray.hEquationTip"), ts("tray.hLookFor", { a: q.minuend, b: q.subtrahend }), ts("tray.hEquals"));
     default:
       return composeHints(
-        state.kidTip ?? "Take away only the amount named in the question.",
-        `You have taken away ${state.removed}. Take away ${q.subtrahend - state.removed} more.`,
-        `${q.minuend} minus ${q.subtrahend} leaves ${q.difference}.`,
+        state.kidTip ?? ts("tray.hTip"),
+        ts("tray.hTakenSoFar", { removed: state.removed, left: q.subtrahend - state.removed }),
+        ts("tray.hLeaves", { a: q.minuend, b: q.subtrahend, difference: q.difference }),
       );
   }
 }
@@ -250,18 +256,18 @@ const Token: React.FC<{
   </>;
   if (!onTap) return <div className={shell} role="img" aria-label={label}>{face}</div>;
   return <motion.button type="button" onClick={onTap}
-    aria-label={`${label}${lit ? ", touch this one next" : ""}`}
+    aria-label={lit ? ts("tray.touchNext", { label }) : label}
     aria-pressed={Boolean(state)} className={`${shell}${lit ? " ring-4 ring-indigo-500 animate-pulse" : ""}`}
     initial={{ opacity: 0, scale: 0.6 }} animate={{ opacity: 1, scale: 1 }} transition={{ ...SPRING.enter, delay }}
     whileHover={{ scale: 1.07 }} whileTap={{ scale: 0.86 }}>{face}</motion.button>;
 };
 
 const Hand: React.FC<{ total: number; up: number; onToggle: (n: number) => void }> = ({ total, up, onToggle }) => (
-  <div className="flex flex-wrap justify-center gap-2 max-w-[380px]" aria-label={`${up} fingers raised`}>
+  <div className="flex flex-wrap justify-center gap-2 max-w-[380px]" aria-label={ts("tray.fingersRaised", { up })}>
     {Array.from({ length: total }, (_, i) => {
       const n = i + 1;
       const raised = n <= up;
-      return <motion.button key={n} type="button" onClick={() => onToggle(n)} aria-label={`Finger ${n}, ${raised ? "raised" : "lowered"}`} aria-pressed={raised}
+      return <motion.button key={n} type="button" onClick={() => onToggle(n)} aria-label={ts(raised ? "tray.fingerRaised" : "tray.fingerLowered", { n })} aria-pressed={raised}
         className={`w-11 min-h-20 rounded-t-full border-2 ${raised ? `${WHOLE.solid} border-violet-300` : "h-12 self-end bg-surface border-line opacity-55"}`}
         whileTap={{ scale: 0.9 }} transition={SPRING.tap} />;
     })}
@@ -269,6 +275,8 @@ const Hand: React.FC<{ total: number; up: number; onToggle: (n: number) => void 
 );
 
 export const RemoveTray: React.FC<ActivityProps<RemoveTrayParams>> = ({ params, koda, onComplete, lesson }) => {
+  // Re-render when the language changes: every line below reads the catalog.
+  useT();
   const setup: TraySetup = { ...params, ...params.question };
   const totalQuestions = setup.questionsPerRound ?? 5;
   const copy = playCopy(params);
@@ -358,23 +366,23 @@ export const RemoveTray: React.FC<ActivityProps<RemoveTrayParams>> = ({ params, 
       given,
       expected: q.expected,
       errorKind: correct ? undefined : "off_by_more",
-      title: correct ? "That is the difference!" : "Look once more",
+      title: correct ? ts("tray.rightTitle") : ts("tray.lookOnce"),
       message: practising ? undefined : message,
     });
   };
-  const choose = (value: number) => submit(String(value), value === q.difference, `${q.minuend} minus ${q.subtrahend} is ${q.difference}.`);
+  const choose = (value: number) => submit(String(value), value === q.difference, ts("aMinusBIs", { a: q.minuend, b: q.subtrahend, difference: q.difference }));
 
   const take = (i: number) => {
     if (stateFor(i) !== undefined) guide.stumbled();
     else guide.moved();
     if (round.feedback || removed.includes(i)) return;
     if (removed.length >= q.subtrahend) {
-      nudge.refuse(`You have already taken away ${q.subtrahend}. Now find what remains.`);
+      nudge.refuse(ts("tray.refuseEnough", { b: q.subtrahend }));
       return;
     }
     setRemoved((items) => [...items, i]);
     feedback("tap");
-    if (speaks) void koda.speech.say("Take one away.", speechRate(koda));
+    if (speaks) void koda.speech.say(ts("tray.saidTakeOne"), speechRate(koda));
   };
 
   const countRemainder = (i: number) => {
@@ -384,7 +392,7 @@ export const RemoveTray: React.FC<ActivityProps<RemoveTrayParams>> = ({ params, 
     feedback("tap");
     const spoken = sayNumber(next.length);
     if (next.length === q.difference) {
-      finishing.after(spoken, () => submit(String(next.length), true, `${q.difference} objects remain.`));
+      finishing.after(spoken, () => submit(String(next.length), true, ts("tray.objectsRemain", { difference: q.difference })));
     }
   };
 
@@ -395,12 +403,12 @@ export const RemoveTray: React.FC<ActivityProps<RemoveTrayParams>> = ({ params, 
     setCountValue(next);
     feedback("tap");
     const spoken = sayNumber(next);
-    if (moved + 1 === q.subtrahend) finishing.after(spoken, () => submit(String(next), true, `You landed on ${q.difference}.`));
+    if (moved + 1 === q.subtrahend) finishing.after(spoken, () => submit(String(next), true, ts("tray.landedOn", { difference: q.difference })));
   };
 
   const pairBottom = (i: number) => {
     if (selectedTop === undefined) {
-      nudge.refuse("Choose an object in the larger group first, then match it below.");
+      nudge.refuse(ts("tray.refuseMatch"));
       return;
     }
     if (i < pairs) return;
@@ -428,7 +436,7 @@ export const RemoveTray: React.FC<ActivityProps<RemoveTrayParams>> = ({ params, 
         const state = preRemoved ? "removed" : stateFor(i);
         const onTap = preRemoved ? undefined : mode === "count" ? () => countRemainder(i) : () => take(i);
         return <Token key={i} asset={q.asset}
-          label={`${q.asset.one} ${i + 1}${state ? `, ${state}` : ""}`}
+          label={state ? ts("tray.tokenState", { one: q.asset.one, n: i + 1, state: ts(`tray.state.${state}`) }) : ts("tray.token", { one: q.asset.one, n: i + 1 })}
           state={state} badge={state === "removed" ? (preRemoved ? i + 1 : removed.indexOf(i) + 1) : state === "counted" ? counted.indexOf(i) + 1 : undefined}
           badges={badges} onTap={round.feedback ? undefined : onTap}
           lit={guide.target === i && onTap !== undefined} delay={stagger(i)} />;
@@ -439,19 +447,19 @@ export const RemoveTray: React.FC<ActivityProps<RemoveTrayParams>> = ({ params, 
   const separationModel = (
     <div className="grid grid-cols-2 gap-3 sm:gap-6 w-full max-w-[580px]">
       <div className={`${ZONE} ${WHOLE.soft} min-h-[150px]`}>
-        <div className={`mb-3 text-center text-xs font-bold uppercase tracking-wide ${WHOLE.text}`}>Whole area</div>
+        <div className={`mb-3 text-center text-xs font-bold uppercase tracking-wide ${WHOLE.text}`}>{ts("tray.wholeArea")}</div>
         <div className="flex flex-wrap justify-center gap-2">
           {Array.from({ length: q.minuend }, (_, i) => removed.includes(i) ? null : (
-            <Token key={i} asset={q.asset} label={`${q.asset.one} ${i + 1}`} badges={badges}
+            <Token key={i} asset={q.asset} label={ts("tray.token", { one: q.asset.one, n: i + 1 })} badges={badges}
               onTap={round.feedback ? undefined : () => take(i)} delay={stagger(i)} />
           ))}
         </div>
       </div>
       <div className={`${ZONE} ${REMOVED_PART.soft} min-h-[150px]`}>
-        <div className={`mb-3 text-center text-xs font-bold uppercase tracking-wide ${REMOVED_PART.text}`}>Separated part</div>
+        <div className={`mb-3 text-center text-xs font-bold uppercase tracking-wide ${REMOVED_PART.text}`}>{ts("tray.separatedPart")}</div>
         <div className="flex flex-wrap justify-center gap-2">
           {removed.map((source, i) => <Token key={source} asset={q.asset}
-            label={`Separated ${q.asset.one} ${i + 1}`} state="separated" badge={i + 1} badges={badges} />)}
+            label={ts("tray.separatedToken", { one: q.asset.one, n: i + 1 })} state="separated" badge={i + 1} badges={badges} />)}
         </div>
       </div>
     </div>
@@ -499,7 +507,7 @@ export const RemoveTray: React.FC<ActivityProps<RemoveTrayParams>> = ({ params, 
   });
 
   return <SkillRound
-    koda={koda} lesson={lesson} fallbackTitle="Take Away and Compare" round={round}
+    koda={koda} lesson={lesson} fallbackTitle={ts("tray.title")} round={round}
     totalQuestions={totalQuestions} prompt={prompt} iconName={ICONS[q.mode]} iconTone="purple"
     tagLabels={tagLabelsFrom(koda)} nudge={nudge.message}
     hints={hints}
@@ -521,36 +529,36 @@ export const RemoveTray: React.FC<ActivityProps<RemoveTrayParams>> = ({ params, 
         {q.mode === "match_groups" && <div className="space-y-5">
           <div className="flex flex-wrap justify-center gap-2">
             {Array.from({ length: q.minuend }, (_, i) => <Token key={`a${i}`} asset={q.asset} badges={badges}
-              label={`Larger group ${q.asset.one} ${i + 1}${i < pairs ? ", paired" : ""}`}
+              label={ts(i < pairs ? "tray.largerPaired" : "tray.larger", { one: q.asset.one, n: i + 1 })}
               state={i < pairs ? "paired" : selectedTop === i ? "held" : undefined}
               onTap={!round.feedback && i >= pairs ? () => setSelectedTop(i) : undefined} delay={stagger(i)} />)}
           </div>
           <div className="flex flex-wrap justify-center gap-2">
             {Array.from({ length: q.subtrahend }, (_, i) => <Token key={`b${i}`} asset={q.asset} badges={badges}
-              label={`Smaller group ${q.asset.one} ${i + 1}${i < pairs ? ", paired" : ""}`}
+              label={ts(i < pairs ? "tray.smallerPaired" : "tray.smaller", { one: q.asset.one, n: i + 1 })}
               state={i < pairs ? "paired" : undefined} badge={i < pairs ? i + 1 : undefined}
               onTap={!round.feedback && i >= pairs ? () => pairBottom(i) : undefined} delay={stagger(i)} />)}
           </div>
         </div>}
 
         {q.mode === "equation_match" && <div className="flex items-center gap-1 sm:gap-5 max-w-full">
-          <div className={`rounded-2xl px-2 py-2 sm:px-4 sm:py-3 ${WHOLE.soft} text-center`}><strong className={`text-3xl sm:text-4xl ${WHOLE.text}`}>{q.minuend}</strong><div className="text-[9px] sm:text-xs font-bold">STARTED</div></div>
+          <div className={`rounded-2xl px-2 py-2 sm:px-4 sm:py-3 ${WHOLE.soft} text-center`}><strong className={`text-3xl sm:text-4xl ${WHOLE.text}`}>{q.minuend}</strong><div className="text-[9px] sm:text-xs font-bold">{ts("tray.started")}</div></div>
           <span className="text-2xl sm:text-4xl font-black text-ink/30">−</span>
-          <div className={`rounded-2xl px-2 py-2 sm:px-4 sm:py-3 ${REMOVED_PART.soft} text-center`}><strong className={`text-3xl sm:text-4xl ${REMOVED_PART.text}`}>{q.subtrahend}</strong><div className="text-[9px] sm:text-xs font-bold">REMOVED</div></div>
+          <div className={`rounded-2xl px-2 py-2 sm:px-4 sm:py-3 ${REMOVED_PART.soft} text-center`}><strong className={`text-3xl sm:text-4xl ${REMOVED_PART.text}`}>{q.subtrahend}</strong><div className="text-[9px] sm:text-xs font-bold">{ts("tray.removed")}</div></div>
           <span className="text-2xl sm:text-4xl font-black text-ink/30">=</span>
-          <div className={`rounded-2xl px-2 py-2 sm:px-4 sm:py-3 ${DIFFERENCE.soft} text-center`}><strong className={`text-3xl sm:text-4xl ${DIFFERENCE.text}`}>{q.difference}</strong><div className="text-[9px] sm:text-xs font-bold">REMAINS</div></div>
+          <div className={`rounded-2xl px-2 py-2 sm:px-4 sm:py-3 ${DIFFERENCE.soft} text-center`}><strong className={`text-3xl sm:text-4xl ${DIFFERENCE.text}`}>{q.difference}</strong><div className="text-[9px] sm:text-xs font-bold">{ts("tray.remains")}</div></div>
         </div>}
 
         {q.mode === "count_back" && <div className="flex flex-col items-center gap-5">
           <motion.span key={countValue} initial={{ scale: 0.7 }} animate={{ scale: 1 }} className={`text-7xl font-black tabular-nums ${DIFFERENCE.text}`}>{countValue}</motion.span>
-          <div className="flex gap-2" aria-label={`${q.minuend - countValue} of ${q.subtrahend} steps complete`}>
+          <div className="flex gap-2" aria-label={ts("tray.stepsDone", { done: q.minuend - countValue, b: q.subtrahend })}>
             {Array.from({ length: q.subtrahend }, (_, i) => <span key={i} className={`w-11 h-2 rounded-full ${i < q.minuend - countValue ? DIFFERENCE.solid : "bg-ink/15"}`} />)}
           </div>
         </div>}
 
         {(q.mode === "subtract_zero" || q.mode === "subtract_all" || q.mode === "subtract_one") && <div className="text-center">
           <div className="text-6xl font-black tabular-nums text-ink">{q.minuend} <span className={REMOVED_PART.text}>− {q.subtrahend}</span></div>
-          <div className="mt-3 text-sm font-bold text-ink/55">{q.mode === "subtract_zero" ? "nothing leaves" : q.mode === "subtract_all" ? "the whole group leaves" : "one leaves"}</div>
+          <div className="mt-3 text-sm font-bold text-ink/55">{ts(q.mode === "subtract_zero" ? "tray.nothingLeaves" : q.mode === "subtract_all" ? "tray.allLeaves" : "tray.oneLeaves")}</div>
         </div>}
 
         {q.mode === "fingers" && <Hand total={q.minuend} up={fingersUp} onToggle={(n) => {
@@ -562,27 +570,27 @@ export const RemoveTray: React.FC<ActivityProps<RemoveTrayParams>> = ({ params, 
 
         {showsDifference && (removed.length > 0 || counted.length > 0 || pairs > 0) && <div aria-live="polite" className={`text-3xl font-black tabular-nums ${DIFFERENCE.text}`}>
           {q.mode === "remainder" ? counted.length : q.mode === "match_groups" ? q.minuend - pairs : q.minuend - removed.length}
-          <span className="ml-2 text-xs uppercase tracking-wide text-ink/50">{q.mode === "match_groups" ? "unmatched" : "remain"}</span>
+          <span className="ml-2 text-xs uppercase tracking-wide text-ink/50">{ts(q.mode === "match_groups" ? "tray.unmatched" : "tray.remain")}</span>
         </div>}
-        {scaffold && !practising && q.mode === "separate" && <div className={`${ZONE} ${REMOVED_PART.soft} text-sm font-bold`}>Move {q.subtrahend - removed.length} more into the separated part.</div>}
+        {scaffold && !practising && q.mode === "separate" && <div className={`${ZONE} ${REMOVED_PART.soft} text-sm font-bold`}>{ts("tray.moveMore", { left: q.subtrahend - removed.length })}</div>}
       </div>
 
       {(q.mode === "remove" || q.mode === "separate") && removed.length > 0 && !round.feedback && <div className="flex justify-center">
-        <button type="button" onClick={undoLastMove} className={themeSystem.button("ghost", "sm")}>Undo last move</button>
+        <button type="button" onClick={undoLastMove} className={themeSystem.button("ghost", "sm")}>{ts("tray.undoMove")}</button>
       </div>}
       {q.mode === "match_groups" && pairs > 0 && !round.feedback && <div className="flex justify-center">
-        <button type="button" onClick={() => setPairs((n) => n - 1)} className={themeSystem.button("ghost", "sm")}>Undo last pair</button>
+        <button type="button" onClick={() => setPairs((n) => n - 1)} className={themeSystem.button("ghost", "sm")}>{ts("tray.undoPair")}</button>
       </div>}
 
-      {q.mode === "count_back" && <div className="flex justify-center"><motion.button type="button" onClick={countBack} disabled={Boolean(round.feedback) || countValue === q.difference} className={themeSystem.button("primary", "lg")} whileTap={{ scale: 0.92 }}>Count back one</motion.button></div>}
+      {q.mode === "count_back" && <div className="flex justify-center"><motion.button type="button" onClick={countBack} disabled={Boolean(round.feedback) || countValue === q.difference} className={themeSystem.button("primary", "lg")} whileTap={{ scale: 0.92 }}>{ts("tray.countBackOne")}</motion.button></div>}
 
       {q.mode === "fingers" && <div className="flex justify-center"><motion.button type="button" onClick={() => {
-        if (fingersUp === q.minuend) { nudge.refuse(`Lower ${q.subtrahend} fingers before you check.`); return; }
+        if (fingersUp === q.minuend) { nudge.refuse(ts("tray.refuseLower", { b: q.subtrahend })); return; }
         choose(fingersUp);
-      }} className={themeSystem.button("primary", "lg")} whileTap={{ scale: 0.92 }}>Check</motion.button></div>}
+      }} className={themeSystem.button("primary", "lg")} whileTap={{ scale: 0.92 }}>{ts("check")}</motion.button></div>}
 
       {q.mode === "equation_match" && <div className="flex flex-wrap justify-center gap-2.5">
-        {equationChoices.current.get(q.id)!.map((value) => <button key={value} type="button" onClick={() => submit(value, value === q.expected, `${q.minuend} minus ${q.subtrahend} equals ${q.difference}.`)} disabled={Boolean(round.feedback)} className={themeSystem.button("secondary", "choice")}>{value}</button>)}
+        {equationChoices.current.get(q.id)!.map((value) => <button key={value} type="button" onClick={() => submit(value, value === q.expected, ts("tray.equals", { a: q.minuend, b: q.subtrahend, difference: q.difference }))} disabled={Boolean(round.feedback)} className={themeSystem.button("secondary", "choice")}>{value}</button>)}
       </div>}
 
       {((q.mode === "remove" || q.mode === "separate") && ready || q.mode === "match_groups" && pairs === q.subtrahend || q.mode === "subtract_zero" || q.mode === "subtract_all" || q.mode === "subtract_one") && <div className="flex flex-wrap justify-center gap-2.5">

@@ -1,3 +1,4 @@
+import { ta } from "../i18n";
 import { skillArtId } from "../../../../assets/svg/skillArt";
 
 /**
@@ -18,19 +19,36 @@ const art = (name: string) => skillArtId("addition", name);
 
 export interface Countable {
   id: string;
-  /** Plural, for prompts: "Touch each apple." */
-  name: string;
+  /** Plural, for prompts: "Touch each apple." In the language on screen. */
+  readonly name: string;
   /** Singular, for a hint that names one: "one more apple". */
-  one: string;
+  readonly one: string;
+  /** One of them, with its article: "an apple". */
+  readonly aOne: string;
   /** Silhouette class, so a lesson can ask for two that cannot be confused. */
   shape: "round" | "sphere" | "blocky" | "tall" | "radial" | "peaked";
 }
 
+/** Names come from the catalog (`objects.*`), so each language writes its own. */
+const countable = (key: string, shape: Countable["shape"]): Countable => ({
+  id: art(key),
+  get name() {
+    return ta(`objects.${key}.many`);
+  },
+  get one() {
+    return ta(`objects.${key}.one`);
+  },
+  get aOne() {
+    return ta(`objects.${key}.aOne`);
+  },
+  shape,
+});
+
 export const COUNTABLES: Countable[] = [
-  { id: art("apple"), name: "apples", one: "apple", shape: "round" },
-  { id: art("bead"), name: "beads", one: "bead", shape: "sphere" },
-  { id: art("block"), name: "blocks", one: "block", shape: "blocky" },
-  { id: art("balloon"), name: "balloons", one: "balloon", shape: "tall" },
-  { id: art("shell"), name: "shells", one: "shell", shape: "radial" },
-  { id: art("star"), name: "stars", one: "star", shape: "peaked" },
+  countable("apple", "round"),
+  countable("bead", "sphere"),
+  countable("block", "blocky"),
+  countable("balloon", "tall"),
+  countable("shell", "radial"),
+  countable("star", "peaked"),
 ];

@@ -13,6 +13,7 @@
  * the place split, or for `exchange: "always"` and gets numbers where it is not.
  */
 
+import { td } from "../i18n";
 import {
   drawQuotient,
   placeSplit,
@@ -122,11 +123,11 @@ const DEFAULTS: Record<PlaceMode, ModeDefaults> = {
 };
 
 const PROMPTS: Record<PlaceMode, (q: Omit<PlaceQuestion, "prompt">) => string> = {
-  tens_quotient: (q) => `${q.dividend} ÷ ${q.divisor}. How many tens is that, and how many altogether?`,
+  tens_quotient: (q) => td("place.prompt.tens_quotient", { n: q.dividend, d: q.divisor }),
   scale_down: (q) => `${q.dividend} ÷ ${q.divisor}`,
   tens_into_tens: (q) => `${q.dividend} ÷ ${q.divisor}`,
-  split_exact: (q) => `${q.dividend} ÷ ${q.divisor}, one place at a time.`,
-  split_exchange: (q) => `${q.dividend} ÷ ${q.divisor}. The tens will not divide on their own.`,
+  split_exact: (q) => td("place.prompt.split_exact", { n: q.dividend, d: q.divisor }),
+  split_exchange: (q) => td("place.prompt.split_exchange", { n: q.dividend, d: q.divisor }),
 };
 
 export function buildPlaceQuestion(

@@ -18,6 +18,8 @@ import {
   type StoryQuestion,
   type StorySetup,
 } from "../internal/data/divisionStory";
+import { td } from "../internal/i18n";
+import { useT } from "../../../lib/i18n";
 
 /**
  * Division in words, modelled before it is answered.
@@ -62,46 +64,48 @@ function storyHintsRungs(question: StoryQuestion): string[] {
   switch (question.mode) {
     case "size_unknown":
       return composeHints(
-        "The story tells you how many people are sharing.",
-        "Cut the bar into that many equal parts.",
-        "One of those parts is the answer.",
+        td("story.hint.size1"),
+        td("story.hint.size2"),
+        td("story.hint.size3"),
       );
     case "count_unknown":
       return composeHints(
-        "The story tells you how big each bag is, not how many bags.",
-        "Ask how many of that size fit into the total.",
+        td("story.hint.count1"),
+        td("story.hint.count2"),
       );
     case "remainder_context":
       return composeHints(
-        "Divide first, and see what is left.",
-        "Now read the question: does it want the full ones, or does everything have to fit?",
+        td("story.hint.rem1"),
+        td("story.hint.rem2"),
       );
     case "unit_rate":
       return composeHints(
-        "Every box holds the same amount.",
-        "Share the total between the boxes to find what one holds.",
+        td("story.hint.rate1"),
+        td("story.hint.rate2"),
       );
     case "times_comparison":
       return composeHints(
-        "This is not asking how many more.",
-        "It is asking how many of the smaller amount fit into the bigger one.",
-        "Try it: how many lots of the small number make the big one?",
+        td("story.hint.times1"),
+        td("story.hint.times2"),
+        td("story.hint.times3"),
       );
     case "multi_step":
       return composeHints(
-        "There are two things to do, and the order matters.",
-        "Take away what is kept back first.",
-        "Only then share out what is left.",
+        td("story.hint.multi1"),
+        td("story.keptBackFirst"),
+        td("story.hint.multi3"),
       );
     default:
       return composeHints(
-        "Imagine the days were all the same.",
-        "Add every day together, then share the total between the days.",
+        td("story.hint.mean1"),
+        td("story.hint.mean2"),
       );
   }
 }
 
 export const StoryBoard: React.FC<ActivityProps<StoryParams>> = ({ params, koda, onComplete, lesson }) => {
+  // Re-render when the language changes: every line below reads the catalog.
+  useT();
   const setup: StorySetup = useMemo(() => ({ ...params, ...params.question }), [params]);
   const practising = isPractice(setup);
   const total = setup.questionsPerRound ?? 5;
@@ -182,7 +186,7 @@ export const StoryBoard: React.FC<ActivityProps<StoryParams>> = ({ params, koda,
       guide.stumbled();
       setRefused(true);
       if (speechEnabled) {
-        void koda.speech.say("Cut the bar into the right number of parts first.", {
+        void koda.speech.say(td("story.cutFirst"), {
           rate: koda.config.get("speechRate", 1),
         });
       }
@@ -198,12 +202,12 @@ export const StoryBoard: React.FC<ActivityProps<StoryParams>> = ({ params, koda,
       correct,
       given: String(value),
       expected: question.expected,
-      title: correct ? "Yes!" : "Not that one",
+      title: correct ? td("yes") : td("strategy.notThatOne"),
       message: correct
-        ? "That is what the story asked for."
+        ? td("story.asked")
         : question.mode === "times_comparison" && value === question.whole - question.whole / question.parts
-          ? "That is how many MORE. The question asks how many TIMES as many."
-          : "Read the story once more, slowly.",
+          ? td("story.howManyMore")
+          : td("story.readAgain"),
     });
   };
 
@@ -211,7 +215,7 @@ export const StoryBoard: React.FC<ActivityProps<StoryParams>> = ({ params, koda,
     <SkillRound
       koda={koda}
       lesson={lesson}
-      fallbackTitle="In Words"
+      fallbackTitle={td("story.title")}
       round={round}
       totalQuestions={total}
       prompt={promptFor(question)}
@@ -262,7 +266,7 @@ export const StoryBoard: React.FC<ActivityProps<StoryParams>> = ({ params, koda,
               ))}
             </div>
             <p className="text-center text-xs text-muted">
-              {question.whole} in {cuts} part{cuts === 1 ? "" : "s"}
+              {td("story.inParts", { whole: question.whole, count: cuts })}
             </p>
           </div>
         )}
@@ -273,7 +277,7 @@ export const StoryBoard: React.FC<ActivityProps<StoryParams>> = ({ params, koda,
               type="button"
               onClick={() => setCut(cuts - 1)}
               disabled={cuts <= 1 || !!round.feedback}
-              aria-label="One part fewer"
+              aria-label={td("story.fewer")}
               className="min-h-11 min-w-11 rounded-xl bg-surface text-lg text-ink shadow-sm disabled:opacity-30"
             >
               −
@@ -282,7 +286,7 @@ export const StoryBoard: React.FC<ActivityProps<StoryParams>> = ({ params, koda,
               type="button"
               onClick={() => setCut(cuts + 1)}
               disabled={cuts >= 12 || !!round.feedback}
-              aria-label="One part more"
+              aria-label={td("story.more")}
               className="min-h-11 min-w-11 rounded-xl bg-surface text-lg text-ink shadow-sm disabled:opacity-30"
             >
               +
@@ -292,7 +296,7 @@ export const StoryBoard: React.FC<ActivityProps<StoryParams>> = ({ params, koda,
 
         {refused ? (
           <p role="status" className="text-center text-sm text-muted">
-            Cut the bar into the right number of parts first.
+            {td("story.cutFirst")}
           </p>
         ) : null}
 
@@ -340,7 +344,7 @@ export const figureFor = (question: StoryQuestion): React.ReactNode | null => {
         width={w}
         height={70}
         role="img"
-        aria-label={`${question.values.length} columns to level off`}
+        aria-label={td("story.columnsLabel", { count: question.values.length })}
         className="text-slate-900"
       >
         {question.values.map((value, i) => (
@@ -371,7 +375,7 @@ export const figureFor = (question: StoryQuestion): React.ReactNode | null => {
       width={250}
       height={46}
       role="img"
-      aria-label={`A bar in ${parts} part${parts === 1 ? "" : "s"}`}
+      aria-label={td("story.barLabel", { count: parts })}
       className="text-slate-900"
     >
       <rect x={5} y={8} width={W} height={26} fill="none" stroke="currentColor" strokeWidth="1.5" />
@@ -397,26 +401,26 @@ export function methodFor(question: StoryQuestion): string[] {
   switch (question.mode) {
     case "times_comparison":
       return [
-        "Draw both amounts as bars, one under the other.",
-        "Ask how many of the short bar fit along the long one.",
-        "That is how many times as many — not the difference.",
+        td("story.method.times1"),
+        td("story.method.times2"),
+        td("story.method.times3"),
       ];
     case "multi_step":
       return [
-        "Read the whole story before writing anything.",
-        "Take away what is kept back first.",
-        "Then share out what is left.",
+        td("story.method.multi1"),
+        td("story.keptBackFirst"),
+        td("story.method.multi3"),
       ];
     case "mean":
       return [
-        "Add every value together.",
-        "Share the total between however many values there were.",
+        td("story.method.mean1"),
+        td("story.method.mean2"),
       ];
     default:
       return [
-        "Draw the total as one bar.",
-        "Cut it into the parts the story describes.",
-        "One part, or the number of parts, is the answer.",
+        td("story.method.bar1"),
+        td("story.method.bar2"),
+        td("story.method.bar3"),
       ];
   }
 }

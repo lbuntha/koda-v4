@@ -14,6 +14,8 @@ import {
   differenceKey, digitsOf, drawDifference, withoutRepeat,
   type Difference, type DifferenceSpec, type Place,
 } from "../internal/data/subtractionNumbers";
+import { ts } from "../internal/i18n";
+import { useT } from "../../../lib/i18n";
 
 export type ChartMode =
   | "chart_subtract"
@@ -80,7 +82,8 @@ export const specFor = (mode: ChartMode, setup: ChartSetup): DifferenceSpec => (
   ...DEFAULT_SPEC[mode], ...declared(setup), exchange: "never", excludeEqual: true,
 });
 
-const PLACE_LABEL: Record<Place, string> = { hundreds: "H", tens: "T", ones: "O" };
+/** "H", "T", "O", in the language on screen. */
+const placeLabel = (place: Place): string => ts(`place.${place}Short`);
 
 const slotsFor = (mode: ChartMode, value: Difference, places: Place[]): ChartSlot[] => {
   const a = digitsOf(value.minuend);
@@ -92,18 +95,18 @@ const slotsFor = (mode: ChartMode, value: Difference, places: Place[]): ChartSlo
       .filter((place) => place !== "ones")
       .map((place) => {
         const unit = place === "hundreds" ? 100 : 10;
-        return { key: place, label: `${PLACE_LABEL[place]} part`, lead: `${a[place] * unit} − ${b[place] * unit} =`, answer: (a[place] - b[place]) * unit };
+        return { key: place, label: ts("desk.part", { place: placeLabel(place) }), lead: `${a[place] * unit} − ${b[place] * unit} =`, answer: (a[place] - b[place]) * unit };
       });
     return [
       ...parts,
-      { key: "ones", label: "O part", lead: `${a.ones} − ${b.ones} =`, answer: a.ones - b.ones },
-      { key: "total", label: "Total", lead: "added together =", answer: value.difference },
+      { key: "ones", label: ts("desk.part", { place: placeLabel("ones") }), lead: `${a.ones} − ${b.ones} =`, answer: a.ones - b.ones },
+      { key: "total", label: ts("desk.total"), lead: ts("desk.addedTogether"), answer: value.difference },
     ];
   }
 
   if (mode === "check_addition") return [
-    { key: "difference", label: "Difference", lead: `${value.minuend} − ${value.subtrahend} =`, answer: value.difference },
-    { key: "check", label: "Check", lead: `□ + ${value.subtrahend} =`, answer: value.minuend },
+    { key: "difference", label: ts("desk.difference"), lead: `${value.minuend} − ${value.subtrahend} =`, answer: value.difference },
+    { key: "check", label: ts("check"), lead: `□ + ${value.subtrahend} =`, answer: value.minuend },
   ];
 
   if (mode === "left_right") {
@@ -114,12 +117,12 @@ const slotsFor = (mode: ChartMode, value: Difference, places: Place[]): ChartSlo
       const chunk = b[place] * unit;
       const before = running;
       running -= chunk;
-      steps.push({ key: place, label: `After the ${place}`, lead: `${before} − ${chunk} =`, answer: running });
+      steps.push({ key: place, label: ts(`desk.after.${place}`), lead: `${before} − ${chunk} =`, answer: running });
     }
     return steps;
   }
 
-  return places.map((place) => ({ key: place, label: PLACE_LABEL[place], answer: d[place] }));
+  return places.map((place) => ({ key: place, label: placeLabel(place), answer: d[place] }));
 };
 
 export const buildQuestion = (setup: ChartSetup, index: number, seen: Set<string>): ChartQuestion => {
@@ -137,10 +140,10 @@ export const buildQuestion = (setup: ChartSetup, index: number, seen: Set<string
 export const promptFor = (q: ChartQuestion, template?: string): string => {
   const filled = template?.replaceAll("{a}", String(q.minuend)).replaceAll("{b}", String(q.subtrahend)).replaceAll("{difference}", String(q.difference));
   if (filled) return filled;
-  if (q.mode === "expanded") return `${q.minuend} minus ${q.subtrahend}. Subtract each part, then put them back together.`;
-  if (q.mode === "check_addition") return `${q.minuend} minus ${q.subtrahend}. Solve it, then check it with addition.`;
-  if (q.mode === "left_right") return `${q.minuend} minus ${q.subtrahend}. Subtract the biggest place first.`;
-  return `${q.minuend} minus ${q.subtrahend}. Fill the answer row of the chart.`;
+  if (q.mode === "expanded") return ts("desk.promptExpanded", { a: q.minuend, b: q.subtrahend });
+  if (q.mode === "check_addition") return ts("desk.promptCheck", { a: q.minuend, b: q.subtrahend });
+  if (q.mode === "left_right") return ts("desk.promptLeftRight", { a: q.minuend, b: q.subtrahend });
+  return ts("desk.prompt", { a: q.minuend, b: q.subtrahend });
 };
 
 export const printedFor = (q: ChartQuestion): PrintedQuestion => {
@@ -153,17 +156,17 @@ export const printedFor = (q: ChartQuestion): PrintedQuestion => {
   }
   if (q.mode === "check_addition") return { text: `${q.minuend} − ${q.subtrahend} = □, then □ + ${q.subtrahend} = ${q.minuend}`, answer: String(q.difference) };
   if (q.mode === "left_right") {
-    const steps = q.slots.map((slot) => `${slot.lead} □`).join(", then ");
+    const steps = q.slots.map((slot) => `${slot.lead} □`).join(ts("desk.then"));
     return { text: steps, answer: String(q.difference) };
   }
-  return { text: `Write ${q.minuend} − ${q.subtrahend} in the chart and subtract each column.`, answer: String(q.difference) };
+  return { text: ts("desk.printed", { a: q.minuend, b: q.subtrahend }), answer: String(q.difference) };
 };
 
 export const methodFor = (q: ChartQuestion): string[] => {
-  if (q.mode === "expanded") return ["Split both numbers into their places.", "Subtract each place separately.", "Add the parts back together."];
-  if (q.mode === "check_addition") return ["Subtract to find the difference.", "Add the difference to the part taken away.", "The check is right only when it rebuilds the whole."];
-  if (q.mode === "left_right") return ["Subtract the largest place first.", "Subtract each smaller place from what is left.", "The last total is the difference."];
-  return ["Line the digits up by place.", "Subtract each column on its own.", "Read the answer row."];
+  if (q.mode === "expanded") return [ts("desk.methodExpanded1"), ts("desk.methodExpanded2"), ts("desk.methodExpanded3")];
+  if (q.mode === "check_addition") return [ts("desk.methodCheck1"), ts("desk.methodCheck2"), ts("desk.methodCheck3")];
+  if (q.mode === "left_right") return [ts("desk.methodLeftRight1"), ts("desk.methodLeftRight2"), ts("desk.methodLeftRight3")];
+  return [ts("desk.method1"), ts("desk.method2"), ts("desk.method3")];
 };
 
 export function chartHints(
@@ -172,35 +175,35 @@ export function chartHints(
 ): string[] {
   const next = q.slots[Math.min(state.filled, q.slots.length - 1)];
   if (q.mode === "check_addition") return composeHints(
-    state.kidTip ?? "Addition undoes subtraction.",
+    state.kidTip ?? ts("desk.hintCheckTip"),
     state.filled === 0
-      ? `First find ${q.minuend} minus ${q.subtrahend}.`
-      : `Now add your difference to ${q.subtrahend}. It should rebuild ${q.minuend}.`,
-    `${q.difference} plus ${q.subtrahend} is ${q.minuend}, so ${q.difference} is right.`,
+      ? ts("desk.hintFirstFind", { a: q.minuend, b: q.subtrahend })
+      : ts("desk.hintNowAdd", { b: q.subtrahend, a: q.minuend }),
+    ts("desk.hintRebuilds", { difference: q.difference, b: q.subtrahend, a: q.minuend }),
   );
   if (q.mode === "expanded") return composeHints(
-    state.kidTip ?? "Split both numbers by place, then subtract each part.",
-    `${state.filled} of ${q.slots.length} boxes are filled. Next: ${next.lead}`,
-    `The parts add back to ${q.difference}.`,
+    state.kidTip ?? ts("desk.hintExpandedTip"),
+    ts("desk.hintBoxesNext", { filled: state.filled, total: q.slots.length, next: next.lead ?? "" }),
+    ts("desk.hintPartsAdd", { difference: q.difference }),
   );
   if (q.mode === "left_right") return composeHints(
-    state.kidTip ?? "Take the biggest place away first.",
-    `${state.filled} of ${q.slots.length} steps are done. Next: ${next.lead}`,
-    `Working down the places leaves ${q.difference}.`,
+    state.kidTip ?? ts("desk.hintLeftRightTip"),
+    ts("desk.hintStepsNext", { filled: state.filled, total: q.slots.length, next: next.lead ?? "" }),
+    ts("desk.hintWorkingDown", { difference: q.difference }),
   );
   return composeHints(
-    state.kidTip ?? "Subtract one column at a time.",
-    `${state.filled} of ${q.slots.length} columns are filled. Each column only uses its own two digits.`,
-    `The answer row spells ${q.difference}.`,
+    state.kidTip ?? ts("desk.hintTip"),
+    ts("desk.hintColumns", { filled: state.filled, total: q.slots.length }),
+    ts("desk.hintSpells", { difference: q.difference }),
   );
 }
 
 export const figureFor = (q: ChartQuestion): React.ReactNode => {
   const rows: Array<[string, number]> = [["", q.minuend], ["−", q.subtrahend]];
-  return <span className="inline-flex flex-col text-slate-900" role="img" aria-label={`Place value chart for ${q.minuend} minus ${q.subtrahend} with the answer row blank`}>
+  return <span className="inline-flex flex-col text-slate-900" role="img" aria-label={ts("desk.figure", { a: q.minuend, b: q.subtrahend })}>
     <span className="inline-flex">
       <span className="inline-flex h-6 w-6 items-center justify-center text-[9px] uppercase" />
-      {q.places.map((place) => <span key={place} className="inline-flex h-6 w-8 items-center justify-center border-x-2 border-t-2 border-slate-900 text-[9px] uppercase">{PLACE_LABEL[place]}</span>)}
+      {q.places.map((place) => <span key={place} className="inline-flex h-6 w-8 items-center justify-center border-x-2 border-t-2 border-slate-900 text-[9px] uppercase">{placeLabel(place)}</span>)}
     </span>
     {rows.map(([sign, value], row) => <span key={row} className="inline-flex">
       <span className="inline-flex h-8 w-6 items-center justify-center font-bold">{sign}</span>
@@ -224,6 +227,8 @@ const ChartRow: React.FC<{ sign: string; value: number; places: Place[]; tone: t
 );
 
 export const PlaceValueDesk: React.FC<ActivityProps<PlaceValueDeskParams>> = ({ params, koda, onComplete, lesson }) => {
+  // Re-render when the language changes: every line below reads the catalog.
+  useT();
   const setup: ChartSetup = { ...params, ...params.question };
   const totalQuestions = setup.questionsPerRound ?? 5;
   const practising = isPractice(setup);
@@ -264,7 +269,7 @@ export const PlaceValueDesk: React.FC<ActivityProps<PlaceValueDeskParams>> = ({ 
 
   const check = () => {
     if (filled < q.slots.length) {
-      nudge.refuse(`${q.slots.length - filled} ${q.slots.length - filled === 1 ? "box is" : "boxes are"} still empty.`);
+      nudge.refuse(ts("desk.refuseEmpty", { count: q.slots.length - filled }));
       return;
     }
     const given = q.slots.map((slot) => entries[slot.key]).join(",");
@@ -277,17 +282,15 @@ export const PlaceValueDesk: React.FC<ActivityProps<PlaceValueDeskParams>> = ({ 
     round.submit({
       correct, given, expected: q.expected,
       errorKind: correct ? undefined : chart && wrongPlaces.length < q.slots.length ? "place_value" : "off_by_more",
-      title: correct ? "Every place agrees!" : "Check each place again",
-      message: practising ? undefined : `${q.minuend} minus ${q.subtrahend} is ${q.difference}.`,
+      title: correct ? ts("desk.rightTitle") : ts("desk.wrongTitle"),
+      message: practising ? undefined : ts("aMinusBIs", { a: q.minuend, b: q.subtrahend, difference: q.difference }),
     });
   };
 
   const box = (slot: typeof q.slots[number]) => <input key={slot.key} inputMode="numeric" pattern="[0-9]*"
     value={entries[slot.key] ?? ""} disabled={Boolean(round.feedback)}
     onChange={(event) => setEntries((current) => ({ ...current, [slot.key]: event.target.value.replace(/[^0-9]/g, "").slice(0, 3) }))}
-    aria-label={`${slot.label}${
-      q.slots.indexOf(slot) === guide.target ? ", fill this one next" : ""
-    }`}
+    aria-label={q.slots.indexOf(slot) === guide.target ? ts("desk.fillNext", { label: slot.label }) : slot.label}
     className={themeSystem.field("md", `w-full text-center text-2xl font-black tabular-nums${
       q.slots.indexOf(slot) === guide.target ? " ring-4 ring-indigo-500" : ""
     }`)} />;
@@ -318,7 +321,7 @@ export const PlaceValueDesk: React.FC<ActivityProps<PlaceValueDeskParams>> = ({ 
     useSupport: round.useSupport,
   });
 
-  return <SkillRound koda={koda} lesson={lesson} fallbackTitle="Place Value Desk" round={round}
+  return <SkillRound koda={koda} lesson={lesson} fallbackTitle={ts("desk.title")} round={round}
     totalQuestions={totalQuestions} prompt={prompt} iconName="layers" iconTone="indigo"
     tagLabels={tagLabelsFrom(koda)} nudge={nudge.message}
     hints={hints}
@@ -334,7 +337,7 @@ export const PlaceValueDesk: React.FC<ActivityProps<PlaceValueDeskParams>> = ({ 
         {chart ? <>
           <div className="flex items-center justify-center gap-1.5">
             <span className="w-6" />
-            {q.places.map((place) => <span key={place} className={`${DIGIT_CELL} flex items-center justify-center text-[11px] font-bold uppercase tracking-wide text-ink/55`}>{PLACE_LABEL[place]}</span>)}
+            {q.places.map((place) => <span key={place} className={`${DIGIT_CELL} flex items-center justify-center text-[11px] font-bold uppercase tracking-wide text-ink/55`}>{placeLabel(place)}</span>)}
           </div>
           <ChartRow sign="" value={q.minuend} places={q.places} tone={WHOLE} />
           <ChartRow sign="−" value={q.subtrahend} places={q.places} tone={REMOVED_PART} />
@@ -355,14 +358,14 @@ export const PlaceValueDesk: React.FC<ActivityProps<PlaceValueDeskParams>> = ({ 
         </>}
         {scaffold && !practising && <div className={`text-center text-sm font-bold ${filled === q.slots.length ? DIFFERENCE.text : "text-ink/60"}`}>
           {q.mode === "check_addition"
-            ? filled === 0 ? "Subtract first, then check it." : `Your check must rebuild ${q.minuend}.`
-            : q.mode === "left_right" ? "Biggest place first, then work down."
-              : q.mode === "expanded" ? "Each place is subtracted on its own."
-                : "Each column uses only its own two digits."}
+            ? filled === 0 ? ts("desk.helpCheckFirst") : ts("desk.helpRebuild", { a: q.minuend })
+            : q.mode === "left_right" ? ts("desk.helpLeftRight")
+              : q.mode === "expanded" ? ts("desk.helpExpanded")
+                : ts("desk.help")}
         </div>}
       </div>
-      {q.mode === "check_addition" && <div className={`text-center text-sm font-bold ${COMPARISON.text}`}>The subtraction stays on screen so the check has something to rebuild.</div>}
-      <div className="flex justify-center"><button type="button" onClick={check} className={themeSystem.button("primary", "lg")}>Check</button></div>
+      {q.mode === "check_addition" && <div className={`text-center text-sm font-bold ${COMPARISON.text}`}>{ts("desk.helpStays")}</div>}
+      <div className="flex justify-center"><button type="button" onClick={check} className={themeSystem.button("primary", "lg")}>{ts("check")}</button></div>
     </div>
   </SkillRound>;
 };
