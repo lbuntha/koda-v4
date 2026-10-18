@@ -359,3 +359,13 @@ Built (`server/app/rebus_room.py` rules, `repos/rebus_rooms.py`, `routers/rebus_
 - Trust model: the device checks the answer and claims; the server only decides who was first. Fine for a children's game; the answers are already on every device.
 
 Next: 5b client lobby, 5c synchronized play, 5d podium + rematch + "ask a parent", 5e admin settings and reporting.
+
+## Phase 5b — group lobby, client (2026-10-18)
+
+Built in `src/rebus/group/`: `GroupHome` (open or join), `HostForm` (topic, count, level, nickname and avatar; signed-in users only), `JoinForm` (code + nickname + avatar from fixed lists; guests and signed-in users), `Lobby` (big code, copy code/link/share, players with Host and Koda badges, lock, remove, Start when two or more, Leave), `GroupRoom` + `useRoom` (poll every second, "Reconnecting…" instead of errors, removed/closed screens), `seatStore` (a refresh returns to the same room, per tab).
+
+- Entry: "Play with friends" on the Rebus topic screen.
+- Invitation link: `/?room=CODE`. Signed out → a guest screen in front of the sign-in gate (join as a guest, or "I have a Koda account. Sign in", which brings them back to the room). Signed in → straight to the join screen.
+- Nicknames are stored in English and shown in the viewer's language (`rebus.nick.*`, en + km).
+- Verified live in Chrome: host on localhost, guest on 127.0.0.1 (no session); the host saw the guest within a second; both left and the room closed.
+- Start works, but the play screens are Phase 5c; until then the room shows "The game has started!".

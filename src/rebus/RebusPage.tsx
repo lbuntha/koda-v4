@@ -17,6 +17,8 @@ import { loadResults, saveOutcome } from "./resultsStore";
 import { loadSeen, markSeen } from "./seenStore";
 import type { RebusSettings } from "./settings";
 import { useRebusSettings } from "./settingsStore";
+import { GroupHome } from "./group/GroupHome";
+import { useSession } from "../lib/sync";
 import { seenSet } from "./seen";
 import { RebusEmpty } from "./ui/RebusEmpty";
 import { PlayView, RevealView } from "./ui/RebusPlay";
@@ -37,9 +39,13 @@ export interface RebusPageProps {
   onAwardXp?(xp: number): void;
   /** Back out of Rebus Rush to the Think shelf. */
   onExit?(): void;
+  /** A room code from an invitation link: opens group play at the join screen. */
+  joinCode?: string | null;
+  /** The invitation code has been used (or the player backed out of it). */
+  onJoinCodeUsed?(): void;
 }
 
-export const RebusPage: React.FC<RebusPageProps> = ({ age: ageOverride, settings: settingsProp, onDeepChange, onAwardXp, onExit }) => {
+export const RebusPage: React.FC<RebusPageProps> = ({ age: ageOverride, settings: settingsProp, onDeepChange, onAwardXp, onExit, joinCode = null, onJoinCodeUsed }) => {
   const { t } = useT();
   const ownerSettings = useRebusSettings();
   const settings = settingsProp ?? ownerSettings;
@@ -60,11 +66,14 @@ export const RebusPage: React.FC<RebusPageProps> = ({ age: ageOverride, settings
   // A round of puzzles the child has all played before is practice: no XP.
   const [replay, setReplay] = useState(false);
   const phase = round.state?.phase;
+  const session = useSession();
+  // Playing with friends: its own screens, opened from setup or from an invitation link.
+  const [group, setGroup] = useState(joinCode !== null);
 
   useEffect(() => {
-    onDeepChange?.(phase !== undefined);
+    onDeepChange?.(phase !== undefined || group);
     return () => onDeepChange?.(false);
-  }, [phase, onDeepChange]);
+  }, [phase, group, onDeepChange]);
 
   useRebusSounds(round);
   // The ages the round covers, so the log files it under the right band.
@@ -107,12 +116,27 @@ export const RebusPage: React.FC<RebusPageProps> = ({ age: ageOverride, settings
     round.start({ puzzles: built.puzzles, settings, level: pick.level, seed: `${Date.now()}` });
   };
 
+  if (group) {
+    return (
+      <GroupHome
+        userToken={session?.accessToken ?? null}
+        settings={settings}
+        counts={fullBank.counts}
+        initialCode={joinCode}
+        onExit={() => {
+          setGroup(false);
+          onJoinCodeUsed?.();
+        }}
+      />
+    );
+  }
+
   if (!round.state && fullBank.puzzles.length === 0) return <RebusEmpty loaded={fullBank.loaded} onBack={onExit} />;
 
   if (!round.state) {
     return (
       <>
-        <RebusSetup bank={bank} settings={settings} results={results} onStart={(pick) => start(pick)} onBack={onExit} />
+        <RebusSetup bank={bank} settings={settings} results={results} onStart={(pick) => start(pick)} onGroup={() => setGroup(true)} onBack={onExit} />
         {short && <p role="alert" className={themeSystem.flash("info", "mx-auto mt-3 max-w-2xl")}>{t("rebus.noneFit")}</p>}
       </>
     );

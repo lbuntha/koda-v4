@@ -25,8 +25,8 @@ from app.deps import AUTHENTICATED, CurrentPrincipal, Db, require
 from app.errors import AppError, Forbidden, NotFound
 from app.models.auth import Principal
 from app.models.rebus_puzzle import ApproveAllIn, PromptIn, PublishIn, PuzzleIn, PuzzlePatch, StatusIn
-from app.repos import rebus as repo
 from app.rebus_verify import describe, validate_puzzle
+from app.repos import rebus as repo
 from app.security import principal_can
 
 router = APIRouter(prefix="/rebus", tags=["rebus"], dependencies=[AUTHENTICATED])

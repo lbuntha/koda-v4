@@ -24,10 +24,30 @@ CODE_LENGTH = 6
 
 #: What a player may be called. Chosen from this list, never typed.
 NICKNAMES: tuple[str, ...] = (
-    "Brave Tiger", "Clever Fox", "Happy Panda", "Swift Falcon", "Quiet Owl", "Bright Dolphin",
-    "Kind Elephant", "Bold Lion", "Gentle Deer", "Lucky Rabbit", "Mighty Bear", "Silly Monkey",
-    "Sunny Parrot", "Cool Turtle", "Speedy Cheetah", "Proud Peacock", "Jolly Frog", "Wise Crane",
-    "Sparkly Otter", "Zippy Koala", "Calm Whale", "Cheery Robin", "Daring Eagle", "Merry Penguin",
+    "Brave Tiger",
+    "Clever Fox",
+    "Happy Panda",
+    "Swift Falcon",
+    "Quiet Owl",
+    "Bright Dolphin",
+    "Kind Elephant",
+    "Bold Lion",
+    "Gentle Deer",
+    "Lucky Rabbit",
+    "Mighty Bear",
+    "Silly Monkey",
+    "Sunny Parrot",
+    "Cool Turtle",
+    "Speedy Cheetah",
+    "Proud Peacock",
+    "Jolly Frog",
+    "Wise Crane",
+    "Sparkly Otter",
+    "Zippy Koala",
+    "Calm Whale",
+    "Cheery Robin",
+    "Daring Eagle",
+    "Merry Penguin",
 )
 AVATARS: tuple[str, ...] = ("tiger", "fox", "panda", "falcon", "owl", "dolphin", "elephant", "lion", "deer", "rabbit", "bear", "monkey")
 

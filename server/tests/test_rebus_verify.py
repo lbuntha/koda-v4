@@ -1,4 +1,5 @@
 """The server's copy of the answer and puzzle checks, on the same cases as the TypeScript tests."""
+
 import json
 from pathlib import Path
 
@@ -11,10 +12,17 @@ ICONS = frozenset({"rebus-honey", "rebus-moon", "rebus-dog", "rebus-fire"})
 
 def puzzle(**over):
     base = {
-        "category": "food", "ages": [6, 12], "difficulty": 1,
-        "pieces": [{"kind": "icon", "id": "rebus-honey", "name": "honey"}, {"kind": "op", "op": "+"},
-                   {"kind": "icon", "id": "rebus-moon", "name": "moon"}],
-        "answer": "Honeymoon", "accepts": [], "explanation": "honey + moon = honeymoon.",
+        "category": "food",
+        "ages": [6, 12],
+        "difficulty": 1,
+        "pieces": [
+            {"kind": "icon", "id": "rebus-honey", "name": "honey"},
+            {"kind": "op", "op": "+"},
+            {"kind": "icon", "id": "rebus-moon", "name": "moon"},
+        ],
+        "answer": "Honeymoon",
+        "accepts": [],
+        "explanation": "honey + moon = honeymoon.",
     }
     return {**base, **over}
 
@@ -50,18 +58,21 @@ def test_a_good_puzzle_passes():
     assert codes(puzzle()) == []
 
 
-@pytest.mark.parametrize("over,code", [
-    ({"category": "cars"}, "bad-category"),
-    ({"ages": [3, 9]}, "bad-ages"),
-    ({"ages": [12, 9]}, "bad-ages"),
-    ({"difficulty": 4}, "bad-difficulty"),
-    ({"pieces": [{"kind": "op", "op": "+"}]}, "no-picture"),
-    ({"answer": "ab"}, "answer-short"),
-    ({"explanation": "  nope "}, "no-explanation"),
-    ({"pieces": [{"kind": "icon", "id": "rebus-yeti", "name": "yeti"}]}, "unknown-icon"),
-    ({"pieces": [{"kind": "word", "text": "honey moon"}]}, "answer-in-puzzle"),
-    ({"accepts": ["sweet"], "pieces": [{"kind": "word", "text": "SWEET"}]}, "answer-in-puzzle"),
-])
+@pytest.mark.parametrize(
+    "over,code",
+    [
+        ({"category": "cars"}, "bad-category"),
+        ({"ages": [3, 9]}, "bad-ages"),
+        ({"ages": [12, 9]}, "bad-ages"),
+        ({"difficulty": 4}, "bad-difficulty"),
+        ({"pieces": [{"kind": "op", "op": "+"}]}, "no-picture"),
+        ({"answer": "ab"}, "answer-short"),
+        ({"explanation": "  nope "}, "no-explanation"),
+        ({"pieces": [{"kind": "icon", "id": "rebus-yeti", "name": "yeti"}]}, "unknown-icon"),
+        ({"pieces": [{"kind": "word", "text": "honey moon"}]}, "answer-in-puzzle"),
+        ({"accepts": ["sweet"], "pieces": [{"kind": "word", "text": "SWEET"}]}, "answer-in-puzzle"),
+    ],
+)
 def test_each_fault_is_named(over, code):
     assert code in codes(puzzle(**over))
 

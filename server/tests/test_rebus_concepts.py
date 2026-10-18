@@ -1,4 +1,5 @@
 """Rebus Rush in the progress messages: a game, not a first-try measure."""
+
 from app.services import mastery
 
 

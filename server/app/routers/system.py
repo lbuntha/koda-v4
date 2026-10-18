@@ -224,7 +224,12 @@ async def update(setting_id: str, body: ValueIn, db: Db, p: CanOperate) -> Setti
         try:
             value = RebusSettings.model_validate_json(value).model_dump_json()
         except ValidationError as exc:
-            raise AppError(400, "bad_value", "Use a hint delay of 3 to 60 seconds, a time limit of 30 to 120, 1 to 3 hints, 2 to 6 players and rounds of 5 to 10 puzzles.") from exc
+            raise AppError(
+                400,
+                "bad_value",
+                "Use a hint delay of 3 to 60 seconds, a time limit of 30 to 120, 1 to 3 hints, "
+                "2 to 6 players and rounds of 5 to 10 puzzles.",
+            ) from exc
     elif definition["type"] == "bool":
         if not isinstance(value, bool):
             raise AppError(400, "bad_value", f"'{setting_id}' is a switch: send true or false.")

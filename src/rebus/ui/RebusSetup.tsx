@@ -9,7 +9,7 @@
  */
 
 import React, { useMemo, useState } from "react";
-import { ArrowLeft, Play } from "lucide-react";
+import { ArrowLeft, Play, Users } from "lucide-react";
 import { useT } from "../../lib/i18n";
 import { themeSystem } from "../../lib/themeSystem";
 import { UIBadge, UIButton, UITabs } from "../../components/ui";
@@ -41,13 +41,15 @@ export interface RebusSetupProps {
   /** How each puzzle went last time, for the history filter. */
   results?: Results;
   onStart(choice: RebusChoice): void;
+  /** Open the group-play door: open a room, or join one with a code. */
+  onGroup?(): void;
   onBack?(): void;
 }
 
 const LEVEL_KEYS = ["easy", "medium", "hard"] as const;
 const STATUS_KEYS: readonly StatusFilter[] = ["all", "new", "retry", "clean"];
 
-export const RebusSetup: React.FC<RebusSetupProps> = ({ bank, settings, results = {}, onStart, onBack }) => {
+export const RebusSetup: React.FC<RebusSetupProps> = ({ bank, settings, results = {}, onStart, onGroup, onBack }) => {
   const { t } = useT();
   const total = bank.puzzles.length;
   const firstWithPuzzles = CATEGORIES.find((c) => bank.counts[c.id] > 0)?.id ?? "mixed";
@@ -91,44 +93,51 @@ export const RebusSetup: React.FC<RebusSetupProps> = ({ bank, settings, results 
       </div>
 
       {step === "topic" && (
-        <section aria-labelledby="rebus-topic" className={themeSystem.spacing.stack}>
-          <h3 id="rebus-topic" className={themeSystem.typography("h4")}>
-            {t("rebus.chooseTopic")}
-          </h3>
-          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-            {[
-              ...CATEGORIES.map((c) => ({
-                id: c.id as CategoryId | "mixed",
-                name: t(`rebus.categories.${c.id}`),
-                n: bank.counts[c.id],
-              })),
-              { id: "mixed" as const, name: t("rebus.mixed"), n: total },
-            ].map(({ id, name, n }) => {
-              const empty = n === 0;
-              const selected = id === category;
-              return (
-                <button
-                  key={id}
-                  type="button"
-                  disabled={empty}
-                  aria-pressed={selected}
-                  onClick={() => {
-                    cue("pick");
-                    setCategory(id);
-                    setStep("options");
-                  }}
-                  className={themeSystem.card(
-                    empty ? "default" : "interactive",
-                    `flex items-center justify-between gap-3 px-4 py-3 text-left pointer-coarse:min-h-14 disabled:cursor-not-allowed disabled:opacity-50 ${selected ? "!border-indigo-500 ring-2 ring-indigo-200 dark:ring-indigo-800" : ""}`,
-                  )}
-                >
-                  <span className="text-base font-black text-ink">{name}</span>
-                  <UIBadge variant={empty ? "neutral" : selected ? "primary" : "info"}>{empty ? t("rebus.soon") : t("rebus.puzzlesCount", { count: n })}</UIBadge>
-                </button>
-              );
-            })}
-          </div>
-        </section>
+        <>
+          <section aria-labelledby="rebus-topic" className={themeSystem.spacing.stack}>
+            <h3 id="rebus-topic" className={themeSystem.typography("h4")}>
+              {t("rebus.chooseTopic")}
+            </h3>
+            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+              {[
+                ...CATEGORIES.map((c) => ({
+                  id: c.id as CategoryId | "mixed",
+                  name: t(`rebus.categories.${c.id}`),
+                  n: bank.counts[c.id],
+                })),
+                { id: "mixed" as const, name: t("rebus.mixed"), n: total },
+              ].map(({ id, name, n }) => {
+                const empty = n === 0;
+                const selected = id === category;
+                return (
+                  <button
+                    key={id}
+                    type="button"
+                    disabled={empty}
+                    aria-pressed={selected}
+                    onClick={() => {
+                      cue("pick");
+                      setCategory(id);
+                      setStep("options");
+                    }}
+                    className={themeSystem.card(
+                      empty ? "default" : "interactive",
+                      `flex items-center justify-between gap-3 px-4 py-3 text-left pointer-coarse:min-h-14 disabled:cursor-not-allowed disabled:opacity-50 ${selected ? "!border-indigo-500 ring-2 ring-indigo-200 dark:ring-indigo-800" : ""}`,
+                    )}
+                  >
+                    <span className="text-base font-black text-ink">{name}</span>
+                    <UIBadge variant={empty ? "neutral" : selected ? "primary" : "info"}>{empty ? t("rebus.soon") : t("rebus.puzzlesCount", { count: n })}</UIBadge>
+                  </button>
+                );
+              })}
+            </div>
+          </section>
+          {onGroup && (
+            <UIButton variant="secondary" size="lg" fullWidth icon={<Users />} onClick={onGroup}>
+              {t("rebus.group.playWithFriends")}
+            </UIButton>
+          )}
+        </>
       )}
 
       {step === "options" && (

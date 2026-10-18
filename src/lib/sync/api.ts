@@ -63,6 +63,8 @@ interface RequestOptions {
   body?: unknown;
   /** Bearer token, when the route needs one. */
   token?: string | null;
+  /** Extra headers, for a route that names the caller some other way than a bearer token. */
+  headers?: Record<string, string>;
   signal?: AbortSignal;
   /** Give up and call it offline after this long. `0` waits forever. */
   timeoutMs?: number;
@@ -108,7 +110,7 @@ function withDeadline(signal: AbortSignal | undefined, timeoutMs: number) {
 }
 
 export async function request<T>(path: string, options: RequestOptions = {}): Promise<T> {
-  const { method = "GET", body, token, signal, timeoutMs = DEFAULT_TIMEOUT_MS } = options;
+  const { method = "GET", body, token, headers, signal, timeoutMs = DEFAULT_TIMEOUT_MS } = options;
   const deadline = withDeadline(signal, timeoutMs);
 
   let response: Response;
@@ -119,6 +121,7 @@ export async function request<T>(path: string, options: RequestOptions = {}): Pr
       headers: {
         ...(body ? { "Content-Type": "application/json" } : {}),
         ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        ...headers,
       },
       body: body ? JSON.stringify(body) : undefined,
     });

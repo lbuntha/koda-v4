@@ -11,6 +11,8 @@ setting needs something behind it, which is a release, not a row. The database
 holds the *values*; this holds what a value means.
 """
 
+from app.models.rebus import DEFAULT_REBUS_SETTINGS
+
 #: Types a setting's value may take.
 #:
 #: `bool` is the switchboard. `text` exists because "disable this" is not the
@@ -20,8 +22,6 @@ holds the *values*; this holds what a value means.
 #: what lets a credential live in this collection beside the switches instead of
 #: in a second one.
 SETTING_TYPES = ("bool", "text", "secret")
-
-from app.models.rebus import DEFAULT_REBUS_SETTINGS
 
 DEFAULT_SETTINGS: list[dict] = [
     {
@@ -489,7 +489,10 @@ DEFAULT_SETTINGS: list[dict] = [
         "settingId": "rebus.group",
         "group": "Rebus Rush",
         "label": "Play in a group",
-        "description": "Lets a signed-in player open a room with an invitation code, and friends (with or without a Koda account) join and race. Off closes the door to new rooms.",
+        "description": (
+            "Lets a signed-in player open a room with an invitation code, and friends (with or without a Koda "
+            "account) join and race. Off closes the door to new rooms."
+        ),
         "type": "bool",
         "value": True,
         "order": 116,
@@ -498,7 +501,10 @@ DEFAULT_SETTINGS: list[dict] = [
         "settingId": "ai.rebusDrafts",
         "group": "Rebus Rush",
         "label": "Draft puzzles with AI",
-        "description": "Lets Rebus Studio staff ask a model to draft batches of puzzles. Nothing it writes reaches a child without a person approving it.",
+        "description": (
+            "Lets Rebus Studio staff ask a model to draft batches of puzzles. "
+            "Nothing it writes reaches a child without a person approving it."
+        ),
         "type": "bool",
         "value": True,
         "order": 118,

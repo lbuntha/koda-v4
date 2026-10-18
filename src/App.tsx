@@ -45,6 +45,7 @@ import { useAudienceViewer } from "./skills/viewer";
 import { SignInScreen } from "./components/account/SignInScreen";
 import { ResetPasswordScreen, resetTokenFromUrl } from "./components/account/ResetPasswordScreen";
 import { VerifyEmailScreen, verificationTokenFromUrl } from "./components/account/VerifyEmailScreen";
+import { clearRoomFromUrl, roomCodeFromUrl } from "./rebus/group/roomLink";
 import { LearnersPage } from "./components/account/LearnersPage";
 import { DevicesPage } from "./components/account/DevicesPage";
 const NotificationsPage = lazy(() =>
@@ -103,6 +104,7 @@ import { refreshMaintenanceVersions } from "./lib/maintenanceReset";
 const SkillManagerPage = lazy(() =>
   import("./components/skills/SkillManagerPage").then((m) => ({ default: m.SkillManagerPage })),
 );
+const GuestRoomScreen = lazy(() => import("./rebus/group/GuestRoomScreen").then((m) => ({ default: m.GuestRoomScreen })));
 const RebusPage = lazy(() => import("./rebus/RebusPage").then((m) => ({ default: m.RebusPage })));
 const RebusStudio = lazy(() => import("./rebus/studio/RebusStudio").then((m) => ({ default: m.RebusStudio })));
 const TraceStudio = lazy(() => import("./trace/studio/TraceStudio").then((m) => ({ default: m.TraceStudio })));
@@ -158,6 +160,9 @@ export default function App() {
   /** Rebus Rush is open on the Think shelf, and whether a round is being played in it. */
   const [rebusOpen, setRebusOpen] = useState(false);
   const [rebusDeep, setRebusDeep] = useState(false);
+  // An invitation link to a Rebus Rush room: a guest sees the join screen before sign-in, a signed-in player is taken to it.
+  const [roomCode, setRoomCode] = useState<string | null>(roomCodeFromUrl);
+  const [guestSignIn, setGuestSignIn] = useState(false);
   /** A Trace item is open (writing or colouring): like a book, it takes the phone's whole screen. */
   const [tracePlaying, setTracePlaying] = useState(false);
   /* A book or collection to open once Learn shows it — a Today pick on Home. */
@@ -387,6 +392,14 @@ export default function App() {
    * their afternoon.
    */
   useSessionClock(inRound);
+  // Someone signed in who opens an invitation link goes straight to the join screen for that room.
+  useEffect(() => {
+    if (!session || !roomCode) return;
+    setActiveTab("game");
+    setLearnCategory("lessons");
+    setRebusOpen(true);
+  }, [session, roomCode, setLearnCategory]);
+
   const { cap: sessionCap, dayDone, hours: studyHours, outsideHours } = useStudyGate();
 
   /**
@@ -730,6 +743,15 @@ export default function App() {
     return <ResetPasswordScreen token={resetToken} onDone={() => setResetToken(null)} />;
   }
 
+  // A friend with an invitation link and no account joins as a guest, in front of the sign-in gate.
+  if (!session && roomCode && !guestSignIn) {
+    return (
+      <Deferred label="Loading Rebus Rush">
+        <GuestRoomScreen code={roomCode} onSignIn={() => setGuestSignIn(true)} />
+      </Deferred>
+    );
+  }
+
   if (!session) {
     return <SignInScreen />;
   }
@@ -851,6 +873,11 @@ export default function App() {
                 <DayDoneScreen cap={sessionCap} onGoHome={() => setActiveTab("home")} />
               ) : rebusOpen ? (
                 <RebusPage
+                  joinCode={roomCode}
+                  onJoinCodeUsed={() => {
+                    clearRoomFromUrl();
+                    setRoomCode(null);
+                  }}
                   onDeepChange={setRebusDeep}
                   onAwardXp={(earnedXp) => setUserProgress((prev) => ({ ...prev, xp: prev.xp + earnedXp }))}
                   onExit={() => setRebusOpen(false)}

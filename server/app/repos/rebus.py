@@ -47,9 +47,7 @@ async def version(db: AsyncIOMotorDatabase) -> int:
 
 
 async def bump(db: AsyncIOMotorDatabase) -> int:
-    row = await db.rebus_state.find_one_and_update(
-        {"_id": "state"}, {"$inc": {"version": 1}}, upsert=True, return_document=True
-    )
+    row = await db.rebus_state.find_one_and_update({"_id": "state"}, {"$inc": {"version": 1}}, upsert=True, return_document=True)
     return int(row["version"])
 
 
@@ -145,7 +143,9 @@ async def is_duplicate(db: AsyncIOMotorDatabase, row: dict[str, Any]) -> bool:
 
     key = answer_key(row)
     mine = (row.get("createdAt"), row.get("id", ""))
-    async for other in db.rebus_puzzles.find({"status": {"$in": ["draft", "approved", "published"]}}, {"id": 1, "answer": 1, "status": 1, "createdAt": 1}):
+    async for other in db.rebus_puzzles.find(
+        {"status": {"$in": ["draft", "approved", "published"]}}, {"id": 1, "answer": 1, "status": 1, "createdAt": 1}
+    ):
         if other["id"] == row.get("id") or answer_key(other) != key:
             continue
         if other["status"] in ("approved", "published"):
@@ -190,9 +190,7 @@ async def insert(db: AsyncIOMotorDatabase, doc: dict[str, Any]) -> dict[str, Any
 
 
 async def update(db: AsyncIOMotorDatabase, puzzle_id: str, fields: dict[str, Any]) -> dict[str, Any] | None:
-    return await db.rebus_puzzles.find_one_and_update(
-        {"id": puzzle_id}, {"$set": {**fields, "updatedAt": now()}}, return_document=True
-    )
+    return await db.rebus_puzzles.find_one_and_update({"id": puzzle_id}, {"$set": {**fields, "updatedAt": now()}}, return_document=True)
 
 
 async def delete(db: AsyncIOMotorDatabase, puzzle_id: str) -> bool:
@@ -233,9 +231,7 @@ async def overview(db: AsyncIOMotorDatabase) -> dict[str, Any]:
     """Counts the Studio shows on its first screen."""
     by_status = {s: 0 for s in STATUSES}
     by_category: dict[str, dict[str, int]] = {}
-    async for row in db.rebus_puzzles.aggregate(
-        [{"$group": {"_id": {"status": "$status", "category": "$category"}, "n": {"$sum": 1}}}]
-    ):
+    async for row in db.rebus_puzzles.aggregate([{"$group": {"_id": {"status": "$status", "category": "$category"}, "n": {"$sum": 1}}}]):
         status, category = row["_id"]["status"], row["_id"]["category"]
         by_status[status] = by_status.get(status, 0) + row["n"]
         cat = by_category.setdefault(category, {s: 0 for s in STATUSES})
@@ -291,9 +287,7 @@ async def prompts(db: AsyncIOMotorDatabase, limit: int = 20) -> list[dict[str, A
 
 async def save_prompt(db: AsyncIOMotorDatabase, *, text: str, by: str) -> dict[str, Any]:
     """A new version of the system prompt. Old ones are kept, so a good batch can be repeated."""
-    seq = await db.rebus_state.find_one_and_update(
-        {"_id": "state"}, {"$inc": {"promptSeq": 1}}, upsert=True, return_document=True
-    )
+    seq = await db.rebus_state.find_one_and_update({"_id": "state"}, {"$inc": {"promptSeq": 1}}, upsert=True, return_document=True)
     row = {"version": int(seq["promptSeq"]), "text": text, "by": by, "at": now()}
     await db.rebus_prompts.insert_one(dict(row))
     return row
@@ -313,7 +307,17 @@ async def icon_usage(db: AsyncIOMotorDatabase, *, sample: int = 8) -> dict[str, 
     out: dict[str, dict[str, Any]] = {}
     pipeline = [
         {"$match": {"status": {"$in": ["draft", "approved", "published"]}}},
-        {"$project": {"answer": 1, "icons": {"$setUnion": [[], {"$map": {"input": {"$filter": {"input": "$pieces", "cond": {"$eq": ["$$this.kind", "icon"]}}}, "in": "$$this.id"}}]}}},
+        {
+            "$project": {
+                "answer": 1,
+                "icons": {
+                    "$setUnion": [
+                        [],
+                        {"$map": {"input": {"$filter": {"input": "$pieces", "cond": {"$eq": ["$$this.kind", "icon"]}}}, "in": "$$this.id"}},
+                    ]
+                },
+            }
+        },
         {"$unwind": "$icons"},
         {"$sort": {"answer": 1}},
         {"$group": {"_id": "$icons", "count": {"$sum": 1}, "answers": {"$push": "$answer"}}},

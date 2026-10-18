@@ -191,7 +191,9 @@ async def join_room(code: str, body: RoomJoinIn, db: Db, request: Request, user:
         raise Forbidden("Playing in a group is switched off.", "group_off")
     _check_choice(body.name, body.avatar)
     now_ms = _now_ms()
-    outcome, room, token = await repo.join(db, rules.normalize_code(code), name=body.name, avatar=body.avatar, user_id=user.subject_id if user else None, now_ms=now_ms)
+    outcome, room, token = await repo.join(
+        db, rules.normalize_code(code), name=body.name, avatar=body.avatar, user_id=user.subject_id if user else None, now_ms=now_ms
+    )
     if outcome == "not_found":
         raise NotFound("That code does not match an open room.", "room_not_found")
     if outcome == "started":
@@ -224,7 +226,9 @@ async def start_room(code: str, db: Db, x_player_token: Annotated[str | None, He
     if len(room["players"]) < 2:
         raise Conflict("Wait for at least one friend to join.", "need_players")
     s = room["settings"]
-    chosen = rules.pick_puzzles(await puzzles_repo.published(db), category=s["category"], count=s["count"], difficulty=s.get("difficulty"), seed=room["seed"])
+    chosen = rules.pick_puzzles(
+        await puzzles_repo.published(db), category=s["category"], count=s["count"], difficulty=s.get("difficulty"), seed=room["seed"]
+    )
     if len(chosen) < 3:
         raise Conflict("There are not enough puzzles for that topic yet.", "not_enough_puzzles")
     started = await repo.start(db, room["_id"], puzzles=[_public_puzzle(c) for c in chosen], now_ms=now_ms)
@@ -235,7 +239,7 @@ async def start_room(code: str, db: Db, x_player_token: Annotated[str | None, He
 
 @router.post("/{code}/solve")
 async def solve(code: str, body: SolveIn, db: Db, x_player_token: Annotated[str | None, Header()] = None) -> dict[str, Any]:
-    """"I solved it": first claim on the live puzzle wins its points. The device has already checked the answer."""
+    """ "I solved it": first claim on the live puzzle wins its points. The device has already checked the answer."""
     now_ms = _now_ms()
     room, me = await _seat(db, code, x_player_token, now_ms)
     if room["status"] != "playing":

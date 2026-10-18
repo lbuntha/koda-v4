@@ -82,7 +82,9 @@ def _expires(now_ms: int):
     return datetime.fromtimestamp((now_ms + rules.ROOM_LIFETIME_MS) / 1000, tz=UTC)
 
 
-async def join(db: AsyncIOMotorDatabase, code: str, *, name: str, avatar: str, user_id: str | None, now_ms: int) -> tuple[str, dict[str, Any] | None, str]:
+async def join(
+    db: AsyncIOMotorDatabase, code: str, *, name: str, avatar: str, user_id: str | None, now_ms: int
+) -> tuple[str, dict[str, Any] | None, str]:
     """Take a seat. Returns (outcome, room, token): outcome is "ok" or why not."""
     room = await get(db, code)
     if not room or room["status"] == "closed":
@@ -136,7 +138,13 @@ async def settle(db: AsyncIOMotorDatabase, code: str, now_ms: int) -> dict[str, 
             return room
         # Guarded by where the room was, so two pollers cannot both record the same ending.
         await _col(db).update_one(
-            {"_id": code, "status": "playing", "index": room["index"], "endedMs": room["endedMs"], "results": {"$size": len(room["results"])}},
+            {
+                "_id": code,
+                "status": "playing",
+                "index": room["index"],
+                "endedMs": room["endedMs"],
+                "results": {"$size": len(room["results"])},
+            },
             {"$set": change},
         )
     return await get(db, code)
@@ -160,7 +168,9 @@ async def start(db: AsyncIOMotorDatabase, code: str, *, puzzles: list[dict[str, 
     )
 
 
-async def claim(db: AsyncIOMotorDatabase, code: str, *, pid: str, index: int, hints: int, now_ms: int, points: int) -> dict[str, Any] | None:
+async def claim(
+    db: AsyncIOMotorDatabase, code: str, *, pid: str, index: int, hints: int, now_ms: int, points: int
+) -> dict[str, Any] | None:
     """The first correct claim on the live puzzle wins it. Anyone later finds it already ended."""
     room = await get(db, code)
     if not room:
@@ -176,7 +186,15 @@ async def claim(db: AsyncIOMotorDatabase, code: str, *, pid: str, index: int, hi
         },
         {
             "$set": {"endedMs": now_ms},
-            "$push": {"results": {"index": index, "winnerPid": pid, "points": points, "hints": hints, "atMs": max(0, now_ms - room["puzzleStartMs"])}},
+            "$push": {
+                "results": {
+                    "index": index,
+                    "winnerPid": pid,
+                    "points": points,
+                    "hints": hints,
+                    "atMs": max(0, now_ms - room["puzzleStartMs"]),
+                }
+            },
             "$inc": {"players.$[w].score": points, "players.$[w].solved": 1},
         },
         array_filters=[{"w.pid": pid}],

@@ -1,4 +1,5 @@
 """Rebus Rush: seed puzzles go through the Studio like any other, and what a device is given."""
+
 import json
 from pathlib import Path
 
@@ -41,10 +42,18 @@ async def live(client, admin):
 
 def draft(**over):
     body = {
-        "category": "food", "ages": [6, 12], "difficulty": 1, "trick": "compound",
-        "pieces": [{"kind": "icon", "id": "rebus-cheese", "name": "cheese"}, {"kind": "op", "op": "+"},
-                   {"kind": "icon", "id": "rebus-pie", "name": "pie"}],
-        "answer": "Cheese pie", "accepts": [], "explanation": "cheese + pie = cheese pie.",
+        "category": "food",
+        "ages": [6, 12],
+        "difficulty": 1,
+        "trick": "compound",
+        "pieces": [
+            {"kind": "icon", "id": "rebus-cheese", "name": "cheese"},
+            {"kind": "op", "op": "+"},
+            {"kind": "icon", "id": "rebus-pie", "name": "pie"},
+        ],
+        "answer": "Cheese pie",
+        "accepts": [],
+        "explanation": "cheese + pie = cheese pie.",
     }
     return {**body, **over}
 
@@ -80,7 +89,9 @@ async def test_seed_puzzles_created_when_an_admin_already_exists_are_theirs_from
 
     await db.rebus_puzzles.delete_many({})
     await db.rebus_state.delete_many({})
-    boss = await users.create(db, "boss@example.com", passwords.hash_password("correct horse battery"), platform_role="admin", display_name="The Boss")
+    boss = await users.create(
+        db, "boss@example.com", passwords.hash_password("correct horse battery"), platform_role="admin", display_name="The Boss"
+    )
     await repo.ensure_seed(db, SEED)
     assert await db.rebus_puzzles.count_documents({"createdBy": boss["_id"], "status": "draft"}) == len(SEED)
 
@@ -157,7 +168,9 @@ async def test_a_draft_may_be_wrong_but_cannot_be_approved_until_it_is_right(cli
     assert row["status"] == "draft" and set(row["issues"]) == {"answer-short", "no-explanation"}
     refused = await client.post(f"/rebus/studio/puzzles/{row['id']}/status", json={"status": "approved"}, headers=admin)
     assert refused.status_code == 422 and "answer needs at least 3 letters" in refused.json()["error"]["message"]
-    fixed = await client.patch(f"/rebus/studio/puzzles/{row['id']}", json={"answer": "Cheese pie", "explanation": "cheese + pie = cheese pie."}, headers=admin)
+    fixed = await client.patch(
+        f"/rebus/studio/puzzles/{row['id']}", json={"answer": "Cheese pie", "explanation": "cheese + pie = cheese pie."}, headers=admin
+    )
     assert fixed.json()["issues"] == []
     ok = await client.post(f"/rebus/studio/puzzles/{row['id']}/status", json={"status": "approved"}, headers=admin)
     assert ok.json()["status"] == "approved"
@@ -200,7 +213,9 @@ async def test_publishing_with_nothing_approved_says_so(client, admin):
 async def test_a_live_puzzle_can_be_fixed_in_place_and_children_see_the_fix(client, admin, owner, live):
     before = (await client.get("/rebus/puzzles", headers=owner)).json()
     target = next(p for p in before["puzzles"] if p["answer"] == "Teapot")
-    fixed = await client.patch(f"/rebus/studio/puzzles/{target['id']}", json={"explanation": "tea + pot = teapot, a pot for tea."}, headers=admin)
+    fixed = await client.patch(
+        f"/rebus/studio/puzzles/{target['id']}", json={"explanation": "tea + pot = teapot, a pot for tea."}, headers=admin
+    )
     assert fixed.status_code == 200 and fixed.json()["status"] == "published"
     after = (await client.get(f"/rebus/puzzles?since={before['version']}", headers=owner)).json()
     assert after["unchanged"] is False
@@ -234,7 +249,9 @@ async def test_only_unfinished_puzzles_can_be_deleted_and_never_seed_ones(client
 async def test_status_changes_follow_the_workflow(client, admin):
     row = (await client.post("/rebus/studio/puzzles", json=draft(), headers=admin)).json()
     assert (await client.post(f"/rebus/studio/puzzles/{row['id']}/status", json={"status": "retired"}, headers=admin)).status_code == 409
-    assert (await client.post(f"/rebus/studio/puzzles/{row['id']}/status", json={"status": "rejected", "note": "unclear"}, headers=admin)).status_code == 200
+    assert (
+        await client.post(f"/rebus/studio/puzzles/{row['id']}/status", json={"status": "rejected", "note": "unclear"}, headers=admin)
+    ).status_code == 200
     assert (await client.post(f"/rebus/studio/puzzles/{row['id']}/status", json={"status": "draft"}, headers=admin)).status_code == 200
 
 
@@ -247,7 +264,13 @@ async def test_an_edit_after_approval_sends_it_back_for_review(client, admin):
 
 async def test_an_ai_draft_is_saved_with_its_checks_and_still_has_to_be_approved(client, admin):
     checks = {"blind": {"ok": False, "said": "sweet night"}, "safe": True}
-    row = (await client.post("/rebus/studio/puzzles", json=draft(source="ai", checks=checks, runId="r1", promptVersion=2, model="claude-sonnet-5-5"), headers=admin)).json()
+    row = (
+        await client.post(
+            "/rebus/studio/puzzles",
+            json=draft(source="ai", checks=checks, runId="r1", promptVersion=2, model="claude-sonnet-5-5"),
+            headers=admin,
+        )
+    ).json()
     assert row["source"] == "ai" and row["status"] == "draft" and row["checks"] == checks and row["promptVersion"] == 2
 
 
@@ -278,9 +301,19 @@ async def test_the_generation_prompt_is_versioned_and_only_staff_may_change_it(c
 async def test_a_drawing_added_through_the_art_library_can_be_used_in_a_puzzle(client, admin):
     yeti = {"kind": "icon", "id": "rebus-yeti", "name": "yeti"}
     pie = {"kind": "icon", "id": "rebus-pie", "name": "pie"}
-    row = (await client.post("/rebus/studio/puzzles", json=draft(pieces=[yeti, {"kind": "op", "op": "+"}, pie], answer="Yeti pie", explanation="yeti + pie = yeti pie."), headers=admin)).json()
+    row = (
+        await client.post(
+            "/rebus/studio/puzzles",
+            json=draft(pieces=[yeti, {"kind": "op", "op": "+"}, pie], answer="Yeti pie", explanation="yeti + pie = yeti pie."),
+            headers=admin,
+        )
+    ).json()
     assert "unknown-icon" in row["issues"]
-    art = await client.put("/art/rebus-yeti", json={"markup": '<svg viewBox="0 0 64 64"><circle cx="32" cy="32" r="20" fill="#ccc"/></svg>', "category": "rebus"}, headers=admin)
+    art = await client.put(
+        "/art/rebus-yeti",
+        json={"markup": '<svg viewBox="0 0 64 64"><circle cx="32" cy="32" r="20" fill="#ccc"/></svg>', "category": "rebus"},
+        headers=admin,
+    )
     assert art.status_code == 200
     assert "unknown-icon" not in (await client.get(f"/rebus/studio/puzzles/{row['id']}", headers=admin)).json()["issues"]
     await client.delete("/art/rebus-yeti", headers=admin)
@@ -288,7 +321,9 @@ async def test_a_drawing_added_through_the_art_library_can_be_used_in_a_puzzle(c
 
 
 async def test_an_art_drawing_without_the_rebus_prefix_does_not_count(client, admin):
-    await client.put("/art/yeti", json={"markup": '<svg viewBox="0 0 64 64"><circle cx="32" cy="32" r="20"/></svg>', "category": "icons"}, headers=admin)
+    await client.put(
+        "/art/yeti", json={"markup": '<svg viewBox="0 0 64 64"><circle cx="32" cy="32" r="20"/></svg>', "category": "icons"}, headers=admin
+    )
     yeti = {"kind": "icon", "id": "yeti", "name": "yeti"}
     row = (await client.post("/rebus/studio/puzzles", json=draft(pieces=[yeti]), headers=admin)).json()
     assert "unknown-icon" in row["issues"]
@@ -304,7 +339,11 @@ async def test_each_drawing_says_how_many_puzzles_use_it(client, admin):
 async def test_a_drawing_used_twice_in_one_puzzle_counts_the_puzzle_once(client, admin):
     dog = {"kind": "icon", "id": "rebus-dog", "name": "dog"}
     before = (await client.get("/rebus/studio/icon-usage", headers=admin)).json()["usage"]["rebus-dog"]["count"]
-    await client.post("/rebus/studio/puzzles", json=draft(pieces=[dog, {"kind": "op", "op": "&"}, dog], answer="Dogs and dogs", explanation="dog and dog."), headers=admin)
+    await client.post(
+        "/rebus/studio/puzzles",
+        json=draft(pieces=[dog, {"kind": "op", "op": "&"}, dog], answer="Dogs and dogs", explanation="dog and dog."),
+        headers=admin,
+    )
     after = (await client.get("/rebus/studio/icon-usage", headers=admin)).json()["usage"]["rebus-dog"]["count"]
     assert after == before + 1
 
@@ -330,7 +369,9 @@ async def test_the_older_of_two_drafts_with_the_same_answer_is_the_one_that_can_
     second = (await client.post("/rebus/studio/puzzles", json=draft(answer="cheese  PIE"), headers=admin)).json()
     assert "duplicate" not in first["issues"] and "duplicate" in second["issues"]
     assert (await client.post(f"/rebus/studio/puzzles/{first['id']}/status", json={"status": "approved"}, headers=admin)).status_code == 200
-    assert (await client.post(f"/rebus/studio/puzzles/{second['id']}/status", json={"status": "approved"}, headers=admin)).status_code == 422
+    assert (
+        await client.post(f"/rebus/studio/puzzles/{second['id']}/status", json={"status": "approved"}, headers=admin)
+    ).status_code == 422
 
 
 async def test_a_puzzle_can_be_created_and_approved_in_one_step_when_it_passes(client, admin):

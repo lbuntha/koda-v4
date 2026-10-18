@@ -1,4 +1,5 @@
 """Rebus Rush group rooms: who may open one, who may join, and how a race is decided."""
+
 import json
 from pathlib import Path
 
@@ -74,7 +75,15 @@ def test_points_fall_with_hints_but_never_below_one():
 
 
 def room_for_tick(**over):
-    base = {"status": "playing", "index": 0, "puzzleStartMs": 1000, "endedMs": None, "results": [], "puzzles": [{}, {}], "settings": {"puzzleLimitSec": 30}}
+    base = {
+        "status": "playing",
+        "index": 0,
+        "puzzleStartMs": 1000,
+        "endedMs": None,
+        "results": [],
+        "puzzles": [{}, {}],
+        "settings": {"puzzleLimitSec": 30},
+    }
     return {**base, **over}
 
 
@@ -90,12 +99,20 @@ def test_time_alone_ends_a_puzzle_then_moves_on_then_finishes():
 
 
 def test_equal_scores_share_a_place():
-    room = {"players": [{"pid": "a", "score": 5, "joinedMs": 1}, {"pid": "b", "score": 5, "joinedMs": 2}, {"pid": "c", "score": 1, "joinedMs": 3}]}
+    room = {
+        "players": [
+            {"pid": "a", "score": 5, "joinedMs": 1},
+            {"pid": "b", "score": 5, "joinedMs": 2},
+            {"pid": "c", "score": 1, "joinedMs": 3},
+        ]
+    }
     assert [(s["pid"], s["place"]) for s in rules.standings(room)] == [("a", 1), ("b", 1), ("c", 3)]
 
 
 async def test_only_a_signed_in_user_can_open_a_room(client, owner, clock):
-    assert (await client.post("/rebus/rooms", json={"category": "food", "count": 3, "name": "Brave Tiger", "avatar": "tiger"})).status_code == 401
+    assert (
+        await client.post("/rebus/rooms", json={"category": "food", "count": 3, "name": "Brave Tiger", "avatar": "tiger"})
+    ).status_code == 401
     made = await open_room(client, owner)
     assert len(made["room"]["code"]) == 6 and made["room"]["me"]["isHost"] and made["room"]["status"] == "lobby"
 
@@ -117,10 +134,16 @@ async def test_a_guest_joins_with_only_the_code_and_a_koda_user_is_recorded_as_t
     assert guest["room"]["me"]["isKodaUser"] is False and len(guest["room"]["players"]) == 2
 
     other = (await client.post("/auth/signup", json=signup_body("friend@example.com"))).json()
-    signed = (await join(client, code, name="Happy Panda", avatar="panda", headers={"Authorization": f"Bearer {other['accessToken']}"})).json()
+    signed = (
+        await join(client, code, name="Happy Panda", avatar="panda", headers={"Authorization": f"Bearer {other['accessToken']}"})
+    ).json()
     assert signed["room"]["me"]["isKodaUser"] is True
     # A guest sees who is a Koda user, and nothing else about them.
-    assert {p["name"]: p["isKodaUser"] for p in signed["room"]["players"]} == {"Brave Tiger": True, "Clever Fox": False, "Happy Panda": True}
+    assert {p["name"]: p["isKodaUser"] for p in signed["room"]["players"]} == {
+        "Brave Tiger": True,
+        "Clever Fox": False,
+        "Happy Panda": True,
+    }
 
 
 async def test_the_door_refuses_a_taken_name_a_full_room_a_locked_room_and_an_unknown_code(client, owner, clock):
