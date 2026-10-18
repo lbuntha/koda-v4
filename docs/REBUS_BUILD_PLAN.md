@@ -369,3 +369,11 @@ Built in `src/rebus/group/`: `GroupHome` (open or join), `HostForm` (topic, coun
 - Nicknames are stored in English and shown in the viewer's language (`rebus.nick.*`, en + km).
 - Verified live in Chrome: host on localhost, guest on 127.0.0.1 (no session); the host saw the guest within a second; both left and the room closed.
 - Start works, but the play screens are Phase 5c; until then the room shows "The game has started!".
+
+## Phase 5c — synchronized group play (2026-10-18)
+
+Built in `src/rebus/group/`: `GroupPlay` (countdown on the server's clock, the shared puzzle, answer box with the cursor in it, hints after the owner's delay, claim on a correct answer, the reveal with who was first, the answer and why), `Scoreboard` (everyone's score, the leader ringed), `GroupFinal` (winner, places, host "Play again", Leave), `useServerClock` (counts against the server's time, so a phone with a wrong clock still starts with everyone).
+
+- The device checks the answer and sends one claim; the first to arrive wins the points. A player who was too late is told who was first. A claim that fails to send can be tried again.
+- Verified live with two browsers (host signed in, guest with no session): shared puzzle, guest won the first puzzle +3, the host saw "Clever Fox got it first!", the race ran to the end and both saw the final screen.
+- Next, 5d: a creative podium, "ask a grown-up to sign up" for guests, XP and the learning log for signed-in players (a replay pays no XP). 5e: admin settings and reporting.

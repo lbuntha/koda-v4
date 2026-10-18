@@ -1,8 +1,8 @@
 /**
  * One seat in one room, from the lobby on.
  *
- * Owns the polling and every action a seat can take. The lobby is drawn here;
- * once the game starts the play screens take over (Phase 5c).
+ * Owns the polling and every action a seat can take, and draws whichever
+ * screen the room is on: the lobby, a puzzle, or the results.
  */
 
 import React, { useEffect, useRef, useState } from "react";
@@ -11,6 +11,8 @@ import { themeSystem } from "../../lib/themeSystem";
 import { UIButton } from "../../components/ui";
 import { roomErrorKey } from "./errors";
 import { GroupAPI } from "./groupApi";
+import { GroupFinal } from "./GroupFinal";
+import { GroupPlay } from "./GroupPlay";
 import { Lobby } from "./Lobby";
 import { clearSeat } from "./seatStore";
 import type { RoomView } from "./types";
@@ -83,18 +85,20 @@ export const GroupRoom: React.FC<GroupRoomProps> = ({ code, token, initial = nul
     );
   }
 
-  if (room.status !== "lobby") {
-    // The play screens arrive with Phase 5c; until then say so plainly rather than show a blank page.
+  if (room.status === "playing" && room.puzzle) {
+    return <GroupPlay room={room} token={token} skewMs={feed.skewMs} apply={apply} />;
+  }
+
+  if (room.status === "playing") {
     return (
-      <div className="mx-auto flex w-full max-w-xl flex-col items-center gap-4 pb-20 text-center">
-        <p role="status" className={themeSystem.flash("info")}>
-          {t("rebus.group.started")}
-        </p>
-        <UIButton variant="ghost" onClick={() => void leave()}>
-          {t("rebus.group.leave")}
-        </UIButton>
-      </div>
+      <p role="status" className={`${themeSystem.typography("body-sm")} text-center`}>
+        {t("rebus.group.connecting")}
+      </p>
     );
+  }
+
+  if (room.status === "finished") {
+    return <GroupFinal room={room} busy={busy} error={error} onAgain={() => void act(() => GroupAPI.rematch(code, token))} onLeave={() => void leave()} />;
   }
 
   return (

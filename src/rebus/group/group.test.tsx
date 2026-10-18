@@ -1,6 +1,7 @@
 import { act, fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { ApiError } from "../../lib/sync";
+import { SAMPLE_PUZZLES } from "../fixtures/samplePuzzles";
 import { DEFAULT_SETTINGS } from "../settings";
 import { GroupAPI } from "./groupApi";
 import { GroupHome } from "./GroupHome";
@@ -128,11 +129,11 @@ describe("the host", () => {
 
   it("starts the game once a friend has joined", async () => {
     api.open.mockResolvedValue(seat(twoPlayers()));
-    api.start.mockResolvedValue({ ...twoPlayers(), status: "playing" });
+    api.start.mockResolvedValue({ ...twoPlayers(), status: "playing", total: 3, index: 0, puzzle: SAMPLE_PUZZLES[7], startMs: Date.now() + 60_000, limitMs: 60_000, endedMs: null });
     await openAs();
     fireEvent.click(screen.getByRole("button", { name: "Start the game" }));
     await waitFor(() => expect(api.start).toHaveBeenCalledWith("ABC234", "tok"));
-    await screen.findByText("The game has started!");
+    await screen.findByText("Get ready!");
   });
 
   it("can lock the room and remove a player", async () => {
