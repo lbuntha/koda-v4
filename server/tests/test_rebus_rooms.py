@@ -308,3 +308,40 @@ async def test_the_owner_can_switch_group_play_off(client, owner, db, clock):
     await db.system_settings.update_one({"settingId": "rebus.group"}, {"$set": {"value": False}}, upsert=True)
     res = await client.post("/rebus/rooms", json={"category": "food", "count": 3, "name": "Brave Tiger", "avatar": "tiger"}, headers=owner)
     assert res.status_code == 403 and res.json()["error"]["code"] == "group_off"
+
+
+async def test_the_owner_can_close_the_door_to_guests_but_not_to_koda_users(client, owner, signup_body, db, clock):
+    made = await open_room(client, owner)
+    code = made["room"]["code"]
+    await db.system_settings.update_one({"settingId": "rebus.settings"}, {"$set": {"value": '{"guestsAllowed": false}'}}, upsert=True)
+    refused = await join(client, code)
+    assert refused.status_code == 403 and refused.json()["error"]["code"] == "guests_off"
+    other = (await client.post("/auth/signup", json=signup_body("friend@example.com"))).json()
+    ok = await join(client, code, name="Happy Panda", avatar="panda", headers={"Authorization": f"Bearer {other['accessToken']}"})
+    assert ok.status_code == 200 and ok.json()["room"]["status"] == "pending"
+
+
+async def test_group_play_is_counted_in_numbers_only_and_only_the_owner_can_read_them(client, owner, admin, live, clock):
+    made = await open_room(client, owner)
+    code, host = made["room"]["code"], seat(made["playerToken"])
+    friend = await admit(client, code, host)
+    await client.post(f"/rebus/rooms/{code}/start", headers=host)
+    clock["ms"] += 10 * 60 * 1000
+    assert (await client.get(f"/rebus/rooms/{code}", headers=host)).json()["status"] == "finished"
+    # A guest asks a grown-up: counted once, however many times they press it.
+    for _ in range(3):
+        assert (await client.post(f"/rebus/rooms/{code}/asked", headers=seat(friend["playerToken"]))).status_code == 200
+    # A signed-in player pressing it is not a guest asking.
+    await client.post(f"/rebus/rooms/{code}/asked", headers=host)
+
+    totals = (await client.get("/rebus/rooms/report/summary?days=7", headers=admin)).json()["totals"]
+    assert totals["roomsOpened"] == 1 and totals["requests"] == 1
+    assert totals["seatsKoda"] == 1 and totals["seatsGuest"] == 1
+    assert totals["gamesStarted"] == 1 and totals["playersStarted"] == 2 and totals["gamesFinished"] == 1
+    assert totals["askedGrownUp"] == 1
+    rows = (await client.get("/rebus/rooms/report/summary?days=7", headers=admin)).json()["rows"]
+    assert len(rows) == 7 and sum(r["gamesFinished"] for r in rows) == 1
+
+    # A player cannot read the owner's numbers.
+    assert (await client.get("/rebus/rooms/report/summary", headers=owner)).status_code == 403
+    assert (await client.get("/rebus/rooms/report/summary")).status_code in (401, 403)

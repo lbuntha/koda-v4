@@ -18,6 +18,7 @@ import { cacheSystemSetting } from "../../lib/sync/system";
 import { themeSystem } from "../../lib/themeSystem";
 import { UIButton, UITabs, UIToggleRow } from "../../components/ui";
 import { DEFAULT_SETTINGS, SETTING_LIMITS, type RebusSettings } from "../settings";
+import { GroupReport } from "./GroupReport";
 import { parseRebusSettings, REBUS_SETTING } from "../settingsStore";
 
 const LEVELS = ["easy", "medium", "hard"] as const;
@@ -135,6 +136,7 @@ export const RebusAdminPanel: React.FC = () => {
         <Row title={t("rebus.admin.maxPlayers")} hint={t("rebus.admin.maxPlayersHint")}>
           <NumberStepper label={t("rebus.admin.maxPlayers")} value={draft.maxPlayers} {...SETTING_LIMITS.maxPlayers} onChange={(n) => change({ maxPlayers: n })} />
         </Row>
+        <UIToggleRow title={t("rebus.admin.guestsAllowed")} description={t("rebus.admin.guestsAllowedHint")} checked={draft.guestsAllowed} onChange={() => change({ guestsAllowed: !draft.guestsAllowed })} />
         <h4 className={`${themeSystem.typography("h4")} pt-2`}>{t("rebus.admin.pointsTitle")}</h4>
         <p className={themeSystem.typography("caption")}>{t("rebus.admin.pointsText")}</p>
         <Row title={t("rebus.admin.pointsPerPuzzle")} hint={t("rebus.admin.pointsPerPuzzleHint")}>
@@ -187,6 +189,7 @@ export const RebusAdminPanel: React.FC = () => {
           {t("rebus.admin.reset")}
         </UIButton>
       </div>
+      <GroupReport />
     </section>
   );
 };

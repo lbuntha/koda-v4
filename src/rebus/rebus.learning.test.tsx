@@ -14,7 +14,7 @@ vi.mock("./bank", () => {
   const bank = { puzzles, counts: { countries: 0, food: puzzles.length, sayings: 0, animals: 0, sports: 0, school: 0, science: 0 }, loaded: true };
   return { useRebusBank: () => bank, bankForAge: (b: typeof bank) => b };
 });
-vi.mock("../utils/audio", () => ({ playSound: () => {} }));
+vi.mock("../utils/audio", () => ({ isVoiceEnabled: () => false, playSound: () => {} }));
 
 import { RebusPage } from "./RebusPage";
 

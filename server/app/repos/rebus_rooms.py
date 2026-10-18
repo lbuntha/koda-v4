@@ -16,6 +16,7 @@ from pymongo.errors import DuplicateKeyError
 from app import rebus_room as rules
 
 COLLECTION = "rebus_rooms"
+STATS = "rebus_group_stats"
 
 
 def _col(db: AsyncIOMotorDatabase):
@@ -191,7 +192,7 @@ async def settle(db: AsyncIOMotorDatabase, code: str, now_ms: int) -> dict[str, 
         if change is None:
             return room
         # Guarded by where the room was, so two pollers cannot both record the same ending.
-        await _col(db).update_one(
+        done = await _col(db).update_one(
             {
                 "_id": code,
                 "status": "playing",
@@ -201,6 +202,8 @@ async def settle(db: AsyncIOMotorDatabase, code: str, now_ms: int) -> dict[str, 
             },
             {"$set": change},
         )
+        if done.modified_count and change["status"] == "finished":
+            await count(db, now_ms, gamesFinished=1)
     return await get(db, code)
 
 
@@ -293,3 +296,56 @@ async def rematch(db: AsyncIOMotorDatabase, code: str, *, now_ms: int) -> dict[s
         },
         return_document=True,
     )
+
+
+# ---- Reporting: anonymous daily counters. A room is deleted after two hours, so
+# ---- what the owner can learn about group play has to be counted as it happens.
+# ---- Only numbers are kept: no names, codes, answers or anything about a person.
+
+COUNTERS = (
+    "roomsOpened",
+    "requests",
+    "seatsKoda",
+    "seatsGuest",
+    "gamesStarted",
+    "playersStarted",
+    "gamesFinished",
+    "rematches",
+    "askedGrownUp",
+)
+
+
+def _day(now_ms: int) -> str:
+    from datetime import UTC, datetime
+
+    return datetime.fromtimestamp(now_ms / 1000, tz=UTC).strftime("%Y-%m-%d")
+
+
+async def count(db: AsyncIOMotorDatabase, now_ms: int, **by: int) -> None:
+    """Add to today's counters. Never raises: counting must not break a game."""
+    known = {k: v for k, v in by.items() if k in COUNTERS and v}
+    if not known:
+        return
+    try:
+        await db[STATS].update_one({"_id": _day(now_ms)}, {"$inc": known}, upsert=True)
+    except Exception:  # noqa: BLE001 - a lost count is better than a failed join
+        return
+
+
+async def report(db: AsyncIOMotorDatabase, now_ms: int, days: int) -> list[dict[str, Any]]:
+    """One row per day, oldest first, with zeros for quiet days, for the last `days` days."""
+    from datetime import UTC, datetime, timedelta
+
+    today = datetime.fromtimestamp(now_ms / 1000, tz=UTC).date()
+    wanted = [(today - timedelta(days=i)).isoformat() for i in range(days - 1, -1, -1)]
+    found = {d["_id"]: d async for d in db[STATS].find({"_id": {"$in": wanted}})}
+    return [{"day": day, **{c: int(found.get(day, {}).get(c, 0)) for c in COUNTERS}} for day in wanted]
+
+
+async def mark_asked(db: AsyncIOMotorDatabase, code: str, pid: str) -> bool:
+    """Note that this seat asked a grown-up to sign up, once. True the first time."""
+    done = await _col(db).update_one(
+        {"_id": code, "players": {"$elemMatch": {"pid": pid, "asked": {"$ne": True}}}},
+        {"$set": {"players.$.asked": True}},
+    )
+    return done.modified_count > 0

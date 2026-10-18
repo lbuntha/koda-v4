@@ -18,6 +18,8 @@ export interface RebusSettings {
   hintRungs: 1 | 2 | 3;
   /** Most players in one group room. */
   maxPlayers: number;
+  /** Whether someone without a Koda account may join a room. */
+  guestsAllowed: boolean;
   /** "free" lets the child pick the Machine's level; a number fixes it. */
   machineLock: "free" | MachineLevel;
   /** Letter tiles instead of a keyboard, for the youngest. */
@@ -55,6 +57,7 @@ export const DEFAULT_SETTINGS: RebusSettings = {
   puzzleLimitSec: 60,
   hintRungs: 3,
   maxPlayers: 4,
+  guestsAllowed: true,
   machineLock: "free",
   letterTiles: false,
   questionChoices: [5, 7, 10],
@@ -81,6 +84,7 @@ export const normalizeSettings = (raw: unknown): RebusSettings => {
     puzzleLimitSec: clampInt(r.puzzleLimitSec, SETTING_LIMITS.puzzleLimitSec.min, SETTING_LIMITS.puzzleLimitSec.max, DEFAULT_SETTINGS.puzzleLimitSec),
     hintRungs: clampInt(r.hintRungs, 1, 3, DEFAULT_SETTINGS.hintRungs) as 1 | 2 | 3,
     maxPlayers: clampInt(r.maxPlayers, SETTING_LIMITS.maxPlayers.min, SETTING_LIMITS.maxPlayers.max, DEFAULT_SETTINGS.maxPlayers),
+    guestsAllowed: r.guestsAllowed !== false,
     machineLock: lock === 0 || lock === 1 || lock === 2 ? lock : "free",
     letterTiles: r.letterTiles === true,
     questionChoices: choices.length > 0 ? choices : DEFAULT_SETTINGS.questionChoices,

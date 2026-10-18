@@ -188,6 +188,13 @@ describe("the Machine's level", () => {
     expect(startRound(config({ level: 0, settings: { ...DEFAULT_SETTINGS, machineLock: 2 } }), 0).run.level).toBe(2);
   });
 
+  it("starts where the last round left off, when adaptive", () => {
+    expect(startRound(config({ level: "adaptive", adaptiveStart: 2 }), 0).run.level).toBe(2);
+    expect(startRound(config({ level: "adaptive", adaptiveStart: 0 }), 0).run.level).toBe(0);
+    // A fixed pick ignores it.
+    expect(startRound(config({ level: 1, adaptiveStart: 2 }), 0).run.level).toBe(1);
+  });
+
   it("follows the round when adaptive: up after a child win, down after a Machine win", () => {
     let s = machineAt(startRound(config({ level: "adaptive" }), 0), 50);
     expect(s.run.level).toBe(1);

@@ -9,7 +9,7 @@ import { useGroupLearning } from "./useGroupLearning";
 import type { RoomPlayer, RoomView } from "./types";
 
 vi.mock("./groupApi", () => ({ GroupAPI: { solve: vi.fn() } }));
-vi.mock("../../utils/audio", () => ({ playSound: () => {} }));
+vi.mock("../../utils/audio", () => ({ isVoiceEnabled: () => false, playSound: () => {} }));
 const api = vi.mocked(GroupAPI);
 
 const puzzle = SAMPLE_PUZZLES.find((p) => p.answer === "Hot dog")!;

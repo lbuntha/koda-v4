@@ -221,3 +221,25 @@ describe("staying in the room", () => {
     expect(loadSeat()).toBeNull();
   });
 });
+
+describe("a dropped connection", () => {
+  it("never ends the game: it says reconnecting, keeps the seat, and carries on when the network is back", async () => {
+    vi.useFakeTimers({ toFake: ["setInterval", "clearInterval", "setTimeout", "clearTimeout", "Date"] });
+    api.join.mockResolvedValue(seat(room({ status: "pending", players: [] }, { pid: "p2", isHost: false, isKodaUser: false })));
+    const lobby = room({ players: [player(), player({ pid: "p2", name: "Clever Fox", avatar: "fox", isHost: false, isKodaUser: false })] }, { pid: "p2", isHost: false, isKodaUser: false });
+    api.poll.mockRejectedValue(new ApiError(0, "network", "offline"));
+    render(<GroupHome userToken={null} settings={DEFAULT_SETTINGS} initialCode="abc234" onExit={() => {}} />);
+    pickWho();
+    fireEvent.click(screen.getByRole("button", { name: "Join" }));
+    await act(async () => void (await vi.advanceTimersByTimeAsync(0)));
+    // Far longer than the old give-up point: still reconnecting, not "closed", and the seat is still remembered.
+    await act(async () => void (await vi.advanceTimersByTimeAsync(120_000)));
+    expect(screen.getAllByText("Reconnecting…").length).toBeGreaterThan(0);
+    expect(screen.queryByText("This room is closed.")).toBeNull();
+    expect(loadSeat()).toEqual({ code: "ABC234", token: "tok" });
+    // The network comes back and the next ask puts the player in the room.
+    api.poll.mockResolvedValue(lobby);
+    await act(async () => void (await vi.advanceTimersByTimeAsync(4_000)));
+    expect(screen.getByText("ABC 234")).toBeTruthy();
+  });
+});

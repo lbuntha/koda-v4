@@ -21,7 +21,12 @@ const copyText = async (text: string): Promise<boolean> => {
   }
 };
 
-export const AskGrownUp: React.FC = () => {
+export interface AskGrownUpProps {
+  /** The first time the note is opened, so the owner can see how many children ask. */
+  onOpen?(): void;
+}
+
+export const AskGrownUp: React.FC<AskGrownUpProps> = ({ onOpen }) => {
   const { t } = useT();
   const [open, setOpen] = useState(false);
   const [copied, setCopied] = useState(false);
@@ -52,7 +57,10 @@ export const AskGrownUp: React.FC = () => {
         </div>
       </div>
       {!open ? (
-        <UIButton variant="secondary" fullWidth onClick={() => setOpen(true)}>
+        <UIButton variant="secondary" fullWidth onClick={() => {
+            setOpen(true);
+            onOpen?.();
+          }}>
           {t("rebus.group.ask.button")}
         </UIButton>
       ) : (

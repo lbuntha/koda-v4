@@ -1,0 +1,161 @@
+{
+  "_comment": [
+    "What Rebus Rush says out loud.",
+    "",
+    "Rebus Rush is its own module, not a skill, so its lines live here beside the",
+    "common pack and are recorded the same way:",
+    "",
+    "  npm run voice:plan -- --skill rebus",
+    "  npm run voice:record -- --skill rebus --provider openai",
+    "",
+    "Only fixed lines: nothing with a name or a number in it, because a sentence",
+    "that never repeats cannot be one clip. They play as reactions (several ways",
+    "of saying one thing, never the same one twice running) and are silent when",
+    "not recorded, so the game works the same with no recordings at all.",
+    "",
+    "A line is never a verdict on the child. The Machine winning, or time running",
+    "out, is said kindly and in the Machine's voice, not the child's failure."
+  ],
+  "groups": {
+    "rebus-start": {
+      "voices": [
+        "Kore",
+        "Zephyr",
+        "Puck"
+      ],
+      "phrases": [
+        "Ready? Look at the pictures!",
+        "What do the pictures say?",
+        "Let's crack this one!"
+      ]
+    },
+    "rebus-next": {
+      "voices": [
+        "Zephyr",
+        "Kore"
+      ],
+      "phrases": [
+        "Next puzzle!",
+        "Here comes another one!",
+        "Ready for the next one?"
+      ]
+    },
+    "rebus-wrong": {
+      "voices": [
+        "Kore",
+        "Zephyr",
+        "Puck"
+      ],
+      "phrases": [
+        "Not quite. Look again!",
+        "Hmm, try once more!",
+        "Almost! Read the pictures again."
+      ]
+    },
+    "rebus-solved": {
+      "voices": [
+        "Kore",
+        "Puck",
+        "Zephyr"
+      ],
+      "phrases": [
+        "You cracked it!",
+        "Yes! You read the pictures!",
+        "Brilliant puzzle solving!",
+        "You got there first!"
+      ]
+    },
+    "rebus-machineMissed": {
+      "voices": [
+        "Zephyr",
+        "Kore"
+      ],
+      "phrases": [
+        "Oops! The Machine slipped. Your chance!",
+        "The Machine guessed wrong. Go on!"
+      ]
+    },
+    "rebus-machineWon": {
+      "voices": [
+        "Kore",
+        "Zephyr"
+      ],
+      "phrases": [
+        "The Machine got that one. On to the next!",
+        "That was quick! The Machine got it this time."
+      ]
+    },
+    "rebus-timeUp": {
+      "voices": [
+        "Zephyr",
+        "Kore"
+      ],
+      "phrases": [
+        "Time's up! Let's see the answer.",
+        "That was a tricky one. Here's the answer."
+      ]
+    },
+    "rebus-roundWon": {
+      "voices": [
+        "Kore",
+        "Puck",
+        "Zephyr"
+      ],
+      "phrases": [
+        "You beat the Machine! Hooray!",
+        "You win! What a puzzle solver!",
+        "The Machine is beaten! Well done!"
+      ]
+    },
+    "rebus-roundTie": {
+      "voices": [
+        "Kore",
+        "Zephyr"
+      ],
+      "phrases": [
+        "It's a tie! Well played.",
+        "You and the Machine are even!"
+      ]
+    },
+    "rebus-roundEnd": {
+      "voices": [
+        "Zephyr",
+        "Kore"
+      ],
+      "phrases": [
+        "Good game! Shall we play again?",
+        "The Machine won this time. You'll get it next time!"
+      ]
+    },
+    "rebus-groupWon": {
+      "voices": [
+        "Kore",
+        "Puck"
+      ],
+      "phrases": [
+        "You won! Well done!",
+        "First place! Fantastic!"
+      ]
+    },
+    "rebus-groupEnd": {
+      "voices": [
+        "Zephyr",
+        "Kore"
+      ],
+      "phrases": [
+        "Great game, everyone!",
+        "Well played, all of you!"
+      ]
+    },
+    "rebus-friendWon": {
+      "voices": [
+        "Zephyr",
+        "Kore"
+      ],
+      "phrases": [
+        "Someone was quicker. On to the next!",
+        "A friend got that one. Next puzzle!"
+      ]
+    }
+  }
+}

@@ -94,9 +94,18 @@ export const GroupRoom: React.FC<GroupRoomProps> = ({ code, token, initial = nul
     );
   }
 
+  // The game goes on through a dropped connection: say so, and carry on.
+  const offline =
+    link === "reconnecting" ? (
+      <p role="status" className={`${themeSystem.flash("info")} mx-auto mb-3 w-full max-w-xl text-center`}>
+        {t("rebus.group.reconnecting")}
+      </p>
+    ) : null;
+
   if (room.status === "pending") {
     return (
       <div className="mx-auto flex w-full max-w-xl flex-col items-center gap-4 pb-20 text-center">
+        {offline}
         <p role="status" className={themeSystem.flash("info")}>
           {t("rebus.group.door")}
         </p>
@@ -109,7 +118,12 @@ export const GroupRoom: React.FC<GroupRoomProps> = ({ code, token, initial = nul
   }
 
   if (room.status === "playing" && room.puzzle) {
-    return <GroupPlay room={room} token={token} skewMs={feed.skewMs} apply={apply} />;
+    return (
+      <>
+        {offline}
+        <GroupPlay room={room} token={token} skewMs={feed.skewMs} apply={apply} />
+      </>
+    );
   }
 
   if (room.status === "playing") {
@@ -121,7 +135,20 @@ export const GroupRoom: React.FC<GroupRoomProps> = ({ code, token, initial = nul
   }
 
   if (room.status === "finished") {
-    return <GroupFinal room={room} busy={busy} error={error} reward={reward} onAgain={() => void act(() => GroupAPI.rematch(code, token))} onLeave={() => void leave()} />;
+    return (
+      <>
+        {offline}
+        <GroupFinal
+          room={room}
+          busy={busy}
+          error={error}
+          reward={reward}
+          onAsked={() => void GroupAPI.asked(code, token).catch(() => undefined)}
+          onAgain={() => void act(() => GroupAPI.rematch(code, token))}
+          onLeave={() => void leave()}
+        />
+      </>
+    );
   }
 
   return (

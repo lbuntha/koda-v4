@@ -39,6 +39,7 @@ from app.security.tokens import read_access
 router = APIRouter(prefix="/rebus/rooms", tags=["rebus-rooms"])
 
 CanRead = Annotated[Principal, Depends(require("settings:read"))]
+CanOperate = Annotated[Principal, Depends(require("system:write"))]
 
 #: What a puzzle looks like to a player in a room: everything to show and check it, nothing about its authoring.
 PUZZLE_FIELDS = ("id", "category", "ages", "difficulty", "trick", "pieces", "answer", "accepts", "explanation")
@@ -194,6 +195,7 @@ async def create_room(body: RoomCreateIn, db: Db, p: CanRead) -> dict[str, Any]:
     }
     now_ms = _now_ms()
     room, token = await repo.create(db, host_user_id=p.subject_id, settings=settings, name=body.name, avatar=body.avatar, now_ms=now_ms)
+    await repo.count(db, now_ms, roomsOpened=1, seatsKoda=1)
     return {"playerToken": token, "room": _view(room, room["players"][0], now_ms)}
 
 
@@ -203,6 +205,8 @@ async def join_room(code: str, body: RoomJoinIn, db: Db, request: Request, user:
     if not await _switch(db, "rebus.enabled") or not await _switch(db, "rebus.group"):
         raise Forbidden("Playing in a group is switched off.", "group_off")
     _check_choice(body.name, body.avatar)
+    if user is None and not (await _owner_settings(db)).guestsAllowed:
+        raise Forbidden("Only players with a Koda account can join right now.", "guests_off")
     now_ms = _now_ms()
     outcome, room, token = await repo.join(
         db, rules.normalize_code(code), name=body.name, avatar=body.avatar, user_id=user.subject_id if user else None, now_ms=now_ms
@@ -219,7 +223,17 @@ async def join_room(code: str, body: RoomJoinIn, db: Db, request: Request, user:
         raise Conflict("This room is full.", "room_full")
     me = repo.request_of(room, token)
     assert me is not None
+    await repo.count(db, now_ms, requests=1)
     return {"playerToken": token, "room": _waiting_view(room, me, now_ms)}
+
+
+@router.get("/report/summary")
+async def report(db: Db, p: CanOperate, days: int = 30) -> dict[str, Any]:
+    """Group play in numbers for the owner: one row per day, and the totals."""
+    days = max(1, min(days, 120))
+    rows = await repo.report(db, _now_ms(), days)
+    totals = {c: sum(r[c] for r in rows) for c in repo.COUNTERS}
+    return {"days": days, "rows": rows, "totals": totals}
 
 
 @router.get("/{code}")
@@ -252,6 +266,7 @@ async def start_room(code: str, db: Db, x_player_token: Annotated[str | None, He
     started = await repo.start(db, room["_id"], puzzles=[_public_puzzle(c) for c in chosen], now_ms=now_ms)
     if not started:
         raise Conflict("The game has already started.", "room_started")
+    await repo.count(db, now_ms, gamesStarted=1, playersStarted=len(started["players"]))
     return _view(started, repo.seat_of(started, x_player_token) or me, now_ms)
 
 
@@ -302,9 +317,12 @@ async def accept(code: str, body: AnswerIn, db: Db, x_player_token: Annotated[st
     _host_only(room, me)
     if room["status"] != "lobby":
         raise Conflict("The game has already started.", "room_started")
+    knocking = next((r for r in room.get("requests", []) if r["pid"] == body.pid), None)
     outcome = await repo.accept(db, room["_id"], body.pid)
     if outcome == "full":
         raise Conflict("This room is full.", "room_full")
+    if outcome == "ok" and knocking:
+        await repo.count(db, now_ms, **({"seatsKoda": 1} if knocking.get("userId") else {"seatsGuest": 1}))
     room = await repo.get(db, room["_id"]) or room
     return _view(room, me, now_ms)
 
@@ -317,6 +335,16 @@ async def decline(code: str, body: AnswerIn, db: Db, x_player_token: Annotated[s
     await repo.decline(db, room["_id"], body.pid)
     room = await repo.get(db, room["_id"]) or room
     return _view(room, me, now_ms)
+
+
+@router.post("/{code}/asked")
+async def asked_grown_up(code: str, db: Db, x_player_token: Annotated[str | None, Header()] = None) -> dict[str, str]:
+    """A guest opened "ask a grown-up". Counted once per seat; nothing about the child is kept."""
+    now_ms = _now_ms()
+    room, me = await _seat(db, code, x_player_token, now_ms)
+    if me.get("userId") is None and await repo.mark_asked(db, room["_id"], me["pid"]):
+        await repo.count(db, now_ms, askedGrownUp=1)
+    return {"status": "noted"}
 
 
 @router.post("/{code}/leave")
@@ -346,4 +374,5 @@ async def rematch(code: str, db: Db, x_player_token: Annotated[str | None, Heade
     again = await repo.rematch(db, room["_id"], now_ms=now_ms)
     if not again:
         raise Conflict("The game is not over yet.", "not_finished")
+    await repo.count(db, now_ms, rematches=1)
     return _view(again, repo.seat_of(again, x_player_token) or me, now_ms)

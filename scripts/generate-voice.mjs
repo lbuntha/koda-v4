@@ -78,8 +78,18 @@ const skillsRoot = path.join(root, "src", "skills");
 const COMMON_ID = "common";
 const commonRoot = path.join(root, "src", "voice", COMMON_ID);
 
+/**
+ * Other voices that belong to a module rather than a skill.
+ *
+ * Rebus Rush is its own module (`src/rebus/`), so its lines live in
+ * `src/voice/rebus/` beside the common pack and are recorded the same way:
+ * `--skill rebus`.
+ */
+const MODULE_VOICES = new Set(["rebus"]);
+
 /** Where one voice keeps its files. Beside its `assets/`, for the same reason. */
-const voiceRoot = (id) => (id === COMMON_ID ? commonRoot : path.join(skillsRoot, id));
+const voiceRoot = (id) =>
+  id === COMMON_ID ? commonRoot : MODULE_VOICES.has(id) ? path.join(root, "src", "voice", id) : path.join(skillsRoot, id);
 const audioDir = (id) => path.join(voiceRoot(id), "audio");
 
 /** Phrases the common pack already covers, so no skill pays to record them twice. */
@@ -378,6 +388,12 @@ async function speakingSkills() {
   if (!onlySkill || onlySkill === COMMON_ID) {
     const phrases = await phrasesFor(COMMON_ID);
     if (phrases.length > 0) found.push({ skillId: COMMON_ID, phrases });
+  }
+
+  for (const id of MODULE_VOICES) {
+    if (onlySkill && onlySkill !== id) continue;
+    const phrases = (await phrasesFor(id)).filter((p) => !shared.has(p.phrase));
+    if (phrases.length > 0) found.push({ skillId: id, phrases });
   }
   return found;
 }

@@ -22,3 +22,26 @@ export const saveAutoNext = (on: boolean): void => {
     /* Not remembered this time. */
   }
 };
+
+const ADAPTIVE_KEY = "koda.rebus.adaptive";
+
+/**
+ * Where "adaptive" left off, so a child who has been beating the Machine does
+ * not start every round on medium. 0 easy, 1 medium, 2 hard; anything unreadable is medium.
+ */
+export const loadAdaptive = (): 0 | 1 | 2 => {
+  try {
+    const raw = localStorage.getItem(ADAPTIVE_KEY);
+    return raw === "0" ? 0 : raw === "2" ? 2 : 1;
+  } catch {
+    return 1;
+  }
+};
+
+export const saveAdaptive = (level: 0 | 1 | 2): void => {
+  try {
+    localStorage.setItem(ADAPTIVE_KEY, String(level));
+  } catch {
+    /* Not remembered this time. */
+  }
+};

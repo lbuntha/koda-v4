@@ -21,6 +21,8 @@ class RebusSettings(Model):
     hintRungs: int = Field(default=3, ge=1, le=3)
     #: Most players in one group room.
     maxPlayers: int = Field(default=4, ge=2, le=6)
+    #: Whether someone without a Koda account may join a room. Off: only signed-in players.
+    guestsAllowed: bool = True
     #: "free" lets the child pick the Machine's level; 0 easy, 1 medium, 2 hard fixes it.
     machineLock: Literal["free", 0, 1, 2] = "free"
     #: Letter tiles instead of a keyboard, for the youngest.

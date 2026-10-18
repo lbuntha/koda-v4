@@ -8,7 +8,7 @@
 
 import type { AgeRange } from "../lib/ages";
 
-export const CATEGORY_IDS = ["countries", "food", "sayings", "animals", "sports", "school", "science"] as const;
+export const CATEGORY_IDS = ["countries", "food", "sayings", "animals", "sports", "school", "science", "khmer"] as const;
 export type CategoryId = (typeof CATEGORY_IDS)[number];
 
 /** 1 easy – 3 hard. */

@@ -633,6 +633,28 @@ html.theme-light,
   animation: rebus-confetti 1.4s cubic-bezier(0.2, 0.7, 0.3, 1) both;
 }
 
+/* The Machine's moods: a wobble when it slips, a hop when it wins, a slow droop when it loses. Each plays once. */
+@keyframes rebus-bot-oops {
+  0%, 100% { transform: rotate(0deg); }
+  20% { transform: rotate(-14deg); }
+  40% { transform: rotate(12deg); }
+  60% { transform: rotate(-8deg); }
+  80% { transform: rotate(5deg); }
+}
+@keyframes rebus-bot-cheer {
+  0%, 100% { transform: translateY(0); }
+  35% { transform: translateY(-6px) scale(1.15); }
+  60% { transform: translateY(0) scale(1); }
+  80% { transform: translateY(-3px); }
+}
+@keyframes rebus-bot-groan {
+  0% { transform: translateY(0) rotate(0deg); }
+  100% { transform: translateY(2px) rotate(-10deg); }
+}
+.rebus-bot-oops { animation: rebus-bot-oops 0.7s ease-in-out both; }
+.rebus-bot-cheer { animation: rebus-bot-cheer 0.8s ease-out both; }
+.rebus-bot-groan { animation: rebus-bot-groan 0.5s ease-out both; }
+
 .tap-pop-anim {
   animation: tactile-tap-pop 0.42s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
   z-index: 30;
@@ -656,6 +678,9 @@ html.theme-light,
   .koda-bob,
   .koda-celebrate-icon,
   .rebus-confetti,
+  .rebus-bot-oops,
+  .rebus-bot-cheer,
+  .rebus-bot-groan,
   .ready-to-unlock-node,
   .block-draggable:active,
   .chamber-snap-hundreds::before,

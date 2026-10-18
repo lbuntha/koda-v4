@@ -16,7 +16,7 @@ vi.mock("./bank", () => {
   };
 });
 const played = vi.hoisted(() => vi.fn());
-vi.mock("../utils/audio", () => ({ playSound: played }));
+vi.mock("../utils/audio", () => ({ isVoiceEnabled: () => false, playSound: played }));
 
 import { RebusPage } from "./RebusPage";
 

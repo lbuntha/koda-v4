@@ -9,7 +9,7 @@
  */
 
 import React, { useMemo, useState } from "react";
-import { ArrowLeft, Play, Users } from "lucide-react";
+import { ArrowLeft, Hand, Play, Users } from "lucide-react";
 import { useT } from "../../lib/i18n";
 import { themeSystem } from "../../lib/themeSystem";
 import { UIBadge, UIButton, UITabs } from "../../components/ui";
@@ -43,13 +43,15 @@ export interface RebusSetupProps {
   onStart(choice: RebusChoice): void;
   /** Open the group-play door: open a room, or join one with a code. */
   onGroup?(): void;
+  /** Take turns on this device: no internet needed. */
+  onTurns?(): void;
   onBack?(): void;
 }
 
 const LEVEL_KEYS = ["easy", "medium", "hard"] as const;
 const STATUS_KEYS: readonly StatusFilter[] = ["all", "new", "retry", "clean"];
 
-export const RebusSetup: React.FC<RebusSetupProps> = ({ bank, settings, results = {}, onStart, onGroup, onBack }) => {
+export const RebusSetup: React.FC<RebusSetupProps> = ({ bank, settings, results = {}, onStart, onGroup, onTurns, onBack }) => {
   const { t } = useT();
   const total = bank.puzzles.length;
   const firstWithPuzzles = CATEGORIES.find((c) => bank.counts[c.id] > 0)?.id ?? "mixed";
@@ -135,6 +137,11 @@ export const RebusSetup: React.FC<RebusSetupProps> = ({ bank, settings, results 
           {onGroup && (
             <UIButton variant="secondary" size="lg" fullWidth icon={<Users />} onClick={onGroup}>
               {t("rebus.group.playWithFriends")}
+            </UIButton>
+          )}
+          {onTurns && (
+            <UIButton variant="secondary" size="lg" fullWidth icon={<Hand />} onClick={onTurns}>
+              {t("rebus.turns.openCard")}
             </UIButton>
           )}
         </>

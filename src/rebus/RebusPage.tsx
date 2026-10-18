@@ -13,11 +13,13 @@ import { themeSystem } from "../lib/themeSystem";
 import { useAudienceViewer } from "../skills/viewer";
 import { bankForAge, useRebusBank } from "./bank";
 import { buildRound, filterPuzzles } from "./round";
+import { loadAdaptive, saveAdaptive } from "./prefs";
 import { loadResults, saveOutcome } from "./resultsStore";
 import { loadSeen, markSeen } from "./seenStore";
 import type { RebusSettings } from "./settings";
 import { useRebusSettings } from "./settingsStore";
 import { GroupHome } from "./group/GroupHome";
+import { TurnsHome } from "./turns/TurnsHome";
 import { useSession } from "../lib/sync";
 import { seenSet } from "./seen";
 import { RebusEmpty } from "./ui/RebusEmpty";
@@ -69,11 +71,13 @@ export const RebusPage: React.FC<RebusPageProps> = ({ age: ageOverride, settings
   const session = useSession();
   // Playing with friends: its own screens, opened from setup or from an invitation link.
   const [group, setGroup] = useState(joinCode !== null);
+  // Taking turns on this device: its own screens, no network.
+  const [turns, setTurns] = useState(false);
 
   useEffect(() => {
-    onDeepChange?.(phase !== undefined || group);
+    onDeepChange?.(phase !== undefined || group || turns);
     return () => onDeepChange?.(false);
-  }, [phase, group, onDeepChange]);
+  }, [phase, group, turns, onDeepChange]);
 
   useRebusSounds(round);
   // The ages the round covers, so the log files it under the right band.
@@ -93,6 +97,8 @@ export const RebusPage: React.FC<RebusPageProps> = ({ age: ageOverride, settings
     if (recorded.current === key) return;
     recorded.current = key;
     saveOutcome(state.outcomes[state.outcomes.length - 1]);
+    // "Adaptive" picks up next round where this one left it.
+    if (state.config.level === "adaptive") saveAdaptive(state.adaptive);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [outcomes?.length]);
 
@@ -113,7 +119,7 @@ export const RebusPage: React.FC<RebusPageProps> = ({ age: ageOverride, settings
       setPass(null);
     }
     markSeen(built.puzzles.map((p) => p.id));
-    round.start({ puzzles: built.puzzles, settings, level: pick.level, seed: `${Date.now()}` });
+    round.start({ puzzles: built.puzzles, settings, level: pick.level, adaptiveStart: loadAdaptive(), seed: `${Date.now()}` });
   };
 
   if (group) {
@@ -132,12 +138,14 @@ export const RebusPage: React.FC<RebusPageProps> = ({ age: ageOverride, settings
     );
   }
 
+  if (turns) return <TurnsHome puzzles={bank.puzzles} counts={bank.counts} settings={settings} onExit={() => setTurns(false)} />;
+
   if (!round.state && fullBank.puzzles.length === 0) return <RebusEmpty loaded={fullBank.loaded} onBack={onExit} />;
 
   if (!round.state) {
     return (
       <>
-        <RebusSetup bank={bank} settings={settings} results={results} onStart={(pick) => start(pick)} onGroup={() => setGroup(true)} onBack={onExit} />
+        <RebusSetup bank={bank} settings={settings} results={results} onStart={(pick) => start(pick)} onGroup={() => setGroup(true)} onTurns={() => setTurns(true)} onBack={onExit} />
         {short && <p role="alert" className={themeSystem.flash("info", "mx-auto mt-3 max-w-2xl")}>{t("rebus.noneFit")}</p>}
       </>
     );

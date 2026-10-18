@@ -44,7 +44,7 @@ export const useRebusSounds = ({ state, now }: RebusRound): void => {
       else if (reason === "machine") cue("machineWon");
       else if (reason === "time") cue("timeUp");
     } else if (phase !== prev.phase && phase === "done") {
-      cue(state.score.child > state.score.machine ? "roundWon" : "roundEnd");
+      cue(state.score.child > state.score.machine ? "roundWon" : state.score.child === state.score.machine ? "roundTie" : "roundEnd");
     }
 
     seen.current = next;

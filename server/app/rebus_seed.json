@@ -4880,5 +4880,877 @@
   "accepts": [],
   "explanation": "thunder + storm = thunderstorm.",
   "source": "official"
+ },
+ {
+  "id": "khmer-sun",
+  "category": "khmer",
+  "ages": [
+   5,
+   10
+  ],
+  "difficulty": 1,
+  "trick": "compound",
+  "pieces": [
+   {
+    "kind": "icon",
+    "id": "rebus-sun",
+    "name": "sun"
+   }
+  ],
+  "answer": "ព្រះអាទិត្យ",
+  "accepts": [
+   "ថ្ងៃ"
+  ],
+  "explanation": "រូបនេះជាព្រះអាទិត្យ។",
+  "source": "official"
+ },
+ {
+  "id": "khmer-moon",
+  "category": "khmer",
+  "ages": [
+   5,
+   10
+  ],
+  "difficulty": 1,
+  "trick": "compound",
+  "pieces": [
+   {
+    "kind": "icon",
+    "id": "rebus-moon",
+    "name": "moon"
+   }
+  ],
+  "answer": "ព្រះច័ន្ទ",
+  "accepts": [
+   "ខែ"
+  ],
+  "explanation": "រូបនេះជាព្រះច័ន្ទ។",
+  "source": "official"
+ },
+ {
+  "id": "khmer-star",
+  "category": "khmer",
+  "ages": [
+   5,
+   10
+  ],
+  "difficulty": 1,
+  "trick": "compound",
+  "pieces": [
+   {
+    "kind": "icon",
+    "id": "rebus-star",
+    "name": "star"
+   }
+  ],
+  "answer": "ផ្កាយ",
+  "accepts": [],
+  "explanation": "រូបនេះជាផ្កាយ។",
+  "source": "official"
+ },
+ {
+  "id": "khmer-fish",
+  "category": "khmer",
+  "ages": [
+   5,
+   10
+  ],
+  "difficulty": 1,
+  "trick": "compound",
+  "pieces": [
+   {
+    "kind": "icon",
+    "id": "rebus-fish",
+    "name": "fish"
+   }
+  ],
+  "answer": "ត្រី",
+  "accepts": [],
+  "explanation": "រូបនេះជាត្រី។",
+  "source": "official"
+ },
+ {
+  "id": "khmer-bird",
+  "category": "khmer",
+  "ages": [
+   5,
+   10
+  ],
+  "difficulty": 1,
+  "trick": "compound",
+  "pieces": [
+   {
+    "kind": "icon",
+    "id": "rebus-bird",
+    "name": "bird"
+   }
+  ],
+  "answer": "បក្សី",
+  "accepts": [
+   "សត្វស្លាប",
+   "សត្វបក្សី"
+  ],
+  "explanation": "រូបនេះជាបក្សី។",
+  "source": "official"
+ },
+ {
+  "id": "khmer-dog",
+  "category": "khmer",
+  "ages": [
+   5,
+   10
+  ],
+  "difficulty": 1,
+  "trick": "compound",
+  "pieces": [
+   {
+    "kind": "icon",
+    "id": "rebus-dog",
+    "name": "dog"
+   }
+  ],
+  "answer": "ឆ្កែ",
+  "accepts": [
+   "សត្វឆ្កែ"
+  ],
+  "explanation": "រូបនេះជាឆ្កែ។",
+  "source": "official"
+ },
+ {
+  "id": "khmer-cat",
+  "category": "khmer",
+  "ages": [
+   5,
+   10
+  ],
+  "difficulty": 1,
+  "trick": "compound",
+  "pieces": [
+   {
+    "kind": "icon",
+    "id": "rebus-cat",
+    "name": "cat"
+   }
+  ],
+  "answer": "ឆ្មា",
+  "accepts": [
+   "សត្វឆ្មា"
+  ],
+  "explanation": "រូបនេះជាឆ្មា។",
+  "source": "official"
+ },
+ {
+  "id": "khmer-egg",
+  "category": "khmer",
+  "ages": [
+   5,
+   10
+  ],
+  "difficulty": 1,
+  "trick": "compound",
+  "pieces": [
+   {
+    "kind": "icon",
+    "id": "rebus-egg",
+    "name": "egg"
+   }
+  ],
+  "answer": "ពងមាន់",
+  "accepts": [
+   "ពង"
+  ],
+  "explanation": "រូបនេះជាពង។",
+  "source": "official"
+ },
+ {
+  "id": "khmer-house",
+  "category": "khmer",
+  "ages": [
+   5,
+   10
+  ],
+  "difficulty": 1,
+  "trick": "compound",
+  "pieces": [
+   {
+    "kind": "icon",
+    "id": "rebus-house",
+    "name": "house"
+   }
+  ],
+  "answer": "ផ្ទះ",
+  "accepts": [],
+  "explanation": "រូបនេះជាផ្ទះ។",
+  "source": "official"
+ },
+ {
+  "id": "khmer-flower",
+  "category": "khmer",
+  "ages": [
+   5,
+   10
+  ],
+  "difficulty": 1,
+  "trick": "compound",
+  "pieces": [
+   {
+    "kind": "icon",
+    "id": "rebus-flower",
+    "name": "flower"
+   }
+  ],
+  "answer": "ផ្កា",
+  "accepts": [],
+  "explanation": "រូបនេះជាផ្កា។",
+  "source": "official"
+ },
+ {
+  "id": "khmer-book",
+  "category": "khmer",
+  "ages": [
+   5,
+   10
+  ],
+  "difficulty": 1,
+  "trick": "compound",
+  "pieces": [
+   {
+    "kind": "icon",
+    "id": "rebus-book",
+    "name": "book"
+   }
+  ],
+  "answer": "សៀវភៅ",
+  "accepts": [],
+  "explanation": "រូបនេះជាសៀវភៅ។",
+  "source": "official"
+ },
+ {
+  "id": "khmer-water",
+  "category": "khmer",
+  "ages": [
+   5,
+   10
+  ],
+  "difficulty": 1,
+  "trick": "compound",
+  "pieces": [
+   {
+    "kind": "icon",
+    "id": "rebus-water",
+    "name": "water"
+   }
+  ],
+  "answer": "ទឹក",
+  "accepts": [],
+  "explanation": "រូបនេះជាទឹក។",
+  "source": "official"
+ },
+ {
+  "id": "khmer-fire",
+  "category": "khmer",
+  "ages": [
+   5,
+   10
+  ],
+  "difficulty": 1,
+  "trick": "compound",
+  "pieces": [
+   {
+    "kind": "icon",
+    "id": "rebus-fire",
+    "name": "fire"
+   }
+  ],
+  "answer": "ភ្លើង",
+  "accepts": [],
+  "explanation": "រូបនេះជាភ្លើង។",
+  "source": "official"
+ },
+ {
+  "id": "khmer-rain",
+  "category": "khmer",
+  "ages": [
+   5,
+   10
+  ],
+  "difficulty": 1,
+  "trick": "compound",
+  "pieces": [
+   {
+    "kind": "icon",
+    "id": "rebus-rain",
+    "name": "rain"
+   }
+  ],
+  "answer": "ភ្លៀង",
+  "accepts": [],
+  "explanation": "រូបនេះជាភ្លៀង។",
+  "source": "official"
+ },
+ {
+  "id": "khmer-leaf",
+  "category": "khmer",
+  "ages": [
+   5,
+   10
+  ],
+  "difficulty": 1,
+  "trick": "compound",
+  "pieces": [
+   {
+    "kind": "icon",
+    "id": "rebus-leaf",
+    "name": "leaf"
+   }
+  ],
+  "answer": "ស្លឹក",
+  "accepts": [],
+  "explanation": "រូបនេះជាស្លឹក។",
+  "source": "official"
+ },
+ {
+  "id": "khmer-key",
+  "category": "khmer",
+  "ages": [
+   5,
+   10
+  ],
+  "difficulty": 1,
+  "trick": "compound",
+  "pieces": [
+   {
+    "kind": "icon",
+    "id": "rebus-key",
+    "name": "key"
+   }
+  ],
+  "answer": "កូនសោ",
+  "accepts": [
+   "សោ",
+   "សោរ"
+  ],
+  "explanation": "រូបនេះជាកូនសោ។",
+  "source": "official"
+ },
+ {
+  "id": "khmer-horse",
+  "category": "khmer",
+  "ages": [
+   5,
+   10
+  ],
+  "difficulty": 1,
+  "trick": "compound",
+  "pieces": [
+   {
+    "kind": "icon",
+    "id": "rebus-horse",
+    "name": "horse"
+   }
+  ],
+  "answer": "សេះ",
+  "accepts": [
+   "សត្វសេះ"
+  ],
+  "explanation": "រូបនេះជាសេះ។",
+  "source": "official"
+ },
+ {
+  "id": "khmer-sheep",
+  "category": "khmer",
+  "ages": [
+   5,
+   10
+  ],
+  "difficulty": 1,
+  "trick": "compound",
+  "pieces": [
+   {
+    "kind": "icon",
+    "id": "rebus-sheep",
+    "name": "sheep"
+   }
+  ],
+  "answer": "ចៀម",
+  "accepts": [
+   "សត្វចៀម"
+  ],
+  "explanation": "រូបនេះជាចៀម។",
+  "source": "official"
+ },
+ {
+  "id": "khmer-frog",
+  "category": "khmer",
+  "ages": [
+   5,
+   10
+  ],
+  "difficulty": 1,
+  "trick": "compound",
+  "pieces": [
+   {
+    "kind": "icon",
+    "id": "rebus-frog",
+    "name": "frog"
+   }
+  ],
+  "answer": "កង្កែប",
+  "accepts": [
+   "សត្វកង្កែប"
+  ],
+  "explanation": "រូបនេះជាកង្កែប។",
+  "source": "official"
+ },
+ {
+  "id": "khmer-monkey",
+  "category": "khmer",
+  "ages": [
+   5,
+   10
+  ],
+  "difficulty": 1,
+  "trick": "compound",
+  "pieces": [
+   {
+    "kind": "icon",
+    "id": "rebus-monkey",
+    "name": "monkey"
+   }
+  ],
+  "answer": "ស្វា",
+  "accepts": [
+   "សត្វស្វា"
+  ],
+  "explanation": "រូបនេះជាស្វា។",
+  "source": "official"
+ },
+ {
+  "id": "khmer-pencil",
+  "category": "khmer",
+  "ages": [
+   5,
+   10
+  ],
+  "difficulty": 1,
+  "trick": "compound",
+  "pieces": [
+   {
+    "kind": "icon",
+    "id": "rebus-pencil",
+    "name": "pencil"
+   }
+  ],
+  "answer": "ខ្មៅដៃ",
+  "accepts": [],
+  "explanation": "រូបនេះជាខ្មៅដៃ។",
+  "source": "official"
+ },
+ {
+  "id": "khmer-cloud",
+  "category": "khmer",
+  "ages": [
+   5,
+   10
+  ],
+  "difficulty": 1,
+  "trick": "compound",
+  "pieces": [
+   {
+    "kind": "icon",
+    "id": "rebus-cloud",
+    "name": "cloud"
+   }
+  ],
+  "answer": "ពពក",
+  "accepts": [],
+  "explanation": "រូបនេះជាពពក។",
+  "source": "official"
+ },
+ {
+  "id": "khmer-wind",
+  "category": "khmer",
+  "ages": [
+   5,
+   10
+  ],
+  "difficulty": 1,
+  "trick": "compound",
+  "pieces": [
+   {
+    "kind": "icon",
+    "id": "rebus-wind",
+    "name": "wind"
+   }
+  ],
+  "answer": "ខ្យល់",
+  "accepts": [],
+  "explanation": "រូបនេះជាខ្យល់។",
+  "source": "official"
+ },
+ {
+  "id": "khmer-sea",
+  "category": "khmer",
+  "ages": [
+   5,
+   10
+  ],
+  "difficulty": 1,
+  "trick": "compound",
+  "pieces": [
+   {
+    "kind": "icon",
+    "id": "rebus-sea",
+    "name": "sea"
+   }
+  ],
+  "answer": "សមុទ្រ",
+  "accepts": [],
+  "explanation": "រូបនេះជាសមុទ្រ។",
+  "source": "official"
+ },
+ {
+  "id": "khmer-bee",
+  "category": "khmer",
+  "ages": [
+   5,
+   10
+  ],
+  "difficulty": 1,
+  "trick": "compound",
+  "pieces": [
+   {
+    "kind": "icon",
+    "id": "rebus-bee",
+    "name": "bee"
+   }
+  ],
+  "answer": "ឃ្មុំ",
+  "accepts": [
+   "សត្វឃ្មុំ"
+  ],
+  "explanation": "រូបនេះជាឃ្មុំ។",
+  "source": "official"
+ },
+ {
+  "id": "khmer-corn",
+  "category": "khmer",
+  "ages": [
+   5,
+   10
+  ],
+  "difficulty": 1,
+  "trick": "compound",
+  "pieces": [
+   {
+    "kind": "icon",
+    "id": "rebus-corn",
+    "name": "corn"
+   }
+  ],
+  "answer": "ពោត",
+  "accepts": [],
+  "explanation": "រូបនេះជាពោត។",
+  "source": "official"
+ },
+ {
+  "id": "khmer-water-ice",
+  "category": "khmer",
+  "ages": [
+   7,
+   12
+  ],
+  "difficulty": 2,
+  "trick": "compound",
+  "pieces": [
+   {
+    "kind": "icon",
+    "id": "rebus-water",
+    "name": "water"
+   },
+   {
+    "kind": "op",
+    "op": "+"
+   },
+   {
+    "kind": "icon",
+    "id": "rebus-ice",
+    "name": "ice"
+   }
+  ],
+  "answer": "ទឹកកក",
+  "accepts": [],
+  "explanation": "ទឹក + កក = ទឹកកក។",
+  "source": "official"
+ },
+ {
+  "id": "khmer-water-fish",
+  "category": "khmer",
+  "ages": [
+   7,
+   12
+  ],
+  "difficulty": 2,
+  "trick": "compound",
+  "pieces": [
+   {
+    "kind": "icon",
+    "id": "rebus-water",
+    "name": "water"
+   },
+   {
+    "kind": "op",
+    "op": "+"
+   },
+   {
+    "kind": "icon",
+    "id": "rebus-fish",
+    "name": "fish"
+   }
+  ],
+  "answer": "ទឹកត្រី",
+  "accepts": [],
+  "explanation": "ទឹក + ត្រី = ទឹកត្រី។",
+  "source": "official"
+ },
+ {
+  "id": "khmer-water-sea",
+  "category": "khmer",
+  "ages": [
+   7,
+   12
+  ],
+  "difficulty": 2,
+  "trick": "compound",
+  "pieces": [
+   {
+    "kind": "icon",
+    "id": "rebus-water",
+    "name": "water"
+   },
+   {
+    "kind": "op",
+    "op": "+"
+   },
+   {
+    "kind": "icon",
+    "id": "rebus-sea",
+    "name": "sea"
+   }
+  ],
+  "answer": "ទឹកសមុទ្រ",
+  "accepts": [],
+  "explanation": "ទឹក + សមុទ្រ = ទឹកសមុទ្រ។",
+  "source": "official"
+ },
+ {
+  "id": "khmer-water-bee",
+  "category": "khmer",
+  "ages": [
+   7,
+   12
+  ],
+  "difficulty": 2,
+  "trick": "compound",
+  "pieces": [
+   {
+    "kind": "icon",
+    "id": "rebus-water",
+    "name": "water"
+   },
+   {
+    "kind": "op",
+    "op": "+"
+   },
+   {
+    "kind": "icon",
+    "id": "rebus-bee",
+    "name": "bee"
+   }
+  ],
+  "answer": "ទឹកឃ្មុំ",
+  "accepts": [],
+  "explanation": "ទឹក + ឃ្មុំ = ទឹកឃ្មុំ។",
+  "source": "official"
+ },
+ {
+  "id": "khmer-water-rain",
+  "category": "khmer",
+  "ages": [
+   7,
+   12
+  ],
+  "difficulty": 2,
+  "trick": "compound",
+  "pieces": [
+   {
+    "kind": "icon",
+    "id": "rebus-water",
+    "name": "water"
+   },
+   {
+    "kind": "op",
+    "op": "+"
+   },
+   {
+    "kind": "icon",
+    "id": "rebus-rain",
+    "name": "rain"
+   }
+  ],
+  "answer": "ទឹកភ្លៀង",
+  "accepts": [],
+  "explanation": "ទឹក + ភ្លៀង = ទឹកភ្លៀង។",
+  "source": "official"
+ },
+ {
+  "id": "khmer-tree-wood",
+  "category": "khmer",
+  "ages": [
+   7,
+   12
+  ],
+  "difficulty": 2,
+  "trick": "compound",
+  "pieces": [
+   {
+    "kind": "icon",
+    "id": "rebus-tree",
+    "name": "tree"
+   },
+   {
+    "kind": "op",
+    "op": "+"
+   },
+   {
+    "kind": "icon",
+    "id": "rebus-wood",
+    "name": "wood"
+   }
+  ],
+  "answer": "ដើមឈើ",
+  "accepts": [],
+  "explanation": "ដើម + ឈើ = ដើមឈើ។",
+  "source": "official"
+ },
+ {
+  "id": "khmer-leaf-wood",
+  "category": "khmer",
+  "ages": [
+   7,
+   12
+  ],
+  "difficulty": 2,
+  "trick": "compound",
+  "pieces": [
+   {
+    "kind": "icon",
+    "id": "rebus-leaf",
+    "name": "leaf"
+   },
+   {
+    "kind": "op",
+    "op": "+"
+   },
+   {
+    "kind": "icon",
+    "id": "rebus-wood",
+    "name": "wood"
+   }
+  ],
+  "answer": "ស្លឹកឈើ",
+  "accepts": [],
+  "explanation": "ស្លឹក + ឈើ = ស្លឹកឈើ។",
+  "source": "official"
+ },
+ {
+  "id": "khmer-wind-storm",
+  "category": "khmer",
+  "ages": [
+   7,
+   12
+  ],
+  "difficulty": 2,
+  "trick": "compound",
+  "pieces": [
+   {
+    "kind": "icon",
+    "id": "rebus-wind",
+    "name": "wind"
+   },
+   {
+    "kind": "op",
+    "op": "+"
+   },
+   {
+    "kind": "icon",
+    "id": "rebus-storm",
+    "name": "storm"
+   }
+  ],
+  "answer": "ខ្យល់ព្យុះ",
+  "accepts": [],
+  "explanation": "ខ្យល់ + ព្យុះ = ខ្យល់ព្យុះ។",
+  "source": "official"
+ },
+ {
+  "id": "khmer-earth-sand",
+  "category": "khmer",
+  "ages": [
+   7,
+   12
+  ],
+  "difficulty": 2,
+  "trick": "compound",
+  "pieces": [
+   {
+    "kind": "icon",
+    "id": "rebus-earth",
+    "name": "earth"
+   },
+   {
+    "kind": "op",
+    "op": "+"
+   },
+   {
+    "kind": "icon",
+    "id": "rebus-sand",
+    "name": "sand"
+   }
+  ],
+  "answer": "ដីខ្សាច់",
+  "accepts": [],
+  "explanation": "ដី + ខ្សាច់ = ដីខ្សាច់។",
+  "source": "official"
+ },
+ {
+  "id": "khmer-water-earth",
+  "category": "khmer",
+  "ages": [
+   9,
+   14
+  ],
+  "difficulty": 3,
+  "trick": "compound",
+  "pieces": [
+   {
+    "kind": "icon",
+    "id": "rebus-water",
+    "name": "water"
+   },
+   {
+    "kind": "op",
+    "op": "+"
+   },
+   {
+    "kind": "icon",
+    "id": "rebus-earth",
+    "name": "earth"
+   }
+  ],
+  "answer": "ទឹកដី",
+  "accepts": [],
+  "explanation": "ទឹក + ដី = ទឹកដី ជាកន្លែងដែលជាប្រទេសរបស់យើង។",
+  "source": "official"
  }
 ]

@@ -6,6 +6,13 @@
  * nothing else to subscribe to. A failed ask is "reconnecting", not an error: the
  * next one usually works, and a poll that takes too long is dropped so slow
  * answers never pile up.
+ *
+ * A dropped connection never ends a game. Only the server saying "you are not
+ * in this room" (removed, or the room is closed) does. The seat is kept, the
+ * asking carries on (slower the longer it fails, and at once when the device
+ * comes back online or the page is shown again), and the player is back where
+ * the room is now the moment one ask gets through. The server holds a room for
+ * two hours, so a minute under a bridge costs nothing.
  */
 
 import { useCallback, useEffect, useRef, useState } from "react";
@@ -14,8 +21,9 @@ import { GroupAPI } from "./groupApi";
 import type { RoomView } from "./types";
 
 export const POLL_MS = 1_000;
-/** After this many failed asks in a row the room is called unreachable. */
-const GIVE_UP_AFTER = 8;
+/** After this many failed asks in a row, ask less often: the network is bad, not busy. */
+const SLOW_AFTER = 10;
+const SLOW_POLL_MS = 3_000;
 
 export type Link = "connecting" | "live" | "reconnecting" | "gone";
 
@@ -50,7 +58,10 @@ export const useRoom = (code: string | null, seat: string | null, initial: RoomV
     let timer: number | undefined;
     const controller = new AbortController();
 
+    let asking = false;
     const ask = async () => {
+      if (asking) return;
+      asking = true;
       try {
         apply(await GroupAPI.poll(code, seat, controller.signal));
       } catch (e) {
@@ -63,18 +74,27 @@ export const useRoom = (code: string | null, seat: string | null, initial: RoomV
           return;
         }
         misses.current += 1;
-        setLink(misses.current >= GIVE_UP_AFTER ? "gone" : "reconnecting");
-        if (misses.current >= GIVE_UP_AFTER) {
-          setGone("closed");
-          return;
-        }
+        setLink("reconnecting");
+      } finally {
+        asking = false;
       }
-      if (live) timer = window.setTimeout(() => void ask(), POLL_MS);
+      if (live) timer = window.setTimeout(() => void ask(), misses.current >= SLOW_AFTER ? SLOW_POLL_MS : POLL_MS);
     };
+
+    // Back online, or the page shown again: ask now rather than wait out the pause.
+    const askNow = () => {
+      if (!live || document.visibilityState === "hidden") return;
+      if (timer) window.clearTimeout(timer);
+      void ask();
+    };
+    window.addEventListener("online", askNow);
+    document.addEventListener("visibilitychange", askNow);
 
     timer = window.setTimeout(() => void ask(), initial ? POLL_MS : 0);
     return () => {
       live = false;
+      window.removeEventListener("online", askNow);
+      document.removeEventListener("visibilitychange", askNow);
       controller.abort();
       if (timer) window.clearTimeout(timer);
     };

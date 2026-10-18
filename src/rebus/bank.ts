@@ -18,7 +18,7 @@ export interface RebusBank {
 }
 
 const countBy = (puzzles: readonly Puzzle[]): Record<CategoryId, number> => {
-  const counts: Record<CategoryId, number> = { countries: 0, food: 0, sayings: 0, animals: 0, sports: 0, school: 0, science: 0 };
+  const counts: Record<CategoryId, number> = { countries: 0, food: 0, sayings: 0, animals: 0, sports: 0, school: 0, science: 0, khmer: 0 };
   for (const p of puzzles) counts[p.category] += 1;
   return counts;
 };

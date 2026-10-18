@@ -41,12 +41,14 @@ export interface PuzzleSpec {
   difficulty?: Difficulty;
   accepts?: string[];
   ages?: AgeRange;
+  /** The id's tail, for an answer that is not written in Latin letters (a Khmer word slugs to nothing). */
+  key?: string;
 }
 
 /** A category's puzzles from short specs. Difficulty defaults to 1 (easy). */
 export const puzzlesFor = (category: CategoryId, specs: readonly PuzzleSpec[]): Puzzle[] =>
-  specs.map(({ pieces, answer, why, trick, difficulty = 1, accepts = [], ages }) => ({
-    id: `${category}-${slug(answer)}`,
+  specs.map(({ pieces, answer, why, trick, difficulty = 1, accepts = [], ages, key }) => ({
+    id: `${category}-${key ?? slug(answer)}`,
     category,
     ages: ages ?? AGES[difficulty],
     difficulty,

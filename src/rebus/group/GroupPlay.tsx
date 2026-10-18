@@ -79,7 +79,7 @@ export const GroupPlay: React.FC<GroupPlayProps> = ({ room, token, skewMs, apply
     if (sounded.current === key) return;
     sounded.current = key;
     if (key.endsWith("live")) cue("start");
-    else if (ended && room.result?.winnerPid && room.result.winnerPid !== room.me.pid) cue("machineWon");
+    else if (ended && room.result?.winnerPid && room.result.winnerPid !== room.me.pid) cue("friendWon");
     else if (key.endsWith("over") || (ended && !room.result?.winnerPid)) cue("timeUp");
   }, [index, ended, locallyOver, counting, room.result, room.me.pid]);
 

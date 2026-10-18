@@ -10,8 +10,9 @@ import type { Puzzle } from "../types";
 import { ANIMALS } from "./animals";
 import { COUNTRIES } from "./countries";
 import { FOOD } from "./food";
+import { KHMER } from "./khmer";
 import { SAYINGS } from "./sayings";
 import { SCHOOL } from "./school";
 import { SCIENCE } from "./science";
 
-export const OFFICIAL_PUZZLES: readonly Puzzle[] = [...COUNTRIES, ...FOOD, ...ANIMALS, ...SAYINGS, ...SCHOOL, ...SCIENCE];
+export const OFFICIAL_PUZZLES: readonly Puzzle[] = [...COUNTRIES, ...FOOD, ...ANIMALS, ...SAYINGS, ...SCHOOL, ...SCIENCE, ...KHMER];

@@ -9,7 +9,7 @@
  */
 
 import React, { useEffect, useRef, useState } from "react";
-import { Bot, Lightbulb, SkipForward, User } from "lucide-react";
+import { Bot, BotMessageSquare, Lightbulb, SkipForward, User } from "lucide-react";
 import { useT } from "../../lib/i18n";
 import { themeSystem } from "../../lib/themeSystem";
 import { UIButton, UIKidMessage, UIProgressBar } from "../../components/ui";
@@ -26,13 +26,29 @@ const WRONG_MS = 2500;
 
 type Standing = "ahead" | "behind" | "tied";
 
+/**
+ * How the Machine is feeling, for the little character in its score chip.
+ * It is only ever a reaction to what just happened, never a judgement of the
+ * child: it groans when the child is quicker, and it never gloats.
+ */
+export type MachineMood = "thinking" | "oops" | "cheer" | "groan" | "shrug";
+
+export const moodOf = (state: RoundState, locked: boolean): MachineMood => {
+  if (state.phase === "playing") return locked ? "oops" : "thinking";
+  const reason = state.last?.reason;
+  return reason === "machine" ? "cheer" : reason === "solved" ? "groan" : "shrug";
+};
+
+const MOOD_CLASS: Record<MachineMood, string> = { thinking: "", oops: "rebus-bot-oops", cheer: "rebus-bot-cheer", groan: "rebus-bot-groan", shrug: "" };
+
+
 const standingOf = (mine: number, theirs: number): Standing => (mine > theirs ? "ahead" : mine < theirs ? "behind" : "tied");
 
-const ScoreChip: React.FC<{ icon: React.ReactNode; label: string; points: number; cue?: string; standing: Standing }> = ({ icon, label, points, cue, standing }) => {
+const ScoreChip: React.FC<{ icon: React.ReactNode; label: string; points: number; cue?: string; standing: Standing; iconClass?: string }> = ({ icon, label, points, cue, standing, iconClass = "" }) => {
   const { t } = useT();
   return (
     <div className={themeSystem.card("default", `flex flex-1 items-center gap-2 px-3 py-2 ${standing === "ahead" ? "!border-emerald-500 ring-2 ring-emerald-200 dark:ring-emerald-800" : ""}`)}>
-      <span className="text-indigo-600 dark:text-indigo-300 [&>svg]:h-5 [&>svg]:w-5">{icon}</span>
+      <span className={`inline-flex text-indigo-600 dark:text-indigo-300 [&>svg]:h-5 [&>svg]:w-5 ${iconClass}`}>{icon}</span>
       <div className="min-w-0">
         <div className="text-xl font-black leading-none text-ink">{points}</div>
         <div className="truncate text-[11px] font-bold text-muted">{cue ?? label}</div>
@@ -47,7 +63,7 @@ const ScoreChip: React.FC<{ icon: React.ReactNode; label: string; points: number
 };
 
 /** Both scores, and in words who is winning: it should never take working out. */
-const Scoreboard: React.FC<{ you: number; machine: number; machineCue?: string; final?: boolean }> = ({ you, machine, machineCue, final }) => {
+const Scoreboard: React.FC<{ you: number; machine: number; machineCue?: string; mood?: MachineMood; final?: boolean }> = ({ you, machine, machineCue, mood = "thinking", final }) => {
   const { t } = useT();
   const diff = Math.abs(you - machine);
   const line = final
@@ -65,7 +81,15 @@ const Scoreboard: React.FC<{ you: number; machine: number; machineCue?: string; 
     <div className="flex flex-col gap-1.5">
       <div className="flex gap-2">
         <ScoreChip icon={<User />} label={t("rebus.you")} points={you} standing={standingOf(you, machine)} />
-        <ScoreChip icon={<Bot />} label={t("rebus.machineName")} points={machine} cue={machineCue} standing={standingOf(machine, you)} />
+        <ScoreChip
+          key={mood}
+          icon={mood === "cheer" || mood === "oops" ? <BotMessageSquare /> : <Bot />}
+          iconClass={MOOD_CLASS[mood]}
+          label={t("rebus.machineName")}
+          points={machine}
+          cue={machineCue ?? (mood === "thinking" ? undefined : t(`rebus.mood.${mood}`))}
+          standing={standingOf(machine, you)}
+        />
       </div>
       <p role="status" className="text-center text-sm font-bold text-body">
         {line}
@@ -166,7 +190,7 @@ export const PlayView: React.FC<{ round: RebusRound; letterTiles: boolean }> = (
     <div className="mx-auto flex w-full max-w-xl flex-col gap-4 pb-20">
       <UIProgressBar value={state.index} max={total} size="sm" label={t("rebus.puzzleOf", { n: state.index + 1, total })} caption={t("rebus.puzzleOf", { n: state.index + 1, total })} />
 
-      <Scoreboard you={state.score.child} machine={state.score.machine} machineCue={locked ? t("rebus.machineLocked") : undefined} />
+      <Scoreboard you={state.score.child} machine={state.score.machine} machineCue={locked ? t("rebus.machineLocked") : undefined} mood={moodOf(state, locked)} />
 
       <PuzzleCanvas pieces={run.puzzle.pieces} label={t("rebus.puzzle")} />
 
@@ -252,7 +276,7 @@ export const RevealView: React.FC<{ round: RebusRound; autoNext?: boolean }> = (
 
   return (
     <div className="mx-auto flex w-full max-w-xl flex-col gap-4 pb-20">
-      <Scoreboard you={state.score.child} machine={state.score.machine} final={lastPuzzle} />
+      <Scoreboard you={state.score.child} machine={state.score.machine} mood={moodOf(state, false)} final={lastPuzzle} />
 
       <UIKidMessage {...message} actionLabel={lastPuzzle ? t("rebus.seeResults") : t("rebus.next")} onAction={() => send({ type: "next" })} />
 

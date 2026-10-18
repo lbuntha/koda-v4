@@ -117,3 +117,52 @@ describe("the owner's panel", () => {
     await screen.findByText("Use a hint delay of 3 to 60 seconds.");
   });
 });
+
+describe("the group play controls and report", () => {
+  const report = {
+    days: 7,
+    rows: [
+      { day: "2026-10-17", roomsOpened: 0, requests: 0, seatsKoda: 0, seatsGuest: 0, gamesStarted: 0, playersStarted: 0, gamesFinished: 0, rematches: 0, askedGrownUp: 0 },
+      { day: "2026-10-18", roomsOpened: 2, requests: 3, seatsKoda: 2, seatsGuest: 3, gamesStarted: 2, playersStarted: 5, gamesFinished: 1, rematches: 1, askedGrownUp: 2 },
+    ],
+    totals: { roomsOpened: 2, requests: 3, seatsKoda: 2, seatsGuest: 3, gamesStarted: 2, playersStarted: 5, gamesFinished: 1, rematches: 1, askedGrownUp: 2 },
+  };
+
+  it("lets the owner close the door to guests and saves it", async () => {
+    vi.mocked(request).mockImplementation(async (path, options) => {
+      if (String(path).startsWith("/rebus/rooms/report")) return report;
+      if (options?.method === "PATCH") return { value: (options.body as { value: string }).value };
+      return { [REBUS_SETTING]: JSON.stringify(DEFAULT_SETTINGS) };
+    });
+    render(<RebusAdminPanel />);
+    const guests = await screen.findByRole("switch", { name: "Let players without an account join" });
+    await waitFor(() => expect((screen.getByRole("button", { name: "Save changes" }) as HTMLButtonElement).disabled).toBe(true));
+    fireEvent.click(guests);
+    fireEvent.click(screen.getByRole("button", { name: "Save changes" }));
+    await screen.findByText("Saved. Every device uses these on its next sync.");
+    expect(parseRebusSettings(System.snapshot()[REBUS_SETTING]).guestsAllowed).toBe(false);
+  });
+
+  it("shows the owner's totals and the busy days, and says so when the numbers cannot load", async () => {
+    vi.mocked(request).mockImplementation(async (path) => {
+      if (String(path).startsWith("/rebus/rooms/report")) return report;
+      return { [REBUS_SETTING]: JSON.stringify(DEFAULT_SETTINGS) };
+    });
+    const { unmount } = render(<RebusAdminPanel />);
+    const section = await screen.findByRole("region", { name: "Group play" });
+    fireEvent.click(within(section).getByRole("button", { name: "Show the numbers" }));
+    await within(section).findByText("Players seated (3 guests)");
+    expect(within(section).getByText("Players seated (3 guests)").parentElement?.textContent).toContain("5");
+    // Only the day with games is listed.
+    expect(within(section).getAllByRole("row")).toHaveLength(2);
+    unmount();
+
+    vi.mocked(request).mockImplementation(async (path) => {
+      if (String(path).startsWith("/rebus/rooms/report")) throw new Error("offline");
+      return { [REBUS_SETTING]: JSON.stringify(DEFAULT_SETTINGS) };
+    });
+    render(<RebusAdminPanel />);
+    fireEvent.click(await screen.findByRole("button", { name: "Show the numbers" }));
+    await screen.findByText("Could not load the numbers. Check the connection and try again.");
+  });
+});

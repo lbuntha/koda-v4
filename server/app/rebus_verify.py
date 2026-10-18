@@ -21,7 +21,7 @@ from typing import Any
 
 from app.ages import is_age_range
 
-CATEGORIES = ("countries", "food", "sayings", "animals", "sports", "school", "science")
+CATEGORIES = ("countries", "food", "sayings", "animals", "sports", "school", "science", "khmer")
 TRICKS = ("compound", "sound-alike", "position", "size", "style", "add-remove")
 MAX_PIECES = 7
 MIN_ANSWER_LETTERS = 3

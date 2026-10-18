@@ -1,8 +1,9 @@
 /** The end of a race: who won, everybody's place, and the host can run it again. */
 
-import React from "react";
+import React, { useEffect } from "react";
 import { LogOut, RotateCcw, Trophy } from "lucide-react";
 import { useT } from "../../lib/i18n";
+import { cue } from "../sound";
 import { themeSystem } from "../../lib/themeSystem";
 import { UIButton } from "../../components/ui";
 import { useNickname } from "./NicknamePicker";
@@ -18,17 +19,24 @@ export interface GroupFinalProps {
   error?: string;
   /** What a signed-in player earned for the game, once it has been recorded. */
   reward?: GroupReward | null;
+  /** A guest opened "ask a grown-up". */
+  onAsked?(): void;
   onAgain(): void;
   onLeave(): void;
 }
 
-export const GroupFinal: React.FC<GroupFinalProps> = ({ room, busy = false, error, reward = null, onAgain, onLeave }) => {
+export const GroupFinal: React.FC<GroupFinalProps> = ({ room, busy = false, error, reward = null, onAsked, onAgain, onLeave }) => {
   const { t } = useT();
   const show = useNickname();
   const standings = room.standings ?? [];
   const winners = standings.filter((s) => s.place === 1).map((s) => room.players.find((p) => p.pid === s.pid)).filter((p) => p !== undefined);
   const rest = standings.filter((s) => s.place > 3);
   const iWon = standings.some((s) => s.place === 1 && s.pid === room.me.pid);
+
+  // Said once, when the results appear.
+  useEffect(() => {
+    cue(iWon ? "groupWon" : "groupEnd");
+  }, [iWon]);
 
   return (
     <div className="mx-auto flex w-full max-w-xl flex-col gap-5 pb-20">
@@ -67,7 +75,7 @@ export const GroupFinal: React.FC<GroupFinalProps> = ({ room, busy = false, erro
         </p>
       )}
 
-      {!room.me.isKodaUser && <AskGrownUp />}
+      {!room.me.isKodaUser && <AskGrownUp onOpen={onAsked} />}
 
       {error && (
         <p role="alert" className={themeSystem.flash("error")}>

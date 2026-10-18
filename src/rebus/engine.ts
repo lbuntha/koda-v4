@@ -22,6 +22,8 @@ export interface RoundConfig {
   settings: RebusSettings;
   /** The child's pick; "adaptive" follows how the round is going. */
   level: MachineLevel | "adaptive";
+  /** Where "adaptive" starts: the level the child's last round ended on, so it does not begin cold every time. */
+  adaptiveStart?: MachineLevel;
   seed: string | number;
 }
 
@@ -93,7 +95,7 @@ const startRun = (config: RoundConfig, index: number, adaptive: MachineLevel, no
 /** A round needs at least one puzzle; the caller shows "not enough puzzles" before getting here. */
 export const startRound = (config: RoundConfig, now: number): RoundState => {
   if (config.puzzles.length === 0) throw new Error("A round needs at least one puzzle.");
-  const adaptive = MIDDLE;
+  const adaptive = config.adaptiveStart ?? MIDDLE;
   return {
     phase: "playing",
     config,

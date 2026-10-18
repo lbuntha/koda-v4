@@ -24,6 +24,7 @@ export const CATEGORIES: readonly Category[] = [
   { id: "sports", name: "Sports", topic: "health" },
   { id: "school", name: "School", topic: "school" },
   { id: "science", name: "Science", topic: "nature" },
+  { id: "khmer", name: "Khmer words", topic: "words" },
 ];
 
 /** How many puzzles a category should have before the Studio stops asking for more. */

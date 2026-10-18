@@ -52,7 +52,7 @@ async def test_invalid_subject_catalog_is_rejected(client, admin, catalog):
 async def test_rebus_settings_ship_with_defaults_and_are_an_operators_to_change(client, admin, owner):
     effective = (await client.get("/system", headers=owner)).json()
     assert json.loads(effective["rebus.settings"]) == {
-        "hintDelaySec": 15, "puzzleLimitSec": 60, "hintRungs": 3, "maxPlayers": 4,
+        "hintDelaySec": 15, "puzzleLimitSec": 60, "hintRungs": 3, "maxPlayers": 4, "guestsAllowed": True,
         "machineLock": "free", "letterTiles": False, "questionChoices": [5, 7, 10],
         "pointsPerPuzzle": 3, "hintCost": 1, "machinePoints": 3, "xpPerRound": None,
     }

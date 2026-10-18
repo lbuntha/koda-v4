@@ -61,7 +61,7 @@ PRESENT_MS = 10_000
 #: A request at the door still shows to the host if its owner polled within this long.
 REQUEST_FRESH_MS = 30_000
 
-CATEGORIES = ("countries", "food", "sayings", "animals", "sports", "school", "science")
+CATEGORIES = ("countries", "food", "sayings", "animals", "sports", "school", "science", "khmer")
 
 
 def make_code(rng: secrets.SystemRandom | random.Random | None = None) -> str:

@@ -1,7 +1,7 @@
 # Rebus Rush — proposed build plan
 
 **Skill id:** `rebus` · **Name:** Rebus Rush · **Proposed ages:** 7–18 (hint depth and word difficulty scale with age) ·
-**Category:** `logic` (shown under Learn → **Think**) · **Status (2026-10-18): Phases 0–4b, the Studio and group play 5a–5c are built. Phase 5d built. Next: 5e (admin settings and reporting), then Phase 6 (voice and polish).**
+**Category:** `logic` (shown under Learn → **Think**) · **Status (2026-10-18): Phases 0–4b, the Studio and group play 5a–5c are built. Phases 5d and 5e built. Next: Phase 6 (voice and polish), then Phase 6 (voice and polish).**
 **Structure decided 2026-10-17: its own module `src/rebus/` (not a skill under `src/skills/`), with the Studio at `src/rebus/studio/` and the API in `server/app/routers/rebus.py`; read "skill" in §2 and §9 as "module". Real screens use `themeSystem`, the `UI*` components and semantic tokens from `docs/THEME.md`; the HTML mocks only imitate the look.**
 
 The reference is the "Solve this puzzle. Family games" reels: a picture-sum such as
@@ -396,3 +396,28 @@ Built in `src/rebus/group/`:
 - `AskGrownUp` (guests only, i.e. `!me.isKodaUser`): a card on the results screen with "Ask a grown-up", which shows a short note with Koda's address to copy or share. The child types and sends nothing; nothing is collected.
 - `useGroupLearning` (signed-in players only): once per game, records the game in the learning log with the same `RebusRecorder` as a solo round, files outcomes in the per-puzzle memory, and pays stars and XP with the same rule (`rebusReward`, owner's `xpPerRound`). A game of puzzles the player has all played before is logged as practice and pays no XP, and the results screen says so. A friend winning a puzzle is logged as an unanswered puzzle ("machine"), never as a mistake. Puzzles are collected as they are shown, so one a device never saw is left out.
 - Verified in Chrome: host (signed in) and a guest over the API played five puzzles; the podium showed Clever Fox first and Brave Tiger second, and the replay note appeared (those puzzles had been played on this browser before).
+
+
+## Phase 5e — owner controls and reporting for group play (2026-10-18)
+
+- **Owner settings** (Admin → Rebus Rush): the existing `rebus.group` switch (generic System list) and most players per room, plus a new **"Let players without an account join"** (`guestsAllowed`, default on). Off: a join without a Koda sign-in is refused with `guests_off` ("Only players with a Koda account can join right now."). Rooms can always be opened only by a signed-in player.
+- **Counting, numbers only:** `rebus_group_stats`, one document per day (UTC) of counters: rooms opened, join requests, seats (Koda / guest), games started, players at start, games finished, play-agains, guests who opened "ask a grown-up" (once per seat, via `POST /rebus/rooms/{code}/asked`). No names, codes, answers or anything about a child; counting never fails a game. Rooms still vanish two hours after they open, so these counters are the only history.
+- **Report:** `GET /rebus/rooms/report/summary?days=` (needs `system:write`, so only the owner) returns one row per day, zeros included, and totals. Admin → Rebus Rush → **Group play** shows them as tiles and a day table for 7 or 30 days, fetched only when the owner presses "Show the numbers".
+- Not built (by design): reports on individual rooms or players; parent approval for a managed child's room; preset reaction stickers.
+
+
+## Phase 6 — voice and polish (2026-10-18)
+
+- **The Machine's moods:** the Machine's score chip now reacts. Thinking while a puzzle runs; a wobble and "Oops!" when it guesses wrong (the child's chance); a hop and "Got it!" when it wins a puzzle; a droop and "Aw, you were quicker!" when the child does; a shrug when nobody solves it. Each plays once and stops, and a "reduce motion" setting turns the movement off (the words stay). It is a reaction, never a judgement of the child.
+- **Adaptive carries over:** "Adaptive" used to start every round on medium. It now starts where the last adaptive round ended (`prefs.ts` `loadAdaptive` / `saveAdaptive`, kept on the device; `RoundConfig.adaptiveStart`). A fixed level pick, or the owner's lock, ignores it.
+- **Spoken lines:** Rebus Rush has its own voice pack, `src/voice/rebus/` (`voice.json`, `index.ts`, `audio/`), registered under the id `rebus` so its lines are heard only in Rebus Rush. 13 reaction groups (start, next, wrong, solved, machine missed / won, time up, round won / tie / end, a friend winning in a group, group won / end), 2 to 4 variants each, 33 lines in all. Only fixed lines: nothing with a name or a number. `cue()` in `sound.ts` says the matching line after its chime, only when the family's **voice** switch is on (separate from the chimes), and says nothing for a line that was never recorded, so the game works the same with no recordings.
+- **Recording:** `scripts/generate-voice.mjs` learned a second kind of non-skill voice (`MODULE_VOICES`). Plan with `npm run voice:plan -- --skill rebus`, record with `npm run voice:record -- --skill rebus --provider openai`. **The first attempt failed for every line: the OpenAI account has no credits left.** The game is silent where it would speak until that is topped up and the command is run again; no code changes are needed.
+- A tie now has its own cue (a chime and a line), instead of sounding like a loss.
+
+
+## Phase 7 — take turns on one device, and Khmer words (2026-10-19)
+
+- **Dropped connections no longer end a group game.** `useRoom` used to give up after 8 failed asks (about 8 to 16 seconds) and call the room closed. Now only the server saying "you are not in this room" (removed, or closed) ends it. A failed ask shows "Reconnecting…" on every screen (lobby, play, results, waiting at the door), keeps the seat, keeps asking (every 3 s once 10 in a row have failed), and asks at once when the device comes back online or the page is shown again.
+- **Take turns on this device** (`src/rebus/turns/`): two to four players share a screen, with no network at all. Puzzles go round the players in order (everyone gets the same number: 2, 3 or 5 each). Between turns a hand-over screen says who to pass the device to and the clock does not run while it is passed. Same hints, time limit and points as a game against the Machine (the owner's settings). Most points wins on the same podium as group play; ties share a place. Players are a nickname and a look from the fixed lists. It pays no XP and writes no learning log, because a shared screen cannot say whose play it was. A pure `engine.ts` reducer (7 tests) and screens (3 tests). Entry: a second button under "Play with friends".
+- **Khmer words** (`src/rebus/content/khmer.ts`): a new topic "Khmer words" / ពាក្យខ្មែរ (`khmer` is now a category in the app and on the server) with 36 puzzles for early readers (about 5 to 12): 26 "name the picture" and 10 two-picture compounds (ទឹក + កក = ទឹកកក). Answers are typed in Khmer; matching already kept Khmer syllables whole. Ids are spelled out (`key`) because a Khmer word has no Latin letters to make one from. The audit stops at age 12 for this topic until it has harder words.
+- **A Khmer speaker should read every puzzle before it is published.** They arrive in the Studio as drafts (the standard flow), but I cannot check the spelling or whether each drawing is what the answer says. Drawings have English names, so the third hint ("the pieces") is in English.
