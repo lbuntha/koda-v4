@@ -34,6 +34,21 @@ PUBLIC = {
     # The app's own labels, nothing about a person; writing them still needs
     # `content:write`, and the PUT/DELETE routes stay in the sweep below.
     ("GET", "/v1/translations"),
+    # Rebus Rush group rooms are joined by friends who may have no Koda account,
+    # so these answer without a bearer token. They are not open: every call
+    # after `join` must carry the seat's own token (`X-Player-Token`, stored as a
+    # hash) and is refused with 403 without it, and `join` is rate-limited per
+    # IP and takes only a nickname and avatar from fixed lists. Opening a room
+    # (`POST /v1/rebus/rooms`) is NOT here: it still needs a signed-in user.
+    ("GET", "/v1/rebus/rooms/choices"),  # the fixed nickname and avatar lists
+    ("POST", "/v1/rebus/rooms/{code}/join"),
+    ("GET", "/v1/rebus/rooms/{code}"),
+    ("POST", "/v1/rebus/rooms/{code}/start"),
+    ("POST", "/v1/rebus/rooms/{code}/solve"),
+    ("POST", "/v1/rebus/rooms/{code}/lock"),
+    ("POST", "/v1/rebus/rooms/{code}/kick"),
+    ("POST", "/v1/rebus/rooms/{code}/leave"),
+    ("POST", "/v1/rebus/rooms/{code}/rematch"),
 }
 
 DOCS = {"/v1/docs", "/v1/openapi.json", "/v1/docs/oauth2-redirect"}
