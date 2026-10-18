@@ -47,12 +47,32 @@ def _out(row: dict[str, Any]) -> dict[str, Any]:
     return {key: value for key, value in row.items() if key != "_id"}
 
 
+class Checks:
+    """What the checks need from the database, read once per request.
+
+    A list of puzzles is checked one by one; fetching the drawings and the answers
+    for each would multiply round trips to the database by the page size.
+    """
+
+    def __init__(self, icons: frozenset[str], index: list[dict[str, Any]]):
+        self.icons = icons
+        self.index = index
+
+    def codes(self, row: dict[str, Any]) -> list[str]:
+        """Every reason this puzzle may not be approved or live, as codes."""
+        codes = validate_puzzle(row, known_icons=self.icons)
+        if repo.duplicate_in(self.index, row):
+            codes.append("duplicate")
+        return codes
+
+
+async def _checks(db) -> Checks:
+    return Checks(await repo.known_icons(db), await repo.duplicate_index(db))
+
+
 async def _problems(db, row: dict[str, Any]) -> list[str]:
-    """Every reason this puzzle may not be approved or live, as codes."""
-    codes = validate_puzzle(row, known_icons=await repo.known_icons(db))
-    if await repo.is_duplicate(db, row):
-        codes.append("duplicate")
-    return codes
+    """Every reason one puzzle may not be approved or live, as codes."""
+    return (await _checks(db)).codes(row)
 
 
 def _refuse(codes: list[str]) -> AppError:
@@ -97,9 +117,8 @@ async def studio_list(
 ) -> dict[str, Any]:
     rows, total = await repo.listing(db, status=status, category=category, source=source, icon=icon, query=q, skip=skip, limit=limit)
     who = await repo.names(db, {r["createdBy"] for r in rows if r.get("createdBy")})
-    out = []
-    for row in rows:
-        out.append({**_out(row), "issues": await _problems(db, row), "createdByName": who.get(row.get("createdBy", ""))})
+    checks = await _checks(db)
+    out = [{**_out(row), "issues": checks.codes(row), "createdByName": who.get(row.get("createdBy", ""))} for row in rows]
     return {"puzzles": out, "total": total}
 
 
@@ -190,8 +209,9 @@ async def studio_approve_all(body: ApproveAllIn, db: Db, p: CanWrite) -> dict[st
     so the checks stay the gate whoever presses the button.
     """
     approved, skipped = 0, 0
+    checks = await _checks(db)
     for row in await repo.drafts_in_scope(db, body.category):
-        if await _problems(db, row):
+        if checks.codes(row):
             skipped += 1
             continue
         await repo.update(db, row["id"], {"status": "approved", "statusBy": p.subject_id})

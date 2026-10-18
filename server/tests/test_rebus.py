@@ -389,3 +389,31 @@ async def test_create_and_approve_leaves_a_puzzle_with_a_problem_as_a_draft_and_
 async def test_create_and_approve_does_not_approve_a_duplicate(client, admin):
     row = (await client.post("/rebus/studio/puzzles", json=draft(approve=True, answer="Hot dog"), headers=admin)).json()
     assert row["status"] == "draft" and "duplicate" in row["issues"]
+
+
+async def test_a_page_of_puzzles_is_checked_with_one_read_of_the_drawings_and_one_of_the_answers(client, admin, monkeypatch):
+    """A page of 100 once cost two database round trips per puzzle: over a minute on a remote database.
+
+    The checks now read the drawings and the answers once per request, however many puzzles are on the page.
+    """
+    calls = {"icons": 0, "index": 0}
+    real_icons, real_index = repo.known_icons, repo.duplicate_index
+
+    async def icons(db):
+        calls["icons"] += 1
+        return await real_icons(db)
+
+    async def index(db):
+        calls["index"] += 1
+        return await real_index(db)
+
+    monkeypatch.setattr(repo, "known_icons", icons)
+    monkeypatch.setattr(repo, "duplicate_index", index)
+
+    page = (await client.get("/rebus/studio/puzzles?limit=100&status=draft", headers=admin)).json()
+    assert len(page["puzzles"]) == 100
+    assert calls == {"icons": 1, "index": 1}
+
+    calls.update(icons=0, index=0)
+    await client.post("/rebus/studio/approve-all", json={}, headers=admin)
+    assert calls == {"icons": 1, "index": 1}

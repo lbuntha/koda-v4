@@ -132,20 +132,29 @@ async def get(db: AsyncIOMotorDatabase, puzzle_id: str) -> dict[str, Any] | None
     return await db.rebus_puzzles.find_one({"id": puzzle_id})
 
 
-async def is_duplicate(db: AsyncIOMotorDatabase, row: dict[str, Any]) -> bool:
+async def duplicate_index(db: AsyncIOMotorDatabase) -> list[dict[str, Any]]:
+    """Every puzzle that is in play or waiting, just enough to tell whether an answer is taken. One query."""
+    return await db.rebus_puzzles.find(
+        {"status": {"$in": ["draft", "approved", "published"]}}, {"id": 1, "answer": 1, "status": 1, "createdAt": 1}
+    ).to_list(length=20000)
+
+
+def duplicate_in(index: list[dict[str, Any]], row: dict[str, Any]) -> bool:
     """Whether another puzzle already has this answer.
 
     A puzzle in play (approved or published) always counts. Among drafts the
     older one wins, so a fresh copy of an answer cannot block the original from
     being approved, and two copies cannot each block the other.
+
+    Pure, over an index read once: a page of 100 puzzles asks the database one
+    question, not a hundred, which on a database across the network is the
+    difference between a second and over a minute.
     """
     from app.rebus_verify import answer_key
 
     key = answer_key(row)
     mine = (row.get("createdAt"), row.get("id", ""))
-    async for other in db.rebus_puzzles.find(
-        {"status": {"$in": ["draft", "approved", "published"]}}, {"id": 1, "answer": 1, "status": 1, "createdAt": 1}
-    ):
+    for other in index:
         if other["id"] == row.get("id") or answer_key(other) != key:
             continue
         if other["status"] in ("approved", "published"):
@@ -153,6 +162,10 @@ async def is_duplicate(db: AsyncIOMotorDatabase, row: dict[str, Any]) -> bool:
         if (other.get("createdAt"), other["id"]) < mine:
             return True
     return False
+
+
+async def is_duplicate(db: AsyncIOMotorDatabase, row: dict[str, Any]) -> bool:
+    return duplicate_in(await duplicate_index(db), row)
 
 
 async def known_icons(db: AsyncIOMotorDatabase) -> frozenset[str]:
