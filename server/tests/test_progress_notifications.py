@@ -250,7 +250,9 @@ async def test_the_weekly_email_says_what_was_mastered_and_what_is_next(db, fami
 
 
 async def test_a_stuck_child_outranks_an_absence_on_home(client, parent, db, family, seeded):
-    local_today = (datetime.now(UTC) + timedelta(minutes=120)).date().isoformat()
+    # The UTC date, not "UTC plus two hours": this family has no timezone on file, so the overview's
+    # "this week" ends on the UTC date, and a day two hours ahead falls outside it after 22:00 UTC.
+    local_today = datetime.now(UTC).date().isoformat()
     await progress_marks.record(db, family_id=family["familyId"], learner_id=family["mia"], kind="stuck",
                                 local_day=local_today, concept_key="count-all")
 
