@@ -11,6 +11,8 @@ export type TabId =
   // Learn: Lessons, Books (Koda Library) and Write & Draw (Koda Trace), one tab.
   // Where library books are written and published. content:write, like Art.
   | "library-studio"
+  // Where Rebus Rush puzzles are reviewed, written and published. content:write, like Art.
+  | "rebus-studio"
   // Where trace items are made: strokes, steps, tests. content:write, like Library Studio.
   | "trace-studio"
   | "profile"

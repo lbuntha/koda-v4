@@ -52,11 +52,12 @@ export const TRACE_CONCEPT_NAMES: Readonly<Record<string, { lesson: string; skil
 };
 
 /**
- * Whether a concept is writing, measured letter by letter on the trace ladder.
+ * Whether a concept is writing (measured letter by letter on the trace ladder) or
+ * Rebus Rush (a game against a clock, not a first-try measure).
  * As one concept it is too coarse for "mastered"; the server keeps the same
  * rule (`mastery.is_ladder_concept`), so the report and the messages agree.
  */
-export const isLadderConcept = (conceptKey: string): boolean => conceptKey.startsWith("trace-");
+export const isLadderConcept = (conceptKey: string): boolean => conceptKey.startsWith("trace-") || conceptKey.startsWith("rebus-");
 
 /** The ladder moments that end an item — what a parent hears about. */
 export type TraceMilestone = Extract<LadderEvent, "canDo" | "rechecked" | "learned">;

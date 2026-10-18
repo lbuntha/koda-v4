@@ -1,0 +1,17 @@
+/**
+ * The puzzles Koda ships with, before the Studio adds more.
+ *
+ * Written by hand and checked by `content.audit.test.ts` against the same
+ * validator the Studio uses, so a puzzle that would not pass review cannot be
+ * added here either.
+ */
+
+import type { Puzzle } from "../types";
+import { ANIMALS } from "./animals";
+import { COUNTRIES } from "./countries";
+import { FOOD } from "./food";
+import { SAYINGS } from "./sayings";
+import { SCHOOL } from "./school";
+import { SCIENCE } from "./science";
+
+export const OFFICIAL_PUZZLES: readonly Puzzle[] = [...COUNTRIES, ...FOOD, ...ANIMALS, ...SAYINGS, ...SCHOOL, ...SCIENCE];

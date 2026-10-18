@@ -615,6 +615,24 @@ html.theme-light,
   animation: koda-celebrate-pop 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275) 0.12s both;
 }
 
+/* One burst of confetti: each piece flies out along --x/--y, spins, and fades. It never loops. */
+@keyframes rebus-confetti {
+  0% {
+    transform: translate(0, 0) rotate(0deg) scale(0.6);
+    opacity: 1;
+  }
+  70% {
+    opacity: 1;
+  }
+  100% {
+    transform: translate(var(--x), calc(var(--y) + 90px)) rotate(540deg) scale(1);
+    opacity: 0;
+  }
+}
+.rebus-confetti {
+  animation: rebus-confetti 1.4s cubic-bezier(0.2, 0.7, 0.3, 1) both;
+}
+
 .tap-pop-anim {
   animation: tactile-tap-pop 0.42s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
   z-index: 30;
@@ -637,6 +655,7 @@ html.theme-light,
   .animate-spin-slow,
   .koda-bob,
   .koda-celebrate-icon,
+  .rebus-confetti,
   .ready-to-unlock-node,
   .block-draggable:active,
   .chamber-snap-hundreds::before,

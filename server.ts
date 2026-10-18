@@ -8,6 +8,8 @@ import { WebSocketServer, WebSocket } from "ws";
 import dotenv from "dotenv";
 import { createProxyMiddleware } from "http-proxy-middleware";
 import { kodaSystemPrompt, resolveCharacter } from "./tutor/persona";
+import { generate as generateRebus } from "./src/rebus/generate/pipeline";
+import { readBrief as readRebusBrief } from "./src/rebus/generate/prompt";
 
 dotenv.config();
 
@@ -1903,6 +1905,83 @@ app.post("/api/library/draft", async (req, res) => {
   } catch (error: any) {
     console.error("Error in /api/library/draft:", error);
     res.status(502).json({ error: { code: "draft_failed", message: error?.message ?? "The model could not be reached." } });
+  }
+});
+
+/** A provider with no key: answered as the refusal every AI route gives, not as a crash. */
+class NoProviderKey extends Error {
+  constructor(public provider: string) {
+    super(`No ${provider} key`);
+  }
+}
+
+/**
+ * A batch of Rebus Rush puzzles, drafted by a model for the Studio.
+ *
+ * Staff only (the same `content:write` the Studio itself needs, asked of the
+ * data API), and switchable by the operator (`ai.rebusDrafts`). This route
+ * drafts and checks and stops: it returns candidates with their checks, and
+ * the Studio saves each as a *draft*. Nothing here can reach a child, because
+ * a person approves and publishes every puzzle before one is played. The
+ * pipeline itself (the brief, the blind solve, the checks) is `src/rebus/generate`.
+ */
+app.post("/api/rebus/generate", async (req, res) => {
+  const authorization = req.headers.authorization;
+  if (!authorization) return res.status(401).json({ error: { code: "auth", message: "Sign in to draft puzzles." } });
+
+  const brief = readRebusBrief(req.body?.brief);
+  if (typeof brief === "string") return res.status(400).json({ error: { code: "bad_brief", message: brief } });
+
+  let existing: string[] = [];
+  try {
+    const may = await fetch(`${API_URL}/v1/rebus/studio/answers`, { headers: { Authorization: authorization } });
+    if (may.status === 401) return res.status(401).json({ error: { code: "auth", message: "Your session has ended. Sign in again." } });
+    if (!may.ok) return res.status(403).json({ error: { code: "not_an_operator", message: "Only an operator can draft Rebus Rush puzzles." } });
+    existing = ((await may.json()) as { answers?: string[] }).answers ?? [];
+  } catch {
+    return res.status(503).json({ error: { code: "api_unreachable", message: "The data service is not running." } });
+  }
+  if (!(await systemAllows("ai.rebusDrafts", authorization))) {
+    return res.status(503).json({ error: { code: "feature_disabled", message: "Drafting puzzles with AI is switched off." } });
+  }
+
+  const settings = await systemSettings(authorization);
+  const provider = String(req.body?.provider ?? settings["ai.rebusProvider"] ?? settings["ai.libraryProvider"] ?? "gemini").toLowerCase();
+  const claudeModel = req.body?.model === "haiku" ? "claude-haiku-5-5" : "claude-sonnet-5-5";
+  const systemPrompt = typeof req.body?.systemPrompt === "string" ? req.body.systemPrompt.slice(0, 8000) : undefined;
+
+  /** A model that does not answer must not leave the Studio waiting for ever. */
+  const MODEL_DEADLINE_MS = 90_000;
+  const withDeadline = <T,>(work: Promise<T>): Promise<T> =>
+    Promise.race([work, new Promise<never>((_, reject) => setTimeout(() => reject(new Error("The model took too long to answer. Try again, or pick another model.")), MODEL_DEADLINE_MS))]);
+
+  const askModel = async (system: string, user: string): Promise<string> => {
+    if (provider === "chatgpt" || provider === "openai") {
+      const key = (await providerKey("openai", authorization)).key;
+      if (!key) throw new NoProviderKey("ChatGPT");
+      return drawWithChatGPT(key, system, user);
+    }
+    if (provider === "claude" || provider === "anthropic") {
+      const key = (await providerKey("anthropic", authorization)).key;
+      if (!key) throw new NoProviderKey("Claude");
+      const response = await new Anthropic({ apiKey: key }).messages.create({ model: claudeModel, max_tokens: 8000, system, messages: [{ role: "user", content: user }] });
+      if (response.stop_reason === "refusal") throw new Error("The model declined to write these puzzles.");
+      return response.content.filter((b): b is Anthropic.TextBlock => b.type === "text").map((b) => b.text).join("\n");
+    }
+    const ai = getGeminiClient(await systemApiKey(authorization));
+    if (!ai) throw new NoProviderKey("Gemini");
+    const response = await ai.models.generateContent({ model: process.env.GEMINI_LIBRARY_MODEL ?? process.env.GEMINI_ART_MODEL ?? "gemini-3.7-flash", contents: user, config: { systemInstruction: system, responseMimeType: "application/json" } });
+    return response.text ?? "";
+  };
+  const ask = (system: string, user: string): Promise<string> => withDeadline(askModel(system, user));
+
+  try {
+    const result = await generateRebus(ask, { brief, systemPrompt, existingAnswers: existing });
+    res.json({ ...result, provider, model: provider === "claude" || provider === "anthropic" ? claudeModel : provider });
+  } catch (error: any) {
+    if (error instanceof NoProviderKey) return res.status(503).json(noKey(error.provider));
+    console.error("Error in /api/rebus/generate:", error);
+    res.status(502).json({ error: { code: "generate_failed", message: error?.message ?? "The model could not be reached." } });
   }
 });
 

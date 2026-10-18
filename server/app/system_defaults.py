@@ -21,6 +21,8 @@ holds the *values*; this holds what a value means.
 #: in a second one.
 SETTING_TYPES = ("bool", "text", "secret")
 
+from app.models.rebus import DEFAULT_REBUS_SETTINGS
+
 DEFAULT_SETTINGS: list[dict] = [
     {
         "settingId": "learning.subjects",
@@ -471,6 +473,44 @@ DEFAULT_SETTINGS: list[dict] = [
         "type": "bool",
         "value": True,
         "order": 95,
+    },
+    # ---- Rebus Rush. One JSON row, validated by `RebusSettings` and edited
+    # ---- on its own admin tab rather than as raw text on the generic list.
+    {
+        "settingId": "rebus.enabled",
+        "group": "Rebus Rush",
+        "label": "Rebus Rush",
+        "description": "The picture-puzzle game on the Think shelf. Off hides it for every family.",
+        "type": "bool",
+        "value": True,
+        "order": 115,
+    },
+    {
+        "settingId": "rebus.group",
+        "group": "Rebus Rush",
+        "label": "Play in a group",
+        "description": "Lets a signed-in player open a room with an invitation code, and friends (with or without a Koda account) join and race. Off closes the door to new rooms.",
+        "type": "bool",
+        "value": True,
+        "order": 116,
+    },
+    {
+        "settingId": "ai.rebusDrafts",
+        "group": "Rebus Rush",
+        "label": "Draft puzzles with AI",
+        "description": "Lets Rebus Studio staff ask a model to draft batches of puzzles. Nothing it writes reaches a child without a person approving it.",
+        "type": "bool",
+        "value": True,
+        "order": 118,
+    },
+    {
+        "settingId": "rebus.settings",
+        "group": "Rebus Rush",
+        "label": "Rebus Rush",
+        "description": "Hint timing, puzzle time limit, the Machine's level and the rest of the picture-puzzle game's rules.",
+        "type": "text",
+        "value": DEFAULT_REBUS_SETTINGS.model_dump_json(),
+        "order": 120,
     },
     {
         "settingId": "system.notice",

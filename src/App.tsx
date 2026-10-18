@@ -103,6 +103,8 @@ import { refreshMaintenanceVersions } from "./lib/maintenanceReset";
 const SkillManagerPage = lazy(() =>
   import("./components/skills/SkillManagerPage").then((m) => ({ default: m.SkillManagerPage })),
 );
+const RebusPage = lazy(() => import("./rebus/RebusPage").then((m) => ({ default: m.RebusPage })));
+const RebusStudio = lazy(() => import("./rebus/studio/RebusStudio").then((m) => ({ default: m.RebusStudio })));
 const TraceStudio = lazy(() => import("./trace/studio/TraceStudio").then((m) => ({ default: m.TraceStudio })));
 const LibraryStudio = lazy(() => import("./library/studio/LibraryStudio").then((m) => ({ default: m.LibraryStudio })));
 const SvgAssetsPage = lazy(() =>
@@ -153,6 +155,9 @@ export default function App() {
   /* Learn holds Lessons, Books and Write & Draw; which one is showing. */
   const [learnCategory, setLearnCategory] = useLearnCategory();
   const [traceDeep, setTraceDeep] = useState(false);
+  /** Rebus Rush is open on the Think shelf, and whether a round is being played in it. */
+  const [rebusOpen, setRebusOpen] = useState(false);
+  const [rebusDeep, setRebusDeep] = useState(false);
   /** A Trace item is open (writing or colouring): like a book, it takes the phone's whole screen. */
   const [tracePlaying, setTracePlaying] = useState(false);
   /* A book or collection to open once Learn shows it — a Today pick on Home. */
@@ -226,6 +231,8 @@ export default function App() {
     // Mongo is authoritative for the shared art library. The IndexedDB cache
     // and bundled snapshot keep rendering available before this returns.
     void listSvgAssets().catch(() => undefined);
+    // The published Rebus Rush puzzles, kept on the device so the game plays offline. Its own small chunk.
+    void import("./rebus/bankStore").then((m) => m.refreshBank()).catch(() => undefined);
     // What this family's plan covers. Read here, beside the switchboard, so a
     // screen never has to fetch it before it can decide what to draw.
     void Billing.refresh();
@@ -250,6 +257,7 @@ export default function App() {
     | "skills"
     | "assets"
     | "library-studio"
+    | "rebus-studio"
     | "trace-studio"
     | "users"
     | "roles"
@@ -326,6 +334,7 @@ export default function App() {
     if (activeTab === "children" && !canManageChildren) setActiveTab("home");
     if (activeTab === "assets" && !canEditArt) setActiveTab("home");
     if (activeTab === "library-studio" && !canEditArt) setActiveTab("home");
+    if (activeTab === "rebus-studio" && !canEditArt) setActiveTab("home");
     if (activeTab === "translations" && !canEditArt) setActiveTab("home");
     if (activeTab === "trace-studio" && !canTrace) setActiveTab("home");
     if (activeTab === "skills" && !canManageSkills) setActiveTab("home");
@@ -743,7 +752,7 @@ export default function App() {
       // Only a running round wants the full width; the picker is a normal page.
       contained={!inLesson}
       hideMobileChrome={inBooks && libraryReaderOpen}
-      hideMobileTabBar={(inBooks && libraryBookOpen) || tracePlayingHere}
+      hideMobileTabBar={(inBooks && libraryBookOpen) || tracePlayingHere || (activeTab === "game" && !inRound && learnCategory === "lessons" && rebusOpen && rebusDeep && !outsideHours && !dayDone)}
       /* Two shells, each hiding itself at the width that is not its own — the
          rail from `rail:` up, the toolbar and tab bar below it. A round stands
          both of them down: what a rail shows a five-year-old counting crowns is
@@ -801,7 +810,9 @@ export default function App() {
               pending={switchingCategory}
               immersed={
                 learnCategory === "lessons"
-                  ? Boolean(selectedLearnSkillId) && !outsideHours && !dayDone
+                  ? rebusOpen && !outsideHours && !dayDone
+                    ? rebusDeep
+                    : Boolean(selectedLearnSkillId) && !outsideHours && !dayDone
                   : learnCategory === "books"
                     ? libraryBookOpen
                     : traceDeep
@@ -838,6 +849,12 @@ export default function App() {
                 /* Stands in for the picker rather than sitting beside it: a path a
                    child can still tap is a path they will keep tapping. */
                 <DayDoneScreen cap={sessionCap} onGoHome={() => setActiveTab("home")} />
+              ) : rebusOpen ? (
+                <RebusPage
+                  onDeepChange={setRebusDeep}
+                  onAwardXp={(earnedXp) => setUserProgress((prev) => ({ ...prev, xp: prev.xp + earnedXp }))}
+                  onExit={() => setRebusOpen(false)}
+                />
               ) : selectedLearnSkillId ? (
                 <LearnPage
                   skillId={selectedLearnSkillId}
@@ -851,6 +868,7 @@ export default function App() {
                   activeLevelNumber={activeLevelNumber}
                   completedLevels={completedGameLevels}
                   onSelectSkill={setSelectedLearnSkillId}
+                  onOpenRebus={() => setRebusOpen(true)}
                 />
               )}
             </LearnHub>
@@ -930,6 +948,13 @@ export default function App() {
           {activeTab === "library-studio" && canEditArt && (
             <Deferred label="Loading Library Studio">
               <LibraryStudio />
+            </Deferred>
+          )}
+
+          {/* TAB: REBUS STUDIO — review, write and publish picture puzzles (content:write) */}
+          {activeTab === "rebus-studio" && canEditArt && (
+            <Deferred label="Loading Rebus Studio">
+              <RebusStudio />
             </Deferred>
           )}
 

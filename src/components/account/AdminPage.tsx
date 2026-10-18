@@ -14,6 +14,7 @@ import { BadgesPage } from "./BadgesPage";
 import { BillingPage } from "./BillingPage";
 import { ScoringPage } from "./ScoringPage";
 import { NoAccess } from "./NoAccess";
+import { RebusAdminPanel } from "../../rebus/admin/RebusAdminPanel";
 
 import { translate } from "../../lib/i18n";
 interface Setting {
@@ -198,6 +199,8 @@ const SystemPanel: React.FC<{
       // know which is authoritative. The key stays in the vault below, because
       // that tab is every credential this deployment holds.
       .filter((setting) => setting.id !== "learning.subjects")
+      // Rebus Rush has its own tab, with real controls instead of a JSON box.
+      .filter((setting) => setting.id !== "rebus.settings")
       // Keys and the default models live on the API keys tab, all together.
       .filter((setting) => setting.group !== "AI defaults")
       .filter((setting) => setting.group !== "Ask Koda" || setting.type === "secret") ?? null;
@@ -437,7 +440,7 @@ const SystemPanel: React.FC<{
   );
 };
 
-type AdminTab = "scoring" | "badges" | "billing" | "keys" | "system";
+type AdminTab = "scoring" | "badges" | "billing" | "keys" | "rebus" | "system";
 
 /**
  * What runs Koda, rather than what a family uses it with.
@@ -478,6 +481,7 @@ export const AdminPage: React.FC<{
         { id: "badges", label: translate("admin.adminPage.badges") },
         { id: "billing", label: translate("admin.adminPage.billing") },
         { id: "keys", label: translate("admin.adminPage.apiKeys") },
+        { id: "rebus", label: translate("rebus.admin.tab") },
         { id: "system", label: translate("admin.adminPage.system") },
       ]
     : [];
@@ -528,6 +532,9 @@ export const AdminPage: React.FC<{
       </div>
       <div hidden={active !== "keys"}>
         <ApiKeysPanel />
+      </div>
+      <div hidden={active !== "rebus"}>
+        <RebusAdminPanel />
       </div>
       <div hidden={active !== "system"}>
         <SystemPanel embedded show="switches" />

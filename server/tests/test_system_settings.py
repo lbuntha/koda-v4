@@ -49,6 +49,72 @@ async def test_invalid_subject_catalog_is_rejected(client, admin, catalog):
     assert result.status_code == 400
 
 
+async def test_rebus_settings_ship_with_defaults_and_are_an_operators_to_change(client, admin, owner):
+    effective = (await client.get("/system", headers=owner)).json()
+    assert json.loads(effective["rebus.settings"]) == {
+        "hintDelaySec": 15, "puzzleLimitSec": 60, "hintRungs": 3, "maxPlayers": 4,
+        "machineLock": "free", "letterTiles": False, "questionChoices": [5, 7, 10],
+        "pointsPerPuzzle": 3, "hintCost": 1, "machinePoints": 3, "xpPerRound": None,
+    }
+    change = {"value": json.dumps({"hintDelaySec": 20, "machineLock": 2, "letterTiles": True, "questionChoices": [10, 5, 5]})}
+    assert (await client.patch("/system/settings/rebus.settings", json=change, headers=owner)).status_code == 403
+    result = await client.patch("/system/settings/rebus.settings", json=change, headers=admin)
+    assert result.status_code == 200
+    saved = json.loads((await client.get("/system", headers=owner)).json()["rebus.settings"])
+    assert saved["hintDelaySec"] == 20 and saved["machineLock"] == 2 and saved["letterTiles"] is True
+    assert saved["questionChoices"] == [5, 10]
+    assert saved["puzzleLimitSec"] == 60
+
+
+async def test_rebus_can_be_switched_off_for_every_family(client, admin, owner):
+    assert (await client.get("/system", headers=owner)).json()["rebus.enabled"] is True
+    assert (await client.patch("/system/settings/rebus.enabled", json={"value": False}, headers=owner)).status_code == 403
+    assert (await client.patch("/system/settings/rebus.enabled", json={"value": False}, headers=admin)).status_code == 200
+    assert (await client.get("/system", headers=owner)).json()["rebus.enabled"] is False
+    assert (await client.patch("/system/settings/rebus.enabled", json={"value": "no"}, headers=admin)).status_code == 400
+
+
+@pytest.mark.parametrize("bad", [
+    {"hintDelaySec": 0},
+    {"hintDelaySec": 61},
+    {"puzzleLimitSec": 10},
+    {"hintRungs": 4},
+    {"maxPlayers": 1},
+    {"machineLock": 3},
+    {"machineLock": True},
+    {"questionChoices": [4]},
+    {"questionChoices": []},
+    {"pointsPerPuzzle": 0},
+    {"pointsPerPuzzle": 11},
+    {"hintCost": -1},
+    {"hintCost": 6},
+    {"machinePoints": 0},
+    {"xpPerRound": -1},
+    {"xpPerRound": 201},
+    {"xpPerRound": True},
+    {"hintCost": True},
+])
+async def test_rebus_settings_outside_the_allowed_range_are_refused(client, admin, bad):
+    result = await client.patch("/system/settings/rebus.settings", json={"value": json.dumps(bad)}, headers=admin)
+    assert result.status_code == 400
+
+
+async def test_the_points_and_the_rebus_xp_can_be_set_and_xp_can_follow_the_deployment_again(client, admin, owner):
+    change = {"value": json.dumps({"pointsPerPuzzle": 8, "hintCost": 0, "machinePoints": 5, "xpPerRound": 40})}
+    assert (await client.patch("/system/settings/rebus.settings", json=change, headers=owner)).status_code == 403
+    assert (await client.patch("/system/settings/rebus.settings", json=change, headers=admin)).status_code == 200
+    saved = json.loads((await client.get("/system", headers=owner)).json()["rebus.settings"])
+    assert (saved["pointsPerPuzzle"], saved["hintCost"], saved["machinePoints"], saved["xpPerRound"]) == (8, 0, 5, 40)
+    back = {"value": json.dumps({"xpPerRound": None})}
+    assert (await client.patch("/system/settings/rebus.settings", json=back, headers=admin)).status_code == 200
+    assert json.loads((await client.get("/system", headers=owner)).json()["rebus.settings"])["xpPerRound"] is None
+
+
+async def test_rebus_settings_must_be_json(client, admin):
+    assert (await client.patch("/system/settings/rebus.settings", json={"value": "not json"}, headers=admin)).status_code == 400
+    assert (await client.patch("/system/settings/rebus.settings", json={"value": 5}, headers=admin)).status_code == 400
+
+
 @pytest.fixture(autouse=True)
 async def seeded(db):
     """The app seeds these at startup; the test fixture skips the lifespan."""

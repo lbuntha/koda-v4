@@ -1,0 +1,425 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Rebus Rush — flow mock</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet">
+<style>
+/* Koda tokens (src/index.css). No yellow / amber anywhere. */
+:root{
+  --canvas:#F8FAFC; --surface:#FFFFFF; --muted-fill:#F0F4FF; --ink:#0F172A; --body:#475569; --muted:#64748B; --line:#E2E8F0;
+  --sky:#E8F1FF; --ground:#E4F5E9;
+  --i50:#F3F0FC; --i100:#E6E0FA; --i200:#D0C3F6; --i600:#6B46C1; --i700:#553C9A; --i800:#44337A;
+  --r50:#FFF0F6; --r100:#FFD6E8; --r600:#FF2D78; --r700:#D0145A;
+  --g50:#ECFDF5; --g100:#D1FAE5; --g600:#059669; --g700:#047857;
+  --o50:#FFF3E6; --o600:#EA580C;
+}
+:root.dark{
+  --canvas:#0d061a; --surface:#0F172A; --muted-fill:#1E293B; --ink:#F8FAFC; --body:#CBD5E1; --muted:#94A3B8; --line:#334155;
+  --sky:#1b2447; --ground:#10281f;
+  --i50:#241a45; --i100:#2f2159; --i200:#44337A; --i600:#8b6be0; --i700:#B794F4; --i800:#D0C3F6;
+  --r50:#3a1024; --r100:#5a1536; --r600:#FF5E9B; --r700:#FF85B3;
+  --g50:#0f2a22; --g100:#14382c; --g600:#34d399; --g700:#6ee7b7;
+  --o50:#3a2412; --o600:#fb923c;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--canvas);color:var(--body);font:14px/1.45 "Plus Jakarta Sans",system-ui,sans-serif}
+.mono{font-family:"JetBrains Mono",monospace}
+/* Koda has two shapes: phone (<720px: toolbar + bottom tabs) and rail (>=720px: sidebar + page). */
+.shell{display:grid;grid-template-columns:1fr;height:100vh;height:100dvh}
+.col{display:flex;flex-direction:column;min-width:0;min-height:0}
+.rail{display:none;background:var(--surface);border-right:1px solid var(--line);padding:16px 12px;flex-direction:column;gap:4px}
+.brand{display:flex;gap:10px;align-items:center;padding:4px 8px 16px}.logo{width:38px;height:38px;border-radius:14px;background:var(--i600);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:800}
+.brand b{display:block;color:var(--ink);font-size:15px;line-height:1.1}.brand small{color:var(--muted);font-size:11px}
+.rn{display:flex;align-items:center;gap:10px;border:0;background:none;font:inherit;font-weight:700;color:var(--body);padding:10px 12px;border-radius:16px;cursor:pointer;text-align:left}
+.rn.on{background:var(--i50);color:var(--i700)}
+.bar{display:flex;align-items:center;gap:10px;padding:12px 16px 10px;background:var(--surface);border-bottom:1px solid var(--line)}
+.bar h1{margin:0;font-size:17px;font-weight:800;color:var(--ink);flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.iconbtn{width:40px;height:40px;border-radius:16px;border:1px solid var(--line);background:var(--surface);color:var(--i600);font-size:18px;cursor:pointer;font-weight:800}
+.net{font-size:11px;font-weight:700;padding:4px 9px;border-radius:99px;border:1px solid var(--g100);background:var(--g50);color:var(--g700);white-space:nowrap}
+.net.off{border-color:var(--line);background:var(--mf);color:var(--muted)}
+.body{flex:1;overflow:auto;padding:16px max(16px,calc((100% - 700px)/2)) 24px;display:flex;flex-direction:column;gap:12px}
+.cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,300px),1fr));gap:12px}
+.tabs{display:flex;background:var(--surface);border-top:1px solid var(--line);padding-bottom:env(safe-area-inset-bottom)}
+.tabs div{flex:1;text-align:center;padding:8px 0 12px;font-size:11px;font-weight:700;color:var(--muted)}
+.tabs div.on{color:var(--i600)}.tabs svg{display:block;margin:0 auto 2px}
+.fab{position:fixed;right:12px;bottom:76px;opacity:.92;z-index:20;border:0;border-radius:99px;background:var(--ink);color:var(--canvas);font:inherit;font-weight:800;padding:10px 16px;cursor:pointer;box-shadow:0 8px 24px rgba(15,23,42,.3)}
+.side{position:fixed;z-index:30;background:var(--surface);border:1px solid var(--line);padding:16px;overflow:auto;transition:transform .2s;
+ left:0;right:0;bottom:0;max-height:78dvh;border-radius:26px 26px 0 0;transform:translateY(110%)}
+.side.open{transform:none}
+.scrim{position:fixed;inset:0;background:rgba(15,23,42,.45);z-index:25;display:none}.scrim.open{display:block}
+.sidehead{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px}
+@media (max-width:719px){.fab{padding:10px 13px}.fab .fl{display:none}}
+@media (min-width:720px){
+ .shell{grid-template-columns:220px 1fr}.rail{display:flex}.tabs{display:none}.fab{bottom:18px}
+ .side{left:auto;top:0;right:0;bottom:0;width:380px;max-height:none;border-radius:26px 0 0 26px;transform:translateX(110%)}.side.open{transform:none}
+}
+@media (min-width:1220px){
+ .shell{grid-template-columns:220px 1fr 380px}.fab,.scrim,.sidehead .iconbtn{display:none!important}
+ .side{position:static;transform:none;border-radius:0;border-width:0 0 0 1px;width:auto;height:100dvh}
+}
+/* primitives */
+.card{background:var(--surface);border:1px solid var(--line);border-radius:22px;padding:14px}
+.card.tap{cursor:pointer;text-align:left;width:100%;font:inherit;color:inherit;display:block}
+.card.tap:hover{border-color:var(--i200)}
+.card[disabled]{opacity:.55;cursor:not-allowed}
+.hero{background:linear-gradient(180deg,var(--sky),var(--ground));border-radius:26px;padding:18px;border:1px solid var(--line)}
+.h2{font-size:20px;font-weight:800;color:var(--ink);margin:0}
+.h3{font-size:12px;font-weight:800;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;margin:4px 0 -4px}
+.sub{font-size:12px;color:var(--muted)}
+.btn{border:0;border-radius:18px;padding:12px 16px;font:inherit;font-weight:800;cursor:pointer;min-height:46px;width:100%}
+.btn.p{background:var(--i600);color:#fff} .btn.g{background:var(--i50);color:var(--i700);border:1px solid var(--i100)}
+.btn.s{background:var(--g600);color:#fff} .btn.d{background:var(--r50);color:var(--r700);border:1px solid var(--r100)}
+.btn.sm{width:auto;min-height:36px;padding:6px 12px;font-size:13px;border-radius:14px}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+.badge{display:inline-flex;align-items:center;gap:4px;font-size:11px;font-weight:800;padding:2px 8px;border-radius:99px;border:1px solid var(--i200);background:var(--i50);color:var(--i700)}
+.badge.ok{border-color:var(--g100);background:var(--g50);color:var(--g700)} .badge.no{border-color:var(--r100);background:var(--r50);color:var(--r700)}
+.badge.mu{border-color:var(--line);background:var(--muted-fill);color:var(--muted)} .badge.or{border-color:var(--o50);background:var(--o50);color:var(--o600)}
+.row{display:flex;align-items:center;gap:10px}
+.row.sp{justify-content:space-between}
+.grow{flex:1;min-width:0}
+.ttl{font-weight:800;color:var(--ink)}
+.well{width:44px;height:44px;border-radius:16px;background:var(--i50);color:var(--i600);display:flex;align-items:center;justify-content:center;font-size:22px;flex:none}
+.seg{display:flex;gap:8px;flex-wrap:wrap}
+.seg button{flex:1;min-width:64px;border:2px solid var(--line);background:var(--surface);color:var(--body);border-radius:16px;padding:9px;font:inherit;font-weight:700;cursor:pointer;min-height:44px}
+.seg button.on{border-color:var(--i600);background:var(--i50);color:var(--i700)}
+.seg button:disabled{opacity:.4;cursor:not-allowed}
+.field{width:100%;border:2px solid var(--line);background:var(--surface);color:var(--ink);border-radius:16px;padding:11px 12px;font:inherit;font-size:16px}
+.field:focus{outline:0;border-color:var(--i600)}
+.notice{border-radius:16px;padding:10px 12px;font-size:13px;border:1px solid var(--line);background:var(--muted-fill);color:var(--body)}
+.notice.warn{background:var(--r50);border-color:var(--r100);color:var(--r700)}
+.notice.good{background:var(--g50);border-color:var(--g100);color:var(--g700)}
+.meter{height:8px;border-radius:8px;background:var(--muted-fill);overflow:hidden}
+.meter i{display:block;height:100%;background:var(--i600);border-radius:8px}
+.meter.m i{background:var(--r600)}
+.meter.g i{background:var(--g600)}
+/* play */
+.prog{display:flex;gap:4px}.prog span{flex:1;height:6px;border-radius:4px;background:var(--line)}.prog .done{background:var(--i600)}.prog .cur{background:var(--r600)}
+.chips{display:flex;gap:6px;flex-wrap:wrap}
+.pl{flex:1;min-width:84px;border:1px solid var(--line);border-radius:16px;background:var(--surface);padding:6px 8px;display:flex;align-items:center;gap:6px}
+.pl.you{border-color:var(--i200);background:var(--i50)}
+.av{width:26px;height:26px;border-radius:99px;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:12px;color:#fff;flex:none}
+.pl b{font-size:15px;color:var(--ink)} .pl small{display:block;font-size:10px;color:var(--muted);line-height:1.1}
+.canvas{background:linear-gradient(180deg,var(--sky),var(--ground));border:1px solid var(--line);border-radius:26px;padding:16px 8px;min-height:160px;display:flex;align-items:center;justify-content:center;gap:10px;flex-wrap:wrap}
+.pc{display:flex;flex-direction:column;align-items:center;gap:2px}.pc .e{font-size:58px;line-height:1}
+.pc .lbl{font-size:11px;font-weight:800;color:var(--i700);background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:0 6px}
+.op{font-size:38px;font-weight:800;color:var(--ink)}
+.word{font-weight:800;font-size:54px;color:var(--ink);letter-spacing:.02em}.word.cut{clip-path:polygon(0 0,36% 0,50% 46%,64% 0,100% 0,100% 100%,0 100%)}
+.stack{display:flex;flex-direction:column;align-items:center;font-weight:800;font-size:32px;line-height:1.05;color:var(--ink)}
+.ans{display:flex;gap:8px}
+.slots,.pool{display:flex;gap:6px;flex-wrap:wrap;justify-content:center}
+.slot{width:32px;height:40px;border:2px solid var(--line);border-radius:12px;background:var(--surface);color:var(--ink);display:flex;align-items:center;justify-content:center;font-weight:800;font-size:19px}.slot.gap{border:0;width:10px;background:none}
+.tile{width:42px;height:46px;border:0;border-radius:14px;background:var(--i50);color:var(--i700);font:800 19px "Plus Jakarta Sans";cursor:pointer;border:1px solid var(--i100)}.tile:disabled{opacity:.25}
+.ring{position:relative;width:50px;height:50px;flex:none}.ring svg{transform:rotate(-90deg)}.ring span{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:13px;color:var(--ink)}
+.hints{background:var(--sky);border:1px solid var(--line);border-radius:16px;padding:8px 12px;font-size:13px;color:var(--ink)}
+.banner{border-radius:22px;padding:14px;text-align:center;font-weight:800;font-size:18px}
+.banner.win{background:var(--g50);color:var(--g700);border:1px solid var(--g100)}.banner.lose{background:var(--r50);color:var(--r700);border:1px solid var(--r100)}.banner.none{background:var(--i50);color:var(--i700);border:1px solid var(--i100)}
+.big{font-size:38px;font-weight:800;text-align:center;color:var(--ink)}
+.stats{display:grid;grid-template-columns:1fr 1fr;gap:8px}.stat{background:var(--surface);border:1px solid var(--line);border-radius:18px;padding:10px;text-align:center}.stat b{display:block;font-size:22px;color:var(--ink)}.stat small{color:var(--muted)}
+.toast{position:fixed;left:50%;bottom:86px;transform:translateX(-50%);background:var(--ink);color:var(--canvas);border-radius:99px;padding:8px 14px;font-weight:700;font-size:13px;z-index:5;display:none;max-width:90%;text-align:center}
+.overlay{position:fixed;inset:0;background:rgba(15,23,42,.7);z-index:6;display:none;align-items:center;justify-content:center;padding:24px}
+.overlay .card{text-align:center}
+.pick{display:grid;grid-template-columns:repeat(6,1fr);gap:6px}.pick button{border:1px solid var(--line);background:var(--surface);border-radius:12px;font-size:24px;padding:4px;cursor:pointer;min-height:44px}
+.step{display:flex;gap:8px;align-items:center;font-size:12px;padding:3px 0;color:var(--muted)}.step i{width:9px;height:9px;border-radius:99px;background:var(--line);flex:none}.step.on{color:var(--ink);font-weight:800}.step.on i{background:var(--r600)}.step.done i{background:var(--g600)}
+/* side panel */
+.side .seg button{min-width:0}
+.sec{margin:14px 0 0;padding-top:12px;border-top:1px solid var(--line)}
+.sl label{display:flex;justify-content:space-between;font-weight:800;color:var(--ink);font-size:13px;margin-top:10px}.sl label span{color:var(--i600)}
+.sl input[type=range]{width:100%;accent-color:#6B46C1}
+.lane{margin-top:8px}.lane h4{margin:6px 0 2px;color:var(--ink);font-size:13px}
+.q{border:1px solid var(--line);border-radius:16px;padding:10px;margin-top:8px}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+</style>
+</head>
+<body>
+<div class="shell">
+  <aside class="rail"><div class="brand"><div class="logo">K</div><div><b>Learn with Koda</b><small>Prototype</small></div></div><div id="rnav" style="display:flex;flex-direction:column;gap:4px"></div></aside>
+  <div class="col">
+    <div class="bar"><button class="iconbtn" id="back" aria-label="Back">‹</button><h1 id="ttl">Learn</h1><span class="net" id="net">● Online</span></div>
+    <div class="body" id="body"></div>
+    <nav class="tabs" id="tabs"></nav>
+  </div>
+  <aside class="side" id="side">
+    <div class="sidehead"><b style="color:var(--ink)">Prototype panel</b><button class="iconbtn" id="sx" aria-label="Close">✕</button></div>
+    <div class="seg" id="ptabs"><button data-t="flow" class="on">Process</button><button data-t="demo">Demo</button><button data-t="owner">Owner</button><button data-t="studio">Studio</button></div>
+    <div id="pbody"></div>
+  </aside>
+</div>
+<div class="scrim" id="scrim"></div>
+<button class="fab" id="fab" aria-label="Prototype panel">⚙<span class="fl"> Prototype</span></button>
+<div class="toast" id="toast"></div>
+<div class="overlay" id="ov"><div class="card"><div class="h2">Connection lost</div><p class="sub" style="margin:8px 0 12px">Your seat is held for 30 seconds. The race goes on without you until you are back.</p><div class="meter m"><i id="ovbar" style="width:100%"></i></div><p class="sub" id="ovmsg" style="margin-top:10px">Reconnecting…</p></div></div>
+
+<script>
+/* ================= content (mock: 15 sample puzzles; real bank = 1,000+ per category) ================= */
+const E=(e,n)=>({t:'icon',e,n}), OP=v=>({t:'op',v});
+const BANK={
+ countries:[
+  {p:[E('🦠','germ'),OP('+'),E('💵','money')],a:['germany'],why:'germ + money, said fast, sounds like "Germany".',d:2,by:'official'},
+  {p:[E('🦃','turkey')],a:['turkey'],why:'A turkey bird — the bird and the country share a name.',d:1,by:'official'},
+  {p:[E('🐋','whales')],a:['wales'],why:'Whales sounds just like "Wales".',d:1,by:'Maya'},
+  {p:[{t:'word',v:'S',n:'the letter S'},OP('+'),E('🤕','pain')],a:['spain'],why:'S + pain = Spain.',d:2,by:'official'},
+  {p:[E('🌶️','chili')],a:['chile'],why:'A chili pepper sounds like "Chile".',d:1,by:'official'}],
+ food:[
+  {p:[{t:'word',v:'CAKE',s:'cut',n:'a slice cut out of CAKE'}],a:['slice of cake','piece of cake','a piece of cake'],why:'A slice is missing from CAKE — "slice of cake" (also: piece of cake).',d:2,by:'official'},
+  {p:[E('🍯','honey'),OP('+'),E('🌙','moon')],a:['honeymoon'],why:'honey + moon = honeymoon.',d:1,by:'Nika'},
+  {p:[E('🥵','hot'),OP('+'),E('🐶','dog')],a:['hot dog','hotdog'],why:'hot + dog = hot dog.',d:1,by:'official'},
+  {p:[E('🥜','peanut'),OP('+'),E('🧈','butter')],a:['peanut butter'],why:'peanut + butter = peanut butter.',d:1,by:'official'},
+  {p:[E('🍎','apple'),OP('+'),E('🥧','pie')],a:['apple pie'],why:'apple + pie = apple pie.',d:1,by:'official'}],
+ sayings:[
+  {p:[{t:'stack',top:'MAN',bottom:'BOARD',n:'MAN over BOARD'}],a:['man overboard'],why:'MAN is over BOARD → "man overboard".',d:2,by:'official'},
+  {p:[{t:'stack',top:'STAND',bottom:'I',n:'I under STAND'}],a:['i understand','understand'],why:'I is under STAND → "I understand".',d:2,by:'official'},
+  {p:[E('🌧️','raining'),E('🐱','cats'),OP('&'),E('🐶','dogs')],a:['raining cats and dogs','its raining cats and dogs'],why:'rain + cats + dogs → "raining cats and dogs".',d:2,by:'Sam'},
+  {p:[E('🔵','blue'),E('🌙','moon')],a:['once in a blue moon','blue moon'],why:'blue + moon → "once in a blue moon" (very rare).',d:3,by:'official'},
+  {p:[{t:'icon',e:'🐟',n:'a BIG fish',big:1},{t:'word',v:'pond',n:'a tiny pond',tiny:1}],a:['big fish in a small pond','big fish small pond'],why:'A BIG fish with a tiny pond → "big fish in a small pond".',d:3,by:'official'}]
+};
+const CATS=[ // off = official, cm = community (illustrative numbers; goal 1,000 per category)
+ {k:'countries',n:'Countries',em:'🌍',off:812,cm:301,live:1},{k:'food',n:'Food',em:'🍰',off:790,cm:316,live:1},
+ {k:'sayings',n:'Sayings',em:'💬',off:1040,cm:302,live:1},{k:'animals',n:'Animals',em:'🐾',off:704,cm:315},
+ {k:'sports',n:'Sports',em:'⚽',off:640,cm:347},{k:'school',n:'School',em:'🎒',off:880,cm:180},{k:'science',n:'Science',em:'🔬',off:905,cm:309}];
+const GOAL=1000, fmt=n=>n.toLocaleString('en-US');
+const total=c=>c.off+c.cm+(c.add||0);
+const ACC=[.55,.75,.9], MT=[[26,48],[16,32],[8,18]], LV=['Easy','Medium','Hard'];
+const PEOPLE=[{id:'maya',name:'Maya',c:'#6B46C1',lv:1,seen:'online'},{id:'sam',name:'Sam',c:'#059669',lv:0,seen:'online'},{id:'lina',name:'Lina',c:'#FF2D78',lv:2,seen:'online'},{id:'nika',name:'Nika',c:'#EA580C',lv:1,seen:'away 2h'}];
+const PICK=[['🦠','germ'],['💵','money'],['🌙','moon'],['🐶','dog'],['🐱','cat'],['🍎','apple'],['🥧','pie'],['🌧️','rain'],['🔥','fire'],['🍯','honey'],['🐝','bee'],['🔑','key'],['⭐','star'],['🌸','flower'],['🚪','door'],['🧊','ice'],['🦁','lion'],['🚗','car'],['⚽','ball'],['🐟','fish'],['🍞','bread'],['🌳','tree'],['☔','umbrella'],['👑','crown']];
+
+/* ================= state ================= */
+const cfg={hint:15,limit:60,rungs:3,players:4,lock:'free',young:0};
+const S={scr:'learn',net:true,mode:'solo',cat:null,count:5,level:1,adapt:1,
+ packs:{countries:1,food:1},dl:{},puzzles:[],i:0,me:0,opps:[],hints:[],hintsUsed:0,solved:0,times:[],t0:0,lastHintAt:0,res:null,timer:null,picked:[],tiles:[],
+ room:null,invited:{},code:null,codeT:0,mine:[],draft:null,studio:[
+  {id:'s1',by:'Maya',cat:'food',p:[E('🍯','honey'),OP('+'),E('🐝','bee')],a:['honeybee'],why:'honey + bee = honeybee.',d:1,checks:[1,1,1]},
+  {id:'s2',by:'Lina',cat:'sayings',p:[E('☔','umbrella'),E('🌧️','rain')],a:['raining'],why:'rain + umbrella.',d:1,checks:[1,0,1]}],
+ ptab:'flow',queue:0};
+const $=(s,r=document)=>r.querySelector(s), body=$('#body');
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const norm=s=>s.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,'').replace(/[^a-z ]/g,'').replace(/\b(a|an|the)\b/g,'').replace(/\s+/g,' ').trim();
+function lev(a,b){const m=[...Array(a.length+1)].map((_,i)=>[i]);for(let j=1;j<=b.length;j++)m[0][j]=j;for(let i=1;i<=a.length;i++)for(let j=1;j<=b.length;j++)m[i][j]=Math.min(m[i-1][j]+1,m[i][j-1]+1,m[i-1][j-1]+(a[i-1]===b[j-1]?0:1));return m[a.length][b.length];}
+const correct=(p,x)=>{x=norm(x);return !!x&&p.a.some(a=>{const y=norm(a);return x===y||(y.length>=6&&lev(x,y)<=1)})};
+const rnd=(a,b)=>a+Math.random()*(b-a), shuffle=a=>{a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a};
+const cat=k=>CATS.find(c=>c.k===k);
+const avatar=(n,c)=>`<span class="av" style="background:${c}">${esc(n[0])}</span>`;
+const GROUP=['gHome','gCreate','gInvite','gJoin','gLobby','gCount','gFinal'];
+function toast(m,ms=2200){const t=$('#toast');t.textContent=m;t.style.display='block';clearTimeout(toast.h);toast.h=setTimeout(()=>t.style.display='none',ms)}
+function pieceHTML(p,label){if(p.t==='op')return `<div class="op">${esc(p.v)}</div>`;let h='';
+  if(p.t==='icon')h=`<div class="e" style="${p.big?'font-size:88px':''}">${p.e}</div>`;
+  if(p.t==='word')h=`<div class="word ${p.s==='cut'?'cut':''}" style="${p.tiny?'font-size:15px':''}">${esc(p.v)}</div>`;
+  if(p.t==='stack')h=`<div class="stack"><span>${esc(p.top)}</span><span>${esc(p.bottom)}</span></div>`;
+  return `<div class="pc">${h}${label?`<div class="lbl">${esc(p.n)}</div>`:''}</div>`}
+const poolFor=k=>k==='mixed'||!cat(k)?.live?Object.values(BANK).flat():BANK[k];
+
+const ICON={home:'<path d="M3 11l9-8 9 8"/><path d="M5 10v10h14V10"/>',learn:'<path d="M12 4C7 4 3 8 3 12s4 8 9 8 9-4 9-8-4-8-9-8z"/><path d="M9 11h.01M15 11h.01M9 15c1.5 1.3 4.5 1.3 6 0"/>',set:'<circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M5 5l2 2M17 17l2 2M19 5l-2 2M7 17l-2 2"/>'};
+const svg=k=>`<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">${ICON[k]}</svg>`;
+$('#rnav').innerHTML=[['home','Home'],['learn','Learn'],['set','Settings']].map(([k,n])=>`<button class="rn ${k==='learn'?'on':''}">${svg(k)}${n}</button>`).join('');
+$('#tabs').innerHTML=[['home','Home'],['learn','Learn'],['set','Settings']].map(([k,n])=>`<div class="${k==='learn'?'on':''}">${svg(k)}${n}</div>`).join('');
+const drawer=o=>{$('#side').classList.toggle('open',o);$('#scrim').classList.toggle('open',o)};
+$('#fab').onclick=()=>drawer(true);$('#sx').onclick=()=>drawer(false);$('#scrim').onclick=()=>drawer(false);
+/* ================= navigation ================= */
+const TITLES={learn:'Learn',mode:'Rebus Rush',topics:'Pick a category',setup:'Round setup',play:'',reveal:'',summary:'Round complete',
+ gHome:'Play with friends',gCreate:'New room',gInvite:'Invite players',gJoin:'Join a room',gLobby:'Lobby',gCount:'Get ready',gFinal:'Final result',make:'Make a puzzle',mine:'My puzzles'};
+const PARENT={mode:'learn',topics:'mode',setup:'topics',play:'mode',reveal:'mode',summary:'mode',gHome:'mode',gCreate:'gHome',gInvite:'gCreate',gJoin:'gHome',gLobby:'gHome',gCount:'gHome',gFinal:'mode',make:'mode',mine:'mode'};
+function go(scr){S.scr=scr;render()}
+$('#back').onclick=()=>{clearInterval(S.timer);if(S.scr==='play'||S.scr==='reveal'||S.scr==='summary')S.room=null;go(PARENT[S.scr]||'learn')};
+function setNet(on){S.net=on;const n=$('#net');n.textContent=on?'● Online':'● Offline';n.className='net'+(on?'':' off');
+  if(on&&S.queue>0){S.mine.filter(m=>m.st==='queued').forEach(m=>{m.st='review';S.studio.push({id:'u'+m.id,by:'You',cat:m.cat,p:m.p,a:m.a,why:m.why,d:1,checks:m.checks,mine:m.id})});toast(`${S.queue} queued puzzle${S.queue>1?'s':''} sent for review`);S.queue=0;}
+  const inGroupRun=S.mode==='group'&&(S.scr==='play'||S.scr==='reveal'||S.scr==='gLobby'||S.scr==='gCount');
+  if(inGroupRun){const ov=$('#ov');if(!on){ov.style.display='flex';let t=30;clearInterval(setNet.h);setNet.h=setInterval(()=>{t--;$('#ovbar').style.width=(t/30*100)+'%';$('#ovmsg').textContent=t>0?`Reconnecting… ${t}s left`:'Seat released';if(t<=0)clearInterval(setNet.h)},1000)}else{clearInterval(setNet.h);ov.style.display='none';toast('Back online — you are in the race again')}}
+  if(!['play','reveal','gLobby','gCount'].includes(S.scr))render();else renderPanel()}
+
+/* ================= round engine (solo + group share it) ================= */
+function buildPool(){const k=S.cat;const list=(k==='mixed'||!cat(k)?.live)?Object.values(BANK).flat():BANK[k];return shuffle(list).sort((a,b)=>a.d-b.d+(Math.random()-.5)).slice(0,Math.min(S.count,list.length))}
+const levelNow=()=>cfg.lock==='free'?(S.level==='adaptive'?S.adapt:S.level):cfg.lock;
+function startRound(){S.puzzles=buildPool();Object.assign(S,{i:0,me:0,hintsUsed:0,solved:0,times:[],adapt:1,results:[]});
+  S.opps=S.mode==='solo'?[{id:'m',name:'Machine',c:'#FF2D78',score:0,lv:levelNow(),bot:1}]:S.room.players.filter(p=>p.id!=='you').map(p=>({id:p.id,name:p.name,c:p.c,score:0,lv:p.lv}));startPuzzle()}
+function startPuzzle(){const p=S.puzzles[S.i];S.scr='play';S.t0=performance.now();S.lastHintAt=S.t0;S.hints=[];S.picked=[];
+  S.opps.forEach(o=>{const [a,b]=MT[S.mode==='solo'?levelNow():o.lv];o.t=rnd(a,b)*(.8+.2*p.d);o.ok=Math.random()<ACC[S.mode==='solo'?levelNow():o.lv];o.tried=0;o.lock=0});
+  const ans=norm(p.a[0]).replace(/ /g,'');S.tiles=shuffle(ans.split('').concat(shuffle('abcdefghijklmnopqrstuvwxyz'.split('').filter(c=>!ans.includes(c))).slice(0,Math.max(3,Math.ceil(ans.length/3))))).map((c,i)=>({c,i}));
+  render();clearInterval(S.timer);S.timer=setInterval(tick,100)}
+const elapsed=()=>(performance.now()-S.t0)/1000;
+function tick(){if(S.scr!=='play'){clearInterval(S.timer);return}const t=elapsed();if(t>=cfg.limit)return finish('time');
+  for(const o of S.opps){if(o.lock&&t>o.lock)o.lock=0;if(t>=o.t){if(o.ok||o.tried)return finish(o.id);o.tried=1;o.lock=t+3;o.t=t+rnd(6,10);o.ok=Math.random()<.9;toast(`${o.name} guessed wrong — your chance!`)}
+    const st=$('#st_'+o.id);if(st)st.textContent=o.lock?'wrong ✕ locked':'thinking…'}
+  const mb=$('#mbar');if(mb&&S.opps[0])mb.style.width=Math.min(100,t/S.opps[0].t*100)+'%';const tl=$('#tl');if(tl)tl.textContent=Math.max(0,Math.ceil(cfg.limit-t))+'s left';
+  const left=Math.max(0,cfg.hint-(performance.now()-S.lastHintAt)/1000),used=S.hints.length,rg=$('#ring'),rt=$('#ringt'),hb=$('#hintbtn');
+  if(rg)rg.style.strokeDashoffset=138*(left/cfg.hint);
+  if(used>=cfg.rungs){rt.textContent='—';hb.disabled=true;hb.textContent='No more hints'}else if(left>0){rt.textContent=Math.ceil(left);hb.disabled=true;hb.textContent=`Hint ${used+1} unlocks in ${Math.ceil(left)}s`}else{rt.textContent='💡';hb.disabled=false;hb.textContent=`Hint ${used+1} of ${cfg.rungs}  (−1 pt)`}}
+function giveHint(){const p=S.puzzles[S.i],k=S.hints.length;if(k>=cfg.rungs)return;const ans=p.a[0];
+  if(k===0)S.hints.push('Category: '+(cat(S.cat)?.live?cat(S.cat).n.toLowerCase():'a word or saying'));
+  if(k===1)S.hints.push('Letters: '+ans.split(' ').map(w=>w[0].toUpperCase()+' '+'_ '.repeat(w.length-1)).join('  ')+` (${ans.replace(/ /g,'').length})`);
+  if(k===2)S.hints.push('The pieces: '+p.p.filter(x=>x.t!=='op').map(x=>x.n).join(' · '));S.hintsUsed++;S.lastHintAt=performance.now();render()}
+function submit(v){if(correct(S.puzzles[S.i],v))return finish('me');toast('Not quite — try again');S.picked=[];if(S.scr==='play'&&S.tiles.length&&cfg.young)render()}
+function finish(who){clearInterval(S.timer);const t=elapsed(),pts=Math.max(1,3-S.hints.length);const r={who,t,hints:S.hints.length,pts:0};
+  if(who==='me'){S.me+=pts;S.solved++;r.pts=pts}else if(S.opps.some(o=>o.id===who)){S.opps.find(o=>o.id===who).score+=3;r.pts=3}
+  S.times.push(t);S.res=r;if(S.mode==='solo'&&S.level==='adaptive'&&cfg.lock==='free')S.adapt=Math.max(0,Math.min(2,S.adapt+(who==='me'?1:S.opps.some(o=>o.id===who)?-1:0)));
+  S.scr='reveal';render()}
+const next=()=>{S.i++;if(S.i>=S.puzzles.length){go(S.mode==='group'?'gFinal':'summary')}else startPuzzle()};
+
+/* ================= views ================= */
+function render(){const s=S.scr;$('#back').style.visibility=s==='learn'?'hidden':'visible';
+  $('#ttl').textContent=(s==='play'||s==='reveal')?`Puzzle ${S.i+1} of ${S.puzzles.length}${S.mode==='group'?' · Room':''}`:TITLES[s];
+  if(GROUP.includes(s)&&!S.net&&s!=='gLobby'&&s!=='gCount'&&s!=='gFinal')return vGroupOff();
+  ({learn:vLearn,mode:vMode,topics:vTopics,setup:vSetup,play:vPlay,reveal:vReveal,summary:vSummary,gHome:vGHome,gCreate:vGCreate,gInvite:vGInvite,gJoin:vGJoin,gLobby:vLobby,gCount:vCount,gFinal:vGFinal,make:vMake,mine:vMine})[s]();
+  body.scrollTop=0;renderPanel()}
+const on=(sel,fn)=>body.querySelectorAll(sel).forEach(el=>el.onclick=()=>fn(el))
+function vLearn(){body.innerHTML=`<div class="seg"><button>Think</button><button disabled>Read</button><button disabled>Write</button></div>
+ <div class="h3">Logic &amp; thinking</div>
+ <div class="cards"><button class="card tap" id="rr" style="border-color:var(--i200)"><div class="row"><div class="well">🧩</div><div class="grow"><div class="row sp"><span class="ttl">Rebus Rush</span><span class="badge">New</span></div><div class="sub">Decode picture puzzles. Race the Machine or your friends.</div><div class="row" style="margin-top:6px;gap:6px"><span class="badge mu">Ages 7–18</span><span class="badge ok">Works offline</span><span class="badge">Group: online</span></div></div></div></button>
+ <div class="card"><div class="row"><div class="well">🎨</div><div class="grow"><div class="ttl">Color Sweeper</div><div class="sub">Deduce the hidden colours.</div></div><span class="badge mu">6–14</span></div></div>
+ <div class="card"><div class="row"><div class="well">🔎</div><div class="grow"><div class="ttl">Observation</div><div class="sub">Spot, match and compare.</div></div><span class="badge mu">5–9</span></div></div></div>`;
+ $('#rr').onclick=()=>go('mode')}
+function vMode(){const q=S.mine.filter(m=>m.st==='queued').length;
+ body.innerHTML=`<div class="hero"><div class="h2">Rebus Rush</div><p class="sub" style="margin:4px 0 0;color:var(--body)">Read the pictures, say the phrase. First correct answer wins the point.</p></div>
+ <div class="cards"><button class="card tap" id="solo"><div class="row"><div class="well">🤖</div><div class="grow"><div class="ttl">Play alone vs the Machine</div><div class="sub">Pick a category, 5–10 puzzles.</div></div><span class="badge ok">Works offline</span></div></button>
+ <button class="card tap" id="grp" ${S.net?'':'disabled'}><div class="row"><div class="well">👥</div><div class="grow"><div class="ttl">Play with friends</div><div class="sub">${S.net?'Create a room and invite your buddies.':'Needs internet. Solo play still works.'}</div></div><span class="badge ${S.net?'':'mu'}">Online</span></div></button>
+ <button class="card tap" id="mk"><div class="row"><div class="well">✏️</div><div class="grow"><div class="ttl">Make a puzzle</div><div class="sub">Your puzzle joins the category once approved.</div></div><span class="badge ok">Draft offline</span></div></button>
+ <button class="card tap" id="mn"><div class="row"><div class="well">📋</div><div class="grow"><div class="ttl">My puzzles</div><div class="sub">${S.mine.length?S.mine.length+' made'+(q?` · ${q} waiting to send`:''):'None yet'}</div></div></div></button></div>`;
+ $('#solo').onclick=()=>{S.mode='solo';go('topics')};$('#grp').onclick=()=>{S.mode='group';go('gHome')};$('#mk').onclick=()=>{S.draft={cat:'food',p:[],ans:'',alts:'',why:''};go('make')};$('#mn').onclick=()=>go('mine')}
+function vTopics(){const solo=S.mode==='solo',list=CATS;
+ body.innerHTML=`<div class="notice">${S.net?'Saved categories play with no internet. Download others while you are online.':'<b>Offline.</b> Only categories saved on this device can be played.'}</div>
+ <div class="cards">${list.map(c=>{const t=total(c),saved=S.packs[c.k],dl=S.dl[c.k];const kb=Math.round(t*.33);
+  return `<div class="card"><div class="row"><div class="well">${c.em}</div><div class="grow"><div class="ttl">${c.n}</div><div class="sub">${fmt(t)} puzzles · ${fmt(c.cm+(c.add||0))} from the community</div>
+   <div class="meter ${t>=GOAL?'g':''}" style="margin-top:6px"><i style="width:${Math.min(100,t/GOAL*100)}%"></i></div></div></div>
+   <div class="row sp" style="margin-top:10px"><span class="badge ${saved?'ok':'mu'}">${saved?'Saved · '+kb+' KB':dl!=null?'Downloading '+dl+'%':'Not saved'}</span>
+   <div class="row" style="gap:6px">${saved?'':`<button class="btn g sm" data-dl="${c.k}" ${S.net&&dl==null?'':'disabled'}>Download</button>`}<button class="btn p sm" data-play="${c.k}" ${saved?'':'disabled'}>Play</button></div></div></div>`}).join('')}</div>
+ <button class="btn g" data-play="mixed">🎲 Mixed (saved categories)</button><p class="sub">Mock note: counts are illustrative (goal 1,000 per category); the demo plays the 15 sample puzzles.</p>`;
+ on('[data-play]',el=>{S.cat=el.dataset.play;go('setup')});
+ on('[data-dl]',el=>{const k=el.dataset.dl;S.dl[k]=0;render();const h=setInterval(()=>{if(!S.net){clearInterval(h);delete S.dl[k];render();toast('Download paused — no connection');return}S.dl[k]+=20;if(S.dl[k]>=100){clearInterval(h);delete S.dl[k];S.packs[k]=1;toast(cat(k).n+' saved for offline')}if(S.scr==='topics')render()},350)})}
+function vSetup(){const c=cat(S.cat)||{n:'Mixed',em:'🎲'};const locked=cfg.lock!=='free';
+ body.innerHTML=`<div class="card"><div class="row"><div class="well">${c.em}</div><div><div class="ttl">${c.n}</div><div class="sub">Puzzles you have not seen lately, easy first.</div></div></div></div>
+ <div class="h3">Questions</div><div class="seg" id="cnt">${[5,7,10].map(n=>`<button data-n="${n}" class="${S.count===n?'on':''}">${n}</button>`).join('')}</div>
+ <div class="h3">Machine ${locked?'· set by owner':''}</div><div class="seg">${['Easy','Medium','Hard'].map((n,i)=>`<button data-l="${i}" ${locked?'disabled':''} class="${(locked?cfg.lock===i:S.level===i)?'on':''}">${n}</button>`).join('')}<button data-l="adaptive" ${locked?'disabled':''} class="${!locked&&S.level==='adaptive'?'on':''}">Adaptive</button></div>
+ <div class="notice">First correct answer gets 3 points (−1 per hint). A hint unlocks every <b>${cfg.hint}s</b>; ${cfg.limit}s per puzzle.</div>
+ <button class="btn p" id="go" style="margin-top:auto">Start round</button>`;
+ on('#cnt button',el=>{S.count=+el.dataset.n;render()});on('[data-l]',el=>{S.level=el.dataset.l==='adaptive'?'adaptive':+el.dataset.l;render()});$('#go').onclick=startRound}
+function oppsStrip(){const you=`<div class="pl you">${avatar('You','#6B46C1')}<div><b>${S.me}</b><small>You</small></div></div>`;
+ return `<div class="chips">${you}${S.opps.map(o=>`<div class="pl">${o.bot?`<span class="av" style="background:${o.c}">🤖</span>`:avatar(o.name,o.c)}<div><b>${o.score}</b><small>${esc(o.name)} · <span id="st_${o.id}">thinking…</span></small></div></div>`).join('')}</div>`}
+function vPlay(){const p=S.puzzles[S.i],ans=norm(p.a[0]);
+ const input=cfg.young?`<div class="slots">${ans.split('').map((c,i)=>{if(c===' ')return'<div class="slot gap"></div>';const ix=ans.slice(0,i).replace(/ /g,'').length;const t=S.picked[ix];return `<div class="slot">${t?t.c.toUpperCase():''}</div>`}).join('')}</div><div class="pool">${S.tiles.map(t=>`<button class="tile" data-i="${t.i}" ${S.picked.includes(t)?'disabled':''}>${t.c.toUpperCase()}</button>`).join('')}</div><div class="seg"><button id="undo">⌫ Undo</button><button id="skip">Skip</button></div>`
+  :`<div class="ans"><input class="field" id="inp" placeholder="Type the answer…" autocomplete="off" autocapitalize="off"><button class="btn p" style="width:84px" id="ok">Go</button></div><div class="seg"><button id="skip">Skip this one</button></div>`;
+ body.innerHTML=`<div class="prog">${S.puzzles.map((_,i)=>`<span class="${i<S.i?'done':i===S.i?'cur':''}"></span>`).join('')}</div>${oppsStrip()}
+ <div class="canvas">${p.p.map(x=>pieceHTML(x,S.hints.length>=3)).join('')}</div>
+ <div class="row sp"><span class="sub" id="tl"></span>${S.mode==='solo'?'<div class="meter m" style="width:60%"><i id="mbar"></i></div>':'<span class="badge">Live race</span>'}</div>
+ ${S.hints.length?`<div class="hints">${S.hints.map(h=>`<div>💡 ${esc(h)}</div>`).join('')}</div>`:''}${input}
+ <div class="row"><div class="ring"><svg width="50" height="50"><circle cx="25" cy="25" r="22" fill="none" stroke="var(--line)" stroke-width="5"/><circle id="ring" cx="25" cy="25" r="22" fill="none" stroke="#6B46C1" stroke-width="5" stroke-linecap="round" stroke-dasharray="138" stroke-dashoffset="138"/></svg><span id="ringt"></span></div><button class="btn g grow" id="hintbtn" disabled>Hint</button></div>`;
+ $('#hintbtn').onclick=giveHint;$('#skip').onclick=()=>finish('skip');
+ if(cfg.young){on('.tile',b=>{const t=S.tiles.find(x=>x.i==b.dataset.i),need=ans.replace(/ /g,'').length;if(S.picked.length>=need)return;S.picked.push(t);if(S.picked.length===need){const g=S.picked.map(x=>x.c).join('');if(p.a.some(a=>norm(a).replace(/ /g,'')===g))return finish('me');toast('Not quite — try again');S.picked=[]}render()});$('#undo').onclick=()=>{S.picked.pop();render()}}
+ else{$('#ok').onclick=()=>submit($('#inp').value);$('#inp').onkeydown=e=>{if(e.key==='Enter')submit($('#inp').value)};$('#inp').focus()}tick()}
+function vReveal(){const p=S.puzzles[S.i],r=S.res,last=S.i===S.puzzles.length-1,o=S.opps.find(x=>x.id===r.who);
+ const b=r.who==='me'?['win',`You scored +${r.pts}!${r.hints?` (${r.hints} hint${r.hints>1?'s':''})`:' No hints!'}`]:o?['lose',`${o.name} got it first (+3)`]:r.who==='time'?['none','⏱ Time is up — nobody scores']:['none','Skipped — nobody scores'];
+ const rows=[{n:'You',c:'#6B46C1',s:S.me},...S.opps.map(x=>({n:x.name,c:x.c,s:x.score}))].sort((a,b)=>b.s-a.s);
+ body.innerHTML=`<div class="banner ${b[0]}">${b[1]}</div><div class="canvas">${p.p.map(x=>pieceHTML(x,true)).join('')}</div><div class="big">${esc(p.a[0])}</div>
+ <div class="card"><b class="ttl">Why?</b> ${esc(p.why)}<div class="row sp" style="margin-top:8px"><span class="sub">${p.by==='official'?'Koda puzzle':'Made by '+esc(p.by)+' · community'}</span><button class="btn g sm" id="rep">⚑ Report</button></div></div>
+ <div class="chips">${rows.map(x=>`<div class="pl">${avatar(x.n,x.c)}<div><b>${x.s}</b><small>${esc(x.n)}</small></div></div>`).join('')}</div>
+ <button class="btn p" id="nx" style="margin-top:auto">${last?'See results':'Next puzzle'}</button>`;
+ $('#nx').onclick=next;$('#rep').onclick=()=>toast(S.net?'Thanks — sent to the review team':'Saved — will send when you are online')}
+function vSummary(){const o=S.opps[0],w=S.me>o.score?['win','🏆 You beat the Machine!']:S.me<o.score?['lose','🤖 Machine wins this round']:['none','🤝 A tie'];const avg=S.times.length?(S.times.reduce((a,b)=>a+b,0)/S.times.length).toFixed(1):0;
+ body.innerHTML=`<div class="banner ${w[0]}">${w[1]}</div>${oppsStrip().replace(/<span id="st_[^>]*>[^<]*<\/span>/,'done')}
+ <div class="stats"><div class="stat"><b>${S.solved}/${S.puzzles.length}</b><small>solved by you</small></div><div class="stat"><b>${S.hintsUsed}</b><small>hints used</small></div><div class="stat"><b>${avg}s</b><small>avg per puzzle</small></div><div class="stat"><b>${S.net?'Synced':'Saved'}</b><small>${S.net?'to your report':'on device, syncs later'}</small></div></div>
+ <div class="card"><b class="ttl">For the parent report</b><p class="sub" style="margin:4px 0 0">“Solved ${S.solved} picture puzzles, ${S.hintsUsed} hint${S.hintsUsed===1?'':'s'}.” Counts toward Think this week.</p></div>
+ <button class="btn p" id="again" style="margin-top:auto">Play again</button><button class="btn g" id="cats">Choose another category</button>`;
+ $('#again').onclick=startRound;$('#cats').onclick=()=>go('topics')}
+
+/* ---------- group (online only) ---------- */
+function vGroupOff(){body.innerHTML=`<div class="card" style="text-align:center"><div class="well" style="margin:0 auto 8px">📡</div><div class="h2">Group play needs internet</div><p class="sub">Everyone must see the same puzzle at the same moment, so rooms only work online. Your solo rounds and saved categories are not affected.</p></div>
+ <button class="btn p" id="solo">Play alone instead (works offline)</button><button class="btn g" id="retry">I am back online</button>`;$('#solo').onclick=()=>{S.mode='solo';go('topics')};$('#retry').onclick=()=>{setNet(true)};renderPanel()}
+function vGHome(){body.innerHTML=`<div class="hero"><div class="h2">Race your buddies</div><p class="sub" style="margin:4px 0 0;color:var(--body)">Same puzzle, same time. First correct answer scores. Only accepted Koda buddies can join.</p></div>
+ <button class="btn p" id="cr">Create a room</button><button class="btn g" id="jn">Join with a code</button>
+ <div class="notice"><b>Safe by design:</b> no chat, only reaction stickers · nickname and avatar only · a parent approves rooms for a managed child · rooms are deleted after the game.</div>`;
+ $('#cr').onclick=()=>{S.room={topic:'mixed',count:5,players:[{id:'you',name:'You',c:'#6B46C1',lv:1,host:1}],host:1};S.invited={};go('gCreate')};$('#jn').onclick=()=>go('gJoin')}
+function vGCreate(){const r=S.room,live=CATS.filter(c=>c.live);
+ body.innerHTML=`<div class="h3">Category</div><div class="seg">${[...live.map(c=>[c.k,c.em+' '+c.n]),['mixed','🎲 Mixed']].map(([k,n])=>`<button data-c="${k}" class="${r.topic===k?'on':''}">${n}</button>`).join('')}</div>
+ <div class="h3">Questions</div><div class="seg">${[5,7,10].map(n=>`<button data-n="${n}" class="${r.count===n?'on':''}">${n}</button>`).join('')}</div>
+ <div class="notice">Rules come from the owner: hint unlocks every <b>${cfg.hint}s</b>, <b>${cfg.limit}s</b> per puzzle, up to <b>${cfg.players}</b> players.</div>
+ <div class="notice good">Everyone plays this category from the online library, so no download is needed.</div>
+ <button class="btn p" id="nx" style="margin-top:auto">Next: invite players</button>`;
+ on('[data-c]',el=>{r.topic=el.dataset.c;render()});on('[data-n]',el=>{r.count=+el.dataset.n;render()});$('#nx').onclick=()=>{S.code='KODA-'+Math.random().toString(36).slice(2,8).toUpperCase();S.codeT=Date.now()+15*60000;go('gInvite')}}
+function vGInvite(){const n=Object.keys(S.invited).length;
+ body.innerHTML=`<div class="h3">Buddies</div><div class="cards">${PEOPLE.map(p=>`<div class="card"><div class="row">${avatar(p.name,p.c)}<div class="grow"><div class="ttl">${p.name}</div><div class="sub">${p.seen==='online'?'Online now':'Last seen '+p.seen}</div></div>${p.seen==='online'?`<button class="btn ${S.invited[p.id]?'s':'g'} sm" data-i="${p.id}">${S.invited[p.id]?'Invited ✓':'Invite'}</button>`:'<span class="badge mu">Away</span>'}</div></div>`).join('')}</div>
+ <div class="h3">Or share a code</div><div class="card"><div class="row sp"><span class="mono" style="font-size:20px;font-weight:700;color:var(--ink)">${S.code}</span><span class="badge">Expires in <span id="cd">15:00</span></span></div><p class="sub" style="margin:6px 0 0">One use per friend. A new code replaces this one.</p></div>
+ <button class="btn p" id="open" style="margin-top:auto" ${n?'':'disabled'}>Open lobby${n?` (${n} invited)`:''}</button>`;
+ on('[data-i]',el=>{const id=el.dataset.i;if(S.invited[id])delete S.invited[id];else if(Object.keys(S.invited).length<cfg.players-1)S.invited[id]=1;else toast('Room is full ('+cfg.players+' players max)');render()});$('#open').onclick=()=>{S.room.players=[S.room.players[0]];go('gLobby')}}
+function vGJoin(){body.innerHTML=`<div class="card"><div class="ttl">Enter the room code</div><p class="sub">A friend sent you a code like KODA-7Q4M2X.</p><input class="field mono" id="cd" value="KODA-7Q4M2X" maxlength="11"></div><button class="btn p" id="j">Join room</button>`;
+ $('#j').onclick=()=>{S.room={topic:'mixed',count:5,host:0,players:[{id:'host',name:'Maya',c:'#6B46C1',lv:1,host:1},{id:'you',name:'You',c:'#6B46C1',lv:1}]};S.invited={};go('gLobby')}}
+function vLobby(){const r=S.room,seats=cfg.players;
+ body.innerHTML=`<div class="card"><div class="row sp"><div><div class="ttl">${(cat(r.topic)?.n)||'Mixed'} · ${r.count} questions</div><div class="sub">${r.host?'You are the host':'Hosted by Maya'}</div></div><span class="badge ok">Live</span></div></div>
+ <div class="h3">Players ${r.players.length}/${seats}</div>
+ ${r.players.map(p=>`<div class="card"><div class="row">${avatar(p.name,p.c)}<div class="grow ttl">${esc(p.name)}${p.host?' · host':''}</div><span class="badge ok">Ready</span></div></div>`).join('')}
+ ${Object.keys(S.invited).filter(id=>!r.players.some(p=>p.id===id)).map(id=>{const p=PEOPLE.find(x=>x.id===id);return `<div class="card" style="opacity:.7"><div class="row">${avatar(p.name,p.c)}<div class="grow ttl">${p.name}</div><span class="badge mu">Invited…</span></div></div>`}).join('')}
+ <div class="notice">${r.host?'Start when at least two players are ready.':'Waiting for the host to start…'}</div>
+ ${r.host?`<button class="btn p" id="st" style="margin-top:auto" ${r.players.length>1?'':'disabled'}>Start game</button>`:''}`;
+ if(r.host)$('#st').onclick=startCount;
+ clearTimeout(vLobby.h);const pending=Object.keys(S.invited).filter(id=>!r.players.some(p=>p.id===id));
+ if(pending.length&&S.scr==='gLobby')vLobby.h=setTimeout(()=>{if(S.scr!=='gLobby')return;const p=PEOPLE.find(x=>x.id===pending[0]);r.players.push({id:p.id,name:p.name,c:p.c,lv:p.lv});toast(p.name+' joined');render()},1400);
+ if(!r.host)vLobby.h=setTimeout(()=>{if(S.scr==='gLobby')startCount()},5000)}
+function startCount(){go('gCount')}
+function vCount(){let n=3;body.innerHTML=`<div style="margin:auto;text-align:center"><div class="sub">Get ready</div><div style="font-size:110px;font-weight:800;color:var(--i600)" id="n">3</div><div class="sub">${S.room.players.length} players · same puzzle at the same time</div></div>`;
+ const h=setInterval(()=>{if(S.scr!=='gCount'){clearInterval(h);return}n--;if(n<=0){clearInterval(h);S.mode='group';S.cat=S.room.topic;S.count=S.room.count;startRound()}else $('#n').textContent=n},900)}
+function vGFinal(){const rows=[{n:'You',c:'#6B46C1',s:S.me},...S.opps.map(x=>({n:x.name,c:x.c,s:x.score}))].sort((a,b)=>b.s-a.s);
+ body.innerHTML=`<div class="banner ${rows[0].n==='You'?'win':'none'}">${rows[0].n==='You'?'🏆 You won the room!':rows[0].n+' wins the room'}</div>
+ ${rows.map((x,i)=>`<div class="card"><div class="row"><span class="ttl" style="width:24px">${['🥇','🥈','🥉'][i]||i+1}</span>${avatar(x.n,x.c)}<div class="grow ttl">${x.n}</div><b class="ttl" style="font-size:20px">${x.s}</b></div></div>`).join('')}
+ <div class="card"><b class="ttl">What is saved</b><p class="sub" style="margin:4px 0 0">Your score goes to your learning log and parent report. The room, answers of others and chat are deleted.</p></div>
+ <button class="btn p" id="again" style="margin-top:auto">Rematch with the same players</button><button class="btn g" id="home">Back to Rebus Rush</button>`;
+ $('#again').onclick=()=>{S.mode='group';startRound()};$('#home').onclick=()=>{S.room=null;go('mode')}}
+
+/* ---------- community: make / my puzzles ---------- */
+function vMake(){const d=S.draft,live=CATS.filter(c=>c.live);
+ const checks=[['Has at least one picture or word',d.p.some(x=>x.t!=='op')],['Answer is 3+ letters',norm(d.ans).length>=3],['Answer is not written in the puzzle',!d.p.some(x=>x.t==='word'&&norm(x.v)===norm(d.ans))],['Explains why it works',d.why.trim().length>=8]];
+ const ok=checks.every(c=>c[1]);
+ body.innerHTML=`<div class="notice ${S.net?'good':''}">${S.net?'Online — you can send it for review right away.':'Offline — you can draft now. It will be sent when you are back online.'}</div>
+ <div class="h3">Category</div><div class="seg">${live.map(c=>`<button data-c="${c.k}" class="${d.cat===c.k?'on':''}">${c.em} ${c.n}</button>`).join('')}</div>
+ <div class="h3">Build with pictures</div><div class="canvas" style="min-height:90px">${d.p.length?d.p.map(x=>pieceHTML(x)).join(''):'<span class="sub">Tap pictures below</span>'}</div>
+ <div class="pick">${PICK.map(([e,n])=>`<button data-e="${e}" data-n="${n}" aria-label="${n}">${e}</button>`).join('')}</div>
+ <div class="seg"><button data-op="+">+</button><button data-op="&">&amp;</button><button id="un">⌫ Undo</button></div>
+ <div class="ans"><input class="field" id="wtxt" placeholder="Or add a word, e.g. S" maxlength="12"><button class="btn g" style="width:84px" id="wd">Add</button></div>
+ <input class="field" id="ans" placeholder="Answer, e.g. honeymoon" value="${esc(d.ans)}"><input class="field" id="alts" placeholder="Other accepted answers (comma separated)" value="${esc(d.alts)}"><input class="field" id="why" placeholder="Why does it work?" value="${esc(d.why)}">
+ <div class="card">${checks.map(c=>`<div class="step ${c[1]?'done':''}"><i></i>${c[0]}</div>`).join('')}</div>
+ <button class="btn p" id="sub" ${ok?'':'disabled'}>${S.net?'Submit for review':'Save &amp; send later'}</button>`;
+ const keep=()=>{d.ans=$('#ans').value;d.alts=$('#alts').value;d.why=$('#why').value};
+ on('[data-c]',el=>{keep();d.cat=el.dataset.c;render()});on('[data-e]',el=>{keep();d.p.push(E(el.dataset.e,el.dataset.n));render()});on('[data-op]',el=>{keep();d.p.push(OP(el.dataset.op));render()});
+ $('#wd').onclick=()=>{keep();const w=$('#wtxt').value.trim();if(!w)return;d.p.push({t:'word',v:w.toUpperCase(),n:'the word '+w});render()};$('#un').onclick=()=>{keep();d.p.pop();render()};
+ ['#ans','#alts','#why'].forEach(s=>$(s).oninput=()=>{keep();const c2=norm(d.ans).length>=3,c3=!d.p.some(x=>x.t==='word'&&norm(x.v)===norm(d.ans)),c4=d.why.trim().length>=8;$('#sub').disabled=!(d.p.some(x=>x.t!=='op')&&c2&&c3&&c4)});
+ $('#sub').onclick=()=>{keep();const id=Date.now()%100000,m={id,cat:d.cat,p:d.p.slice(),a:[d.ans,...d.alts.split(',').map(s=>s.trim()).filter(Boolean)],why:d.why,checks:[1,1,1],st:S.net?'review':'queued'};S.mine.unshift(m);
+  if(S.net)S.studio.push({id:'u'+id,by:'You',cat:m.cat,p:m.p,a:m.a,why:m.why,d:1,checks:m.checks,mine:id});else S.queue++;
+  toast(S.net?'Sent for review':'Saved on device — sends when online');S.ptab='studio';go('mine')}}
+const STT={queued:['mu','Waiting to send'],review:['','In review'],pub:['ok','Published'],rej:['no','Needs changes']};
+function vMine(){body.innerHTML=S.mine.length?S.mine.map(m=>`<div class="card"><div class="canvas" style="min-height:70px;padding:8px">${m.p.map(x=>pieceHTML(x)).join('')}</div><div class="row sp" style="margin-top:8px"><div><div class="ttl">${esc(m.a[0])}</div><div class="sub">${cat(m.cat).n}${m.st==='pub'?` · played ${m.plays} times`:''}</div></div><span class="badge ${STT[m.st][0]}">${STT[m.st][1]}</span></div>${m.note?`<div class="notice warn" style="margin-top:8px">${esc(m.note)}</div>`:''}</div>`).join('')
+ :`<div class="card" style="text-align:center"><div class="well" style="margin:0 auto 8px">✏️</div><div class="ttl">No puzzles yet</div><p class="sub">Make one — approved puzzles are credited to your nickname and join the category.</p></div>`;
+ body.innerHTML+=`<button class="btn p" id="mk">Make a puzzle</button>`;$('#mk').onclick=()=>{S.draft={cat:'food',p:[],ans:'',alts:'',why:''};go('make')}}
+
+/* ================= side panel ================= */
+const FLOWS=[
+ ['Play alone',['learn','mode','topics','setup','play','reveal','summary'],['Learn › Think › Rebus Rush','Rebus Rush home','Pick a saved category','Round setup','Play vs Machine','Reveal + why','Summary → report'],'Offline OK'],
+ ['Play with friends',['gHome','gCreate','gInvite','gLobby','gCount','play*','reveal*','gFinal'],['Group home','Create room','Invite buddies / code','Lobby','Countdown','Live race','Reveal','Podium'],'Online only'],
+ ['Make a puzzle',['make','mine'],['Build + checks (offline OK)','My puzzles → Studio review → Published'],'Draft offline']];
+function renderPanel(){const t=S.ptab;document.querySelectorAll('#ptabs button').forEach(b=>b.classList.toggle('on',b.dataset.t===t));const pb=$('#pbody');
+ if(t==='flow'){const cur=S.scr+((S.scr==='play'||S.scr==='reveal')&&S.mode==='group'?'*':'');
+  pb.innerHTML=`<div class="sec" style="border:0;margin-top:8px"><span class="sub">You are here. Pick a path and follow it in the app.</span></div>`+FLOWS.map(([n,ids,labels,tag])=>{const ix=ids.indexOf(cur);return `<div class="lane"><h4>${n} <span class="badge ${tag==='Online only'?'':'ok'}">${tag}</span></h4>${labels.map((l,i)=>`<div class="step ${i===ix?'on':ix>i?'done':''}"><i></i>${l}</div>`).join('')}</div>`}).join('')
+   +`<div class="sec"><div class="h3">Offline vs online</div><p class="sub">Offline: solo rounds on saved categories, drafting puzzles, reports queue and sync later. Online: downloading categories, group rooms, submitting puzzles for review.</p></div>`}
+ if(t==='demo'){pb.innerHTML=`<div class="sec" style="border:0"><div class="h3">Network</div><div class="seg" id="nt"><button data-n="1" class="${S.net?'on':''}">Online</button><button data-n="0" class="${S.net?'':'on'}">Offline</button></div><p class="sub">Go offline on the category list, in a group lobby or mid-race and watch what happens.</p></div>
+  <div class="sec"><div class="h3">Theme</div><div class="seg" id="th"><button data-d="0" class="${document.documentElement.classList.contains('dark')?'':'on'}">Light</button><button data-d="1" class="${document.documentElement.classList.contains('dark')?'on':''}">Dark</button></div></div>
+  <div class="sec"><div class="h3">Shortcuts</div><div class="seg"><button data-g="solo">Solo start</button><button data-g="group">Group start</button></div></div>`;
+  pb.querySelectorAll('#nt button').forEach(b=>b.onclick=()=>setNet(b.dataset.n==='1'));pb.querySelectorAll('#th button').forEach(b=>b.onclick=()=>{document.documentElement.classList.toggle('dark',b.dataset.d==='1');renderPanel()});
+  pb.querySelectorAll('[data-g]').forEach(b=>b.onclick=()=>{S.mode=b.dataset.g;go(b.dataset.g==='solo'?'topics':'gHome')})}
+ if(t==='owner'){pb.innerHTML=`<p class="sub" style="margin-top:10px">Owner settings, synced as system defaults. Changes apply to the next puzzle.</p><div class="sl">
+  <label>Hint unlocks after <span>${cfg.hint}s</span></label><input type="range" data-k="hint" min="3" max="60" value="${cfg.hint}">
+  <label>Puzzle time limit <span>${cfg.limit}s</span></label><input type="range" data-k="limit" min="30" max="120" step="5" value="${cfg.limit}">
+  <label>Hint rungs <span>${cfg.rungs}</span></label><input type="range" data-k="rungs" min="1" max="3" value="${cfg.rungs}">
+  <label>Max players per room <span>${cfg.players}</span></label><input type="range" data-k="players" min="2" max="6" value="${cfg.players}"></div>
+  <div class="sec"><div class="h3">Machine level</div><div class="seg" id="lk"><button data-v="free" class="${cfg.lock==='free'?'on':''}">Child picks</button>${LV.map((n,i)=>`<button data-v="${i}" class="${cfg.lock===i?'on':''}">${n}</button>`).join('')}</div></div>
+  <div class="sec"><div class="h3">Young mode</div><div class="seg" id="yg"><button data-v="0" class="${cfg.young?'':'on'}">Keyboard</button><button data-v="1" class="${cfg.young?'on':''}">Letter tiles</button></div></div>
+  <div class="sec"><div class="h3">Community</div><div class="notice">New puzzles need a Studio approval before anyone plays them. Reports hide a puzzle after 3 flags until reviewed.</div></div>`;
+  pb.querySelectorAll('input[data-k]').forEach(i=>i.oninput=()=>{cfg[i.dataset.k]=+i.value;i.previousElementSibling.lastElementChild.textContent=i.value+(['hint','limit'].includes(i.dataset.k)?'s':'')});
+  pb.querySelectorAll('#lk button').forEach(b=>b.onclick=()=>{cfg.lock=b.dataset.v==='free'?'free':+b.dataset.v;renderPanel()});pb.querySelectorAll('#yg button').forEach(b=>b.onclick=()=>{cfg.young=+b.dataset.v;renderPanel()})}
+ if(t==='studio'){const q=S.studio;pb.innerHTML=`<p class="sub" style="margin-top:10px">Staff review queue. Approving makes the puzzle playable and raises the category count.</p>`+(q.length?q.map(x=>`<div class="q"><div class="canvas" style="min-height:56px;padding:6px;transform:scale(.8);transform-origin:left;margin-bottom:-8px">${x.p.map(y=>pieceHTML(y)).join('')}</div><div class="row sp"><div><div class="ttl">${esc(x.a[0])}</div><div class="sub">${cat(x.cat).n} · by ${esc(x.by)}</div></div></div>
+   <div class="sub" style="margin:4px 0">Auto-checks: ${['pieces','answer','profanity'].map((n,i)=>`<span class="badge ${x.checks[i]?'ok':'no'}">${n}</span>`).join(' ')}</div>
+   <div class="row"><button class="btn s sm" data-ap="${x.id}">Approve</button><button class="btn d sm" data-rj="${x.id}">Send back</button></div></div>`).join(''):`<div class="notice" style="margin-top:10px">Queue is empty.</div>`);
+  pb.querySelectorAll('[data-ap]').forEach(b=>b.onclick=()=>{const i=q.findIndex(x=>x.id===b.dataset.ap),x=q.splice(i,1)[0];BANK[x.cat].push({p:x.p,a:x.a,why:x.why,d:x.d||1,by:x.by});cat(x.cat).add=(cat(x.cat).add||0)+1;const m=S.mine.find(m=>m.id===x.mine);if(m){m.st='pub';m.plays=0}toast(`Published — ${cat(x.cat).n} now ${fmt(total(cat(x.cat)))}`);if(['mine','topics'].includes(S.scr))render();else renderPanel()});
+  pb.querySelectorAll('[data-rj]').forEach(b=>b.onclick=()=>{const i=q.findIndex(x=>x.id===b.dataset.rj),x=q.splice(i,1)[0];const m=S.mine.find(m=>m.id===x.mine);if(m){m.st='rej';m.note='The answer is hard to see from the pictures. Try adding a clearer piece.'}toast('Sent back to the maker');if(S.scr==='mine')render();else renderPanel()})}}
+$('#ptabs').onclick=e=>{const b=e.target.closest('button');if(b){S.ptab=b.dataset.t;renderPanel()}};
+setInterval(()=>{const c=$('#cd');if(c&&S.codeT){const s=Math.max(0,Math.round((S.codeT-Date.now())/1000));c.textContent=Math.floor(s/60)+':'+String(s%60).padStart(2,'0')}},1000);
+render();
+</script>
+</body>
+</html>

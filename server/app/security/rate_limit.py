@@ -70,6 +70,8 @@ VERIFY_TOKEN_PER_IP = RateLimit(attempts=30, window_seconds=300)
 # Redeeming an invite. Eight characters from a 32-letter alphabet is a large
 # space, but a budget is what keeps it large in practice.
 INVITE_PER_IP = RateLimit(attempts=10, window_seconds=300)
+# Trying a Rebus Rush room code. Six characters from 31 is about 887 million codes, and a budget keeps it that big.
+ROOM_JOIN_PER_IP = RateLimit(attempts=20, window_seconds=60)
 
 
 class Limiter:

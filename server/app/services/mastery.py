@@ -70,17 +70,22 @@ MODULE_CONCEPT_NAMES: dict[str, str] = {
     "trace-write-khmer": "Writing Khmer letters and numbers",
     "trace-write-latin": "Writing English letters and numbers",
     "trace-draw": "Drawing lines and pictures",
+    "rebus-decoder": "Solving picture puzzles",
 }
 
 #: Writing is measured per letter on the trace ladder ("can write ក"), not per
 #: concept: one "Writing Khmer letters" concept would read as mastered after a
 #: handful of good tries at three letters. So its concepts never raise
 #: mastered/stuck — the ladder's own milestones tell parents instead.
-LADDER_CONCEPT_PREFIX = "trace-"
+#:
+#: Rebus Rush is the other: a game against a clock and a Machine, where losing
+#: a round or timing out is not a mistake the child made, so its concept never
+#: raises "mastered" or "stuck" either.
+LADDER_CONCEPT_PREFIXES = ("trace-", "rebus-")
 
 
 def is_ladder_concept(concept_key: str) -> bool:
-    return concept_key.startswith(LADDER_CONCEPT_PREFIX)
+    return concept_key.startswith(LADDER_CONCEPT_PREFIXES)
 
 
 @lru_cache(maxsize=1)

@@ -47,6 +47,10 @@ DEFAULT_MENU: list[dict] = [
     # (`trace:create`), which a Koda admin gives to chosen adults.
     {"itemId": "trace-studio", "label": "Trace Studio", "icon": "art:menu-trace-studio",
      "requires": "trace:create", "order": 43},
+    # Where Rebus Rush puzzles are reviewed, written and published. Same gate as Art
+    # and the Library Studio.
+    {"itemId": "rebus-studio", "label": "Rebus Studio", "icon": "art:menu-library-studio",
+     "requires": "content:write", "order": 44},
     {"itemId": "users", "label": "Users", "icon": "art:menu-users", "badge": "Manage",
      "requires": "user:manage", "order": 45},
     {"itemId": "roles", "label": "Roles", "icon": "art:menu-roles", "badge": "Access",
@@ -99,6 +103,7 @@ LEGACY_ICONS: dict[str, str] = {
     "subjects": "list",
     "assets": "shapes",
     "library-studio": "pen",
+    "rebus-studio": "pen",
     "trace-studio": "pencil",
     "users": "users",
     "roles": "shield",

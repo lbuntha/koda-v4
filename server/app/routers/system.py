@@ -22,6 +22,7 @@ from app.deps import AUTHENTICATED, CurrentPrincipal, Db, require
 from app.errors import AppError, Forbidden, NotFound
 from app.models.auth import Principal
 from app.models.common import Model
+from app.models.rebus import RebusSettings
 from app.models.subjects import SubjectCatalog
 from app.push_defaults import (
     BODY_MAX,
@@ -217,6 +218,13 @@ async def update(setting_id: str, body: ValueIn, db: Db, p: CanOperate) -> Setti
             value = SubjectCatalog.model_validate_json(value).model_dump_json()
         except ValidationError as exc:
             raise AppError(400, "bad_value", "Use unique subject names and assign skills to existing subjects.") from exc
+    elif setting_id == "rebus.settings":
+        if not isinstance(value, str) or len(value) > 2_000:
+            raise AppError(400, "bad_value", "Invalid Rebus Rush settings.")
+        try:
+            value = RebusSettings.model_validate_json(value).model_dump_json()
+        except ValidationError as exc:
+            raise AppError(400, "bad_value", "Use a hint delay of 3 to 60 seconds, a time limit of 30 to 120, 1 to 3 hints, 2 to 6 players and rounds of 5 to 10 puzzles.") from exc
     elif definition["type"] == "bool":
         if not isinstance(value, bool):
             raise AppError(400, "bad_value", f"'{setting_id}' is a switch: send true or false.")

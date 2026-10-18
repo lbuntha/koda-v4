@@ -1,0 +1,242 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Rebus Studio — mock</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet">
+<style>
+:root{--canvas:#F8FAFC;--surface:#fff;--mf:#F0F4FF;--ink:#0F172A;--body:#475569;--muted:#64748B;--line:#E2E8F0;--sky:#E8F1FF;--ground:#E4F5E9;
+--i50:#F3F0FC;--i100:#E6E0FA;--i200:#D0C3F6;--i600:#6B46C1;--i700:#553C9A;--r50:#FFF0F6;--r100:#FFD6E8;--r600:#FF2D78;--r700:#D0145A;--g50:#ECFDF5;--g100:#D1FAE5;--g600:#059669;--g700:#047857;--o50:#FFF3E6;--o600:#EA580C}
+:root.dark{--canvas:#0d061a;--surface:#0F172A;--mf:#1E293B;--ink:#F8FAFC;--body:#CBD5E1;--muted:#94A3B8;--line:#334155;--sky:#1b2447;--ground:#10281f;--i50:#241a45;--i100:#2f2159;--i200:#44337A;--i600:#8b6be0;--i700:#B794F4;--r50:#3a1024;--r100:#5a1536;--r600:#FF5E9B;--r700:#FF85B3;--g50:#0f2a22;--g100:#14382c;--g600:#34d399;--g700:#6ee7b7;--o50:#3a2412;--o600:#fb923c}
+*{box-sizing:border-box}body{margin:0;background:var(--canvas);color:var(--body);font:14px/1.45 "Plus Jakarta Sans",system-ui,sans-serif}
+.mono{font-family:"JetBrains Mono",monospace}
+.app{display:grid;grid-template-columns:230px minmax(0,1fr);min-height:100vh}
+.rail{background:var(--surface);border-right:1px solid var(--line);padding:16px 12px;display:flex;flex-direction:column;gap:4px;position:sticky;top:0;height:100vh}
+.brand{display:flex;gap:10px;align-items:center;padding:4px 8px 14px}.logo{width:38px;height:38px;border-radius:14px;background:var(--i600);color:#fff;display:flex;align-items:center;justify-content:center;font-size:20px}
+.brand b{display:block;color:var(--ink);font-size:15px;line-height:1.1}.brand small{color:var(--muted);font-size:11px}
+.nav{display:flex;align-items:center;gap:10px;border:0;background:none;font:inherit;font-weight:700;color:var(--body);padding:10px 12px;border-radius:16px;cursor:pointer;text-align:left;width:100%}
+.nav:hover{background:var(--mf)}.nav.on{background:var(--i50);color:var(--i700)}.nav .n{margin-left:auto}
+.h4{font-size:11px;font-weight:800;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;padding:12px 12px 4px}
+main{padding:20px 26px;max-width:1200px;width:100%;min-width:0}.grid>*{min-width:0}.code,textarea{overflow-wrap:anywhere}
+.top{display:flex;align-items:center;gap:12px;margin-bottom:14px;flex-wrap:wrap}.top h1{margin:0;font-size:24px;color:var(--ink);font-weight:800;flex:1;min-width:200px}
+.flow{display:flex;gap:6px;margin-bottom:16px;flex-wrap:wrap}.fs{display:flex;align-items:center;gap:8px;padding:8px 14px;border-radius:99px;border:1px solid var(--line);background:var(--surface);font-weight:700;font-size:13px;color:var(--muted);cursor:pointer}
+.fs i{width:22px;height:22px;border-radius:99px;background:var(--mf);display:flex;align-items:center;justify-content:center;font-style:normal;font-size:12px}.fs.on{border-color:var(--i600);color:var(--i700);background:var(--i50)}.fs.on i{background:var(--i600);color:#fff}.fs.done i{background:var(--g600);color:#fff}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:22px;padding:16px}
+.grid{display:grid;gap:14px}.g2{grid-template-columns:1fr 1fr}.g3{grid-template-columns:repeat(3,1fr)}.gc{grid-template-columns:repeat(auto-fill,minmax(270px,1fr))}
+.h2{font-size:17px;font-weight:800;color:var(--ink);margin:0 0 4px}.sub{font-size:12px;color:var(--muted)}.ttl{font-weight:800;color:var(--ink)}
+.row{display:flex;align-items:center;gap:10px}.sp{justify-content:space-between}.grow{flex:1;min-width:0}.wr{flex-wrap:wrap}
+.btn{border:0;border-radius:16px;padding:10px 16px;font:inherit;font-weight:800;cursor:pointer;min-height:42px}.btn.p{background:var(--i600);color:#fff}.btn.g{background:var(--i50);color:var(--i700);border:1px solid var(--i100)}.btn.s{background:var(--g600);color:#fff}.btn.d{background:var(--r50);color:var(--r700);border:1px solid var(--r100)}.btn.sm{min-height:34px;padding:5px 12px;font-size:13px;border-radius:12px}.btn:disabled{opacity:.45;cursor:not-allowed}
+.badge{display:inline-flex;align-items:center;gap:4px;font-size:11px;font-weight:800;padding:2px 8px;border-radius:99px;border:1px solid var(--i200);background:var(--i50);color:var(--i700);white-space:nowrap}
+.badge.ok{border-color:var(--g100);background:var(--g50);color:var(--g700)}.badge.no{border-color:var(--r100);background:var(--r50);color:var(--r700)}.badge.mu{border-color:var(--line);background:var(--mf);color:var(--muted)}.badge.or{border-color:var(--o50);background:var(--o50);color:var(--o600)}
+.field,select,textarea{width:100%;border:2px solid var(--line);background:var(--surface);color:var(--ink);border-radius:14px;padding:9px 11px;font:inherit}textarea{font-family:"JetBrains Mono",monospace;font-size:12px;line-height:1.5;resize:vertical}
+.field:focus,select:focus,textarea:focus{outline:0;border-color:var(--i600)}label.l{display:block;font-size:12px;font-weight:800;color:var(--ink);margin:12px 0 4px}
+.seg{display:flex;gap:6px;flex-wrap:wrap}.seg button{border:2px solid var(--line);background:var(--surface);color:var(--body);border-radius:14px;padding:7px 12px;font:inherit;font-weight:700;cursor:pointer}.seg button.on{border-color:var(--i600);background:var(--i50);color:var(--i700)}
+.meter{height:9px;border-radius:9px;background:var(--mf);overflow:hidden}.meter i{display:block;height:100%;background:var(--i600)}.meter.g i{background:var(--g600)}.meter.r i{background:var(--r600)}
+.notice{border-radius:16px;padding:10px 12px;font-size:13px;border:1px solid var(--line);background:var(--mf)}.notice.good{background:var(--g50);border-color:var(--g100);color:var(--g700)}.notice.warn{background:var(--r50);border-color:var(--r100);color:var(--r700)}
+.cv{background:linear-gradient(180deg,var(--sky),var(--ground));border:1px solid var(--line);border-radius:18px;padding:10px 6px;min-height:92px;display:flex;align-items:center;justify-content:center;gap:6px;flex-wrap:wrap}
+.pc{display:flex;flex-direction:column;align-items:center}.pc .e{font-size:40px;line-height:1}.pc .e.miss{width:44px;height:44px;border:2px dashed var(--r600);border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:18px;color:var(--r600)}
+.op{font-size:26px;font-weight:800;color:var(--ink)}.word{font-weight:800;font-size:36px;color:var(--ink)}.stack{display:flex;flex-direction:column;align-items:center;font-weight:800;font-size:22px;line-height:1.05;color:var(--ink)}
+.chk{display:flex;gap:5px;flex-wrap:wrap;margin:8px 0}
+.stg{display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid var(--line)}.stg:last-child{border:0}.dot{width:26px;height:26px;border-radius:99px;background:var(--mf);display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:800;color:var(--muted)}.dot.run{background:var(--i50);color:var(--i600)}.dot.ok{background:var(--g600);color:#fff}
+.heat{display:grid;grid-template-columns:70px repeat(3,1fr);gap:4px;font-size:12px}.heat div{padding:8px;border-radius:10px;text-align:center;font-weight:700}.heat .c{cursor:pointer}
+.code{background:var(--mf);border:1px solid var(--line);border-radius:14px;padding:10px 12px;font:12px/1.55 "JetBrains Mono",monospace;white-space:pre-wrap;color:var(--ink);max-height:260px;overflow:auto}
+.toast{position:fixed;right:20px;bottom:20px;background:var(--ink);color:var(--canvas);padding:10px 16px;border-radius:99px;font-weight:700;z-index:9;display:none}
+.tw{overflow-x:auto}table{width:100%;border-collapse:collapse;min-width:520px}td,th{padding:8px 6px;border-bottom:1px solid var(--line);text-align:left;font-size:13px}th{color:var(--muted);font-size:11px;text-transform:uppercase;letter-spacing:.05em}
+@media (max-width:860px){.app{grid-template-columns:minmax(0,1fr)}.rail{position:static;height:auto;flex-direction:row;overflow-x:auto;gap:4px;padding:8px;border-right:0;border-bottom:1px solid var(--line)}.brand,.h4{display:none}.nav{white-space:nowrap;width:auto;flex:none}.g2,.g3{grid-template-columns:1fr}main{padding:14px}.top h1{font-size:20px}.heat{grid-template-columns:54px repeat(3,1fr)}}
+</style>
+</head>
+<body>
+<div class="app">
+ <nav class="rail" id="rail"></nav>
+ <main>
+  <div class="top"><h1 id="h1">Coverage</h1><span class="badge mu" title="illustrative">AI budget $12.40 / $50 this month</span><button class="btn g sm" id="th">☾ Dark</button></div>
+  <div class="flow" id="flow"></div>
+  <div id="view"></div>
+ </main>
+</div>
+<div class="toast" id="toast"></div>
+<script>
+/* ============ data (simulated: no real AI is called in this mock) ============ */
+const I=(e,n)=>({t:'icon',e,n}),OP={t:'op',v:'+'},ST=(a,b)=>({t:'stack',top:a,bottom:b,n:a+' over '+b}),W=(v,s)=>({t:'word',v,s,n:v});
+const pl=(...a)=>a.flatMap((x,i)=>i?[OP,x]:[x]);
+const T=(c,d,trick,p,ans,why,alts=[],age='7–9')=>({c,d,trick,p,ans,why,alts,age});
+const TPL=[
+ T('food',1,'compound',pl(I('🍯','honey'),I('🌙','moon')),'honeymoon','honey + moon = honeymoon.'),
+ T('food',1,'compound',pl(I('🥵','hot'),I('🐶','dog')),'hot dog','hot + dog = hot dog.',['hotdog']),
+ T('food',1,'compound',pl(I('🧈','butter'),I('🪰','fly')),'butterfly','butter + fly = butterfly.'),
+ T('food',1,'compound',pl(I('🍳','pan'),I('🍰','cake')),'pancake','pan + cake = pancake.'),
+ T('food',1,'compound',pl(I('☀️','sun'),I('🌸','flower')),'sunflower','sun + flower = sunflower.'),
+ T('food',2,'compound',pl(I('💧','water'),I('🍈','melon')),'watermelon','water + melon = watermelon.','',''),
+ T('food',2,'compound',pl(I('🌲','pine'),I('🍎','apple')),'pineapple','pine + apple = pineapple.',[],'10–12'),
+ T('food',2,'compound',pl(I('🥚','egg'),I('🌱','plant')),'eggplant','egg + plant = eggplant.',[],'10–12'),
+ T('animals',1,'compound',pl(I('🐱','cat'),I('🐟','fish')),'catfish','cat + fish = catfish.'),
+ T('animals',1,'compound',pl(I('🐉','dragon'),I('🪰','fly')),'dragonfly','dragon + fly = dragonfly.'),
+ T('animals',1,'compound',pl(I('🐂','bull'),I('🐶','dog')),'bulldog','bull + dog = bulldog.'),
+ T('animals',1,'compound',pl(I('⭐','star'),I('🐟','fish')),'starfish','star + fish = starfish.'),
+ T('animals',2,'compound',pl(I('👩','lady'),I('🐛','bug')),'ladybug','lady + bug = ladybug.',['ladybird'],'10–12'),
+ T('animals',2,'compound',pl(I('🍮','jelly'),I('🐟','fish')),'jellyfish','jelly + fish = jellyfish.'),
+ T('sayings',2,'position',[ST('MIND','MATTER')],'mind over matter','MIND is over MATTER.',[],'13–18'),
+ T('sayings',2,'position',[ST('HEAD','HEELS')],'head over heels','HEAD is over HEELS.',[],'13–18'),
+ T('sayings',3,'position',[ST('MAN','BOARD')],'man overboard','MAN is over BOARD.',[],'10–12'),
+ T('sayings',3,'size',[{t:'icon',e:'🐟',n:'a BIG fish',big:1},{t:'word',v:'pond',n:'a tiny pond',tiny:1}],'big fish in a small pond','A big fish and a tiny pond.',['big fish small pond'],'13–18'),
+ T('sayings',2,'style',[W('CAKE','cut')],'piece of cake','A slice cut from CAKE.',['slice of cake'],'10–12'),
+ T('sayings',2,'sound-alike',pl(I('🦵','leg'),I('💥','break')),'break a leg','break + leg.',[],'10–12'),
+ T('countries',1,'sound-alike',pl(I('🍓','jam'),I('🍳','pan')),'japan','jam + pan sounds like Japan.',[],'10–12'),
+ T('countries',1,'compound',pl(I('🚫','no'),I('🛣️','way')),'norway','no + way = Norway.',[],'10–12'),
+ T('countries',1,'compound',pl(I('🧊','ice'),I('🏝️','land')),'iceland','ice + land = Iceland.'),
+ T('countries',1,'compound',pl(I('🟢','green'),I('🏝️','land')),'greenland','green + land = Greenland.'),
+ T('countries',2,'sound-alike',pl(I('👔','tie'),I('🏝️','land')),'thailand','tie + land sounds like Thailand.',[],'10–12'),
+ T('countries',2,'sound-alike',pl(I('🐟','fin'),I('🏝️','land')),'finland','fin + land sounds like Finland.',[],'10–12'),
+ T('countries',2,'compound',pl(I('🛖','den'),I('✏️','mark')),'denmark','den + mark = Denmark.',[],'13–18'),
+ T('sports',1,'compound',pl(I('🦶','foot'),I('⚽','ball')),'football','foot + ball = football.'),
+ T('sports',1,'compound',pl(I('🧺','basket'),I('🏀','ball')),'basketball','basket + ball = basketball.'),
+ T('sports',2,'compound',pl(I('🧊','ice'),I('🛼','skate')),'ice skate','ice + skate.',['ice skating']),
+ T('school',1,'compound',pl(I('📖','book'),I('🪱','worm')),'bookworm','book + worm = bookworm.'),
+ T('school',1,'compound',pl(I('🏠','home'),I('💼','work')),'homework','home + work = homework.'),
+ T('school',1,'compound',pl(I('📝','note'),I('📖','book')),'notebook','note + book = notebook.'),
+ T('science',1,'compound',pl(I('🌧️','rain'),I('🎀','bow')),'rainbow','rain + bow = rainbow.'),
+ T('science',1,'compound',pl(I('🌍','earth'),I('🫨','quake')),'earthquake','earth + quake = earthquake.',[],'10–12'),
+ T('science',1,'compound',pl(I('💡','light'),I('🏠','house')),'lighthouse','light + house = lighthouse.')];
+const CATS=[{k:'countries',n:'Countries',em:'🌍',cnt:{official:812,community:301,ai:0}},{k:'food',n:'Food',em:'🍰',cnt:{official:790,community:316,ai:0}},{k:'sayings',n:'Sayings',em:'💬',cnt:{official:1040,community:302,ai:0}},{k:'animals',n:'Animals',em:'🐾',cnt:{official:704,community:315,ai:0}},{k:'sports',n:'Sports',em:'⚽',cnt:{official:640,community:347,ai:0}},{k:'school',n:'School',em:'🎒',cnt:{official:880,community:180,ai:0}},{k:'science',n:'Science',em:'🔬',cnt:{official:905,community:309,ai:0}}];
+const GOAL=1000,fmt=n=>n.toLocaleString('en-US'),total=c=>c.cnt.official+c.cnt.community+c.cnt.ai,cat=k=>CATS.find(c=>c.k===k);
+const TRICKS=['compound','sound-alike','position','size','style','add/remove letter'];
+const VOCAB=new Set(TPL.flatMap(t=>t.p.filter(x=>x.t==='icon').map(x=>x.n)));
+const DEFAULT_PROMPT=`You write rebus puzzles for children learning with Koda.
+A rebus shows pictures, words and operators that read aloud as a word or phrase.
+
+RULES
+1. Use ONLY icons from ICON_LIBRARY. If a puzzle needs an icon that is not
+   there, still write it and list the name in "missing_icons".
+2. The answer must be recoverable from the pieces alone. Never write the
+   answer in a piece.
+3. Match the age band: vocabulary, number of pieces, and trick difficulty.
+4. Keep the explanation to one short sentence a child can follow.
+5. Do not repeat anything in EXISTING_ANSWERS.
+6. Safe for children. No brands, violence, or adult themes.
+
+OUTPUT: a JSON array. Each item:
+{ "pieces":[{"kind":"icon|word|stack|op","icon_id|text|top|bottom|style":"…"}],
+  "answer":"…", "accepts":["…"], "explanation":"…",
+  "age_min":7, "age_max":9, "difficulty":1-3, "trick":"…", "missing_icons":[] }`;
+const S={sec:'coverage',brief:{cat:'food',age:'7–9',d:1,n:12,tricks:{compound:1},notes:'',model:'Claude Sonnet 5.5',lang:'English'},pv:3,prompt:DEFAULT_PROMPT,run:null,cards:[],rel:[],filter:'all',bank:new Set(['honeymoon','hot dog','japan']),
+ comm:[{id:'c1',by:'Maya',cat:'food',p:pl(I('🍯','honey'),I('🐝','bee')),ans:'honeybee',alts:[],why:'honey + bee = honeybee.',d:1,age:'7–9',trick:'compound',note:'AI suggests: say "honey + bee, an insect" in the explanation.'},
+  {id:'c2',by:'Lina',cat:'sayings',p:pl(I('☔','umbrella'),I('🌧️','rain')),ans:'raining',alts:[],why:'rain.',d:1,age:'7–9',trick:'compound',note:'AI flags: explanation too short; answer is ambiguous (umbrella/rain/storm).',bad:1}]};
+const $=(s,r=document)=>r.querySelector(s),esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const view=$('#view');
+const rnd=(a,b)=>a+Math.random()*(b-a),shuffle=a=>{a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a};
+function toast(m){const t=$('#toast');t.textContent=m;t.style.display='block';clearTimeout(toast.h);toast.h=setTimeout(()=>t.style.display='none',2600)}
+function pieces(p,missing=[]){return `<div class="cv">${p.map(x=>{if(x.t==='op')return`<div class="op">+</div>`;
+ if(x.t==='icon'){const m=missing.includes(x.n);return`<div class="pc"><div class="e ${m?'miss':''}" style="${x.big?'font-size:60px':''}">${m?'?':x.e}</div>${m?`<small style="color:var(--r700);font-weight:800">${esc(x.n)}</small>`:''}</div>`}
+ if(x.t==='word')return`<div class="word" style="${x.tiny?'font-size:12px':''}${x.s==='cut'?';clip-path:polygon(0 0,36% 0,50% 46%,64% 0,100% 0,100% 100%,0 100%)':''}">${esc(x.v)}</div>`;
+ return`<div class="stack"><span>${esc(x.top)}</span><span>${esc(x.bottom)}</span></div>`}).join('')}</div>`}
+
+/* ============ shell ============ */
+const NAV=[['coverage','📊','Coverage'],['brief','📝','1 · Brief & prompt'],['run','⚙️','2 · Generate'],['review','✅','3 · Review'],['publish','🚀','4 · Publish'],['comm','👥','Community queue'],['rel','🗂️','Releases']];
+function shell(){const need=S.cards.filter(c=>c.st==='new').length,ok=S.cards.filter(c=>c.st==='ok').length;
+ $('#rail').innerHTML=`<div class="brand"><div class="logo">🧩</div><div><b>Rebus Studio</b><small>Studio grant · staff only</small></div></div><div class="h4">Overview</div>${btn(0)}<div class="h4">Make content</div>${[1,2,3,4].map(btn).join('')}<div class="h4">Other</div>${btn(5)}${btn(6)}`;
+ function btn(i){const [k,ic,n]=NAV[i];const b=k==='review'&&need?`<span class="badge n">${need}</span>`:k==='publish'&&ok?`<span class="badge ok n">${ok}</span>`:k==='comm'&&S.comm.length?`<span class="badge or n">${S.comm.length}</span>`:'';return `<button class="nav ${S.sec===k?'on':''}" data-s="${k}"><span>${ic}</span>${n}${b}</button>`}
+ const order=['brief','run','review','publish'],ix=order.indexOf(S.sec);
+ $('#flow').innerHTML=['Brief','Generate','Review','Publish'].map((n,i)=>`<div class="fs ${ix===i?'on':ix>i?'done':''}" data-s="${order[i]}"><i>${ix>i?'✓':i+1}</i>${n}</div>`).join('');
+ $('#h1').textContent=NAV.find(n=>n[0]===S.sec)[2].replace(/^\d · /,'');
+ document.querySelectorAll('[data-s]').forEach(b=>b.onclick=()=>go(b.dataset.s))}
+function go(s){S.sec=s;shell();({coverage:vCov,brief:vBrief,run:vRun,review:vReview,publish:vPub,comm:vComm,rel:vRel})[s]();window.scrollTo(0,0)}
+$('#th').onclick=()=>{const d=document.documentElement.classList.toggle('dark');$('#th').textContent=d?'☀ Light':'☾ Dark'};
+
+/* ============ views ============ */
+function vCov(){const gaps=CATS.filter(c=>total(c)<GOAL).length;
+ view.innerHTML=`<div class="notice" style="margin-bottom:14px">Goal: <b>${fmt(GOAL)} puzzles per category</b>. ${gaps?`${gaps} categor${gaps>1?'ies are':'y is'} below the goal.`:'Every category has reached the goal.'} Counts include official, community and AI-drafted (human-approved) puzzles. <span class="sub">Numbers are illustrative.</span></div>
+ <div class="grid gc">${CATS.map(c=>{const t=total(c),gap=Math.max(0,GOAL-t);return `<div class="card"><div class="row sp"><div class="ttl">${c.em} ${c.n}</div><span class="badge ${t>=GOAL?'ok':'no'}">${fmt(t)}</span></div>
+  <div class="meter ${t>=GOAL?'g':'r'}" style="margin:10px 0"><i style="width:${Math.min(100,t/GOAL*100)}%"></i></div>
+  <div class="sub">Official ${fmt(c.cnt.official)} · Community ${fmt(c.cnt.community)} · AI-drafted ${fmt(c.cnt.ai)}</div>
+  <div class="row sp" style="margin-top:10px"><span class="sub">${gap?gap+' to go':'Goal reached'}</span><button class="btn g sm" data-fill="${c.k}">${gap?'Generate to fill':'Generate more'}</button></div></div>`}).join('')}</div>
+ <div class="card" style="margin-top:14px"><div class="row sp"><div><div class="h2">Thin spots in Food</div><div class="sub">Age band × difficulty. Rose cells are thin — click one to start a batch for it.</div></div></div>
+  <div class="heat" style="margin-top:10px"><div></div><div>Easy</div><div>Medium</div><div>Hard</div>${[['7–9',[210,120,18]],['10–12',[180,260,64]],['13–18',[40,150,92]]].map(([a,r])=>`<div style="text-align:left">${a}</div>${r.map((n,d)=>`<div class="c" data-a="${a}" data-d="${d+1}" style="background:${n<80?'var(--r50)':'var(--i50)'};color:${n<80?'var(--r700)':'var(--i700)'}">${n}</div>`).join('')}`).join('')}</div></div>`;
+ view.querySelectorAll('[data-fill]').forEach(b=>b.onclick=()=>{S.brief.cat=b.dataset.fill;S.brief.n=Math.min(30,Math.max(10,GOAL-total(cat(b.dataset.fill))));go('brief')});
+ view.querySelectorAll('[data-a]').forEach(b=>b.onclick=()=>{S.brief.cat='food';S.brief.age=b.dataset.a;S.brief.d=+b.dataset.d;go('brief')})}
+
+function assemble(){const b=S.brief,tr=Object.keys(b.tricks).filter(k=>b.tricks[k]);
+ return `${S.prompt}\n\n--- BRIEF (filled by Studio) ---\nCATEGORY: ${cat(b.cat).n}\nLANGUAGE: ${b.lang}\nAGE BAND: ${b.age}\nDIFFICULTY: ${b.d} (1 easy – 3 hard)\nCOUNT: ${b.n}\nTRICKS: ${tr.join(', ')||'any'}\nNOTES: ${b.notes||'—'}\nICON_LIBRARY: ${VOCAB.size} icons [${[...VOCAB].slice(0,14).join(', ')}, …]\nEXISTING_ANSWERS: ${S.bank.size} answers in this category [${[...S.bank].slice(0,4).join(', ')}, …]`}
+function vBrief(){const b=S.brief;
+ view.innerHTML=`<div class="grid g2"><div class="card"><div class="h2">Define the batch</div><div class="sub">Staff set the brief; the prompt does the rest.</div>
+  <label class="l">Category</label><div class="seg" id="c">${CATS.map(c=>`<button data-v="${c.k}" class="${b.cat===c.k?'on':''}">${c.em} ${c.n}</button>`).join('')}</div>
+  <label class="l">Age band</label><div class="seg" id="a">${['7–9','10–12','13–18'].map(a=>`<button data-v="${a}" class="${b.age===a?'on':''}">${a}</button>`).join('')}</div>
+  <label class="l">Difficulty</label><div class="seg" id="d">${[1,2,3].map(d=>`<button data-v="${d}" class="${b.d===d?'on':''}">${['Easy','Medium','Hard'][d-1]}</button>`).join('')}</div>
+  <label class="l">Tricks to use</label><div class="seg" id="t">${TRICKS.map(t=>`<button data-v="${t}" class="${b.tricks[t]?'on':''}">${t}</button>`).join('')}</div>
+  <label class="l">How many (10–50)</label><input class="field" id="n" type="number" min="10" max="50" value="${b.n}">
+  <label class="l">Language</label><select id="lg">${['English','Khmer'].map(x=>`<option ${b.lang===x?'selected':''}>${x}</option>`).join('')}</select>
+  <label class="l">Extra notes for the AI</label><input class="field" id="nt" placeholder="e.g. keep to foods children eat at breakfast" value="${esc(b.notes)}">
+  <label class="l">Model</label><select id="md">${['Claude Sonnet 5.5','Claude Haiku 5.5 (cheaper drafts)'].map(x=>`<option ${b.model===x?'selected':''}>${x}</option>`).join('')}</select></div>
+  <div class="card"><div class="row sp"><div class="h2">Prompt</div><div class="row"><span class="badge">Template v${S.pv}</span><button class="btn g sm" id="sv">Save as v${S.pv+1}</button></div></div>
+   <div class="sub" style="margin-bottom:6px">Editable system prompt. Versions are kept so a good batch can be repeated.</div><textarea id="pr" rows="14">${esc(S.prompt)}</textarea>
+   <label class="l">What the model will receive</label><div class="code" id="ap">${esc(assemble())}</div></div></div>
+  <div class="row" style="margin-top:14px"><button class="btn p" id="go">Generate ${b.n} puzzles →</button><span class="sub">Players never wait for AI: it runs here, and only approved puzzles ship to learners.</span></div>`;
+ const seg=(id,fn)=>view.querySelectorAll(`#${id} button`).forEach(x=>x.onclick=()=>{fn(x.dataset.v);vBrief()});
+ seg('c',v=>b.cat=v);seg('a',v=>b.age=v);seg('d',v=>b.d=+v);seg('t',v=>{b.tricks[v]?delete b.tricks[v]:b.tricks[v]=1});
+ const up=()=>{$('#ap').textContent=assemble()};$('#n').oninput=e=>{b.n=Math.max(10,Math.min(50,+e.target.value||10));up()};$('#nt').oninput=e=>{b.notes=e.target.value;up()};$('#lg').onchange=e=>{b.lang=e.target.value;up()};$('#md').onchange=e=>b.model=e.target.value;
+ $('#pr').oninput=e=>{S.prompt=e.target.value;up()};$('#sv').onclick=()=>{S.pv++;toast('Saved as prompt template v'+S.pv);vBrief()};$('#go').onclick=startRun}
+
+/* ---- simulated generation + automatic checks ---- */
+const STAGES=[['Draft with AI','Model writes the puzzles as structured JSON'],['Schema & icon check','Every piece is valid and every icon exists in the library'],['Blind solve','A second AI call sees only the pictures and must name the answer'],['Duplicates','Compared with every answer already in the bank'],['Safety & age fit','Content filter and vocabulary for the age band']];
+function startRun(){const b=S.brief;let pool=TPL.filter(t=>t.c===b.cat);if(!pool.length)pool=TPL;
+ const picks=shuffle(pool).slice(0,Math.min(b.n,pool.length));
+ const cards=picks.map((t,i)=>{const miss=Math.random()<.12?[t.p.find(x=>x.t==='icon')?.n]:[];const blindOk=Math.random()>.14;
+  return{id:'g'+Date.now()+i,cat:b.cat,p:t.p,ans:t.ans,alts:t.alts,why:t.why,age:b.age,d:b.d,trick:t.trick,src:'ai',st:'new',
+   chk:{schema:!miss.length,missing:miss.filter(Boolean),blind:blindOk,said:blindOk?t.ans:'“'+(t.p.filter(x=>x.n).map(x=>x.n).join(' ')||'unclear')+'” — two answers possible',dupe:S.bank.has(t.ans),safe:true}}});
+ S.run={n:b.n,got:cards.length,stage:0,done:false,cards,t0:Date.now()};go('run');
+ let i=0;const h=setInterval(()=>{S.run.stage=++i;if(S.sec==='run')vRun();if(i>=STAGES.length){clearInterval(h);S.run.done=true;S.cards=S.cards.filter(c=>c.st==='ok').concat(cards);if(S.sec==='run')vRun()}},900)}
+function vRun(){const r=S.run;if(!r){view.innerHTML=`<div class="notice">No run yet. Start from the Brief.</div>`;return}
+ const c=r.cards,fail=c.filter(x=>x.chk.missing.length||!x.chk.blind||x.chk.dupe).length;
+ view.innerHTML=`<div class="grid g2"><div class="card"><div class="h2">${r.done?'Batch ready':'Generating…'}</div><div class="sub">${cat(S.brief.cat).n} · ${S.brief.age} · ${['Easy','Medium','Hard'][S.brief.d-1]} · ${S.brief.model}</div>
+  <div style="margin-top:8px">${STAGES.map(([n,d],i)=>`<div class="stg"><div class="dot ${i<r.stage?'ok':i===r.stage&&!r.done?'run':''}">${i<r.stage?'✓':i+1}</div><div class="grow"><div class="ttl">${n}</div><div class="sub">${d}</div></div><span class="sub">${i<r.stage?stageNote(i,c):''}</span></div>`).join('')}</div>
+  ${r.done?`<button class="btn p" id="rv" style="margin-top:12px">Review ${c.length} puzzles →</button>`:''}</div>
+  <div class="card"><div class="h2">Why these checks</div><div class="sub">AI drafts are cheap but sometimes wrong, so nothing is trusted without proof.</div>
+   <ul style="padding-left:18px;margin:8px 0;color:var(--body)"><li><b>Closed icon library.</b> The model chooses icon ids; it cannot invent artwork. Missing ones become icon requests for the artist.</li><li><b>Blind solve.</b> If a second AI call cannot get the answer from the pictures, a child won’t either — flagged as ambiguous.</li><li><b>Duplicate check</b> keeps the 1,000 fresh.</li><li><b>You decide.</b> Nothing publishes without a human approval.</li></ul>
+   ${r.done?`<div class="notice ${fail?'warn':'good'}">${c.length-fail} of ${c.length} passed every check; ${fail} need attention.</div>`:'<div class="meter"><i style="width:'+Math.min(100,r.stage/STAGES.length*100)+'%"></i></div>'}
+   <div class="sub" style="margin-top:8px">Cost of this run (illustrative): ~$${(c.length*.011).toFixed(2)} · ~${(c.length*.9+2).toFixed(0)}s</div></div></div>`;
+ const rv=$('#rv');if(rv)rv.onclick=()=>go('review')}
+function stageNote(i,c){return[`${c.length} drafted`,`${c.filter(x=>x.chk.schema).length}/${c.length} valid · ${c.filter(x=>x.chk.missing.length).length} need icons`,`${c.filter(x=>x.chk.blind).length}/${c.length} solved`,`${c.filter(x=>x.chk.dupe).length} duplicate${c.filter(x=>x.chk.dupe).length===1?'':'s'}`,'all clear'][i]}
+
+/* ---- review ---- */
+function flagged(x){return x.chk.missing.length||!x.chk.blind||x.chk.dupe}
+function vReview(){const list=S.cards.filter(x=>x.st!=='rej');const f=S.filter;
+ const shown=list.filter(x=>f==='all'?x.st!=='ok'||true:f==='attention'?flagged(x)&&x.st==='new':f==='pass'?!flagged(x)&&x.st==='new':x.st==='ok');
+ view.innerHTML=`<div class="row sp wr" style="margin-bottom:12px"><div class="seg" id="f">${[['all','All'],['attention','Needs attention'],['pass','Passing'],['ok','Approved']].map(([k,n])=>`<button data-v="${k}" class="${f===k?'on':''}">${n}</button>`).join('')}</div>
+  <div class="row"><button class="btn g" id="ap">Approve all passing</button><button class="btn p" id="pb">Go to publish (${S.cards.filter(x=>x.st==='ok').length}) →</button></div></div>
+  ${shown.length?`<div class="grid gc">${shown.map(card).join('')}</div>`:`<div class="notice">Nothing here. Generate a batch from the Brief, or change the filter.</div>`}`;
+ view.querySelectorAll('#f button').forEach(b=>b.onclick=()=>{S.filter=b.dataset.v;vReview()});
+ $('#ap').onclick=()=>{let n=0;S.cards.forEach(x=>{if(x.st==='new'&&!flagged(x)){x.st='ok';n++}});toast(n+' approved');shell();vReview()};$('#pb').onclick=()=>go('publish');
+ view.querySelectorAll('[data-act]').forEach(b=>b.onclick=()=>act(b.dataset.id,b.dataset.act))}
+function card(x){const m=x.chk.missing;return`<div class="card" style="${x.st==='ok'?'border-color:var(--g600)':''}"><div class="row sp"><span class="badge mu">${cat(x.cat).n}</span><span class="row" style="gap:4px"><span class="badge">${x.age}</span><span class="badge">${['Easy','Medium','Hard'][x.d-1]}</span>${x.src==='community'?'<span class="badge or">Community</span>':''}</span></div>
+ <div style="margin:10px 0">${pieces(x.p,m)}</div>
+ ${x.edit?`<label class="l">Answer</label><input class="field" id="e_a" value="${esc(x.ans)}"><label class="l">Why it works</label><input class="field" id="e_w" value="${esc(x.why)}">`:`<div class="ttl" style="font-size:18px">${esc(x.ans)}</div><div class="sub">${esc(x.why)}${x.alts.length?' · also: '+esc(x.alts.join(', ')):''} · trick: ${x.trick}</div>`}
+ <div class="chk"><span class="badge ${x.chk.schema?'ok':'no'}">${x.chk.schema?'✓ Schema':'✕ Icon missing: '+esc(m.join(', '))}</span><span class="badge ${x.chk.blind?'ok':'no'}">${x.chk.blind?'✓ Blind-solved':'✕ Blind solve failed'}</span><span class="badge ${x.chk.dupe?'no':'ok'}">${x.chk.dupe?'✕ Duplicate':'✓ Unique'}</span><span class="badge ok">✓ Safe</span></div>
+ ${!x.chk.blind?`<div class="notice warn" style="margin-bottom:8px">Blind AI said: ${esc(x.chk.said)}. Edit the pieces or regenerate.</div>`:''}${x.note?`<div class="notice" style="margin-bottom:8px">${esc(x.note)}</div>`:''}
+ <div class="row wr">${x.st==='ok'?`<span class="badge ok">Approved</span><button class="btn g sm" data-id="${x.id}" data-act="undo">Undo</button>`:x.edit?`<button class="btn p sm" data-id="${x.id}" data-act="save">Save</button>`:`<button class="btn s sm" data-id="${x.id}" data-act="ok" ${m.length||x.chk.dupe?'disabled':''}>Approve</button><button class="btn g sm" data-id="${x.id}" data-act="edit">Edit</button><button class="btn g sm" data-id="${x.id}" data-act="regen">Regenerate</button><button class="btn d sm" data-id="${x.id}" data-act="rej">Reject</button>`}</div></div>`}
+function act(id,a){const x=S.cards.find(c=>c.id===id);
+ if(a==='ok'){x.st='ok'}else if(a==='undo'){x.st='new'}else if(a==='rej'){x.st='rej';toast('Rejected — reason saved for prompt tuning')}
+ else if(a==='edit'){x.edit=true}else if(a==='save'){x.ans=$('#e_a').value;x.why=$('#e_w').value;x.edit=false;x.chk.dupe=S.bank.has(x.ans.toLowerCase());x.chk.blind=true;toast('Saved — re-running checks')}
+ else if(a==='regen'){const alt=TPL.filter(t=>t.c===x.cat&&!S.cards.some(c=>c.ans===t.ans)&&!S.bank.has(t.ans));const t=alt[0];if(t){Object.assign(x,{p:t.p,ans:t.ans,alts:t.alts,why:t.why,trick:t.trick,chk:{schema:true,missing:[],blind:true,said:t.ans,dupe:false,safe:true},st:'new'});toast('Regenerated with the same brief')}else toast('No fresh idea available in this mock')}
+ shell();vReview()}
+
+/* ---- publish ---- */
+function vPub(){const ok=S.cards.filter(x=>x.st==='ok'),by={};ok.forEach(x=>by[x.cat]=(by[x.cat]||0)+1);
+ view.innerHTML=ok.length?`<div class="grid g2"><div class="card"><div class="h2">Ready to publish</div><div class="sub">Approved puzzles join the category and become part of the next offline pack.</div>
+  <div class="tw"><table style="margin-top:8px"><tr><th>Category</th><th>Adds</th><th>Total after</th><th>Pack</th></tr>${Object.entries(by).map(([k,n])=>`<tr><td>${cat(k).em} ${cat(k).n}</td><td>+${n}</td><td>${fmt(total(cat(k))+n)}</td><td class="mono">+${(n*.33).toFixed(1)} KB</td></tr>`).join('')}</table></div>
+  <label class="l">Release note (staff only)</label><input class="field" id="rn" placeholder="e.g. Food: easy compound words for ages 7–9"><div class="row" style="margin-top:12px"><button class="btn p" id="pub">Publish ${ok.length} puzzles</button></div></div>
+  <div class="card"><div class="h2">What happens next</div><ol style="padding-left:18px;margin:6px 0;color:var(--body)"><li>New pack version is built per category.</li><li>Learners get it on their next sync; offline learners keep playing the old pack until then.</li><li>Group rooms use the new library immediately.</li><li>You can roll the release back from <b>Releases</b>.</li></ol><div class="notice">Every release is logged with who approved it, the prompt version and the model used.</div></div></div>`
+ :`<div class="notice">Nothing approved yet. Approve puzzles in Review first.</div>`;
+ const p=$('#pub');if(p)p.onclick=()=>{const rel={id:'r'+(S.rel.length+1),by:{...by},n:ok.length,pv:S.pv,model:S.brief.model,note:$('#rn').value||'—',t:new Date().toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'}),rolled:false,items:ok.map(x=>x.ans),src:ok.map(x=>x.src)};
+  ok.forEach(x=>{const c=cat(x.cat);c.cnt[x.src==='community'?'community':'ai']++;S.bank.add(x.ans.toLowerCase())});S.cards=S.cards.filter(x=>x.st!=='ok');S.rel.unshift(rel);toast(`Published ${ok.length} puzzles`);go('rel')}}
+
+/* ---- community & releases ---- */
+function vComm(){view.innerHTML=S.comm.length?`<div class="notice" style="margin-bottom:12px">Puzzles made by learners go through the same checks. AI adds a suggestion; a person decides.</div><div class="grid gc">${S.comm.map(x=>`<div class="card"><div class="row sp"><span class="badge mu">${cat(x.cat).n}</span><span class="badge">by ${esc(x.by)}</span></div><div style="margin:10px 0">${pieces(x.p)}</div><div class="ttl" style="font-size:18px">${esc(x.ans)}</div><div class="sub">${esc(x.why)}</div><div class="notice ${x.bad?'warn':''}" style="margin:8px 0">${esc(x.note)}</div><div class="row wr"><button class="btn s sm" data-a="${x.id}">Approve → Review</button><button class="btn d sm" data-r="${x.id}">Send back</button></div></div>`).join('')}</div>`:`<div class="notice">No community puzzles waiting.</div>`;
+ view.querySelectorAll('[data-a]').forEach(b=>b.onclick=()=>{const i=S.comm.findIndex(x=>x.id===b.dataset.a),x=S.comm.splice(i,1)[0];S.cards.push({id:'u'+x.id,cat:x.cat,p:x.p,ans:x.ans,alts:x.alts,why:x.why,age:x.age,d:x.d,trick:x.trick,src:'community',st:'ok',chk:{schema:true,missing:[],blind:!x.bad,said:x.ans,dupe:false,safe:true}});toast('Approved — ready to publish');shell();vComm()});
+ view.querySelectorAll('[data-r]').forEach(b=>b.onclick=()=>{S.comm=S.comm.filter(x=>x.id!==b.dataset.r);toast('Sent back to the maker');shell();vComm()})}
+function vRel(){view.innerHTML=S.rel.length?`<div class="card tw"><table><tr><th>Release</th><th>Time</th><th>Added</th><th>Prompt · model</th><th>Note</th><th></th></tr>${S.rel.map(r=>`<tr><td class="mono">${r.id}</td><td>${r.t}</td><td>${Object.entries(r.by).map(([k,n])=>cat(k).n+' +'+n).join(', ')}</td><td class="sub">v${r.pv} · ${esc(r.model)}</td><td>${esc(r.note)}</td><td>${r.rolled?'<span class="badge mu">Rolled back</span>':`<button class="btn d sm" data-rb="${r.id}">Roll back</button>`}</td></tr>`).join('')}</table></div>`:`<div class="notice">No releases yet.</div>`;
+ view.querySelectorAll('[data-rb]').forEach(b=>b.onclick=()=>{const r=S.rel.find(x=>x.id===b.dataset.rb);r.rolled=true;Object.entries(r.by).forEach(([k,n])=>{const c=cat(k);let rest=n;r.src.forEach((s,i)=>{if(cat(k)&&rest>0){c.cnt[s==='community'?'community':'ai']--;S.bank.delete(r.items[i].toLowerCase());rest--}})});toast('Rolled back — counts restored, packs reverted');vRel()})}
+shell();go('coverage');
+</script>
+</body>
+</html>

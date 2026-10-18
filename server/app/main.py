@@ -5,8 +5,10 @@ one string rather than a decoration on every route.
 """
 
 import asyncio
+import json
 import logging
 from contextlib import asynccontextmanager
+from pathlib import Path
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
@@ -25,6 +27,7 @@ from app.repos import menu as menu_repo
 from app.repos import personas as personas_repo
 from app.repos import plans as plans_repo
 from app.repos import platform_roles as platform_roles_repo
+from app.repos import rebus as rebus_repo
 from app.repos import skills as skills_repo
 from app.repos import system as system_repo
 from app.role_defaults import DEFAULT_PLATFORM_ROLES
@@ -49,6 +52,8 @@ from app.routers import (
     personas,
     profile,
     push,
+    rebus,
+    rebus_rooms,
     skill_registrations,
     skills,
     sync,
@@ -204,6 +209,13 @@ async def _prepare(db) -> None:
     if characters:
         log.info("seeded %s Koda characters", characters)
 
+    # The pre-built Rebus Rush puzzles, copied in once so the Studio can manage
+    # them. Create-if-absent: an admin's edits and retirements survive a restart.
+    prebuilt = json.loads((Path(__file__).parent / "rebus_seed.json").read_text())
+    rebus_new = await rebus_repo.ensure_seed(db, prebuilt)
+    if rebus_new:
+        log.info("seeded %s Rebus Rush puzzles", rebus_new)
+
     roles = sum(await _each(DEFAULT_PLATFORM_ROLES, lambda role: platform_roles_repo.seed_default(db, role)))
     if roles:
         log.info("seeded %s platform roles", roles)
@@ -304,6 +316,8 @@ def create_app() -> FastAPI:
         personas.router,
         profile.router,
         push.router,
+        rebus.router,
+        rebus_rooms.router,
         skill_registrations.router,
         sync.router,
         system.router,

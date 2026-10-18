@@ -1,0 +1,93 @@
+"""The server's copy of the answer and puzzle checks, on the same cases as the TypeScript tests."""
+import json
+from pathlib import Path
+
+import pytest
+
+from app import rebus_verify as v
+
+ICONS = frozenset({"rebus-honey", "rebus-moon", "rebus-dog", "rebus-fire"})
+
+
+def puzzle(**over):
+    base = {
+        "category": "food", "ages": [6, 12], "difficulty": 1,
+        "pieces": [{"kind": "icon", "id": "rebus-honey", "name": "honey"}, {"kind": "op", "op": "+"},
+                   {"kind": "icon", "id": "rebus-moon", "name": "moon"}],
+        "answer": "Honeymoon", "accepts": [], "explanation": "honey + moon = honeymoon.",
+    }
+    return {**base, **over}
+
+
+def codes(p):
+    return v.validate_puzzle(p, known_icons=ICONS)
+
+
+def test_normalising_ignores_case_accents_apostrophes_punctuation_and_articles():
+    assert v.normalize_answer("  The  Café!  ") == "cafe"
+    assert v.normalize_answer("It's raining, cats & dogs") == "its raining cats dogs"
+    assert v.normalize_answer("A piece of cake") == "piece of cake"
+
+
+def test_khmer_is_left_alone():
+    assert v.normalize_answer("ព្រះអាទិត្យ") == "ព្រះអាទិត្យ"
+
+
+def test_a_word_with_and_without_its_space_is_the_same():
+    assert v.compact_answer("hot dog") == v.compact_answer("hotdog")
+
+
+def test_typos_are_forgiven_only_on_long_answers():
+    assert [v.typo_allowance(n) for n in (3, 5, 6, 7, 8, 13, 14, 20)] == [0, 0, 0, 0, 1, 1, 2, 2]
+    assert v.matches("Honeymoon", [], "honeymon")
+    assert not v.matches("Hot dog", [], "hat dog")
+    assert not v.matches("Spain", [], "spail")
+    assert v.matches("Slice of cake", ["piece of cake"], "Piece of cake")
+    assert not v.matches("Hot dog", [], "   !? ")
+
+
+def test_a_good_puzzle_passes():
+    assert codes(puzzle()) == []
+
+
+@pytest.mark.parametrize("over,code", [
+    ({"category": "cars"}, "bad-category"),
+    ({"ages": [3, 9]}, "bad-ages"),
+    ({"ages": [12, 9]}, "bad-ages"),
+    ({"difficulty": 4}, "bad-difficulty"),
+    ({"pieces": [{"kind": "op", "op": "+"}]}, "no-picture"),
+    ({"answer": "ab"}, "answer-short"),
+    ({"explanation": "  nope "}, "no-explanation"),
+    ({"pieces": [{"kind": "icon", "id": "rebus-yeti", "name": "yeti"}]}, "unknown-icon"),
+    ({"pieces": [{"kind": "word", "text": "honey moon"}]}, "answer-in-puzzle"),
+    ({"accepts": ["sweet"], "pieces": [{"kind": "word", "text": "SWEET"}]}, "answer-in-puzzle"),
+])
+def test_each_fault_is_named(over, code):
+    assert code in codes(puzzle(**over))
+
+
+def test_operators_must_sit_between_two_pieces():
+    moon = {"kind": "icon", "id": "rebus-moon", "name": "moon"}
+    plus = {"kind": "op", "op": "+"}
+    for pieces in ([plus, moon], [moon, plus], [moon, plus, plus, moon]):
+        assert "bad-operators" in codes(puzzle(pieces=pieces))
+
+
+def test_too_many_pieces():
+    one = {"kind": "icon", "id": "rebus-moon", "name": "moon"}
+    assert "too-many-pieces" in codes(puzzle(pieces=[one] * 8))
+
+
+def test_a_stack_holding_only_part_of_the_answer_is_not_giving_it_away():
+    stack = {"kind": "stack", "top": "STAND", "bottom": "I"}
+    assert codes(puzzle(pieces=[stack], answer="I understand", accepts=["understand"], explanation="I is under STAND.")) == []
+
+
+def test_every_message_has_words():
+    assert v.describe(["answer-in-puzzle", "duplicate"]).startswith("The answer is written")
+
+
+def test_the_icon_list_is_the_one_the_app_draws():
+    on_disk = set(json.loads((Path(v.__file__).parent / "rebus_icons.json").read_text()))
+    assert on_disk == v.icon_ids()
+    assert "rebus-germ" in on_disk

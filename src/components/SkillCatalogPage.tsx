@@ -12,11 +12,15 @@ import { UIBadge, UIButton, UIPageHeader, UISkillCard, UISearchInput } from "./u
 import { subjectForSkill, useSubjects } from "../lib/subjects";
 import { refreshSystem } from "../lib/sync/system";
 import { useT } from "../lib/i18n";
+import { RebusEntry } from "../rebus/ui/RebusEntry";
+import { useSystem } from "../lib/sync/useSystem";
 
 export interface SkillCatalogPageProps {
   activeLevelNumber: number;
   completedLevels: Record<number, number>;
   onSelectSkill(skillId: string): void;
+  /** Opens Rebus Rush, the picture-puzzle game that sits on this shelf. */
+  onOpenRebus?(): void;
   /** Shown inside Learn, which carries the page's title: keep only the admin badge. */
   embedded?: boolean;
 }
@@ -37,10 +41,12 @@ export const SkillCatalogPage: React.FC<SkillCatalogPageProps> = ({
   activeLevelNumber,
   completedLevels,
   onSelectSkill,
+  onOpenRebus,
   embedded = false,
 }) => {
   const { skills, viewer } = useSkillCatalog(completedLevels);
   const { t } = useT();
+  const system = useSystem();
   const subjects = useSubjects();
   const { registeredIds, register } = useSkillRegistrations();
   const [query, setQuery] = useState("");
@@ -199,6 +205,8 @@ export const SkillCatalogPage: React.FC<SkillCatalogPageProps> = ({
         action={viewer.showAllSkills ? <UIBadge variant="primary">{t("catalog.adminBadge")}</UIBadge> : undefined}
       />
       )}
+
+      {onOpenRebus && system.allows("rebus.enabled") && <RebusEntry onOpen={onOpenRebus} />}
 
       <UISearchInput
         label={t("catalog.search")}

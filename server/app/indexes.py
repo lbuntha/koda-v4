@@ -188,6 +188,18 @@ INDEXES: dict[str, list[IndexModel]] = {
         IndexModel([("id", ASCENDING)], unique=True, name="library_book_id_unique"),
         IndexModel([("deletedAt", ASCENDING), ("updatedAt", DESCENDING)], name="library_book_recent"),
     ],
+    # Rebus Rush: every puzzle in any state, each publish, and the one version row.
+    "rebus_puzzles": [
+        IndexModel([("id", ASCENDING)], unique=True, name="rebus_puzzle_id_unique"),
+        IndexModel([("status", ASCENDING), ("category", ASCENDING)], name="rebus_puzzle_by_status"),
+    ],
+    # Group rooms live for hours, not days: Mongo removes a room once its time is up.
+    "rebus_rooms": [
+        IndexModel([("expiresAt", ASCENDING)], expireAfterSeconds=0, name="rebus_room_expiry"),
+    ],
+    "rebus_releases": [
+        IndexModel([("number", ASCENDING)], unique=True, name="rebus_release_number_unique"),
+    ],
     "library_unit_voices": [
         IndexModel([("unit", ASCENDING)], unique=True, name="library_unit_voice_unique"),
     ],
