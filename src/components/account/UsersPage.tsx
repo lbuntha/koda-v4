@@ -195,6 +195,7 @@ export const UsersPage: React.FC = () => {
   const [passwordUser, setPasswordUser] = useState<UserRecord | null>(null);
   const [password, setPassword] = useState("");
   const [deleting, setDeleting] = useState<UserRecord | null>(null);
+  const [promoting, setPromoting] = useState<UserRecord | null>(null);
   const [busy, setBusy] = useState<string | null>(null);
   /*
    * Granting a plan from here.
@@ -375,6 +376,20 @@ export const UsersPage: React.FC = () => {
     }, next === "active" ? "Account activated." : "Account suspended and sessions ended.");
   };
 
+  const promoteToAdmin = async (user: UserRecord) => {
+    await run(`promote:${user.id}`, async () => {
+      const token = await accessToken();
+      // Family members keep their family session at sign-in, so the role alone
+      // never reaches the admin menu; this leaves the family as well.
+      await request(`/admin/users/${user.id}/convert-to-staff`, {
+        method: "POST",
+        token,
+        body: { platformRole: "admin" },
+      });
+      setPromoting(null);
+    }, "User is now an admin. They must sign in again.");
+  };
+
   const deleteUser = async (user: UserRecord) => {
     await run(`delete:${user.id}`, async () => {
       const token = await accessToken();
@@ -497,7 +512,7 @@ export const UsersPage: React.FC = () => {
     {
       key: "actions",
       header: "Actions",
-      render: (user) => <div className="flex min-w-[19rem] items-center justify-end gap-1.5" onClick={(event) => event.stopPropagation()}><UIButton variant="ghost" size="sm" icon={<Pencil />} onClick={() => setEditing({ ...user, memberships: user.memberships.map((membership) => ({ ...membership })) })}>{translate("admin.usersPage.edit")}</UIButton><UIButton variant="ghost" size="sm" icon={<KeyRound />} onClick={() => setPasswordUser(user)}>{translate("admin.usersPage.password")}</UIButton>{user.status === "active" ? <UIButton variant="warning" size="sm" icon={<Ban />} disabled={user.isYou} isLoading={busy === `status:${user.id}`} onClick={() => void setAccountStatus(user, "suspended")}>{translate("admin.usersPage.suspend")}</UIButton> : <UIButton variant="success" size="sm" icon={<UserCheck />} isLoading={busy === `status:${user.id}`} onClick={() => void setAccountStatus(user, "active")}>{translate("admin.usersPage.activate")}</UIButton>}<UIButton variant="danger" size="sm" icon={<Trash2 />} disabled={user.isYou || user.memberships.length > 0} onClick={() => setDeleting(user)}>{translate("admin.usersPage.delete")}</UIButton></div>,
+      render: (user) => <div className="flex min-w-[19rem] items-center justify-end gap-1.5" onClick={(event) => event.stopPropagation()}><UIButton variant="ghost" size="sm" icon={<Pencil />} onClick={() => setEditing({ ...user, memberships: user.memberships.map((membership) => ({ ...membership })) })}>{translate("admin.usersPage.edit")}</UIButton>{user.platformRole !== "admin" && user.status === "active" && !user.memberships.some((item) => item.role === "owner") && <UIButton variant="ghost" size="sm" icon={<ShieldCheck />} isLoading={busy === `promote:${user.id}`} onClick={() => setPromoting(user)}>{translate("admin.usersPage.makeAdmin")}</UIButton>}<UIButton variant="ghost" size="sm" icon={<KeyRound />} onClick={() => setPasswordUser(user)}>{translate("admin.usersPage.password")}</UIButton>{user.status === "active" ? <UIButton variant="warning" size="sm" icon={<Ban />} disabled={user.isYou} isLoading={busy === `status:${user.id}`} onClick={() => void setAccountStatus(user, "suspended")}>{translate("admin.usersPage.suspend")}</UIButton> : <UIButton variant="success" size="sm" icon={<UserCheck />} isLoading={busy === `status:${user.id}`} onClick={() => void setAccountStatus(user, "active")}>{translate("admin.usersPage.activate")}</UIButton>}<UIButton variant="danger" size="sm" icon={<Trash2 />} disabled={user.isYou || user.memberships.length > 0} onClick={() => setDeleting(user)}>{translate("admin.usersPage.delete")}</UIButton></div>,
       align: "right",
       nowrap: true,
     },
@@ -542,7 +557,7 @@ export const UsersPage: React.FC = () => {
     {
       key: "actions",
       header: "Actions",
-      render: (user) => <div className="flex min-w-[17rem] items-center justify-end gap-1.5" onClick={(event) => event.stopPropagation()}><UIButton variant="ghost" size="sm" icon={<Pencil />} onClick={() => setEditing({ ...user, memberships: user.memberships.map((membership) => ({ ...membership })) })}>{translate("admin.usersPage.edit")}</UIButton><UIButton variant="ghost" size="sm" icon={<KeyRound />} onClick={() => setPasswordUser(user)}>{user.onboardingStatus === "pending" ? translate("admin.usersPage.credentials") : translate("admin.usersPage.password")}</UIButton>{user.status === "active" ? <UIButton variant="warning" size="sm" icon={<Ban />} disabled={user.isYou} isLoading={busy === `status:${user.id}`} onClick={() => void setAccountStatus(user, "suspended")}>{translate("admin.usersPage.block")}</UIButton> : <UIButton variant="success" size="sm" icon={<UserCheck />} isLoading={busy === `status:${user.id}`} onClick={() => void setAccountStatus(user, "active")}>{translate("admin.usersPage.reopen")}</UIButton>}</div>,
+      render: (user) => <div className="flex min-w-[17rem] items-center justify-end gap-1.5" onClick={(event) => event.stopPropagation()}><UIButton variant="ghost" size="sm" icon={<Pencil />} onClick={() => setEditing({ ...user, memberships: user.memberships.map((membership) => ({ ...membership })) })}>{translate("admin.usersPage.edit")}</UIButton>{user.platformRole !== "admin" && user.status === "active" && !user.memberships.some((item) => item.role === "owner") && <UIButton variant="ghost" size="sm" icon={<ShieldCheck />} isLoading={busy === `promote:${user.id}`} onClick={() => setPromoting(user)}>{translate("admin.usersPage.makeAdmin")}</UIButton>}<UIButton variant="ghost" size="sm" icon={<KeyRound />} onClick={() => setPasswordUser(user)}>{user.onboardingStatus === "pending" ? translate("admin.usersPage.credentials") : translate("admin.usersPage.password")}</UIButton>{user.status === "active" ? <UIButton variant="warning" size="sm" icon={<Ban />} disabled={user.isYou} isLoading={busy === `status:${user.id}`} onClick={() => void setAccountStatus(user, "suspended")}>{translate("admin.usersPage.block")}</UIButton> : <UIButton variant="success" size="sm" icon={<UserCheck />} isLoading={busy === `status:${user.id}`} onClick={() => void setAccountStatus(user, "active")}>{translate("admin.usersPage.reopen")}</UIButton>}</div>,
       align: "right",
       nowrap: true,
     },
@@ -682,6 +697,7 @@ export const UsersPage: React.FC = () => {
         )}
       </UIModal>
 
+      <UIDialog isOpen={Boolean(promoting)} onClose={() => setPromoting(null)} title={translate("admin.usersPage.makeAdmin")} description={translate(promoting?.memberships.length ? "admin.usersPage.makeAdminLeavesFamily" : "admin.usersPage.makeAdminDescription", { value: promoting?.email ?? translate("admin.usersPage.thisAccount") })} confirmText={translate("admin.usersPage.makeAdmin")} onConfirm={() => { if (promoting) void promoteToAdmin(promoting); }} />
       <UIDialog isOpen={Boolean(deleting)} onClose={() => setDeleting(null)} title={translate("admin.usersPage.deleteUserAccount")} description={translate("admin.usersPage.valueWillBePermanentlyRemovedThis", { value: deleting?.email ?? translate("admin.usersPage.thisAccount") })} confirmText={translate("admin.usersPage.deleteAccount")} variant="danger" onConfirm={() => { if (deleting) void deleteUser(deleting); }} />
     </div>
   );

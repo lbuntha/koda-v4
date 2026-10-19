@@ -199,6 +199,52 @@ async def test_admin_can_change_platform_and_family_roles(client, db, signup_bod
     assert owner_change.json()["error"]["code"] == "cannot_demote_owner"
 
 
+async def test_convert_to_staff_leaves_the_family_and_gets_the_admin_session(
+    client, db, signup_body
+):
+    from app.repos import memberships, users
+    from app.security import passwords
+
+    auth = await _admin_auth(client, db)
+    await client.post("/auth/signup", json=signup_body("owner3@example.com"))
+    owner_row = await users.by_email(db, "owner3@example.com")
+    family_id = (await memberships.for_user(db, owner_row["_id"]))[0]["familyId"]
+    member = await users.create(
+        db, "member3@example.com", passwords.hash_password("member-pass-123")
+    )
+    await memberships.add(db, member["_id"], family_id, role="parent")
+
+    blocked = await client.post(
+        f"/admin/users/{owner_row['_id']}/convert-to-staff", headers=auth, json={}
+    )
+    assert blocked.status_code == 409
+    assert blocked.json()["error"]["code"] == "user_owns_family"
+
+    done = await client.post(
+        f"/admin/users/{member['_id']}/convert-to-staff", headers=auth, json={}
+    )
+    assert done.status_code == 200, done.text
+    assert done.json()["platformRole"] == "admin"
+    assert done.json()["memberships"] == []
+
+    signed_in = (
+        await client.post(
+            "/auth/login", json={"email": "member3@example.com", "password": "member-pass-123"}
+        )
+    ).json()
+    assert signed_in["familyId"] is None
+    from app.menu_defaults import DEFAULT_MENU
+    from app.repos import menu as menu_repo
+
+    for item in DEFAULT_MENU:
+        await menu_repo.seed_default(db, item)
+    menu = await client.get(
+        "/menu", headers={"Authorization": f"Bearer {signed_in['accessToken']}"}
+    )
+    assert menu.status_code == 200
+    assert "users" in {item["id"] for item in menu.json()["items"]}
+
+
 async def test_deleting_an_account_forgets_its_notification_data(db):
     from app.repos import users
 

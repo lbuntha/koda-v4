@@ -98,6 +98,10 @@ class PasswordIn(Model):
     password: str = Field(min_length=8, max_length=200)
 
 
+class ConvertToStaffIn(Model):
+    platform_role: str = Field(default="admin", min_length=1, max_length=50, alias="platformRole")
+
+
 class MembershipRoleIn(Model):
     role: MembershipRole
 
@@ -296,6 +300,36 @@ async def update_membership_role(
 
     row = await _full_user(db, user_id)
     return _out(row, p.subject_id)
+
+
+@router.post("/{user_id}/convert-to-staff")
+async def convert_to_staff(
+    user_id: str, body: ConvertToStaffIn, db: Db, p: CanManageUsers
+) -> UserOut:
+    """Turn a family member into a staff account.
+
+    Sign-in lets family membership win over a platform role, so setting
+    `platformRole` on someone who still belongs to a family never reaches the
+    admin menu. Staff access therefore means leaving the family: memberships
+    are removed here, and a family's owner has to hand ownership over first.
+    """
+    target = await users.by_id(db, user_id)
+    if not target:
+        raise NotFound("No such user account.")
+    if body.platform_role == "none" or not await platform_roles.by_id(db, body.platform_role):
+        raise Conflict("Choose an existing platform role.", "unknown_platform_role")
+    held = await memberships.for_user(db, user_id)
+    if any(item["role"] == "owner" for item in held):
+        raise Conflict(
+            "This person owns a family. Transfer ownership before making them staff.",
+            "user_owns_family",
+        )
+    for item in held:
+        await memberships.remove(db, user_id, item["familyId"])
+    if target.get("platformRole", "none") != body.platform_role:
+        await users.update_account(db, user_id, {"platformRole": body.platform_role})
+    await devices.revoke_all_for_user(db, user_id)
+    return _out(await _full_user(db, user_id), p.subject_id)
 
 
 @router.post("/{user_id}/password", status_code=status.HTTP_204_NO_CONTENT)
