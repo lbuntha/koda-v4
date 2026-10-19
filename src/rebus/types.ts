@@ -7,9 +7,13 @@
  */
 
 import type { AgeRange } from "../lib/ages";
+import type { MathSpec } from "./math";
 
-export const CATEGORY_IDS = ["countries", "food", "sayings", "animals", "sports", "school", "science", "khmer"] as const;
-export type CategoryId = (typeof CATEGORY_IDS)[number];
+/**
+ * A category's id: its address, never changed. Categories are data an owner manages
+ * in the Studio (`categories.ts`), so this is a string, not a list in the code.
+ */
+export type CategoryId = string;
 
 /** 1 easy – 3 hard. */
 export type Difficulty = 1 | 2 | 3;
@@ -21,6 +25,8 @@ export type Trick = (typeof TRICKS)[number];
 export type WordStyle = "plain" | "cut" | "small" | "big" | "upside-down";
 
 export type Piece =
+  /** A photo an author uploaded, kept with the library's photos. `id` is `photo-<sha256>`; `name` is what it is read as. */
+  | { kind: "photo"; id: string; name: string; scale?: "big" | "small" }
   /** A picture from Koda's own icon library. `id` is the library id; `name` is what it is called, said aloud. */
   | { kind: "icon"; id: string; name: string; scale?: "big" | "small" }
   /** Written text that is part of the puzzle, optionally styled (CAKE with a slice cut out). */
@@ -38,6 +44,10 @@ export interface Puzzle {
   ages: AgeRange;
   difficulty: Difficulty;
   trick: Trick;
+  /** "picture" (the default: pieces add up to a typed answer) or "math" (the numbers are in `math`). */
+  kind?: "picture" | "math";
+  /** A math question's numbers. Its prompt (the one word piece), answer and explanation are worked out from them. */
+  math?: MathSpec;
   pieces: Piece[];
   /** The answer as it is shown after the puzzle. */
   answer: string;

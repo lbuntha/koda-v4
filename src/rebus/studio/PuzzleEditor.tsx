@@ -11,13 +11,18 @@
  * "More options".
  */
 
-import React, { useMemo, useState } from "react";
-import { ArrowLeft, ArrowRight, Check, Save, X } from "lucide-react";
+import React, { useMemo, useRef, useState } from "react";
+import { ArrowLeft, ArrowRight, Check, ImagePlus, Save, X } from "lucide-react";
 import { useT } from "../../lib/i18n";
 import { themeSystem } from "../../lib/themeSystem";
 import { UIAgePicker, UIButton, UIInput, UISelect, UITabs, UITextarea } from "../../components/ui";
 import { LEVELS, levelOf } from "./levels";
-import { CATEGORIES } from "../categories";
+import { categoryLabel } from "../categories";
+import { useRebusCategories } from "../bank";
+import { PHOTO_ACCEPT, uploadPhoto } from "../../library/photos";
+import { deriveMath } from "../math";
+import { MathFields } from "./MathFields";
+import { PIECE_PHOTO_SIDE, UPLOAD_ROUTE } from "../photos";
 import { useRebusIcons } from "../icons/useRebusIcons";
 import { validatePuzzle } from "../puzzle";
 import { TRICKS, type Piece, type Puzzle, type Trick } from "../types";
@@ -31,7 +36,7 @@ export const BLANK_DRAFT: PuzzleDraft = { category: "food", ages: [6, 12], diffi
 const asPuzzle = (d: PuzzleDraft): Puzzle => ({ ...d, id: "draft", ages: d.ages, difficulty: d.difficulty as Puzzle["difficulty"], category: d.category as Puzzle["category"], source: "official" });
 
 /** What each piece is called in the list, so the author can find and fix it. */
-const pieceLabel = (p: Piece): string => (p.kind === "icon" ? p.name : p.kind === "word" ? p.text : p.kind === "stack" ? `${p.top} / ${p.bottom}` : p.op);
+const pieceLabel = (p: Piece): string => (p.kind === "icon" || p.kind === "photo" ? p.name : p.kind === "word" ? p.text : p.kind === "stack" ? `${p.top} / ${p.bottom}` : p.op);
 
 export interface PuzzleEditorProps {
   initial: PuzzleDraft;
@@ -48,6 +53,7 @@ export interface PuzzleEditorProps {
 
 export const PuzzleEditor: React.FC<PuzzleEditorProps> = ({ initial, onSave, onCancel, approvable = false, saveLabel }) => {
   const { t } = useT();
+  const cats = useRebusCategories();
   const issueText = useIssueText();
   const [draft, setDraft] = useState<PuzzleDraft>(initial);
   const [busy, setBusy] = useState(false);
@@ -58,6 +64,7 @@ export const PuzzleEditor: React.FC<PuzzleEditorProps> = ({ initial, onSave, onC
   const [more, setMore] = useState(false);
 
   const set = (patch: Partial<PuzzleDraft>) => setDraft((d) => ({ ...d, ...patch }));
+  const isMath = draft.kind === "math" && draft.math !== undefined;
   const icons = useRebusIcons();
   const iconIds = useMemo(() => new Set(icons.map((i) => i.id)), [icons]);
   const issues = useMemo(() => validatePuzzle(asPuzzle(draft), { iconIds }).map((i) => i.code), [draft, iconIds]);
@@ -71,7 +78,29 @@ export const PuzzleEditor: React.FC<PuzzleEditorProps> = ({ initial, onSave, onC
     [next[i], next[j]] = [next[j], next[i]];
     set({ pieces: next });
   };
-  const rename = (i: number, name: string) => set({ pieces: draft.pieces.map((p, j) => (j === i && p.kind === "icon" ? { ...p, name } : p)) });
+  const rename = (i: number, name: string) => set({ pieces: draft.pieces.map((p, j) => (j === i && (p.kind === "icon" || p.kind === "photo") ? { ...p, name } : p)) });
+  const resize = (i: number, scale: "big" | "small" | undefined) =>
+    set({ pieces: draft.pieces.map((p, j) => (j === i && (p.kind === "icon" || p.kind === "photo") ? { ...p, scale } : p)) });
+
+  // A photo from the author's own computer: shrunk in the browser, checked and kept by the server.
+  const picker = useRef<HTMLInputElement>(null);
+  const [uploading, setUploading] = useState(false);
+  const [uploadError, setUploadError] = useState("");
+  const addPhoto = async (file: File | undefined) => {
+    if (!file) return;
+    setUploading(true);
+    setUploadError("");
+    try {
+      const id = await uploadPhoto(file, UPLOAD_ROUTE, PIECE_PHOTO_SIDE);
+      const guess = file.name.replace(/\.[^.]+$/, "").replace(/[-_]+/g, " ").trim().slice(0, 40);
+      add({ kind: "photo", id, name: guess || t("rebus.studio.photoName") });
+    } catch (e) {
+      setUploadError(e instanceof Error ? e.message : t("rebus.studio.photoFailed"));
+    } finally {
+      setUploading(false);
+      if (picker.current) picker.current.value = "";
+    }
+  };
 
   const save = async (approve: boolean) => {
     setBusy(true);
@@ -83,15 +112,43 @@ export const PuzzleEditor: React.FC<PuzzleEditorProps> = ({ initial, onSave, onC
 
   return (
     <div className="flex flex-col gap-5">
-      <PuzzleCanvas pieces={draft.pieces} label={t("rebus.puzzle")} />
+      {isMath && draft.math ? (
+        <MathFields
+          spec={draft.math}
+          onChange={(math) => {
+            const derived = deriveMath(math);
+            set(derived ? { math, ...derived } : { math, pieces: [], answer: "", accepts: [], explanation: "" });
+          }}
+        />
+      ) : (
+        <PuzzleCanvas pieces={draft.pieces} label={t("rebus.puzzle")} />
+      )}
 
+      {!isMath && (
       <section className="flex flex-col gap-2" aria-label={t("rebus.studio.pieces")}>
         <h4 className={themeSystem.typography("h4")}>{t("rebus.studio.pieces")}</h4>
         <ol className="flex flex-col gap-1.5">
           {draft.pieces.map((p, i) => (
             <li key={i} className="flex items-center gap-2 rounded-xl border border-line bg-surface-muted px-2.5 py-1.5">
-              {p.kind === "icon" ? (
-                <UIInput aria-label={t("rebus.studio.readAs", { n: i + 1 })} value={p.name} onChange={(e) => rename(i, e.target.value)} className="!min-h-9 flex-1 !py-1" />
+              {p.kind === "icon" || p.kind === "photo" ? (
+                <>
+                  <span className="shrink-0 rounded-md bg-surface px-1.5 py-0.5 text-[10px] font-black uppercase text-muted">{p.kind === "photo" ? t("rebus.studio.photo") : t("rebus.studio.drawing")}</span>
+                  <UIInput aria-label={t("rebus.studio.readAs", { n: i + 1 })} value={p.name} onChange={(e) => rename(i, e.target.value)} className="!min-h-9 flex-1 !py-1" />
+                  <div role="group" aria-label={t("rebus.studio.sizeOf", { n: i + 1 })} className="flex shrink-0 overflow-hidden rounded-lg border border-line">
+                    {([["small", "S"], [undefined, "M"], ["big", "L"]] as const).map(([value, label]) => (
+                      <button
+                        key={label}
+                        type="button"
+                        aria-pressed={p.scale === value}
+                        aria-label={t(`rebus.studio.size_${label}`)}
+                        onClick={() => resize(i, value)}
+                        className={`px-2 py-1 text-xs font-black ${p.scale === value ? "bg-indigo-600 text-white" : "bg-white text-ink dark:bg-slate-900"}`}
+                      >
+                        {label}
+                      </button>
+                    ))}
+                  </div>
+                </>
               ) : (
                 <span className="flex-1 text-sm font-bold text-ink">{pieceLabel(p)}</span>
               )}
@@ -104,6 +161,19 @@ export const PuzzleEditor: React.FC<PuzzleEditorProps> = ({ initial, onSave, onC
         </ol>
 
         <IconPicker onPick={(id, name) => add({ kind: "icon", id, name })} />
+
+        <div className="flex flex-wrap items-center gap-2">
+          <input ref={picker} type="file" accept={PHOTO_ACCEPT} className="sr-only" aria-label={t("rebus.studio.photoFile")} onChange={(e) => void addPhoto(e.target.files?.[0])} />
+          <UIButton size="sm" variant="secondary" icon={<ImagePlus />} isLoading={uploading} disabled={uploading} onClick={() => picker.current?.click()}>
+            {t("rebus.studio.addPhoto")}
+          </UIButton>
+          <span className={themeSystem.typography("caption")}>{t("rebus.studio.photoHint")}</span>
+        </div>
+        {uploadError && (
+          <p role="alert" className={themeSystem.flash("error")}>
+            {uploadError}
+          </p>
+        )}
 
         <div className="flex flex-wrap gap-2">
           <UIButton size="sm" variant="secondary" onClick={() => add({ kind: "op", op: "+" })}>
@@ -127,26 +197,31 @@ export const PuzzleEditor: React.FC<PuzzleEditorProps> = ({ initial, onSave, onC
           </UIButton>
         </div>
       </section>
+      )}
 
       <section className="grid gap-4 sm:grid-cols-2">
+        {!isMath && (
         <label className="flex flex-col gap-1">
           <span className="text-xs font-extrabold uppercase tracking-wider text-muted">{t("rebus.studio.answer")}</span>
           <UIInput value={draft.answer} onChange={(e) => set({ answer: e.target.value })} maxLength={80} />
         </label>
+        )}
         <label className="flex flex-col gap-1">
           <span className="text-xs font-extrabold uppercase tracking-wider text-muted">{t("rebus.studio.category")}</span>
           <UISelect value={draft.category} onChange={(e) => set({ category: e.target.value })}>
-            {CATEGORIES.map((c) => (
+            {cats.map((c) => (
               <option key={c.id} value={c.id}>
-                {t(`rebus.categories.${c.id}`)}
+                {categoryLabel(c.id)}
               </option>
             ))}
           </UISelect>
         </label>
+        {!isMath && (
         <label className="flex flex-col gap-1 sm:col-span-2">
           <span className="text-xs font-extrabold uppercase tracking-wider text-muted">{t("rebus.studio.explanation")}</span>
           <UITextarea rows={2} value={draft.explanation} onChange={(e) => set({ explanation: e.target.value })} maxLength={200} />
         </label>
+        )}
         <div className="flex flex-col gap-1 sm:col-span-2">
           <span className="text-xs font-extrabold uppercase tracking-wider text-muted">{t("rebus.studio.level")}</span>
           <UITabs
@@ -168,6 +243,8 @@ export const PuzzleEditor: React.FC<PuzzleEditorProps> = ({ initial, onSave, onC
         </div>
         {more && (
           <>
+            {!isMath && (
+              <>
             <label className="flex flex-col gap-1 sm:col-span-2">
               <span className="text-xs font-extrabold uppercase tracking-wider text-muted">{t("rebus.studio.accepts")}</span>
               <UIInput value={draft.accepts.join(", ")} onChange={(e) => set({ accepts: e.target.value.split(",").map((s) => s.trim()).filter(Boolean) })} placeholder={t("rebus.studio.acceptsHint")} />
@@ -182,6 +259,8 @@ export const PuzzleEditor: React.FC<PuzzleEditorProps> = ({ initial, onSave, onC
                 ))}
               </UISelect>
             </label>
+              </>
+            )}
             <div className="flex flex-col gap-1">
               <span className="text-xs font-extrabold uppercase tracking-wider text-muted">{t("rebus.studio.difficultyLabel")}</span>
               <UITabs label={t("rebus.studio.difficultyLabel")} items={[1, 2, 3].map((d) => ({ id: String(d), label: t(`rebus.studio.difficulty.${d}`) }))} value={String(draft.difficulty)} onChange={(id) => set({ difficulty: Number(id) })} />

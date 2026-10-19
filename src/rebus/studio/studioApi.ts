@@ -10,6 +10,7 @@ import { accessToken, request } from "../../lib/sync";
 import { tutorHeaders } from "../../lib/tutorApi";
 import { translate } from "../../lib/i18n";
 import type { GenerationResult } from "../generate/pipeline";
+import type { MathSpec } from "../math";
 import type { Piece, Puzzle } from "../types";
 
 export type PuzzleStatus = "draft" | "approved" | "published" | "retired" | "rejected";
@@ -56,6 +57,9 @@ export interface SavedPrompt {
 }
 
 export interface PuzzleDraft {
+  /** "math": the numbers are in `math`, and the prompt, answer and explanation are worked out from them. */
+  kind?: "picture" | "math";
+  math?: MathSpec;
   category: string;
   ages: [number, number];
   difficulty: number;
@@ -72,6 +76,25 @@ export interface PuzzleDraft {
   model?: string;
   /** Approve in the same step, if every check passes. */
   approve?: boolean;
+}
+
+/** A category as the Studio sees it: also the ones switched off, and how many puzzles use it. */
+export interface StudioCategory {
+  id: string;
+  names: Record<string, string>;
+  tone: string;
+  topic: string;
+  order: number;
+  enabled: boolean;
+  builtIn: boolean;
+  puzzles: number;
+}
+
+export interface CategoryDraft {
+  id: string;
+  names: Record<string, string>;
+  tone: string;
+  topic: string;
 }
 
 export interface ListQuery {
@@ -108,6 +131,12 @@ export const StudioAPI = {
   rollback: (number: number) => call<Release>(`/releases/${number}/rollback`, { method: "POST" }),
   iconUsage: () => call<{ usage: Record<string, { count: number; answers: string[] }> }>("/icon-usage"),
   prompts: () => call<{ versions: SavedPrompt[]; latest: SavedPrompt | null }>("/prompt"),
+  categories: () => call<{ categories: StudioCategory[] }>("/categories"),
+  addCategory: (draft: CategoryDraft) => call<StudioCategory>("/categories", { method: "POST", body: draft }),
+  editCategory: (id: string, patch: Partial<Omit<CategoryDraft, "id">> & { enabled?: boolean }) =>
+    call<StudioCategory>(`/categories/${encodeURIComponent(id)}`, { method: "PATCH", body: patch }),
+  reorderCategories: (order: string[]) => call<unknown>("/categories/reorder", { method: "POST", body: { order } }),
+  removeCategory: (id: string) => call<unknown>(`/categories/${encodeURIComponent(id)}`, { method: "DELETE" }),
   savePrompt: (text: string) => call<SavedPrompt>("/prompt", { method: "POST", body: { text } }),
 };
 
@@ -134,3 +163,16 @@ export const generatePuzzles = async (input: GenerateRequest): Promise<GenerateR
   if (!res.ok || !body?.puzzles) throw new Error(body?.error?.message ?? translate("rebus.studio.failed"));
   return body;
 };
+
+/** A saved puzzle as the editor holds it. */
+export const draftOf = (p: StudioPuzzle): PuzzleDraft => ({
+  category: p.category,
+  ages: [p.ages[0], p.ages[1]],
+  difficulty: p.difficulty,
+  trick: p.trick,
+  ...(p.kind === "math" && p.math ? { kind: "math" as const, math: p.math } : {}),
+  pieces: p.pieces,
+  answer: p.answer,
+  accepts: p.accepts,
+  explanation: p.explanation,
+});

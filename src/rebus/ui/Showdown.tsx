@@ -13,44 +13,24 @@ import React from "react";
 import { Bot, Crown, Handshake, Trophy, User } from "lucide-react";
 import { useT } from "../../lib/i18n";
 import { themeSystem } from "../../lib/themeSystem";
+import { UIBurst } from "../../components/ui";
 
 export interface ShowdownProps {
   you: number;
   machine: number;
 }
 
-/** Confetti pieces: where they land, how far they travel, how long they take. No yellow anywhere. */
-const CONFETTI = [
-  { x: -150, y: -120, color: "bg-indigo-500", delay: 0 },
-  { x: -90, y: -170, color: "bg-pink-500", delay: 0.05 },
-  { x: -30, y: -140, color: "bg-emerald-500", delay: 0.1 },
-  { x: 40, y: -180, color: "bg-cyan-500", delay: 0.02 },
-  { x: 100, y: -130, color: "bg-purple-500", delay: 0.08 },
-  { x: 150, y: -160, color: "bg-pink-400", delay: 0.12 },
-  { x: -120, y: -60, color: "bg-cyan-400", delay: 0.15 },
-  { x: 120, y: -70, color: "bg-emerald-400", delay: 0.06 },
-  { x: -60, y: -90, color: "bg-purple-400", delay: 0.18 },
-  { x: 70, y: -100, color: "bg-indigo-400", delay: 0.14 },
-];
-
-const Burst: React.FC = () => (
-  <span aria-hidden="true" className="pointer-events-none absolute left-1/2 top-1/3">
-    {CONFETTI.map((c, i) => (
-      <span
-        key={i}
-        className={`rebus-confetti absolute block h-2.5 w-1.5 rounded-sm ${c.color}`}
-        style={{ ["--x" as string]: `${c.x}px`, ["--y" as string]: `${c.y}px`, animationDelay: `${c.delay}s` }}
-      />
-    ))}
-  </span>
-);
-
 const Side: React.FC<{ icon: React.ReactNode; name: string; points: number; result: "won" | "lost" | "tied" }> = ({ icon, name, points, result }) => {
   const { t } = useT();
   const won = result === "won";
   return (
-    <div className={`relative flex flex-1 flex-col items-center gap-1 rounded-3xl border-2 px-3 pb-4 pt-6 transition-transform ${won ? "koda-celebrate -translate-y-1 border-emerald-500 bg-emerald-50 dark:bg-emerald-950/40" : result === "tied" ? "border-indigo-400 bg-indigo-50 dark:bg-indigo-950/40" : "border-line bg-white opacity-90 dark:bg-slate-900"}`}>
-      {won && <Crown aria-hidden="true" className="koda-celebrate-icon absolute -top-4 h-8 w-8 text-emerald-600 dark:text-emerald-400" />}
+    <div className={`relative flex flex-1 flex-col items-center gap-1 rounded-3xl border-2 px-3 pb-4 pt-11 transition-transform ${won ? "koda-celebrate -translate-y-1 border-emerald-500 bg-emerald-50 dark:bg-emerald-950/40" : result === "tied" ? "border-indigo-400 bg-indigo-50 dark:bg-indigo-950/40" : "border-line bg-white opacity-90 dark:bg-slate-900"}`}>
+      {won && (
+        // Centred by its box, not by a transform: the pop animation owns the icon's transform.
+        <span aria-hidden="true" className="absolute inset-x-0 top-2 flex justify-center">
+          <Crown className="koda-celebrate-icon h-7 w-7 text-emerald-600 dark:text-emerald-400" />
+        </span>
+      )}
       <span className={`flex h-14 w-14 items-center justify-center rounded-full ${won ? "koda-celebrate-icon bg-emerald-500 text-white" : "bg-indigo-100 text-indigo-600 dark:bg-indigo-900/50 dark:text-indigo-300"} [&>svg]:h-7 [&>svg]:w-7`}>{icon}</span>
       <span className="text-4xl font-black leading-none text-ink">{points}</span>
       <span className="text-sm font-black text-ink">{name}</span>
@@ -67,7 +47,7 @@ export const Showdown: React.FC<ShowdownProps> = ({ you, machine }) => {
 
   return (
     <section aria-label={headline} className="relative flex flex-col items-center gap-3 overflow-visible">
-      {youResult === "won" && <Burst />}
+      {youResult === "won" && <UIBurst />}
       <div className="flex items-center gap-2 text-center">
         {youResult === "tied" ? <Handshake aria-hidden="true" className="h-7 w-7 text-indigo-600" /> : <Trophy aria-hidden="true" className="h-7 w-7 text-emerald-600 dark:text-emerald-400" />}
         <h2 role="status" className={themeSystem.typography("h2")}>

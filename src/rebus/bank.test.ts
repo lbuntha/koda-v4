@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { bankForAge } from "./bank";
 import { OFFICIAL_PUZZLES } from "./content";
-import { CATEGORIES } from "./categories";
+import { BUILT_IN_CATEGORIES as CATEGORIES } from "./categories";
 
 const full = { puzzles: OFFICIAL_PUZZLES, counts: Object.fromEntries(CATEGORIES.map((c) => [c.id, OFFICIAL_PUZZLES.filter((p) => p.category === c.id).length])) as never, loaded: true };
 

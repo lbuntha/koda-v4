@@ -5,10 +5,10 @@
  */
 
 import React, { useEffect, useRef, useState } from "react";
-import { ArrowRight, Hand, Lightbulb, LogOut, RotateCcw, SkipForward, Trophy } from "lucide-react";
+import { ArrowRight, Hand, LogOut, RotateCcw, SkipForward, Trophy } from "lucide-react";
 import { useT } from "../../lib/i18n";
 import { themeSystem } from "../../lib/themeSystem";
-import { UIButton, UIKidMessage, UIProgressBar } from "../../components/ui";
+import { UIButton, UICountdown, UICountUp, UIHintPanel, UIKidMessage, UIOutcome, UIPointsPop, UIProgressBar } from "../../components/ui";
 import { useNickname } from "../group/NicknamePicker";
 import { Podium } from "../group/Podium";
 import { RoomAvatar } from "../group/RoomAvatar";
@@ -21,17 +21,18 @@ import type { TurnsGame } from "./useTurns";
 
 const WRONG_MS = 2500;
 
-/** Everyone's score, the player whose turn it is ringed. */
-const Scores: React.FC<{ state: TurnsState; active: number | null }> = ({ state, active }) => {
+/** Everyone's score, the player whose turn it is ringed, and "+3" rising from whoever just scored. */
+const Scores: React.FC<{ state: TurnsState; active: number | null; scored?: { player: number; points: number } | null }> = ({ state, active, scored = null }) => {
   const { t } = useT();
   const show = useNickname();
   return (
-    <ul className="flex flex-wrap gap-2" aria-label={t("rebus.group.play.scores")}>
+    <ul className="flex flex-wrap gap-2 pt-5" aria-label={t("rebus.group.play.scores")}>
       {state.config.players.map((p, i) => (
-        <li key={i} className={themeSystem.card("default", `flex min-w-0 flex-1 items-center gap-2 px-2 py-1.5 ${active === i ? "!border-indigo-500 ring-2 ring-indigo-200 dark:ring-indigo-800" : ""}`)}>
+        <li key={i} className={themeSystem.card("default", `relative flex min-w-0 flex-1 items-center gap-2 px-2 py-1.5 transition-colors ${scored?.player === i ? "ui-glow !border-emerald-500" : active === i ? "!border-indigo-500 ring-2 ring-indigo-200 dark:ring-indigo-800" : ""}`)}>
+          {scored?.player === i && scored.points > 0 && <UIPointsPop key={state.index}>+{scored.points}</UIPointsPop>}
           <RoomAvatar avatar={p.avatar} />
           <div className="min-w-0">
-            <div className="text-xl font-black leading-none text-ink">{state.scores[i]}</div>
+            <UICountUp value={state.scores[i]} className="block text-xl font-black leading-none text-ink" />
             <div className="truncate text-[11px] font-bold text-muted">{show(p.name)}</div>
           </div>
         </li>
@@ -116,28 +117,22 @@ export const TurnPlay: React.FC<{ game: TurnsGame; letterTiles: boolean }> = ({ 
 
   return (
     <div className="mx-auto flex w-full max-w-xl flex-col gap-4 pb-20">
-      <UIProgressBar value={state.index} max={state.config.puzzles.length} size="sm" label={t("rebus.puzzleOf", { n: state.index + 1, total: state.config.puzzles.length })} caption={t("rebus.puzzleOf", { n: state.index + 1, total: state.config.puzzles.length })} />
+      <div className="flex items-center gap-3">
+        <div className="min-w-0 flex-1">
+          <UIProgressBar value={state.index} max={state.config.puzzles.length} size="sm" label={t("rebus.puzzleOf", { n: state.index + 1, total: state.config.puzzles.length })} caption={t("rebus.puzzleOf", { n: state.index + 1, total: state.config.puzzles.length })} />
+        </div>
+        <UICountdown secondsLeft={left} totalSeconds={state.config.settings.puzzleLimitSec} label={t("rebus.timeLeft", { seconds: left })} />
+      </div>
       <Scores state={state} active={me} />
       <p role="status" className="text-center text-sm font-black text-indigo-700 dark:text-indigo-300">
-        {t("rebus.turns.turnOf", { name: show(state.config.players[me].name) })} · {t("rebus.seconds", { seconds: left })}
+        {t("rebus.turns.turnOf", { name: show(state.config.players[me].name) })}
       </p>
 
       <PuzzleCanvas pieces={puzzle.pieces} label={t("rebus.puzzle")} />
 
       <div aria-live="polite">{showWrong && <UIKidMessage tone="nudge" title={t("rebus.wrongTitle")} message={t("rebus.wrongText")} />}</div>
 
-      {state.hints.length > 0 && (
-        <ul className={themeSystem.card("default", "flex flex-col gap-1.5 p-3")}>
-          {state.hints.map((h) => (
-            <li key={h.rung} className="flex items-start gap-2 text-sm font-bold text-ink">
-              <Lightbulb className="mt-0.5 h-4 w-4 shrink-0 text-indigo-600 dark:text-indigo-300" aria-hidden="true" />
-              {h.text}
-            </li>
-          ))}
-        </ul>
-      )}
-
-      {letterTiles ? (
+      {letterTiles && puzzle.kind !== "math" ? (
         <LetterTiles key={puzzle.id} answer={puzzle.answer} seed={puzzle.id} onSubmit={(value) => send({ type: "answer", text: value })} />
       ) : (
         <form onSubmit={submit} className="flex gap-2">
@@ -148,7 +143,8 @@ export const TurnPlay: React.FC<{ game: TurnsGame; letterTiles: boolean }> = ({ 
             value={text}
             onChange={(e) => setText(e.target.value)}
             aria-label={t("rebus.answerLabel")}
-            placeholder={t("rebus.answerPlaceholder")}
+            placeholder={puzzle.kind === "math" ? t("rebus.answerPlaceholderMath") : t("rebus.answerPlaceholder")}
+            inputMode={puzzle.kind === "math" ? "numeric" : undefined}
             autoComplete="off"
             autoCapitalize="off"
             autoCorrect="off"
@@ -161,12 +157,17 @@ export const TurnPlay: React.FC<{ game: TurnsGame; letterTiles: boolean }> = ({ 
         </form>
       )}
 
-      <div className="flex flex-col gap-2 sm:flex-row">
-        <div className="flex-1">
-          <UIButton variant="secondary" fullWidth icon={<Lightbulb />} disabled={status.state !== "ready"} onClick={() => send({ type: "hint" })}>
-            {hintLabel}
-          </UIButton>
-        </div>
+      <UIHintPanel
+        status={status}
+        delaySec={state.config.settings.hintDelaySec}
+        totalRungs={state.config.settings.hintRungs}
+        hints={state.hints}
+        onTake={() => send({ type: "hint" })}
+        buttonLabel={hintLabel}
+        hintTitle={(n) => t("rebus.hintN", { n })}
+        progressLabel={t("rebus.hintsUsedOf", { used: state.hints.length, total: state.config.settings.hintRungs })}
+      />
+      <div className="flex justify-end">
         <UIButton variant="ghost" icon={<SkipForward />} onClick={() => send({ type: "skip" })}>
           {t("rebus.skip")}
         </UIButton>
@@ -194,17 +195,17 @@ export const TurnReveal: React.FC<{ game: TurnsGame }> = ({ game }) => {
   const finalPuzzle = state.index + 1 >= state.config.puzzles.length;
   const next = state.config.players[(state.index + 1) % state.config.players.length];
   const name = show(state.config.players[last.player].name);
-  const message =
+  const outcome =
     last.reason === "solved"
-      ? { tone: "correct" as const, title: t("rebus.turns.solved", { name }), message: t("rebus.wonText", { points: last.points }) }
+      ? { kind: "correct" as const, title: t("rebus.turns.solved", { name }), message: undefined, points: last.points }
       : last.reason === "time"
-        ? { tone: "nudge" as const, title: t("rebus.timeUpTitle"), message: t("rebus.timeUpText") }
-        : { tone: "nudge" as const, title: t("rebus.skippedTitle"), message: t("rebus.skippedText") };
+        ? { kind: "timeUp" as const, title: t("rebus.timeUpTitle"), message: t("rebus.timeUpText"), points: undefined }
+        : { kind: "skipped" as const, title: t("rebus.skippedTitle"), message: t("rebus.skippedText"), points: undefined };
 
   return (
     <div className="mx-auto flex w-full max-w-xl flex-col gap-4 pb-20">
-      <Scores state={state} active={last.player} />
-      <UIKidMessage {...message} actionLabel={finalPuzzle ? t("rebus.seeResults") : t("rebus.turns.passTo", { name: show(next.name) })} onAction={() => game.send({ type: "next" })} />
+      <Scores state={state} active={last.player} scored={{ player: last.player, points: last.points }} />
+      <UIOutcome {...outcome} leading={<RoomAvatar avatar={state.config.players[last.player].avatar} size="lg" />} pointsLabel={outcome.points ? t("rebus.pointsChip", { points: outcome.points }) : undefined} actionLabel={finalPuzzle ? t("rebus.seeResults") : t("rebus.turns.passTo", { name: show(next.name) })} onAction={() => game.send({ type: "next" })} />
       <PuzzleCanvas pieces={last.puzzle.pieces} label={t("rebus.puzzle")} />
       <div className="text-center">
         <div className={themeSystem.typography("caption")}>{t("rebus.answerWas")}</div>

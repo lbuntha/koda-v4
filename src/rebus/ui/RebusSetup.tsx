@@ -15,10 +15,10 @@ import { themeSystem } from "../../lib/themeSystem";
 import { UIBadge, UIButton, UITabs } from "../../components/ui";
 import { cue } from "../sound";
 import { loadAutoNext, saveAutoNext } from "../prefs";
-import { CATEGORIES } from "../categories";
+import { categoryLabel } from "../categories";
 import type { MachineLevel } from "../machine";
 import type { RebusSettings } from "../settings";
-import type { RebusBank } from "../bank";
+import { useRebusCategories, type RebusBank } from "../bank";
 import type { CategoryId, Difficulty } from "../types";
 import { filterPuzzles } from "../round";
 import type { Results, StatusFilter } from "../results";
@@ -54,7 +54,8 @@ const STATUS_KEYS: readonly StatusFilter[] = ["all", "new", "retry", "clean"];
 export const RebusSetup: React.FC<RebusSetupProps> = ({ bank, settings, results = {}, onStart, onGroup, onTurns, onBack }) => {
   const { t } = useT();
   const total = bank.puzzles.length;
-  const firstWithPuzzles = CATEGORIES.find((c) => bank.counts[c.id] > 0)?.id ?? "mixed";
+  const cats = useRebusCategories();
+  const firstWithPuzzles = cats.find((c) => (bank.counts[c.id] ?? 0) > 0)?.id ?? "mixed";
   const [category, setCategory] = useState<CategoryId | "mixed">(firstWithPuzzles);
   const [count, setCount] = useState<number>(settings.questionChoices[0] ?? 5);
   const [level, setLevel] = useState<MachineLevel | "adaptive">("adaptive");
@@ -77,7 +78,7 @@ export const RebusSetup: React.FC<RebusSetupProps> = ({ bank, settings, results 
     { id: "adaptive", label: t("rebus.level.adaptive") },
   ];
 
-  const topicName = category === "mixed" ? t("rebus.mixed") : t(`rebus.categories.${category}`);
+  const topicName = category === "mixed" ? t("rebus.mixed") : categoryLabel(category);
 
   return (
     <div className="mx-auto flex w-full max-w-2xl flex-col gap-5 pb-20">
@@ -102,10 +103,10 @@ export const RebusSetup: React.FC<RebusSetupProps> = ({ bank, settings, results 
             </h3>
             <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
               {[
-                ...CATEGORIES.map((c) => ({
+                ...cats.map((c) => ({
                   id: c.id as CategoryId | "mixed",
-                  name: t(`rebus.categories.${c.id}`),
-                  n: bank.counts[c.id],
+                  name: categoryLabel(c.id),
+                  n: bank.counts[c.id] ?? 0,
                 })),
                 { id: "mixed" as const, name: t("rebus.mixed"), n: total },
               ].map(({ id, name, n }) => {

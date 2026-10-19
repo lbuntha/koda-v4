@@ -61,7 +61,6 @@ PRESENT_MS = 10_000
 #: A request at the door still shows to the host if its owner polled within this long.
 REQUEST_FRESH_MS = 30_000
 
-CATEGORIES = ("countries", "food", "sayings", "animals", "sports", "school", "science", "khmer")
 
 
 def make_code(rng: secrets.SystemRandom | random.Random | None = None) -> str:
@@ -86,6 +85,12 @@ def hash_token(token: str) -> str:
 
 
 def answer_key(puzzle: dict[str, Any]) -> str:
+    """One puzzle per answer in a room, except math, where it is one per question: many sums come to 13."""
+    from app import rebus_math
+
+    spec = puzzle.get("math")
+    if puzzle.get("kind") == "math" and isinstance(spec, dict) and rebus_math.problem(spec) is None:
+        return "math|" + rebus_math.prompt(spec)
     return "".join(ch for ch in str(puzzle.get("answer", "")).lower() if ch.isalnum())
 
 

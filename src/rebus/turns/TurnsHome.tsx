@@ -13,7 +13,8 @@ import { ArrowLeft, Pencil, Play, Plus, X } from "lucide-react";
 import { useT } from "../../lib/i18n";
 import { themeSystem } from "../../lib/themeSystem";
 import { UIBadge, UIButton, UITabs } from "../../components/ui";
-import { CATEGORIES } from "../categories";
+import { categoryLabel } from "../categories";
+import { useRebusCategories } from "../bank";
 import { AVATARS, NICKNAMES } from "../group/choices";
 import { NicknamePicker, useNickname } from "../group/NicknamePicker";
 import { RoomAvatar } from "../group/RoomAvatar";
@@ -44,7 +45,8 @@ export const TurnsHome: React.FC<TurnsHomeProps> = ({ puzzles, counts, settings,
   const { t } = useT();
   const show = useNickname();
   const game = useTurns();
-  const first = CATEGORIES.find((c) => (counts[c.id] ?? 0) > 0)?.id ?? "mixed";
+  const cats = useRebusCategories();
+  const first = cats.find((c) => (counts[c.id] ?? 0) > 0)?.id ?? "mixed";
   const [category, setCategory] = useState<CategoryId | "mixed">(first);
   const [each, setEach] = useState<number>(3);
   const [players, setPlayers] = useState<TurnPlayer[]>([starter(0), starter(1)]);
@@ -136,7 +138,7 @@ export const TurnsHome: React.FC<TurnsHomeProps> = ({ puzzles, counts, settings,
       <section className={themeSystem.spacing.stack}>
         <h3 className={themeSystem.typography("h4")}>{t("rebus.chooseTopic")}</h3>
         <div className="grid gap-2 sm:grid-cols-2">
-          {[...CATEGORIES.map((c) => ({ id: c.id as CategoryId | "mixed", name: t(`rebus.categories.${c.id}`), n: counts[c.id] ?? 0 })), { id: "mixed" as const, name: t("rebus.mixed"), n: puzzles.length }].map(({ id, name, n }) => {
+          {[...cats.map((c) => ({ id: c.id as CategoryId | "mixed", name: categoryLabel(c.id), n: counts[c.id] ?? 0 })), { id: "mixed" as const, name: t("rebus.mixed"), n: puzzles.length }].map(({ id, name, n }) => {
             const empty = n === 0;
             const selected = category === id;
             return (

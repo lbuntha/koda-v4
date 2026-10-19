@@ -5,7 +5,8 @@ import { DoorOpen } from "lucide-react";
 import { useT } from "../../lib/i18n";
 import { themeSystem } from "../../lib/themeSystem";
 import { UIButton, UITabs } from "../../components/ui";
-import { CATEGORIES } from "../categories";
+import { categoryLabel } from "../categories";
+import { useRebusCategories } from "../bank";
 import type { RebusSettings } from "../settings";
 import { roomErrorKey } from "./errors";
 import { GroupAPI } from "./groupApi";
@@ -24,7 +25,8 @@ const LEVELS = ["easy", "medium", "hard"] as const;
 
 export const HostForm: React.FC<HostFormProps> = ({ userToken, settings, counts, onOpened }) => {
   const { t } = useT();
-  const topics = [...CATEGORIES.map((c) => c.id as string), "mixed"].filter((id) => id === "mixed" || !counts || (counts[id] ?? 0) > 0);
+  const cats = useRebusCategories();
+  const topics = [...cats.map((c) => c.id as string), "mixed"].filter((id) => id === "mixed" || !counts || (counts[id] ?? 0) > 0);
   const [category, setCategory] = useState(topics[0] ?? "mixed");
   const [count, setCount] = useState(settings.questionChoices[0] ?? 5);
   const [difficulty, setDifficulty] = useState<0 | 1 | 2 | 3>(0);
@@ -58,7 +60,7 @@ export const HostForm: React.FC<HostFormProps> = ({ userToken, settings, counts,
               onClick={() => setCategory(id)}
               className={themeSystem.card("interactive", `min-h-11 px-3 py-2 text-left text-sm font-black text-ink ${category === id ? "!border-indigo-500 ring-2 ring-indigo-200 dark:ring-indigo-800" : ""}`)}
             >
-              {id === "mixed" ? t("rebus.mixed") : t(`rebus.categories.${id}`)}
+              {id === "mixed" ? t("rebus.mixed") : categoryLabel(id)}
             </button>
           ))}
         </div>

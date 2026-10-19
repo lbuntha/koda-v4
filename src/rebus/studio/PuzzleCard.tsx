@@ -7,6 +7,7 @@ import React from "react";
 import { AlertTriangle, CheckCircle2 } from "lucide-react";
 import { useT } from "../../lib/i18n";
 import { themeSystem } from "../../lib/themeSystem";
+import { categoryLabel } from "../categories";
 import { UIBadge } from "../../components/ui";
 import type { BadgeVariant } from "../../lib/themeSystem";
 import { PuzzleCanvas } from "../ui/PieceView";
@@ -27,7 +28,7 @@ export const PuzzleCard: React.FC<{ puzzle: StudioPuzzle; actions?: React.ReactN
     <article className={themeSystem.card("default", `flex flex-col gap-3 ${themeSystem.spacing.cardSm}`)} aria-label={puzzle.answer}>
       <div className="flex flex-wrap items-center gap-1.5">
         <UIBadge variant={STATUS_TONE[puzzle.status]}>{t(`rebus.studio.status.${puzzle.status}`)}</UIBadge>
-        <UIBadge variant="info">{t(`rebus.categories.${puzzle.category}`)}</UIBadge>
+        <UIBadge variant="info">{categoryLabel(puzzle.category)}</UIBadge>
         <UIBadge variant="neutral">{t("rebus.studio.ages", { min: puzzle.ages[0], max: puzzle.ages[1] })}</UIBadge>
         <UIBadge variant="neutral">{t(`rebus.studio.difficulty.${puzzle.difficulty}`)}</UIBadge>
         {puzzle.source !== "official" && <UIBadge variant="primary">{t(`rebus.studio.source.${puzzle.source}`)}</UIBadge>}

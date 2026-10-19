@@ -7,7 +7,7 @@ import React from "react";
 import { CheckCircle2, Lightbulb, Timer, Trophy } from "lucide-react";
 import { useT } from "../../lib/i18n";
 import { themeSystem } from "../../lib/themeSystem";
-import { UIButton, UIKidMessage, UIStatGrid, UIStatTile } from "../../components/ui";
+import { UIButton, UIStatGrid, UIStatTile, UIXpReward } from "../../components/ui";
 import { Showdown } from "./Showdown";
 import type { RebusReward } from "../reward";
 import { averageSeconds, type RoundScore } from "../scoring";
@@ -36,7 +36,7 @@ export const RebusSummary: React.FC<RebusSummaryProps> = ({ score, earned, repla
       <Showdown you={score.child} machine={score.machine} />
 
       {earned && earned.xp > 0 && (
-        <UIKidMessage tone="celebrate" title={t("rebus.xpTitle")} message={t("rebus.xpText", { xp: earned.xp })} xpEarned={earned.xp} />
+        <UIXpReward xp={earned.xp} title={t("rebus.xpTitle")} message={t("rebus.xpText", { xp: earned.xp })} format={(n) => t("rebus.xpAmount", { xp: n })} />
       )}
 
       {replay && <p className={themeSystem.typography("caption", "text-center")}>{t("rebus.replayNoXp")}</p>}
@@ -47,7 +47,7 @@ export const RebusSummary: React.FC<RebusSummaryProps> = ({ score, earned, repla
         <UIStatTile icon={<CheckCircle2 />} value={`${score.solved}/${score.puzzles}`} label={t("rebus.solved")} tone="success" />
         <UIStatTile icon={<Lightbulb />} value={score.hintsUsed} label={t("rebus.hintsUsed")} tone="primary" />
         <UIStatTile icon={<Timer />} value={t("rebus.seconds", { seconds: Math.round(averageSeconds(score)) })} label={t("rebus.avgTime")} tone="primary" />
-        <UIStatTile icon={<Trophy />} value={score.child} label={t("rebus.points")} tone="streak" />
+        <UIStatTile icon={<Trophy />} value={score.child} label={t("rebus.points")} tone="success" />
       </UIStatGrid>
 
       <div className={`${themeSystem.spacing.stack} flex flex-col`}>

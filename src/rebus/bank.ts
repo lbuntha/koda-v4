@@ -7,19 +7,21 @@
 import { useEffect, useMemo, useSyncExternalStore } from "react";
 import { fitsAge } from "../lib/ages";
 import { bankSnapshot, refreshBank, subscribeBank } from "./bankStore";
+import { categories, categorySnapshot, subscribeCategories, type Category } from "./categories";
 import type { CategoryId, Puzzle } from "./types";
 
 export interface RebusBank {
   puzzles: readonly Puzzle[];
   /** How many puzzles each category has to play. */
-  counts: Readonly<Record<CategoryId, number>>;
+  counts: Readonly<Record<string, number>>;
   /** True once this device has had the published list from the server, even an empty one. */
   loaded: boolean;
 }
 
 const countBy = (puzzles: readonly Puzzle[]): Record<CategoryId, number> => {
-  const counts: Record<CategoryId, number> = { countries: 0, food: 0, sayings: 0, animals: 0, sports: 0, school: 0, science: 0, khmer: 0 };
-  for (const p of puzzles) counts[p.category] += 1;
+  // Every category has a number, so "none yet" is 0 and never undefined.
+  const counts: Record<CategoryId, number> = Object.fromEntries(categorySnapshot().map((c) => [c.id, 0]));
+  for (const p of puzzles) counts[p.category] = (counts[p.category] ?? 0) + 1;
   return counts;
 };
 
@@ -45,3 +47,9 @@ export const useRebusBank = (): RebusBank => {
 
 /** The bank as one child sees it: only the puzzles that suit their age, counted. */
 export const bankForAge = (bank: RebusBank, age: number | null | undefined): RebusBank => makeBank(bank.puzzles.filter((p) => fitsAge(p.ages, age)), bank.loaded);
+
+/** The categories a child can pick, in the owner's order, re-read whenever the server's list changes. */
+export const useRebusCategories = (): readonly Category[] => {
+  useSyncExternalStore(subscribeCategories, categorySnapshot, categorySnapshot);
+  return categories();
+};

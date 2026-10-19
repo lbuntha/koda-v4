@@ -43,7 +43,10 @@ describe("validatePuzzle", () => {
     expect(codes({ ...good, ages: [3, 9] })).toContain("bad-ages");
     expect(codes({ ...good, ages: [12, 9] })).toContain("bad-ages");
     expect(codes({ ...good, difficulty: 4 as never })).toContain("bad-difficulty");
-    expect(codes({ ...good, category: "cars" as never })).toContain("bad-category");
+    expect(codes({ ...good, category: "Cars!" })).toContain("bad-category");
+    // Known by the Studio's list: a well-formed id that is not a category is still refused.
+    expect(validatePuzzle({ ...good, category: "cars" }, { categoryIds: new Set(["food"]) }).map((i) => i.code)).toContain("bad-category");
+    expect(validatePuzzle({ ...good, category: "food" }, { categoryIds: new Set(["food"]) }).map((i) => i.code)).not.toContain("bad-category");
   });
 
   it("limits how many pieces a child must hold in their head", () => {

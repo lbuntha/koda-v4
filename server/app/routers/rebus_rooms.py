@@ -30,6 +30,7 @@ from app.models.auth import Principal
 from app.models.rebus import RebusSettings
 from app.models.rebus_room import AnswerIn, KickIn, LockIn, RoomCreateIn, RoomJoinIn, SolveIn
 from app.repos import rebus as puzzles_repo
+from app.repos import rebus_categories as categories_repo
 from app.repos import rebus_rooms as repo
 from app.repos import system as system_repo
 from app.security.rate_limit import ROOM_JOIN_PER_IP, limiter
@@ -42,7 +43,7 @@ CanRead = Annotated[Principal, Depends(require("settings:read"))]
 CanOperate = Annotated[Principal, Depends(require("system:write"))]
 
 #: What a puzzle looks like to a player in a room: everything to show and check it, nothing about its authoring.
-PUZZLE_FIELDS = ("id", "category", "ages", "difficulty", "trick", "pieces", "answer", "accepts", "explanation")
+PUZZLE_FIELDS = ("id", "category", "ages", "difficulty", "trick", "kind", "math", "pieces", "answer", "accepts", "explanation")
 
 
 def _now_ms() -> int:
@@ -178,7 +179,7 @@ async def choices() -> dict[str, Any]:
 async def create_room(body: RoomCreateIn, db: Db, p: CanRead) -> dict[str, Any]:
     if not await _switch(db, "rebus.enabled") or not await _switch(db, "rebus.group"):
         raise Forbidden("Playing in a group is switched off.", "group_off")
-    if body.category != "mixed" and body.category not in rules.CATEGORIES:
+    if body.category != "mixed" and body.category not in await categories_repo.ids(db, only_enabled=True):
         raise AppError(400, "bad_category", "Pick a topic.")
     _check_choice(body.name, body.avatar)
     owner = await _owner_settings(db)

@@ -9,10 +9,9 @@
  */
 
 import React, { useEffect, useRef, useState } from "react";
-import { Lightbulb } from "lucide-react";
 import { useT } from "../../lib/i18n";
 import { themeSystem } from "../../lib/themeSystem";
-import { UIButton, UIKidMessage, UIProgressBar } from "../../components/ui";
+import { UIButton, UICountdown, UIHintPanel, UIKidMessage, UIOutcome, UIProgressBar } from "../../components/ui";
 import { matchAnswer } from "../answer";
 import { hintFor, hintState, type Hint } from "../hints";
 import { cue } from "../sound";
@@ -21,6 +20,7 @@ import { PuzzleCanvas } from "../ui/PieceView";
 import { roomErrorKey } from "./errors";
 import { GroupAPI } from "./groupApi";
 import { useNickname } from "./NicknamePicker";
+import { RoomAvatar } from "./RoomAvatar";
 import { Scoreboard } from "./Scoreboard";
 import type { RoomView } from "./types";
 import { useServerClock } from "./useServerClock";
@@ -121,7 +121,7 @@ export const GroupPlay: React.FC<GroupPlayProps> = ({ room, token, skewMs, apply
   return (
     <div className="mx-auto flex w-full max-w-xl flex-col gap-4 pb-20">
       <UIProgressBar value={index + (ended ? 1 : 0)} max={total} size="sm" label={t("rebus.puzzleOf", { n: index + 1, total })} caption={t("rebus.puzzleOf", { n: index + 1, total })} />
-      <Scoreboard players={room.players} meId={room.me.pid} />
+      <Scoreboard players={room.players} meId={room.me.pid} scored={ended && room.result?.winnerPid ? { pid: room.result.winnerPid, points: room.result.points, key: index } : null} />
 
       {counting ? (
         <div role="status" aria-live="polite" className="flex flex-col items-center gap-2 py-16 text-center">
@@ -136,13 +136,16 @@ export const GroupPlay: React.FC<GroupPlayProps> = ({ room, token, skewMs, apply
             <div className="flex flex-col gap-3">
               <div aria-live="polite">
                 {winner ? (
-                  <UIKidMessage
-                    tone={iWon ? "correct" : "nudge"}
+                  <UIOutcome
+                    kind={iWon ? "correct" : "beaten"}
+                    leading={<RoomAvatar avatar={winner.avatar} size="lg" />}
                     title={iWon ? t("rebus.group.play.youFirst") : t("rebus.group.play.someoneFirst", { name: show(winner.name) })}
-                    message={t("rebus.group.play.points", { points: room.result?.points ?? 0 })}
+                    message={iWon ? undefined : t("rebus.group.play.points", { points: room.result?.points ?? 0 })}
+                    points={room.result?.points}
+                    pointsLabel={t("rebus.pointsChip", { points: room.result?.points ?? 0 })}
                   />
                 ) : (
-                  <UIKidMessage tone="nudge" title={t("rebus.timeUpTitle")} message={t("rebus.group.play.nobody")} />
+                  <UIOutcome kind="timeUp" title={t("rebus.timeUpTitle")} message={t("rebus.group.play.nobody")} />
                 )}
               </div>
               {ended && (
@@ -163,7 +166,12 @@ export const GroupPlay: React.FC<GroupPlayProps> = ({ room, token, skewMs, apply
             </div>
           ) : (
             <>
-              <UIProgressBar value={remaining} max={Math.round(limitMs / 1000)} size="sm" label={t("rebus.seconds", { seconds: remaining })} caption={t("rebus.seconds", { seconds: remaining })} />
+              <div className="flex items-center gap-3">
+                <div className="min-w-0 flex-1">
+                  <UIProgressBar value={remaining} max={Math.round(limitMs / 1000)} size="sm" label={t("rebus.seconds", { seconds: remaining })} caption={t("rebus.seconds", { seconds: remaining })} />
+                </div>
+                <UICountdown secondsLeft={remaining} totalSeconds={Math.round(limitMs / 1000)} label={t("rebus.timeLeft", { seconds: remaining })} />
+              </div>
 
               <div aria-live="polite">
                 {mine.claimed && mine.won === null ? (
@@ -179,17 +187,6 @@ export const GroupPlay: React.FC<GroupPlayProps> = ({ room, token, skewMs, apply
                 ) : null}
               </div>
 
-              {mine.hints.length > 0 && (
-                <ul className={themeSystem.card("default", "flex flex-col gap-1.5 p-3")}>
-                  {mine.hints.map((h) => (
-                    <li key={h.rung} className="flex items-start gap-2 text-sm font-bold text-ink">
-                      <Lightbulb className="mt-0.5 h-4 w-4 shrink-0 text-indigo-600 dark:text-indigo-300" aria-hidden="true" />
-                      {h.text}
-                    </li>
-                  ))}
-                </ul>
-              )}
-
               <form onSubmit={(e) => void submit(e)} className="flex gap-2">
                 <input
                   ref={input}
@@ -197,7 +194,8 @@ export const GroupPlay: React.FC<GroupPlayProps> = ({ room, token, skewMs, apply
                   value={text}
                   onChange={(e) => setText(e.target.value)}
                   aria-label={t("rebus.answerLabel")}
-                  placeholder={t("rebus.answerPlaceholder")}
+                  placeholder={puzzle.kind === "math" ? t("rebus.answerPlaceholderMath") : t("rebus.answerPlaceholder")}
+                  inputMode={puzzle.kind === "math" ? "numeric" : undefined}
                   autoComplete="off"
                   autoCapitalize="off"
                   autoCorrect="off"
@@ -210,13 +208,22 @@ export const GroupPlay: React.FC<GroupPlayProps> = ({ room, token, skewMs, apply
                 </UIButton>
               </form>
 
-              <UIButton variant="secondary" fullWidth disabled={hint.state !== "ready"} onClick={takeHint} icon={<Lightbulb />}>
-                {hint.state === "locked"
-                  ? t("rebus.hintLocked", { seconds: Math.ceil(hint.secondsLeft) })
-                  : hint.state === "ready"
-                    ? t("rebus.hintReady", { n: hint.rung, total: room.settings.hintRungs }) + (room.settings.hintCost > 0 ? ` ${t("rebus.hintCostSuffix", { cost: room.settings.hintCost })}` : "")
-                    : t("rebus.hintNone")}
-              </UIButton>
+              <UIHintPanel
+                status={hint}
+                delaySec={room.settings.hintDelaySec}
+                totalRungs={room.settings.hintRungs}
+                hints={mine.hints}
+                onTake={takeHint}
+                buttonLabel={
+                  hint.state === "locked"
+                    ? t("rebus.hintLocked", { seconds: Math.ceil(hint.secondsLeft) })
+                    : hint.state === "ready"
+                      ? t("rebus.hintReady", { n: hint.rung, total: room.settings.hintRungs }) + (room.settings.hintCost > 0 ? ` ${t("rebus.hintCostSuffix", { cost: room.settings.hintCost })}` : "")
+                      : t("rebus.hintNone")
+                }
+                hintTitle={(n) => t("rebus.hintN", { n })}
+                progressLabel={t("rebus.hintsUsedOf", { used: mine.hints.length, total: room.settings.hintRungs })}
+              />
             </>
           )}
         </>

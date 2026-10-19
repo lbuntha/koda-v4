@@ -13,12 +13,14 @@
 
 import { compactAnswer, normalizeAnswer } from "./answer";
 import { translate } from "../lib/i18n";
+import { categoryLabel } from "./categories";
+import { answerRange, isMathSpec, mathAnswer, mathProblem } from "./math";
 import { meaningfulPieces, pieceName } from "./puzzle";
 import type { RebusSettings } from "./settings";
 import type { Puzzle } from "./types";
 
 export type HintRung = 1 | 2 | 3;
-export type HintKind = "category" | "letters" | "pieces";
+export type HintKind = "category" | "letters" | "pieces" | "digits" | "range";
 
 export interface Hint {
   rung: HintRung;
@@ -76,7 +78,14 @@ export const lettersMask = (answer: string): string => {
 };
 
 export const hintFor = (puzzle: Puzzle, rung: HintRung): Hint => {
-  if (rung === 1) return { rung, kind: "category", text: translate("rebus.hint.category", { name: translate(`rebus.categories.${puzzle.category}`).toLowerCase() }) };
+  // A number is not spelled, so a math question narrows it down instead: how many digits, then which ten.
+  if (puzzle.kind === "math" && isMathSpec(puzzle.math) && mathProblem(puzzle.math) === null && rung > 1) {
+    const answer = mathAnswer(puzzle.math);
+    if (rung === 2) return { rung, kind: "digits", text: translate("rebus.hint.digits", { n: String(answer).length }) };
+    const [low, high] = answerRange(answer);
+    return { rung, kind: "range", text: translate("rebus.hint.range", { low, high }) };
+  }
+  if (rung === 1) return { rung, kind: "category", text: translate("rebus.hint.category", { name: categoryLabel(puzzle.category).toLowerCase() }) };
   if (rung === 2) return { rung, kind: "letters", text: translate("rebus.hint.letters", { mask: lettersMask(puzzle.answer) }) };
   const names = meaningfulPieces(puzzle.pieces).map(pieceName).filter(Boolean);
   return { rung, kind: "pieces", text: translate("rebus.hint.pieces", { names: names.join(" · ") }) };

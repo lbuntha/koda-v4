@@ -12,6 +12,7 @@ import { CheckCircle2, ClipboardCheck, EyeOff, Rocket } from "lucide-react";
 import { useT } from "../../lib/i18n";
 import { themeSystem } from "../../lib/themeSystem";
 import { UISectionHeader, UIStatGrid, UIStatTile, UITabs } from "../../components/ui";
+import { CategoriesPanel } from "./CategoriesPanel";
 import { DrawingsPanel } from "./DrawingsPanel";
 import { CreatePanel } from "./CreatePanel";
 import { PublishPanel } from "./PublishPanel";
@@ -20,7 +21,7 @@ import { ReviewQueue } from "./ReviewQueue";
 import { StudioAPI, type Overview } from "./studioApi";
 import { messageOf } from "./useStudioAction";
 
-type Tab = "create" | "review" | "publish" | "puzzles" | "drawings";
+type Tab = "create" | "review" | "publish" | "puzzles" | "categories" | "drawings";
 
 export const RebusStudio: React.FC = () => {
   const { t } = useT();
@@ -68,6 +69,7 @@ export const RebusStudio: React.FC = () => {
           { id: "review", label: t("rebus.studio.tabReview"), count: overview?.byStatus.draft },
           { id: "publish", label: t("rebus.studio.tabPublish"), count: overview?.byStatus.approved },
           { id: "puzzles", label: t("rebus.studio.tabPuzzles") },
+          { id: "categories", label: t("rebus.studio.tabCategories") },
           { id: "drawings", label: t("rebus.studio.tabDrawings") },
         ]}
         value={shown}
@@ -77,6 +79,7 @@ export const RebusStudio: React.FC = () => {
       {shown === "create" && <CreatePanel onChanged={() => void refresh()} />}
       {shown === "review" && <ReviewQueue overview={overview} onChanged={() => void refresh()} />}
       {shown === "puzzles" && <PuzzleList onChanged={() => void refresh()} />}
+      {shown === "categories" && <CategoriesPanel />}
       {shown === "drawings" && <DrawingsPanel />}
       {shown === "publish" && <PublishPanel onChanged={() => void refresh()} />}
     </div>

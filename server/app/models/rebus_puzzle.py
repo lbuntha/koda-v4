@@ -15,6 +15,16 @@ class IconPiece(Model):
     scale: Literal["big", "small"] | None = None
 
 
+class PhotoPiece(Model):
+    """A photo an author uploaded (kept with the library's photos), drawn like a picture."""
+
+    kind: Literal["photo"]
+    #: `photo-` and the SHA-256 of the stored bytes, which is also its address.
+    id: str = Field(pattern=r"^photo-[0-9a-f]{64}$")
+    name: str = Field(min_length=1, max_length=40)
+    scale: Literal["big", "small"] | None = None
+
+
 class WordPiece(Model):
     kind: Literal["word"]
     text: str = Field(min_length=1, max_length=40)
@@ -32,7 +42,16 @@ class OpPiece(Model):
     op: Literal["+", "&", "-"]
 
 
-Piece = Annotated[IconPiece | WordPiece | StackPiece | OpPiece, Field(discriminator="kind")]
+Piece = Annotated[IconPiece | PhotoPiece | WordPiece | StackPiece | OpPiece, Field(discriminator="kind")]
+
+
+class MathSpecIn(Model):
+    """The numbers of a math question. Loose here (a draft has to be savable); `rebus_math.problem` says what is wrong."""
+
+    a: int
+    op: Literal["+", "−", "×", "÷"]
+    b: int
+    unknown: Literal["result", "a", "b"] = "result"
 
 
 class PuzzleIn(Model):
@@ -43,12 +62,15 @@ class PuzzleIn(Model):
     list of codes tells the author what to fix instead of a refusal to save.
     """
 
-    category: str = Field(max_length=20)
+    category: str = Field(max_length=24)
     ages: list[int] = Field(max_length=2)
     difficulty: int
     trick: Literal["compound", "sound-alike", "position", "size", "style", "add-remove"]
-    pieces: list[Piece] = Field(max_length=12)
-    answer: str = Field(max_length=80)
+    #: "picture" (pieces add up to a typed answer) or "math" (numbers, with the prompt and answer worked out from them).
+    kind: Literal["picture", "math"] = "picture"
+    math: MathSpecIn | None = None
+    pieces: list[Piece] = Field(default_factory=list, max_length=12)
+    answer: str = Field(default="", max_length=80)
     accepts: list[Annotated[str, Field(max_length=80)]] = Field(default_factory=list, max_length=8)
     explanation: str = Field(default="", max_length=200)
     #: Where it came from. A person writes "official"; the Studio saves a model's
@@ -64,10 +86,11 @@ class PuzzleIn(Model):
 
 
 class PuzzlePatch(Model):
-    category: str | None = Field(default=None, max_length=20)
+    category: str | None = Field(default=None, max_length=24)
     ages: list[int] | None = Field(default=None, max_length=2)
     difficulty: int | None = None
     trick: Literal["compound", "sound-alike", "position", "size", "style", "add-remove"] | None = None
+    math: MathSpecIn | None = None
     pieces: list[Piece] | None = Field(default=None, max_length=12)
     answer: str | None = Field(default=None, max_length=80)
     accepts: list[Annotated[str, Field(max_length=80)]] | None = Field(default=None, max_length=8)
@@ -85,7 +108,7 @@ class PublishIn(Model):
 
 class ApproveAllIn(Model):
     #: Only drafts in this category; all of them when absent.
-    category: str | None = Field(default=None, max_length=20)
+    category: str | None = Field(default=None, max_length=24)
 
 
 class PromptIn(Model):

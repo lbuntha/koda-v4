@@ -8,7 +8,7 @@ from app.models.common import Model
 
 
 class RoomCreateIn(Model):
-    category: str = Field(min_length=2, max_length=20)
+    category: str = Field(min_length=2, max_length=24)
     count: int = Field(default=5, ge=3, le=10)
     #: Only puzzles of this difficulty (1 easy to 3 hard), or any.
     difficulty: Literal[1, 2, 3] | None = None

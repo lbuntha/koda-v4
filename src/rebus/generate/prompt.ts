@@ -9,7 +9,7 @@
  */
 
 import { isAgeRange, type AgeRange } from "../../lib/ages";
-import { isCategoryId } from "../categories";
+import { categories } from "../categories";
 import { ICON_PREFIX } from "../icons/library";
 import { TRICKS, type CategoryId, type Difficulty, type Piece, type Trick } from "../types";
 
@@ -162,7 +162,7 @@ export const parseCandidates = (reply: string): Candidate[] => {
 export const readBrief = (raw: unknown): Brief | string => {
   if (typeof raw !== "object" || raw === null) return "Send a brief.";
   const b = raw as Record<string, unknown>;
-  if (!isCategoryId(b.category)) return "Pick a category.";
+  if (typeof b.category !== "string" || !categories().some((c) => c.id === b.category)) return "Pick a category.";
   if (!isAgeRange(b.ages)) return "Pick the ages this is for.";
   if (![1, 2, 3].includes(b.difficulty as number)) return "Pick a difficulty.";
   const count = Math.round(Number(b.count));

@@ -615,24 +615,6 @@ html.theme-light,
   animation: koda-celebrate-pop 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275) 0.12s both;
 }
 
-/* One burst of confetti: each piece flies out along --x/--y, spins, and fades. It never loops. */
-@keyframes rebus-confetti {
-  0% {
-    transform: translate(0, 0) rotate(0deg) scale(0.6);
-    opacity: 1;
-  }
-  70% {
-    opacity: 1;
-  }
-  100% {
-    transform: translate(var(--x), calc(var(--y) + 90px)) rotate(540deg) scale(1);
-    opacity: 0;
-  }
-}
-.rebus-confetti {
-  animation: rebus-confetti 1.4s cubic-bezier(0.2, 0.7, 0.3, 1) both;
-}
-
 /* The Machine's moods: a wobble when it slips, a hop when it wins, a slow droop when it loses. Each plays once. */
 @keyframes rebus-bot-oops {
   0%, 100% { transform: rotate(0deg); }
@@ -654,6 +636,68 @@ html.theme-light,
 .rebus-bot-oops { animation: rebus-bot-oops 0.7s ease-in-out both; }
 .rebus-bot-cheer { animation: rebus-bot-cheer 0.8s ease-out both; }
 .rebus-bot-groan { animation: rebus-bot-groan 0.5s ease-out both; }
+
+/* ---- Shared play feedback (UIBurst, UICountdown, UIHintPanel, UIOutcome). Each one plays once unless it says otherwise. ---- */
+@keyframes ui-burst {
+  0% { transform: translate(0, 0) rotate(0deg) scale(0.6); opacity: 1; }
+  70% { opacity: 1; }
+  100% { transform: translate(var(--x), calc(var(--y) + 90px)) rotate(540deg) scale(1); opacity: 0; }
+}
+.ui-burst { animation: ui-burst 1.4s cubic-bezier(0.2, 0.7, 0.3, 1) both; }
+
+/* A medallion that pops in with a little overshoot. */
+@keyframes ui-pop-in {
+  0% { transform: scale(0.4); opacity: 0; }
+  60% { transform: scale(1.18); opacity: 1; }
+  100% { transform: scale(1); }
+}
+.ui-pop-in { animation: ui-pop-in 0.55s cubic-bezier(0.175, 0.885, 0.32, 1.275) 0.05s both; }
+
+/* Time is up: a short side-to-side shake, then still. */
+@keyframes ui-shake {
+  0%, 100% { transform: translateX(0) rotate(0deg); }
+  15% { transform: translateX(-5px) rotate(-8deg); }
+  35% { transform: translateX(5px) rotate(8deg); }
+  55% { transform: translateX(-3px) rotate(-5deg); }
+  75% { transform: translateX(2px) rotate(3deg); }
+}
+.ui-shake { animation: ui-shake 0.7s ease-in-out 0.1s both; }
+
+/* The time ring beats gently while the last seconds run. This one repeats until the puzzle ends. */
+@keyframes ui-tick {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.1); }
+}
+.ui-tick { animation: ui-tick 1s ease-in-out infinite; }
+
+/* A hint slides down into place, and its card glows once. */
+@keyframes ui-hint-in {
+  0% { transform: translateY(-10px) scale(0.97); opacity: 0; }
+  100% { transform: translateY(0) scale(1); opacity: 1; }
+}
+@keyframes ui-glow {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(99, 102, 241, 0); }
+  40% { box-shadow: 0 0 0 6px rgba(99, 102, 241, 0.28); }
+}
+.ui-hint-in { animation: ui-hint-in 0.45s cubic-bezier(0.2, 0.8, 0.3, 1) both, ui-glow 1.4s ease-out 0.2s 2; }
+/* The hint button tells you it is ready: two soft rings, then rests. */
+.ui-glow { animation: ui-glow 1.2s ease-out 3; }
+
+/* Points rise from the medallion and settle. */
+@keyframes ui-float-up {
+  0% { transform: translateY(10px) scale(0.8); opacity: 0; }
+  100% { transform: translateY(0) scale(1); opacity: 1; }
+}
+.ui-float-up { animation: ui-float-up 0.5s ease-out 0.35s both; }
+
+/* Points rise out of whoever scored and fade. */
+@keyframes ui-points-pop {
+  0% { transform: translate(-50%, 6px) scale(0.7); opacity: 0; }
+  25% { transform: translate(-50%, -8px) scale(1.1); opacity: 1; }
+  80% { transform: translate(-50%, -22px) scale(1); opacity: 1; }
+  100% { transform: translate(-50%, -30px) scale(1); opacity: 0; }
+}
+.ui-points-pop { animation: ui-points-pop 1.5s ease-out both; }
 
 .tap-pop-anim {
   animation: tactile-tap-pop 0.42s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
@@ -677,7 +721,14 @@ html.theme-light,
   .animate-spin-slow,
   .koda-bob,
   .koda-celebrate-icon,
-  .rebus-confetti,
+  .ui-burst,
+  .ui-pop-in,
+  .ui-shake,
+  .ui-tick,
+  .ui-hint-in,
+  .ui-glow,
+  .ui-float-up,
+  .ui-points-pop,
   .rebus-bot-oops,
   .rebus-bot-cheer,
   .rebus-bot-groan,
@@ -688,6 +739,12 @@ html.theme-light,
   .chamber-snap-ones::before,
   .koda-shimmer {
     animation: none !important;
+  }
+
+  /* Decoration with no resting state is hidden, not frozen mid-air. */
+  .ui-burst,
+  .ui-points-pop {
+    display: none !important;
   }
 
   /* Entrances become instant rather than absent, so nothing pops in unseen. */

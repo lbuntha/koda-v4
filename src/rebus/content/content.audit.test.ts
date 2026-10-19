@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { compactAnswer } from "../answer";
-import { CATEGORIES } from "../categories";
+import { BUILT_IN_CATEGORIES as CATEGORIES } from "../categories";
 import { fitsAge } from "../../lib/ages";
 import { ICON_ART, ICON_IDS } from "../icons/library";
 import { answerKey, validatePuzzle } from "../puzzle";
@@ -35,7 +35,7 @@ describe("the puzzles Koda ships with", () => {
     }
   });
 
-  it.each(LIVE.map((c) => [c.id, c.name]))("%s (%s) has enough to play a long round, at more than one difficulty where it can", (id) => {
+  it.each(LIVE.map((c) => [c.id, c.names.en]))("%s (%s) has enough to play a long round, at more than one difficulty where it can", (id) => {
     const mine = OFFICIAL_PUZZLES.filter((p) => p.category === id);
     expect(mine.length).toBeGreaterThanOrEqual(15);
     expect(new Set(mine.map((p) => p.difficulty)).size).toBeGreaterThanOrEqual(id === "animals" || id === "school" || id === "science" || id === "countries" ? 2 : 1);

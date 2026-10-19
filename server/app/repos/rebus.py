@@ -30,7 +30,21 @@ from app.models.common import now
 STATUSES = ("draft", "approved", "published", "retired", "rejected")
 
 #: What a device is told about a puzzle, and nothing else: no status, notes or authors' ids.
-PUBLIC_FIELDS = ("id", "category", "ages", "difficulty", "trick", "pieces", "answer", "accepts", "explanation", "source", "author")
+PUBLIC_FIELDS = (
+    "id",
+    "category",
+    "ages",
+    "difficulty",
+    "trick",
+    "kind",
+    "math",
+    "pieces",
+    "answer",
+    "accepts",
+    "explanation",
+    "source",
+    "author",
+)
 
 
 def _slug(text: str) -> str:
@@ -92,6 +106,9 @@ async def ensure_seed(db: AsyncIOMotorDatabase, puzzles: list[dict[str, Any]]) -
     an unwanted one is rejected or retired instead.
     """
     created = 0
+    from app.repos import rebus_categories
+
+    new_categories = await rebus_categories.ensure_seed(db)
     owner = await first_admin_id(db) or SYSTEM
     for puzzle in puzzles:
         if await db.rebus_puzzles.find_one({"id": puzzle["id"]}, {"_id": 1}):
@@ -113,7 +130,7 @@ async def ensure_seed(db: AsyncIOMotorDatabase, puzzles: list[dict[str, Any]]) -
         )
         created += 1
     adopted = await adopt_seed(db, owner) if owner != SYSTEM else 0
-    if created or adopted:
+    if created or adopted or new_categories:
         await bump(db)
     return created
 
@@ -124,7 +141,11 @@ async def next_release_number(db: AsyncIOMotorDatabase) -> int:
 
 
 async def published(db: AsyncIOMotorDatabase) -> list[dict[str, Any]]:
-    rows = await db.rebus_puzzles.find({"status": "published"}).sort("id", 1).to_list(length=20000)
+    from app.repos import rebus_categories
+
+    # A category that is switched off takes its puzzles out of play without touching them.
+    live = await rebus_categories.ids(db, only_enabled=True)
+    rows = await db.rebus_puzzles.find({"status": "published", "category": {"$in": list(live)}}).sort("id", 1).to_list(length=20000)
     return [public(r) for r in rows]
 
 
@@ -135,7 +156,7 @@ async def get(db: AsyncIOMotorDatabase, puzzle_id: str) -> dict[str, Any] | None
 async def duplicate_index(db: AsyncIOMotorDatabase) -> list[dict[str, Any]]:
     """Every puzzle that is in play or waiting, just enough to tell whether an answer is taken. One query."""
     return await db.rebus_puzzles.find(
-        {"status": {"$in": ["draft", "approved", "published"]}}, {"id": 1, "answer": 1, "status": 1, "createdAt": 1}
+        {"status": {"$in": ["draft", "approved", "published"]}}, {"id": 1, "answer": 1, "kind": 1, "math": 1, "status": 1, "createdAt": 1}
     ).to_list(length=20000)
 
 
@@ -174,6 +195,16 @@ async def known_icons(db: AsyncIOMotorDatabase) -> frozenset[str]:
 
     added = {row["id"] async for row in db.art_assets.find({"id": {"$regex": "^rebus-"}, "deletedAt": None}, {"id": 1})}
     return icon_ids() | added
+
+
+async def known_photos(db: AsyncIOMotorDatabase) -> frozenset[str]:
+    """The ids of every uploaded photo (the library's store, shared with Trace and Rebus)."""
+    return frozenset({row["id"] async for row in db.library_images.find({}, {"id": 1})})
+
+
+async def photo_in_use(db: AsyncIOMotorDatabase, image_id: str) -> bool:
+    """Whether any Rebus puzzle shows this photo, whatever state the puzzle is in."""
+    return await db.rebus_puzzles.find_one({"pieces": {"$elemMatch": {"kind": "photo", "id": f"photo-{image_id}"}}}, {"_id": 1}) is not None
 
 
 async def unique_id(db: AsyncIOMotorDatabase, category: str, answer: str) -> str:

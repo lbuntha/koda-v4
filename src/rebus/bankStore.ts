@@ -13,7 +13,8 @@
 
 import { isAgeRange } from "../lib/ages";
 import { accessToken, request } from "../lib/sync";
-import { isCategoryId } from "./categories";
+import { isCategoryId, parseCategories, setCategories, type Category } from "./categories";
+import { prefetchPuzzlePhotos } from "./photos";
 import { validatePuzzle } from "./puzzle";
 import type { Piece, Puzzle } from "./types";
 
@@ -25,9 +26,11 @@ const DEADLINE_MS = 6_000;
 export interface BankSnapshot {
   version: number;
   puzzles: Puzzle[];
+  /** The categories the owner has switched on, as the server last said. Missing on a copy saved by an older app. */
+  categories?: Category[];
 }
 
-const PIECE_KINDS = new Set(["icon", "word", "stack", "op"]);
+const PIECE_KINDS = new Set(["icon", "photo", "word", "stack", "op"]);
 
 const isPiece = (p: unknown): p is Piece => typeof p === "object" && p !== null && PIECE_KINDS.has((p as { kind?: string }).kind ?? "");
 
@@ -52,15 +55,17 @@ const load = (): BankSnapshot | null => {
   try {
     const raw = localStorage.getItem(KEY);
     if (!raw) return null;
-    const parsed = JSON.parse(raw) as { version?: unknown; puzzles?: unknown };
+    const parsed = JSON.parse(raw) as { version?: unknown; puzzles?: unknown; categories?: unknown };
     const puzzles = parsePuzzles(parsed.puzzles);
-    return typeof parsed.version === "number" ? { version: parsed.version, puzzles } : null;
+    const categories = parseCategories(parsed.categories);
+    return typeof parsed.version === "number" ? { version: parsed.version, puzzles, ...(categories.length > 0 ? { categories } : {}) } : null;
   } catch {
     return null;
   }
 };
 
 let snapshot: BankSnapshot | null = load();
+if (snapshot?.categories) setCategories(snapshot.categories);
 let lastAsked = 0;
 const listeners = new Set<() => void>();
 
@@ -73,12 +78,15 @@ export const subscribeBank = (listener: () => void): (() => void) => {
 
 const adopt = (next: BankSnapshot): void => {
   snapshot = next;
+  if (next.categories) setCategories(next.categories);
   try {
     localStorage.setItem(KEY, JSON.stringify(next));
   } catch {
     /* Not kept this time (storage full or off): the list is still used until the app closes. */
   }
   listeners.forEach((fn) => fn());
+  // The photos in the list come along with it, so offline play never shows an empty frame.
+  void prefetchPuzzlePhotos(next.puzzles);
 };
 
 /** Ask the server what is current. Quiet on any failure; the copy on this device stands. */
@@ -90,10 +98,13 @@ export const refreshBank = async (options: { force?: boolean } = {}): Promise<vo
     const token = await accessToken();
     if (!token) return;
     const since = snapshot ? `?since=${snapshot.version}` : "";
-    const body = await request<{ version: number; unchanged: boolean; puzzles: unknown }>(`/rebus/puzzles${since}`, { token, timeoutMs: DEADLINE_MS });
+    const body = await request<{ version: number; unchanged: boolean; puzzles: unknown; categories?: unknown }>(`/rebus/puzzles${since}`, { token, timeoutMs: DEADLINE_MS });
     if (body.unchanged) return;
     // An empty list is a real answer (nothing published, or everything unpublished): the server said so.
-    if (Array.isArray(body.puzzles)) adopt({ version: body.version, puzzles: parsePuzzles(body.puzzles) });
+    if (Array.isArray(body.puzzles)) {
+      const categories = parseCategories(body.categories);
+      adopt({ version: body.version, puzzles: parsePuzzles(body.puzzles), ...(categories.length > 0 ? { categories } : {}) });
+    }
   } catch {
     /* Offline or slow: nothing to say. */
   }
@@ -103,6 +114,7 @@ export const refreshBank = async (options: { force?: boolean } = {}): Promise<vo
 export const resetBank = (): void => {
   snapshot = null;
   lastAsked = 0;
+  setCategories([]);
   try {
     localStorage.removeItem(KEY);
   } catch {

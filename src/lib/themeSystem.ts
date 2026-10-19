@@ -436,7 +436,7 @@ export const themeSystem = {
 
     title: "text-lg sm:text-xl font-black text-slate-900 dark:text-white",
     message: "text-sm sm:text-base font-bold text-slate-700 dark:text-slate-200 mt-0.5",
-    xp: "text-xs font-black font-mono px-2 py-1 rounded-lg bg-amber-400 text-slate-900",
+    xp: "text-xs font-black font-mono px-2 py-1 rounded-lg bg-emerald-600 text-white",
 
     action: (tone: KidMessageTone = "correct") => {
       const base =

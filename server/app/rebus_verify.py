@@ -19,9 +19,11 @@ from functools import lru_cache
 from pathlib import Path
 from typing import Any
 
+from app import rebus_math
 from app.ages import is_age_range
 
-CATEGORIES = ("countries", "food", "sayings", "animals", "sports", "school", "science", "khmer")
+#: What a deployment starts with. The real list is data (`repos/rebus_categories.py`), passed to `validate_puzzle`.
+BUILT_IN_CATEGORIES = frozenset({"countries", "food", "sayings", "animals", "sports", "school", "science", "khmer", "math"})
 TRICKS = ("compound", "sound-alike", "position", "size", "style", "add-remove")
 MAX_PIECES = 7
 MIN_ANSWER_LETTERS = 3
@@ -84,12 +86,16 @@ def matches(answer: str, accepts: list[str], typed: str) -> bool:
 
 
 def answer_key(puzzle: dict[str, Any]) -> str:
+    """What makes two puzzles the same one. A math question is its numbers, not its answer: many sums come to 13."""
+    spec = puzzle.get("math")
+    if puzzle.get("kind") == "math" and isinstance(spec, dict) and rebus_math.problem(spec) is None:
+        return "math|" + rebus_math.prompt(spec)
     return compact_answer(str(puzzle.get("answer", "")))
 
 
 def _piece_name(piece: dict[str, Any]) -> str:
     kind = piece.get("kind")
-    if kind == "icon":
+    if kind in ("icon", "photo"):
         return str(piece.get("name", ""))
     if kind == "word":
         return str(piece.get("text", ""))
@@ -112,19 +118,43 @@ def _written_text(piece: dict[str, Any]) -> list[str]:
     return []
 
 
-def validate_puzzle(puzzle: dict[str, Any], *, known_icons: frozenset[str] | None = None) -> list[str]:
+def _math_issues(puzzle: dict[str, Any]) -> list[str]:
+    """What is wrong with a math question: its numbers, or its prompt and answer drifting from them."""
+    spec = puzzle.get("math")
+    if not isinstance(spec, dict):
+        return ["math-missing"]
+    wrong = rebus_math.problem(spec)
+    if wrong:
+        return [wrong]
+    pieces = puzzle.get("pieces") or []
+    in_step = (
+        pieces == [{"kind": "word", "text": rebus_math.prompt(spec)}]
+        and str(puzzle.get("answer", "")) == str(rebus_math.answer(spec))
+        and not puzzle.get("accepts")
+    )
+    return [] if in_step else ["math-out-of-step"]
+
+
+def validate_puzzle(
+    puzzle: dict[str, Any], *, known_icons: frozenset[str] | None = None, known_photos: frozenset[str] | None = None,
+    known_categories: frozenset[str] | None = None,
+) -> list[str]:
     """The codes of everything wrong with a puzzle; empty means it can be reviewed."""
     issues: list[str] = []
     pieces: list[dict[str, Any]] = puzzle.get("pieces") or []
 
-    if puzzle.get("category") not in CATEGORIES:
+    if puzzle.get("category") not in (known_categories if known_categories is not None else BUILT_IN_CATEGORIES):
         issues.append("bad-category")
     if not is_age_range(puzzle.get("ages")):
         issues.append("bad-ages")
     if puzzle.get("difficulty") not in (1, 2, 3):
         issues.append("bad-difficulty")
 
-    if not any(p.get("kind") != "op" for p in pieces):
+    math_kind = puzzle.get("kind") == "math"
+    if math_kind:
+        issues.extend(_math_issues(puzzle))
+
+    if not math_kind and not any(p.get("kind") != "op" for p in pieces):
         issues.append("no-picture")
     if len(pieces) > MAX_PIECES:
         issues.append("too-many-pieces")
@@ -135,12 +165,13 @@ def validate_puzzle(puzzle: dict[str, Any], *, known_icons: frozenset[str] | Non
         issues.append("bad-operators")
 
     answer = compact_answer(str(puzzle.get("answer", "")))
-    if len(answer) < MIN_ANSWER_LETTERS:
+    # A number is short by nature, and a math prompt is not a picture that could spell its answer.
+    if not math_kind and len(answer) < MIN_ANSWER_LETTERS:
         issues.append("answer-short")
 
     every = {compact_answer(a) for a in [str(puzzle.get("answer", "")), *map(str, puzzle.get("accepts") or [])]}
     every.discard("")
-    if any(compact_answer(t) in every for p in pieces for t in _written_text(p)):
+    if not math_kind and any(compact_answer(t) in every for p in pieces for t in _written_text(p)):
         issues.append("answer-in-puzzle")
 
     if len(str(puzzle.get("explanation", "")).strip()) < MIN_EXPLANATION_CHARS:
@@ -149,6 +180,13 @@ def validate_puzzle(puzzle: dict[str, Any], *, known_icons: frozenset[str] | Non
     icons = known_icons if known_icons is not None else icon_ids()
     if any(p.get("kind") == "icon" and p.get("id") not in icons for p in pieces):
         issues.append("unknown-icon")
+
+    photos = [p for p in pieces if p.get("kind") == "photo"]
+    if any(not str(p.get("name", "")).strip() for p in photos):
+        issues.append("photo-no-name")
+    # A photo that was never uploaded (or was cleaned away) would show as an empty frame to every child.
+    if known_photos is not None and any(str(p.get("id", "")).removeprefix("photo-") not in known_photos for p in photos):
+        issues.append("unknown-photo")
 
     return issues
 
@@ -165,6 +203,14 @@ ISSUE_MESSAGES: dict[str, str] = {
     "answer-in-puzzle": "The answer is written in the puzzle. Show it with pictures instead.",
     "no-explanation": "Say why the pieces give that answer.",
     "unknown-icon": "A picture is not in the icon library.",
+    "photo-no-name": "Say what each photo is read as.",
+    "unknown-photo": "A photo was not uploaded. Upload it again.",
+    "math-missing": "A math question needs its numbers.",
+    "bad-math-numbers": "Use whole numbers from 0 to 9999.",
+    "bad-math-op": "Pick +, −, × or ÷, and which part is missing.",
+    "bad-math-result": "The sum must come out as a whole number from 0 to 9999 (division must be exact).",
+    "bad-math-missing": "That sum has no single missing number. Use numbers other than 0.",
+    "math-out-of-step": "The question and its answer do not match its numbers. Save it again.",
     "duplicate": "Another puzzle already has this answer.",
 }
 

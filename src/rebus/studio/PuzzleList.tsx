@@ -12,19 +12,20 @@ import { Check, EyeOff, Plus, RotateCcw, Trash2, Undo2, X } from "lucide-react";
 import { useT } from "../../lib/i18n";
 import { themeSystem } from "../../lib/themeSystem";
 import { UIButton, UIPagination, UISearchInput, UISelect } from "../../components/ui";
-import { CATEGORIES } from "../categories";
+import { categoryLabel } from "../categories";
+import { useRebusCategories } from "../bank";
 import { PuzzleCard } from "./PuzzleCard";
 import { BLANK_DRAFT, PuzzleEditor } from "./PuzzleEditor";
-import { StudioAPI, type PuzzleStatus, type StudioPuzzle } from "./studioApi";
+import { draftOf, StudioAPI, type PuzzleStatus, type StudioPuzzle } from "./studioApi";
 import { messageOf, useStudioAction } from "./useStudioAction";
 
 const PAGE = 12;
 const STATUSES: PuzzleStatus[] = ["draft", "approved", "published", "retired", "rejected"];
 
-const draftOf = (p: StudioPuzzle) => ({ category: p.category, ages: [p.ages[0], p.ages[1]] as [number, number], difficulty: p.difficulty, trick: p.trick, pieces: p.pieces, answer: p.answer, accepts: p.accepts, explanation: p.explanation });
 
 export const PuzzleList: React.FC<{ initialStatus?: PuzzleStatus; onChanged(): void }> = ({ initialStatus, onChanged }) => {
   const { t } = useT();
+  const cats = useRebusCategories();
   const [status, setStatus] = useState<PuzzleStatus | "">(initialStatus ?? "");
   const [category, setCategory] = useState("");
   const [q, setQ] = useState("");
@@ -156,9 +157,9 @@ export const PuzzleList: React.FC<{ initialStatus?: PuzzleStatus; onChanged(): v
         </UISelect>
         <UISelect aria-label={t("rebus.studio.category")} className="!w-auto" value={category} onChange={(e) => { setCategory(e.target.value); setPage(1); }}>
           <option value="">{t("rebus.studio.all")}</option>
-          {CATEGORIES.map((c) => (
+          {cats.map((c) => (
             <option key={c.id} value={c.id}>
-              {t(`rebus.categories.${c.id}`)}
+              {categoryLabel(c.id)}
             </option>
           ))}
         </UISelect>

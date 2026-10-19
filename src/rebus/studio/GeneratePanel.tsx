@@ -17,7 +17,8 @@ import { Check, Save, Sparkles } from "lucide-react";
 import { useT } from "../../lib/i18n";
 import { themeSystem } from "../../lib/themeSystem";
 import { UIAgePicker, UIBadge, UIButton, UIInput, UISelect, UITabs, UITextarea } from "../../components/ui";
-import { CATEGORIES } from "../categories";
+import { categoryLabel } from "../categories";
+import { useRebusCategories } from "../bank";
 import { DEFAULT_SYSTEM_PROMPT } from "../generate/prompt";
 import type { GeneratedPuzzle } from "../generate/pipeline";
 import { TRICKS } from "../types";
@@ -47,6 +48,7 @@ export const worthSaving = (g: GeneratedPuzzle): boolean => g.checks.safe && !g.
 
 export const GeneratePanel: React.FC<{ onSaved(): void }> = ({ onSaved }) => {
   const { t } = useT();
+  const cats = useRebusCategories();
   const [category, setCategory] = useState("food");
   const [ages, setAges] = useState<[number, number]>([LEVELS[1].ages[0], LEVELS[1].ages[1]]);
   const [difficulty, setDifficulty] = useState<number>(LEVELS[1].difficulty);
@@ -170,9 +172,9 @@ export const GeneratePanel: React.FC<{ onSaved(): void }> = ({ onSaved }) => {
         <label className="flex flex-col gap-1">
           <span className="text-xs font-extrabold uppercase tracking-wider text-muted">{t("rebus.studio.topic")}</span>
           <UISelect value={category} onChange={(e) => setCategory(e.target.value)}>
-            {CATEGORIES.map((c) => (
+            {cats.filter((c) => c.id !== "math").map((c) => (
               <option key={c.id} value={c.id}>
-                {t(`rebus.categories.${c.id}`)}
+                {categoryLabel(c.id)}
               </option>
             ))}
           </UISelect>

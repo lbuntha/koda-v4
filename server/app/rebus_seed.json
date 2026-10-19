@@ -5752,5 +5752,2921 @@
   "accepts": [],
   "explanation": "ទឹក + ដី = ទឹកដី ជាកន្លែងដែលជាប្រទេសរបស់យើង។",
   "source": "official"
+ },
+ {
+  "id": "math-3-plus-4-result",
+  "category": "math",
+  "ages": [
+   5,
+   9
+  ],
+  "difficulty": 1,
+  "trick": "compound",
+  "kind": "math",
+  "math": {
+   "a": 3,
+   "op": "+",
+   "b": 4,
+   "unknown": "result"
+  },
+  "pieces": [
+   {
+    "kind": "word",
+    "text": "3 + 4 = ?"
+   }
+  ],
+  "answer": "7",
+  "accepts": [],
+  "explanation": "3 + 4 = 7.",
+  "source": "official"
+ },
+ {
+  "id": "math-5-plus-2-result",
+  "category": "math",
+  "ages": [
+   5,
+   9
+  ],
+  "difficulty": 1,
+  "trick": "compound",
+  "kind": "math",
+  "math": {
+   "a": 5,
+   "op": "+",
+   "b": 2,
+   "unknown": "result"
+  },
+  "pieces": [
+   {
+    "kind": "word",
+    "text": "5 + 2 = ?"
+   }
+  ],
+  "answer": "7",
+  "accepts": [],
+  "explanation": "5 + 2 = 7.",
+  "source": "official"
+ },
+ {
+  "id": "math-6-plus-3-result",
+  "category": "math",
+  "ages": [
+   5,
+   9
+  ],
+  "difficulty": 1,
+  "trick": "compound",
+  "kind": "math",
+  "math": {
+   "a": 6,
+   "op": "+",
+   "b": 3,
+   "unknown": "result"
+  },
+  "pieces": [
+   {
+    "kind": "word",
+    "text": "6 + 3 = ?"
+   }
+  ],
+  "answer": "9",
+  "accepts": [],
+  "explanation": "6 + 3 = 9.",
+  "source": "official"
+ },
+ {
+  "id": "math-7-plus-5-result",
+  "category": "math",
+  "ages": [
+   5,
+   9
+  ],
+  "difficulty": 1,
+  "trick": "compound",
+  "kind": "math",
+  "math": {
+   "a": 7,
+   "op": "+",
+   "b": 5,
+   "unknown": "result"
+  },
+  "pieces": [
+   {
+    "kind": "word",
+    "text": "7 + 5 = ?"
+   }
+  ],
+  "answer": "12",
+  "accepts": [],
+  "explanation": "7 + 5 = 12.",
+  "source": "official"
+ },
+ {
+  "id": "math-8-plus-4-result",
+  "category": "math",
+  "ages": [
+   5,
+   9
+  ],
+  "difficulty": 1,
+  "trick": "compound",
+  "kind": "math",
+  "math": {
+   "a": 8,
+   "op": "+",
+   "b": 4,
+   "unknown": "result"
+  },
+  "pieces": [
+   {
+    "kind": "word",
+    "text": "8 + 4 = ?"
+   }
+  ],
+  "answer": "12",
+  "accepts": [],
+  "explanation": "8 + 4 = 12.",
+  "source": "official"
+ },
+ {
+  "id": "math-9-plus-6-result",
+  "category": "math",
+  "ages": [
+   5,
+   9
+  ],
+  "difficulty": 1,
+  "trick": "compound",
+  "kind": "math",
+  "math": {
+   "a": 9,
+   "op": "+",
+   "b": 6,
+   "unknown": "result"
+  },
+  "pieces": [
+   {
+    "kind": "word",
+    "text": "9 + 6 = ?"
+   }
+  ],
+  "answer": "15",
+  "accepts": [],
+  "explanation": "9 + 6 = 15.",
+  "source": "official"
+ },
+ {
+  "id": "math-4-plus-4-result",
+  "category": "math",
+  "ages": [
+   5,
+   9
+  ],
+  "difficulty": 1,
+  "trick": "compound",
+  "kind": "math",
+  "math": {
+   "a": 4,
+   "op": "+",
+   "b": 4,
+   "unknown": "result"
+  },
+  "pieces": [
+   {
+    "kind": "word",
+    "text": "4 + 4 = ?"
+   }
+  ],
+  "answer": "8",
+  "accepts": [],
+  "explanation": "4 + 4 = 8.",
+  "source": "official"
+ },
+ {
+  "id": "math-7-plus-7-result",
+  "category": "math",
+  "ages": [
+   5,
+   9
+  ],
+  "difficulty": 1,
+  "trick": "compound",
+  "kind": "math",
+  "math": {
+   "a": 7,
+   "op": "+",
+   "b": 7,
+   "unknown": "result"
+  },
+  "pieces": [
+   {
+    "kind": "word",
+    "text": "7 + 7 = ?"
+   }
+  ],
+  "answer": "14",
+  "accepts": [],
+  "explanation": "7 + 7 = 14.",
+  "source": "official"
+ },
+ {
+  "id": "math-8-plus-6-result",
+  "category": "math",
+  "ages": [
+   5,
+   9
+  ],
+  "difficulty": 1,
+  "trick": "compound",
+  "kind": "math",
+  "math": {
+   "a": 8,
+   "op": "+",
+   "b": 6,
+   "unknown": "result"
+  },
+  "pieces": [
+   {
+    "kind": "word",
+    "text": "8 + 6 = ?"
+   }
+  ],
+  "answer": "14",
+  "accepts": [],
+  "explanation": "8 + 6 = 14.",
+  "source": "official"
+ },
+ {
+  "id": "math-9-plus-9-result",
+  "category": "math",
+  "ages": [
+   5,
+   9
+  ],
+  "difficulty": 1,
+  "trick": "compound",
+  "kind": "math",
+  "math": {
+   "a": 9,
+   "op": "+",
+   "b": 9,
+   "unknown": "result"
+  },
+  "pieces": [
+   {
+    "kind": "word",
+    "text": "9 + 9 = ?"
+   }
+  ],
+  "answer": "18",
+  "accepts": [],
+  "explanation": "9 + 9 = 18.",
+  "source": "official"
+ },
+ {
+  "id": "math-5-plus-5-result",
+  "category": "math",
+  "ages": [
+   5,
+   9
+  ],
+  "difficulty": 1,
+  "trick": "compound",
+  "kind": "math",
+  "math": {
+   "a": 5,
+   "op": "+",
+   "b": 5,
+   "unknown": "result"
+  },
+  "pieces": [
+   {
+    "kind": "word",
+    "text": "5 + 5 = ?"
+   }
+  ],
+  "answer": "10",
+  "accepts": [],
+  "explanation": "5 + 5 = 10.",
+  "source": "official"
+ },
+ {
+  "id": "math-6-plus-7-result",
+  "category": "math",
+  "ages": [
+   5,
+   9
+  ],
+  "difficulty": 1,
+  "trick": "compound",
+  "kind": "math",
+  "math": {
+   "a": 6,
+   "op": "+",
+   "b": 7,
+   "unknown": "result"
+  },
+  "pieces": [
+   {
+    "kind": "word",
+    "text": "6 + 7 = ?"
+   }
+  ],
+  "answer": "13",
+  "accepts": [],
+  "explanation": "6 + 7 = 13.",
+  "source": "official"
+ },
+ {
+  "id": "math-10-minus-3-result",
+  "category": "math",
+  "ages": [
+   5,
+   9
+  ],
+  "difficulty": 1,
+  "trick": "compound",
+  "kind": "math",
+  "math": {
+   "a": 10,
+   "op": "−",
+   "b": 3,
+   "unknown": "result"
+  },
+  "pieces": [
+   {
+    "kind": "word",
+    "text": "10 − 3 = ?"
+   }
+  ],
+  "answer": "7",
+  "accepts": [],
+  "explanation": "10 − 3 = 7.",
+  "source": "official"
+ },
+ {
+  "id": "math-12-minus-5-result",
+  "category": "math",
+  "ages": [
+   5,
+   9
+  ],
+  "difficulty": 1,
+  "trick": "compound",
+  "kind": "math",
+  "math": {
+   "a": 12,
+   "op": "−",
+   "b": 5,
+   "unknown": "result"
+  },
+  "pieces": [
+   {
+    "kind": "word",
+    "text": "12 − 5 = ?"
+   }
+  ],
+  "answer": "7",
+  "accepts": [],
+  "explanation": "12 − 5 = 7.",
+  "source": "official"
+ },
+ {
+  "id": "math-15-minus-7-result",
+  "category": "math",
+  "ages": [
+   5,
+   9
+  ],
+  "difficulty": 1,
+  "trick": "compound",
+  "kind": "math",
+  "math": {
+   "a": 15,
+   "op": "−",
+   "b": 7,
+   "unknown": "result"
+  },
+  "pieces": [
+   {
+    "kind": "word",
+    "text": "15 − 7 = ?"
+   }
+  ],
+  "answer": "8",
+  "accepts": [],
+  "explanation": "15 − 7 = 8.",
+  "source": "official"
+ },
+ {
+  "id": "math-14-minus-6-result",
+  "category": "math",
+  "ages": [
+   5,
+   9
+  ],
+  "difficulty": 1,
+  "trick": "compound",
+  "kind": "math",
+  "math": {
+   "a": 14,
+   "op": "−",
+   "b": 6,
+   "unknown": "result"
+  },
+  "pieces": [
+   {
+    "kind": "word",
+    "text": "14 − 6 = ?"
+   }
+  ],
+  "answer": "8",
+  "accepts": [],
+  "explanation": "14 − 6 = 8.",
+  "source": "official"
+ },
+ {
+  "id": "math-17-minus-9-result",
+  "category": "math",
+  "ages": [
+   5,
+   9
+  ],
+  "difficulty": 1,
+  "trick": "compound",
+  "kind": "math",
+  "math": {
+   "a": 17,
+   "op": "−",
+   "b": 9,
+   "unknown": "result"
+  },
+  "pieces": [
+   {
+    "kind": "word",
+    "text": "17 − 9 = ?"
+   }
+  ],
+  "answer": "8",
+  "accepts": [],
+  "explanation": "17 − 9 = 8.",
+  "source": "official"
+ },
+ {
+  "id": "math-11-minus-4-result",
+  "category": "math",
+  "ages": [
+   5,
+   9
+  ],
+  "difficulty": 1,
+  "trick": "compound",
+  "kind": "math",
+  "math": {
+   "a": 11,
+   "op": "−",
+   "b": 4,
+   "unknown": "result"
+  },
+  "pieces": [
+   {
+    "kind": "word",
+    "text": "11 − 4 = ?"
+   }
+  ],
+  "answer": "7",
+  "accepts": [],
+  "explanation": "11 − 4 = 7.",
+  "source": "official"
+ },
+ {
+  "id": "math-16-minus-8-result",
+  "category": "math",
+  "ages": [
+   5,
+   9
+  ],
+  "difficulty": 1,
+  "trick": "compound",
+  "kind": "math",
+  "math": {
+   "a": 16,
+   "op": "−",
+   "b": 8,
+   "unknown": "result"
+  },
+  "pieces": [
+   {
+    "kind": "word",
+    "text": "16 − 8 = ?"
+   }
+  ],
+  "answer": "8",
+  "accepts": [],
+  "explanation": "16 − 8 = 8.",
+  "source": "official"
+ },
+ {
+  "id": "math-13-minus-5-result",
+  "category": "math",
+  "ages": [
+   5,
+   9
+  ],
+  "difficulty": 1,
+  "trick": "compound",
+  "kind": "math",
+  "math": {
+   "a": 13,
+   "op": "−",
+   "b": 5,
+   "unknown": "result"
+  },
+  "pieces": [
+   {
+    "kind": "word",
+    "text": "13 − 5 = ?"
+   }
+  ],
+  "answer": "8",
+  "accepts": [],
+  "explanation": "13 − 5 = 8.",
+  "source": "official"
+ },
+ {
+  "id": "math-4-plus-5-b",
+  "category": "math",
+  "ages": [
+   5,
+   9
+  ],
+  "difficulty": 1,
+  "trick": "compound",
+  "kind": "math",
+  "math": {
+   "a": 4,
+   "op": "+",
+   "b": 5,
+   "unknown": "b"
+  },
+  "pieces": [
+   {
+    "kind": "word",
+    "text": "4 + ? = 9"
+   }
+  ],
+  "answer": "5",
+  "accepts": [],
+  "explanation": "4 + 5 = 9.",
+  "source": "official"
+ },
+ {
+  "id": "math-6-plus-7-b",
+  "category": "math",
+  "ages": [
+   5,
+   9
+  ],
+  "difficulty": 1,
+  "trick": "compound",
+  "kind": "math",
+  "math": {
+   "a": 6,
+   "op": "+",
+   "b": 7,
+   "unknown": "b"
+  },
+  "pieces": [
+   {
+    "kind": "word",
+    "text": "6 + ? = 13"
+   }
+  ],
+  "answer": "7",
+  "accepts": [],
+  "explanation": "6 + 7 = 13.",
+  "source": "official"
+ },
+ {
+  "id": "math-8-plus-3-b",
+  "category": "math",
+  "ages": [
+   5,
+   9
+  ],
+  "difficulty": 1,
+  "trick": "compound",
+  "kind": "math",
+  "math": {
+   "a": 8,
+   "op": "+",
+   "b": 3,
+   "unknown": "b"
+  },
+  "pieces": [
+   {
+    "kind": "word",
+    "text": "8 + ? = 11"
+   }
+  ],
+  "answer": "3",
+  "accepts": [],
+  "explanation": "8 + 3 = 11.",
+  "source": "official"
+ },
+ {
+  "id": "math-9-plus-5-b",
+  "category": "math",
+  "ages": [
+   5,
+   9
+  ],
+  "difficulty": 1,
+  "trick": "compound",
+  "kind": "math",
+  "math": {
+   "a": 9,
+   "op": "+",
+   "b": 5,
+   "unknown": "b"
+  },
+  "pieces": [
+   {
+    "kind": "word",
+    "text": "9 + ? = 14"
+   }
+  ],
+  "answer": "5",
+  "accepts": [],
+  "explanation": "9 + 5 = 14.",
+  "source": "official"
+ },
+ {
+  "id": "math-7-plus-8-b",
+  "category": "math",
+  "ages": [
+   5,
+   9
+  ],
+  "difficulty": 1,
+  "trick": "compound",
+  "kind": "math",
+  "math": {
+   "a": 7,
+   "op": "+",
+   "b": 8,
+   "unknown": "b"
+  },
+  "pieces": [
+   {
+    "kind": "word",
+    "text": "7 + ? = 15"
+   }
+  ],
+  "answer": "8",
+  "accepts": [],
+  "explanation": "7 + 8 = 15.",
+  "source": "official"
+ },
+ {
+  "id": "math-5-plus-9-b",
+  "category": "math",
+  "ages": [
+   5,
+   9
+  ],
+  "difficulty": 1,
+  "trick": "compound",
+  "kind": "math",
+  "math": {
+   "a": 5,
+   "op": "+",
+   "b": 9,
+   "unknown": "b"
+  },
+  "pieces": [
+   {
+    "kind": "word",
+    "text": "5 + ? = 14"
+   }
+  ],
+  "answer": "9",
+  "accepts": [],
+  "explanation": "5 + 9 = 14.",
+  "source": "official"
+ },
+ {
+  "id": "math-27-plus-48-result",
+  "category": "math",
+  "ages": [
+   7,
+   12
+  ],
+  "difficulty": 2,
+  "trick": "compound",
+  "kind": "math",
+  "math": {
+   "a": 27,
+   "op": "+",
+   "b": 48,
+   "unknown": "result"
+  },
+  "pieces": [
+   {
+    "kind": "word",
+    "text": "27 + 48 = ?"
+   }
+  ],
+  "answer": "75",
+  "accepts": [],
+  "explanation": "27 + 48 = 75.",
+  "source": "official"
+ },
+ {
+  "id": "math-36-plus-29-result",
+  "category": "math",
+  "ages": [
+   7,
+   12
+  ],
+  "difficulty": 2,
+  "trick": "compound",
+  "kind": "math",
+  "math": {
+   "a": 36,
+   "op": "+",
+   "b": 29,
+   "unknown": "result"
+  },
+  "pieces": [
+   {
+    "kind": "word",
+    "text": "36 + 29 = ?"
+   }
+  ],
+  "answer": "65",
+  "accepts": [],
+  "explanation": "36 + 29 = 65.",
+  "source": "official"
+ },
+ {
+  "id": "math-58-plus-17-result",
+  "category": "math",
+  "ages": [
+   7,
+   12
+  ],
+  "difficulty": 2,
+  "trick": "compound",
+  "kind": "math",
+  "math": {
+   "a": 58,
+   "op": "+",
+   "b": 17,
+   "unknown": "result"
+  },
+  "pieces": [
+   {
+    "kind": "word",
+    "text": "58 + 17 = ?"
+   }
+  ],
+  "answer": "75",
+  "accepts": [],
+  "explanation": "58 + 17 = 75.",
+  "source": "official"
+ },
+ {
+  "id": "math-45-plus-38-result",
+  "category": "math",
+  "ages": [
+   7,
+   12
+  ],
+  "difficulty": 2,
+  "trick": "compound",
+  "kind": "math",
+  "math": {
+   "a": 45,
+   "op": "+",
+   "b": 38,
+   "unknown": "result"
+  },
+  "pieces": [
+   {
+    "kind": "word",
+    "text": "45 + 38 = ?"
+   }
+  ],
+  "answer": "83",
+  "accepts": [],
+  "explanation": "45 + 38 = 83.",
+  "source": "official"
+ },
+ {
+  "id": "math-64-plus-19-result",
+  "category": "math",
+  "ages": [
+   7,
+   12
+  ],
+  "difficulty": 2,
+  "trick": "compound",
+  "kind": "math",
+  "math": {
+   "a": 64,
+   "op": "+",
+   "b": 19,
+   "unknown": "result"
+  },
+  "pieces": [
+   {
+    "kind": "word",
+    "text": "64 + 19 = ?"
+   }
+  ],
+  "answer": "83",
+  "accepts": [],
+  "explanation": "64 + 19 = 83.",
+  "source": "official"
+ },
+ {
+  "id": "math-73-plus-18-result",
+  "category": "math",
+  "ages": [
+   7,
+   12
+  ],
+  "difficulty": 2,
+  "trick": "compound",
+  "kind": "math",
+  "math": {
+   "a": 73,
+   "op": "+",
+   "b": 18,
+   "unknown": "result"
+  },
+  "pieces": [
+   {
+    "kind": "word",
+    "text": "73 + 18 = ?"
+   }
+  ],
+  "answer": "91",
+  "accepts": [],
+  "explanation": "73 + 18 = 91.",
+  "source": "official"
+ },
+ {
+  "id": "math-39-plus-46-result",
+  "category": "math",
+  "ages": [
+   7,
+   12
+  ],
+  "difficulty": 2,
+  "trick": "compound",
+  "kind": "math",
+  "math": {
+   "a": 39,
+   "op": "+",
+   "b": 46,
+   "unknown": "result"
+  },
+  "pieces": [
+   {
+    "kind": "word",
+    "text": "39 + 46 = ?"
+   }
+  ],
+  "answer": "85",
+  "accepts": [],
+  "explanation": "39 + 46 = 85.",
+  "source": "official"
+ },
+ {
+  "id": "math-52-plus-39-result",
+  "category": "math",
+  "ages": [
+   7,
+   12
+  ],
+  "difficulty": 2,
+  "trick": "compound",
+  "kind": "math",
+  "math": {
+   "a": 52,
+   "op": "+",
+   "b": 39,
+   "unknown": "result"
+  },
+  "pieces": [
+   {
+    "kind": "word",
+    "text": "52 + 39 = ?"
+   }
+  ],
+  "answer": "91",
+  "accepts": [],
+  "explanation": "52 + 39 = 91.",
+  "source": "official"
+ },
+ {
+  "id": "math-82-minus-37-result",
+  "category": "math",
+  "ages": [
+   7,
+   12
+  ],
+  "difficulty": 2,
+  "trick": "compound",
+  "kind": "math",
+  "math": {
+   "a": 82,
+   "op": "−",
+   "b": 37,
+   "unknown": "result"
+  },
+  "pieces": [
+   {
+    "kind": "word",
+    "text": "82 − 37 = ?"
+   }
+  ],
+  "answer": "45",
+  "accepts": [],
+  "explanation": "82 − 37 = 45.",
+  "source": "official"
+ },
+ {
+  "id": "math-91-minus-45-result",
+  "category": "math",
+  "ages": [
+   7,
+   12
+  ],
+  "difficulty": 2,
+  "trick": "compound",
+  "kind": "math",
+  "math": {
+   "a": 91,
+   "op": "−",
+   "b": 45,
+   "unknown": "result"
+  },
+  "pieces": [
+   {
+    "kind": "word",
+    "text": "91 − 45 = ?"
+   }
+  ],
+  "answer": "46",
+  "accepts": [],
+  "explanation": "91 − 45 = 46.",
+  "source": "official"
+ },
+ {
+  "id": "math-63-minus-28-result",
+  "category": "math",
+  "ages": [
+   7,
+   12
+  ],
+  "difficulty": 2,
+  "trick": "compound",
+  "kind": "math",
+  "math": {
+   "a": 63,
+   "op": "−",
+   "b": 28,
+   "unknown": "result"
+  },
+  "pieces": [
+   {
+    "kind": "word",
+    "text": "63 − 28 = ?"
+   }
+  ],
+  "answer": "35",
+  "accepts": [],
+  "explanation": "63 − 28 = 35.",
+  "source": "official"
+ },
+ {
+  "id": "math-70-minus-34-result",
+  "category": "math",
+  "ages": [
+   7,
+   12
+  ],
+  "difficulty": 2,
+  "trick": "compound",
+  "kind": "math",
+  "math": {
+   "a": 70,
+   "op": "−",
+   "b": 34,
+   "unknown": "result"
+  },
+  "pieces": [
+   {
+    "kind": "word",
+    "text": "70 − 34 = ?"
+   }
+  ],
+  "answer": "36",
+  "accepts": [],
+  "explanation": "70 − 34 = 36.",
+  "source": "official"
+ },
+ {
+  "id": "math-55-minus-19-result",
+  "category": "math",
+  "ages": [
+   7,
+   12
+  ],
+  "difficulty": 2,
+  "trick": "compound",
+  "kind": "math",
+  "math": {
+   "a": 55,
+   "op": "−",
+   "b": 19,
+   "unknown": "result"
+  },
+  "pieces": [
+   {
+    "kind": "word",
+    "text": "55 − 19 = ?"
+   }
+  ],
+  "answer": "36",
+  "accepts": [],
+  "explanation": "55 − 19 = 36.",
+  "source": "official"
+ },
+ {
+  "id": "math-84-minus-56-result",
+  "category": "math",
+  "ages": [
+   7,
+   12
+  ],
+  "difficulty": 2,
+  "trick": "compound",
+  "kind": "math",
+  "math": {
+   "a": 84,
+   "op": "−",
+   "b": 56,
+   "unknown": "result"
+  },
+  "pieces": [
+   {
+    "kind": "word",
+    "text": "84 − 56 = ?"
+   }
+  ],
+  "answer": "28",
+  "accepts": [],
+  "explanation": "84 − 56 = 28.",
+  "source": "official"
+ },
+ {
+  "id": "math-92-minus-38-result",
+  "category": "math",
+  "ages": [
+   7,
+   12
+  ],
+  "difficulty": 2,
+  "trick": "compound",
+  "kind": "math",
+  "math": {
+   "a": 92,
+   "op": "−",
+   "b": 38,
+   "unknown": "result"
+  },
+  "pieces": [
+   {
+    "kind": "word",
+    "text": "92 − 38 = ?"
+   }
+  ],
+  "answer": "54",
+  "accepts": [],
+  "explanation": "92 − 38 = 54.",
+  "source": "official"
+ },
+ {
+  "id": "math-76-minus-49-result",
+  "category": "math",
+  "ages": [
+   7,
+   12
+  ],
+  "difficulty": 2,
+  "trick": "compound",
+  "kind": "math",
+  "math": {
+   "a": 76,
+   "op": "−",
+   "b": 49,
+   "unknown": "result"
+  },
+  "pieces": [
+   {
+    "kind": "word",
+    "text": "76 − 49 = ?"
+   }
+  ],
+  "answer": "27",
+  "accepts": [],
+  "explanation": "76 − 49 = 27.",
+  "source": "official"
+ },
+ {
+  "id": "math-3-times-4-result",
+  "category": "math",
+  "ages": [
+   7,
+   12
+  ],
+  "difficulty": 2,
+  "trick": "compound",
+  "kind": "math",
+  "math": {
+   "a": 3,
+   "op": "×",
+   "b": 4,
+   "unknown": "result"
+  },
+  "pieces": [
+   {
+    "kind": "word",
+    "text": "3 × 4 = ?"
+   }
+  ],
+  "answer": "12",
+  "accepts": [],
+  "explanation": "3 × 4 = 12.",
+  "source": "official"
+ },
+ {
+  "id": "math-6-times-7-result",
+  "category": "math",
+  "ages": [
+   7,
+   12
+  ],
+  "difficulty": 2,
+  "trick": "compound",
+  "kind": "math",
+  "math": {
+   "a": 6,
+   "op": "×",
+   "b": 7,
+   "unknown": "result"
+  },
+  "pieces": [
+   {
+    "kind": "word",
+    "text": "6 × 7 = ?"
+   }
+  ],
+  "answer": "42",
+  "accepts": [],
+  "explanation": "6 × 7 = 42.",
+  "source": "official"
+ },
+ {
+  "id": "math-8-times-5-result",
+  "category": "math",
+  "ages": [
+   7,
+   12
+  ],
+  "difficulty": 2,
+  "trick": "compound",
+  "kind": "math",
+  "math": {
+   "a": 8,
+   "op": "×",
+   "b": 5,
+   "unknown": "result"
+  },
+  "pieces": [
+   {
+    "kind": "word",
+    "text": "8 × 5 = ?"
+   }
+  ],
+  "answer": "40",
+  "accepts": [],
+  "explanation": "8 × 5 = 40.",
+  "source": "official"
+ },
+ {
+  "id": "math-9-times-6-result",
+  "category": "math",
+  "ages": [
+   7,
+   12
+  ],
+  "difficulty": 2,
+  "trick": "compound",
+  "kind": "math",
+  "math": {
+   "a": 9,
+   "op": "×",
+   "b": 6,
+   "unknown": "result"
+  },
+  "pieces": [
+   {
+    "kind": "word",
+    "text": "9 × 6 = ?"
+   }
+  ],
+  "answer": "54",
+  "accepts": [],
+  "explanation": "9 × 6 = 54.",
+  "source": "official"
+ },
+ {
+  "id": "math-7-times-8-result",
+  "category": "math",
+  "ages": [
+   7,
+   12
+  ],
+  "difficulty": 2,
+  "trick": "compound",
+  "kind": "math",
+  "math": {
+   "a": 7,
+   "op": "×",
+   "b": 8,
+   "unknown": "result"
+  },
+  "pieces": [
+   {
+    "kind": "word",
+    "text": "7 × 8 = ?"
+   }
+  ],
+  "answer": "56",
+  "accepts": [],
+  "explanation": "7 × 8 = 56.",
+  "source": "official"
+ },
+ {
+  "id": "math-4-times-9-result",
+  "category": "math",
+  "ages": [
+   7,
+   12
+  ],
+  "difficulty": 2,
+  "trick": "compound",
+  "kind": "math",
+  "math": {
+   "a": 4,
+   "op": "×",
+   "b": 9,
+   "unknown": "result"
+  },
+  "pieces": [
+   {
+    "kind": "word",
+    "text": "4 × 9 = ?"
+   }
+  ],
+  "answer": "36",
+  "accepts": [],
+  "explanation": "4 × 9 = 36.",
+  "source": "official"
+ },
+ {
+  "id": "math-6-times-6-result",
+  "category": "math",
+  "ages": [
+   7,
+   12
+  ],
+  "difficulty": 2,
+  "trick": "compound",
+  "kind": "math",
+  "math": {
+   "a": 6,
+   "op": "×",
+   "b": 6,
+   "unknown": "result"
+  },
+  "pieces": [
+   {
+    "kind": "word",
+    "text": "6 × 6 = ?"
+   }
+  ],
+  "answer": "36",
+  "accepts": [],
+  "explanation": "6 × 6 = 36.",
+  "source": "official"
+ },
+ {
+  "id": "math-8-times-8-result",
+  "category": "math",
+  "ages": [
+   7,
+   12
+  ],
+  "difficulty": 2,
+  "trick": "compound",
+  "kind": "math",
+  "math": {
+   "a": 8,
+   "op": "×",
+   "b": 8,
+   "unknown": "result"
+  },
+  "pieces": [
+   {
+    "kind": "word",
+    "text": "8 × 8 = ?"
+   }
+  ],
+  "answer": "64",
+  "accepts": [],
+  "explanation": "8 × 8 = 64.",
+  "source": "official"
+ },
+ {
+  "id": "math-9-times-9-result",
+  "category": "math",
+  "ages": [
+   7,
+   12
+  ],
+  "difficulty": 2,
+  "trick": "compound",
+  "kind": "math",
+  "math": {
+   "a": 9,
+   "op": "×",
+   "b": 9,
+   "unknown": "result"
+  },
+  "pieces": [
+   {
+    "kind": "word",
+    "text": "9 × 9 = ?"
+   }
+  ],
+  "answer": "81",
+  "accepts": [],
+  "explanation": "9 × 9 = 81.",
+  "source": "official"
+ },
+ {
+  "id": "math-7-times-7-result",
+  "category": "math",
+  "ages": [
+   7,
+   12
+  ],
+  "difficulty": 2,
+  "trick": "compound",
+  "kind": "math",
+  "math": {
+   "a": 7,
+   "op": "×",
+   "b": 7,
+   "unknown": "result"
+  },
+  "pieces": [
+   {
+    "kind": "word",
+    "text": "7 × 7 = ?"
+   }
+  ],
+  "answer": "49",
+  "accepts": [],
+  "explanation": "7 × 7 = 49.",
+  "source": "official"
+ },
+ {
+  "id": "math-10-times-7-result",
+  "category": "math",
+  "ages": [
+   7,
+   12
+  ],
+  "difficulty": 2,
+  "trick": "compound",
+  "kind": "math",
+  "math": {
+   "a": 10,
+   "op": "×",
+   "b": 7,
+   "unknown": "result"
+  },
+  "pieces": [
+   {
+    "kind": "word",
+    "text": "10 × 7 = ?"
+   }
+  ],
+  "answer": "70",
+  "accepts": [],
+  "explanation": "10 × 7 = 70.",
+  "source": "official"
+ },
+ {
+  "id": "math-3-times-9-result",
+  "category": "math",
+  "ages": [
+   7,
+   12
+  ],
+  "difficulty": 2,
+  "trick": "compound",
+  "kind": "math",
+  "math": {
+   "a": 3,
+   "op": "×",
+   "b": 9,
+   "unknown": "result"
+  },
+  "pieces": [
+   {
+    "kind": "word",
+    "text": "3 × 9 = ?"
+   }
+  ],
+  "answer": "27",
+  "accepts": [],
+  "explanation": "3 × 9 = 27.",
+  "source": "official"
+ },
+ {
+  "id": "math-8-times-6-result",
+  "category": "math",
+  "ages": [
+   7,
+   12
+  ],
+  "difficulty": 2,
+  "trick": "compound",
+  "kind": "math",
+  "math": {
+   "a": 8,
+   "op": "×",
+   "b": 6,
+   "unknown": "result"
+  },
+  "pieces": [
+   {
+    "kind": "word",
+    "text": "8 × 6 = ?"
+   }
+  ],
+  "answer": "48",
+  "accepts": [],
+  "explanation": "8 × 6 = 48.",
+  "source": "official"
+ },
+ {
+  "id": "math-12-by-3-result",
+  "category": "math",
+  "ages": [
+   7,
+   12
+  ],
+  "difficulty": 2,
+  "trick": "compound",
+  "kind": "math",
+  "math": {
+   "a": 12,
+   "op": "÷",
+   "b": 3,
+   "unknown": "result"
+  },
+  "pieces": [
+   {
+    "kind": "word",
+    "text": "12 ÷ 3 = ?"
+   }
+  ],
+  "answer": "4",
+  "accepts": [],
+  "explanation": "12 ÷ 3 = 4.",
+  "source": "official"
+ },
+ {
+  "id": "math-18-by-6-result",
+  "category": "math",
+  "ages": [
+   7,
+   12
+  ],
+  "difficulty": 2,
+  "trick": "compound",
+  "kind": "math",
+  "math": {
+   "a": 18,
+   "op": "÷",
+   "b": 6,
+   "unknown": "result"
+  },
+  "pieces": [
+   {
+    "kind": "word",
+    "text": "18 ÷ 6 = ?"
+   }
+  ],
+  "answer": "3",
+  "accepts": [],
+  "explanation": "18 ÷ 6 = 3.",
+  "source": "official"
+ },
+ {
+  "id": "math-24-by-8-result",
+  "category": "math",
+  "ages": [
+   7,
+   12
+  ],
+  "difficulty": 2,
+  "trick": "compound",
+  "kind": "math",
+  "math": {
+   "a": 24,
+   "op": "÷",
+   "b": 8,
+   "unknown": "result"
+  },
+  "pieces": [
+   {
+    "kind": "word",
+    "text": "24 ÷ 8 = ?"
+   }
+  ],
+  "answer": "3",
+  "accepts": [],
+  "explanation": "24 ÷ 8 = 3.",
+  "source": "official"
+ },
+ {
+  "id": "math-35-by-7-result",
+  "category": "math",
+  "ages": [
+   7,
+   12
+  ],
+  "difficulty": 2,
+  "trick": "compound",
+  "kind": "math",
+  "math": {
+   "a": 35,
+   "op": "÷",
+   "b": 7,
+   "unknown": "result"
+  },
+  "pieces": [
+   {
+    "kind": "word",
+    "text": "35 ÷ 7 = ?"
+   }
+  ],
+  "answer": "5",
+  "accepts": [],
+  "explanation": "35 ÷ 7 = 5.",
+  "source": "official"
+ },
+ {
+  "id": "math-48-by-6-result",
+  "category": "math",
+  "ages": [
+   7,
+   12
+  ],
+  "difficulty": 2,
+  "trick": "compound",
+  "kind": "math",
+  "math": {
+   "a": 48,
+   "op": "÷",
+   "b": 6,
+   "unknown": "result"
+  },
+  "pieces": [
+   {
+    "kind": "word",
+    "text": "48 ÷ 6 = ?"
+   }
+  ],
+  "answer": "8",
+  "accepts": [],
+  "explanation": "48 ÷ 6 = 8.",
+  "source": "official"
+ },
+ {
+  "id": "math-63-by-9-result",
+  "category": "math",
+  "ages": [
+   7,
+   12
+  ],
+  "difficulty": 2,
+  "trick": "compound",
+  "kind": "math",
+  "math": {
+   "a": 63,
+   "op": "÷",
+   "b": 9,
+   "unknown": "result"
+  },
+  "pieces": [
+   {
+    "kind": "word",
+    "text": "63 ÷ 9 = ?"
+   }
+  ],
+  "answer": "7",
+  "accepts": [],
+  "explanation": "63 ÷ 9 = 7.",
+  "source": "official"
+ },
+ {
+  "id": "math-72-by-8-result",
+  "category": "math",
+  "ages": [
+   7,
+   12
+  ],
+  "difficulty": 2,
+  "trick": "compound",
+  "kind": "math",
+  "math": {
+   "a": 72,
+   "op": "÷",
+   "b": 8,
+   "unknown": "result"
+  },
+  "pieces": [
+   {
+    "kind": "word",
+    "text": "72 ÷ 8 = ?"
+   }
+  ],
+  "answer": "9",
+  "accepts": [],
+  "explanation": "72 ÷ 8 = 9.",
+  "source": "official"
+ },
+ {
+  "id": "math-56-by-7-result",
+  "category": "math",
+  "ages": [
+   7,
+   12
+  ],
+  "difficulty": 2,
+  "trick": "compound",
+  "kind": "math",
+  "math": {
+   "a": 56,
+   "op": "÷",
+   "b": 7,
+   "unknown": "result"
+  },
+  "pieces": [
+   {
+    "kind": "word",
+    "text": "56 ÷ 7 = ?"
+   }
+  ],
+  "answer": "8",
+  "accepts": [],
+  "explanation": "56 ÷ 7 = 8.",
+  "source": "official"
+ },
+ {
+  "id": "math-81-by-9-result",
+  "category": "math",
+  "ages": [
+   7,
+   12
+  ],
+  "difficulty": 2,
+  "trick": "compound",
+  "kind": "math",
+  "math": {
+   "a": 81,
+   "op": "÷",
+   "b": 9,
+   "unknown": "result"
+  },
+  "pieces": [
+   {
+    "kind": "word",
+    "text": "81 ÷ 9 = ?"
+   }
+  ],
+  "answer": "9",
+  "accepts": [],
+  "explanation": "81 ÷ 9 = 9.",
+  "source": "official"
+ },
+ {
+  "id": "math-45-by-5-result",
+  "category": "math",
+  "ages": [
+   7,
+   12
+  ],
+  "difficulty": 2,
+  "trick": "compound",
+  "kind": "math",
+  "math": {
+   "a": 45,
+   "op": "÷",
+   "b": 5,
+   "unknown": "result"
+  },
+  "pieces": [
+   {
+    "kind": "word",
+    "text": "45 ÷ 5 = ?"
+   }
+  ],
+  "answer": "9",
+  "accepts": [],
+  "explanation": "45 ÷ 5 = 9.",
+  "source": "official"
+ },
+ {
+  "id": "math-6-times-7-b",
+  "category": "math",
+  "ages": [
+   7,
+   12
+  ],
+  "difficulty": 2,
+  "trick": "compound",
+  "kind": "math",
+  "math": {
+   "a": 6,
+   "op": "×",
+   "b": 7,
+   "unknown": "b"
+  },
+  "pieces": [
+   {
+    "kind": "word",
+    "text": "6 × ? = 42"
+   }
+  ],
+  "answer": "7",
+  "accepts": [],
+  "explanation": "6 × 7 = 42.",
+  "source": "official"
+ },
+ {
+  "id": "math-8-times-9-b",
+  "category": "math",
+  "ages": [
+   7,
+   12
+  ],
+  "difficulty": 2,
+  "trick": "compound",
+  "kind": "math",
+  "math": {
+   "a": 8,
+   "op": "×",
+   "b": 9,
+   "unknown": "b"
+  },
+  "pieces": [
+   {
+    "kind": "word",
+    "text": "8 × ? = 72"
+   }
+  ],
+  "answer": "9",
+  "accepts": [],
+  "explanation": "8 × 9 = 72.",
+  "source": "official"
+ },
+ {
+  "id": "math-7-times-4-b",
+  "category": "math",
+  "ages": [
+   7,
+   12
+  ],
+  "difficulty": 2,
+  "trick": "compound",
+  "kind": "math",
+  "math": {
+   "a": 7,
+   "op": "×",
+   "b": 4,
+   "unknown": "b"
+  },
+  "pieces": [
+   {
+    "kind": "word",
+    "text": "7 × ? = 28"
+   }
+  ],
+  "answer": "4",
+  "accepts": [],
+  "explanation": "7 × 4 = 28.",
+  "source": "official"
+ },
+ {
+  "id": "math-9-times-5-b",
+  "category": "math",
+  "ages": [
+   7,
+   12
+  ],
+  "difficulty": 2,
+  "trick": "compound",
+  "kind": "math",
+  "math": {
+   "a": 9,
+   "op": "×",
+   "b": 5,
+   "unknown": "b"
+  },
+  "pieces": [
+   {
+    "kind": "word",
+    "text": "9 × ? = 45"
+   }
+  ],
+  "answer": "5",
+  "accepts": [],
+  "explanation": "9 × 5 = 45.",
+  "source": "official"
+ },
+ {
+  "id": "math-4-times-8-b",
+  "category": "math",
+  "ages": [
+   7,
+   12
+  ],
+  "difficulty": 2,
+  "trick": "compound",
+  "kind": "math",
+  "math": {
+   "a": 4,
+   "op": "×",
+   "b": 8,
+   "unknown": "b"
+  },
+  "pieces": [
+   {
+    "kind": "word",
+    "text": "4 × ? = 32"
+   }
+  ],
+  "answer": "8",
+  "accepts": [],
+  "explanation": "4 × 8 = 32.",
+  "source": "official"
+ },
+ {
+  "id": "math-348-plus-275-result",
+  "category": "math",
+  "ages": [
+   10,
+   14
+  ],
+  "difficulty": 3,
+  "trick": "compound",
+  "kind": "math",
+  "math": {
+   "a": 348,
+   "op": "+",
+   "b": 275,
+   "unknown": "result"
+  },
+  "pieces": [
+   {
+    "kind": "word",
+    "text": "348 + 275 = ?"
+   }
+  ],
+  "answer": "623",
+  "accepts": [],
+  "explanation": "348 + 275 = 623.",
+  "source": "official"
+ },
+ {
+  "id": "math-467-plus-385-result",
+  "category": "math",
+  "ages": [
+   10,
+   14
+  ],
+  "difficulty": 3,
+  "trick": "compound",
+  "kind": "math",
+  "math": {
+   "a": 467,
+   "op": "+",
+   "b": 385,
+   "unknown": "result"
+  },
+  "pieces": [
+   {
+    "kind": "word",
+    "text": "467 + 385 = ?"
+   }
+  ],
+  "answer": "852",
+  "accepts": [],
+  "explanation": "467 + 385 = 852.",
+  "source": "official"
+ },
+ {
+  "id": "math-529-plus-296-result",
+  "category": "math",
+  "ages": [
+   10,
+   14
+  ],
+  "difficulty": 3,
+  "trick": "compound",
+  "kind": "math",
+  "math": {
+   "a": 529,
+   "op": "+",
+   "b": 296,
+   "unknown": "result"
+  },
+  "pieces": [
+   {
+    "kind": "word",
+    "text": "529 + 296 = ?"
+   }
+  ],
+  "answer": "825",
+  "accepts": [],
+  "explanation": "529 + 296 = 825.",
+  "source": "official"
+ },
+ {
+  "id": "math-618-plus-247-result",
+  "category": "math",
+  "ages": [
+   10,
+   14
+  ],
+  "difficulty": 3,
+  "trick": "compound",
+  "kind": "math",
+  "math": {
+   "a": 618,
+   "op": "+",
+   "b": 247,
+   "unknown": "result"
+  },
+  "pieces": [
+   {
+    "kind": "word",
+    "text": "618 + 247 = ?"
+   }
+  ],
+  "answer": "865",
+  "accepts": [],
+  "explanation": "618 + 247 = 865.",
+  "source": "official"
+ },
+ {
+  "id": "math-735-plus-189-result",
+  "category": "math",
+  "ages": [
+   10,
+   14
+  ],
+  "difficulty": 3,
+  "trick": "compound",
+  "kind": "math",
+  "math": {
+   "a": 735,
+   "op": "+",
+   "b": 189,
+   "unknown": "result"
+  },
+  "pieces": [
+   {
+    "kind": "word",
+    "text": "735 + 189 = ?"
+   }
+  ],
+  "answer": "924",
+  "accepts": [],
+  "explanation": "735 + 189 = 924.",
+  "source": "official"
+ },
+ {
+  "id": "math-842-plus-158-result",
+  "category": "math",
+  "ages": [
+   10,
+   14
+  ],
+  "difficulty": 3,
+  "trick": "compound",
+  "kind": "math",
+  "math": {
+   "a": 842,
+   "op": "+",
+   "b": 158,
+   "unknown": "result"
+  },
+  "pieces": [
+   {
+    "kind": "word",
+    "text": "842 + 158 = ?"
+   }
+  ],
+  "answer": "1000",
+  "accepts": [],
+  "explanation": "842 + 158 = 1000.",
+  "source": "official"
+ },
+ {
+  "id": "math-500-minus-237-result",
+  "category": "math",
+  "ages": [
+   10,
+   14
+  ],
+  "difficulty": 3,
+  "trick": "compound",
+  "kind": "math",
+  "math": {
+   "a": 500,
+   "op": "−",
+   "b": 237,
+   "unknown": "result"
+  },
+  "pieces": [
+   {
+    "kind": "word",
+    "text": "500 − 237 = ?"
+   }
+  ],
+  "answer": "263",
+  "accepts": [],
+  "explanation": "500 − 237 = 263.",
+  "source": "official"
+ },
+ {
+  "id": "math-623-minus-478-result",
+  "category": "math",
+  "ages": [
+   10,
+   14
+  ],
+  "difficulty": 3,
+  "trick": "compound",
+  "kind": "math",
+  "math": {
+   "a": 623,
+   "op": "−",
+   "b": 478,
+   "unknown": "result"
+  },
+  "pieces": [
+   {
+    "kind": "word",
+    "text": "623 − 478 = ?"
+   }
+  ],
+  "answer": "145",
+  "accepts": [],
+  "explanation": "623 − 478 = 145.",
+  "source": "official"
+ },
+ {
+  "id": "math-800-minus-356-result",
+  "category": "math",
+  "ages": [
+   10,
+   14
+  ],
+  "difficulty": 3,
+  "trick": "compound",
+  "kind": "math",
+  "math": {
+   "a": 800,
+   "op": "−",
+   "b": 356,
+   "unknown": "result"
+  },
+  "pieces": [
+   {
+    "kind": "word",
+    "text": "800 − 356 = ?"
+   }
+  ],
+  "answer": "444",
+  "accepts": [],
+  "explanation": "800 − 356 = 444.",
+  "source": "official"
+ },
+ {
+  "id": "math-742-minus-295-result",
+  "category": "math",
+  "ages": [
+   10,
+   14
+  ],
+  "difficulty": 3,
+  "trick": "compound",
+  "kind": "math",
+  "math": {
+   "a": 742,
+   "op": "−",
+   "b": 295,
+   "unknown": "result"
+  },
+  "pieces": [
+   {
+    "kind": "word",
+    "text": "742 − 295 = ?"
+   }
+  ],
+  "answer": "447",
+  "accepts": [],
+  "explanation": "742 − 295 = 447.",
+  "source": "official"
+ },
+ {
+  "id": "math-910-minus-463-result",
+  "category": "math",
+  "ages": [
+   10,
+   14
+  ],
+  "difficulty": 3,
+  "trick": "compound",
+  "kind": "math",
+  "math": {
+   "a": 910,
+   "op": "−",
+   "b": 463,
+   "unknown": "result"
+  },
+  "pieces": [
+   {
+    "kind": "word",
+    "text": "910 − 463 = ?"
+   }
+  ],
+  "answer": "447",
+  "accepts": [],
+  "explanation": "910 − 463 = 447.",
+  "source": "official"
+ },
+ {
+  "id": "math-1000-minus-648-result",
+  "category": "math",
+  "ages": [
+   10,
+   14
+  ],
+  "difficulty": 3,
+  "trick": "compound",
+  "kind": "math",
+  "math": {
+   "a": 1000,
+   "op": "−",
+   "b": 648,
+   "unknown": "result"
+  },
+  "pieces": [
+   {
+    "kind": "word",
+    "text": "1000 − 648 = ?"
+   }
+  ],
+  "answer": "352",
+  "accepts": [],
+  "explanation": "1000 − 648 = 352.",
+  "source": "official"
+ },
+ {
+  "id": "math-23-times-4-result",
+  "category": "math",
+  "ages": [
+   10,
+   14
+  ],
+  "difficulty": 3,
+  "trick": "compound",
+  "kind": "math",
+  "math": {
+   "a": 23,
+   "op": "×",
+   "b": 4,
+   "unknown": "result"
+  },
+  "pieces": [
+   {
+    "kind": "word",
+    "text": "23 × 4 = ?"
+   }
+  ],
+  "answer": "92",
+  "accepts": [],
+  "explanation": "23 × 4 = 92.",
+  "source": "official"
+ },
+ {
+  "id": "math-35-times-6-result",
+  "category": "math",
+  "ages": [
+   10,
+   14
+  ],
+  "difficulty": 3,
+  "trick": "compound",
+  "kind": "math",
+  "math": {
+   "a": 35,
+   "op": "×",
+   "b": 6,
+   "unknown": "result"
+  },
+  "pieces": [
+   {
+    "kind": "word",
+    "text": "35 × 6 = ?"
+   }
+  ],
+  "answer": "210",
+  "accepts": [],
+  "explanation": "35 × 6 = 210.",
+  "source": "official"
+ },
+ {
+  "id": "math-48-times-7-result",
+  "category": "math",
+  "ages": [
+   10,
+   14
+  ],
+  "difficulty": 3,
+  "trick": "compound",
+  "kind": "math",
+  "math": {
+   "a": 48,
+   "op": "×",
+   "b": 7,
+   "unknown": "result"
+  },
+  "pieces": [
+   {
+    "kind": "word",
+    "text": "48 × 7 = ?"
+   }
+  ],
+  "answer": "336",
+  "accepts": [],
+  "explanation": "48 × 7 = 336.",
+  "source": "official"
+ },
+ {
+  "id": "math-56-times-8-result",
+  "category": "math",
+  "ages": [
+   10,
+   14
+  ],
+  "difficulty": 3,
+  "trick": "compound",
+  "kind": "math",
+  "math": {
+   "a": 56,
+   "op": "×",
+   "b": 8,
+   "unknown": "result"
+  },
+  "pieces": [
+   {
+    "kind": "word",
+    "text": "56 × 8 = ?"
+   }
+  ],
+  "answer": "448",
+  "accepts": [],
+  "explanation": "56 × 8 = 448.",
+  "source": "official"
+ },
+ {
+  "id": "math-67-times-9-result",
+  "category": "math",
+  "ages": [
+   10,
+   14
+  ],
+  "difficulty": 3,
+  "trick": "compound",
+  "kind": "math",
+  "math": {
+   "a": 67,
+   "op": "×",
+   "b": 9,
+   "unknown": "result"
+  },
+  "pieces": [
+   {
+    "kind": "word",
+    "text": "67 × 9 = ?"
+   }
+  ],
+  "answer": "603",
+  "accepts": [],
+  "explanation": "67 × 9 = 603.",
+  "source": "official"
+ },
+ {
+  "id": "math-74-times-5-result",
+  "category": "math",
+  "ages": [
+   10,
+   14
+  ],
+  "difficulty": 3,
+  "trick": "compound",
+  "kind": "math",
+  "math": {
+   "a": 74,
+   "op": "×",
+   "b": 5,
+   "unknown": "result"
+  },
+  "pieces": [
+   {
+    "kind": "word",
+    "text": "74 × 5 = ?"
+   }
+  ],
+  "answer": "370",
+  "accepts": [],
+  "explanation": "74 × 5 = 370.",
+  "source": "official"
+ },
+ {
+  "id": "math-89-times-6-result",
+  "category": "math",
+  "ages": [
+   10,
+   14
+  ],
+  "difficulty": 3,
+  "trick": "compound",
+  "kind": "math",
+  "math": {
+   "a": 89,
+   "op": "×",
+   "b": 6,
+   "unknown": "result"
+  },
+  "pieces": [
+   {
+    "kind": "word",
+    "text": "89 × 6 = ?"
+   }
+  ],
+  "answer": "534",
+  "accepts": [],
+  "explanation": "89 × 6 = 534.",
+  "source": "official"
+ },
+ {
+  "id": "math-95-times-8-result",
+  "category": "math",
+  "ages": [
+   10,
+   14
+  ],
+  "difficulty": 3,
+  "trick": "compound",
+  "kind": "math",
+  "math": {
+   "a": 95,
+   "op": "×",
+   "b": 8,
+   "unknown": "result"
+  },
+  "pieces": [
+   {
+    "kind": "word",
+    "text": "95 × 8 = ?"
+   }
+  ],
+  "answer": "760",
+  "accepts": [],
+  "explanation": "95 × 8 = 760.",
+  "source": "official"
+ },
+ {
+  "id": "math-12-times-12-result",
+  "category": "math",
+  "ages": [
+   10,
+   14
+  ],
+  "difficulty": 3,
+  "trick": "compound",
+  "kind": "math",
+  "math": {
+   "a": 12,
+   "op": "×",
+   "b": 12,
+   "unknown": "result"
+  },
+  "pieces": [
+   {
+    "kind": "word",
+    "text": "12 × 12 = ?"
+   }
+  ],
+  "answer": "144",
+  "accepts": [],
+  "explanation": "12 × 12 = 144.",
+  "source": "official"
+ },
+ {
+  "id": "math-15-times-14-result",
+  "category": "math",
+  "ages": [
+   10,
+   14
+  ],
+  "difficulty": 3,
+  "trick": "compound",
+  "kind": "math",
+  "math": {
+   "a": 15,
+   "op": "×",
+   "b": 14,
+   "unknown": "result"
+  },
+  "pieces": [
+   {
+    "kind": "word",
+    "text": "15 × 14 = ?"
+   }
+  ],
+  "answer": "210",
+  "accepts": [],
+  "explanation": "15 × 14 = 210.",
+  "source": "official"
+ },
+ {
+  "id": "math-24-times-13-result",
+  "category": "math",
+  "ages": [
+   10,
+   14
+  ],
+  "difficulty": 3,
+  "trick": "compound",
+  "kind": "math",
+  "math": {
+   "a": 24,
+   "op": "×",
+   "b": 13,
+   "unknown": "result"
+  },
+  "pieces": [
+   {
+    "kind": "word",
+    "text": "24 × 13 = ?"
+   }
+  ],
+  "answer": "312",
+  "accepts": [],
+  "explanation": "24 × 13 = 312.",
+  "source": "official"
+ },
+ {
+  "id": "math-35-times-12-result",
+  "category": "math",
+  "ages": [
+   10,
+   14
+  ],
+  "difficulty": 3,
+  "trick": "compound",
+  "kind": "math",
+  "math": {
+   "a": 35,
+   "op": "×",
+   "b": 12,
+   "unknown": "result"
+  },
+  "pieces": [
+   {
+    "kind": "word",
+    "text": "35 × 12 = ?"
+   }
+  ],
+  "answer": "420",
+  "accepts": [],
+  "explanation": "35 × 12 = 420.",
+  "source": "official"
+ },
+ {
+  "id": "math-45-times-11-result",
+  "category": "math",
+  "ages": [
+   10,
+   14
+  ],
+  "difficulty": 3,
+  "trick": "compound",
+  "kind": "math",
+  "math": {
+   "a": 45,
+   "op": "×",
+   "b": 11,
+   "unknown": "result"
+  },
+  "pieces": [
+   {
+    "kind": "word",
+    "text": "45 × 11 = ?"
+   }
+  ],
+  "answer": "495",
+  "accepts": [],
+  "explanation": "45 × 11 = 495.",
+  "source": "official"
+ },
+ {
+  "id": "math-36-times-15-result",
+  "category": "math",
+  "ages": [
+   10,
+   14
+  ],
+  "difficulty": 3,
+  "trick": "compound",
+  "kind": "math",
+  "math": {
+   "a": 36,
+   "op": "×",
+   "b": 15,
+   "unknown": "result"
+  },
+  "pieces": [
+   {
+    "kind": "word",
+    "text": "36 × 15 = ?"
+   }
+  ],
+  "answer": "540",
+  "accepts": [],
+  "explanation": "36 × 15 = 540.",
+  "source": "official"
+ },
+ {
+  "id": "math-144-by-12-result",
+  "category": "math",
+  "ages": [
+   10,
+   14
+  ],
+  "difficulty": 3,
+  "trick": "compound",
+  "kind": "math",
+  "math": {
+   "a": 144,
+   "op": "÷",
+   "b": 12,
+   "unknown": "result"
+  },
+  "pieces": [
+   {
+    "kind": "word",
+    "text": "144 ÷ 12 = ?"
+   }
+  ],
+  "answer": "12",
+  "accepts": [],
+  "explanation": "144 ÷ 12 = 12.",
+  "source": "official"
+ },
+ {
+  "id": "math-169-by-13-result",
+  "category": "math",
+  "ages": [
+   10,
+   14
+  ],
+  "difficulty": 3,
+  "trick": "compound",
+  "kind": "math",
+  "math": {
+   "a": 169,
+   "op": "÷",
+   "b": 13,
+   "unknown": "result"
+  },
+  "pieces": [
+   {
+    "kind": "word",
+    "text": "169 ÷ 13 = ?"
+   }
+  ],
+  "answer": "13",
+  "accepts": [],
+  "explanation": "169 ÷ 13 = 13.",
+  "source": "official"
+ },
+ {
+  "id": "math-252-by-12-result",
+  "category": "math",
+  "ages": [
+   10,
+   14
+  ],
+  "difficulty": 3,
+  "trick": "compound",
+  "kind": "math",
+  "math": {
+   "a": 252,
+   "op": "÷",
+   "b": 12,
+   "unknown": "result"
+  },
+  "pieces": [
+   {
+    "kind": "word",
+    "text": "252 ÷ 12 = ?"
+   }
+  ],
+  "answer": "21",
+  "accepts": [],
+  "explanation": "252 ÷ 12 = 21.",
+  "source": "official"
+ },
+ {
+  "id": "math-336-by-14-result",
+  "category": "math",
+  "ages": [
+   10,
+   14
+  ],
+  "difficulty": 3,
+  "trick": "compound",
+  "kind": "math",
+  "math": {
+   "a": 336,
+   "op": "÷",
+   "b": 14,
+   "unknown": "result"
+  },
+  "pieces": [
+   {
+    "kind": "word",
+    "text": "336 ÷ 14 = ?"
+   }
+  ],
+  "answer": "24",
+  "accepts": [],
+  "explanation": "336 ÷ 14 = 24.",
+  "source": "official"
+ },
+ {
+  "id": "math-405-by-15-result",
+  "category": "math",
+  "ages": [
+   10,
+   14
+  ],
+  "difficulty": 3,
+  "trick": "compound",
+  "kind": "math",
+  "math": {
+   "a": 405,
+   "op": "÷",
+   "b": 15,
+   "unknown": "result"
+  },
+  "pieces": [
+   {
+    "kind": "word",
+    "text": "405 ÷ 15 = ?"
+   }
+  ],
+  "answer": "27",
+  "accepts": [],
+  "explanation": "405 ÷ 15 = 27.",
+  "source": "official"
+ },
+ {
+  "id": "math-520-by-13-result",
+  "category": "math",
+  "ages": [
+   10,
+   14
+  ],
+  "difficulty": 3,
+  "trick": "compound",
+  "kind": "math",
+  "math": {
+   "a": 520,
+   "op": "÷",
+   "b": 13,
+   "unknown": "result"
+  },
+  "pieces": [
+   {
+    "kind": "word",
+    "text": "520 ÷ 13 = ?"
+   }
+  ],
+  "answer": "40",
+  "accepts": [],
+  "explanation": "520 ÷ 13 = 40.",
+  "source": "official"
+ },
+ {
+  "id": "math-396-by-18-result",
+  "category": "math",
+  "ages": [
+   10,
+   14
+  ],
+  "difficulty": 3,
+  "trick": "compound",
+  "kind": "math",
+  "math": {
+   "a": 396,
+   "op": "÷",
+   "b": 18,
+   "unknown": "result"
+  },
+  "pieces": [
+   {
+    "kind": "word",
+    "text": "396 ÷ 18 = ?"
+   }
+  ],
+  "answer": "22",
+  "accepts": [],
+  "explanation": "396 ÷ 18 = 22.",
+  "source": "official"
+ },
+ {
+  "id": "math-288-by-16-result",
+  "category": "math",
+  "ages": [
+   10,
+   14
+  ],
+  "difficulty": 3,
+  "trick": "compound",
+  "kind": "math",
+  "math": {
+   "a": 288,
+   "op": "÷",
+   "b": 16,
+   "unknown": "result"
+  },
+  "pieces": [
+   {
+    "kind": "word",
+    "text": "288 ÷ 16 = ?"
+   }
+  ],
+  "answer": "18",
+  "accepts": [],
+  "explanation": "288 ÷ 16 = 18.",
+  "source": "official"
+ },
+ {
+  "id": "math-125-plus-175-b",
+  "category": "math",
+  "ages": [
+   10,
+   14
+  ],
+  "difficulty": 3,
+  "trick": "compound",
+  "kind": "math",
+  "math": {
+   "a": 125,
+   "op": "+",
+   "b": 175,
+   "unknown": "b"
+  },
+  "pieces": [
+   {
+    "kind": "word",
+    "text": "125 + ? = 300"
+   }
+  ],
+  "answer": "175",
+  "accepts": [],
+  "explanation": "125 + 175 = 300.",
+  "source": "official"
+ },
+ {
+  "id": "math-423-minus-148-a",
+  "category": "math",
+  "ages": [
+   10,
+   14
+  ],
+  "difficulty": 3,
+  "trick": "compound",
+  "kind": "math",
+  "math": {
+   "a": 423,
+   "op": "−",
+   "b": 148,
+   "unknown": "a"
+  },
+  "pieces": [
+   {
+    "kind": "word",
+    "text": "? − 148 = 275"
+   }
+  ],
+  "answer": "423",
+  "accepts": [],
+  "explanation": "423 − 148 = 275.",
+  "source": "official"
+ },
+ {
+  "id": "math-17-times-12-b",
+  "category": "math",
+  "ages": [
+   10,
+   14
+  ],
+  "difficulty": 3,
+  "trick": "compound",
+  "kind": "math",
+  "math": {
+   "a": 17,
+   "op": "×",
+   "b": 12,
+   "unknown": "b"
+  },
+  "pieces": [
+   {
+    "kind": "word",
+    "text": "17 × ? = 204"
+   }
+  ],
+  "answer": "12",
+  "accepts": [],
+  "explanation": "17 × 12 = 204.",
+  "source": "official"
+ },
+ {
+  "id": "math-91-by-7-a",
+  "category": "math",
+  "ages": [
+   10,
+   14
+  ],
+  "difficulty": 3,
+  "trick": "compound",
+  "kind": "math",
+  "math": {
+   "a": 91,
+   "op": "÷",
+   "b": 7,
+   "unknown": "a"
+  },
+  "pieces": [
+   {
+    "kind": "word",
+    "text": "? ÷ 7 = 13"
+   }
+  ],
+  "answer": "91",
+  "accepts": [],
+  "explanation": "91 ÷ 7 = 13.",
+  "source": "official"
  }
 ]

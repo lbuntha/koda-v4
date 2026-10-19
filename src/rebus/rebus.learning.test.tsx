@@ -9,10 +9,11 @@ import { REBUS_CONCEPT, REBUS_SKILL_ID, RebusRecorder } from "./learning";
 import { firstTry, rebusReward } from "./reward";
 import type { PuzzleOutcome } from "./engine";
 
-vi.mock("./bank", () => {
+vi.mock("./bank", async () => {
+  const { BUILT_IN_CATEGORIES } = await import("./categories");
   const puzzles = SAMPLE_PUZZLES.filter((p) => p.answer === "Hot dog" || p.answer === "Honeymoon");
   const bank = { puzzles, counts: { countries: 0, food: puzzles.length, sayings: 0, animals: 0, sports: 0, school: 0, science: 0 }, loaded: true };
-  return { useRebusBank: () => bank, bankForAge: (b: typeof bank) => b };
+  return { useRebusBank: () => bank, bankForAge: (b: typeof bank) => b, useRebusCategories: () => BUILT_IN_CATEGORIES };
 });
 vi.mock("../utils/audio", () => ({ isVoiceEnabled: () => false, playSound: () => {} }));
 

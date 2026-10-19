@@ -5,7 +5,7 @@ import { LogOut, RotateCcw, Trophy } from "lucide-react";
 import { useT } from "../../lib/i18n";
 import { cue } from "../sound";
 import { themeSystem } from "../../lib/themeSystem";
-import { UIButton } from "../../components/ui";
+import { UIButton, UIXpReward } from "../../components/ui";
 import { useNickname } from "./NicknamePicker";
 import { AskGrownUp } from "./AskGrownUp";
 import { Podium } from "./Podium";
@@ -69,11 +69,14 @@ export const GroupFinal: React.FC<GroupFinalProps> = ({ room, busy = false, erro
         </ol>
       )}
 
-      {reward && (
-        <p role="status" className={themeSystem.flash(reward.xp > 0 ? "success" : "info")}>
-          {reward.xp > 0 ? t("rebus.group.earnedXp", { xp: reward.xp }) : t("rebus.group.noXp")}
-        </p>
-      )}
+      {reward &&
+        (reward.xp > 0 ? (
+          <UIXpReward xp={reward.xp} title={t("rebus.xpTitle")} format={(n) => t("rebus.xpAmount", { xp: n })} />
+        ) : (
+          <p role="status" className={themeSystem.flash("info")}>
+            {t("rebus.group.noXp")}
+          </p>
+        ))}
 
       {!room.me.isKodaUser && <AskGrownUp onOpen={onAsked} />}
 

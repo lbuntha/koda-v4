@@ -40,6 +40,7 @@ PUBLIC = {
     # hash) and is refused with 403 without it, and `join` is rate-limited per
     # IP and takes only a nickname and avatar from fixed lists. Opening a room
     # (`POST /v1/rebus/rooms`) is NOT here: it still needs a signed-in user.
+    ("GET", "/v1/rebus/images/{image_id}"),  # a photo a puzzle shows; its address is its hash
     ("GET", "/v1/rebus/rooms/choices"),  # the fixed nickname and avatar lists
     ("POST", "/v1/rebus/rooms/{code}/join"),
     ("GET", "/v1/rebus/rooms/{code}"),

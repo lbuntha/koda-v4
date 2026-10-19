@@ -85,12 +85,12 @@ async function toCache(id: string, blob: Blob) {
  * used on a connection that drops, and a request with no deadline leaves a page
  * waiting on it for ever.
  */
-async function download(id: string): Promise<{ blob: Blob } | "gone" | "again"> {
+async function download(id: string, route: string): Promise<{ blob: Blob } | "gone" | "again"> {
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), PHOTO_TIMEOUT_MS);
   try {
     const token = await accessToken();
-    const res = await fetch(`${API_BASE}/library/images/${encodeURIComponent(id)}`, {
+    const res = await fetch(`${API_BASE}/${route}/${encodeURIComponent(id)}`, {
       headers: token ? { Authorization: `Bearer ${token}` } : {},
       signal: controller.signal,
     });
@@ -105,7 +105,7 @@ async function download(id: string): Promise<{ blob: Blob } | "gone" | "again"> 
 }
 
 /** A displayable URL for a photo key, or null if it is not reachable now. */
-export function photoUrl(key: string): Promise<string | null> {
+export function photoUrl(key: string, route = "library/images"): Promise<string | null> {
   const id = photoId(key);
   const known = urls.get(id);
   if (known) return Promise.resolve(known);
@@ -119,7 +119,7 @@ export function photoUrl(key: string): Promise<string | null> {
           if (offline()) break;
           await sleep(RETRY_BACKOFF_MS * 2 ** (attempt - 1));
         }
-        const got = await download(id);
+        const got = await download(id, route);
         if (got === "gone") return null;
         if (got !== "again") blob = got.blob;
       }
@@ -206,9 +206,9 @@ export async function prefetchPhotos(p: PhotoHolder, onProgress?: (p: { ready: n
 export const PHOTO_ACCEPT = "image/jpeg,image/png,image/webp,image/heic,image/heif";
 
 /** Shrink a photo to LONG_SIDE and re-encode it as small as it will honestly go, upright. */
-export async function shrinkPhoto(file: Blob): Promise<Blob> {
+export async function shrinkPhoto(file: Blob, longSide = LONG_SIDE): Promise<Blob> {
   const bitmap = await createImageBitmap(file, { imageOrientation: "from-image" });
-  const scale = Math.min(1, LONG_SIDE / Math.max(bitmap.width, bitmap.height));
+  const scale = Math.min(1, longSide / Math.max(bitmap.width, bitmap.height));
   const w = Math.max(1, Math.round(bitmap.width * scale));
   const h = Math.max(1, Math.round(bitmap.height * scale));
   const canvas = document.createElement("canvas");
@@ -253,10 +253,10 @@ async function smallestOf(canvas: HTMLCanvasElement): Promise<Blob> {
  * picture key. `route` is who is asking: Trace creators upload through
  * `/trace/studio/images`, into the same store.
  */
-export async function uploadPhoto(file: Blob, route = "library/images"): Promise<string> {
+export async function uploadPhoto(file: Blob, route = "library/images", longSide = LONG_SIDE): Promise<string> {
   let blob: Blob;
   try {
-    blob = await shrinkPhoto(file);
+    blob = await shrinkPhoto(file, longSide);
   } catch {
     throw new Error(translate("studio.picture.notAPhoto"));
   }

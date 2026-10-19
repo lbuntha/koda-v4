@@ -11,6 +11,7 @@ import { Check, Copy, Crown, X, Lock, LogOut, Play, Share2, Unlock, UserMinus } 
 import { useT } from "../../lib/i18n";
 import { themeSystem } from "../../lib/themeSystem";
 import { UIBadge, UIButton } from "../../components/ui";
+import { categoryLabel } from "../categories";
 import { formatCode } from "./choices";
 import { useNickname } from "./NicknamePicker";
 import { RoomAvatar } from "./RoomAvatar";
@@ -140,7 +141,7 @@ export const Lobby: React.FC<LobbyProps> = ({ room, busy = false, error, reconne
       </section>
 
       <p className={themeSystem.typography("body-sm", "text-center")}>
-        {room.settings.category === "mixed" ? t("rebus.mixed") : t(`rebus.categories.${room.settings.category}`)} · {t("rebus.puzzlesCount", { count: room.settings.count })}
+        {room.settings.category === "mixed" ? t("rebus.mixed") : categoryLabel(room.settings.category)} · {t("rebus.puzzlesCount", { count: room.settings.count })}
       </p>
 
       {reconnecting && (

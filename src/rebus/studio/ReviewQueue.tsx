@@ -14,16 +14,17 @@ import { Check, CheckCheck, PartyPopper, Pencil, SkipForward, X } from "lucide-r
 import { useT } from "../../lib/i18n";
 import { themeSystem } from "../../lib/themeSystem";
 import { UIButton, UIProgressBar, UITabs } from "../../components/ui";
-import { CATEGORIES } from "../categories";
+import { categoryLabel } from "../categories";
+import { useRebusCategories } from "../bank";
 import { PuzzleCard } from "./PuzzleCard";
 import { PuzzleEditor } from "./PuzzleEditor";
-import { StudioAPI, type Overview, type StudioPuzzle } from "./studioApi";
+import { draftOf, StudioAPI, type Overview, type StudioPuzzle } from "./studioApi";
 import { messageOf, useStudioAction } from "./useStudioAction";
 
-const draftOf = (p: StudioPuzzle) => ({ category: p.category, ages: [p.ages[0], p.ages[1]] as [number, number], difficulty: p.difficulty, trick: p.trick, pieces: p.pieces, answer: p.answer, accepts: p.accepts, explanation: p.explanation });
 
 export const ReviewQueue: React.FC<{ overview: Overview | null; onChanged(): void }> = ({ overview, onChanged }) => {
   const { t } = useT();
+  const cats = useRebusCategories();
   const [category, setCategory] = useState("all");
   const [queue, setQueue] = useState<StudioPuzzle[] | null>(null);
   /** How many are waiting in this view in all, not just the batch loaded. */
@@ -81,7 +82,7 @@ export const ReviewQueue: React.FC<{ overview: Overview | null; onChanged(): voi
       </div>
       <UIProgressBar value={done} max={Math.max(total, 1)} tone="emerald" label={t("rebus.studio.reviewProgress", { done, total })} caption={t("rebus.studio.reviewProgress", { done, total })} />
 
-      <UITabs label={t("rebus.studio.category")} items={[{ id: "all", label: t("rebus.studio.all") }, ...CATEGORIES.map((c) => ({ id: c.id, label: t(`rebus.categories.${c.id}`) }))]} value={category} onChange={setCategory} />
+      <UITabs label={t("rebus.studio.category")} items={[{ id: "all", label: t("rebus.studio.all") }, ...cats.map((c) => ({ id: c.id, label: categoryLabel(c.id) }))]} value={category} onChange={setCategory} />
 
       {remaining > 0 && !editing && (
         <div>

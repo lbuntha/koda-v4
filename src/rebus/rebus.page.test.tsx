@@ -7,12 +7,14 @@ import { RebusEntry } from "./ui/RebusEntry";
 /** Two food puzzles, so the round is short and the puzzle on screen is known. */
 const emptyBank = vi.hoisted(() => ({ on: false, loaded: false }));
 vi.mock("./bankStore", () => ({ refreshBank: vi.fn(async () => undefined) }));
-vi.mock("./bank", () => {
+vi.mock("./bank", async () => {
+  const { BUILT_IN_CATEGORIES } = await import("./categories");
   const puzzles = SAMPLE_PUZZLES.filter((p) => p.answer === "Hot dog" || p.answer === "Honeymoon");
   const bank = { puzzles, counts: { countries: 0, food: puzzles.length, sayings: 0, animals: 0, sports: 0, school: 0, science: 0 }, loaded: true };
   return {
     useRebusBank: () => (emptyBank.on ? { puzzles: [], counts: { ...bank.counts, food: 0 }, loaded: emptyBank.loaded } : bank),
     bankForAge: (b: typeof bank) => b,
+    useRebusCategories: () => BUILT_IN_CATEGORIES,
   };
 });
 const played = vi.hoisted(() => vi.fn());
