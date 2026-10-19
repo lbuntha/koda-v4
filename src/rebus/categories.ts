@@ -5,11 +5,13 @@
  * changed), a name in each language, a colour, the Koda topic it files under, an
  * order and an on/off switch. The server sends the live list with the puzzles and
  * this device keeps it, so a category added today is on a child's tablet without
- * a release. Until the server has been heard from, the eight that shipped stand
+ * a release. Until the server has been heard from, the ones that shipped stand
  * in, so a fresh install offline still has topics to pick.
+ *
+ * Pure on purpose: the Node server bundles this file (to check a brief), and it
+ * must not reach the browser-only code the language module sits on. The name a
+ * viewer reads, which depends on their language, is in `categoryNames.ts`.
  */
-
-import { currentLanguage } from "../lib/i18n";
 
 export interface Category {
   id: string;
@@ -55,15 +57,6 @@ export const categorySnapshot = (): readonly Category[] => live;
 
 const ID = /^[a-z][a-z0-9-]{1,23}$/;
 export const isCategoryId = (value: unknown): value is string => typeof value === "string" && ID.test(value);
-
-/** A category's name as this viewer reads it: their language, else English, else the id made readable. */
-export const nameOfCategory = (category: Pick<Category, "id" | "names">, language: string = currentLanguage()): string =>
-  category.names[language] ?? category.names.en ?? category.id.replace(/-/g, " ");
-
-export const categoryLabel = (id: string, language: string = currentLanguage()): string => {
-  const found = live.find((c) => c.id === id);
-  return found ? nameOfCategory(found, language) : id.replace(/-/g, " ");
-};
 
 /** Read the categories out of what came over the wire or out of storage; anything malformed is dropped. */
 export const parseCategories = (raw: unknown): Category[] => {

@@ -42,7 +42,7 @@ describe("reading a model's reply", () => {
 describe("a brief", () => {
   it("is refused before any model is paid when it is not sensible", () => {
     expect(readBrief(null)).toBe("Send a brief.");
-    expect(readBrief({ category: "cars", ages: [6, 9], difficulty: 1, count: 5 })).toBe("Pick a category.");
+    expect(readBrief({ category: "Cars!", ages: [6, 9], difficulty: 1, count: 5 })).toBe("Pick a category.");
     expect(readBrief({ category: "food", ages: [3, 9], difficulty: 1, count: 5 })).toBe("Pick the ages this is for.");
     expect(readBrief({ category: "food", ages: [6, 9], difficulty: 5, count: 5 })).toBe("Pick a difficulty.");
     expect(readBrief({ category: "food", ages: [6, 9], difficulty: 1, count: 500 })).toMatch(/1 to 30/);

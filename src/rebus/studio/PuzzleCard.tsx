@@ -7,7 +7,7 @@ import React from "react";
 import { AlertTriangle, CheckCircle2 } from "lucide-react";
 import { useT } from "../../lib/i18n";
 import { themeSystem } from "../../lib/themeSystem";
-import { categoryLabel } from "../categories";
+import { categoryLabel } from "../categoryNames";
 import { UIBadge } from "../../components/ui";
 import type { BadgeVariant } from "../../lib/themeSystem";
 import { PuzzleCanvas } from "../ui/PieceView";
@@ -29,6 +29,7 @@ export const PuzzleCard: React.FC<{ puzzle: StudioPuzzle; actions?: React.ReactN
       <div className="flex flex-wrap items-center gap-1.5">
         <UIBadge variant={STATUS_TONE[puzzle.status]}>{t(`rebus.studio.status.${puzzle.status}`)}</UIBadge>
         <UIBadge variant="info">{categoryLabel(puzzle.category)}</UIBadge>
+        {puzzle.kind && puzzle.kind !== "picture" && <UIBadge variant="primary">{t(`rebus.studio.kind_${puzzle.kind}`)}</UIBadge>}
         <UIBadge variant="neutral">{t("rebus.studio.ages", { min: puzzle.ages[0], max: puzzle.ages[1] })}</UIBadge>
         <UIBadge variant="neutral">{t(`rebus.studio.difficulty.${puzzle.difficulty}`)}</UIBadge>
         {puzzle.source !== "official" && <UIBadge variant="primary">{t(`rebus.studio.source.${puzzle.source}`)}</UIBadge>}
@@ -38,6 +39,17 @@ export const PuzzleCard: React.FC<{ puzzle: StudioPuzzle; actions?: React.ReactN
       <div className={large ? "scale-100" : "origin-top-left scale-[0.82]"} style={large ? undefined : { marginBottom: "-1.5rem" }}>
         <PuzzleCanvas pieces={puzzle.pieces} label={puzzle.answer} />
       </div>
+
+      {puzzle.kind === "choice" && puzzle.choice && (
+        <ul className="flex flex-wrap gap-1.5" aria-label={t("rebus.choice.answers")}>
+          {puzzle.choice.options.map((option, i) => (
+            <li key={option} className={`rounded-lg border px-2 py-1 text-sm font-bold ${i === puzzle.choice?.correct ? "border-emerald-400 bg-emerald-50 text-emerald-800 dark:bg-emerald-950/40 dark:text-emerald-200" : "border-line text-body"}`}>
+              {i === puzzle.choice?.correct ? "✓ " : ""}
+              {option}
+            </li>
+          ))}
+        </ul>
+      )}
 
       <div>
         <div className="text-xl font-black text-ink">{puzzle.answer}</div>

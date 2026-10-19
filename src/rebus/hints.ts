@@ -13,7 +13,7 @@
 
 import { compactAnswer, normalizeAnswer } from "./answer";
 import { translate } from "../lib/i18n";
-import { categoryLabel } from "./categories";
+import { categoryLabel } from "./categoryNames";
 import { isChoiceSpec } from "./choice";
 import { answerRange, isMathSpec, mathAnswer, mathProblem } from "./math";
 import { meaningfulPieces, pieceName } from "./puzzle";

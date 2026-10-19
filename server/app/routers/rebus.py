@@ -190,11 +190,14 @@ async def studio_list(
     category: str | None = None,
     source: str | None = None,
     icon: Annotated[str | None, Query(max_length=64)] = None,
+    kind: Annotated[str | None, Query(max_length=10)] = None,
     q: Annotated[str | None, Query(max_length=60)] = None,
     skip: Annotated[int, Query(ge=0)] = 0,
     limit: Annotated[int, Query(ge=1, le=100)] = 50,
 ) -> dict[str, Any]:
-    rows, total = await repo.listing(db, status=status, category=category, source=source, icon=icon, query=q, skip=skip, limit=limit)
+    rows, total = await repo.listing(
+        db, status=status, category=category, source=source, icon=icon, kind=kind, query=q, skip=skip, limit=limit
+    )
     who = await repo.names(db, {r["createdBy"] for r in rows if r.get("createdBy")})
     checks = await _checks(db)
     out = [{**_out(row), "issues": checks.codes(row), "createdByName": who.get(row.get("createdBy", ""))} for row in rows]

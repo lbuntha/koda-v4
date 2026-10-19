@@ -249,6 +249,7 @@ async def listing(
     source: str | None = None,
     seeded: bool | None = None,
     icon: str | None = None,
+    kind: str | None = None,
     query: str | None = None,
     skip: int = 0,
     limit: int = 50,
@@ -262,6 +263,11 @@ async def listing(
         flt["source"] = source
     if seeded is not None:
         flt["seeded"] = seeded
+    if kind == "picture":
+        # Puzzles written before kinds existed have none: they are picture puzzles.
+        flt["kind"] = {"$in": [None, "picture"]}
+    elif kind:
+        flt["kind"] = kind
     if icon:
         flt["pieces"] = {"$elemMatch": {"kind": "icon", "id": icon}}
     if query and query.strip():

@@ -14,7 +14,7 @@ import { Check, CheckCheck, PartyPopper, Pencil, SkipForward, X } from "lucide-r
 import { useT } from "../../lib/i18n";
 import { themeSystem } from "../../lib/themeSystem";
 import { UIButton, UIProgressBar, UITabs } from "../../components/ui";
-import { categoryLabel } from "../categories";
+import { categoryLabel } from "../categoryNames";
 import { useRebusCategories } from "../bank";
 import { PuzzleCard } from "./PuzzleCard";
 import { PuzzleEditor } from "./PuzzleEditor";

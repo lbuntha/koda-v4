@@ -17,7 +17,7 @@ import { Check, Save, Sparkles } from "lucide-react";
 import { useT } from "../../lib/i18n";
 import { themeSystem } from "../../lib/themeSystem";
 import { UIAgePicker, UIBadge, UIButton, UIInput, UISelect, UITabs, UITextarea } from "../../components/ui";
-import { categoryLabel } from "../categories";
+import { categoryLabel } from "../categoryNames";
 import { useRebusCategories } from "../bank";
 import { DEFAULT_SYSTEM_PROMPT } from "../generate/prompt";
 import type { GeneratedPuzzle } from "../generate/pipeline";

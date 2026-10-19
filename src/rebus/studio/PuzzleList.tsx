@@ -12,7 +12,7 @@ import { Check, EyeOff, Plus, RotateCcw, Trash2, Undo2, X } from "lucide-react";
 import { useT } from "../../lib/i18n";
 import { themeSystem } from "../../lib/themeSystem";
 import { UIButton, UIPagination, UISearchInput, UISelect } from "../../components/ui";
-import { categoryLabel } from "../categories";
+import { categoryLabel } from "../categoryNames";
 import { useRebusCategories } from "../bank";
 import { PuzzleCard } from "./PuzzleCard";
 import { BLANK_DRAFT, PuzzleEditor } from "./PuzzleEditor";
@@ -28,6 +28,7 @@ export const PuzzleList: React.FC<{ initialStatus?: PuzzleStatus; onChanged(): v
   const cats = useRebusCategories();
   const [status, setStatus] = useState<PuzzleStatus | "">(initialStatus ?? "");
   const [category, setCategory] = useState("");
+  const [kind, setKind] = useState<"" | "picture" | "math" | "choice">("");
   const [q, setQ] = useState("");
   const [page, setPage] = useState(1);
   const [rows, setRows] = useState<StudioPuzzle[] | null>(null);
@@ -39,13 +40,13 @@ export const PuzzleList: React.FC<{ initialStatus?: PuzzleStatus; onChanged(): v
   const load = useCallback(async () => {
     setLoadError("");
     try {
-      const out = await StudioAPI.list({ status: status || undefined, category: category || undefined, q: q.trim() || undefined, skip: (page - 1) * PAGE, limit: PAGE });
+      const out = await StudioAPI.list({ status: status || undefined, category: category || undefined, kind: kind || undefined, q: q.trim() || undefined, skip: (page - 1) * PAGE, limit: PAGE });
       setRows(out.puzzles);
       setTotal(out.total);
     } catch (e) {
       setLoadError(messageOf(e));
     }
-  }, [status, category, q, page]);
+  }, [status, category, kind, q, page]);
 
   useEffect(() => {
     void load();
@@ -160,6 +161,14 @@ export const PuzzleList: React.FC<{ initialStatus?: PuzzleStatus; onChanged(): v
           {cats.map((c) => (
             <option key={c.id} value={c.id}>
               {categoryLabel(c.id)}
+            </option>
+          ))}
+        </UISelect>
+        <UISelect aria-label={t("rebus.studio.kindLabel")} className="!w-auto" value={kind} onChange={(e) => { setKind(e.target.value as typeof kind); setPage(1); }}>
+          <option value="">{t("rebus.studio.anyKind")}</option>
+          {(["picture", "math", "choice"] as const).map((k) => (
+            <option key={k} value={k}>
+              {t(`rebus.studio.kind_${k}`)}
             </option>
           ))}
         </UISelect>

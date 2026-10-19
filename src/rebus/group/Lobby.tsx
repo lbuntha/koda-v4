@@ -11,7 +11,7 @@ import { Check, Copy, Crown, X, Lock, LogOut, Play, Share2, Unlock, UserMinus } 
 import { useT } from "../../lib/i18n";
 import { themeSystem } from "../../lib/themeSystem";
 import { UIBadge, UIButton } from "../../components/ui";
-import { categoryLabel } from "../categories";
+import { categoryLabel } from "../categoryNames";
 import { formatCode } from "./choices";
 import { useNickname } from "./NicknamePicker";
 import { RoomAvatar } from "./RoomAvatar";

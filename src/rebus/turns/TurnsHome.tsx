@@ -13,7 +13,7 @@ import { ArrowLeft, Pencil, Play, Plus, X } from "lucide-react";
 import { useT } from "../../lib/i18n";
 import { themeSystem } from "../../lib/themeSystem";
 import { UIBadge, UIButton, UITabs } from "../../components/ui";
-import { categoryLabel } from "../categories";
+import { categoryLabel } from "../categoryNames";
 import { useRebusCategories } from "../bank";
 import { AVATARS, NICKNAMES } from "../group/choices";
 import { NicknamePicker, useNickname } from "../group/NicknamePicker";

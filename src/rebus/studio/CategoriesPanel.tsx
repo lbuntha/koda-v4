@@ -15,7 +15,7 @@ import { themeSystem } from "../../lib/themeSystem";
 import { TOPICS } from "../../lib/topics";
 import { UIBadge, UIButton, UIInput, UISelect, UIToggleRow } from "../../components/ui";
 import { refreshBank } from "../bankStore";
-import { nameOfCategory } from "../categories";
+import { nameOfCategory } from "../categoryNames";
 import { StudioAPI, type CategoryDraft, type StudioCategory } from "./studioApi";
 import { useStudioAction } from "./useStudioAction";
 

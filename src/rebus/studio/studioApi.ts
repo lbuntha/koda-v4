@@ -106,6 +106,8 @@ export interface ListQuery {
   source?: string;
   /** Only puzzles that use this drawing (`rebus-honey`). */
   icon?: string;
+  /** Only this kind of question. */
+  kind?: "picture" | "math" | "choice";
   q?: string;
   skip?: number;
   limit?: number;

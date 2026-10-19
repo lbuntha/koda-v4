@@ -1,6 +1,7 @@
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { BUILT_IN_CATEGORIES, categories, categoryLabel, nameOfCategory, parseCategories, setCategories } from "./categories";
+import { BUILT_IN_CATEGORIES, categories, parseCategories, setCategories } from "./categories";
+import { categoryLabel, nameOfCategory } from "./categoryNames";
 import { idFromName, CategoriesPanel } from "./studio/CategoriesPanel";
 import { StudioAPI, type StudioCategory } from "./studio/studioApi";
 

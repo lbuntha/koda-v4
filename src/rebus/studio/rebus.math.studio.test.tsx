@@ -51,3 +51,19 @@ describe("writing a math question", () => {
     expect(api.create.mock.calls[0][0]).toMatchObject({ kind: "math", category: "math", math: { a: 6, op: "×", b: 7, unknown: "result" }, answer: "42", approve: false });
   });
 });
+
+describe("a saved question on the Studio card", () => {
+  it("names its kind and lists a multiple-choice question's answers with the right one ticked", async () => {
+    const { PuzzleCard } = await import("./PuzzleCard");
+    const choice = {
+      id: "q", category: "countries", ages: [7, 12], difficulty: 1, trick: "compound", kind: "choice", choice: { options: ["Paris", "Rome"], correct: 1 },
+      pieces: [{ kind: "word", text: "Capital of Italy?" }], answer: "Rome", accepts: [], explanation: "Rome is the capital.", source: "official",
+      status: "draft", seeded: false, note: "", issues: [],
+    } as never;
+    render(<PuzzleCard puzzle={choice} />);
+    expect(screen.getByText("Multiple choice")).toBeTruthy();
+    const list = screen.getByRole("list", { name: "The answers" });
+    expect(list.textContent).toContain("✓ Rome");
+    expect(list.textContent).not.toContain("✓ Paris");
+  });
+});

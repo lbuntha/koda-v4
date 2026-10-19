@@ -15,7 +15,7 @@ import { themeSystem } from "../../lib/themeSystem";
 import { UIBadge, UIButton, UITabs } from "../../components/ui";
 import { cue } from "../sound";
 import { loadAutoNext, saveAutoNext } from "../prefs";
-import { categoryLabel } from "../categories";
+import { categoryLabel } from "../categoryNames";
 import type { MachineLevel } from "../machine";
 import type { RebusSettings } from "../settings";
 import { useRebusCategories, type RebusBank } from "../bank";
