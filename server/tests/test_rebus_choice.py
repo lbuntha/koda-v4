@@ -48,7 +48,7 @@ def question(options=("Paris", "Rome", "Madrid"), correct=0, **over):
         "difficulty": 1,
         "trick": "compound",
         "kind": "choice",
-        "pieces": [{"kind": "word", "text": "What is the capital of France?"}],
+        "pieces": [{"kind": "word", "text": "In which city is the Eiffel Tower?"}],
         "choice": {"options": list(options), "correct": correct},
         "explanation": "Paris is the capital of France.",
     }
@@ -110,3 +110,11 @@ async def test_changing_which_option_is_right_changes_the_answer(client, admin):
     changed = await client.patch(f"/rebus/studio/puzzles/{made['id']}", json=marked, headers=admin)
     assert changed.status_code == 200, changed.text
     assert changed.json()["answer"] == "Rome" and changed.json()["issues"] == []
+
+
+def test_every_multiple_choice_sample_that_ships_is_sound_and_in_step():
+    samples = [p for p in SEED if p.get("kind") == "choice"]
+    assert len(samples) >= 12
+    known = frozenset({p["category"] for p in samples})
+    assert [(p["id"], codes) for p in samples if (codes := validate_puzzle(p, known_categories=known))] == []
+    assert all(p["choice"]["options"][p["choice"]["correct"]] == p["answer"] for p in samples)

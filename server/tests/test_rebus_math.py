@@ -132,4 +132,5 @@ async def test_the_studio_list_can_be_narrowed_to_one_kind_of_question(client, a
     # Puzzles written before kinds existed have none, and are picture puzzles.
     picture = (await client.get("/rebus/studio/puzzles?kind=picture&limit=100", headers=admin)).json()
     assert picture["total"] > 0 and all(p.get("kind", "picture") == "picture" for p in picture["puzzles"])
-    assert (await client.get("/rebus/studio/puzzles?kind=choice", headers=admin)).json()["total"] == 0
+    choice = (await client.get("/rebus/studio/puzzles?kind=choice&limit=100", headers=admin)).json()
+    assert choice["total"] >= 12 and all(p["kind"] == "choice" for p in choice["puzzles"])

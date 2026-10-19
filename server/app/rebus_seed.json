@@ -8668,5 +8668,495 @@
   "accepts": [],
   "explanation": "91 ÷ 7 = 13.",
   "source": "official"
+ },
+ {
+  "id": "choice-capital-france",
+  "category": "countries",
+  "ages": [
+   7,
+   12
+  ],
+  "difficulty": 1,
+  "trick": "compound",
+  "kind": "choice",
+  "choice": {
+   "options": [
+    "Paris",
+    "Rome",
+    "Madrid",
+    "Berlin"
+   ],
+   "correct": 0
+  },
+  "pieces": [
+   {
+    "kind": "word",
+    "text": "What is the capital of France?"
+   }
+  ],
+  "answer": "Paris",
+  "accepts": [],
+  "explanation": "Paris is the capital of France.",
+  "source": "official"
+ },
+ {
+  "id": "choice-boot-country",
+  "category": "countries",
+  "ages": [
+   8,
+   13
+  ],
+  "difficulty": 2,
+  "trick": "compound",
+  "kind": "choice",
+  "choice": {
+   "options": [
+    "Italy",
+    "Spain",
+    "Japan",
+    "Egypt"
+   ],
+   "correct": 0
+  },
+  "pieces": [
+   {
+    "kind": "word",
+    "text": "Which country is shaped like a boot?"
+   }
+  ],
+  "answer": "Italy",
+  "accepts": [],
+  "explanation": "Italy looks like a boot on the map.",
+  "source": "official"
+ },
+ {
+  "id": "choice-capital-cambodia",
+  "category": "countries",
+  "ages": [
+   6,
+   12
+  ],
+  "difficulty": 1,
+  "trick": "compound",
+  "kind": "choice",
+  "choice": {
+   "options": [
+    "Phnom Penh",
+    "Siem Reap",
+    "Battambang",
+    "Kampot"
+   ],
+   "correct": 0
+  },
+  "pieces": [
+   {
+    "kind": "word",
+    "text": "What is the capital of Cambodia?"
+   }
+  ],
+  "answer": "Phnom Penh",
+  "accepts": [],
+  "explanation": "Phnom Penh is the capital of Cambodia.",
+  "source": "official"
+ },
+ {
+  "id": "choice-which-animal-moo",
+  "category": "animals",
+  "ages": [
+   5,
+   9
+  ],
+  "difficulty": 1,
+  "trick": "compound",
+  "kind": "choice",
+  "choice": {
+   "options": [
+    "Cow",
+    "Duck",
+    "Cat",
+    "Sheep"
+   ],
+   "correct": 0
+  },
+  "pieces": [
+   {
+    "kind": "word",
+    "text": "Which animal says moo?"
+   }
+  ],
+  "answer": "Cow",
+  "accepts": [],
+  "explanation": "A cow says moo.",
+  "source": "official"
+ },
+ {
+  "id": "choice-animal-picture",
+  "category": "animals",
+  "ages": [
+   5,
+   8
+  ],
+  "difficulty": 1,
+  "trick": "compound",
+  "kind": "choice",
+  "choice": {
+   "options": [
+    "Cat",
+    "Dog",
+    "Fish",
+    "Horse"
+   ],
+   "correct": 0
+  },
+  "pieces": [
+   {
+    "kind": "word",
+    "text": "Which animal is this?"
+   },
+   {
+    "kind": "icon",
+    "id": "rebus-cat",
+    "name": "animal"
+   }
+  ],
+  "answer": "Cat",
+  "accepts": [],
+  "explanation": "The picture shows a cat.",
+  "source": "official"
+ },
+ {
+  "id": "choice-which-is-a-bird",
+  "category": "animals",
+  "ages": [
+   6,
+   10
+  ],
+  "difficulty": 1,
+  "trick": "compound",
+  "kind": "choice",
+  "choice": {
+   "options": [
+    "Eagle",
+    "Shark",
+    "Frog",
+    "Horse"
+   ],
+   "correct": 0
+  },
+  "pieces": [
+   {
+    "kind": "word",
+    "text": "Which of these is a bird?"
+   }
+  ],
+  "answer": "Eagle",
+  "accepts": [],
+  "explanation": "An eagle is a bird. It has feathers and wings.",
+  "source": "official"
+ },
+ {
+  "id": "choice-what-is-this-sun",
+  "category": "science",
+  "ages": [
+   5,
+   8
+  ],
+  "difficulty": 1,
+  "trick": "compound",
+  "kind": "choice",
+  "choice": {
+   "options": [
+    "The sun",
+    "The moon",
+    "A star",
+    "A cloud"
+   ],
+   "correct": 0
+  },
+  "pieces": [
+   {
+    "kind": "word",
+    "text": "What is this?"
+   },
+   {
+    "kind": "icon",
+    "id": "rebus-sun",
+    "name": "picture"
+   }
+  ],
+  "answer": "The sun",
+  "accepts": [],
+  "explanation": "The picture shows the sun.",
+  "source": "official"
+ },
+ {
+  "id": "choice-plant-food",
+  "category": "science",
+  "ages": [
+   8,
+   13
+  ],
+  "difficulty": 2,
+  "trick": "compound",
+  "kind": "choice",
+  "choice": {
+   "options": [
+    "Sunlight",
+    "Plastic",
+    "Sand",
+    "Metal"
+   ],
+   "correct": 0
+  },
+  "pieces": [
+   {
+    "kind": "word",
+    "text": "Which one helps a plant make its food?"
+   }
+  ],
+  "answer": "Sunlight",
+  "accepts": [],
+  "explanation": "A plant uses sunlight, water and air to make its food.",
+  "source": "official"
+ },
+ {
+  "id": "choice-spider-legs",
+  "category": "science",
+  "ages": [
+   7,
+   12
+  ],
+  "difficulty": 2,
+  "trick": "compound",
+  "kind": "choice",
+  "choice": {
+   "options": [
+    "6",
+    "8",
+    "10",
+    "4"
+   ],
+   "correct": 1
+  },
+  "pieces": [
+   {
+    "kind": "word",
+    "text": "How many legs does a spider have?"
+   }
+  ],
+  "answer": "8",
+  "accepts": [],
+  "explanation": "A spider has 8 legs.",
+  "source": "official"
+ },
+ {
+  "id": "choice-which-vegetable",
+  "category": "food",
+  "ages": [
+   5,
+   9
+  ],
+  "difficulty": 1,
+  "trick": "compound",
+  "kind": "choice",
+  "choice": {
+   "options": [
+    "Carrot",
+    "Apple",
+    "Banana",
+    "Mango"
+   ],
+   "correct": 0
+  },
+  "pieces": [
+   {
+    "kind": "word",
+    "text": "Which one is a vegetable?"
+   }
+  ],
+  "answer": "Carrot",
+  "accepts": [],
+  "explanation": "A carrot is a vegetable. The others are fruit.",
+  "source": "official"
+ },
+ {
+  "id": "choice-days-in-week",
+  "category": "school",
+  "ages": [
+   6,
+   10
+  ],
+  "difficulty": 1,
+  "trick": "compound",
+  "kind": "choice",
+  "choice": {
+   "options": [
+    "5",
+    "7",
+    "10",
+    "12"
+   ],
+   "correct": 1
+  },
+  "pieces": [
+   {
+    "kind": "word",
+    "text": "How many days are in a week?"
+   }
+  ],
+  "answer": "7",
+  "accepts": [],
+  "explanation": "A week has 7 days.",
+  "source": "official"
+ },
+ {
+  "id": "choice-piece-of-cake",
+  "category": "sayings",
+  "ages": [
+   10,
+   14
+  ],
+  "difficulty": 3,
+  "trick": "compound",
+  "kind": "choice",
+  "choice": {
+   "options": [
+    "Very easy",
+    "Very sweet",
+    "A birthday",
+    "A small gift"
+   ],
+   "correct": 0
+  },
+  "pieces": [
+   {
+    "kind": "word",
+    "text": "What does \"a piece of cake\" mean?"
+   }
+  ],
+  "answer": "Very easy",
+  "accepts": [],
+  "explanation": "If something is a piece of cake, it is very easy to do.",
+  "source": "official"
+ },
+ {
+  "id": "choice-eggs-two-boxes",
+  "category": "math",
+  "ages": [
+   7,
+   10
+  ],
+  "difficulty": 2,
+  "trick": "compound",
+  "kind": "choice",
+  "choice": {
+   "options": [
+    "14",
+    "24",
+    "122",
+    "20"
+   ],
+   "correct": 1
+  },
+  "pieces": [
+   {
+    "kind": "word",
+    "text": "A box has 12 eggs. How many eggs are in 2 boxes?"
+   }
+  ],
+  "answer": "24",
+  "accepts": [],
+  "explanation": "12 + 12 = 24.",
+  "source": "official"
+ },
+ {
+  "id": "choice-km-capital",
+  "category": "khmer",
+  "ages": [
+   6,
+   12
+  ],
+  "difficulty": 1,
+  "trick": "compound",
+  "kind": "choice",
+  "choice": {
+   "options": [
+    "ភ្នំពេញ",
+    "សៀមរាប",
+    "បាត់ដំបង",
+    "កំពត"
+   ],
+   "correct": 0
+  },
+  "pieces": [
+   {
+    "kind": "word",
+    "text": "រាជធានីនៃប្រទេសកម្ពុជាគឺអ្វី?"
+   }
+  ],
+  "answer": "ភ្នំពេញ",
+  "accepts": [],
+  "explanation": "ភ្នំពេញជារាជធានីនៃប្រទេសកម្ពុជា។",
+  "source": "official"
+ },
+ {
+  "id": "choice-km-leaf-colour",
+  "category": "khmer",
+  "ages": [
+   5,
+   9
+  ],
+  "difficulty": 1,
+  "trick": "compound",
+  "kind": "choice",
+  "choice": {
+   "options": [
+    "បៃតង",
+    "ក្រហម",
+    "ខ្មៅ",
+    "ស"
+   ],
+   "correct": 0
+  },
+  "pieces": [
+   {
+    "kind": "word",
+    "text": "ស្លឹកឈើមានពណ៌អ្វី?"
+   }
+  ],
+  "answer": "បៃតង",
+  "accepts": [],
+  "explanation": "ស្លឹកឈើភាគច្រើនមានពណ៌បៃតង។",
+  "source": "official"
+ },
+ {
+  "id": "choice-km-days-week",
+  "category": "khmer",
+  "ages": [
+   6,
+   10
+  ],
+  "difficulty": 1,
+  "trick": "compound",
+  "kind": "choice",
+  "choice": {
+   "options": [
+    "5",
+    "7",
+    "10",
+    "12"
+   ],
+   "correct": 1
+  },
+  "pieces": [
+   {
+    "kind": "word",
+    "text": "មួយសប្តាហ៍មានប៉ុន្មានថ្ងៃ?"
+   }
+  ],
+  "answer": "7",
+  "accepts": [],
+  "explanation": "មួយសប្តាហ៍មាន ៧ ថ្ងៃ។",
+  "source": "official"
  }
 ]
