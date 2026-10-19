@@ -12,7 +12,9 @@ import React, { useEffect, useRef, useState } from "react";
 import { Bot, BotMessageSquare, SkipForward, User } from "lucide-react";
 import { useT } from "../../lib/i18n";
 import { themeSystem } from "../../lib/themeSystem";
-import { UIButton, UICountdown, UICountUp, UIHintPanel, UIKidMessage, UIOutcome, UIPointsPop, UIProgressBar } from "../../components/ui";
+import { UIButton, UIChoiceGrid, UICountdown, UICountUp, UIHintPanel, UIKidMessage, UIOutcome, UIPointsPop, UIProgressBar } from "../../components/ui";
+import { isChoiceSpec, visibleOptions } from "../choice";
+import { matchAnswer } from "../answer";
 import { elapsedOf, hintStatus, machineLockedOut, machineProgress, type RoundState } from "../engine";
 import { LetterTiles } from "./LetterTiles";
 import { PuzzleCanvas } from "./PieceView";
@@ -105,6 +107,8 @@ export const PlayView: React.FC<{ round: RebusRound; letterTiles: boolean }> = (
   const { state, now, send } = round;
   const [text, setText] = useState("");
   const [showWrong, setShowWrong] = useState(false);
+  // Answers tapped and wrong, for a multiple-choice question: crossed out, and gone with the next puzzle.
+  const [tried, setTried] = useState<ReadonlySet<string>>(new Set());
   const wrong = state?.run.wrong ?? 0;
   const seenWrong = useRef(0);
   const input = useRef<HTMLInputElement>(null);
@@ -123,6 +127,7 @@ export const PlayView: React.FC<{ round: RebusRound; letterTiles: boolean }> = (
   const puzzleId = state?.run.puzzle.id;
   useEffect(() => {
     setText("");
+    setTried(new Set());
     setShowWrong(false);
     seenWrong.current = 0;
     // The cursor is in the answer box, ready to type.
@@ -166,7 +171,17 @@ export const PlayView: React.FC<{ round: RebusRound; letterTiles: boolean }> = (
         ) : null}
       </div>
 
-      {letterTiles && run.puzzle.kind !== "math" ? (
+      {run.puzzle.kind === "choice" && isChoiceSpec(run.puzzle.choice) ? (
+        <UIChoiceGrid
+          label={t("rebus.chooseAnswer")}
+          options={visibleOptions(run.puzzle.choice, run.hints.length, run.puzzle.id)}
+          tried={tried}
+          onPick={(option) => {
+            if (!matchAnswer(run.puzzle, option).ok) setTried((s) => new Set(s).add(option));
+            send({ type: "answer", text: option });
+          }}
+        />
+      ) : letterTiles && run.puzzle.kind !== "math" ? (
         <LetterTiles key={run.puzzle.id} answer={run.puzzle.answer} seed={run.puzzle.id} onSubmit={(value) => send({ type: "answer", text: value })} />
       ) : (
         <form onSubmit={submit} className="flex gap-2">

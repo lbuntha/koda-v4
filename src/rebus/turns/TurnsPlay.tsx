@@ -8,11 +8,13 @@ import React, { useEffect, useRef, useState } from "react";
 import { ArrowRight, Hand, LogOut, RotateCcw, SkipForward, Trophy } from "lucide-react";
 import { useT } from "../../lib/i18n";
 import { themeSystem } from "../../lib/themeSystem";
-import { UIButton, UICountdown, UICountUp, UIHintPanel, UIKidMessage, UIOutcome, UIPointsPop, UIProgressBar } from "../../components/ui";
+import { UIButton, UIChoiceGrid, UICountdown, UICountUp, UIHintPanel, UIKidMessage, UIOutcome, UIPointsPop, UIProgressBar } from "../../components/ui";
 import { useNickname } from "../group/NicknamePicker";
 import { Podium } from "../group/Podium";
 import { RoomAvatar } from "../group/RoomAvatar";
 import type { RoomPlayer } from "../group/types";
+import { matchAnswer } from "../answer";
+import { isChoiceSpec, visibleOptions } from "../choice";
 import { cue } from "../sound";
 import { LetterTiles } from "../ui/LetterTiles";
 import { PuzzleCanvas } from "../ui/PieceView";
@@ -73,6 +75,7 @@ export const TurnPlay: React.FC<{ game: TurnsGame; letterTiles: boolean }> = ({ 
   const { state, now, send } = game;
   const [text, setText] = useState("");
   const [showWrong, setShowWrong] = useState(false);
+  const [tried, setTried] = useState<ReadonlySet<string>>(new Set());
   const seenWrong = useRef(0);
   const input = useRef<HTMLInputElement>(null);
   const puzzleId = state?.config.puzzles[state.index].id;
@@ -80,6 +83,7 @@ export const TurnPlay: React.FC<{ game: TurnsGame; letterTiles: boolean }> = ({ 
 
   useEffect(() => {
     setText("");
+    setTried(new Set());
     setShowWrong(false);
     seenWrong.current = 0;
     input.current?.focus();
@@ -132,7 +136,17 @@ export const TurnPlay: React.FC<{ game: TurnsGame; letterTiles: boolean }> = ({ 
 
       <div aria-live="polite">{showWrong && <UIKidMessage tone="nudge" title={t("rebus.wrongTitle")} message={t("rebus.wrongText")} />}</div>
 
-      {letterTiles && puzzle.kind !== "math" ? (
+      {puzzle.kind === "choice" && isChoiceSpec(puzzle.choice) ? (
+        <UIChoiceGrid
+          label={t("rebus.chooseAnswer")}
+          options={visibleOptions(puzzle.choice, state.hints.length, puzzle.id)}
+          tried={tried}
+          onPick={(option) => {
+            if (!matchAnswer(puzzle, option).ok) setTried((s) => new Set(s).add(option));
+            send({ type: "answer", text: option });
+          }}
+        />
+      ) : letterTiles && puzzle.kind !== "math" ? (
         <LetterTiles key={puzzle.id} answer={puzzle.answer} seed={puzzle.id} onSubmit={(value) => send({ type: "answer", text: value })} />
       ) : (
         <form onSubmit={submit} className="flex gap-2">

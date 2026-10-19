@@ -21,7 +21,7 @@ from typing import Annotated, Any
 
 from fastapi import APIRouter, Depends, Query
 
-from app import rebus_math
+from app import rebus_choice, rebus_math
 from app.deps import AUTHENTICATED, CurrentPrincipal, Db, require
 from app.errors import AppError, Conflict, Forbidden, NotFound
 from app.models.auth import Principal
@@ -218,7 +218,7 @@ async def studio_create(body: PuzzleIn, db: Db, p: CanWrite) -> dict[str, Any]:
     publish); one that does not stays a draft and the response lists what to fix.
     """
     # A math question's prompt, answer and explanation come from its numbers, never from the author.
-    doc = rebus_math.normalise(body.model_dump(mode="json", exclude_none=True, exclude={"approve"}))
+    doc = rebus_choice.normalise(rebus_math.normalise(body.model_dump(mode="json", exclude_none=True, exclude={"approve"})))
     doc.update(id=await repo.unique_id(db, doc["category"], doc["answer"] or doc.get("kind", "puzzle")), createdBy=p.subject_id)
     row = await repo.insert(db, doc)
     issues = await _problems(db, row)
@@ -234,6 +234,11 @@ async def studio_edit(puzzle_id: str, body: PuzzlePatch, db: Db, p: CanWrite) ->
         raise NotFound("There is no such puzzle.")
     changes = body.model_dump(mode="json", exclude_none=True)
     merged = {**row, **changes}
+    if row.get("kind") == "choice":
+        # The right option decides the answer; the question's pieces are the author's.
+        derived = rebus_choice.normalise(merged)
+        merged = {**merged, "answer": derived["answer"], "accepts": derived["accepts"]}
+        changes.update(answer=merged["answer"], accepts=merged["accepts"])
     if row.get("kind") == "math":
         # Change the numbers and the prompt and answer follow; the rest of the question cannot be edited by hand.
         derived = rebus_math.normalise({**merged, "explanation": changes.get("explanation", "")})

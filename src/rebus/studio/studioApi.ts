@@ -10,6 +10,7 @@ import { accessToken, request } from "../../lib/sync";
 import { tutorHeaders } from "../../lib/tutorApi";
 import { translate } from "../../lib/i18n";
 import type { GenerationResult } from "../generate/pipeline";
+import type { ChoiceSpec } from "../choice";
 import type { MathSpec } from "../math";
 import type { Piece, Puzzle } from "../types";
 
@@ -58,8 +59,10 @@ export interface SavedPrompt {
 
 export interface PuzzleDraft {
   /** "math": the numbers are in `math`, and the prompt, answer and explanation are worked out from them. */
-  kind?: "picture" | "math";
+  kind?: "picture" | "math" | "choice";
   math?: MathSpec;
+  /** The answers of a multiple-choice question and which is right; its `answer` follows from them. */
+  choice?: ChoiceSpec;
   category: string;
   ages: [number, number];
   difficulty: number;
@@ -171,6 +174,7 @@ export const draftOf = (p: StudioPuzzle): PuzzleDraft => ({
   difficulty: p.difficulty,
   trick: p.trick,
   ...(p.kind === "math" && p.math ? { kind: "math" as const, math: p.math } : {}),
+  ...(p.kind === "choice" && p.choice ? { kind: "choice" as const, choice: p.choice } : {}),
   pieces: p.pieces,
   answer: p.answer,
   accepts: p.accepts,

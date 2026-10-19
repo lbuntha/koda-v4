@@ -54,6 +54,13 @@ class MathSpecIn(Model):
     unknown: Literal["result", "a", "b"] = "result"
 
 
+class ChoiceSpecIn(Model):
+    """The answers of a multiple-choice question. Loose here; `rebus_choice.problem` says what is wrong."""
+
+    options: list[str] = Field(max_length=8)
+    correct: int = 0
+
+
 class PuzzleIn(Model):
     """A puzzle as an author writes it. May be wrong: a draft has to be savable.
 
@@ -67,8 +74,9 @@ class PuzzleIn(Model):
     difficulty: int
     trick: Literal["compound", "sound-alike", "position", "size", "style", "add-remove"]
     #: "picture" (pieces add up to a typed answer) or "math" (numbers, with the prompt and answer worked out from them).
-    kind: Literal["picture", "math"] = "picture"
+    kind: Literal["picture", "math", "choice"] = "picture"
     math: MathSpecIn | None = None
+    choice: ChoiceSpecIn | None = None
     pieces: list[Piece] = Field(default_factory=list, max_length=12)
     answer: str = Field(default="", max_length=80)
     accepts: list[Annotated[str, Field(max_length=80)]] = Field(default_factory=list, max_length=8)
@@ -91,6 +99,7 @@ class PuzzlePatch(Model):
     difficulty: int | None = None
     trick: Literal["compound", "sound-alike", "position", "size", "style", "add-remove"] | None = None
     math: MathSpecIn | None = None
+    choice: ChoiceSpecIn | None = None
     pieces: list[Piece] | None = Field(default=None, max_length=12)
     answer: str | None = Field(default=None, max_length=80)
     accepts: list[Annotated[str, Field(max_length=80)]] | None = Field(default=None, max_length=8)

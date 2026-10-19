@@ -7,6 +7,7 @@
  */
 
 import type { AgeRange } from "../lib/ages";
+import type { ChoiceSpec } from "./choice";
 import type { MathSpec } from "./math";
 
 /**
@@ -45,9 +46,11 @@ export interface Puzzle {
   difficulty: Difficulty;
   trick: Trick;
   /** "picture" (the default: pieces add up to a typed answer) or "math" (the numbers are in `math`). */
-  kind?: "picture" | "math";
+  kind?: "picture" | "math" | "choice";
   /** A math question's numbers. Its prompt (the one word piece), answer and explanation are worked out from them. */
   math?: MathSpec;
+  /** A multiple-choice question's answers and which is right. Its `answer` is that option, worked out from it. */
+  choice?: ChoiceSpec;
   pieces: Piece[];
   /** The answer as it is shown after the puzzle. */
   answer: string;

@@ -38,6 +38,7 @@ PUBLIC_FIELDS = (
     "trick",
     "kind",
     "math",
+    "choice",
     "pieces",
     "answer",
     "accepts",
@@ -155,9 +156,8 @@ async def get(db: AsyncIOMotorDatabase, puzzle_id: str) -> dict[str, Any] | None
 
 async def duplicate_index(db: AsyncIOMotorDatabase) -> list[dict[str, Any]]:
     """Every puzzle that is in play or waiting, just enough to tell whether an answer is taken. One query."""
-    return await db.rebus_puzzles.find(
-        {"status": {"$in": ["draft", "approved", "published"]}}, {"id": 1, "answer": 1, "kind": 1, "math": 1, "status": 1, "createdAt": 1}
-    ).to_list(length=20000)
+    keep = {"id": 1, "answer": 1, "kind": 1, "math": 1, "pieces": 1, "status": 1, "createdAt": 1}
+    return await db.rebus_puzzles.find({"status": {"$in": ["draft", "approved", "published"]}}, keep).to_list(length=20000)
 
 
 def duplicate_in(index: list[dict[str, Any]], row: dict[str, Any]) -> bool:

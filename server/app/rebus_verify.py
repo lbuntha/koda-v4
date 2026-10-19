@@ -19,7 +19,7 @@ from functools import lru_cache
 from pathlib import Path
 from typing import Any
 
-from app import rebus_math
+from app import rebus_choice, rebus_math
 from app.ages import is_age_range
 
 #: What a deployment starts with. The real list is data (`repos/rebus_categories.py`), passed to `validate_puzzle`.
@@ -74,13 +74,14 @@ def typo_allowance(length: int) -> int:
     return 2 if length >= 14 else 1 if length >= 8 else 0
 
 
-def matches(answer: str, accepts: list[str], typed: str) -> bool:
+def matches(answer: str, accepts: list[str], typed: str, *, exact: bool = False) -> bool:
+    """Is what was typed the answer? `exact` (multiple choice) allows no slipped key: one wrong option is not another."""
     got = compact_answer(typed)
     if not got:
         return False
     for candidate in [answer, *accepts]:
         target = compact_answer(candidate)
-        if target and (got == target or edit_distance(got, target) <= typo_allowance(len(target))):
+        if target and (got == target or (not exact and edit_distance(got, target) <= typo_allowance(len(target)))):
             return True
     return False
 
@@ -90,6 +91,10 @@ def answer_key(puzzle: dict[str, Any]) -> str:
     spec = puzzle.get("math")
     if puzzle.get("kind") == "math" and isinstance(spec, dict) and rebus_math.problem(spec) is None:
         return "math|" + rebus_math.prompt(spec)
+    if puzzle.get("kind") == "choice":
+        # The same answer under a different question is a different puzzle ("Paris" is the answer to many).
+        asked = "".join(piece_names(puzzle.get("pieces") or []))
+        return "choice|" + compact_answer(asked) + "|" + compact_answer(str(puzzle.get("answer", "")))
     return compact_answer(str(puzzle.get("answer", "")))
 
 
@@ -135,6 +140,16 @@ def _math_issues(puzzle: dict[str, Any]) -> list[str]:
     return [] if in_step else ["math-out-of-step"]
 
 
+def _choice_issues(puzzle: dict[str, Any]) -> list[str]:
+    """What is wrong with a multiple-choice question: its answers, or its answer drifting from the right one."""
+    spec = puzzle.get("choice")
+    wrong = rebus_choice.problem(spec)
+    if wrong:
+        return [wrong]
+    in_step = str(puzzle.get("answer", "")) == rebus_choice.answer(spec) and not puzzle.get("accepts")
+    return [] if in_step else ["choice-out-of-step"]
+
+
 def validate_puzzle(
     puzzle: dict[str, Any], *, known_icons: frozenset[str] | None = None, known_photos: frozenset[str] | None = None,
     known_categories: frozenset[str] | None = None,
@@ -151,8 +166,11 @@ def validate_puzzle(
         issues.append("bad-difficulty")
 
     math_kind = puzzle.get("kind") == "math"
+    choice_kind = puzzle.get("kind") == "choice"
     if math_kind:
         issues.extend(_math_issues(puzzle))
+    if choice_kind:
+        issues.extend(_choice_issues(puzzle))
 
     if not math_kind and not any(p.get("kind") != "op" for p in pieces):
         issues.append("no-picture")
@@ -166,12 +184,12 @@ def validate_puzzle(
 
     answer = compact_answer(str(puzzle.get("answer", "")))
     # A number is short by nature, and a math prompt is not a picture that could spell its answer.
-    if not math_kind and len(answer) < MIN_ANSWER_LETTERS:
+    if not (math_kind or choice_kind) and len(answer) < MIN_ANSWER_LETTERS:
         issues.append("answer-short")
 
     every = {compact_answer(a) for a in [str(puzzle.get("answer", "")), *map(str, puzzle.get("accepts") or [])]}
     every.discard("")
-    if not math_kind and any(compact_answer(t) in every for p in pieces for t in _written_text(p)):
+    if not (math_kind or choice_kind) and any(compact_answer(t) in every for p in pieces for t in _written_text(p)):
         issues.append("answer-in-puzzle")
 
     if len(str(puzzle.get("explanation", "")).strip()) < MIN_EXPLANATION_CHARS:
@@ -205,6 +223,12 @@ ISSUE_MESSAGES: dict[str, str] = {
     "unknown-icon": "A picture is not in the icon library.",
     "photo-no-name": "Say what each photo is read as.",
     "unknown-photo": "A photo was not uploaded. Upload it again.",
+    "choice-missing": "A multiple-choice question needs its answers.",
+    "choice-options": "Give two to four answers.",
+    "choice-blank": "Every answer needs some text (up to 40 characters).",
+    "choice-duplicate": "Two answers say the same thing. Make each one different.",
+    "choice-correct": "Mark which answer is the right one.",
+    "choice-out-of-step": "The answer does not match the answer you marked as right. Save it again.",
     "math-missing": "A math question needs its numbers.",
     "bad-math-numbers": "Use whole numbers from 0 to 9999.",
     "bad-math-op": "Pick +, −, × or ÷, and which part is missing.",

@@ -296,11 +296,14 @@ describe("creating", () => {
     api.create.mockResolvedValue(puzzle(7, { status: "approved", seeded: false }));
     render(<RebusStudio />);
     fireEvent.click(await screen.findByRole("button", { name: /Write one myself/ }));
+    fireEvent.click(await screen.findByRole("radio", { name: /^Picture puzzle/ }));
+    fireEvent.click(screen.getByRole("button", { name: "Next" }));
     fireEvent.click(await screen.findByRole("button", { name: "cheese" }));
     fireEvent.click(screen.getByRole("button", { name: "+" }));
     fireEvent.click(screen.getByRole("button", { name: "pie" }));
     fireEvent.change(screen.getAllByRole("textbox").find((el) => (el as HTMLInputElement).maxLength === 80 && !(el as HTMLInputElement).placeholder) as HTMLElement, { target: { value: "Cheese pie" } });
     fireEvent.change(screen.getByLabelText("Why it works"), { target: { value: "cheese + pie = cheese pie." } });
+    fireEvent.click(screen.getByRole("button", { name: "Next" }));
     fireEvent.click(screen.getByRole("tab", { name: "Little kids" }));
     fireEvent.click(screen.getByRole("button", { name: "Save & approve" }));
     await screen.findByText(/Saved “Cheese pie” and approved it/);

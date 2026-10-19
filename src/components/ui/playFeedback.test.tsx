@@ -1,6 +1,6 @@
 import { act, fireEvent, render, screen } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { UICountdown, UICountUp, UIHintPanel, UIOutcome, UIPointsPop, UIXpReward, isLowTime } from "./index";
+import { UIChoiceGrid, UICountdown, UICountUp, UIHintPanel, UIOutcome, UIPointsPop, UIXpReward, isLowTime } from "./index";
 
 afterEach(() => vi.useRealTimers());
 
@@ -98,5 +98,30 @@ describe("UIXpReward and UIPointsPop", () => {
   it("is decoration that screen readers skip", () => {
     const { container } = render(<div className="relative"><UIPointsPop>+3</UIPointsPop></div>);
     expect(container.querySelector("[aria-hidden='true']")?.textContent).toBe("+3");
+  });
+});
+
+describe("UIChoiceGrid", () => {
+  const options = ["Paris", "Rome", "Madrid"];
+
+  it("lists the answers as big lettered buttons and says which was tapped", () => {
+    const pick = vi.fn();
+    render(<UIChoiceGrid label="Choose your answer" options={options} onPick={pick} />);
+    expect(screen.getByRole("group", { name: "Choose your answer" })).toBeTruthy();
+    fireEvent.click(screen.getByRole("button", { name: /Rome/ }));
+    expect(pick).toHaveBeenCalledWith("Rome");
+  });
+
+  it("crosses out a wrong answer so it cannot be tapped again, and ticks the right one", () => {
+    const pick = vi.fn();
+    const { rerender } = render(<UIChoiceGrid label="Choose" options={options} tried={new Set(["Rome"])} onPick={pick} />);
+    const rome = screen.getByRole("button", { name: /Rome/ }) as HTMLButtonElement;
+    expect(rome.disabled).toBe(true);
+    expect(rome.className).toContain("line-through");
+    fireEvent.click(rome);
+    expect(pick).not.toHaveBeenCalled();
+    rerender(<UIChoiceGrid label="Choose" options={options} chosen="Paris" onPick={pick} />);
+    // Once one is chosen the others stand still.
+    for (const b of screen.getAllByRole("button")) expect((b as HTMLButtonElement).disabled).toBe(true);
   });
 });

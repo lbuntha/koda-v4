@@ -45,3 +45,4 @@ export * from "./UIOutcome";
 export * from "./UICountUp";
 export * from "./UIPointsPop";
 export * from "./UIXpReward";
+export * from "./UIChoiceGrid";

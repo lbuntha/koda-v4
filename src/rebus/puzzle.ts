@@ -9,6 +9,7 @@
 import { isAgeRange } from "../lib/ages";
 import { compactAnswer } from "./answer";
 import { isCategoryId } from "./categories";
+import { choiceAnswer, choiceProblem, isChoiceSpec } from "./choice";
 import { isMathSpec, mathAnswer, mathPrompt, mathProblem } from "./math";
 import type { Piece, Puzzle } from "./types";
 
@@ -29,6 +30,12 @@ export type PuzzleIssueCode =
   | "unknown-icon"
   | "photo-no-name"
   | "unknown-photo"
+  | "choice-missing"
+  | "choice-options"
+  | "choice-blank"
+  | "choice-duplicate"
+  | "choice-correct"
+  | "choice-out-of-step"
   | "math-missing"
   | "bad-math-numbers"
   | "bad-math-op"
@@ -66,6 +73,15 @@ const writtenText = (piece: Piece): string[] => {
   return [];
 };
 
+const CHOICE_MESSAGES = {
+  "choice-missing": "A multiple-choice question needs its answers.",
+  "choice-options": "Give two to four answers.",
+  "choice-blank": "Every answer needs some text (up to 40 characters).",
+  "choice-duplicate": "Two answers say the same thing. Make each one different.",
+  "choice-correct": "Mark which answer is the right one.",
+  "choice-out-of-step": "The answer does not match the answer you marked as right. Save it again.",
+} as const;
+
 const MATH_MESSAGES = {
   "bad-math-numbers": "Use whole numbers from 0 to 9999.",
   "bad-math-op": "Pick +, −, × or ÷, and which part is missing.",
@@ -96,6 +112,13 @@ export const validatePuzzle = (puzzle: Puzzle, options: { iconIds?: ReadonlySet<
     }
   }
 
+  const isChoice = puzzle.kind === "choice";
+  if (isChoice) {
+    const wrong = choiceProblem(puzzle.choice);
+    if (wrong) add(wrong, CHOICE_MESSAGES[wrong]);
+    else if (isChoiceSpec(puzzle.choice) && (puzzle.answer !== choiceAnswer(puzzle.choice) || puzzle.accepts.length > 0)) add("choice-out-of-step", CHOICE_MESSAGES["choice-out-of-step"]);
+  }
+
   const meaningful = meaningfulPieces(puzzle.pieces);
   if (!isMath && meaningful.length === 0) add("no-picture", "Add at least one picture or word.");
   if (puzzle.pieces.length > MAX_PIECES) add("too-many-pieces", `Use at most ${MAX_PIECES} pieces.`);
@@ -107,10 +130,10 @@ export const validatePuzzle = (puzzle: Puzzle, options: { iconIds?: ReadonlySet<
   }
 
   const answer = compactAnswer(puzzle.answer);
-  if (!isMath && [...answer].length < MIN_ANSWER_LETTERS) add("answer-short", `The answer needs at least ${MIN_ANSWER_LETTERS} letters.`);
+  if (!isMath && !isChoice && [...answer].length < MIN_ANSWER_LETTERS) add("answer-short", `The answer needs at least ${MIN_ANSWER_LETTERS} letters.`);
 
   const everyAnswer = [puzzle.answer, ...puzzle.accepts].map(compactAnswer).filter((a) => a.length > 0);
-  const spelledOut = !isMath && puzzle.pieces.some((p) => writtenText(p).some((t) => everyAnswer.includes(compactAnswer(t))));
+  const spelledOut = !isMath && !isChoice && puzzle.pieces.some((p) => writtenText(p).some((t) => everyAnswer.includes(compactAnswer(t))));
   if (spelledOut) add("answer-in-puzzle", "The answer is written in the puzzle. Show it with pictures instead.");
 
   if (puzzle.explanation.trim().length < MIN_EXPLANATION_CHARS) add("no-explanation", "Say why the pieces give that answer.");
@@ -126,8 +149,12 @@ export const validatePuzzle = (puzzle: Puzzle, options: { iconIds?: ReadonlySet<
 };
 
 /** The key two puzzles share when they have the same answer, however it was typed. */
-export const answerKey = (puzzle: Pick<Puzzle, "answer"> & Partial<Pick<Puzzle, "kind" | "math">>): string =>
-  puzzle.kind === "math" && isMathSpec(puzzle.math) && mathProblem(puzzle.math) === null ? `math|${mathPrompt(puzzle.math)}` : compactAnswer(puzzle.answer);
+export const answerKey = (puzzle: Pick<Puzzle, "answer"> & Partial<Pick<Puzzle, "kind" | "math" | "pieces">>): string => {
+  if (puzzle.kind === "math" && isMathSpec(puzzle.math) && mathProblem(puzzle.math) === null) return `math|${mathPrompt(puzzle.math)}`;
+  // The same answer under a different question is a different puzzle ("Paris" answers many).
+  if (puzzle.kind === "choice") return `choice|${compactAnswer(meaningfulPieces(puzzle.pieces ?? []).map(pieceName).join(""))}|${compactAnswer(puzzle.answer)}`;
+  return compactAnswer(puzzle.answer);
+};
 
 /** Whether a puzzle's answer is already in a bank, for the Studio's duplicate stage. */
 export const isDuplicate = (puzzle: Parameters<typeof answerKey>[0], existing: ReadonlySet<string>): boolean => existing.has(answerKey(puzzle));

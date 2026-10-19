@@ -11,8 +11,9 @@
 import React, { useEffect, useRef, useState } from "react";
 import { useT } from "../../lib/i18n";
 import { themeSystem } from "../../lib/themeSystem";
-import { UIButton, UICountdown, UIHintPanel, UIKidMessage, UIOutcome, UIProgressBar } from "../../components/ui";
+import { UIButton, UIChoiceGrid, UICountdown, UIHintPanel, UIKidMessage, UIOutcome, UIProgressBar } from "../../components/ui";
 import { matchAnswer } from "../answer";
+import { isChoiceSpec, visibleOptions } from "../choice";
 import { hintFor, hintState, type Hint } from "../hints";
 import { cue } from "../sound";
 import type { Puzzle } from "../types";
@@ -37,13 +38,15 @@ interface Mine {
   hints: Hint[];
   lastHintMs: number;
   wrong: number;
+  /** Answers tapped and wrong, for a multiple-choice question. */
+  tried: string[];
   /** The answer was right and the claim is on its way or answered. */
   claimed: boolean;
   won: boolean | null;
   error: string;
 }
 
-const fresh = (startMs: number): Mine => ({ hints: [], lastHintMs: startMs, wrong: 0, claimed: false, won: null, error: "" });
+const fresh = (startMs: number): Mine => ({ hints: [], lastHintMs: startMs, wrong: 0, tried: [], claimed: false, won: null, error: "" });
 
 export const GroupPlay: React.FC<GroupPlayProps> = ({ room, token, skewMs, apply }) => {
   const { t } = useT();
@@ -91,12 +94,17 @@ export const GroupPlay: React.FC<GroupPlayProps> = ({ room, token, skewMs, apply
     setMine((m) => ({ ...m, hints: [...m.hints, hintFor(puzzle, hint.rung)], lastHintMs: now }));
   };
 
-  const submit = async (e: React.FormEvent) => {
+  const submit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!live || mine.claimed || !text.trim()) return;
-    if (!matchAnswer(puzzle, text).ok) {
+    void attempt(text);
+  };
+
+  /** An answer, typed or tapped: wrong ones are counted here, a right one is claimed from the server. */
+  const attempt = async (given: string) => {
+    if (!live || mine.claimed || !given.trim()) return;
+    if (!matchAnswer(puzzle, given).ok) {
       cue("wrong");
-      setMine((m) => ({ ...m, wrong: m.wrong + 1 }));
+      setMine((m) => ({ ...m, wrong: m.wrong + 1, tried: [...m.tried, given] }));
       setText("");
       input.current?.focus();
       return;
@@ -187,7 +195,16 @@ export const GroupPlay: React.FC<GroupPlayProps> = ({ room, token, skewMs, apply
                 ) : null}
               </div>
 
-              <form onSubmit={(e) => void submit(e)} className="flex gap-2">
+              {puzzle.kind === "choice" && isChoiceSpec(puzzle.choice) ? (
+                <UIChoiceGrid
+                  label={t("rebus.chooseAnswer")}
+                  options={visibleOptions(puzzle.choice, mine.hints.length, puzzle.id)}
+                  tried={new Set(mine.tried)}
+                  disabled={mine.claimed}
+                  onPick={(option) => void attempt(option)}
+                />
+              ) : (
+              <form onSubmit={submit} className="flex gap-2">
                 <input
                   ref={input}
                   autoFocus
@@ -207,6 +224,7 @@ export const GroupPlay: React.FC<GroupPlayProps> = ({ room, token, skewMs, apply
                   {t("rebus.check")}
                 </UIButton>
               </form>
+              )}
 
               <UIHintPanel
                 status={hint}

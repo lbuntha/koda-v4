@@ -43,7 +43,7 @@ CanRead = Annotated[Principal, Depends(require("settings:read"))]
 CanOperate = Annotated[Principal, Depends(require("system:write"))]
 
 #: What a puzzle looks like to a player in a room: everything to show and check it, nothing about its authoring.
-PUZZLE_FIELDS = ("id", "category", "ages", "difficulty", "trick", "kind", "math", "pieces", "answer", "accepts", "explanation")
+PUZZLE_FIELDS = ("id", "category", "ages", "difficulty", "trick", "kind", "math", "choice", "pieces", "answer", "accepts", "explanation")
 
 
 def _now_ms() -> int:

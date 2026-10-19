@@ -14,13 +14,14 @@
 import { compactAnswer, normalizeAnswer } from "./answer";
 import { translate } from "../lib/i18n";
 import { categoryLabel } from "./categories";
+import { isChoiceSpec } from "./choice";
 import { answerRange, isMathSpec, mathAnswer, mathProblem } from "./math";
 import { meaningfulPieces, pieceName } from "./puzzle";
 import type { RebusSettings } from "./settings";
 import type { Puzzle } from "./types";
 
 export type HintRung = 1 | 2 | 3;
-export type HintKind = "category" | "letters" | "pieces" | "digits" | "range";
+export type HintKind = "category" | "letters" | "pieces" | "digits" | "range" | "eliminate";
 
 export interface Hint {
   rung: HintRung;
@@ -84,6 +85,11 @@ export const hintFor = (puzzle: Puzzle, rung: HintRung): Hint => {
     if (rung === 2) return { rung, kind: "digits", text: translate("rebus.hint.digits", { n: String(answer).length }) };
     const [low, high] = answerRange(answer);
     return { rung, kind: "range", text: translate("rebus.hint.range", { low, high }) };
+  }
+  // On a list of answers, a hint takes a wrong one away (see `visibleOptions`) instead of spelling the answer.
+  if (puzzle.kind === "choice" && rung > 1) {
+    const removable = isChoiceSpec(puzzle.choice) ? Math.max(0, puzzle.choice.options.length - 2) : 0;
+    return { rung, kind: "eliminate", text: translate(rung - 1 <= removable ? "rebus.hint.eliminate" : "rebus.hint.eliminateNone") };
   }
   if (rung === 1) return { rung, kind: "category", text: translate("rebus.hint.category", { name: categoryLabel(puzzle.category).toLowerCase() }) };
   if (rung === 2) return { rung, kind: "letters", text: translate("rebus.hint.letters", { mask: lettersMask(puzzle.answer) }) };

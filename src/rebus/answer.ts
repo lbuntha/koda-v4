@@ -58,7 +58,9 @@ export interface AnswerMatch {
 }
 
 /** Match an input against every answer a puzzle accepts. */
-export const matchAnswer = (puzzle: { answer: string; accepts: readonly string[] }, input: string): AnswerMatch => {
+export const matchAnswer = (puzzle: { answer: string; accepts: readonly string[]; kind?: string }, input: string): AnswerMatch => {
+  // A tapped answer is exact: on a list of options, one slipped key would be a different option, not a typo.
+  const exact = puzzle.kind === "choice";
   const typed = compactAnswer(input);
   if (typed.length === 0) return { ok: false, kind: "none" };
   let typo = false;
@@ -66,7 +68,7 @@ export const matchAnswer = (puzzle: { answer: string; accepts: readonly string[]
     const target = compactAnswer(candidate);
     if (target.length === 0) continue;
     if (typed === target) return { ok: true, kind: "exact" };
-    if (editDistance(typed, target) <= typoAllowance(target.length)) typo = true;
+    if (!exact && editDistance(typed, target) <= typoAllowance(target.length)) typo = true;
   }
   return typo ? { ok: true, kind: "typo" } : { ok: false, kind: "none" };
 };
