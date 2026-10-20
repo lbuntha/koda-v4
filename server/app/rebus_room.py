@@ -91,7 +91,7 @@ def answer_key(puzzle: dict[str, Any]) -> str:
     spec = puzzle.get("math")
     if puzzle.get("kind") == "math" and isinstance(spec, dict) and rebus_math.problem(spec) is None:
         return "math|" + rebus_math.prompt(spec)
-    if puzzle.get("kind") == "choice":
+    if puzzle.get("kind") in ("choice", "quiz"):
         from app.rebus_verify import answer_key as verify_key
 
         return verify_key(puzzle)

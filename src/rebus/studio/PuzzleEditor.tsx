@@ -20,6 +20,7 @@ import { deriveMath } from "../math";
 import { PuzzleCanvas } from "../ui/PieceView";
 import { ChecksList } from "./builder/ChecksList";
 import { ChoiceFields } from "./builder/ChoiceFields";
+import { KhmerFields } from "./builder/KhmerFields";
 import { LevelFields } from "./builder/LevelFields";
 import { PiecesBuilder } from "./builder/PiecesBuilder";
 import { useChecks } from "./builder/useChecks";
@@ -118,6 +119,8 @@ export const PuzzleEditor: React.FC<PuzzleEditorProps> = ({ initial, onSave, onC
           <AnswerFields draft={draft} onChange={set} />
         </>
       )}
+
+      {(kind !== "picture" || draft.km) && <KhmerFields draft={draft} onChange={set} />}
 
       <CategoryField value={draft.category} onChange={(category) => set({ category })} />
       <LevelFields draft={draft} onChange={set} />

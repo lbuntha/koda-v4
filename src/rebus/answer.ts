@@ -9,12 +9,25 @@
 const ARTICLES = /(^|\s)(a|an|the)(?=\s|$)/g;
 
 /**
+ * Khmer numerals are the digits they stand for, and the marks that change a number
+ * stay with it: -3 is not 3, 3/4 is not 34, 1.2 is not 12, 2:3 is not 23. (1,000 is just 1000.)
+ */
+const numberMarks = (text: string): string =>
+  text
+    .replace(/[០-៩]/g, (d) => String(d.charCodeAt(0) - 0x17e0))
+    .replace(/(\d),(?=\d{3}(?!\d))/g, "$1")
+    .replace(/(\d)[.,](?=\d)/g, "$1point")
+    .replace(/(\d)\/(?=\d)/g, "$1over")
+    .replace(/(\d):(?=\d)/g, "$1colon")
+    .replace(/(^|[\s(=:])[-−–](?=\d)/g, "$1neg");
+
+/**
  * Lower-case, accents and punctuation gone, articles dropped, spaces single.
  * Only Latin diacritics are stripped: the combining marks that make up a Khmer
  * syllable live elsewhere in Unicode and must survive.
  */
 export const normalizeAnswer = (text: string): string =>
-  text
+  numberMarks(text)
     .normalize("NFD")
     .replace(/[̀-ͯ]/g, "")
     .normalize("NFC")

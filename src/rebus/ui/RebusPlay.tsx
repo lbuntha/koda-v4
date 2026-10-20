@@ -15,6 +15,7 @@ import { themeSystem } from "../../lib/themeSystem";
 import { UIButton, UIChoiceGrid, UICountdown, UICountUp, UIHintPanel, UIKidMessage, UIOutcome, UIPointsPop, UIProgressBar } from "../../components/ui";
 import { isChoiceSpec, visibleOptions } from "../choice";
 import { matchAnswer } from "../answer";
+import { answerInputMode, isNumberAnswer, localizePuzzle } from "../localize";
 import { elapsedOf, hintStatus, machineLockedOut, machineProgress, type RoundState } from "../engine";
 import { LetterTiles } from "./LetterTiles";
 import { PuzzleCanvas } from "./PieceView";
@@ -103,7 +104,7 @@ const Scoreboard: React.FC<{ you: number; machine: number; machineCue?: string; 
 };
 
 export const PlayView: React.FC<{ round: RebusRound; letterTiles: boolean }> = ({ round, letterTiles }) => {
-  const { t } = useT();
+  const { t, language } = useT();
   const { state, now, send } = round;
   const [text, setText] = useState("");
   const [showWrong, setShowWrong] = useState(false);
@@ -136,6 +137,7 @@ export const PlayView: React.FC<{ round: RebusRound; letterTiles: boolean }> = (
 
   if (!state) return null;
   const { run, config } = state;
+  const view = localizePuzzle(run.puzzle, language);
   const total = config.puzzles.length;
   const locked = machineLockedOut(state, now);
   const hint = hintStatus(state, now);
@@ -159,7 +161,7 @@ export const PlayView: React.FC<{ round: RebusRound; letterTiles: boolean }> = (
 
       <Scoreboard you={state.score.child} machine={state.score.machine} machineCue={locked ? t("rebus.machineLocked") : undefined} mood={moodOf(state, locked)} />
 
-      <PuzzleCanvas pieces={run.puzzle.pieces} label={t("rebus.puzzle")} />
+      <PuzzleCanvas pieces={view.pieces} label={t("rebus.puzzle")} />
 
       <UIProgressBar value={Math.round(machineProgress(state, now) * 100)} max={100} size="sm" label={t("rebus.thinking")} caption={`${t("rebus.thinking")} · ${t("rebus.seconds", { seconds: secondsLeft })}`} />
 
@@ -171,17 +173,17 @@ export const PlayView: React.FC<{ round: RebusRound; letterTiles: boolean }> = (
         ) : null}
       </div>
 
-      {run.puzzle.kind === "choice" && isChoiceSpec(run.puzzle.choice) ? (
+      {run.puzzle.kind === "choice" && isChoiceSpec(view.choice) ? (
         <UIChoiceGrid
           label={t("rebus.chooseAnswer")}
-          options={visibleOptions(run.puzzle.choice, run.hints.length, run.puzzle.id)}
+          options={visibleOptions(view.choice, run.hints.length, run.puzzle.id)}
           tried={tried}
           onPick={(option) => {
             if (!matchAnswer(run.puzzle, option).ok) setTried((s) => new Set(s).add(option));
             send({ type: "answer", text: option });
           }}
         />
-      ) : letterTiles && run.puzzle.kind !== "math" ? (
+      ) : letterTiles && !isNumberAnswer(run.puzzle) ? (
         <LetterTiles key={run.puzzle.id} answer={run.puzzle.answer} seed={run.puzzle.id} onSubmit={(value) => send({ type: "answer", text: value })} />
       ) : (
         <form onSubmit={submit} className="flex gap-2">
@@ -192,8 +194,8 @@ export const PlayView: React.FC<{ round: RebusRound; letterTiles: boolean }> = (
             value={text}
             onChange={(e) => setText(e.target.value)}
             aria-label={t("rebus.answerLabel")}
-            placeholder={run.puzzle.kind === "math" ? t("rebus.answerPlaceholderMath") : t("rebus.answerPlaceholder")}
-            inputMode={run.puzzle.kind === "math" ? "numeric" : undefined}
+            placeholder={isNumberAnswer(run.puzzle) ? t("rebus.answerPlaceholderMath") : t("rebus.answerPlaceholder")}
+            inputMode={answerInputMode(run.puzzle)}
             autoComplete="off"
             autoCapitalize="off"
             autoCorrect="off"
@@ -226,7 +228,7 @@ export const PlayView: React.FC<{ round: RebusRound; letterTiles: boolean }> = (
 };
 
 export const RevealView: React.FC<{ round: RebusRound; autoNext?: boolean }> = ({ round, autoNext = false }) => {
-  const { t } = useT();
+  const { t, language } = useT();
   const { state, send } = round;
   const shown = state?.last?.puzzle.id;
   // Moving on by themselves: the answer stays up for a few seconds, and Next still works at once.
@@ -237,6 +239,7 @@ export const RevealView: React.FC<{ round: RebusRound; autoNext?: boolean }> = (
   }, [autoNext, shown, send]);
   if (!state?.last) return null;
   const { last } = state;
+  const shown_ = localizePuzzle(last.puzzle, language);
   const lastPuzzle = state.index + 1 >= state.config.puzzles.length;
 
   const outcome =
@@ -256,16 +259,16 @@ export const RevealView: React.FC<{ round: RebusRound; autoNext?: boolean }> = (
 
       {autoNext && <p className={themeSystem.typography("caption", "text-center")}>{t("rebus.movingOn", { seconds: AUTO_NEXT_MS / 1000 })}</p>}
 
-      <PuzzleCanvas pieces={last.puzzle.pieces} label={t("rebus.puzzle")} />
+      <PuzzleCanvas pieces={shown_.pieces} label={t("rebus.puzzle")} />
 
       <div className="text-center">
         <div className={themeSystem.typography("caption")}>{t("rebus.answerWas")}</div>
-        <div className="text-3xl font-black text-ink">{last.puzzle.answer}</div>
+        <div className="text-3xl font-black text-ink">{shown_.answer}</div>
       </div>
 
       <div className={themeSystem.card("default", themeSystem.spacing.cardSm)}>
         <span className="font-black text-ink">{t("rebus.why")} </span>
-        <span className="text-body">{last.puzzle.explanation}</span>
+        <span className="text-body">{shown_.explanation}</span>
       </div>
     </div>
   );

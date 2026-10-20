@@ -66,6 +66,10 @@ export const PieceView: React.FC<{ piece: Piece }> = ({ piece }) => {
     case "icon":
       return <IconPiece piece={piece} />;
     case "word":
+      // A sentence (a question to read) is set as text, not as the big letters a rebus word gets.
+      if (/\p{L}/u.test(piece.text) && [...piece.text].length > 12) {
+        return <span className="basis-full text-balance text-center text-2xl font-extrabold leading-relaxed text-ink sm:text-3xl">{piece.text}</span>;
+      }
       return <span className={`text-5xl font-black tracking-tight text-ink ${WORD_STYLE[piece.style ?? "plain"]}`}>{piece.text}</span>;
     case "stack":
       return (

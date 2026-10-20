@@ -417,3 +417,32 @@ async def test_a_page_of_puzzles_is_checked_with_one_read_of_the_drawings_and_on
     calls.update(icons=0, index=0)
     await client.post("/rebus/studio/approve-all", json={}, headers=admin)
     assert calls == {"icons": 1, "index": 1}
+
+
+async def test_a_worked_question_keeps_its_khmer_words_all_the_way_to_a_device(client, admin, owner):
+    body = draft(
+        category="math",
+        kind="quiz",
+        pieces=[{"kind": "word", "text": "A pack has 6 pens. How many pens are in 7 packs?"}],
+        km={"pieces": [{"kind": "word", "text": "កញ្ចប់មួយមានប៊ិច 6។ កញ្ចប់ 7 មានប៊ិចប៉ុន្មាន?"}], "explanation": "6 × 7 = 42។"},
+        answer="42",
+        explanation="6 × 7 = 42.",
+        approve=True,
+    )
+    response = await client.post("/rebus/studio/puzzles", json=body, headers=admin)
+    assert response.status_code == 201, response.text
+    row = response.json()
+    assert row["status"] == "approved" and row["issues"] == [] and row["kind"] == "quiz"
+    assert row["km"]["explanation"] == "6 × 7 = 42។"
+    await client.post("/rebus/studio/publish", json={}, headers=admin)
+    served = (await client.get("/rebus/puzzles", headers=owner)).json()["puzzles"]
+    mine = next(p for p in served if p["id"] == row["id"])
+    assert mine["kind"] == "quiz" and mine["km"]["pieces"][0]["text"].startswith("កញ្ចប់")
+
+
+async def test_a_worked_question_may_show_a_counted_row_of_pictures_but_a_picture_puzzle_may_not(client, admin):
+    row = [{"kind": "icon", "id": "rebus-cheese", "name": "cheese"}] * 9
+    quiz = draft(category="math", kind="quiz", pieces=[*row, {"kind": "word", "text": "How many cheeses are there?"}], answer="9", explanation="Count them: 9.")
+    assert (await client.post("/rebus/studio/puzzles", json=quiz, headers=admin)).json()["issues"] == []
+    picture = draft(pieces=[*row, {"kind": "word", "text": "cheese"}])
+    assert "too-many-pieces" in (await client.post("/rebus/studio/puzzles", json=picture, headers=admin)).json()["issues"]

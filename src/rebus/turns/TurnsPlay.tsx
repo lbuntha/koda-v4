@@ -14,6 +14,7 @@ import { Podium } from "../group/Podium";
 import { RoomAvatar } from "../group/RoomAvatar";
 import type { RoomPlayer } from "../group/types";
 import { matchAnswer } from "../answer";
+import { answerInputMode, isNumberAnswer, localizePuzzle } from "../localize";
 import { isChoiceSpec, visibleOptions } from "../choice";
 import { cue } from "../sound";
 import { LetterTiles } from "../ui/LetterTiles";
@@ -70,7 +71,7 @@ export const Handover: React.FC<{ game: TurnsGame }> = ({ game }) => {
 
 /** One player's turn at one puzzle. */
 export const TurnPlay: React.FC<{ game: TurnsGame; letterTiles: boolean }> = ({ game, letterTiles }) => {
-  const { t } = useT();
+  const { t, language } = useT();
   const show = useNickname();
   const { state, now, send } = game;
   const [text, setText] = useState("");
@@ -103,6 +104,7 @@ export const TurnPlay: React.FC<{ game: TurnsGame; letterTiles: boolean }> = ({ 
   if (!state) return null;
   const me = playerOf(state);
   const puzzle = state.config.puzzles[state.index];
+  const view = localizePuzzle(puzzle, language);
   const left = Math.max(0, Math.ceil(state.config.settings.puzzleLimitSec - elapsedOf(state, now)));
   const status = hintStatus(state, now);
   const hintLabel =
@@ -132,21 +134,21 @@ export const TurnPlay: React.FC<{ game: TurnsGame; letterTiles: boolean }> = ({ 
         {t("rebus.turns.turnOf", { name: show(state.config.players[me].name) })}
       </p>
 
-      <PuzzleCanvas pieces={puzzle.pieces} label={t("rebus.puzzle")} />
+      <PuzzleCanvas pieces={view.pieces} label={t("rebus.puzzle")} />
 
       <div aria-live="polite">{showWrong && <UIKidMessage tone="nudge" title={t("rebus.wrongTitle")} message={t("rebus.wrongText")} />}</div>
 
-      {puzzle.kind === "choice" && isChoiceSpec(puzzle.choice) ? (
+      {puzzle.kind === "choice" && isChoiceSpec(view.choice) ? (
         <UIChoiceGrid
           label={t("rebus.chooseAnswer")}
-          options={visibleOptions(puzzle.choice, state.hints.length, puzzle.id)}
+          options={visibleOptions(view.choice, state.hints.length, puzzle.id)}
           tried={tried}
           onPick={(option) => {
             if (!matchAnswer(puzzle, option).ok) setTried((s) => new Set(s).add(option));
             send({ type: "answer", text: option });
           }}
         />
-      ) : letterTiles && puzzle.kind !== "math" ? (
+      ) : letterTiles && !isNumberAnswer(puzzle) ? (
         <LetterTiles key={puzzle.id} answer={puzzle.answer} seed={puzzle.id} onSubmit={(value) => send({ type: "answer", text: value })} />
       ) : (
         <form onSubmit={submit} className="flex gap-2">
@@ -157,8 +159,8 @@ export const TurnPlay: React.FC<{ game: TurnsGame; letterTiles: boolean }> = ({ 
             value={text}
             onChange={(e) => setText(e.target.value)}
             aria-label={t("rebus.answerLabel")}
-            placeholder={puzzle.kind === "math" ? t("rebus.answerPlaceholderMath") : t("rebus.answerPlaceholder")}
-            inputMode={puzzle.kind === "math" ? "numeric" : undefined}
+            placeholder={isNumberAnswer(puzzle) ? t("rebus.answerPlaceholderMath") : t("rebus.answerPlaceholder")}
+            inputMode={answerInputMode(puzzle)}
             autoComplete="off"
             autoCapitalize="off"
             autoCorrect="off"
@@ -192,7 +194,7 @@ export const TurnPlay: React.FC<{ game: TurnsGame; letterTiles: boolean }> = ({ 
 
 /** The answer, who got the points, and on to the next hand-over. */
 export const TurnReveal: React.FC<{ game: TurnsGame }> = ({ game }) => {
-  const { t } = useT();
+  const { t, language } = useT();
   const show = useNickname();
   const state = game.state as TurnsState;
   const last = state.last;
@@ -220,14 +222,14 @@ export const TurnReveal: React.FC<{ game: TurnsGame }> = ({ game }) => {
     <div className="mx-auto flex w-full max-w-xl flex-col gap-4 pb-20">
       <Scores state={state} active={last.player} scored={{ player: last.player, points: last.points }} />
       <UIOutcome {...outcome} leading={<RoomAvatar avatar={state.config.players[last.player].avatar} size="lg" />} pointsLabel={outcome.points ? t("rebus.pointsChip", { points: outcome.points }) : undefined} actionLabel={finalPuzzle ? t("rebus.seeResults") : t("rebus.turns.passTo", { name: show(next.name) })} onAction={() => game.send({ type: "next" })} />
-      <PuzzleCanvas pieces={last.puzzle.pieces} label={t("rebus.puzzle")} />
+      <PuzzleCanvas pieces={localizePuzzle(last.puzzle, language).pieces} label={t("rebus.puzzle")} />
       <div className="text-center">
         <div className={themeSystem.typography("caption")}>{t("rebus.answerWas")}</div>
-        <div className="text-3xl font-black text-ink">{last.puzzle.answer}</div>
+        <div className="text-3xl font-black text-ink">{localizePuzzle(last.puzzle, language).answer}</div>
       </div>
       <div className={themeSystem.card("default", themeSystem.spacing.cardSm)}>
         <span className="font-black text-ink">{t("rebus.why")} </span>
-        <span className="text-body">{last.puzzle.explanation}</span>
+        <span className="text-body">{localizePuzzle(last.puzzle, language).explanation}</span>
       </div>
     </div>
   );

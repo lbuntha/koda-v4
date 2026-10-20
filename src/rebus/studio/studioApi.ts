@@ -59,10 +59,12 @@ export interface SavedPrompt {
 
 export interface PuzzleDraft {
   /** "math": the numbers are in `math`, and the prompt, answer and explanation are worked out from them. */
-  kind?: "picture" | "math" | "choice";
+  kind?: "picture" | "math" | "choice" | "quiz";
   math?: MathSpec;
   /** The answers of a multiple-choice question and which is right; its `answer` follows from them. */
   choice?: ChoiceSpec;
+  /** The same question in Khmer: its words and its explanation. */
+  km?: Puzzle["km"];
   category: string;
   ages: [number, number];
   difficulty: number;
@@ -107,7 +109,7 @@ export interface ListQuery {
   /** Only puzzles that use this drawing (`rebus-honey`). */
   icon?: string;
   /** Only this kind of question. */
-  kind?: "picture" | "math" | "choice";
+  kind?: "picture" | "math" | "choice" | "quiz";
   q?: string;
   skip?: number;
   limit?: number;
@@ -177,6 +179,8 @@ export const draftOf = (p: StudioPuzzle): PuzzleDraft => ({
   trick: p.trick,
   ...(p.kind === "math" && p.math ? { kind: "math" as const, math: p.math } : {}),
   ...(p.kind === "choice" && p.choice ? { kind: "choice" as const, choice: p.choice } : {}),
+  ...(p.kind === "quiz" ? { kind: "quiz" as const } : {}),
+  ...(p.km ? { km: p.km } : {}),
   pieces: p.pieces,
   answer: p.answer,
   accepts: p.accepts,

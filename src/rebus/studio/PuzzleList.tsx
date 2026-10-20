@@ -28,7 +28,7 @@ export const PuzzleList: React.FC<{ initialStatus?: PuzzleStatus; onChanged(): v
   const cats = useRebusCategories();
   const [status, setStatus] = useState<PuzzleStatus | "">(initialStatus ?? "");
   const [category, setCategory] = useState("");
-  const [kind, setKind] = useState<"" | "picture" | "math" | "choice">("");
+  const [kind, setKind] = useState<"" | "picture" | "math" | "choice" | "quiz">("");
   const [q, setQ] = useState("");
   const [page, setPage] = useState(1);
   const [rows, setRows] = useState<StudioPuzzle[] | null>(null);
@@ -166,7 +166,7 @@ export const PuzzleList: React.FC<{ initialStatus?: PuzzleStatus; onChanged(): v
         </UISelect>
         <UISelect aria-label={t("rebus.studio.kindLabel")} className="!w-auto" value={kind} onChange={(e) => { setKind(e.target.value as typeof kind); setPage(1); }}>
           <option value="">{t("rebus.studio.anyKind")}</option>
-          {(["picture", "math", "choice"] as const).map((k) => (
+          {(["picture", "math", "choice", "quiz"] as const).map((k) => (
             <option key={k} value={k}>
               {t(`rebus.studio.kind_${k}`)}
             </option>

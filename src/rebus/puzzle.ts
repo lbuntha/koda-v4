@@ -14,6 +14,8 @@ import { isMathSpec, mathAnswer, mathPrompt, mathProblem } from "./math";
 import type { Piece, Puzzle } from "./types";
 
 export const MAX_PIECES = 7;
+/** A worked question may show a counted row of pictures, so it may have more pieces. */
+export const MAX_QUIZ_PIECES = 12;
 export const MIN_ANSWER_LETTERS = 3;
 export const MIN_EXPLANATION_CHARS = 8;
 
@@ -119,9 +121,11 @@ export const validatePuzzle = (puzzle: Puzzle, options: { iconIds?: ReadonlySet<
     else if (isChoiceSpec(puzzle.choice) && (puzzle.answer !== choiceAnswer(puzzle.choice) || puzzle.accepts.length > 0)) add("choice-out-of-step", CHOICE_MESSAGES["choice-out-of-step"]);
   }
 
+  const isQuiz = puzzle.kind === "quiz";
   const meaningful = meaningfulPieces(puzzle.pieces);
   if (!isMath && meaningful.length === 0) add("no-picture", "Add at least one picture or word.");
-  if (puzzle.pieces.length > MAX_PIECES) add("too-many-pieces", `Use at most ${MAX_PIECES} pieces.`);
+  const maxPieces = isQuiz ? MAX_QUIZ_PIECES : MAX_PIECES;
+  if (puzzle.pieces.length > maxPieces) add("too-many-pieces", `Use at most ${maxPieces} pieces.`);
 
   // An operator joins two things: it cannot start, end, or sit beside another.
   const ops = puzzle.pieces.map((p) => p.kind === "op");
@@ -130,10 +134,11 @@ export const validatePuzzle = (puzzle: Puzzle, options: { iconIds?: ReadonlySet<
   }
 
   const answer = compactAnswer(puzzle.answer);
-  if (!isMath && !isChoice && [...answer].length < MIN_ANSWER_LETTERS) add("answer-short", `The answer needs at least ${MIN_ANSWER_LETTERS} letters.`);
+  if (!isMath && !isChoice && !isQuiz && [...answer].length < MIN_ANSWER_LETTERS) add("answer-short", `The answer needs at least ${MIN_ANSWER_LETTERS} letters.`);
+  if (isQuiz && answer.length === 0) add("answer-short", "A question needs its answer.");
 
   const everyAnswer = [puzzle.answer, ...puzzle.accepts].map(compactAnswer).filter((a) => a.length > 0);
-  const spelledOut = !isMath && !isChoice && puzzle.pieces.some((p) => writtenText(p).some((t) => everyAnswer.includes(compactAnswer(t))));
+  const spelledOut = !isMath && !isChoice && !isQuiz && puzzle.pieces.some((p) => writtenText(p).some((t) => everyAnswer.includes(compactAnswer(t))));
   if (spelledOut) add("answer-in-puzzle", "The answer is written in the puzzle. Show it with pictures instead.");
 
   if (puzzle.explanation.trim().length < MIN_EXPLANATION_CHARS) add("no-explanation", "Say why the pieces give that answer.");
@@ -152,7 +157,7 @@ export const validatePuzzle = (puzzle: Puzzle, options: { iconIds?: ReadonlySet<
 export const answerKey = (puzzle: Pick<Puzzle, "answer"> & Partial<Pick<Puzzle, "kind" | "math" | "pieces">>): string => {
   if (puzzle.kind === "math" && isMathSpec(puzzle.math) && mathProblem(puzzle.math) === null) return `math|${mathPrompt(puzzle.math)}`;
   // The same answer under a different question is a different puzzle ("Paris" answers many).
-  if (puzzle.kind === "choice") return `choice|${compactAnswer(meaningfulPieces(puzzle.pieces ?? []).map(pieceName).join(""))}|${compactAnswer(puzzle.answer)}`;
+  if (puzzle.kind === "choice" || puzzle.kind === "quiz") return `choice|${compactAnswer(meaningfulPieces(puzzle.pieces ?? []).map(pieceName).join(""))}|${compactAnswer(puzzle.answer)}`;
   return compactAnswer(puzzle.answer);
 };
 

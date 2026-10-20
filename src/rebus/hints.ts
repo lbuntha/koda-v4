@@ -86,6 +86,13 @@ export const hintFor = (puzzle: Puzzle, rung: HintRung): Hint => {
     const [low, high] = answerRange(answer);
     return { rung, kind: "range", text: translate("rebus.hint.range", { low, high }) };
   }
+  // A worked question with a whole-number answer gets the same two hints: how many digits, then which ten.
+  if (puzzle.kind === "quiz" && rung > 1 && /^\d{1,4}$/.test(puzzle.answer)) {
+    const answer = Number(puzzle.answer);
+    if (rung === 2) return { rung, kind: "digits", text: translate("rebus.hint.digits", { n: puzzle.answer.length }) };
+    const [low, high] = answerRange(answer);
+    return { rung, kind: "range", text: translate("rebus.hint.range", { low, high }) };
+  }
   // On a list of answers, a hint takes a wrong one away (see `visibleOptions`) instead of spelling the answer.
   if (puzzle.kind === "choice" && rung > 1) {
     const removable = isChoiceSpec(puzzle.choice) ? Math.max(0, puzzle.choice.options.length - 2) : 0;

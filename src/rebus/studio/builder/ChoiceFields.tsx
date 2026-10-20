@@ -51,7 +51,7 @@ export const ChoiceFields: React.FC<{ draft: PuzzleDraft; onChange(patch: Partia
     <section className="flex flex-col gap-4" aria-label={t("rebus.studio.choice.title")}>
       <label className="flex flex-col gap-1">
         <span className="text-xs font-extrabold uppercase tracking-wider text-muted">{t("rebus.studio.choice.question")}</span>
-        <UIInput value={questionOf(draft.pieces)} maxLength={40} onChange={(e) => onChange({ pieces: withQuestion(draft.pieces, e.target.value) })} placeholder={t("rebus.studio.choice.questionHint")} />
+        <UIInput value={questionOf(draft.pieces)} maxLength={240} onChange={(e) => onChange({ pieces: withQuestion(draft.pieces, e.target.value) })} placeholder={t("rebus.studio.choice.questionHint")} />
       </label>
 
       <PiecesBuilder visual compact pieces={draft.pieces} onChange={(pieces) => onChange({ pieces })} />

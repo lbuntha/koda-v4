@@ -27,7 +27,8 @@ class PhotoPiece(Model):
 
 class WordPiece(Model):
     kind: Literal["word"]
-    text: str = Field(min_length=1, max_length=40)
+    #: A rebus word is short, but a worked question is a sentence.
+    text: str = Field(min_length=1, max_length=240)
     style: Literal["plain", "cut", "small", "big", "upside-down", "reversed", "spaced", "underlined", "crossed"] | None = None
 
 
@@ -61,6 +62,13 @@ class ChoiceSpecIn(Model):
     correct: int = 0
 
 
+class KhmerIn(Model):
+    """The same question in Khmer: its pieces and its explanation. The answer, the numbers and the pictures are shared."""
+
+    pieces: list[Piece] | None = Field(default=None, max_length=12)
+    explanation: str | None = Field(default=None, max_length=300)
+
+
 class PuzzleIn(Model):
     """A puzzle as an author writes it. May be wrong: a draft has to be savable.
 
@@ -74,9 +82,10 @@ class PuzzleIn(Model):
     difficulty: int
     trick: Literal["compound", "sound-alike", "position", "size", "style", "add-remove"]
     #: "picture" (pieces add up to a typed answer) or "math" (numbers, with the prompt and answer worked out from them).
-    kind: Literal["picture", "math", "choice"] = "picture"
+    kind: Literal["picture", "math", "choice", "quiz"] = "picture"
     math: MathSpecIn | None = None
     choice: ChoiceSpecIn | None = None
+    km: KhmerIn | None = None
     pieces: list[Piece] = Field(default_factory=list, max_length=12)
     answer: str = Field(default="", max_length=80)
     accepts: list[Annotated[str, Field(max_length=80)]] = Field(default_factory=list, max_length=8)
@@ -100,6 +109,7 @@ class PuzzlePatch(Model):
     trick: Literal["compound", "sound-alike", "position", "size", "style", "add-remove"] | None = None
     math: MathSpecIn | None = None
     choice: ChoiceSpecIn | None = None
+    km: KhmerIn | None = None
     pieces: list[Piece] | None = Field(default=None, max_length=12)
     answer: str | None = Field(default=None, max_length=80)
     accepts: list[Annotated[str, Field(max_length=80)]] | None = Field(default=None, max_length=8)

@@ -1,0 +1,551 @@
+{
+  "id": "bot-and-the-seed",
+  "rev": 0,
+  "language": "en",
+  "band": "A",
+  "ages": [
+    6,
+    7
+  ],
+  "topics": [
+    "nature"
+  ],
+  "questionCounts": {
+    "understand": 7,
+    "words": 4,
+    "spell": 5
+  },
+  "title": "Bot and the Seed",
+  "category": "Nature",
+  "picture": "observation-museum-robot",
+  "sentences": [
+    {
+      "id": "s1",
+      "text": "Bot is a smart little robot.",
+      "words": [
+        "Bot",
+        "is",
+        "a",
+        "smart",
+        "little",
+        "robot."
+      ]
+    },
+    {
+      "id": "s2",
+      "text": "Bot can learn new things.",
+      "words": [
+        "Bot",
+        "can",
+        "learn",
+        "new",
+        "things."
+      ]
+    },
+    {
+      "id": "s3",
+      "text": "Bot lives with Mia.",
+      "words": [
+        "Bot",
+        "lives",
+        "with",
+        "Mia."
+      ]
+    },
+    {
+      "id": "s4",
+      "text": "One day, Mia gives Bot a seed.",
+      "words": [
+        "One",
+        "day,",
+        "Mia",
+        "gives",
+        "Bot",
+        "a",
+        "seed."
+      ]
+    },
+    {
+      "id": "s5",
+      "text": "“Plant it,” says Mia.",
+      "words": [
+        "“Plant",
+        "it,”",
+        "says",
+        "Mia."
+      ]
+    },
+    {
+      "id": "s6",
+      "text": "“It needs sun and water.”",
+      "words": [
+        "“It",
+        "needs",
+        "sun",
+        "and",
+        "water.”"
+      ]
+    },
+    {
+      "id": "s7",
+      "text": "Bot digs a hole.",
+      "words": [
+        "Bot",
+        "digs",
+        "a",
+        "hole."
+      ]
+    },
+    {
+      "id": "s8",
+      "text": "Bot puts the seed in.",
+      "words": [
+        "Bot",
+        "puts",
+        "the",
+        "seed",
+        "in."
+      ]
+    },
+    {
+      "id": "s9",
+      "text": "Bot asks its screen, “How fast does a seed grow?”",
+      "words": [
+        "Bot",
+        "asks",
+        "its",
+        "screen,",
+        "“How",
+        "fast",
+        "does",
+        "a",
+        "seed",
+        "grow?”"
+      ]
+    },
+    {
+      "id": "s10",
+      "text": "The screen says, “I am not sure. Watch it!”",
+      "words": [
+        "The",
+        "screen",
+        "says,",
+        "“I",
+        "am",
+        "not",
+        "sure.",
+        "Watch",
+        "it!”"
+      ]
+    },
+    {
+      "id": "s11",
+      "text": "Bot looks at the dirt.",
+      "words": [
+        "Bot",
+        "looks",
+        "at",
+        "the",
+        "dirt."
+      ]
+    },
+    {
+      "id": "s12",
+      "text": "“Where is my plant?”",
+      "words": [
+        "“Where",
+        "is",
+        "my",
+        "plant?”"
+      ]
+    },
+    {
+      "id": "s13",
+      "text": "“Not yet,” says Mia.",
+      "words": [
+        "“Not",
+        "yet,”",
+        "says",
+        "Mia."
+      ]
+    },
+    {
+      "id": "s14",
+      "text": "“A seed needs time.”",
+      "words": [
+        "“A",
+        "seed",
+        "needs",
+        "time.”"
+      ]
+    },
+    {
+      "id": "s15",
+      "text": "Bot gives the seed water.",
+      "words": [
+        "Bot",
+        "gives",
+        "the",
+        "seed",
+        "water."
+      ]
+    },
+    {
+      "id": "s16",
+      "text": "Bot sits in the sun.",
+      "words": [
+        "Bot",
+        "sits",
+        "in",
+        "the",
+        "sun."
+      ]
+    },
+    {
+      "id": "s17",
+      "text": "Day one, no plant.",
+      "words": [
+        "Day",
+        "one,",
+        "no",
+        "plant."
+      ]
+    },
+    {
+      "id": "s18",
+      "text": "Day two, no plant.",
+      "words": [
+        "Day",
+        "two,",
+        "no",
+        "plant."
+      ]
+    },
+    {
+      "id": "s19",
+      "text": "“Not yet,” says Mia.",
+      "words": [
+        "“Not",
+        "yet,”",
+        "says",
+        "Mia."
+      ]
+    },
+    {
+      "id": "s20",
+      "text": "On day six, Bot sees a tiny green leaf!",
+      "words": [
+        "On",
+        "day",
+        "six,",
+        "Bot",
+        "sees",
+        "a",
+        "tiny",
+        "green",
+        "leaf!"
+      ]
+    },
+    {
+      "id": "s21",
+      "text": "“Look, Mia, my seed is a plant!”",
+      "words": [
+        "“Look,",
+        "Mia,",
+        "my",
+        "seed",
+        "is",
+        "a",
+        "plant!”"
+      ]
+    },
+    {
+      "id": "s22",
+      "text": "The plant grows and grows.",
+      "words": [
+        "The",
+        "plant",
+        "grows",
+        "and",
+        "grows."
+      ]
+    },
+    {
+      "id": "s23",
+      "text": "Then it has a red flower.",
+      "words": [
+        "Then",
+        "it",
+        "has",
+        "a",
+        "red",
+        "flower."
+      ]
+    },
+    {
+      "id": "s24",
+      "text": "Bot did not rush.",
+      "words": [
+        "Bot",
+        "did",
+        "not",
+        "rush."
+      ]
+    },
+    {
+      "id": "s25",
+      "text": "Bot did not quit.",
+      "words": [
+        "Bot",
+        "did",
+        "not",
+        "quit."
+      ]
+    },
+    {
+      "id": "s26",
+      "text": "Bot waited.",
+      "words": [
+        "Bot",
+        "waited."
+      ]
+    },
+    {
+      "id": "s27",
+      "text": "Then Bot draws the flower on its screen.",
+      "words": [
+        "Then",
+        "Bot",
+        "draws",
+        "the",
+        "flower",
+        "on",
+        "its",
+        "screen."
+      ]
+    },
+    {
+      "id": "s28",
+      "text": "Bot makes a blue one and a pink one.",
+      "words": [
+        "Bot",
+        "makes",
+        "a",
+        "blue",
+        "one",
+        "and",
+        "a",
+        "pink",
+        "one."
+      ]
+    },
+    {
+      "id": "s29",
+      "text": "“You made art!” says Mia.",
+      "words": [
+        "“You",
+        "made",
+        "art!”",
+        "says",
+        "Mia."
+      ]
+    },
+    {
+      "id": "s30",
+      "text": "Bot learned a new thing.",
+      "words": [
+        "Bot",
+        "learned",
+        "a",
+        "new",
+        "thing."
+      ]
+    },
+    {
+      "id": "s31",
+      "text": "Good things take time.",
+      "words": [
+        "Good",
+        "things",
+        "take",
+        "time."
+      ]
+    }
+  ],
+  "questions": [
+    {
+      "id": "q1",
+      "kind": "comprehension",
+      "prompt": "What does Mia give Bot?",
+      "options": [
+        "A little robot",
+        "A seed",
+        "A red flower"
+      ],
+      "answer": 1,
+      "evidence": "s4"
+    },
+    {
+      "id": "q2",
+      "kind": "comprehension",
+      "prompt": "What does the seed need?",
+      "options": [
+        "Sun and water",
+        "A hole and some dirt",
+        "A seed and a robot"
+      ],
+      "answer": 0,
+      "evidence": "s6"
+    },
+    {
+      "id": "q3",
+      "kind": "comprehension",
+      "prompt": "What does the screen say?",
+      "options": [
+        "It was not sure",
+        "Seeds grow in one day",
+        "Plant it in the sun"
+      ],
+      "answer": 0,
+      "evidence": "s10"
+    },
+    {
+      "id": "q4",
+      "kind": "comprehension",
+      "prompt": "What does Mia say when Bot wants the plant now?",
+      "options": [
+        "Go away",
+        "Not yet",
+        "Look at the dirt"
+      ],
+      "answer": 1,
+      "evidence": "s13"
+    },
+    {
+      "id": "q5",
+      "kind": "comprehension",
+      "prompt": "On which day does Bot see a leaf?",
+      "options": [
+        "Day one",
+        "Day two",
+        "Day six"
+      ],
+      "answer": 2,
+      "evidence": "s20"
+    },
+    {
+      "id": "q6",
+      "kind": "comprehension",
+      "prompt": "What colour is the flower?",
+      "options": [
+        "Green",
+        "Red",
+        "Blue"
+      ],
+      "answer": 1,
+      "evidence": "s23"
+    },
+    {
+      "id": "q7",
+      "kind": "comprehension",
+      "prompt": "What does Bot draw on its screen?",
+      "options": [
+        "A big robot",
+        "The flower",
+        "A hole in the dirt"
+      ],
+      "answer": 1,
+      "evidence": "s27"
+    },
+    {
+      "id": "q8",
+      "kind": "vocab",
+      "prompt": "Which picture is “sun”?",
+      "word": "sun",
+      "options": [
+        "counting-sun",
+        "apple",
+        "star"
+      ],
+      "answer": 0
+    },
+    {
+      "id": "q9",
+      "kind": "vocab",
+      "prompt": "Which picture is “leaf”?",
+      "word": "leaf",
+      "options": [
+        "apple",
+        "observation-park-leaf",
+        "star"
+      ],
+      "answer": 1
+    },
+    {
+      "id": "q10",
+      "kind": "vocab",
+      "prompt": "Which picture is “flower”?",
+      "word": "flower",
+      "options": [
+        "star",
+        "apple",
+        "subtraction-flower"
+      ],
+      "answer": 2
+    },
+    {
+      "id": "q11",
+      "kind": "vocab",
+      "prompt": "Which picture is “robot”?",
+      "word": "robot",
+      "options": [
+        "observation-museum-robot",
+        "apple",
+        "star"
+      ],
+      "answer": 0
+    },
+    {
+      "id": "sp1",
+      "kind": "spell",
+      "sentence": "s4",
+      "word": "seed"
+    },
+    {
+      "id": "sp2",
+      "kind": "spell",
+      "sentence": "s12",
+      "word": "plant"
+    },
+    {
+      "id": "sp3",
+      "kind": "spell",
+      "sentence": "s15",
+      "word": "water"
+    },
+    {
+      "id": "sp4",
+      "kind": "spell",
+      "sentence": "s14",
+      "word": "time"
+    },
+    {
+      "id": "sp5",
+      "kind": "spell",
+      "sentence": "s26",
+      "word": "waited"
+    }
+  ],
+  "pictures": {
+    "sun": "counting-sun",
+    "leaf": "observation-park-leaf",
+    "flower": "subtraction-flower",
+    "robot": "observation-museum-robot"
+  },
+  "noRecording": [
+    "Bot",
+    "Mia"
+  ],
+  "learningTakeaway": "A seed needs sun, water and time to grow. A smart helper can learn, but it does not know everything, so we watch, wait and make new things.",
+  "provenance": "Original story written for Koda, 2026. Draft: not yet read aloud or reviewed by a person."
+}

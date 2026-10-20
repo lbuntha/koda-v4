@@ -9,11 +9,17 @@ import { UISearchInput } from "../../components/ui";
 import { SvgMarkup } from "../../assets/svg";
 import { useRebusIcons } from "../icons/useRebusIcons";
 
+/** Drawings made for math questions (a clock for any time, a slice for any fraction): there are many, so they come last. */
+const MATH_DRAWING = /^(shape|dice|frame|frac|clock|tally|array|grid|angle|thermo|length)-/;
+
 export const IconPicker: React.FC<{ onPick(id: string, name: string): void }> = ({ onPick }) => {
   const { t } = useT();
   const [query, setQuery] = useState("");
   const icons = useRebusIcons();
-  const shown = useMemo(() => icons.filter((i) => i.name.includes(query.trim().toLowerCase())), [icons, query]);
+  const shown = useMemo(() => {
+    const found = icons.filter((i) => i.name.includes(query.trim().toLowerCase()));
+    return [...found.filter((i) => !MATH_DRAWING.test(i.name)), ...found.filter((i) => MATH_DRAWING.test(i.name))];
+  }, [icons, query]);
   return (
     <div className="flex flex-col gap-2">
       <UISearchInput size="sm" label={t("rebus.studio.searchIcons")} value={query} onChange={(e) => setQuery(e.target.value)} />

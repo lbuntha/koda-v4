@@ -146,7 +146,7 @@ export const PiecesBuilder: React.FC<PiecesBuilderProps> = ({ pieces, onChange, 
             </UIButton>
           </div>
           <div className="flex gap-2">
-            <UIInput aria-label={t("rebus.studio.wordText")} placeholder={t("rebus.studio.wordText")} value={wordText} onChange={(e) => setWordText(e.target.value)} maxLength={40} />
+            <UIInput aria-label={t("rebus.studio.wordText")} placeholder={t("rebus.studio.wordText")} value={wordText} onChange={(e) => setWordText(e.target.value)} maxLength={240} />
             <UISelect aria-label={t("rebus.studio.wordStyle")} className="!w-auto" value={wordStyle} onChange={(e) => setWordStyle(e.target.value as WordStyle)}>
               {WORD_STYLES.map((style) => (
                 <option key={style} value={style}>

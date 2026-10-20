@@ -26,6 +26,7 @@ from app.ages import is_age_range
 BUILT_IN_CATEGORIES = frozenset({"countries", "food", "sayings", "animals", "sports", "school", "science", "khmer", "math"})
 TRICKS = ("compound", "sound-alike", "position", "size", "style", "add-remove")
 MAX_PIECES = 7
+MAX_QUIZ_PIECES = 12
 MIN_ANSWER_LETTERS = 3
 MIN_EXPLANATION_CHARS = 8
 
@@ -38,13 +39,24 @@ def icon_ids() -> frozenset[str]:
     return frozenset(json.loads((Path(__file__).parent / "rebus_icons.json").read_text()))
 
 
+#: Khmer numerals read as the digits they stand for, so ១២ is 12 however a child types it.
+_KHMER_DIGITS = {0x17E0 + i: ord("0") + i for i in range(10)}
+
+
 def normalize_answer(text: str) -> str:
     """Lower-case, accents and punctuation gone, articles dropped, spaces single.
 
     Only Latin diacritics are stripped: the marks that make up a Khmer syllable
     sit elsewhere in Unicode and must survive.
     """
-    t = unicodedata.normalize("NFD", text)
+    t = text.translate(_KHMER_DIGITS)
+    # The marks that change a number stay with it: -3 is not 3, 3/4 is not 34, 1.2 is not 12, 2:3 is not 23.
+    t = re.sub(r"(\d),(?=\d{3}(?!\d))", r"\1", t)
+    t = re.sub(r"(\d)[.,](?=\d)", r"\1point", t)
+    t = re.sub(r"(\d)/(?=\d)", r"\1over", t)
+    t = re.sub(r"(\d):(?=\d)", r"\1colon", t)
+    t = re.sub(r"(^|[\s(=:])[-−–](?=\d)", r"\1neg", t)
+    t = unicodedata.normalize("NFD", t)
     t = re.sub(r"[̀-ͯ]", "", t)
     t = unicodedata.normalize("NFC", t).lower()
     t = re.sub(r"['’`]", "", t)
@@ -91,7 +103,7 @@ def answer_key(puzzle: dict[str, Any]) -> str:
     spec = puzzle.get("math")
     if puzzle.get("kind") == "math" and isinstance(spec, dict) and rebus_math.problem(spec) is None:
         return "math|" + rebus_math.prompt(spec)
-    if puzzle.get("kind") == "choice":
+    if puzzle.get("kind") in ("choice", "quiz"):
         # The same answer under a different question is a different puzzle ("Paris" is the answer to many).
         asked = "".join(piece_names(puzzle.get("pieces") or []))
         return "choice|" + compact_answer(asked) + "|" + compact_answer(str(puzzle.get("answer", "")))
@@ -167,6 +179,7 @@ def validate_puzzle(
 
     math_kind = puzzle.get("kind") == "math"
     choice_kind = puzzle.get("kind") == "choice"
+    quiz_kind = puzzle.get("kind") == "quiz"
     if math_kind:
         issues.extend(_math_issues(puzzle))
     if choice_kind:
@@ -174,7 +187,7 @@ def validate_puzzle(
 
     if not math_kind and not any(p.get("kind") != "op" for p in pieces):
         issues.append("no-picture")
-    if len(pieces) > MAX_PIECES:
+    if len(pieces) > (MAX_QUIZ_PIECES if quiz_kind else MAX_PIECES):
         issues.append("too-many-pieces")
 
     # An operator joins two things: it cannot start, end, or sit beside another.
@@ -184,12 +197,12 @@ def validate_puzzle(
 
     answer = compact_answer(str(puzzle.get("answer", "")))
     # A number is short by nature, and a math prompt is not a picture that could spell its answer.
-    if not (math_kind or choice_kind) and len(answer) < MIN_ANSWER_LETTERS:
+    if not (math_kind or choice_kind or quiz_kind) and len(answer) < MIN_ANSWER_LETTERS:
         issues.append("answer-short")
 
     every = {compact_answer(a) for a in [str(puzzle.get("answer", "")), *map(str, puzzle.get("accepts") or [])]}
     every.discard("")
-    if not (math_kind or choice_kind) and any(compact_answer(t) in every for p in pieces for t in _written_text(p)):
+    if not (math_kind or choice_kind or quiz_kind) and any(compact_answer(t) in every for p in pieces for t in _written_text(p)):
         issues.append("answer-in-puzzle")
 
     if len(str(puzzle.get("explanation", "")).strip()) < MIN_EXPLANATION_CHARS:

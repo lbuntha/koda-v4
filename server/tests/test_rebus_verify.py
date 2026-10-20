@@ -102,3 +102,25 @@ def test_the_icon_list_is_the_one_the_app_draws():
     on_disk = set(json.loads((Path(v.__file__).parent / "rebus_icons.json").read_text()))
     assert on_disk == v.icon_ids()
     assert "rebus-germ" in on_disk
+
+
+def test_khmer_numerals_are_the_digits_they_stand_for():
+    assert v.compact_answer("១២") == "12"
+    assert v.matches("42", [], "៤២", exact=True)
+    assert not v.matches("42", [], "៤៣")
+
+
+def test_a_worked_question_needs_no_picture_to_spell_and_a_number_is_a_fine_answer():
+    quiz = puzzle(kind="quiz", pieces=[{"kind": "word", "text": "A pack has 6 pens. How many in 7 packs?"}], answer="42", explanation="6 × 7 = 42.")
+    assert codes(quiz) == []
+    assert v.answer_key(quiz) != v.answer_key({**quiz, "pieces": [{"kind": "word", "text": "A box has 7 pens. How many in 6 boxes?"}]})
+
+
+def test_numbers_keep_the_marks_that_change_them():
+    assert v.matches("-3", [], "−3", exact=True)
+    assert not v.matches("-3", [], "3", exact=True)
+    assert v.matches("3/4", [], "៣/៤", exact=True)
+    assert not v.matches("3/4", [], "34", exact=True)
+    assert v.matches("1.2", [], "1,2", exact=True)
+    assert not v.matches("1.2", [], "12", exact=True)
+    assert v.matches("1000", [], "1,000", exact=True)

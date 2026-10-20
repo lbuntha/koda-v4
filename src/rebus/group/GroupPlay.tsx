@@ -13,6 +13,7 @@ import { useT } from "../../lib/i18n";
 import { themeSystem } from "../../lib/themeSystem";
 import { UIButton, UIChoiceGrid, UICountdown, UIHintPanel, UIKidMessage, UIOutcome, UIProgressBar } from "../../components/ui";
 import { matchAnswer } from "../answer";
+import { answerInputMode, isNumberAnswer, localizePuzzle } from "../localize";
 import { isChoiceSpec, visibleOptions } from "../choice";
 import { hintFor, hintState, type Hint } from "../hints";
 import { cue } from "../sound";
@@ -49,10 +50,11 @@ interface Mine {
 const fresh = (startMs: number): Mine => ({ hints: [], lastHintMs: startMs, wrong: 0, tried: [], claimed: false, won: null, error: "" });
 
 export const GroupPlay: React.FC<GroupPlayProps> = ({ room, token, skewMs, apply }) => {
-  const { t } = useT();
+  const { t, language } = useT();
   const show = useNickname();
   const now = useServerClock(skewMs);
   const puzzle = room.puzzle as Puzzle;
+  const view = localizePuzzle(puzzle, language);
   const index = room.index ?? 0;
   const startMs = room.startMs ?? 0;
   const limitMs = room.limitMs ?? 60_000;
@@ -138,7 +140,7 @@ export const GroupPlay: React.FC<GroupPlayProps> = ({ room, token, skewMs, apply
         </div>
       ) : (
         <>
-          <PuzzleCanvas pieces={puzzle.pieces} label={t("rebus.puzzle")} />
+          <PuzzleCanvas pieces={view.pieces} label={t("rebus.puzzle")} />
 
           {ended || locallyOver ? (
             <div className="flex flex-col gap-3">
@@ -160,11 +162,11 @@ export const GroupPlay: React.FC<GroupPlayProps> = ({ room, token, skewMs, apply
                 <>
                   <div className="text-center">
                     <div className={themeSystem.typography("caption")}>{t("rebus.answerWas")}</div>
-                    <div className="text-3xl font-black text-ink">{puzzle.answer}</div>
+                    <div className="text-3xl font-black text-ink">{view.answer}</div>
                   </div>
                   <div className={themeSystem.card("default", themeSystem.spacing.cardSm)}>
                     <span className="font-black text-ink">{t("rebus.why")} </span>
-                    <span className="text-body">{puzzle.explanation}</span>
+                    <span className="text-body">{view.explanation}</span>
                   </div>
                   <p className={themeSystem.typography("caption", "text-center")}>
                     {index + 1 >= total ? t("rebus.group.play.finishing") : t("rebus.group.play.nextIn", { seconds: Math.max(1, Math.ceil(((room.revealUntilMs ?? now) - now) / 1000)) })}
@@ -195,10 +197,10 @@ export const GroupPlay: React.FC<GroupPlayProps> = ({ room, token, skewMs, apply
                 ) : null}
               </div>
 
-              {puzzle.kind === "choice" && isChoiceSpec(puzzle.choice) ? (
+              {puzzle.kind === "choice" && isChoiceSpec(view.choice) ? (
                 <UIChoiceGrid
                   label={t("rebus.chooseAnswer")}
-                  options={visibleOptions(puzzle.choice, mine.hints.length, puzzle.id)}
+                  options={visibleOptions(view.choice, mine.hints.length, puzzle.id)}
                   tried={new Set(mine.tried)}
                   disabled={mine.claimed}
                   onPick={(option) => void attempt(option)}
@@ -211,8 +213,8 @@ export const GroupPlay: React.FC<GroupPlayProps> = ({ room, token, skewMs, apply
                   value={text}
                   onChange={(e) => setText(e.target.value)}
                   aria-label={t("rebus.answerLabel")}
-                  placeholder={puzzle.kind === "math" ? t("rebus.answerPlaceholderMath") : t("rebus.answerPlaceholder")}
-                  inputMode={puzzle.kind === "math" ? "numeric" : undefined}
+                  placeholder={isNumberAnswer(puzzle) ? t("rebus.answerPlaceholderMath") : t("rebus.answerPlaceholder")}
+                  inputMode={answerInputMode(puzzle)}
                   autoComplete="off"
                   autoCapitalize="off"
                   autoCorrect="off"
