@@ -24,6 +24,9 @@ export const useIssueText = () => {
 export const PuzzleCard: React.FC<{ puzzle: StudioPuzzle; actions?: React.ReactNode; large?: boolean }> = ({ puzzle, actions, large = false }) => {
   const { t } = useT();
   const issueText = useIssueText();
+  const km = puzzle.km;
+  const question = km?.pieces?.flatMap((piece) => (piece.kind === "word" ? [piece.text] : [])).join(" ") ?? "";
+  const khmerText = km && (question || km.explanation) ? { question, explanation: km.explanation ?? "" } : null;
   return (
     <article className={themeSystem.card("default", `flex flex-col gap-3 ${themeSystem.spacing.cardSm}`)} aria-label={puzzle.answer}>
       <div className="flex flex-wrap items-center gap-1.5">
@@ -49,6 +52,14 @@ export const PuzzleCard: React.FC<{ puzzle: StudioPuzzle; actions?: React.ReactN
             </li>
           ))}
         </ul>
+      )}
+
+      {khmerText && (
+        <div className="rounded-xl border border-line bg-surface-muted p-2.5" lang="km">
+          <div className="text-xs font-extrabold uppercase tracking-wider text-muted">{t("rebus.studio.khmer")}</div>
+          {khmerText.question && <p className="mt-1 text-base font-bold text-ink">{khmerText.question}</p>}
+          {khmerText.explanation && <p className="mt-1 text-sm text-body">{khmerText.explanation}</p>}
+        </div>
       )}
 
       <div>
