@@ -4,13 +4,16 @@ import { rb } from "./rb";
 export const SPORTS = puzzlesFor("sports", [
   // --- games with a ball: two small words
   rb("Football", "foot + ball"),
+  rb("Medal and trophy", "medal & trophy"),
+  rb("Dumbbell and rope", "dumbbell & rope"),
+  rb("Dumbbell and shoe", "dumbbell & shoe"),
   rb("Handball", "hand + ball"),
   rb("Basketball", "basket + ball"),
   rb("Netball", "net + ball"),
   rb("Softball", "cloud=soft + ball"),
   rb("Baseball", "base + ball"),
   rb("Cricket ball", "cricket + ball"),
-  rb("Racketball", "racket + ball"),
+  rb("Racketball", "racket + ball", { a: ["racquetball"] }), 
   rb("Pinball", "pin + ball"),
   rb("Snowball", "snow + ball"),
   rb("Fireball", "fire + ball"),
@@ -43,7 +46,7 @@ export const SPORTS = puzzlesFor("sports", [
   rb("World cup", "earth=world + trophy=cup"),
   rb("Hawkeye", "hawk + eye"),
   rb("Bread basket", "bread + basket"),
-  rb("Fruit basket", "apple=fruit + basket"),
+  
   rb("Handbag", "hand + bag"),
   rb("Home base", "home + base"),
   rb("Big foot", "*foot=big + foot", { a: ["bigfoot"] }),
@@ -53,7 +56,7 @@ export const SPORTS = puzzlesFor("sports", [
   rb("Boxing", 'box + "ING"'),
   rb("Bowling", 'bowl + "ING"'),
   rb("Fencing", 'fence + "ING"'),
-  rb("Cycling", 'bike=cycle + "ING"'),
+  rb("Cycling", 'bike=cycle + "ING"', { a: ["biking"] }), 
   rb("Surfing", 'surfboard=surf + "ING"'),
   rb("Sailing", 'sailboat=sail + "ING"'),
   rb("Running", 'runner=run + "ING"'),
@@ -68,14 +71,14 @@ export const SPORTS = puzzlesFor("sports", [
   rb("Snowboard", "snow + board"),
   rb("Surfboard", "surfboard=surf + board"),
   rb("Dartboard", "arrow=dart + board"),
-  rb("Dumbbell", "dumbbell=dumb + bell", { d: 2 }),
+  
   rb("Bike race", 'bike + "RACE"'),
   rb("Wheelie", 'wheel + "IE"', { d: 2 }),
   rb("Big wheel", "*wheel=big wheel"),
   rb("Ice hockey", "ice + hawk + key", { d: 2, t: "sound-alike" }),
   rb("Time out", 'stopwatch=time + "OUT"'),
-  rb("Stopwatch", "no=stop + clock=watch", { d: 2 }),
-  rb("Win win", "medal=win + medal=win", { d: 2 }),
+  
+  
   rb("Runner up", 'runner + "UP"', { d: 2, a: ["runner-up"] }),
   rb("Home run", "home + runner=run", { d: 2 }),
   rb("Hit and run", "bat=hit & runner=run", { d: 2 }),
