@@ -2,8 +2,6 @@
 
 import { PAL as P, circle, ellipse, line, path, rect } from "../draw";
 
-const thick = (s: string, w: number): string => s.replace('stroke-width="2"', `stroke-width="${w}"`);
-
 export const LEARN: Record<string, string> = {
   ruler:
     rect(4, 20, 56, 24, P.sky, 3, P.navy) + line("M12 20v10M20 20v6M28 20v10M36 20v6M44 20v10M52 20v6", P.navy, 2.5),
