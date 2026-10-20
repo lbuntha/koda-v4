@@ -17,9 +17,22 @@ export const FOOD: Record<string, string> = {
   pie: path("M6 46c0-12 12-22 26-22s26 10 26 22z", P.tan, P.brown) + path("M12 44c2-8 10-14 20-14s18 6 20 14z", P.red) + line("M22 32l4 10M34 30l-2 12M44 34l-6 8", P.brown, 3),
   cup: path("M12 18h32v22a14 14 0 0 1-14 14H26a14 14 0 0 1-14-14z", P.sky, P.blue) + path("M44 24h6a6 6 0 0 1 0 14h-6", "none", P.blue).replace('stroke-width="2"', 'stroke-width="4"') + line("M20 26h16", P.ice, 3),
   pan: circle(26, 36, 20, P.mid) + circle(26, 36, 14, P.ink) + rect(44, 33, 18, 6, P.brown, 3),
-  peanut: path("M26 8c8-4 14 4 10 12-2 4 2 6 4 10 4 8-2 20-12 24-8 2-14-6-10-14 2-4-2-6-2-10 0-8 4-18 10-22z", P.tan, P.brown) + circle(28, 20, 1.6, P.brown) + circle(34, 28, 1.6, P.brown) + circle(26, 40, 1.6, P.brown) + circle(32, 48, 1.6, P.brown),
+  // A peanut shell lying on a slant: two lobes with a pinched waist and the net of little pits.
+  peanut:
+    '<g transform="rotate(-32 32 32)">' +
+    path("M9 32c0-9 7-14 15-12 4 1 6 4 8 4s4-3 8-4c8-2 15 3 15 12s-7 14-15 12c-4-1-6-4-8-4s-4 3-8 4c-8 2-15-3-15-12z", P.tan, P.brown) +
+    line("M16 25c3-2 6-1 8 1M16 38c3 2 6 1 8-1M40 25c3-2 6-1 8 1M40 38c3 2 6 1 8-1M30 29v6M34 29v6", P.brown, 1.6) +
+    circle(18, 32, 1.4, P.brown) + circle(24, 32, 1.4, P.brown) + circle(40, 32, 1.4, P.brown) + circle(46, 32, 1.4, P.brown) +
+    "</g>",
   pepper: path("M22 22h20l4 32H18z", P.mid) + rect(22, 14, 20, 10, P.ink, 5) + circle(28, 18, 1.5, P.white) + circle(36, 18, 1.5, P.white) + circle(32, 38, 5, P.ink) + circle(28, 46, 2, P.ink) + circle(37, 47, 2, P.ink),
-  salt: path("M22 22h20l4 32H18z", P.white, P.soft) + rect(22, 14, 20, 10, P.sky, 5) + circle(28, 18, 1.5, P.white) + circle(36, 18, 1.5, P.white) + line("M24 36h16M24 44h16", P.ice, 3),
+  // A glass shaker of salt: a silver top with holes, salt showing through, a few crystals beside it.
+  salt:
+    path("M19 25h26l3 29c0 3-2 5-5 5H21c-3 0-5-2-5-5z", P.white, P.soft) +
+    path("M17.5 40h29l1.5 14c0 3-2 5-5 5H21c-3 0-5-2-5-5z", P.pale) +
+    path("M19 25v-5c0-5 4-8 13-8s13 3 13 8v5z", P.soft, P.mid) +
+    circle(26, 18, 1.5, P.mid) + circle(32, 18, 1.5, P.mid) + circle(38, 18, 1.5, P.mid) + circle(29, 22.5, 1.3, P.mid) + circle(35, 22.5, 1.3, P.mid) +
+    path("M24 47l2-3 2 3-2 3zM35 51l2-3 2 3-2 3zM30 44l1.4-2 1.4 2-1.4 2z", P.white) +
+    path("M50 57l2-3 2 3-2 3zM56 60l1.5-2 1.5 2-1.5 2z", P.soft),
   ham: ellipse(26, 34, 21, 17, P.pink, P.rose) + ellipse(24, 33, 13, 10, P.rose) + path("M16 30c3-5 9-7 14-6", "none", P.pink).replace('stroke-width="2"', 'stroke-width="4"') + rect(44, 31, 12, 6, P.white, 3, P.soft) + circle(58, 30, 4, P.white, P.soft) + circle(58, 38, 4, P.white, P.soft),
   burger: path("M10 28c0-10 10-16 22-16s22 6 22 16z", P.deepOrange) + circle(22, 20, 1.6, P.cream) + circle(34, 17, 1.6, P.cream) + circle(42, 22, 1.6, P.cream) + path("M8 32c4 4 8-2 12 2s8-2 12 2 8-2 12 2 8-2 12 0v4H8z", P.green) + rect(8, 38, 48, 8, P.darkBrown, 4) + path("M10 48h44c0 6-6 8-12 8H22c-6 0-12-2-12-8z", P.orange),
   tea: path("M12 22h32v16a14 14 0 0 1-14 14H26a14 14 0 0 1-14-14z", P.white, P.mid) + path("M44 28h5a5 5 0 0 1 0 10h-5", "none", P.mid).replace('stroke-width="2"', 'stroke-width="3"') + rect(15, 24, 26, 5, P.brown, 2) + line("M30 24l4-12", P.mid, 2) + rect(32, 8, 8, 8, P.green, 2),

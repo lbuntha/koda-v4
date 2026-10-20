@@ -35,5 +35,12 @@ export const NATURE: Record<string, string> = {
   wood: rect(8, 24, 40, 24, P.brown, 4) + ellipse(48, 36, 8, 12, P.tan, P.brown) + ellipse(48, 36, 3, 5, P.brown) + line("M14 30h22M14 42h22", P.darkBrown, 2),
   pole: rect(28, 6, 8, 52, P.red, 2) + path("M28 16l8-4v6l-8 4zM28 30l8-4v6l-8 4zM28 44l8-4v6l-8 4z", P.white),
   hole: ellipse(32, 44, 24, 10, P.darkBrown) + ellipse(32, 42, 18, 6, P.ink) + path("M6 44c0-6 8-8 12-8", P.brown, P.brown),
-  hay: rect(8, 22, 48, 28, P.tan, 4, P.brown) + line("M8 32h48M8 42h48M24 22v28M40 22v28", P.brown, 2) + line("M12 22l-3-6M22 22l-1-8M44 22l2-8M54 22l4-6", P.tan, 3),
+  // A round hay roll, with its spiral of straw and a few stalks poking out.
+  hay:
+    ellipse(32, 57, 20, 3.5, P.pale) +
+    circle(32, 32, 22, P.peach, P.brown) +
+    line("M32 24a8 8 0 1 0 8 8", P.deepOrange, 2) +
+    line("M32 16a16 16 0 1 0 16 16", P.deepOrange, 2) +
+    line("M32 29a3 3 0 1 0 3 3", P.deepOrange, 2) +
+    line("M9 20l-5-3M8 44l-5 3M55 20l5-3M56 44l5 3M32 9v-5M20 53l-2 5M44 53l2 5", P.peach, 2.6),
 };

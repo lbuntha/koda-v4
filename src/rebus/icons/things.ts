@@ -26,7 +26,15 @@ export const THINGS: Record<string, string> = {
   paper: path("M14 6h26l12 12v40H14z", P.white, P.mid) + path("M40 6v12h12", P.pale, P.mid) + line("M22 28h20M22 36h20M22 44h14", P.sky, 3),
   clip: path("M40 14L20 36a8 8 0 0 0 12 12l22-24a12 12 0 0 0-18-16L14 32a16 16 0 0 0 24 22", "none", P.mid).replace('stroke-width="2"', 'stroke-width="4"'),
   shelf: rect(6, 10, 52, 44, P.brown, 3) + rect(10, 14, 44, 16, P.darkBrown, 2) + rect(10, 34, 44, 16, P.darkBrown, 2) + rect(14, 16, 6, 14, P.rose, 1) + rect(22, 18, 6, 12, P.sky, 1) + rect(30, 16, 6, 14, P.green, 1) + rect(16, 38, 8, 12, P.violet, 1) + rect(26, 40, 6, 10, P.rose, 1),
-  case: rect(6, 22, 52, 24, P.indigo, 12) + line("M14 34h36", P.lav, 3) + rect(28, 30, 8, 8, P.violet, 4),
+  // A zipped pencil case with a pencil poking out of the top.
+  case:
+    rect(14, 12, 9, 18, P.rose, 2) +
+    path("M14.6 12L18.5 4.5l3.9 7.5z", P.peach, P.brown) +
+    circle(18.5, 5.6, 1.4, P.ink) +
+    rect(6, 24, 52, 26, P.violet, 10, P.indigo) +
+    line("M13 33h38", P.lav, 2.5) +
+    circle(50, 33, 3.2, P.white, P.indigo) +
+    line("M12 42h14", P.lav, 2.5),
   bus: rect(6, 14, 52, 36, P.deepOrange, 8) + rect(10, 20, 14, 12, P.ice, 2) + rect(26, 20, 14, 12, P.ice, 2) + rect(42, 20, 12, 12, P.ice, 2) + rect(6, 36, 52, 4, P.darkRed, 0) + circle(18, 52, 6, P.ink) + circle(46, 52, 6, P.ink) + circle(18, 52, 2.4, P.soft) + circle(46, 52, 2.4, P.soft),
   bell: path("M32 8c-10 0-16 8-16 20 0 10-4 12-6 16h44c-2-4-6-6-6-16 0-12-6-20-16-20z", P.orange) + circle(32, 50, 5, P.deepOrange) + circle(32, 6, 3, P.deepOrange),
   bag: path("M12 22h40l4 34H8z", P.rose, P.darkRed) + path("M22 22v-6a10 10 0 0 1 20 0v6", "none", P.darkRed).replace('stroke-width="2"', 'stroke-width="4"') + rect(24, 34, 16, 12, P.pink, 3),
