@@ -28,7 +28,7 @@ class PhotoPiece(Model):
 class WordPiece(Model):
     kind: Literal["word"]
     text: str = Field(min_length=1, max_length=40)
-    style: Literal["plain", "cut", "small", "big", "upside-down"] | None = None
+    style: Literal["plain", "cut", "small", "big", "upside-down", "reversed", "spaced", "underlined", "crossed"] | None = None
 
 
 class StackPiece(Model):

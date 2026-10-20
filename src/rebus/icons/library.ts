@@ -10,6 +10,8 @@ import { PAL as P, circle, rect } from "./draw";
 import { CREATURES } from "./creatures";
 import { FOOD } from "./food";
 import { NATURE } from "./nature";
+import { MORE } from "./more";
+import { SPORTS } from "./sports";
 import { THINGS } from "./things";
 
 /** A colour as a picture: a rounded tile with a small shine. */
@@ -20,6 +22,8 @@ export const ICON_ART: Readonly<Record<string, string>> = {
   ...FOOD,
   ...CREATURES,
   ...THINGS,
+  ...SPORTS,
+  ...MORE,
   blue: swatch(P.blue),
   green: swatch(P.green),
   black: swatch(P.ink),

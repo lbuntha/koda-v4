@@ -9,12 +9,12 @@
 
 import type { AgeRange } from "../../lib/ages";
 import { ICON_PREFIX } from "../icons/library";
-import type { CategoryId, Difficulty, Piece, Puzzle, Trick } from "../types";
+import type { CategoryId, Difficulty, Piece, Puzzle, Trick, WordStyle } from "../types";
 
 /** A picture. `name` is what it is read as; it defaults to the drawing's own name. */
 export const pic = (drawing: string, name: string = drawing, scale?: "big" | "small"): Piece => ({ kind: "icon", id: ICON_PREFIX + drawing, name, ...(scale ? { scale } : {}) });
 
-export const word = (text: string, style?: "cut" | "small" | "big" | "upside-down"): Piece => ({ kind: "word", text, ...(style ? { style } : {}) });
+export const word = (text: string, style?: Exclude<WordStyle, "plain">): Piece => ({ kind: "word", text, ...(style ? { style } : {}) });
 export const stack = (top: string, bottom: string): Piece => ({ kind: "stack", top, bottom });
 
 const PLUS: Piece = { kind: "op", op: "+" };

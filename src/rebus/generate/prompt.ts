@@ -35,7 +35,7 @@ RULES
 
 PIECES (in the order they are read)
   {"kind":"icon","id":"rebus-fire","name":"hot"}
-  {"kind":"word","text":"S"}                       optional "style": "cut"|"small"|"big"|"upside-down"
+  {"kind":"word","text":"S"}                       optional "style": "cut"|"small"|"big"|"upside-down"|"reversed"|"spaced"|"underlined"|"crossed"
   {"kind":"stack","top":"MAN","bottom":"BOARD"}    one word above another
   {"kind":"op","op":"+"}  or  "&"                  between two pieces
 
@@ -130,7 +130,7 @@ const readPiece = (raw: unknown): Piece | null => {
     const name = text(p.name, 40) || drawingName(id);
     return id ? { kind: "icon", id, name, ...(p.scale === "big" || p.scale === "small" ? { scale: p.scale } : {}) } : null;
   }
-  if (p.kind === "word") return text(p.text, 40) ? { kind: "word", text: text(p.text, 40), ...(["cut", "small", "big", "upside-down"].includes(p.style as string) ? { style: p.style as "cut" } : {}) } : null;
+  if (p.kind === "word") return text(p.text, 40) ? { kind: "word", text: text(p.text, 40), ...(["cut", "small", "big", "upside-down", "reversed", "spaced", "underlined", "crossed"].includes(p.style as string) ? { style: p.style as "cut" } : {}) } : null;
   if (p.kind === "stack") return text(p.top, 40) && text(p.bottom, 40) ? { kind: "stack", top: text(p.top, 40), bottom: text(p.bottom, 40) } : null;
   return p.op === "+" || p.op === "&" || p.op === "-" ? { kind: "op", op: p.op } : null;
 };

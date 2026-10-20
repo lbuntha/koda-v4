@@ -20,6 +20,10 @@ const WORD_STYLE: Record<WordStyle, string> = {
   small: "text-base",
   big: "text-6xl",
   "upside-down": "rotate-180",
+  reversed: "inline-block -scale-x-100",
+  spaced: "tracking-[0.35em]",
+  underlined: "underline decoration-[6px] underline-offset-[10px]",
+  crossed: "line-through decoration-[6px] decoration-rose-500",
 };
 
 /** One icon: the Art library's drawing if it has one, else the built-in, else its name. */

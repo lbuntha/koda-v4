@@ -23,7 +23,7 @@ export type Difficulty = 1 | 2 | 3;
 export const TRICKS = ["compound", "sound-alike", "position", "size", "style", "add-remove"] as const;
 export type Trick = (typeof TRICKS)[number];
 
-export type WordStyle = "plain" | "cut" | "small" | "big" | "upside-down";
+export type WordStyle = "plain" | "cut" | "small" | "big" | "upside-down" | "reversed" | "spaced" | "underlined" | "crossed";
 
 export type Piece =
   /** A photo an author uploaded, kept with the library's photos. `id` is `photo-<sha256>`; `name` is what it is read as. */

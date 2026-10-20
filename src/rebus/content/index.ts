@@ -15,6 +15,8 @@ import { KHMER } from "./khmer";
 import { MATH } from "./math";
 import { SAYINGS } from "./sayings";
 import { SCHOOL } from "./school";
+import { MORE_ANIMALS, MORE_FOOD, MORE_SAYINGS, MORE_SCIENCE } from "./more";
 import { SCIENCE } from "./science";
+import { SPORTS } from "./sports";
 
-export const OFFICIAL_PUZZLES: readonly Puzzle[] = [...COUNTRIES, ...FOOD, ...ANIMALS, ...SAYINGS, ...SCHOOL, ...SCIENCE, ...KHMER, ...MATH, ...CHOICE];
+export const OFFICIAL_PUZZLES: readonly Puzzle[] = [...COUNTRIES, ...FOOD, ...ANIMALS, ...SAYINGS, ...SCHOOL, ...SCIENCE, ...SPORTS, ...MORE_FOOD, ...MORE_ANIMALS, ...MORE_SCIENCE, ...MORE_SAYINGS, ...KHMER, ...MATH, ...CHOICE];

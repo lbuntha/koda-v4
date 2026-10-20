@@ -4886,6 +4886,5640 @@
   "source": "official"
  },
  {
+  "id": "sports-football",
+  "category": "sports",
+  "ages": [
+   6,
+   12
+  ],
+  "difficulty": 1,
+  "trick": "compound",
+  "pieces": [
+   {
+    "kind": "icon",
+    "id": "rebus-foot",
+    "name": "foot"
+   },
+   {
+    "kind": "op",
+    "op": "+"
+   },
+   {
+    "kind": "icon",
+    "id": "rebus-ball",
+    "name": "ball"
+   }
+  ],
+  "answer": "Football",
+  "accepts": [],
+  "explanation": "foot + ball = football.",
+  "source": "official"
+ },
+ {
+  "id": "sports-handball",
+  "category": "sports",
+  "ages": [
+   6,
+   12
+  ],
+  "difficulty": 1,
+  "trick": "compound",
+  "pieces": [
+   {
+    "kind": "icon",
+    "id": "rebus-hand",
+    "name": "hand"
+   },
+   {
+    "kind": "op",
+    "op": "+"
+   },
+   {
+    "kind": "icon",
+    "id": "rebus-ball",
+    "name": "ball"
+   }
+  ],
+  "answer": "Handball",
+  "accepts": [],
+  "explanation": "hand + ball = handball.",
+  "source": "official"
+ },
+ {
+  "id": "sports-basketball",
+  "category": "sports",
+  "ages": [
+   6,
+   12
+  ],
+  "difficulty": 1,
+  "trick": "compound",
+  "pieces": [
+   {
+    "kind": "icon",
+    "id": "rebus-basket",
+    "name": "basket"
+   },
+   {
+    "kind": "op",
+    "op": "+"
+   },
+   {
+    "kind": "icon",
+    "id": "rebus-ball",
+    "name": "ball"
+   }
+  ],
+  "answer": "Basketball",
+  "accepts": [],
+  "explanation": "basket + ball = basketball.",
+  "source": "official"
+ },
+ {
+  "id": "sports-netball",
+  "category": "sports",
+  "ages": [
+   6,
+   12
+  ],
+  "difficulty": 1,
+  "trick": "compound",
+  "pieces": [
+   {
+    "kind": "icon",
+    "id": "rebus-net",
+    "name": "net"
+   },
+   {
+    "kind": "op",
+    "op": "+"
+   },
+   {
+    "kind": "icon",
+    "id": "rebus-ball",
+    "name": "ball"
+   }
+  ],
+  "answer": "Netball",
+  "accepts": [],
+  "explanation": "net + ball = netball.",
+  "source": "official"
+ },
+ {
+  "id": "sports-softball",
+  "category": "sports",
+  "ages": [
+   6,
+   12
+  ],
+  "difficulty": 1,
+  "trick": "compound",
+  "pieces": [
+   {
+    "kind": "icon",
+    "id": "rebus-cloud",
+    "name": "soft"
+   },
+   {
+    "kind": "op",
+    "op": "+"
+   },
+   {
+    "kind": "icon",
+    "id": "rebus-ball",
+    "name": "ball"
+   }
+  ],
+  "answer": "Softball",
+  "accepts": [],
+  "explanation": "soft + ball = softball.",
+  "source": "official"
+ },
+ {
+  "id": "sports-baseball",
+  "category": "sports",
+  "ages": [
+   6,
+   12
+  ],
+  "difficulty": 1,
+  "trick": "compound",
+  "pieces": [
+   {
+    "kind": "icon",
+    "id": "rebus-base",
+    "name": "base"
+   },
+   {
+    "kind": "op",
+    "op": "+"
+   },
+   {
+    "kind": "icon",
+    "id": "rebus-ball",
+    "name": "ball"
+   }
+  ],
+  "answer": "Baseball",
+  "accepts": [],
+  "explanation": "base + ball = baseball.",
+  "source": "official"
+ },
+ {
+  "id": "sports-cricket-ball",
+  "category": "sports",
+  "ages": [
+   6,
+   12
+  ],
+  "difficulty": 1,
+  "trick": "compound",
+  "pieces": [
+   {
+    "kind": "icon",
+    "id": "rebus-cricket",
+    "name": "cricket"
+   },
+   {
+    "kind": "op",
+    "op": "+"
+   },
+   {
+    "kind": "icon",
+    "id": "rebus-ball",
+    "name": "ball"
+   }
+  ],
+  "answer": "Cricket ball",
+  "accepts": [],
+  "explanation": "cricket + ball = cricket ball.",
+  "source": "official"
+ },
+ {
+  "id": "sports-racketball",
+  "category": "sports",
+  "ages": [
+   6,
+   12
+  ],
+  "difficulty": 1,
+  "trick": "compound",
+  "pieces": [
+   {
+    "kind": "icon",
+    "id": "rebus-racket",
+    "name": "racket"
+   },
+   {
+    "kind": "op",
+    "op": "+"
+   },
+   {
+    "kind": "icon",
+    "id": "rebus-ball",
+    "name": "ball"
+   }
+  ],
+  "answer": "Racketball",
+  "accepts": [],
+  "explanation": "racket + ball = racketball.",
+  "source": "official"
+ },
+ {
+  "id": "sports-pinball",
+  "category": "sports",
+  "ages": [
+   6,
+   12
+  ],
+  "difficulty": 1,
+  "trick": "compound",
+  "pieces": [
+   {
+    "kind": "icon",
+    "id": "rebus-pin",
+    "name": "pin"
+   },
+   {
+    "kind": "op",
+    "op": "+"
+   },
+   {
+    "kind": "icon",
+    "id": "rebus-ball",
+    "name": "ball"
+   }
+  ],
+  "answer": "Pinball",
+  "accepts": [],
+  "explanation": "pin + ball = pinball.",
+  "source": "official"
+ },
+ {
+  "id": "sports-snowball",
+  "category": "sports",
+  "ages": [
+   6,
+   12
+  ],
+  "difficulty": 1,
+  "trick": "compound",
+  "pieces": [
+   {
+    "kind": "icon",
+    "id": "rebus-snow",
+    "name": "snow"
+   },
+   {
+    "kind": "op",
+    "op": "+"
+   },
+   {
+    "kind": "icon",
+    "id": "rebus-ball",
+    "name": "ball"
+   }
+  ],
+  "answer": "Snowball",
+  "accepts": [],
+  "explanation": "snow + ball = snowball.",
+  "source": "official"
+ },
+ {
+  "id": "sports-fireball",
+  "category": "sports",
+  "ages": [
+   6,
+   12
+  ],
+  "difficulty": 1,
+  "trick": "compound",
+  "pieces": [
+   {
+    "kind": "icon",
+    "id": "rebus-fire",
+    "name": "fire"
+   },
+   {
+    "kind": "op",
+    "op": "+"
+   },
+   {
+    "kind": "icon",
+    "id": "rebus-ball",
+    "name": "ball"
+   }
+  ],
+  "answer": "Fireball",
+  "accepts": [],
+  "explanation": "fire + ball = fireball.",
+  "source": "official"
+ },
+ {
+  "id": "sports-eyeball",
+  "category": "sports",
+  "ages": [
+   6,
+   12
+  ],
+  "difficulty": 1,
+  "trick": "compound",
+  "pieces": [
+   {
+    "kind": "icon",
+    "id": "rebus-eye",
+    "name": "eye"
+   },
+   {
+    "kind": "op",
+    "op": "+"
+   },
+   {
+    "kind": "icon",
+    "id": "rebus-ball",
+    "name": "ball"
+   }
+  ],
+  "answer": "Eyeball",
+  "accepts": [],
+  "explanation": "eye + ball = eyeball.",
+  "source": "official"
+ },
+ {
+  "id": "sports-meatball",
+  "category": "sports",
+  "ages": [
+   6,
+   12
+  ],
+  "difficulty": 1,
+  "trick": "compound",
+  "pieces": [
+   {
+    "kind": "icon",
+    "id": "rebus-ham",
+    "name": "meat"
+   },
+   {
+    "kind": "op",
+    "op": "+"
+   },
+   {
+    "kind": "icon",
+    "id": "rebus-ball",
+    "name": "ball"
+   }
+  ],
+  "answer": "Meatball",
+  "accepts": [],
+  "explanation": "meat + ball = meatball.",
+  "source": "official"
+ },
+ {
+  "id": "sports-ballpark",
+  "category": "sports",
+  "ages": [
+   6,
+   12
+  ],
+  "difficulty": 1,
+  "trick": "compound",
+  "pieces": [
+   {
+    "kind": "icon",
+    "id": "rebus-ball",
+    "name": "ball"
+   },
+   {
+    "kind": "op",
+    "op": "+"
+   },
+   {
+    "kind": "word",
+    "text": "PARK"
+   }
+  ],
+  "answer": "Ballpark",
+  "accepts": [],
+  "explanation": "ball + park = ballpark.",
+  "source": "official"
+ },
+ {
+  "id": "sports-ball-game",
+  "category": "sports",
+  "ages": [
+   6,
+   12
+  ],
+  "difficulty": 1,
+  "trick": "compound",
+  "pieces": [
+   {
+    "kind": "icon",
+    "id": "rebus-ball",
+    "name": "ball"
+   },
+   {
+    "kind": "op",
+    "op": "+"
+   },
+   {
+    "kind": "word",
+    "text": "GAME"
+   }
+  ],
+  "answer": "Ball game",
+  "accepts": [],
+  "explanation": "ball + game = ball game.",
+  "source": "official"
+ },
+ {
+  "id": "sports-baseball-bat",
+  "category": "sports",
+  "ages": [
+   6,
+   12
+  ],
+  "difficulty": 1,
+  "trick": "compound",
+  "pieces": [
+   {
+    "kind": "icon",
+    "id": "rebus-base",
+    "name": "base"
+   },
+   {
+    "kind": "op",
+    "op": "+"
+   },
+   {
+    "kind": "icon",
+    "id": "rebus-ball",
+    "name": "ball"
+   },
+   {
+    "kind": "op",
+    "op": "+"
+   },
+   {
+    "kind": "icon",
+    "id": "rebus-bat",
+    "name": "bat"
+   }
+  ],
+  "answer": "Baseball bat",
+  "accepts": [],
+  "explanation": "base + ball + bat = baseball bat.",
+  "source": "official"
+ },
+ {
+  "id": "sports-cricket-bat",
+  "category": "sports",
+  "ages": [
+   6,
+   12
+  ],
+  "difficulty": 1,
+  "trick": "compound",
+  "pieces": [
+   {
+    "kind": "icon",
+    "id": "rebus-cricket",
+    "name": "cricket"
+   },
+   {
+    "kind": "op",
+    "op": "+"
+   },
+   {
+    "kind": "icon",
+    "id": "rebus-bat",
+    "name": "bat"
+   }
+  ],
+  "answer": "Cricket bat",
+  "accepts": [],
+  "explanation": "cricket + bat = cricket bat.",
+  "source": "official"
+ },
+ {
+  "id": "sports-baseball-cap",
+  "category": "sports",
+  "ages": [
+   6,
+   12
+  ],
+  "difficulty": 1,
+  "trick": "compound",
+  "pieces": [
+   {
+    "kind": "icon",
+    "id": "rebus-base",
+    "name": "base"
+   },
+   {
+    "kind": "op",
+    "op": "+"
+   },
+   {
+    "kind": "icon",
+    "id": "rebus-ball",
+    "name": "ball"
+   },
+   {
+    "kind": "op",
+    "op": "+"
+   },
+   {
+    "kind": "icon",
+    "id": "rebus-cap",
+    "name": "cap"
+   }
+  ],
+  "answer": "Baseball cap",
+  "accepts": [],
+  "explanation": "base + ball + cap = baseball cap.",
+  "source": "official"
+ },
+ {
+  "id": "sports-baseball-glove",
+  "category": "sports",
+  "ages": [
+   6,
+   12
+  ],
+  "difficulty": 1,
+  "trick": "compound",
+  "pieces": [
+   {
+    "kind": "icon",
+    "id": "rebus-base",
+    "name": "base"
+   },
+   {
+    "kind": "op",
+    "op": "+"
+   },
+   {
+    "kind": "icon",
+    "id": "rebus-ball",
+    "name": "ball"
+   },
+   {
+    "kind": "op",
+    "op": "+"
+   },
+   {
+    "kind": "icon",
+    "id": "rebus-glove",
+    "name": "glove"
+   }
+  ],
+  "answer": "Baseball glove",
+  "accepts": [],
+  "explanation": "base + ball + glove = baseball glove.",
+  "source": "official"
+ },
+ {
+  "id": "sports-boxing-glove",
+  "category": "sports",
+  "ages": [
+   6,
+   12
+  ],
+  "difficulty": 1,
+  "trick": "compound",
+  "pieces": [
+   {
+    "kind": "icon",
+    "id": "rebus-box",
+    "name": "box"
+   },
+   {
+    "kind": "op",
+    "op": "+"
+   },
+   {
+    "kind": "word",
+    "text": "ING"
+   },
+   {
+    "kind": "op",
+    "op": "+"
+   },
+   {
+    "kind": "icon",
+    "id": "rebus-glove",
+    "name": "glove"
+   }
+  ],
+  "answer": "Boxing glove",
+  "accepts": [],
+  "explanation": "box + ing + glove = boxing glove.",
+  "source": "official"
+ },
+ {
+  "id": "sports-basketball-hoop",
+  "category": "sports",
+  "ages": [
+   6,
+   12
+  ],
+  "difficulty": 1,
+  "trick": "compound",
+  "pieces": [
+   {
+    "kind": "icon",
+    "id": "rebus-basketball",
+    "name": "basketball"
+   },
+   {
+    "kind": "op",
+    "op": "+"
+   },
+   {
+    "kind": "icon",
+    "id": "rebus-hoop",
+    "name": "hoop"
+   }
+  ],
+  "answer": "Basketball hoop",
+  "accepts": [],
+  "explanation": "basketball + hoop = basketball hoop.",
+  "source": "official"
+ },
+ {
+  "id": "sports-bike-helmet",
+  "category": "sports",
+  "ages": [
+   6,
+   12
+  ],
+  "difficulty": 1,
+  "trick": "compound",
+  "pieces": [
+   {
+    "kind": "icon",
+    "id": "rebus-bike",
+    "name": "bike"
+   },
+   {
+    "kind": "op",
+    "op": "+"
+   },
+   {
+    "kind": "icon",
+    "id": "rebus-helmet",
+    "name": "helmet"
+   }
+  ],
+  "answer": "Bike helmet",
+  "accepts": [],
+  "explanation": "bike + helmet = bike helmet.",
+  "source": "official"
+ },
+ {
+  "id": "sports-ski-goggles",
+  "category": "sports",
+  "ages": [
+   6,
+   12
+  ],
+  "difficulty": 1,
+  "trick": "compound",
+  "pieces": [
+   {
+    "kind": "icon",
+    "id": "rebus-ski",
+    "name": "ski"
+   },
+   {
+    "kind": "op",
+    "op": "+"
+   },
+   {
+    "kind": "icon",
+    "id": "rebus-goggles",
+    "name": "goggles"
+   }
+  ],
+  "answer": "Ski goggles",
+  "accepts": [],
+  "explanation": "ski + goggles = ski goggles.",
+  "source": "official"
+ },
+ {
+  "id": "sports-ice-skate",
+  "category": "sports",
+  "ages": [
+   6,
+   12
+  ],
+  "difficulty": 1,
+  "trick": "compound",
+  "pieces": [
+   {
+    "kind": "icon",
+    "id": "rebus-ice",
+    "name": "ice"
+   },
+   {
+    "kind": "op",
+    "op": "+"
+   },
+   {
+    "kind": "icon",
+    "id": "rebus-skate",
+    "name": "skate"
+   }
+  ],
+  "answer": "Ice skate",
+  "accepts": [],
+  "explanation": "ice + skate = ice skate.",
+  "source": "official"
+ },
+ {
+  "id": "sports-snowshoe",
+  "category": "sports",
+  "ages": [
+   6,
+   12
+  ],
+  "difficulty": 1,
+  "trick": "compound",
+  "pieces": [
+   {
+    "kind": "icon",
+    "id": "rebus-snow",
+    "name": "snow"
+   },
+   {
+    "kind": "op",
+    "op": "+"
+   },
+   {
+    "kind": "icon",
+    "id": "rebus-shoe",
+    "name": "shoe"
+   }
+  ],
+  "answer": "Snowshoe",
+  "accepts": [],
+  "explanation": "snow + shoe = snowshoe.",
+  "source": "official"
+ },
+ {
+  "id": "sports-horseshoe",
+  "category": "sports",
+  "ages": [
+   6,
+   12
+  ],
+  "difficulty": 1,
+  "trick": "compound",
+  "pieces": [
+   {
+    "kind": "icon",
+    "id": "rebus-horse",
+    "name": "horse"
+   },
+   {
+    "kind": "op",
+    "op": "+"
+   },
+   {
+    "kind": "icon",
+    "id": "rebus-shoe",
+    "name": "shoe"
+   }
+  ],
+  "answer": "Horseshoe",
+  "accepts": [],
+  "explanation": "horse + shoe = horseshoe.",
+  "source": "official"
+ },
+ {
+  "id": "sports-running-shoe",
+  "category": "sports",
+  "ages": [
+   6,
+   12
+  ],
+  "difficulty": 1,
+  "trick": "compound",
+  "pieces": [
+   {
+    "kind": "icon",
+    "id": "rebus-runner",
+    "name": "running"
+   },
+   {
+    "kind": "op",
+    "op": "+"
+   },
+   {
+    "kind": "icon",
+    "id": "rebus-shoe",
+    "name": "shoe"
+   }
+  ],
+  "answer": "Running shoe",
+  "accepts": [],
+  "explanation": "running + shoe = running shoe.",
+  "source": "official"
+ },
+ {
+  "id": "sports-bow-and-arrow",
+  "category": "sports",
+  "ages": [
+   6,
+   12
+  ],
+  "difficulty": 1,
+  "trick": "compound",
+  "pieces": [
+   {
+    "kind": "icon",
+    "id": "rebus-bow",
+    "name": "bow"
+   },
+   {
+    "kind": "op",
+    "op": "&"
+   },
+   {
+    "kind": "icon",
+    "id": "rebus-arrow",
+    "name": "arrow"
+   }
+  ],
+  "answer": "Bow and arrow",
+  "accepts": [],
+  "explanation": "bow + arrow = bow and arrow.",
+  "source": "official"
+ },
+ {
+  "id": "sports-pine-cone",
+  "category": "sports",
+  "ages": [
+   6,
+   12
+  ],
+  "difficulty": 1,
+  "trick": "compound",
+  "pieces": [
+   {
+    "kind": "icon",
+    "id": "rebus-pine",
+    "name": "pine"
+   },
+   {
+    "kind": "op",
+    "op": "+"
+   },
+   {
+    "kind": "icon",
+    "id": "rebus-cone",
+    "name": "cone"
+   }
+  ],
+  "answer": "Pine cone",
+  "accepts": [],
+  "explanation": "pine + cone = pine cone.",
+  "source": "official"
+ },
+ {
+  "id": "sports-fish-bowl",
+  "category": "sports",
+  "ages": [
+   6,
+   12
+  ],
+  "difficulty": 1,
+  "trick": "compound",
+  "pieces": [
+   {
+    "kind": "icon",
+    "id": "rebus-fish",
+    "name": "fish"
+   },
+   {
+    "kind": "op",
+    "op": "+"
+   },
+   {
+    "kind": "icon",
+    "id": "rebus-bowl",
+    "name": "bowl"
+   }
+  ],
+  "answer": "Fish bowl",
+  "accepts": [
+   "fishbowl"
+  ],
+  "explanation": "fish + bowl = fish bowl.",
+  "source": "official"
+ },
+ {
+  "id": "sports-key-ring",
+  "category": "sports",
+  "ages": [
+   6,
+   12
+  ],
+  "difficulty": 1,
+  "trick": "compound",
+  "pieces": [
+   {
+    "kind": "icon",
+    "id": "rebus-key",
+    "name": "key"
+   },
+   {
+    "kind": "op",
+    "op": "+"
+   },
+   {
+    "kind": "icon",
+    "id": "rebus-ring",
+    "name": "ring"
+   }
+  ],
+  "answer": "Key ring",
+  "accepts": [
+   "keyring"
+  ],
+  "explanation": "key + ring = key ring.",
+  "source": "official"
+ },
+ {
+  "id": "sports-flagpole",
+  "category": "sports",
+  "ages": [
+   6,
+   12
+  ],
+  "difficulty": 1,
+  "trick": "compound",
+  "pieces": [
+   {
+    "kind": "icon",
+    "id": "rebus-flag",
+    "name": "flag"
+   },
+   {
+    "kind": "op",
+    "op": "+"
+   },
+   {
+    "kind": "icon",
+    "id": "rebus-pole",
+    "name": "pole"
+   }
+  ],
+  "answer": "Flagpole",
+  "accepts": [],
+  "explanation": "flag + pole = flagpole.",
+  "source": "official"
+ },
+ {
+  "id": "sports-white-flag",
+  "category": "sports",
+  "ages": [
+   6,
+   12
+  ],
+  "difficulty": 1,
+  "trick": "compound",
+  "pieces": [
+   {
+    "kind": "icon",
+    "id": "rebus-white",
+    "name": "white"
+   },
+   {
+    "kind": "op",
+    "op": "+"
+   },
+   {
+    "kind": "icon",
+    "id": "rebus-flag",
+    "name": "flag"
+   }
+  ],
+  "answer": "White flag",
+  "accepts": [],
+  "explanation": "white + flag = white flag.",
+  "source": "official"
+ },
+ {
+  "id": "sports-fishnet",
+  "category": "sports",
+  "ages": [
+   6,
+   12
+  ],
+  "difficulty": 1,
+  "trick": "compound",
+  "pieces": [
+   {
+    "kind": "icon",
+    "id": "rebus-fish",
+    "name": "fish"
+   },
+   {
+    "kind": "op",
+    "op": "+"
+   },
+   {
+    "kind": "icon",
+    "id": "rebus-net",
+    "name": "net"
+   }
+  ],
+  "answer": "Fishnet",
+  "accepts": [],
+  "explanation": "fish + net = fishnet.",
+  "source": "official"
+ },
+ {
+  "id": "sports-pinwheel",
+  "category": "sports",
+  "ages": [
+   6,
+   12
+  ],
+  "difficulty": 1,
+  "trick": "compound",
+  "pieces": [
+   {
+    "kind": "icon",
+    "id": "rebus-pin",
+    "name": "pin"
+   },
+   {
+    "kind": "op",
+    "op": "+"
+   },
+   {
+    "kind": "icon",
+    "id": "rebus-wheel",
+    "name": "wheel"
+   }
+  ],
+  "answer": "Pinwheel",
+  "accepts": [],
+  "explanation": "pin + wheel = pinwheel.",
+  "source": "official"
+ },
+ {
+  "id": "sports-cup-final",
+  "category": "sports",
+  "ages": [
+   8,
+   15
+  ],
+  "difficulty": 2,
+  "trick": "compound",
+  "pieces": [
+   {
+    "kind": "icon",
+    "id": "rebus-trophy",
+    "name": "cup"
+   },
+   {
+    "kind": "op",
+    "op": "+"
+   },
+   {
+    "kind": "icon",
+    "id": "rebus-fin",
+    "name": "fin"
+   },
+   {
+    "kind": "op",
+    "op": "+"
+   },
+   {
+    "kind": "word",
+    "text": "AL"
+   }
+  ],
+  "answer": "Cup final",
+  "accepts": [],
+  "explanation": "cup + fin + al = cup final.",
+  "source": "official"
+ },
+ {
+  "id": "sports-world-cup",
+  "category": "sports",
+  "ages": [
+   6,
+   12
+  ],
+  "difficulty": 1,
+  "trick": "compound",
+  "pieces": [
+   {
+    "kind": "icon",
+    "id": "rebus-earth",
+    "name": "world"
+   },
+   {
+    "kind": "op",
+    "op": "+"
+   },
+   {
+    "kind": "icon",
+    "id": "rebus-trophy",
+    "name": "cup"
+   }
+  ],
+  "answer": "World cup",
+  "accepts": [],
+  "explanation": "world + cup = world cup.",
+  "source": "official"
+ },
+ {
+  "id": "sports-hawkeye",
+  "category": "sports",
+  "ages": [
+   6,
+   12
+  ],
+  "difficulty": 1,
+  "trick": "compound",
+  "pieces": [
+   {
+    "kind": "icon",
+    "id": "rebus-hawk",
+    "name": "hawk"
+   },
+   {
+    "kind": "op",
+    "op": "+"
+   },
+   {
+    "kind": "icon",
+    "id": "rebus-eye",
+    "name": "eye"
+   }
+  ],
+  "answer": "Hawkeye",
+  "accepts": [],
+  "explanation": "hawk + eye = hawkeye.",
+  "source": "official"
+ },
+ {
+  "id": "sports-bread-basket",
+  "category": "sports",
+  "ages": [
+   6,
+   12
+  ],
+  "difficulty": 1,
+  "trick": "compound",
+  "pieces": [
+   {
+    "kind": "icon",
+    "id": "rebus-bread",
+    "name": "bread"
+   },
+   {
+    "kind": "op",
+    "op": "+"
+   },
+   {
+    "kind": "icon",
+    "id": "rebus-basket",
+    "name": "basket"
+   }
+  ],
+  "answer": "Bread basket",
+  "accepts": [],
+  "explanation": "bread + basket = bread basket.",
+  "source": "official"
+ },
+ {
+  "id": "sports-fruit-basket",
+  "category": "sports",
+  "ages": [
+   6,
+   12
+  ],
+  "difficulty": 1,
+  "trick": "compound",
+  "pieces": [
+   {
+    "kind": "icon",
+    "id": "rebus-apple",
+    "name": "fruit"
+   },
+   {
+    "kind": "op",
+    "op": "+"
+   },
+   {
+    "kind": "icon",
+    "id": "rebus-basket",
+    "name": "basket"
+   }
+  ],
+  "answer": "Fruit basket",
+  "accepts": [],
+  "explanation": "fruit + basket = fruit basket.",
+  "source": "official"
+ },
+ {
+  "id": "sports-handbag",
+  "category": "sports",
+  "ages": [
+   6,
+   12
+  ],
+  "difficulty": 1,
+  "trick": "compound",
+  "pieces": [
+   {
+    "kind": "icon",
+    "id": "rebus-hand",
+    "name": "hand"
+   },
+   {
+    "kind": "op",
+    "op": "+"
+   },
+   {
+    "kind": "icon",
+    "id": "rebus-bag",
+    "name": "bag"
+   }
+  ],
+  "answer": "Handbag",
+  "accepts": [],
+  "explanation": "hand + bag = handbag.",
+  "source": "official"
+ },
+ {
+  "id": "sports-home-base",
+  "category": "sports",
+  "ages": [
+   6,
+   12
+  ],
+  "difficulty": 1,
+  "trick": "compound",
+  "pieces": [
+   {
+    "kind": "icon",
+    "id": "rebus-home",
+    "name": "home"
+   },
+   {
+    "kind": "op",
+    "op": "+"
+   },
+   {
+    "kind": "icon",
+    "id": "rebus-base",
+    "name": "base"
+   }
+  ],
+  "answer": "Home base",
+  "accepts": [],
+  "explanation": "home + base = home base.",
+  "source": "official"
+ },
+ {
+  "id": "sports-big-foot",
+  "category": "sports",
+  "ages": [
+   6,
+   12
+  ],
+  "difficulty": 1,
+  "trick": "size",
+  "pieces": [
+   {
+    "kind": "icon",
+    "id": "rebus-foot",
+    "name": "big",
+    "scale": "big"
+   },
+   {
+    "kind": "op",
+    "op": "+"
+   },
+   {
+    "kind": "icon",
+    "id": "rebus-foot",
+    "name": "foot"
+   }
+  ],
+  "answer": "Big foot",
+  "accepts": [
+   "bigfoot"
+  ],
+  "explanation": "big + foot = big foot.",
+  "source": "official"
+ },
+ {
+  "id": "sports-skiing",
+  "category": "sports",
+  "ages": [
+   6,
+   12
+  ],
+  "difficulty": 1,
+  "trick": "compound",
+  "pieces": [
+   {
+    "kind": "icon",
+    "id": "rebus-ski",
+    "name": "ski"
+   },
+   {
+    "kind": "op",
+    "op": "+"
+   },
+   {
+    "kind": "word",
+    "text": "ING"
+   }
+  ],
+  "answer": "Skiing",
+  "accepts": [],
+  "explanation": "ski + ing = skiing.",
+  "source": "official"
+ },
+ {
+  "id": "sports-skating",
+  "category": "sports",
+  "ages": [
+   6,
+   12
+  ],
+  "difficulty": 1,
+  "trick": "compound",
+  "pieces": [
+   {
+    "kind": "icon",
+    "id": "rebus-skate",
+    "name": "skate"
+   },
+   {
+    "kind": "op",
+    "op": "+"
+   },
+   {
+    "kind": "word",
+    "text": "ING"
+   }
+  ],
+  "answer": "Skating",
+  "accepts": [],
+  "explanation": "skate + ing = skating.",
+  "source": "official"
+ },
+ {
+  "id": "sports-boxing",
+  "category": "sports",
+  "ages": [
+   6,
+   12
+  ],
+  "difficulty": 1,
+  "trick": "compound",
+  "pieces": [
+   {
+    "kind": "icon",
+    "id": "rebus-box",
+    "name": "box"
+   },
+   {
+    "kind": "op",
+    "op": "+"
+   },
+   {
+    "kind": "word",
+    "text": "ING"
+   }
+  ],
+  "answer": "Boxing",
+  "accepts": [],
+  "explanation": "box + ing = boxing.",
+  "source": "official"
+ },
+ {
+  "id": "sports-bowling",
+  "category": "sports",
+  "ages": [
+   6,
+   12
+  ],
+  "difficulty": 1,
+  "trick": "compound",
+  "pieces": [
+   {
+    "kind": "icon",
+    "id": "rebus-bowl",
+    "name": "bowl"
+   },
+   {
+    "kind": "op",
+    "op": "+"
+   },
+   {
+    "kind": "word",
+    "text": "ING"
+   }
+  ],
+  "answer": "Bowling",
+  "accepts": [],
+  "explanation": "bowl + ing = bowling.",
+  "source": "official"
+ },
+ {
+  "id": "sports-fencing",
+  "category": "sports",
+  "ages": [
+   6,
+   12
+  ],
+  "difficulty": 1,
+  "trick": "compound",
+  "pieces": [
+   {
+    "kind": "icon",
+    "id": "rebus-fence",
+    "name": "fence"
+   },
+   {
+    "kind": "op",
+    "op": "+"
+   },
+   {
+    "kind": "word",
+    "text": "ING"
+   }
+  ],
+  "answer": "Fencing",
+  "accepts": [],
+  "explanation": "fence + ing = fencing.",
+  "source": "official"
+ },
+ {
+  "id": "sports-cycling",
+  "category": "sports",
+  "ages": [
+   6,
+   12
+  ],
+  "difficulty": 1,
+  "trick": "compound",
+  "pieces": [
+   {
+    "kind": "icon",
+    "id": "rebus-bike",
+    "name": "cycle"
+   },
+   {
+    "kind": "op",
+    "op": "+"
+   },
+   {
+    "kind": "word",
+    "text": "ING"
+   }
+  ],
+  "answer": "Cycling",
+  "accepts": [],
+  "explanation": "cycle + ing = cycling.",
+  "source": "official"
+ },
+ {
+  "id": "sports-surfing",
+  "category": "sports",
+  "ages": [
+   6,
+   12
+  ],
+  "difficulty": 1,
+  "trick": "compound",
+  "pieces": [
+   {
+    "kind": "icon",
+    "id": "rebus-surfboard",
+    "name": "surf"
+   },
+   {
+    "kind": "op",
+    "op": "+"
+   },
+   {
+    "kind": "word",
+    "text": "ING"
+   }
+  ],
+  "answer": "Surfing",
+  "accepts": [],
+  "explanation": "surf + ing = surfing.",
+  "source": "official"
+ },
+ {
+  "id": "sports-sailing",
+  "category": "sports",
+  "ages": [
+   6,
+   12
+  ],
+  "difficulty": 1,
+  "trick": "compound",
+  "pieces": [
+   {
+    "kind": "icon",
+    "id": "rebus-sailboat",
+    "name": "sail"
+   },
+   {
+    "kind": "op",
+    "op": "+"
+   },
+   {
+    "kind": "word",
+    "text": "ING"
+   }
+  ],
+  "answer": "Sailing",
+  "accepts": [],
+  "explanation": "sail + ing = sailing.",
+  "source": "official"
+ },
+ {
+  "id": "sports-running",
+  "category": "sports",
+  "ages": [
+   6,
+   12
+  ],
+  "difficulty": 1,
+  "trick": "compound",
+  "pieces": [
+   {
+    "kind": "icon",
+    "id": "rebus-runner",
+    "name": "run"
+   },
+   {
+    "kind": "op",
+    "op": "+"
+   },
+   {
+    "kind": "word",
+    "text": "ING"
+   }
+  ],
+  "answer": "Running",
+  "accepts": [],
+  "explanation": "run + ing = running.",
+  "source": "official"
+ },
+ {
+  "id": "sports-fishing",
+  "category": "sports",
+  "ages": [
+   6,
+   12
+  ],
+  "difficulty": 1,
+  "trick": "compound",
+  "pieces": [
+   {
+    "kind": "icon",
+    "id": "rebus-fish",
+    "name": "fish"
+   },
+   {
+    "kind": "op",
+    "op": "+"
+   },
+   {
+    "kind": "word",
+    "text": "ING"
+   }
+  ],
+  "answer": "Fishing",
+  "accepts": [],
+  "explanation": "fish + ing = fishing.",
+  "source": "official"
+ },
+ {
+  "id": "sports-ice-skating",
+  "category": "sports",
+  "ages": [
+   6,
+   12
+  ],
+  "difficulty": 1,
+  "trick": "compound",
+  "pieces": [
+   {
+    "kind": "icon",
+    "id": "rebus-ice",
+    "name": "ice"
+   },
+   {
+    "kind": "op",
+    "op": "+"
+   },
+   {
+    "kind": "icon",
+    "id": "rebus-skate",
+    "name": "skate"
+   },
+   {
+    "kind": "op",
+    "op": "+"
+   },
+   {
+    "kind": "word",
+    "text": "ING"
+   }
+  ],
+  "answer": "Ice skating",
+  "accepts": [],
+  "explanation": "ice + skate + ing = ice skating.",
+  "source": "official"
+ },
+ {
+  "id": "sports-skateboarding",
+  "category": "sports",
+  "ages": [
+   6,
+   12
+  ],
+  "difficulty": 1,
+  "trick": "compound",
+  "pieces": [
+   {
+    "kind": "icon",
+    "id": "rebus-skateboard",
+    "name": "skateboard"
+   },
+   {
+    "kind": "op",
+    "op": "+"
+   },
+   {
+    "kind": "word",
+    "text": "ING"
+   }
+  ],
+  "answer": "Skateboarding",
+  "accepts": [],
+  "explanation": "skateboard + ing = skateboarding.",
+  "source": "official"
+ },
+ {
+  "id": "sports-snowboarding",
+  "category": "sports",
+  "ages": [
+   6,
+   12
+  ],
+  "difficulty": 1,
+  "trick": "compound",
+  "pieces": [
+   {
+    "kind": "icon",
+    "id": "rebus-snow",
+    "name": "snow"
+   },
+   {
+    "kind": "op",
+    "op": "+"
+   },
+   {
+    "kind": "icon",
+    "id": "rebus-board",
+    "name": "board"
+   },
+   {
+    "kind": "op",
+    "op": "+"
+   },
+   {
+    "kind": "word",
+    "text": "ING"
+   }
+  ],
+  "answer": "Snowboarding",
+  "accepts": [],
+  "explanation": "snow + board + ing = snowboarding.",
+  "source": "official"
+ },
+ {
+  "id": "sports-kite-flying",
+  "category": "sports",
+  "ages": [
+   6,
+   12
+  ],
+  "difficulty": 1,
+  "trick": "compound",
+  "pieces": [
+   {
+    "kind": "icon",
+    "id": "rebus-kite",
+    "name": "kite"
+   },
+   {
+    "kind": "op",
+    "op": "+"
+   },
+   {
+    "kind": "icon",
+    "id": "rebus-fly",
+    "name": "fly"
+   },
+   {
+    "kind": "op",
+    "op": "+"
+   },
+   {
+    "kind": "word",
+    "text": "ING"
+   }
+  ],
+  "answer": "Kite flying",
+  "accepts": [],
+  "explanation": "kite + fly + ing = kite flying.",
+  "source": "official"
+ },
+ {
+  "id": "sports-water-skiing",
+  "category": "sports",
+  "ages": [
+   8,
+   15
+  ],
+  "difficulty": 2,
+  "trick": "compound",
+  "pieces": [
+   {
+    "kind": "icon",
+    "id": "rebus-water",
+    "name": "water"
+   },
+   {
+    "kind": "op",
+    "op": "+"
+   },
+   {
+    "kind": "icon",
+    "id": "rebus-ski",
+    "name": "ski"
+   },
+   {
+    "kind": "op",
+    "op": "+"
+   },
+   {
+    "kind": "word",
+    "text": "ING"
+   }
+  ],
+  "answer": "Water skiing",
+  "accepts": [],
+  "explanation": "water + ski + ing = water skiing.",
+  "source": "official"
+ },
+ {
+  "id": "sports-skateboard",
+  "category": "sports",
+  "ages": [
+   6,
+   12
+  ],
+  "difficulty": 1,
+  "trick": "compound",
+  "pieces": [
+   {
+    "kind": "icon",
+    "id": "rebus-skate",
+    "name": "skate"
+   },
+   {
+    "kind": "op",
+    "op": "+"
+   },
+   {
+    "kind": "icon",
+    "id": "rebus-board",
+    "name": "board"
+   }
+  ],
+  "answer": "Skateboard",
+  "accepts": [],
+  "explanation": "skate + board = skateboard.",
+  "source": "official"
+ },
+ {
+  "id": "sports-snowboard",
+  "category": "sports",
+  "ages": [
+   6,
+   12
+  ],
+  "difficulty": 1,
+  "trick": "compound",
+  "pieces": [
+   {
+    "kind": "icon",
+    "id": "rebus-snow",
+    "name": "snow"
+   },
+   {
+    "kind": "op",
+    "op": "+"
+   },
+   {
+    "kind": "icon",
+    "id": "rebus-board",
+    "name": "board"
+   }
+  ],
+  "answer": "Snowboard",
+  "accepts": [],
+  "explanation": "snow + board = snowboard.",
+  "source": "official"
+ },
+ {
+  "id": "sports-surfboard",
+  "category": "sports",
+  "ages": [
+   6,
+   12
+  ],
+  "difficulty": 1,
+  "trick": "compound",
+  "pieces": [
+   {
+    "kind": "icon",
+    "id": "rebus-surfboard",
+    "name": "surf"
+   },
+   {
+    "kind": "op",
+    "op": "+"
+   },
+   {
+    "kind": "icon",
+    "id": "rebus-board",
+    "name": "board"
+   }
+  ],
+  "answer": "Surfboard",
+  "accepts": [],
+  "explanation": "surf + board = surfboard.",
+  "source": "official"
+ },
+ {
+  "id": "sports-dartboard",
+  "category": "sports",
+  "ages": [
+   6,
+   12
+  ],
+  "difficulty": 1,
+  "trick": "compound",
+  "pieces": [
+   {
+    "kind": "icon",
+    "id": "rebus-arrow",
+    "name": "dart"
+   },
+   {
+    "kind": "op",
+    "op": "+"
+   },
+   {
+    "kind": "icon",
+    "id": "rebus-board",
+    "name": "board"
+   }
+  ],
+  "answer": "Dartboard",
+  "accepts": [],
+  "explanation": "dart + board = dartboard.",
+  "source": "official"
+ },
+ {
+  "id": "sports-dumbbell",
+  "category": "sports",
+  "ages": [
+   8,
+   15
+  ],
+  "difficulty": 2,
+  "trick": "compound",
+  "pieces": [
+   {
+    "kind": "icon",
+    "id": "rebus-dumbbell",
+    "name": "dumb"
+   },
+   {
+    "kind": "op",
+    "op": "+"
+   },
+   {
+    "kind": "icon",
+    "id": "rebus-bell",
+    "name": "bell"
+   }
+  ],
+  "answer": "Dumbbell",
+  "accepts": [],
+  "explanation": "dumb + bell = dumbbell.",
+  "source": "official"
+ },
+ {
+  "id": "sports-bike-race",
+  "category": "sports",
+  "ages": [
+   6,
+   12
+  ],
+  "difficulty": 1,
+  "trick": "compound",
+  "pieces": [
+   {
+    "kind": "icon",
+    "id": "rebus-bike",
+    "name": "bike"
+   },
+   {
+    "kind": "op",
+    "op": "+"
+   },
+   {
+    "kind": "word",
+    "text": "RACE"
+   }
+  ],
+  "answer": "Bike race",
+  "accepts": [],
+  "explanation": "bike + race = bike race.",
+  "source": "official"
+ },
+ {
+  "id": "sports-wheelie",
+  "category": "sports",
+  "ages": [
+   8,
+   15
+  ],
+  "difficulty": 2,
+  "trick": "compound",
+  "pieces": [
+   {
+    "kind": "icon",
+    "id": "rebus-wheel",
+    "name": "wheel"
+   },
+   {
+    "kind": "op",
+    "op": "+"
+   },
+   {
+    "kind": "word",
+    "text": "IE"
+   }
+  ],
+  "answer": "Wheelie",
+  "accepts": [],
+  "explanation": "wheel + ie = wheelie.",
+  "source": "official"
+ },
+ {
+  "id": "sports-big-wheel",
+  "category": "sports",
+  "ages": [
+   6,
+   12
+  ],
+  "difficulty": 1,
+  "trick": "size",
+  "pieces": [
+   {
+    "kind": "icon",
+    "id": "rebus-wheel",
+    "name": "big",
+    "scale": "big"
+   },
+   {
+    "kind": "icon",
+    "id": "rebus-wheel",
+    "name": "wheel"
+   }
+  ],
+  "answer": "Big wheel",
+  "accepts": [],
+  "explanation": "big + wheel = big wheel.",
+  "source": "official"
+ },
+ {
+  "id": "sports-ice-hockey",
+  "category": "sports",
+  "ages": [
+   8,
+   15
+  ],
+  "difficulty": 2,
+  "trick": "sound-alike",
+  "pieces": [
+   {
+    "kind": "icon",
+    "id": "rebus-ice",
+    "name": "ice"
+   },
+   {
+    "kind": "op",
+    "op": "+"
+   },
+   {
+    "kind": "icon",
+    "id": "rebus-hawk",
+    "name": "hawk"
+   },
+   {
+    "kind": "op",
+    "op": "+"
+   },
+   {
+    "kind": "icon",
+    "id": "rebus-key",
+    "name": "key"
+   }
+  ],
+  "answer": "Ice hockey",
+  "accepts": [],
+  "explanation": "ice + hawk + key, said fast, sounds like ice hockey.",
+  "source": "official"
+ },
+ {
+  "id": "sports-time-out",
+  "category": "sports",
+  "ages": [
+   6,
+   12
+  ],
+  "difficulty": 1,
+  "trick": "compound",
+  "pieces": [
+   {
+    "kind": "icon",
+    "id": "rebus-stopwatch",
+    "name": "time"
+   },
+   {
+    "kind": "op",
+    "op": "+"
+   },
+   {
+    "kind": "word",
+    "text": "OUT"
+   }
+  ],
+  "answer": "Time out",
+  "accepts": [],
+  "explanation": "time + out = time out.",
+  "source": "official"
+ },
+ {
+  "id": "sports-stopwatch",
+  "category": "sports",
+  "ages": [
+   8,
+   15
+  ],
+  "difficulty": 2,
+  "trick": "compound",
+  "pieces": [
+   {
+    "kind": "icon",
+    "id": "rebus-no",
+    "name": "stop"
+   },
+   {
+    "kind": "op",
+    "op": "+"
+   },
+   {
+    "kind": "icon",
+    "id": "rebus-clock",
+    "name": "watch"
+   }
+  ],
+  "answer": "Stopwatch",
+  "accepts": [],
+  "explanation": "stop + watch = stopwatch.",
+  "source": "official"
+ },
+ {
+  "id": "sports-win-win",
+  "category": "sports",
+  "ages": [
+   8,
+   15
+  ],
+  "difficulty": 2,
+  "trick": "compound",
+  "pieces": [
+   {
+    "kind": "icon",
+    "id": "rebus-medal",
+    "name": "win"
+   },
+   {
+    "kind": "op",
+    "op": "+"
+   },
+   {
+    "kind": "icon",
+    "id": "rebus-medal",
+    "name": "win"
+   }
+  ],
+  "answer": "Win win",
+  "accepts": [],
+  "explanation": "win + win = win win.",
+  "source": "official"
+ },
+ {
+  "id": "sports-runner-up",
+  "category": "sports",
+  "ages": [
+   8,
+   15
+  ],
+  "difficulty": 2,
+  "trick": "compound",
+  "pieces": [
+   {
+    "kind": "icon",
+    "id": "rebus-runner",
+    "name": "runner"
+   },
+   {
+    "kind": "op",
+    "op": "+"
+   },
+   {
+    "kind": "word",
+    "text": "UP"
+   }
+  ],
+  "answer": "Runner up",
+  "accepts": [
+   "runner-up"
+  ],
+  "explanation": "runner + up = runner up.",
+  "source": "official"
+ },
+ {
+  "id": "sports-home-run",
+  "category": "sports",
+  "ages": [
+   8,
+   15
+  ],
+  "difficulty": 2,
+  "trick": "compound",
+  "pieces": [
+   {
+    "kind": "icon",
+    "id": "rebus-home",
+    "name": "home"
+   },
+   {
+    "kind": "op",
+    "op": "+"
+   },
+   {
+    "kind": "icon",
+    "id": "rebus-runner",
+    "name": "run"
+   }
+  ],
+  "answer": "Home run",
+  "accepts": [],
+  "explanation": "home + run = home run.",
+  "source": "official"
+ },
+ {
+  "id": "sports-hit-and-run",
+  "category": "sports",
+  "ages": [
+   8,
+   15
+  ],
+  "difficulty": 2,
+  "trick": "compound",
+  "pieces": [
+   {
+    "kind": "icon",
+    "id": "rebus-bat",
+    "name": "hit"
+   },
+   {
+    "kind": "op",
+    "op": "&"
+   },
+   {
+    "kind": "icon",
+    "id": "rebus-runner",
+    "name": "run"
+   }
+  ],
+  "answer": "Hit and run",
+  "accepts": [],
+  "explanation": "hit + run = hit and run.",
+  "source": "official"
+ },
+ {
+  "id": "sports-hit-the-target",
+  "category": "sports",
+  "ages": [
+   8,
+   15
+  ],
+  "difficulty": 2,
+  "trick": "compound",
+  "pieces": [
+   {
+    "kind": "icon",
+    "id": "rebus-bat",
+    "name": "hit"
+   },
+   {
+    "kind": "op",
+    "op": "+"
+   },
+   {
+    "kind": "icon",
+    "id": "rebus-target",
+    "name": "target"
+   }
+  ],
+  "answer": "Hit the target",
+  "accepts": [
+   "hit the mark"
+  ],
+  "explanation": "hit + target = hit the target.",
+  "source": "official"
+ },
+ {
+  "id": "sports-raise-the-flag",
+  "category": "sports",
+  "ages": [
+   8,
+   15
+  ],
+  "difficulty": 2,
+  "trick": "sound-alike",
+  "pieces": [
+   {
+    "kind": "icon",
+    "id": "rebus-rise",
+    "name": "rise"
+   },
+   {
+    "kind": "op",
+    "op": "+"
+   },
+   {
+    "kind": "icon",
+    "id": "rebus-flag",
+    "name": "flag"
+   }
+  ],
+  "answer": "Raise the flag",
+  "accepts": [],
+  "explanation": "rise + flag, said fast, sounds like raise the flag.",
+  "source": "official"
+ },
+ {
+  "id": "sports-kite-runner",
+  "category": "sports",
+  "ages": [
+   8,
+   15
+  ],
+  "difficulty": 2,
+  "trick": "compound",
+  "pieces": [
+   {
+    "kind": "icon",
+    "id": "rebus-kite",
+    "name": "kite"
+   },
+   {
+    "kind": "op",
+    "op": "+"
+   },
+   {
+    "kind": "icon",
+    "id": "rebus-runner",
+    "name": "runner"
+   }
+  ],
+  "answer": "Kite runner",
+  "accepts": [],
+  "explanation": "kite + runner = kite runner.",
+  "source": "official"
+ },
+ {
+  "id": "sports-butterfly-net",
+  "category": "sports",
+  "ages": [
+   8,
+   15
+  ],
+  "difficulty": 2,
+  "trick": "compound",
+  "pieces": [
+   {
+    "kind": "icon",
+    "id": "rebus-butter",
+    "name": "butter"
+   },
+   {
+    "kind": "op",
+    "op": "+"
+   },
+   {
+    "kind": "icon",
+    "id": "rebus-fly",
+    "name": "fly"
+   },
+   {
+    "kind": "op",
+    "op": "+"
+   },
+   {
+    "kind": "icon",
+    "id": "rebus-net",
+    "name": "net"
+   }
+  ],
+  "answer": "Butterfly net",
+  "accepts": [],
+  "explanation": "butter + fly + net = butterfly net.",
+  "source": "official"
+ },
+ {
+  "id": "sports-tug-of-war",
+  "category": "sports",
+  "ages": [
+   8,
+   15
+  ],
+  "difficulty": 2,
+  "trick": "compound",
+  "pieces": [
+   {
+    "kind": "icon",
+    "id": "rebus-rope",
+    "name": "tug"
+   },
+   {
+    "kind": "op",
+    "op": "+"
+   },
+   {
+    "kind": "word",
+    "text": "OF"
+   },
+   {
+    "kind": "op",
+    "op": "+"
+   },
+   {
+    "kind": "icon",
+    "id": "rebus-sword",
+    "name": "war"
+   }
+  ],
+  "answer": "Tug of war",
+  "accepts": [],
+  "explanation": "tug + of + war = tug of war.",
+  "source": "official"
+ },
+ {
+  "id": "sports-whistle-blower",
+  "category": "sports",
+  "ages": [
+   11,
+   18
+  ],
+  "difficulty": 3,
+  "trick": "compound",
+  "pieces": [
+   {
+    "kind": "icon",
+    "id": "rebus-whistle",
+    "name": "whistle"
+   },
+   {
+    "kind": "op",
+    "op": "+"
+   },
+   {
+    "kind": "icon",
+    "id": "rebus-wind",
+    "name": "blow"
+   },
+   {
+    "kind": "op",
+    "op": "+"
+   },
+   {
+    "kind": "word",
+    "text": "ER"
+   }
+  ],
+  "answer": "Whistle blower",
+  "accepts": [
+   "whistleblower"
+  ],
+  "explanation": "whistle + blow + er = whistle blower.",
+  "source": "official"
+ },
+ {
+  "id": "sports-on-the-ball",
+  "category": "sports",
+  "ages": [
+   8,
+   15
+  ],
+  "difficulty": 2,
+  "trick": "compound",
+  "pieces": [
+   {
+    "kind": "word",
+    "text": "ON THE"
+   },
+   {
+    "kind": "op",
+    "op": "+"
+   },
+   {
+    "kind": "icon",
+    "id": "rebus-ball",
+    "name": "ball"
+   }
+  ],
+  "answer": "On the ball",
+  "accepts": [],
+  "explanation": "on the + ball = on the ball.",
+  "source": "official"
+ },
+ {
+  "id": "sports-rugby",
+  "category": "sports",
+  "ages": [
+   8,
+   15
+  ],
+  "difficulty": 2,
+  "trick": "sound-alike",
+  "pieces": [
+   {
+    "kind": "icon",
+    "id": "rebus-rug",
+    "name": "rug"
+   },
+   {
+    "kind": "op",
+    "op": "+"
+   },
+   {
+    "kind": "icon",
+    "id": "rebus-bee",
+    "name": "bee"
+   }
+  ],
+  "answer": "Rugby",
+  "accepts": [],
+  "explanation": "rug + bee, said fast, sounds like rugby.",
+  "source": "official"
+ },
+ {
+  "id": "sports-hockey",
+  "category": "sports",
+  "ages": [
+   8,
+   15
+  ],
+  "difficulty": 2,
+  "trick": "sound-alike",
+  "pieces": [
+   {
+    "kind": "icon",
+    "id": "rebus-hawk",
+    "name": "hawk"
+   },
+   {
+    "kind": "op",
+    "op": "+"
+   },
+   {
+    "kind": "icon",
+    "id": "rebus-key",
+    "name": "key"
+   }
+  ],
+  "answer": "Hockey",
+  "accepts": [],
+  "explanation": "hawk + key, said fast, sounds like hockey.",
+  "source": "official"
+ },
+ {
+  "id": "sports-karate",
+  "category": "sports",
+  "ages": [
+   11,
+   18
+  ],
+  "difficulty": 3,
+  "trick": "sound-alike",
+  "pieces": [
+   {
+    "kind": "icon",
+    "id": "rebus-carrot",
+    "name": "carrot"
+   },
+   {
+    "kind": "op",
+    "op": "+"
+   },
+   {
+    "kind": "icon",
+    "id": "rebus-tea",
+    "name": "tea"
+   }
+  ],
+  "answer": "Karate",
+  "accepts": [],
+  "explanation": "carrot + tea, said fast, sounds like karate.",
+  "source": "official"
+ },
+ {
+  "id": "sports-team",
+  "category": "sports",
+  "ages": [
+   8,
+   15
+  ],
+  "difficulty": 2,
+  "trick": "sound-alike",
+  "pieces": [
+   {
+    "kind": "icon",
+    "id": "rebus-tea",
+    "name": "tea"
+   },
+   {
+    "kind": "op",
+    "op": "+"
+   },
+   {
+    "kind": "word",
+    "text": "M"
+   }
+  ],
+  "answer": "Team",
+  "accepts": [],
+  "explanation": "tea + m, said fast, sounds like team.",
+  "source": "official"
+ },
+ {
+  "id": "sports-final",
+  "category": "sports",
+  "ages": [
+   8,
+   15
+  ],
+  "difficulty": 2,
+  "trick": "sound-alike",
+  "pieces": [
+   {
+    "kind": "icon",
+    "id": "rebus-fin",
+    "name": "fin"
+   },
+   {
+    "kind": "op",
+    "op": "+"
+   },
+   {
+    "kind": "word",
+    "text": "AL"
+   }
+  ],
+  "answer": "Final",
+  "accepts": [],
+  "explanation": "fin + al, said fast, sounds like final.",
+  "source": "official"
+ },
+ {
+  "id": "sports-captain",
+  "category": "sports",
+  "ages": [
+   11,
+   18
+  ],
+  "difficulty": 3,
+  "trick": "sound-alike",
+  "pieces": [
+   {
+    "kind": "icon",
+    "id": "rebus-cap",
+    "name": "cap"
+   },
+   {
+    "kind": "op",
+    "op": "+"
+   },
+   {
+    "kind": "icon",
+    "id": "rebus-can",
+    "name": "tin"
+   }
+  ],
+  "answer": "Captain",
+  "accepts": [],
+  "explanation": "cap + tin, said fast, sounds like captain.",
+  "source": "official"
+ },
+ {
+  "id": "sports-goalkeeper",
+  "category": "sports",
+  "ages": [
+   11,
+   18
+  ],
+  "difficulty": 3,
+  "trick": "sound-alike",
+  "pieces": [
+   {
+    "kind": "icon",
+    "id": "rebus-goal",
+    "name": "goal"
+   },
+   {
+    "kind": "op",
+    "op": "+"
+   },
+   {
+    "kind": "icon",
+    "id": "rebus-key",
+    "name": "key"
+   },
+   {
+    "kind": "op",
+    "op": "+"
+   },
+   {
+    "kind": "word",
+    "text": "PER"
+   }
+  ],
+  "answer": "Goalkeeper",
+  "accepts": [],
+  "explanation": "goal + key + per, said fast, sounds like goalkeeper.",
+  "source": "official"
+ },
+ {
+  "id": "sports-water-polo",
+  "category": "sports",
+  "ages": [
+   11,
+   18
+  ],
+  "difficulty": 3,
+  "trick": "sound-alike",
+  "pieces": [
+   {
+    "kind": "icon",
+    "id": "rebus-water",
+    "name": "water"
+   },
+   {
+    "kind": "op",
+    "op": "+"
+   },
+   {
+    "kind": "icon",
+    "id": "rebus-pole",
+    "name": "pole"
+   },
+   {
+    "kind": "op",
+    "op": "+"
+   },
+   {
+    "kind": "word",
+    "text": "O"
+   }
+  ],
+  "answer": "Water polo",
+  "accepts": [],
+  "explanation": "water + pole + o, said fast, sounds like water polo.",
+  "source": "official"
+ },
+ {
+  "id": "food-buttercup",
+  "category": "food",
+  "ages": [
+   6,
+   12
+  ],
+  "difficulty": 1,
+  "trick": "compound",
+  "pieces": [
+   {
+    "kind": "icon",
+    "id": "rebus-butter",
+    "name": "butter"
+   },
+   {
+    "kind": "op",
+    "op": "+"
+   },
+   {
+    "kind": "icon",
+    "id": "rebus-cup",
+    "name": "cup"
+   }
+  ],
+  "answer": "Buttercup",
+  "accepts": [],
+  "explanation": "butter + cup = buttercup.",
+  "source": "official"
+ },
+ {
+  "id": "food-blackberry",
+  "category": "food",
+  "ages": [
+   6,
+   12
+  ],
+  "difficulty": 1,
+  "trick": "compound",
+  "pieces": [
+   {
+    "kind": "icon",
+    "id": "rebus-black",
+    "name": "black"
+   },
+   {
+    "kind": "op",
+    "op": "+"
+   },
+   {
+    "kind": "icon",
+    "id": "rebus-berry",
+    "name": "berry"
+   }
+  ],
+  "answer": "Blackberry",
+  "accepts": [],
+  "explanation": "black + berry = blackberry.",
+  "source": "official"
+ },
+ {
+  "id": "food-sweetcorn",
+  "category": "food",
+  "ages": [
+   6,
+   12
+  ],
+  "difficulty": 1,
+  "trick": "compound",
+  "pieces": [
+   {
+    "kind": "icon",
+    "id": "rebus-cake",
+    "name": "sweet"
+   },
+   {
+    "kind": "op",
+    "op": "+"
+   },
+   {
+    "kind": "icon",
+    "id": "rebus-corn",
+    "name": "corn"
+   }
+  ],
+  "answer": "Sweetcorn",
+  "accepts": [
+   "sweet corn"
+  ],
+  "explanation": "sweet + corn = sweetcorn.",
+  "source": "official"
+ },
+ {
+  "id": "food-teacup",
+  "category": "food",
+  "ages": [
+   6,
+   12
+  ],
+  "difficulty": 1,
+  "trick": "compound",
+  "pieces": [
+   {
+    "kind": "icon",
+    "id": "rebus-tea",
+    "name": "tea"
+   },
+   {
+    "kind": "op",
+    "op": "+"
+   },
+   {
+    "kind": "icon",
+    "id": "rebus-cup",
+    "name": "cup"
+   }
+  ],
+  "answer": "Teacup",
+  "accepts": [],
+  "explanation": "tea + cup = teacup.",
+  "source": "official"
+ },
+ {
+  "id": "food-tea-bag",
+  "category": "food",
+  "ages": [
+   6,
+   12
+  ],
+  "difficulty": 1,
+  "trick": "compound",
+  "pieces": [
+   {
+    "kind": "icon",
+    "id": "rebus-tea",
+    "name": "tea"
+   },
+   {
+    "kind": "op",
+    "op": "+"
+   },
+   {
+    "kind": "icon",
+    "id": "rebus-bag",
+    "name": "bag"
+   }
+  ],
+  "answer": "Tea bag",
+  "accepts": [],
+  "explanation": "tea + bag = tea bag.",
+  "source": "official"
+ },
+ {
+  "id": "food-honey-pot",
+  "category": "food",
+  "ages": [
+   6,
+   12
+  ],
+  "difficulty": 1,
+  "trick": "compound",
+  "pieces": [
+   {
+    "kind": "icon",
+    "id": "rebus-honey",
+    "name": "honey"
+   },
+   {
+    "kind": "op",
+    "op": "+"
+   },
+   {
+    "kind": "icon",
+    "id": "rebus-pot",
+    "name": "pot"
+   }
+  ],
+  "answer": "Honey pot",
+  "accepts": [],
+  "explanation": "honey + pot = honey pot.",
+  "source": "official"
+ },
+ {
+  "id": "food-hot-pot",
+  "category": "food",
+  "ages": [
+   6,
+   12
+  ],
+  "difficulty": 1,
+  "trick": "compound",
+  "pieces": [
+   {
+    "kind": "icon",
+    "id": "rebus-fire",
+    "name": "hot"
+   },
+   {
+    "kind": "op",
+    "op": "+"
+   },
+   {
+    "kind": "icon",
+    "id": "rebus-pot",
+    "name": "pot"
+   }
+  ],
+  "answer": "Hot pot",
+  "accepts": [],
+  "explanation": "hot + pot = hot pot.",
+  "source": "official"
+ },
+ {
+  "id": "food-chili-pepper",
+  "category": "food",
+  "ages": [
+   6,
+   12
+  ],
+  "difficulty": 1,
+  "trick": "compound",
+  "pieces": [
+   {
+    "kind": "icon",
+    "id": "rebus-chili",
+    "name": "chili"
+   },
+   {
+    "kind": "op",
+    "op": "+"
+   },
+   {
+    "kind": "icon",
+    "id": "rebus-pepper",
+    "name": "pepper"
+   }
+  ],
+  "answer": "Chili pepper",
+  "accepts": [],
+  "explanation": "chili + pepper = chili pepper.",
+  "source": "official"
+ },
+ {
+  "id": "food-ice-tea",
+  "category": "food",
+  "ages": [
+   6,
+   12
+  ],
+  "difficulty": 1,
+  "trick": "compound",
+  "pieces": [
+   {
+    "kind": "icon",
+    "id": "rebus-ice",
+    "name": "ice"
+   },
+   {
+    "kind": "op",
+    "op": "+"
+   },
+   {
+    "kind": "icon",
+    "id": "rebus-tea",
+    "name": "tea"
+   }
+  ],
+  "answer": "Ice tea",
+  "accepts": [],
+  "explanation": "ice + tea = ice tea.",
+  "source": "official"
+ },
+ {
+  "id": "food-green-tea",
+  "category": "food",
+  "ages": [
+   6,
+   12
+  ],
+  "difficulty": 1,
+  "trick": "compound",
+  "pieces": [
+   {
+    "kind": "icon",
+    "id": "rebus-green",
+    "name": "green"
+   },
+   {
+    "kind": "op",
+    "op": "+"
+   },
+   {
+    "kind": "icon",
+    "id": "rebus-tea",
+    "name": "tea"
+   }
+  ],
+  "answer": "Green tea",
+  "accepts": [],
+  "explanation": "green + tea = green tea.",
+  "source": "official"
+ },
+ {
+  "id": "food-black-tea",
+  "category": "food",
+  "ages": [
+   6,
+   12
+  ],
+  "difficulty": 1,
+  "trick": "compound",
+  "pieces": [
+   {
+    "kind": "icon",
+    "id": "rebus-black",
+    "name": "black"
+   },
+   {
+    "kind": "op",
+    "op": "+"
+   },
+   {
+    "kind": "icon",
+    "id": "rebus-tea",
+    "name": "tea"
+   }
+  ],
+  "answer": "Black tea",
+  "accepts": [],
+  "explanation": "black + tea = black tea.",
+  "source": "official"
+ },
+ {
+  "id": "food-black-pepper",
+  "category": "food",
+  "ages": [
+   6,
+   12
+  ],
+  "difficulty": 1,
+  "trick": "compound",
+  "pieces": [
+   {
+    "kind": "icon",
+    "id": "rebus-black",
+    "name": "black"
+   },
+   {
+    "kind": "op",
+    "op": "+"
+   },
+   {
+    "kind": "icon",
+    "id": "rebus-pepper",
+    "name": "pepper"
+   }
+  ],
+  "answer": "Black pepper",
+  "accepts": [],
+  "explanation": "black + pepper = black pepper.",
+  "source": "official"
+ },
+ {
+  "id": "food-white-bread",
+  "category": "food",
+  "ages": [
+   6,
+   12
+  ],
+  "difficulty": 1,
+  "trick": "compound",
+  "pieces": [
+   {
+    "kind": "icon",
+    "id": "rebus-white",
+    "name": "white"
+   },
+   {
+    "kind": "op",
+    "op": "+"
+   },
+   {
+    "kind": "icon",
+    "id": "rebus-bread",
+    "name": "bread"
+   }
+  ],
+  "answer": "White bread",
+  "accepts": [],
+  "explanation": "white + bread = white bread.",
+  "source": "official"
+ },
+ {
+  "id": "food-milk-tea",
+  "category": "food",
+  "ages": [
+   6,
+   12
+  ],
+  "difficulty": 1,
+  "trick": "compound",
+  "pieces": [
+   {
+    "kind": "icon",
+    "id": "rebus-milk",
+    "name": "milk"
+   },
+   {
+    "kind": "op",
+    "op": "+"
+   },
+   {
+    "kind": "icon",
+    "id": "rebus-tea",
+    "name": "tea"
+   }
+  ],
+  "answer": "Milk tea",
+  "accepts": [],
+  "explanation": "milk + tea = milk tea.",
+  "source": "official"
+ },
+ {
+  "id": "food-sea-salt",
+  "category": "food",
+  "ages": [
+   6,
+   12
+  ],
+  "difficulty": 1,
+  "trick": "compound",
+  "pieces": [
+   {
+    "kind": "icon",
+    "id": "rebus-sea",
+    "name": "sea"
+   },
+   {
+    "kind": "op",
+    "op": "+"
+   },
+   {
+    "kind": "icon",
+    "id": "rebus-salt",
+    "name": "salt"
+   }
+  ],
+  "answer": "Sea salt",
+  "accepts": [],
+  "explanation": "sea + salt = sea salt.",
+  "source": "official"
+ },
+ {
+  "id": "food-honey-cake",
+  "category": "food",
+  "ages": [
+   6,
+   12
+  ],
+  "difficulty": 1,
+  "trick": "compound",
+  "pieces": [
+   {
+    "kind": "icon",
+    "id": "rebus-honey",
+    "name": "honey"
+   },
+   {
+    "kind": "op",
+    "op": "+"
+   },
+   {
+    "kind": "icon",
+    "id": "rebus-cake",
+    "name": "cake"
+   }
+  ],
+  "answer": "Honey cake",
+  "accepts": [],
+  "explanation": "honey + cake = honey cake.",
+  "source": "official"
+ },
+ {
+  "id": "food-egg-pie",
+  "category": "food",
+  "ages": [
+   6,
+   12
+  ],
+  "difficulty": 1,
+  "trick": "compound",
+  "pieces": [
+   {
+    "kind": "icon",
+    "id": "rebus-egg",
+    "name": "egg"
+   },
+   {
+    "kind": "op",
+    "op": "+"
+   },
+   {
+    "kind": "icon",
+    "id": "rebus-pie",
+    "name": "pie"
+   }
+  ],
+  "answer": "Egg pie",
+  "accepts": [],
+  "explanation": "egg + pie = egg pie.",
+  "source": "official"
+ },
+ {
+  "id": "food-jam-pie",
+  "category": "food",
+  "ages": [
+   6,
+   12
+  ],
+  "difficulty": 1,
+  "trick": "compound",
+  "pieces": [
+   {
+    "kind": "icon",
+    "id": "rebus-jam",
+    "name": "jam"
+   },
+   {
+    "kind": "op",
+    "op": "+"
+   },
+   {
+    "kind": "icon",
+    "id": "rebus-pie",
+    "name": "pie"
+   }
+  ],
+  "answer": "Jam pie",
+  "accepts": [],
+  "explanation": "jam + pie = jam pie.",
+  "source": "official"
+ },
+ {
+  "id": "food-hot-milk",
+  "category": "food",
+  "ages": [
+   6,
+   12
+  ],
+  "difficulty": 1,
+  "trick": "compound",
+  "pieces": [
+   {
+    "kind": "icon",
+    "id": "rebus-fire",
+    "name": "hot"
+   },
+   {
+    "kind": "op",
+    "op": "+"
+   },
+   {
+    "kind": "icon",
+    "id": "rebus-milk",
+    "name": "milk"
+   }
+  ],
+  "answer": "Hot milk",
+  "accepts": [],
+  "explanation": "hot + milk = hot milk.",
+  "source": "official"
+ },
+ {
+  "id": "food-cold-milk",
+  "category": "food",
+  "ages": [
+   6,
+   12
+  ],
+  "difficulty": 1,
+  "trick": "compound",
+  "pieces": [
+   {
+    "kind": "icon",
+    "id": "rebus-ice",
+    "name": "cold"
+   },
+   {
+    "kind": "op",
+    "op": "+"
+   },
+   {
+    "kind": "icon",
+    "id": "rebus-milk",
+    "name": "milk"
+   }
+  ],
+  "answer": "Cold milk",
+  "accepts": [],
+  "explanation": "cold + milk = cold milk.",
+  "source": "official"
+ },
+ {
+  "id": "food-hot-tea",
+  "category": "food",
+  "ages": [
+   6,
+   12
+  ],
+  "difficulty": 1,
+  "trick": "compound",
+  "pieces": [
+   {
+    "kind": "icon",
+    "id": "rebus-fire",
+    "name": "hot"
+   },
+   {
+    "kind": "op",
+    "op": "+"
+   },
+   {
+    "kind": "icon",
+    "id": "rebus-tea",
+    "name": "tea"
+   }
+  ],
+  "answer": "Hot tea",
+  "accepts": [],
+  "explanation": "hot + tea = hot tea.",
+  "source": "official"
+ },
+ {
+  "id": "food-apple-tea",
+  "category": "food",
+  "ages": [
+   6,
+   12
+  ],
+  "difficulty": 1,
+  "trick": "compound",
+  "pieces": [
+   {
+    "kind": "icon",
+    "id": "rebus-apple",
+    "name": "apple"
+   },
+   {
+    "kind": "op",
+    "op": "+"
+   },
+   {
+    "kind": "icon",
+    "id": "rebus-tea",
+    "name": "tea"
+   }
+  ],
+  "answer": "Apple tea",
+  "accepts": [],
+  "explanation": "apple + tea = apple tea.",
+  "source": "official"
+ },
+ {
+  "id": "food-berry-pie",
+  "category": "food",
+  "ages": [
+   6,
+   12
+  ],
+  "difficulty": 1,
+  "trick": "compound",
+  "pieces": [
+   {
+    "kind": "icon",
+    "id": "rebus-berry",
+    "name": "berry"
+   },
+   {
+    "kind": "op",
+    "op": "+"
+   },
+   {
+    "kind": "icon",
+    "id": "rebus-pie",
+    "name": "pie"
+   }
+  ],
+  "answer": "Berry pie",
+  "accepts": [],
+  "explanation": "berry + pie = berry pie.",
+  "source": "official"
+ },
+ {
+  "id": "food-melon-pie",
+  "category": "food",
+  "ages": [
+   8,
+   15
+  ],
+  "difficulty": 2,
+  "trick": "compound",
+  "pieces": [
+   {
+    "kind": "icon",
+    "id": "rebus-melon",
+    "name": "melon"
+   },
+   {
+    "kind": "op",
+    "op": "+"
+   },
+   {
+    "kind": "icon",
+    "id": "rebus-pie",
+    "name": "pie"
+   }
+  ],
+  "answer": "Melon pie",
+  "accepts": [],
+  "explanation": "melon + pie = melon pie.",
+  "source": "official"
+ },
+ {
+  "id": "food-bread-pan",
+  "category": "food",
+  "ages": [
+   6,
+   12
+  ],
+  "difficulty": 1,
+  "trick": "compound",
+  "pieces": [
+   {
+    "kind": "icon",
+    "id": "rebus-bread",
+    "name": "bread"
+   },
+   {
+    "kind": "op",
+    "op": "+"
+   },
+   {
+    "kind": "icon",
+    "id": "rebus-pan",
+    "name": "pan"
+   }
+  ],
+  "answer": "Bread pan",
+  "accepts": [],
+  "explanation": "bread + pan = bread pan.",
+  "source": "official"
+ },
+ {
+  "id": "food-pepper-pot",
+  "category": "food",
+  "ages": [
+   6,
+   12
+  ],
+  "difficulty": 1,
+  "trick": "compound",
+  "pieces": [
+   {
+    "kind": "icon",
+    "id": "rebus-pepper",
+    "name": "pepper"
+   },
+   {
+    "kind": "op",
+    "op": "+"
+   },
+   {
+    "kind": "icon",
+    "id": "rebus-pot",
+    "name": "pot"
+   }
+  ],
+  "answer": "Pepper pot",
+  "accepts": [],
+  "explanation": "pepper + pot = pepper pot.",
+  "source": "official"
+ },
+ {
+  "id": "food-salt-pot",
+  "category": "food",
+  "ages": [
+   6,
+   12
+  ],
+  "difficulty": 1,
+  "trick": "compound",
+  "pieces": [
+   {
+    "kind": "icon",
+    "id": "rebus-salt",
+    "name": "salt"
+   },
+   {
+    "kind": "op",
+    "op": "+"
+   },
+   {
+    "kind": "icon",
+    "id": "rebus-pot",
+    "name": "pot"
+   }
+  ],
+  "answer": "Salt pot",
+  "accepts": [],
+  "explanation": "salt + pot = salt pot.",
+  "source": "official"
+ },
+ {
+  "id": "food-cheese-pie",
+  "category": "food",
+  "ages": [
+   6,
+   12
+  ],
+  "difficulty": 1,
+  "trick": "compound",
+  "pieces": [
+   {
+    "kind": "icon",
+    "id": "rebus-cheese",
+    "name": "cheese"
+   },
+   {
+    "kind": "op",
+    "op": "+"
+   },
+   {
+    "kind": "icon",
+    "id": "rebus-pie",
+    "name": "pie"
+   }
+  ],
+  "answer": "Cheese pie",
+  "accepts": [],
+  "explanation": "cheese + pie = cheese pie.",
+  "source": "official"
+ },
+ {
+  "id": "food-honey-bread",
+  "category": "food",
+  "ages": [
+   6,
+   12
+  ],
+  "difficulty": 1,
+  "trick": "compound",
+  "pieces": [
+   {
+    "kind": "icon",
+    "id": "rebus-honey",
+    "name": "honey"
+   },
+   {
+    "kind": "op",
+    "op": "+"
+   },
+   {
+    "kind": "icon",
+    "id": "rebus-bread",
+    "name": "bread"
+   }
+  ],
+  "answer": "Honey bread",
+  "accepts": [],
+  "explanation": "honey + bread = honey bread.",
+  "source": "official"
+ },
+ {
+  "id": "animals-dogfish",
+  "category": "animals",
+  "ages": [
+   6,
+   12
+  ],
+  "difficulty": 1,
+  "trick": "compound",
+  "pieces": [
+   {
+    "kind": "icon",
+    "id": "rebus-dog",
+    "name": "dog"
+   },
+   {
+    "kind": "op",
+    "op": "+"
+   },
+   {
+    "kind": "icon",
+    "id": "rebus-fish",
+    "name": "fish"
+   }
+  ],
+  "answer": "Dogfish",
+  "accepts": [],
+  "explanation": "dog + fish = dogfish.",
+  "source": "official"
+ },
+ {
+  "id": "animals-glow-worm",
+  "category": "animals",
+  "ages": [
+   6,
+   12
+  ],
+  "difficulty": 1,
+  "trick": "compound",
+  "pieces": [
+   {
+    "kind": "icon",
+    "id": "rebus-light",
+    "name": "glow"
+   },
+   {
+    "kind": "op",
+    "op": "+"
+   },
+   {
+    "kind": "icon",
+    "id": "rebus-worm",
+    "name": "worm"
+   }
+  ],
+  "answer": "Glow worm",
+  "accepts": [],
+  "explanation": "glow + worm = glow worm.",
+  "source": "official"
+ },
+ {
+  "id": "animals-cold-turkey",
+  "category": "animals",
+  "ages": [
+   8,
+   15
+  ],
+  "difficulty": 2,
+  "trick": "compound",
+  "pieces": [
+   {
+    "kind": "icon",
+    "id": "rebus-ice",
+    "name": "cold"
+   },
+   {
+    "kind": "op",
+    "op": "+"
+   },
+   {
+    "kind": "icon",
+    "id": "rebus-turkey",
+    "name": "turkey"
+   }
+  ],
+  "answer": "Cold turkey",
+  "accepts": [],
+  "explanation": "cold + turkey = cold turkey.",
+  "source": "official"
+ },
+ {
+  "id": "animals-bull-ring",
+  "category": "animals",
+  "ages": [
+   6,
+   12
+  ],
+  "difficulty": 1,
+  "trick": "compound",
+  "pieces": [
+   {
+    "kind": "icon",
+    "id": "rebus-bull",
+    "name": "bull"
+   },
+   {
+    "kind": "op",
+    "op": "+"
+   },
+   {
+    "kind": "icon",
+    "id": "rebus-ring",
+    "name": "ring"
+   }
+  ],
+  "answer": "Bull ring",
+  "accepts": [],
+  "explanation": "bull + ring = bull ring.",
+  "source": "official"
+ },
+ {
+  "id": "animals-monkfish",
+  "category": "animals",
+  "ages": [
+   6,
+   12
+  ],
+  "difficulty": 1,
+  "trick": "compound",
+  "pieces": [
+   {
+    "kind": "icon",
+    "id": "rebus-monk",
+    "name": "monk"
+   },
+   {
+    "kind": "op",
+    "op": "+"
+   },
+   {
+    "kind": "icon",
+    "id": "rebus-fish",
+    "name": "fish"
+   }
+  ],
+  "answer": "Monkfish",
+  "accepts": [],
+  "explanation": "monk + fish = monkfish.",
+  "source": "official"
+ },
+ {
+  "id": "animals-seabird",
+  "category": "animals",
+  "ages": [
+   6,
+   12
+  ],
+  "difficulty": 1,
+  "trick": "compound",
+  "pieces": [
+   {
+    "kind": "icon",
+    "id": "rebus-sea",
+    "name": "sea"
+   },
+   {
+    "kind": "op",
+    "op": "+"
+   },
+   {
+    "kind": "icon",
+    "id": "rebus-bird",
+    "name": "bird"
+   }
+  ],
+  "answer": "Seabird",
+  "accepts": [],
+  "explanation": "sea + bird = seabird.",
+  "source": "official"
+ },
+ {
+  "id": "animals-sea-dog",
+  "category": "animals",
+  "ages": [
+   6,
+   12
+  ],
+  "difficulty": 1,
+  "trick": "compound",
+  "pieces": [
+   {
+    "kind": "icon",
+    "id": "rebus-sea",
+    "name": "sea"
+   },
+   {
+    "kind": "op",
+    "op": "+"
+   },
+   {
+    "kind": "icon",
+    "id": "rebus-dog",
+    "name": "dog"
+   }
+  ],
+  "answer": "Sea dog",
+  "accepts": [],
+  "explanation": "sea + dog = sea dog.",
+  "source": "official"
+ },
+ {
+  "id": "animals-sea-frog",
+  "category": "animals",
+  "ages": [
+   8,
+   15
+  ],
+  "difficulty": 2,
+  "trick": "compound",
+  "pieces": [
+   {
+    "kind": "icon",
+    "id": "rebus-sea",
+    "name": "sea"
+   },
+   {
+    "kind": "op",
+    "op": "+"
+   },
+   {
+    "kind": "icon",
+    "id": "rebus-frog",
+    "name": "frog"
+   }
+  ],
+  "answer": "Sea frog",
+  "accepts": [],
+  "explanation": "sea + frog = sea frog.",
+  "source": "official"
+ },
+ {
+  "id": "animals-water-bird",
+  "category": "animals",
+  "ages": [
+   6,
+   12
+  ],
+  "difficulty": 1,
+  "trick": "compound",
+  "pieces": [
+   {
+    "kind": "icon",
+    "id": "rebus-water",
+    "name": "water"
+   },
+   {
+    "kind": "op",
+    "op": "+"
+   },
+   {
+    "kind": "icon",
+    "id": "rebus-bird",
+    "name": "bird"
+   }
+  ],
+  "answer": "Water bird",
+  "accepts": [],
+  "explanation": "water + bird = water bird.",
+  "source": "official"
+ },
+ {
+  "id": "animals-fish-bird",
+  "category": "animals",
+  "ages": [
+   8,
+   15
+  ],
+  "difficulty": 2,
+  "trick": "compound",
+  "pieces": [
+   {
+    "kind": "icon",
+    "id": "rebus-fish",
+    "name": "fish"
+   },
+   {
+    "kind": "op",
+    "op": "+"
+   },
+   {
+    "kind": "icon",
+    "id": "rebus-bird",
+    "name": "bird"
+   }
+  ],
+  "answer": "Fish bird",
+  "accepts": [],
+  "explanation": "fish + bird = fish bird.",
+  "source": "official"
+ },
+ {
+  "id": "animals-blue-fish",
+  "category": "animals",
+  "ages": [
+   6,
+   12
+  ],
+  "difficulty": 1,
+  "trick": "compound",
+  "pieces": [
+   {
+    "kind": "icon",
+    "id": "rebus-blue",
+    "name": "blue"
+   },
+   {
+    "kind": "op",
+    "op": "+"
+   },
+   {
+    "kind": "icon",
+    "id": "rebus-fish",
+    "name": "fish"
+   }
+  ],
+  "answer": "Blue fish",
+  "accepts": [],
+  "explanation": "blue + fish = blue fish.",
+  "source": "official"
+ },
+ {
+  "id": "animals-green-frog",
+  "category": "animals",
+  "ages": [
+   6,
+   12
+  ],
+  "difficulty": 1,
+  "trick": "compound",
+  "pieces": [
+   {
+    "kind": "icon",
+    "id": "rebus-green",
+    "name": "green"
+   },
+   {
+    "kind": "op",
+    "op": "+"
+   },
+   {
+    "kind": "icon",
+    "id": "rebus-frog",
+    "name": "frog"
+   }
+  ],
+  "answer": "Green frog",
+  "accepts": [],
+  "explanation": "green + frog = green frog.",
+  "source": "official"
+ },
+ {
+  "id": "animals-white-cat",
+  "category": "animals",
+  "ages": [
+   6,
+   12
+  ],
+  "difficulty": 1,
+  "trick": "compound",
+  "pieces": [
+   {
+    "kind": "icon",
+    "id": "rebus-white",
+    "name": "white"
+   },
+   {
+    "kind": "op",
+    "op": "+"
+   },
+   {
+    "kind": "icon",
+    "id": "rebus-cat",
+    "name": "cat"
+   }
+  ],
+  "answer": "White cat",
+  "accepts": [],
+  "explanation": "white + cat = white cat.",
+  "source": "official"
+ },
+ {
+  "id": "animals-white-horse",
+  "category": "animals",
+  "ages": [
+   6,
+   12
+  ],
+  "difficulty": 1,
+  "trick": "compound",
+  "pieces": [
+   {
+    "kind": "icon",
+    "id": "rebus-white",
+    "name": "white"
+   },
+   {
+    "kind": "op",
+    "op": "+"
+   },
+   {
+    "kind": "icon",
+    "id": "rebus-horse",
+    "name": "horse"
+   }
+  ],
+  "answer": "White horse",
+  "accepts": [],
+  "explanation": "white + horse = white horse.",
+  "source": "official"
+ },
+ {
+  "id": "animals-black-horse",
+  "category": "animals",
+  "ages": [
+   6,
+   12
+  ],
+  "difficulty": 1,
+  "trick": "compound",
+  "pieces": [
+   {
+    "kind": "icon",
+    "id": "rebus-black",
+    "name": "black"
+   },
+   {
+    "kind": "op",
+    "op": "+"
+   },
+   {
+    "kind": "icon",
+    "id": "rebus-horse",
+    "name": "horse"
+   }
+  ],
+  "answer": "Black horse",
+  "accepts": [],
+  "explanation": "black + horse = black horse.",
+  "source": "official"
+ },
+ {
+  "id": "animals-black-dog",
+  "category": "animals",
+  "ages": [
+   6,
+   12
+  ],
+  "difficulty": 1,
+  "trick": "compound",
+  "pieces": [
+   {
+    "kind": "icon",
+    "id": "rebus-black",
+    "name": "black"
+   },
+   {
+    "kind": "op",
+    "op": "+"
+   },
+   {
+    "kind": "icon",
+    "id": "rebus-dog",
+    "name": "dog"
+   }
+  ],
+  "answer": "Black dog",
+  "accepts": [],
+  "explanation": "black + dog = black dog.",
+  "source": "official"
+ },
+ {
+  "id": "animals-white-dog",
+  "category": "animals",
+  "ages": [
+   6,
+   12
+  ],
+  "difficulty": 1,
+  "trick": "compound",
+  "pieces": [
+   {
+    "kind": "icon",
+    "id": "rebus-white",
+    "name": "white"
+   },
+   {
+    "kind": "op",
+    "op": "+"
+   },
+   {
+    "kind": "icon",
+    "id": "rebus-dog",
+    "name": "dog"
+   }
+  ],
+  "answer": "White dog",
+  "accepts": [],
+  "explanation": "white + dog = white dog.",
+  "source": "official"
+ },
+ {
+  "id": "animals-white-whale",
+  "category": "animals",
+  "ages": [
+   6,
+   12
+  ],
+  "difficulty": 1,
+  "trick": "compound",
+  "pieces": [
+   {
+    "kind": "icon",
+    "id": "rebus-white",
+    "name": "white"
+   },
+   {
+    "kind": "op",
+    "op": "+"
+   },
+   {
+    "kind": "icon",
+    "id": "rebus-whale",
+    "name": "whale"
+   }
+  ],
+  "answer": "White whale",
+  "accepts": [],
+  "explanation": "white + whale = white whale.",
+  "source": "official"
+ },
+ {
+  "id": "animals-sea-whale",
+  "category": "animals",
+  "ages": [
+   8,
+   15
+  ],
+  "difficulty": 2,
+  "trick": "compound",
+  "pieces": [
+   {
+    "kind": "icon",
+    "id": "rebus-sea",
+    "name": "sea"
+   },
+   {
+    "kind": "op",
+    "op": "+"
+   },
+   {
+    "kind": "icon",
+    "id": "rebus-whale",
+    "name": "whale"
+   }
+  ],
+  "answer": "Sea whale",
+  "accepts": [],
+  "explanation": "sea + whale = sea whale.",
+  "source": "official"
+ },
+ {
+  "id": "animals-fire-dragon",
+  "category": "animals",
+  "ages": [
+   6,
+   12
+  ],
+  "difficulty": 1,
+  "trick": "compound",
+  "pieces": [
+   {
+    "kind": "icon",
+    "id": "rebus-fire",
+    "name": "fire"
+   },
+   {
+    "kind": "op",
+    "op": "+"
+   },
+   {
+    "kind": "icon",
+    "id": "rebus-dragon",
+    "name": "dragon"
+   }
+  ],
+  "answer": "Fire dragon",
+  "accepts": [],
+  "explanation": "fire + dragon = fire dragon.",
+  "source": "official"
+ },
+ {
+  "id": "animals-ice-dragon",
+  "category": "animals",
+  "ages": [
+   6,
+   12
+  ],
+  "difficulty": 1,
+  "trick": "compound",
+  "pieces": [
+   {
+    "kind": "icon",
+    "id": "rebus-ice",
+    "name": "ice"
+   },
+   {
+    "kind": "op",
+    "op": "+"
+   },
+   {
+    "kind": "icon",
+    "id": "rebus-dragon",
+    "name": "dragon"
+   }
+  ],
+  "answer": "Ice dragon",
+  "accepts": [],
+  "explanation": "ice + dragon = ice dragon.",
+  "source": "official"
+ },
+ {
+  "id": "animals-water-dragon",
+  "category": "animals",
+  "ages": [
+   6,
+   12
+  ],
+  "difficulty": 1,
+  "trick": "compound",
+  "pieces": [
+   {
+    "kind": "icon",
+    "id": "rebus-water",
+    "name": "water"
+   },
+   {
+    "kind": "op",
+    "op": "+"
+   },
+   {
+    "kind": "icon",
+    "id": "rebus-dragon",
+    "name": "dragon"
+   }
+  ],
+  "answer": "Water dragon",
+  "accepts": [],
+  "explanation": "water + dragon = water dragon.",
+  "source": "official"
+ },
+ {
+  "id": "animals-lion-fish",
+  "category": "animals",
+  "ages": [
+   6,
+   12
+  ],
+  "difficulty": 1,
+  "trick": "compound",
+  "pieces": [
+   {
+    "kind": "icon",
+    "id": "rebus-lion",
+    "name": "lion"
+   },
+   {
+    "kind": "op",
+    "op": "+"
+   },
+   {
+    "kind": "icon",
+    "id": "rebus-fish",
+    "name": "fish"
+   }
+  ],
+  "answer": "Lion fish",
+  "accepts": [],
+  "explanation": "lion + fish = lion fish.",
+  "source": "official"
+ },
+ {
+  "id": "animals-frog-fish",
+  "category": "animals",
+  "ages": [
+   6,
+   12
+  ],
+  "difficulty": 1,
+  "trick": "compound",
+  "pieces": [
+   {
+    "kind": "icon",
+    "id": "rebus-frog",
+    "name": "frog"
+   },
+   {
+    "kind": "op",
+    "op": "+"
+   },
+   {
+    "kind": "icon",
+    "id": "rebus-fish",
+    "name": "fish"
+   }
+  ],
+  "answer": "Frog fish",
+  "accepts": [],
+  "explanation": "frog + fish = frog fish.",
+  "source": "official"
+ },
+ {
+  "id": "animals-horse-fish",
+  "category": "animals",
+  "ages": [
+   8,
+   15
+  ],
+  "difficulty": 2,
+  "trick": "compound",
+  "pieces": [
+   {
+    "kind": "icon",
+    "id": "rebus-horse",
+    "name": "horse"
+   },
+   {
+    "kind": "op",
+    "op": "+"
+   },
+   {
+    "kind": "icon",
+    "id": "rebus-fish",
+    "name": "fish"
+   }
+  ],
+  "answer": "Horse fish",
+  "accepts": [],
+  "explanation": "horse + fish = horse fish.",
+  "source": "official"
+ },
+ {
+  "id": "animals-bee-house",
+  "category": "animals",
+  "ages": [
+   6,
+   12
+  ],
+  "difficulty": 1,
+  "trick": "compound",
+  "pieces": [
+   {
+    "kind": "icon",
+    "id": "rebus-bee",
+    "name": "bee"
+   },
+   {
+    "kind": "op",
+    "op": "+"
+   },
+   {
+    "kind": "icon",
+    "id": "rebus-house",
+    "name": "house"
+   }
+  ],
+  "answer": "Bee house",
+  "accepts": [],
+  "explanation": "bee + house = bee house.",
+  "source": "official"
+ },
+ {
+  "id": "science-moonstone",
+  "category": "science",
+  "ages": [
+   6,
+   12
+  ],
+  "difficulty": 1,
+  "trick": "compound",
+  "pieces": [
+   {
+    "kind": "icon",
+    "id": "rebus-moon",
+    "name": "moon"
+   },
+   {
+    "kind": "op",
+    "op": "+"
+   },
+   {
+    "kind": "icon",
+    "id": "rebus-stone",
+    "name": "stone"
+   }
+  ],
+  "answer": "Moonstone",
+  "accepts": [],
+  "explanation": "moon + stone = moonstone.",
+  "source": "official"
+ },
+ {
+  "id": "science-snowdrop",
+  "category": "science",
+  "ages": [
+   6,
+   12
+  ],
+  "difficulty": 1,
+  "trick": "compound",
+  "pieces": [
+   {
+    "kind": "icon",
+    "id": "rebus-snow",
+    "name": "snow"
+   },
+   {
+    "kind": "op",
+    "op": "+"
+   },
+   {
+    "kind": "icon",
+    "id": "rebus-drop",
+    "name": "drop"
+   }
+  ],
+  "answer": "Snowdrop",
+  "accepts": [],
+  "explanation": "snow + drop = snowdrop.",
+  "source": "official"
+ },
+ {
+  "id": "science-sandstone",
+  "category": "science",
+  "ages": [
+   6,
+   12
+  ],
+  "difficulty": 1,
+  "trick": "compound",
+  "pieces": [
+   {
+    "kind": "icon",
+    "id": "rebus-sand",
+    "name": "sand"
+   },
+   {
+    "kind": "op",
+    "op": "+"
+   },
+   {
+    "kind": "icon",
+    "id": "rebus-stone",
+    "name": "stone"
+   }
+  ],
+  "answer": "Sandstone",
+  "accepts": [],
+  "explanation": "sand + stone = sandstone.",
+  "source": "official"
+ },
+ {
+  "id": "science-sandstorm",
+  "category": "science",
+  "ages": [
+   6,
+   12
+  ],
+  "difficulty": 1,
+  "trick": "compound",
+  "pieces": [
+   {
+    "kind": "icon",
+    "id": "rebus-sand",
+    "name": "sand"
+   },
+   {
+    "kind": "op",
+    "op": "+"
+   },
+   {
+    "kind": "icon",
+    "id": "rebus-storm",
+    "name": "storm"
+   }
+  ],
+  "answer": "Sandstorm",
+  "accepts": [],
+  "explanation": "sand + storm = sandstorm.",
+  "source": "official"
+ },
+ {
+  "id": "science-fireman",
+  "category": "science",
+  "ages": [
+   6,
+   12
+  ],
+  "difficulty": 1,
+  "trick": "compound",
+  "pieces": [
+   {
+    "kind": "icon",
+    "id": "rebus-fire",
+    "name": "fire"
+   },
+   {
+    "kind": "op",
+    "op": "+"
+   },
+   {
+    "kind": "icon",
+    "id": "rebus-man",
+    "name": "man"
+   }
+  ],
+  "answer": "Fireman",
+  "accepts": [],
+  "explanation": "fire + man = fireman.",
+  "source": "official"
+ },
+ {
+  "id": "science-icebox",
+  "category": "science",
+  "ages": [
+   6,
+   12
+  ],
+  "difficulty": 1,
+  "trick": "compound",
+  "pieces": [
+   {
+    "kind": "icon",
+    "id": "rebus-ice",
+    "name": "ice"
+   },
+   {
+    "kind": "op",
+    "op": "+"
+   },
+   {
+    "kind": "icon",
+    "id": "rebus-box",
+    "name": "box"
+   }
+  ],
+  "answer": "Icebox",
+  "accepts": [],
+  "explanation": "ice + box = icebox.",
+  "source": "official"
+ },
+ {
+  "id": "science-pine-tree",
+  "category": "science",
+  "ages": [
+   6,
+   12
+  ],
+  "difficulty": 1,
+  "trick": "compound",
+  "pieces": [
+   {
+    "kind": "icon",
+    "id": "rebus-pine",
+    "name": "pine"
+   },
+   {
+    "kind": "op",
+    "op": "+"
+   },
+   {
+    "kind": "icon",
+    "id": "rebus-tree",
+    "name": "tree"
+   }
+  ],
+  "answer": "Pine tree",
+  "accepts": [],
+  "explanation": "pine + tree = pine tree.",
+  "source": "official"
+ },
+ {
+  "id": "science-tree-house",
+  "category": "science",
+  "ages": [
+   6,
+   12
+  ],
+  "difficulty": 1,
+  "trick": "compound",
+  "pieces": [
+   {
+    "kind": "icon",
+    "id": "rebus-tree",
+    "name": "tree"
+   },
+   {
+    "kind": "op",
+    "op": "+"
+   },
+   {
+    "kind": "icon",
+    "id": "rebus-house",
+    "name": "house"
+   }
+  ],
+  "answer": "Tree house",
+  "accepts": [],
+  "explanation": "tree + house = tree house.",
+  "source": "official"
+ },
+ {
+  "id": "science-woodland",
+  "category": "science",
+  "ages": [
+   6,
+   12
+  ],
+  "difficulty": 1,
+  "trick": "compound",
+  "pieces": [
+   {
+    "kind": "icon",
+    "id": "rebus-wood",
+    "name": "wood"
+   },
+   {
+    "kind": "op",
+    "op": "+"
+   },
+   {
+    "kind": "icon",
+    "id": "rebus-land",
+    "name": "land"
+   }
+  ],
+  "answer": "Woodland",
+  "accepts": [],
+  "explanation": "wood + land = woodland.",
+  "source": "official"
+ },
+ {
+  "id": "science-spaceman",
+  "category": "science",
+  "ages": [
+   6,
+   12
+  ],
+  "difficulty": 1,
+  "trick": "compound",
+  "pieces": [
+   {
+    "kind": "icon",
+    "id": "rebus-space",
+    "name": "space"
+   },
+   {
+    "kind": "op",
+    "op": "+"
+   },
+   {
+    "kind": "icon",
+    "id": "rebus-man",
+    "name": "man"
+   }
+  ],
+  "answer": "Spaceman",
+  "accepts": [],
+  "explanation": "space + man = spaceman.",
+  "source": "official"
+ },
+ {
+  "id": "science-plant-pot",
+  "category": "science",
+  "ages": [
+   6,
+   12
+  ],
+  "difficulty": 1,
+  "trick": "compound",
+  "pieces": [
+   {
+    "kind": "icon",
+    "id": "rebus-plant",
+    "name": "plant"
+   },
+   {
+    "kind": "op",
+    "op": "+"
+   },
+   {
+    "kind": "icon",
+    "id": "rebus-pot",
+    "name": "pot"
+   }
+  ],
+  "answer": "Plant pot",
+  "accepts": [],
+  "explanation": "plant + pot = plant pot.",
+  "source": "official"
+ },
+ {
+  "id": "science-raincloud",
+  "category": "science",
+  "ages": [
+   6,
+   12
+  ],
+  "difficulty": 1,
+  "trick": "compound",
+  "pieces": [
+   {
+    "kind": "icon",
+    "id": "rebus-rain",
+    "name": "rain"
+   },
+   {
+    "kind": "op",
+    "op": "+"
+   },
+   {
+    "kind": "icon",
+    "id": "rebus-cloud",
+    "name": "cloud"
+   }
+  ],
+  "answer": "Raincloud",
+  "accepts": [],
+  "explanation": "rain + cloud = raincloud.",
+  "source": "official"
+ },
+ {
+  "id": "science-windstorm",
+  "category": "science",
+  "ages": [
+   6,
+   12
+  ],
+  "difficulty": 1,
+  "trick": "compound",
+  "pieces": [
+   {
+    "kind": "icon",
+    "id": "rebus-wind",
+    "name": "wind"
+   },
+   {
+    "kind": "op",
+    "op": "+"
+   },
+   {
+    "kind": "icon",
+    "id": "rebus-storm",
+    "name": "storm"
+   }
+  ],
+  "answer": "Windstorm",
+  "accepts": [],
+  "explanation": "wind + storm = windstorm.",
+  "source": "official"
+ },
+ {
+  "id": "science-pothole",
+  "category": "science",
+  "ages": [
+   6,
+   12
+  ],
+  "difficulty": 1,
+  "trick": "compound",
+  "pieces": [
+   {
+    "kind": "icon",
+    "id": "rebus-pot",
+    "name": "pot"
+   },
+   {
+    "kind": "op",
+    "op": "+"
+   },
+   {
+    "kind": "icon",
+    "id": "rebus-hole",
+    "name": "hole"
+   }
+  ],
+  "answer": "Pothole",
+  "accepts": [],
+  "explanation": "pot + hole = pothole.",
+  "source": "official"
+ },
+ {
+  "id": "science-keyhole",
+  "category": "science",
+  "ages": [
+   6,
+   12
+  ],
+  "difficulty": 1,
+  "trick": "compound",
+  "pieces": [
+   {
+    "kind": "icon",
+    "id": "rebus-key",
+    "name": "key"
+   },
+   {
+    "kind": "op",
+    "op": "+"
+   },
+   {
+    "kind": "icon",
+    "id": "rebus-hole",
+    "name": "hole"
+   }
+  ],
+  "answer": "Keyhole",
+  "accepts": [],
+  "explanation": "key + hole = keyhole.",
+  "source": "official"
+ },
+ {
+  "id": "science-moonrise",
+  "category": "science",
+  "ages": [
+   6,
+   12
+  ],
+  "difficulty": 1,
+  "trick": "compound",
+  "pieces": [
+   {
+    "kind": "icon",
+    "id": "rebus-moon",
+    "name": "moon"
+   },
+   {
+    "kind": "op",
+    "op": "+"
+   },
+   {
+    "kind": "icon",
+    "id": "rebus-rise",
+    "name": "rise"
+   }
+  ],
+  "answer": "Moonrise",
+  "accepts": [],
+  "explanation": "moon + rise = moonrise.",
+  "source": "official"
+ },
+ {
+  "id": "science-snowflake",
+  "category": "science",
+  "ages": [
+   8,
+   15
+  ],
+  "difficulty": 2,
+  "trick": "compound",
+  "pieces": [
+   {
+    "kind": "icon",
+    "id": "rebus-snow",
+    "name": "snow"
+   },
+   {
+    "kind": "op",
+    "op": "+"
+   },
+   {
+    "kind": "word",
+    "text": "FLAKE"
+   }
+  ],
+  "answer": "Snowflake",
+  "accepts": [],
+  "explanation": "snow + flake = snowflake.",
+  "source": "official"
+ },
+ {
+  "id": "science-sun-and-moon",
+  "category": "science",
+  "ages": [
+   6,
+   12
+  ],
+  "difficulty": 1,
+  "trick": "compound",
+  "pieces": [
+   {
+    "kind": "icon",
+    "id": "rebus-sun",
+    "name": "sun"
+   },
+   {
+    "kind": "op",
+    "op": "&"
+   },
+   {
+    "kind": "icon",
+    "id": "rebus-moon",
+    "name": "moon"
+   }
+  ],
+  "answer": "Sun and moon",
+  "accepts": [],
+  "explanation": "sun + moon = sun and moon.",
+  "source": "official"
+ },
+ {
+  "id": "science-rain-and-snow",
+  "category": "science",
+  "ages": [
+   6,
+   12
+  ],
+  "difficulty": 1,
+  "trick": "compound",
+  "pieces": [
+   {
+    "kind": "icon",
+    "id": "rebus-rain",
+    "name": "rain"
+   },
+   {
+    "kind": "op",
+    "op": "&"
+   },
+   {
+    "kind": "icon",
+    "id": "rebus-snow",
+    "name": "snow"
+   }
+  ],
+  "answer": "Rain and snow",
+  "accepts": [],
+  "explanation": "rain + snow = rain and snow.",
+  "source": "official"
+ },
+ {
+  "id": "science-fire-and-ice",
+  "category": "science",
+  "ages": [
+   6,
+   12
+  ],
+  "difficulty": 1,
+  "trick": "compound",
+  "pieces": [
+   {
+    "kind": "icon",
+    "id": "rebus-fire",
+    "name": "fire"
+   },
+   {
+    "kind": "op",
+    "op": "&"
+   },
+   {
+    "kind": "icon",
+    "id": "rebus-ice",
+    "name": "ice"
+   }
+  ],
+  "answer": "Fire and ice",
+  "accepts": [],
+  "explanation": "fire + ice = fire and ice.",
+  "source": "official"
+ },
+ {
+  "id": "science-sea-and-sky",
+  "category": "science",
+  "ages": [
+   8,
+   15
+  ],
+  "difficulty": 2,
+  "trick": "compound",
+  "pieces": [
+   {
+    "kind": "icon",
+    "id": "rebus-sea",
+    "name": "sea"
+   },
+   {
+    "kind": "op",
+    "op": "&"
+   },
+   {
+    "kind": "word",
+    "text": "SKY"
+   }
+  ],
+  "answer": "Sea and sky",
+  "accepts": [],
+  "explanation": "sea + sky = sea and sky.",
+  "source": "official"
+ },
+ {
+  "id": "science-water-and-sand",
+  "category": "science",
+  "ages": [
+   6,
+   12
+  ],
+  "difficulty": 1,
+  "trick": "compound",
+  "pieces": [
+   {
+    "kind": "icon",
+    "id": "rebus-water",
+    "name": "water"
+   },
+   {
+    "kind": "op",
+    "op": "&"
+   },
+   {
+    "kind": "icon",
+    "id": "rebus-sand",
+    "name": "sand"
+   }
+  ],
+  "answer": "Water and sand",
+  "accepts": [],
+  "explanation": "water + sand = water and sand.",
+  "source": "official"
+ },
+ {
+  "id": "science-wind-and-rain",
+  "category": "science",
+  "ages": [
+   6,
+   12
+  ],
+  "difficulty": 1,
+  "trick": "compound",
+  "pieces": [
+   {
+    "kind": "icon",
+    "id": "rebus-wind",
+    "name": "wind"
+   },
+   {
+    "kind": "op",
+    "op": "&"
+   },
+   {
+    "kind": "icon",
+    "id": "rebus-rain",
+    "name": "rain"
+   }
+  ],
+  "answer": "Wind and rain",
+  "accepts": [],
+  "explanation": "wind + rain = wind and rain.",
+  "source": "official"
+ },
+ {
+  "id": "science-sun-and-rain",
+  "category": "science",
+  "ages": [
+   6,
+   12
+  ],
+  "difficulty": 1,
+  "trick": "compound",
+  "pieces": [
+   {
+    "kind": "icon",
+    "id": "rebus-sun",
+    "name": "sun"
+   },
+   {
+    "kind": "op",
+    "op": "&"
+   },
+   {
+    "kind": "icon",
+    "id": "rebus-rain",
+    "name": "rain"
+   }
+  ],
+  "answer": "Sun and rain",
+  "accepts": [],
+  "explanation": "sun + rain = sun and rain.",
+  "source": "official"
+ },
+ {
+  "id": "science-star-and-moon",
+  "category": "science",
+  "ages": [
+   6,
+   12
+  ],
+  "difficulty": 1,
+  "trick": "compound",
+  "pieces": [
+   {
+    "kind": "icon",
+    "id": "rebus-star",
+    "name": "star"
+   },
+   {
+    "kind": "op",
+    "op": "&"
+   },
+   {
+    "kind": "icon",
+    "id": "rebus-moon",
+    "name": "moon"
+   }
+  ],
+  "answer": "Star and moon",
+  "accepts": [],
+  "explanation": "star + moon = star and moon.",
+  "source": "official"
+ },
+ {
+  "id": "science-tree-and-flower",
+  "category": "science",
+  "ages": [
+   6,
+   12
+  ],
+  "difficulty": 1,
+  "trick": "compound",
+  "pieces": [
+   {
+    "kind": "icon",
+    "id": "rebus-tree",
+    "name": "tree"
+   },
+   {
+    "kind": "op",
+    "op": "&"
+   },
+   {
+    "kind": "icon",
+    "id": "rebus-flower",
+    "name": "flower"
+   }
+  ],
+  "answer": "Tree and flower",
+  "accepts": [],
+  "explanation": "tree + flower = tree and flower.",
+  "source": "official"
+ },
+ {
+  "id": "science-leaf-and-flower",
+  "category": "science",
+  "ages": [
+   6,
+   12
+  ],
+  "difficulty": 1,
+  "trick": "compound",
+  "pieces": [
+   {
+    "kind": "icon",
+    "id": "rebus-leaf",
+    "name": "leaf"
+   },
+   {
+    "kind": "op",
+    "op": "&"
+   },
+   {
+    "kind": "icon",
+    "id": "rebus-flower",
+    "name": "flower"
+   }
+  ],
+  "answer": "Leaf and flower",
+  "accepts": [],
+  "explanation": "leaf + flower = leaf and flower.",
+  "source": "official"
+ },
+ {
+  "id": "science-fire-and-water",
+  "category": "science",
+  "ages": [
+   6,
+   12
+  ],
+  "difficulty": 1,
+  "trick": "compound",
+  "pieces": [
+   {
+    "kind": "icon",
+    "id": "rebus-fire",
+    "name": "fire"
+   },
+   {
+    "kind": "op",
+    "op": "&"
+   },
+   {
+    "kind": "icon",
+    "id": "rebus-water",
+    "name": "water"
+   }
+  ],
+  "answer": "Fire and water",
+  "accepts": [],
+  "explanation": "fire + water = fire and water.",
+  "source": "official"
+ },
+ {
+  "id": "science-earth-and-sea",
+  "category": "science",
+  "ages": [
+   6,
+   12
+  ],
+  "difficulty": 1,
+  "trick": "compound",
+  "pieces": [
+   {
+    "kind": "icon",
+    "id": "rebus-earth",
+    "name": "earth"
+   },
+   {
+    "kind": "op",
+    "op": "&"
+   },
+   {
+    "kind": "icon",
+    "id": "rebus-sea",
+    "name": "sea"
+   }
+  ],
+  "answer": "Earth and sea",
+  "accepts": [],
+  "explanation": "earth + sea = earth and sea.",
+  "source": "official"
+ },
+ {
+  "id": "sayings-crossbow",
+  "category": "sayings",
+  "ages": [
+   6,
+   12
+  ],
+  "difficulty": 1,
+  "trick": "compound",
+  "pieces": [
+   {
+    "kind": "icon",
+    "id": "rebus-cross",
+    "name": "cross"
+   },
+   {
+    "kind": "op",
+    "op": "+"
+   },
+   {
+    "kind": "icon",
+    "id": "rebus-bow",
+    "name": "bow"
+   }
+  ],
+  "answer": "Crossbow",
+  "accepts": [],
+  "explanation": "cross + bow = crossbow.",
+  "source": "official"
+ },
+ {
+  "id": "sayings-broken-home",
+  "category": "sayings",
+  "ages": [
+   6,
+   12
+  ],
+  "difficulty": 1,
+  "trick": "compound",
+  "pieces": [
+   {
+    "kind": "icon",
+    "id": "rebus-broken",
+    "name": "broken"
+   },
+   {
+    "kind": "op",
+    "op": "+"
+   },
+   {
+    "kind": "icon",
+    "id": "rebus-home",
+    "name": "home"
+   }
+  ],
+  "answer": "Broken home",
+  "accepts": [],
+  "explanation": "broken + home = broken home.",
+  "source": "official"
+ },
+ {
+  "id": "sayings-money-bag",
+  "category": "sayings",
+  "ages": [
+   6,
+   12
+  ],
+  "difficulty": 1,
+  "trick": "compound",
+  "pieces": [
+   {
+    "kind": "icon",
+    "id": "rebus-money",
+    "name": "money"
+   },
+   {
+    "kind": "op",
+    "op": "+"
+   },
+   {
+    "kind": "icon",
+    "id": "rebus-bag",
+    "name": "bag"
+   }
+  ],
+  "answer": "Money bag",
+  "accepts": [],
+  "explanation": "money + bag = money bag.",
+  "source": "official"
+ },
+ {
+  "id": "sayings-money-box",
+  "category": "sayings",
+  "ages": [
+   6,
+   12
+  ],
+  "difficulty": 1,
+  "trick": "compound",
+  "pieces": [
+   {
+    "kind": "icon",
+    "id": "rebus-money",
+    "name": "money"
+   },
+   {
+    "kind": "op",
+    "op": "+"
+   },
+   {
+    "kind": "icon",
+    "id": "rebus-box",
+    "name": "box"
+   }
+  ],
+  "answer": "Money box",
+  "accepts": [],
+  "explanation": "money + box = money box.",
+  "source": "official"
+ },
+ {
+  "id": "sayings-toothache",
+  "category": "sayings",
+  "ages": [
+   6,
+   12
+  ],
+  "difficulty": 1,
+  "trick": "compound",
+  "pieces": [
+   {
+    "kind": "icon",
+    "id": "rebus-tooth",
+    "name": "tooth"
+   },
+   {
+    "kind": "op",
+    "op": "+"
+   },
+   {
+    "kind": "icon",
+    "id": "rebus-pain",
+    "name": "ache"
+   }
+  ],
+  "answer": "Toothache",
+  "accepts": [],
+  "explanation": "tooth + ache = toothache.",
+  "source": "official"
+ },
+ {
+  "id": "sayings-keynote",
+  "category": "sayings",
+  "ages": [
+   6,
+   12
+  ],
+  "difficulty": 1,
+  "trick": "compound",
+  "pieces": [
+   {
+    "kind": "icon",
+    "id": "rebus-key",
+    "name": "key"
+   },
+   {
+    "kind": "op",
+    "op": "+"
+   },
+   {
+    "kind": "icon",
+    "id": "rebus-note",
+    "name": "note"
+   }
+  ],
+  "answer": "Keynote",
+  "accepts": [],
+  "explanation": "key + note = keynote.",
+  "source": "official"
+ },
+ {
+  "id": "sayings-keyboard",
+  "category": "sayings",
+  "ages": [
+   6,
+   12
+  ],
+  "difficulty": 1,
+  "trick": "compound",
+  "pieces": [
+   {
+    "kind": "icon",
+    "id": "rebus-key",
+    "name": "key"
+   },
+   {
+    "kind": "op",
+    "op": "+"
+   },
+   {
+    "kind": "icon",
+    "id": "rebus-board",
+    "name": "board"
+   }
+  ],
+  "answer": "Keyboard",
+  "accepts": [],
+  "explanation": "key + board = keyboard.",
+  "source": "official"
+ },
+ {
+  "id": "sayings-bluebell",
+  "category": "sayings",
+  "ages": [
+   6,
+   12
+  ],
+  "difficulty": 1,
+  "trick": "compound",
+  "pieces": [
+   {
+    "kind": "icon",
+    "id": "rebus-blue",
+    "name": "blue"
+   },
+   {
+    "kind": "op",
+    "op": "+"
+   },
+   {
+    "kind": "icon",
+    "id": "rebus-bell",
+    "name": "bell"
+   }
+  ],
+  "answer": "Bluebell",
+  "accepts": [],
+  "explanation": "blue + bell = bluebell.",
+  "source": "official"
+ },
+ {
+  "id": "sayings-dollhouse",
+  "category": "sayings",
+  "ages": [
+   6,
+   12
+  ],
+  "difficulty": 1,
+  "trick": "compound",
+  "pieces": [
+   {
+    "kind": "icon",
+    "id": "rebus-doll",
+    "name": "doll"
+   },
+   {
+    "kind": "op",
+    "op": "+"
+   },
+   {
+    "kind": "icon",
+    "id": "rebus-house",
+    "name": "house"
+   }
+  ],
+  "answer": "Dollhouse",
+  "accepts": [],
+  "explanation": "doll + house = dollhouse.",
+  "source": "official"
+ },
+ {
+  "id": "sayings-clockwork",
+  "category": "sayings",
+  "ages": [
+   6,
+   12
+  ],
+  "difficulty": 1,
+  "trick": "compound",
+  "pieces": [
+   {
+    "kind": "icon",
+    "id": "rebus-clock",
+    "name": "clock"
+   },
+   {
+    "kind": "op",
+    "op": "+"
+   },
+   {
+    "kind": "icon",
+    "id": "rebus-work",
+    "name": "work"
+   }
+  ],
+  "answer": "Clockwork",
+  "accepts": [],
+  "explanation": "clock + work = clockwork.",
+  "source": "official"
+ },
+ {
+  "id": "sayings-wood-work",
+  "category": "sayings",
+  "ages": [
+   6,
+   12
+  ],
+  "difficulty": 1,
+  "trick": "compound",
+  "pieces": [
+   {
+    "kind": "icon",
+    "id": "rebus-wood",
+    "name": "wood"
+   },
+   {
+    "kind": "op",
+    "op": "+"
+   },
+   {
+    "kind": "icon",
+    "id": "rebus-work",
+    "name": "work"
+   }
+  ],
+  "answer": "Wood work",
+  "accepts": [],
+  "explanation": "wood + work = wood work.",
+  "source": "official"
+ },
+ {
+  "id": "sayings-homesick",
+  "category": "sayings",
+  "ages": [
+   8,
+   15
+  ],
+  "difficulty": 2,
+  "trick": "compound",
+  "pieces": [
+   {
+    "kind": "icon",
+    "id": "rebus-home",
+    "name": "home"
+   },
+   {
+    "kind": "op",
+    "op": "+"
+   },
+   {
+    "kind": "word",
+    "text": "SICK"
+   }
+  ],
+  "answer": "Homesick",
+  "accepts": [],
+  "explanation": "home + sick = homesick.",
+  "source": "official"
+ },
+ {
   "id": "khmer-sun",
   "category": "khmer",
   "ages": [

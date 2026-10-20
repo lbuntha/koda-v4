@@ -13,10 +13,10 @@ import React, { useRef, useState } from "react";
 import { ArrowLeft, ArrowRight, ImagePlus, Shapes, X } from "lucide-react";
 import { useT } from "../../../lib/i18n";
 import { themeSystem } from "../../../lib/themeSystem";
-import { UIButton, UIInput } from "../../../components/ui";
+import { UIButton, UIInput, UISelect } from "../../../components/ui";
 import { PHOTO_ACCEPT, uploadPhoto } from "../../../library/photos";
 import { PIECE_PHOTO_SIDE, UPLOAD_ROUTE } from "../../photos";
-import type { Piece } from "../../types";
+import type { Piece, WordStyle } from "../../types";
 import { IconPicker } from "../IconPicker";
 
 export interface PiecesBuilderProps {
@@ -29,11 +29,15 @@ export interface PiecesBuilderProps {
 }
 
 /** What each piece is called in the list, so the author can find and fix it. */
-export const pieceLabel = (p: Piece): string => (p.kind === "icon" || p.kind === "photo" ? p.name : p.kind === "word" ? p.text : p.kind === "stack" ? `${p.top} / ${p.bottom}` : p.op);
+/** How a written word can be drawn, for the picker. */
+const WORD_STYLES: readonly WordStyle[] = ["plain", "big", "small", "cut", "upside-down", "reversed", "spaced", "underlined", "crossed"];
+
+export const pieceLabel = (p: Piece): string => (p.kind === "icon" || p.kind === "photo" ? p.name : p.kind === "word" ? (p.style && p.style !== "plain" ? `${p.text} (${p.style})` : p.text) : p.kind === "stack" ? `${p.top} / ${p.bottom}` : p.op);
 
 export const PiecesBuilder: React.FC<PiecesBuilderProps> = ({ pieces, onChange, visual = false, compact = false }) => {
   const { t } = useT();
   const [wordText, setWordText] = useState("");
+  const [wordStyle, setWordStyle] = useState<WordStyle>("plain");
   const [stackTop, setStackTop] = useState("");
   const [stackBottom, setStackBottom] = useState("");
   const picker = useRef<HTMLInputElement>(null);
@@ -143,12 +147,20 @@ export const PiecesBuilder: React.FC<PiecesBuilderProps> = ({ pieces, onChange, 
           </div>
           <div className="flex gap-2">
             <UIInput aria-label={t("rebus.studio.wordText")} placeholder={t("rebus.studio.wordText")} value={wordText} onChange={(e) => setWordText(e.target.value)} maxLength={40} />
+            <UISelect aria-label={t("rebus.studio.wordStyle")} className="!w-auto" value={wordStyle} onChange={(e) => setWordStyle(e.target.value as WordStyle)}>
+              {WORD_STYLES.map((style) => (
+                <option key={style} value={style}>
+                  {t(`rebus.studio.wordStyle_${style}`)}
+                </option>
+              ))}
+            </UISelect>
             <UIButton
               variant="secondary"
               disabled={!wordText.trim()}
               onClick={() => {
-                add({ kind: "word", text: wordText.trim() });
+                add({ kind: "word", text: wordText.trim(), ...(wordStyle !== "plain" ? { style: wordStyle } : {}) });
                 setWordText("");
+                setWordStyle("plain");
               }}
             >
               {t("rebus.studio.addWord")}
