@@ -2368,6 +2368,10 @@
     "name": "dog"
    },
    {
+    "kind": "word",
+    "text": "eat"
+   },
+   {
     "kind": "icon",
     "id": "rebus-dog",
     "name": "dog"
@@ -2375,7 +2379,7 @@
   ],
   "answer": "Dog eat dog",
   "accepts": [],
-  "explanation": "dog, dog: a world where everyone fights to win.",
+  "explanation": "dog, eat, dog: a world where everyone fights to win.",
   "source": "official"
  },
  {
@@ -2394,8 +2398,8 @@
     "name": "fish"
    },
    {
-    "kind": "op",
-    "op": "+"
+    "kind": "word",
+    "text": "out of"
    },
    {
     "kind": "icon",
@@ -2405,7 +2409,7 @@
   ],
   "answer": "Fish out of water",
   "accepts": [],
-  "explanation": "A fish and water: someone who feels out of place.",
+  "explanation": "A fish, out of, water: someone who feels out of place.",
   "source": "official"
  },
  {

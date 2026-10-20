@@ -1,4 +1,4 @@
-import { pic, puzzlesFor, sum } from "./build";
+import { pic, puzzlesFor, sum, word } from "./build";
 
 export const ANIMALS = puzzlesFor("animals", [
   { pieces: sum(pic("cat"), pic("fish")), answer: "Catfish", why: "cat + fish = catfish.", trick: "compound" },
@@ -27,8 +27,8 @@ export const ANIMALS = puzzlesFor("animals", [
   { pieces: sum(pic("bull"), pic("eye")), answer: "Bullseye", why: "bull + eye = bullseye.", trick: "compound", difficulty: 2, accepts: ["bulls eye"] },
   { pieces: sum(pic("cat"), pic("eye")), answer: "Cat's eye", why: "cat + eye = cat's eye.", trick: "compound", difficulty: 2, accepts: ["cats eye"] },
   { pieces: sum(pic("dog"), pic("sun", "days")), answer: "Dog days", why: "dog + days: the hottest days of summer.", trick: "compound", difficulty: 3 },
-  { pieces: [pic("dog"), pic("dog")], answer: "Dog eat dog", why: "dog, dog: a world where everyone fights to win.", trick: "compound", difficulty: 3 },
-  { pieces: sum(pic("fish"), pic("water")), answer: "Fish out of water", why: "A fish and water: someone who feels out of place.", trick: "compound", difficulty: 3 },
+  { pieces: [pic("dog"), word("eat"), pic("dog")], answer: "Dog eat dog", why: "dog, eat, dog: a world where everyone fights to win.", trick: "compound", difficulty: 3 },
+  { pieces: [pic("fish"), word("out of"), pic("water")], answer: "Fish out of water", why: "A fish, out of, water: someone who feels out of place.", trick: "compound", difficulty: 3 },
   { pieces: sum(pic("monkey"), pic("work", "business")), answer: "Monkey business", why: "monkey + business: silly or sneaky behaviour.", trick: "compound", difficulty: 3 },
   { pieces: sum(pic("dog"), pic("house")), answer: "Doghouse", why: "dog + house = doghouse.", trick: "compound", difficulty: 2, accepts: ["dog house"] },
   { pieces: sum(pic("bird"), pic("house")), answer: "Birdhouse", why: "bird + house = birdhouse.", trick: "compound", difficulty: 2, accepts: ["bird house"] },
