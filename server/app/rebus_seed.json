@@ -3420,7 +3420,10 @@
   "answer": "Bookworm",
   "accepts": [],
   "explanation": "book + worm = bookworm.",
-  "source": "official"
+  "source": "official",
+  "km": {
+   "explanation": "“book” + “worm” = bookworm។ នេះជាអ្នកចូលចិត្តអានសៀវភៅខ្លាំង។"
+  }
  },
  {
   "id": "school-homework",
@@ -3448,9 +3451,14 @@
    }
   ],
   "answer": "Homework",
-  "accepts": [],
+  "accepts": [
+   "កិច្ចការផ្ទះ"
+  ],
   "explanation": "home + work = homework.",
-  "source": "official"
+  "source": "official",
+  "km": {
+   "explanation": "“home” + “work” = homework។ នេះគឺកិច្ចការផ្ទះ។"
+  }
  },
  {
   "id": "school-notebook",
@@ -3478,9 +3486,14 @@
    }
   ],
   "answer": "Notebook",
-  "accepts": [],
+  "accepts": [
+   "សៀវភៅកត់ត្រា"
+  ],
   "explanation": "note + book = notebook.",
-  "source": "official"
+  "source": "official",
+  "km": {
+   "explanation": "“note” + “book” = notebook។ នេះគឺសៀវភៅកត់ត្រា។"
+  }
  },
  {
   "id": "school-blackboard",
@@ -3510,7 +3523,10 @@
   "answer": "Blackboard",
   "accepts": [],
   "explanation": "black + board = blackboard.",
-  "source": "official"
+  "source": "official",
+  "km": {
+   "explanation": "“black” + “board” = blackboard។ នេះគឺក្តារខ្មៅ។"
+  }
  },
  {
   "id": "school-whiteboard",
@@ -3538,9 +3554,14 @@
    }
   ],
   "answer": "Whiteboard",
-  "accepts": [],
+  "accepts": [
+   "ក្តារស"
+  ],
   "explanation": "white + board = whiteboard.",
-  "source": "official"
+  "source": "official",
+  "km": {
+   "explanation": "“white” + “board” = whiteboard។ នេះគឺក្តារស។"
+  }
  },
  {
   "id": "school-paperclip",
@@ -3570,7 +3591,10 @@
   "answer": "Paperclip",
   "accepts": [],
   "explanation": "paper + clip = paperclip.",
-  "source": "official"
+  "source": "official",
+  "km": {
+   "explanation": "“paper” + “clip” = paperclip។ នេះជាឧបករណ៍តូចសម្រាប់ចាប់ក្រដាសបញ្ចូលគ្នា។"
+  }
  },
  {
   "id": "school-bookshelf",
@@ -3598,9 +3622,14 @@
    }
   ],
   "answer": "Bookshelf",
-  "accepts": [],
+  "accepts": [
+   "ធ្នើរសៀវភៅ"
+  ],
   "explanation": "book + shelf = bookshelf.",
-  "source": "official"
+  "source": "official",
+  "km": {
+   "explanation": "“book” + “shelf” = bookshelf។ នេះគឺធ្នើរសៀវភៅ។"
+  }
  },
  {
   "id": "school-pencil-case",
@@ -3630,7 +3659,10 @@
   "answer": "Pencil case",
   "accepts": [],
   "explanation": "pencil + case = pencil case.",
-  "source": "official"
+  "source": "official",
+  "km": {
+   "explanation": "“pencil” + “case” = pencil case។ នេះគឺប្រអប់ខ្មៅដៃ។"
+  }
  },
  {
   "id": "school-school-bus",
@@ -3658,9 +3690,14 @@
    }
   ],
   "answer": "School bus",
-  "accepts": [],
+  "accepts": [
+   "ឡានដឹកសិស្ស"
+  ],
   "explanation": "school + bus = school bus.",
-  "source": "official"
+  "source": "official",
+  "km": {
+   "explanation": "“school” + “bus” = school bus។ នេះគឺឡានដឹកសិស្ស។"
+  }
  },
  {
   "id": "school-school-bell",
@@ -3690,7 +3727,10 @@
   "answer": "School bell",
   "accepts": [],
   "explanation": "school + bell = school bell.",
-  "source": "official"
+  "source": "official",
+  "km": {
+   "explanation": "“school” + “bell” = school bell។ នេះគឺកណ្តឹងសាលា។"
+  }
  },
  {
   "id": "school-school-bag",
@@ -3720,7 +3760,10 @@
   "answer": "School bag",
   "accepts": [],
   "explanation": "school + bag = school bag.",
-  "source": "official"
+  "source": "official",
+  "km": {
+   "explanation": "“school” + “bag” = school bag។ នេះគឺកាបូបរៀន។"
+  }
  },
  {
   "id": "school-book-bag",
@@ -3750,7 +3793,10 @@
   "answer": "Book bag",
   "accepts": [],
   "explanation": "book + bag = book bag.",
-  "source": "official"
+  "source": "official",
+  "km": {
+   "explanation": "“book” + “bag” = book bag។ នេះគឺកាបូបសៀវភៅ។"
+  }
  },
  {
   "id": "school-paper-bag",
@@ -3778,9 +3824,14 @@
    }
   ],
   "answer": "Paper bag",
-  "accepts": [],
+  "accepts": [
+   "ថង់ក្រដាស"
+  ],
   "explanation": "paper + bag = paper bag.",
-  "source": "official"
+  "source": "official",
+  "km": {
+   "explanation": "“paper” + “bag” = paper bag។ នេះគឺថង់ក្រដាស។"
+  }
  },
  {
   "id": "school-pencil-pot",
@@ -3810,7 +3861,10 @@
   "answer": "Pencil pot",
   "accepts": [],
   "explanation": "pencil + pot = pencil pot.",
-  "source": "official"
+  "source": "official",
+  "km": {
+   "explanation": "“pencil” + “pot” = pencil pot។ នេះជាកែវសម្រាប់ដាក់ខ្មៅដៃ។"
+  }
  },
  {
   "id": "school-schoolhouse",
@@ -3839,10 +3893,14 @@
   ],
   "answer": "Schoolhouse",
   "accepts": [
-   "school house"
+   "school house",
+   "អាគារសាលា"
   ],
   "explanation": "school + house = schoolhouse.",
-  "source": "official"
+  "source": "official",
+  "km": {
+   "explanation": "“school” + “house” = schoolhouse។ នេះគឺអាគារសាលា។"
+  }
  },
  {
   "id": "school-homepage",
@@ -3874,7 +3932,10 @@
    "home page"
   ],
   "explanation": "home + page = homepage.",
-  "source": "official"
+  "source": "official",
+  "km": {
+   "explanation": "“home” + “page” = homepage។ នេះជាទំព័រដើមនៃគេហទំព័រ។"
+  }
  },
  {
   "id": "school-school-of-fish",
@@ -3902,9 +3963,14 @@
    }
   ],
   "answer": "School of fish",
-  "accepts": [],
+  "accepts": [
+   "ហ្វូងត្រី"
+  ],
   "explanation": "school + fish: a group of fish.",
-  "source": "official"
+  "source": "official",
+  "km": {
+   "explanation": "“school” + “fish” = ហ្វូងត្រី (school of fish)។ ជាត្រីច្រើនហែលជាមួយគ្នា។"
+  }
  },
  {
   "id": "school-paper-plane",
@@ -3933,10 +3999,14 @@
   ],
   "answer": "Paper plane",
   "accepts": [
-   "paper airplane"
+   "paper airplane",
+   "យន្តហោះក្រដាស"
   ],
   "explanation": "paper + plane = paper plane.",
-  "source": "official"
+  "source": "official",
+  "km": {
+   "explanation": "“paper” + “plane” = paper plane។ នេះគឺយន្តហោះក្រដាស។"
+  }
  },
  {
   "id": "school-paper-money",
@@ -3964,9 +4034,14 @@
    }
   ],
   "answer": "Paper money",
-  "accepts": [],
+  "accepts": [
+   "ក្រដាសប្រាក់"
+  ],
   "explanation": "paper + money = paper money.",
-  "source": "official"
+  "source": "official",
+  "km": {
+   "explanation": "“paper” + “money” = paper money។ នេះគឺក្រដាសប្រាក់។"
+  }
  },
  {
   "id": "school-notepaper",
@@ -3995,10 +4070,14 @@
   ],
   "answer": "Notepaper",
   "accepts": [
-   "note paper"
+   "note paper",
+   "ក្រដាសកត់ត្រា"
   ],
   "explanation": "note + paper = notepaper.",
-  "source": "official"
+  "source": "official",
+  "km": {
+   "explanation": "“note” + “paper” = notepaper។ នេះគឺក្រដាសកត់ត្រា។"
+  }
  },
  {
   "id": "school-housework",
@@ -4026,9 +4105,14 @@
    }
   ],
   "answer": "Housework",
-  "accepts": [],
+  "accepts": [
+   "ការងារផ្ទះ"
+  ],
   "explanation": "house + work = housework.",
-  "source": "official"
+  "source": "official",
+  "km": {
+   "explanation": "“house” + “work” = housework។ នេះគឺការងារផ្ទះ។"
+  }
  },
  {
   "id": "school-black-and-white",
@@ -4056,9 +4140,14 @@
    }
   ],
   "answer": "Black and white",
-  "accepts": [],
+  "accepts": [
+   "ខ្មៅនិងស"
+  ],
   "explanation": "black and white go together.",
-  "source": "official"
+  "source": "official",
+  "km": {
+   "explanation": "“black” និង “white” = Black and white។ ពណ៌ខ្មៅនិងពណ៌ស។"
+  }
  },
  {
   "id": "school-pencil-and-paper",
@@ -4086,9 +4175,14 @@
    }
   ],
   "answer": "Pencil and paper",
-  "accepts": [],
+  "accepts": [
+   "ខ្មៅដៃនិងក្រដាស"
+  ],
   "explanation": "pencil and paper go together.",
-  "source": "official"
+  "source": "official",
+  "km": {
+   "explanation": "“pencil” និង “paper” = Pencil and paper។ ខ្មៅដៃនិងក្រដាស។"
+  }
  },
  {
   "id": "school-school-of-thought",
@@ -4118,7 +4212,10 @@
   "answer": "School of thought",
   "accepts": [],
   "explanation": "school + thought: a way of thinking.",
-  "source": "official"
+  "source": "official",
+  "km": {
+   "explanation": "“school” + “thought” = School of thought។ ជាវិធីគិតមួយបែប។"
+  }
  },
  {
   "id": "school-homeschool",
@@ -4150,7 +4247,10 @@
    "home school"
   ],
   "explanation": "home + school = homeschool.",
-  "source": "official"
+  "source": "official",
+  "km": {
+   "explanation": "“home” + “school” = homeschool។ នេះជាការរៀននៅផ្ទះ។"
+  }
  },
  {
   "id": "science-rainbow",
@@ -5192,7 +5292,10 @@
   "answer": "Football",
   "accepts": [],
   "explanation": "foot + ball = football.",
-  "source": "official"
+  "source": "official",
+  "km": {
+   "explanation": "“foot” + “ball” = football។ នេះគឺបាល់ទាត់។"
+  }
  },
  {
   "id": "sports-medal-and-trophy",
@@ -5220,9 +5323,14 @@
    }
   ],
   "answer": "Medal and trophy",
-  "accepts": [],
+  "accepts": [
+   "មេដាយនិងពាន"
+  ],
   "explanation": "medal + trophy = medal and trophy.",
-  "source": "official"
+  "source": "official",
+  "km": {
+   "explanation": "“medal” + “trophy” = medal and trophy។ នេះគឺមេដាយនិងពាន។"
+  }
  },
  {
   "id": "sports-dumbbell-and-rope",
@@ -5252,7 +5360,10 @@
   "answer": "Dumbbell and rope",
   "accepts": [],
   "explanation": "dumbbell + rope = dumbbell and rope.",
-  "source": "official"
+  "source": "official",
+  "km": {
+   "explanation": "“dumbbell” + “rope” = dumbbell and rope។ នេះជាឧបករណ៍ហាត់ប្រាណ ដុំដែកលើកនិងខ្សែលោត។"
+  }
  },
  {
   "id": "sports-dumbbell-and-shoe",
@@ -5282,7 +5393,10 @@
   "answer": "Dumbbell and shoe",
   "accepts": [],
   "explanation": "dumbbell + shoe = dumbbell and shoe.",
-  "source": "official"
+  "source": "official",
+  "km": {
+   "explanation": "“dumbbell” + “shoe” = dumbbell and shoe។ នេះជាឧបករណ៍ហាត់ប្រាណ ដុំដែកលើកនិងស្បែកជើង។"
+  }
  },
  {
   "id": "sports-handball",
@@ -5312,7 +5426,10 @@
   "answer": "Handball",
   "accepts": [],
   "explanation": "hand + ball = handball.",
-  "source": "official"
+  "source": "official",
+  "km": {
+   "explanation": "“hand” + “ball” = handball។ នេះគឺបាល់ដៃ។"
+  }
  },
  {
   "id": "sports-basketball",
@@ -5342,7 +5459,10 @@
   "answer": "Basketball",
   "accepts": [],
   "explanation": "basket + ball = basketball.",
-  "source": "official"
+  "source": "official",
+  "km": {
+   "explanation": "“basket” + “ball” = basketball។ នេះគឺបាល់បោះ។"
+  }
  },
  {
   "id": "sports-netball",
@@ -5372,7 +5492,10 @@
   "answer": "Netball",
   "accepts": [],
   "explanation": "net + ball = netball.",
-  "source": "official"
+  "source": "official",
+  "km": {
+   "explanation": "“net” + “ball” = netball។ នេះជាកីឡាបាល់ដែលបោះចូលក្នុងរង្វង់។"
+  }
  },
  {
   "id": "sports-softball",
@@ -5400,9 +5523,14 @@
    }
   ],
   "answer": "Softball",
-  "accepts": [],
+  "accepts": [
+   "បាល់ទន់"
+  ],
   "explanation": "soft + ball = softball.",
-  "source": "official"
+  "source": "official",
+  "km": {
+   "explanation": "“soft” + “ball” = softball។ នេះគឺបាល់ទន់។"
+  }
  },
  {
   "id": "sports-baseball",
@@ -5432,7 +5560,10 @@
   "answer": "Baseball",
   "accepts": [],
   "explanation": "base + ball = baseball.",
-  "source": "official"
+  "source": "official",
+  "km": {
+   "explanation": "“base” + “ball” = baseball។ នេះជាកីឡាបាល់បេស្បល។"
+  }
  },
  {
   "id": "sports-cricket-ball",
@@ -5462,7 +5593,10 @@
   "answer": "Cricket ball",
   "accepts": [],
   "explanation": "cricket + ball = cricket ball.",
-  "source": "official"
+  "source": "official",
+  "km": {
+   "explanation": "“cricket” + “ball” = cricket ball។ នេះជាបាល់សម្រាប់លេងកីឡាគ្រីកេត។"
+  }
  },
  {
   "id": "sports-racketball",
@@ -5494,7 +5628,10 @@
    "racquetball"
   ],
   "explanation": "racket + ball = racketball.",
-  "source": "official"
+  "source": "official",
+  "km": {
+   "explanation": "“racket” + “ball” = racketball។ នេះជាកីឡាបាល់ដែលប្រើរ៉ាកែត។"
+  }
  },
  {
   "id": "sports-pinball",
@@ -5524,7 +5661,10 @@
   "answer": "Pinball",
   "accepts": [],
   "explanation": "pin + ball = pinball.",
-  "source": "official"
+  "source": "official",
+  "km": {
+   "explanation": "“pin” + “ball” = pinball។ នេះជាល្បែងបាល់ដែលលោតលើម៉ាស៊ីន។"
+  }
  },
  {
   "id": "sports-snowball",
@@ -5552,9 +5692,14 @@
    }
   ],
   "answer": "Snowball",
-  "accepts": [],
+  "accepts": [
+   "បាល់ព្រិល"
+  ],
   "explanation": "snow + ball = snowball.",
-  "source": "official"
+  "source": "official",
+  "km": {
+   "explanation": "“snow” + “ball” = snowball។ នេះគឺបាល់ព្រិល។"
+  }
  },
  {
   "id": "sports-fireball",
@@ -5582,9 +5727,14 @@
    }
   ],
   "answer": "Fireball",
-  "accepts": [],
+  "accepts": [
+   "បាល់ភ្លើង"
+  ],
   "explanation": "fire + ball = fireball.",
-  "source": "official"
+  "source": "official",
+  "km": {
+   "explanation": "“fire” + “ball” = fireball។ នេះគឺបាល់ភ្លើង។"
+  }
  },
  {
   "id": "sports-eyeball",
@@ -5612,9 +5762,14 @@
    }
   ],
   "answer": "Eyeball",
-  "accepts": [],
+  "accepts": [
+   "ព្រលិតភ្នែក"
+  ],
   "explanation": "eye + ball = eyeball.",
-  "source": "official"
+  "source": "official",
+  "km": {
+   "explanation": "“eye” + “ball” = eyeball។ នេះគឺព្រលិតភ្នែក។"
+  }
  },
  {
   "id": "sports-meatball",
@@ -5644,7 +5799,10 @@
   "answer": "Meatball",
   "accepts": [],
   "explanation": "meat + ball = meatball.",
-  "source": "official"
+  "source": "official",
+  "km": {
+   "explanation": "“meat” + “ball” = meatball។ នេះជាសាច់កិនធ្វើជាគ្រាប់មូលៗ។"
+  }
  },
  {
   "id": "sports-ballpark",
@@ -5673,7 +5831,10 @@
   "answer": "Ballpark",
   "accepts": [],
   "explanation": "ball + park = ballpark.",
-  "source": "official"
+  "source": "official",
+  "km": {
+   "explanation": "“ball” + “park” = ballpark។ នេះជាទីលានសម្រាប់លេងបាល់។"
+  }
  },
  {
   "id": "sports-ball-game",
@@ -5700,9 +5861,14 @@
    }
   ],
   "answer": "Ball game",
-  "accepts": [],
+  "accepts": [
+   "ល្បែងបាល់"
+  ],
   "explanation": "ball + game = ball game.",
-  "source": "official"
+  "source": "official",
+  "km": {
+   "explanation": "“ball” + “game” = ball game។ នេះគឺល្បែងបាល់។"
+  }
  },
  {
   "id": "sports-baseball-bat",
@@ -5741,7 +5907,10 @@
   "answer": "Baseball bat",
   "accepts": [],
   "explanation": "base + ball + bat = baseball bat.",
-  "source": "official"
+  "source": "official",
+  "km": {
+   "explanation": "“base” + “ball” + “bat” = baseball bat។ នេះជាដំបងសម្រាប់វាយបាល់បេស្បល។"
+  }
  },
  {
   "id": "sports-cricket-bat",
@@ -5771,7 +5940,10 @@
   "answer": "Cricket bat",
   "accepts": [],
   "explanation": "cricket + bat = cricket bat.",
-  "source": "official"
+  "source": "official",
+  "km": {
+   "explanation": "“cricket” + “bat” = cricket bat។ នេះជាដំបងសម្រាប់វាយបាល់គ្រីកេត។"
+  }
  },
  {
   "id": "sports-baseball-cap",
@@ -5808,9 +5980,14 @@
    }
   ],
   "answer": "Baseball cap",
-  "accepts": [],
+  "accepts": [
+   "មួកបេស្បល"
+  ],
   "explanation": "base + ball + cap = baseball cap.",
-  "source": "official"
+  "source": "official",
+  "km": {
+   "explanation": "“base” + “ball” + “cap” = baseball cap។ នេះគឺមួកបេស្បល។"
+  }
  },
  {
   "id": "sports-baseball-glove",
@@ -5847,9 +6024,14 @@
    }
   ],
   "answer": "Baseball glove",
-  "accepts": [],
+  "accepts": [
+   "ស្រោមដៃបេស្បល"
+  ],
   "explanation": "base + ball + glove = baseball glove.",
-  "source": "official"
+  "source": "official",
+  "km": {
+   "explanation": "“base” + “ball” + “glove” = baseball glove។ នេះគឺស្រោមដៃបេស្បល។"
+  }
  },
  {
   "id": "sports-boxing-glove",
@@ -5885,9 +6067,14 @@
    }
   ],
   "answer": "Boxing glove",
-  "accepts": [],
+  "accepts": [
+   "ស្រោមដៃប្រដាល់"
+  ],
   "explanation": "box + ing + glove = boxing glove.",
-  "source": "official"
+  "source": "official",
+  "km": {
+   "explanation": "“box” + “ing” + “glove” = boxing glove។ នេះគឺស្រោមដៃប្រដាល់។"
+  }
  },
  {
   "id": "sports-basketball-hoop",
@@ -5915,9 +6102,14 @@
    }
   ],
   "answer": "Basketball hoop",
-  "accepts": [],
+  "accepts": [
+   "រង្វង់បាល់បោះ"
+  ],
   "explanation": "basketball + hoop = basketball hoop.",
-  "source": "official"
+  "source": "official",
+  "km": {
+   "explanation": "“basketball” + “hoop” = basketball hoop។ នេះគឺរង្វង់បាល់បោះ។"
+  }
  },
  {
   "id": "sports-bike-helmet",
@@ -5945,9 +6137,14 @@
    }
   ],
   "answer": "Bike helmet",
-  "accepts": [],
+  "accepts": [
+   "មួកសុវត្ថិភាពជិះកង់"
+  ],
   "explanation": "bike + helmet = bike helmet.",
-  "source": "official"
+  "source": "official",
+  "km": {
+   "explanation": "“bike” + “helmet” = bike helmet។ នេះគឺមួកសុវត្ថិភាពជិះកង់។"
+  }
  },
  {
   "id": "sports-ski-goggles",
@@ -5977,7 +6174,10 @@
   "answer": "Ski goggles",
   "accepts": [],
   "explanation": "ski + goggles = ski goggles.",
-  "source": "official"
+  "source": "official",
+  "km": {
+   "explanation": "“ski” + “goggles” = ski goggles។ នេះជាវ៉ែនតាការពារភ្នែកពេលជិះស្គី។"
+  }
  },
  {
   "id": "sports-ice-skate",
@@ -6007,7 +6207,10 @@
   "answer": "Ice skate",
   "accepts": [],
   "explanation": "ice + skate = ice skate.",
-  "source": "official"
+  "source": "official",
+  "km": {
+   "explanation": "“ice” + “skate” = ice skate។ នេះជាស្បែកជើងសម្រាប់រអិលលើទឹកកក។"
+  }
  },
  {
   "id": "sports-snowshoe",
@@ -6037,7 +6240,10 @@
   "answer": "Snowshoe",
   "accepts": [],
   "explanation": "snow + shoe = snowshoe.",
-  "source": "official"
+  "source": "official",
+  "km": {
+   "explanation": "“snow” + “shoe” = snowshoe។ នេះជាស្បែកជើងសម្រាប់ដើរលើព្រិល។"
+  }
  },
  {
   "id": "sports-horseshoe",
@@ -6065,9 +6271,14 @@
    }
   ],
   "answer": "Horseshoe",
-  "accepts": [],
+  "accepts": [
+   "ដែកជើងសេះ"
+  ],
   "explanation": "horse + shoe = horseshoe.",
-  "source": "official"
+  "source": "official",
+  "km": {
+   "explanation": "“horse” + “shoe” = horseshoe។ នេះគឺដែកជើងសេះ។"
+  }
  },
  {
   "id": "sports-running-shoe",
@@ -6095,9 +6306,14 @@
    }
   ],
   "answer": "Running shoe",
-  "accepts": [],
+  "accepts": [
+   "ស្បែកជើងរត់"
+  ],
   "explanation": "running + shoe = running shoe.",
-  "source": "official"
+  "source": "official",
+  "km": {
+   "explanation": "“running” + “shoe” = running shoe។ នេះគឺស្បែកជើងរត់។"
+  }
  },
  {
   "id": "sports-bow-and-arrow",
@@ -6125,9 +6341,14 @@
    }
   ],
   "answer": "Bow and arrow",
-  "accepts": [],
+  "accepts": [
+   "ធ្នូនិងព្រួញ"
+  ],
   "explanation": "bow + arrow = bow and arrow.",
-  "source": "official"
+  "source": "official",
+  "km": {
+   "explanation": "“bow” + “arrow” = bow and arrow។ នេះគឺធ្នូនិងព្រួញ។"
+  }
  },
  {
   "id": "sports-pine-cone",
@@ -6157,7 +6378,10 @@
   "answer": "Pine cone",
   "accepts": [],
   "explanation": "pine + cone = pine cone.",
-  "source": "official"
+  "source": "official",
+  "km": {
+   "explanation": "“pine” + “cone” = pine cone។ នេះជាផ្លែនៃដើមស្រល់។"
+  }
  },
  {
   "id": "sports-fish-bowl",
@@ -6189,7 +6413,10 @@
    "fishbowl"
   ],
   "explanation": "fish + bowl = fish bowl.",
-  "source": "official"
+  "source": "official",
+  "km": {
+   "explanation": "“fish” + “bowl” = fish bowl។ នេះជាចានកែវសម្រាប់ចិញ្ចឹមត្រី។"
+  }
  },
  {
   "id": "sports-key-ring",
@@ -6221,7 +6448,10 @@
    "keyring"
   ],
   "explanation": "key + ring = key ring.",
-  "source": "official"
+  "source": "official",
+  "km": {
+   "explanation": "“key” + “ring” = key ring។ នេះជាចិញ្ចៀនសម្រាប់ដាក់កូនសោ។"
+  }
  },
  {
   "id": "sports-flagpole",
@@ -6249,9 +6479,14 @@
    }
   ],
   "answer": "Flagpole",
-  "accepts": [],
+  "accepts": [
+   "បង្គោលទង់"
+  ],
   "explanation": "flag + pole = flagpole.",
-  "source": "official"
+  "source": "official",
+  "km": {
+   "explanation": "“flag” + “pole” = flagpole។ នេះគឺបង្គោលទង់។"
+  }
  },
  {
   "id": "sports-white-flag",
@@ -6279,9 +6514,14 @@
    }
   ],
   "answer": "White flag",
-  "accepts": [],
+  "accepts": [
+   "ទង់ស"
+  ],
   "explanation": "white + flag = white flag.",
-  "source": "official"
+  "source": "official",
+  "km": {
+   "explanation": "“white” + “flag” = white flag។ នេះគឺទង់ស។"
+  }
  },
  {
   "id": "sports-fishnet",
@@ -6309,9 +6549,14 @@
    }
   ],
   "answer": "Fishnet",
-  "accepts": [],
+  "accepts": [
+   "សំណាញ់ត្រី"
+  ],
   "explanation": "fish + net = fishnet.",
-  "source": "official"
+  "source": "official",
+  "km": {
+   "explanation": "“fish” + “net” = fishnet។ នេះគឺសំណាញ់ត្រី។"
+  }
  },
  {
   "id": "sports-pinwheel",
@@ -6341,7 +6586,10 @@
   "answer": "Pinwheel",
   "accepts": [],
   "explanation": "pin + wheel = pinwheel.",
-  "source": "official"
+  "source": "official",
+  "km": {
+   "explanation": "“pin” + “wheel” = pinwheel។ នេះជាកង្ហារក្មេងលេងដែលវិលតាមខ្យល់។"
+  }
  },
  {
   "id": "sports-cup-final",
@@ -6379,7 +6627,10 @@
   "answer": "Cup final",
   "accepts": [],
   "explanation": "cup + fin + al = cup final.",
-  "source": "official"
+  "source": "official",
+  "km": {
+   "explanation": "“cup” + “fin” + “al” = cup final។ នេះជាការប្រកួតចុងក្រោយដើម្បីយកពាន។"
+  }
  },
  {
   "id": "sports-world-cup",
@@ -6407,9 +6658,14 @@
    }
   ],
   "answer": "World cup",
-  "accepts": [],
+  "accepts": [
+   "ពានពិភពលោក"
+  ],
   "explanation": "world + cup = world cup.",
-  "source": "official"
+  "source": "official",
+  "km": {
+   "explanation": "“world” + “cup” = world cup។ នេះគឺពានពិភពលោក។"
+  }
  },
  {
   "id": "sports-hawkeye",
@@ -6439,7 +6695,10 @@
   "answer": "Hawkeye",
   "accepts": [],
   "explanation": "hawk + eye = hawkeye.",
-  "source": "official"
+  "source": "official",
+  "km": {
+   "explanation": "“hawk” + “eye” = hawkeye។ នេះជាអ្នកមានភ្នែកមុតស្រួចណាស់។"
+  }
  },
  {
   "id": "sports-bread-basket",
@@ -6467,9 +6726,14 @@
    }
   ],
   "answer": "Bread basket",
-  "accepts": [],
+  "accepts": [
+   "កន្ត្រកនំបុ័ង"
+  ],
   "explanation": "bread + basket = bread basket.",
-  "source": "official"
+  "source": "official",
+  "km": {
+   "explanation": "“bread” + “basket” = bread basket។ នេះគឺកន្ត្រកនំបុ័ង។"
+  }
  },
  {
   "id": "sports-handbag",
@@ -6497,9 +6761,14 @@
    }
   ],
   "answer": "Handbag",
-  "accepts": [],
+  "accepts": [
+   "កាបូបដៃ"
+  ],
   "explanation": "hand + bag = handbag.",
-  "source": "official"
+  "source": "official",
+  "km": {
+   "explanation": "“hand” + “bag” = handbag។ នេះគឺកាបូបដៃ។"
+  }
  },
  {
   "id": "sports-home-base",
@@ -6529,7 +6798,10 @@
   "answer": "Home base",
   "accepts": [],
   "explanation": "home + base = home base.",
-  "source": "official"
+  "source": "official",
+  "km": {
+   "explanation": "“home” + “base” = home base។ នេះជាចំណុចចាប់ផ្តើមនិងបញ្ចប់នៃការលេងបេស្បល។"
+  }
  },
  {
   "id": "sports-big-foot",
@@ -6562,7 +6834,10 @@
    "bigfoot"
   ],
   "explanation": "big + foot = big foot.",
-  "source": "official"
+  "source": "official",
+  "km": {
+   "explanation": "“big” + “foot” = big foot។ នេះជាសត្វក្នុងរឿងព្រេងដែលមានស្នាមជើងធំ។"
+  }
  },
  {
   "id": "sports-skiing",
@@ -6589,9 +6864,14 @@
    }
   ],
   "answer": "Skiing",
-  "accepts": [],
+  "accepts": [
+   "ជិះស្គី"
+  ],
   "explanation": "ski + ing = skiing.",
-  "source": "official"
+  "source": "official",
+  "km": {
+   "explanation": "“ski” + “ing” = skiing។ នេះគឺជិះស្គី។"
+  }
  },
  {
   "id": "sports-skating",
@@ -6620,7 +6900,10 @@
   "answer": "Skating",
   "accepts": [],
   "explanation": "skate + ing = skating.",
-  "source": "official"
+  "source": "official",
+  "km": {
+   "explanation": "“skate” + “ing” = skating។ នេះជាកីឡារអិលដោយស្បែកជើងមានកង់ ឬក្រឡា។"
+  }
  },
  {
   "id": "sports-boxing",
@@ -6647,9 +6930,14 @@
    }
   ],
   "answer": "Boxing",
-  "accepts": [],
+  "accepts": [
+   "ប្រដាល់"
+  ],
   "explanation": "box + ing = boxing.",
-  "source": "official"
+  "source": "official",
+  "km": {
+   "explanation": "“box” + “ing” = boxing។ នេះគឺប្រដាល់។"
+  }
  },
  {
   "id": "sports-bowling",
@@ -6678,7 +6966,10 @@
   "answer": "Bowling",
   "accepts": [],
   "explanation": "bowl + ing = bowling.",
-  "source": "official"
+  "source": "official",
+  "km": {
+   "explanation": "“bowl” + “ing” = bowling។ នេះជាល្បែងរមៀលបាល់ទៅរំលំគ្រាប់។"
+  }
  },
  {
   "id": "sports-fencing",
@@ -6707,7 +6998,10 @@
   "answer": "Fencing",
   "accepts": [],
   "explanation": "fence + ing = fencing.",
-  "source": "official"
+  "source": "official",
+  "km": {
+   "explanation": "“fence” + “ing” = fencing។ នេះជាកីឡាកាប់ដាវ។"
+  }
  },
  {
   "id": "sports-cycling",
@@ -6738,7 +7032,10 @@
    "biking"
   ],
   "explanation": "cycle + ing = cycling.",
-  "source": "official"
+  "source": "official",
+  "km": {
+   "explanation": "“cycle” + “ing” = cycling។ នេះគឺជិះកង់។"
+  }
  },
  {
   "id": "sports-surfing",
@@ -6767,7 +7064,10 @@
   "answer": "Surfing",
   "accepts": [],
   "explanation": "surf + ing = surfing.",
-  "source": "official"
+  "source": "official",
+  "km": {
+   "explanation": "“surf” + “ing” = surfing។ នេះជាកីឡាជិះក្តារលើរលក។"
+  }
  },
  {
   "id": "sports-sailing",
@@ -6796,7 +7096,10 @@
   "answer": "Sailing",
   "accepts": [],
   "explanation": "sail + ing = sailing.",
-  "source": "official"
+  "source": "official",
+  "km": {
+   "explanation": "“sail” + “ing” = sailing។ នេះជាកីឡាជិះទូកក្តោង។"
+  }
  },
  {
   "id": "sports-running",
@@ -6823,9 +7126,14 @@
    }
   ],
   "answer": "Running",
-  "accepts": [],
+  "accepts": [
+   "រត់"
+  ],
   "explanation": "run + ing = running.",
-  "source": "official"
+  "source": "official",
+  "km": {
+   "explanation": "“run” + “ing” = running។ នេះគឺរត់។"
+  }
  },
  {
   "id": "sports-fishing",
@@ -6854,7 +7162,10 @@
   "answer": "Fishing",
   "accepts": [],
   "explanation": "fish + ing = fishing.",
-  "source": "official"
+  "source": "official",
+  "km": {
+   "explanation": "“fish” + “ing” = fishing។ នេះគឺស្ទូចត្រី។"
+  }
  },
  {
   "id": "sports-ice-skating",
@@ -6892,7 +7203,10 @@
   "answer": "Ice skating",
   "accepts": [],
   "explanation": "ice + skate + ing = ice skating.",
-  "source": "official"
+  "source": "official",
+  "km": {
+   "explanation": "“ice” + “skate” + “ing” = ice skating។ នេះជាកីឡារអិលលើទឹកកក។"
+  }
  },
  {
   "id": "sports-skateboarding",
@@ -6921,7 +7235,10 @@
   "answer": "Skateboarding",
   "accepts": [],
   "explanation": "skateboard + ing = skateboarding.",
-  "source": "official"
+  "source": "official",
+  "km": {
+   "explanation": "“skateboard” + “ing” = skateboarding។ នេះជាកីឡាជិះក្តារមានកង់។"
+  }
  },
  {
   "id": "sports-snowboarding",
@@ -6959,7 +7276,10 @@
   "answer": "Snowboarding",
   "accepts": [],
   "explanation": "snow + board + ing = snowboarding.",
-  "source": "official"
+  "source": "official",
+  "km": {
+   "explanation": "“snow” + “board” + “ing” = snowboarding។ នេះជាកីឡាជិះក្តារលើព្រិល។"
+  }
  },
  {
   "id": "sports-kite-flying",
@@ -6997,7 +7317,10 @@
   "answer": "Kite flying",
   "accepts": [],
   "explanation": "kite + fly + ing = kite flying.",
-  "source": "official"
+  "source": "official",
+  "km": {
+   "explanation": "“kite” + “fly” + “ing” = kite flying។ នេះគឺលេងខ្លែង។"
+  }
  },
  {
   "id": "sports-water-skiing",
@@ -7035,7 +7358,10 @@
   "answer": "Water skiing",
   "accepts": [],
   "explanation": "water + ski + ing = water skiing.",
-  "source": "official"
+  "source": "official",
+  "km": {
+   "explanation": "“water” + “ski” + “ing” = water skiing។ នេះជាកីឡាជិះស្គីលើទឹក។"
+  }
  },
  {
   "id": "sports-skateboard",
@@ -7065,7 +7391,10 @@
   "answer": "Skateboard",
   "accepts": [],
   "explanation": "skate + board = skateboard.",
-  "source": "official"
+  "source": "official",
+  "km": {
+   "explanation": "“skate” + “board” = skateboard។ នេះជាក្តារមានកង់សម្រាប់ជិះ។"
+  }
  },
  {
   "id": "sports-snowboard",
@@ -7095,7 +7424,10 @@
   "answer": "Snowboard",
   "accepts": [],
   "explanation": "snow + board = snowboard.",
-  "source": "official"
+  "source": "official",
+  "km": {
+   "explanation": "“snow” + “board” = snowboard។ នេះជាក្តារសម្រាប់ជិះលើព្រិល។"
+  }
  },
  {
   "id": "sports-surfboard",
@@ -7123,9 +7455,14 @@
    }
   ],
   "answer": "Surfboard",
-  "accepts": [],
+  "accepts": [
+   "ក្តារជិះរលក"
+  ],
   "explanation": "surf + board = surfboard.",
-  "source": "official"
+  "source": "official",
+  "km": {
+   "explanation": "“surf” + “board” = surfboard។ នេះគឺក្តារជិះរលក។"
+  }
  },
  {
   "id": "sports-dartboard",
@@ -7155,7 +7492,10 @@
   "answer": "Dartboard",
   "accepts": [],
   "explanation": "dart + board = dartboard.",
-  "source": "official"
+  "source": "official",
+  "km": {
+   "explanation": "“dart” + “board” = dartboard។ នេះជាក្តារសម្រាប់គប់ព្រួញ។"
+  }
  },
  {
   "id": "sports-bike-race",
@@ -7182,9 +7522,14 @@
    }
   ],
   "answer": "Bike race",
-  "accepts": [],
+  "accepts": [
+   "ការប្រណាំងកង់"
+  ],
   "explanation": "bike + race = bike race.",
-  "source": "official"
+  "source": "official",
+  "km": {
+   "explanation": "“bike” + “race” = bike race។ នេះគឺការប្រណាំងកង់។"
+  }
  },
  {
   "id": "sports-wheelie",
@@ -7213,7 +7558,10 @@
   "answer": "Wheelie",
   "accepts": [],
   "explanation": "wheel + ie = wheelie.",
-  "source": "official"
+  "source": "official",
+  "km": {
+   "explanation": "“wheel” + “ie” = wheelie។ នេះជាការជិះកង់ដោយលើកកង់មុខឡើង។"
+  }
  },
  {
   "id": "sports-big-wheel",
@@ -7240,7 +7588,10 @@
   "answer": "Big wheel",
   "accepts": [],
   "explanation": "big + wheel = big wheel.",
-  "source": "official"
+  "source": "official",
+  "km": {
+   "explanation": "“big” + “wheel” = big wheel។ នេះជាកង់ធំ។"
+  }
  },
  {
   "id": "sports-ice-hockey",
@@ -7279,7 +7630,10 @@
   "answer": "Ice hockey",
   "accepts": [],
   "explanation": "ice + hawk + key, said fast, sounds like ice hockey.",
-  "source": "official"
+  "source": "official",
+  "km": {
+   "explanation": "“ice” + “hawk” + “key” ប្រកាសលឿនៗ ស្តាប់ទៅដូច ice hockey។ នេះជាកីឡាហុកគីលើទឹកកក។"
+  }
  },
  {
   "id": "sports-time-out",
@@ -7308,7 +7662,10 @@
   "answer": "Time out",
   "accepts": [],
   "explanation": "time + out = time out.",
-  "source": "official"
+  "source": "official",
+  "km": {
+   "explanation": "“time” + “out” = time out។ នេះជាការឈប់សម្រាករយៈពេលខ្លីក្នុងការប្រកួត។"
+  }
  },
  {
   "id": "sports-runner-up",
@@ -7336,10 +7693,14 @@
   ],
   "answer": "Runner up",
   "accepts": [
-   "runner-up"
+   "runner-up",
+   "ចំណាត់ថ្នាក់ទីពីរ"
   ],
   "explanation": "runner + up = runner up.",
-  "source": "official"
+  "source": "official",
+  "km": {
+   "explanation": "“runner” + “up” = runner up។ នេះគឺចំណាត់ថ្នាក់ទីពីរ។"
+  }
  },
  {
   "id": "sports-home-run",
@@ -7369,7 +7730,10 @@
   "answer": "Home run",
   "accepts": [],
   "explanation": "home + run = home run.",
-  "source": "official"
+  "source": "official",
+  "km": {
+   "explanation": "“home” + “run” = home run។ នេះជាការវាយបាល់បេស្បលបានហើយរត់ជុំគ្រប់បាស។"
+  }
  },
  {
   "id": "sports-hit-and-run",
@@ -7399,7 +7763,10 @@
   "answer": "Hit and run",
   "accepts": [],
   "explanation": "hit + run = hit and run.",
-  "source": "official"
+  "source": "official",
+  "km": {
+   "explanation": "“hit” + “run” = hit and run។ នេះជាការបុកហើយរត់គេច។"
+  }
  },
  {
   "id": "sports-hit-the-target",
@@ -7431,7 +7798,10 @@
    "hit the mark"
   ],
   "explanation": "hit + target = hit the target.",
-  "source": "official"
+  "source": "official",
+  "km": {
+   "explanation": "“hit” + “target” = hit the target។ នេះជាការបាញ់ត្រូវគោលដៅ។"
+  }
  },
  {
   "id": "sports-raise-the-flag",
@@ -7459,9 +7829,14 @@
    }
   ],
   "answer": "Raise the flag",
-  "accepts": [],
+  "accepts": [
+   "លើកទង់"
+  ],
   "explanation": "rise + flag, said fast, sounds like raise the flag.",
-  "source": "official"
+  "source": "official",
+  "km": {
+   "explanation": "“rise” + “flag” ប្រកាសលឿនៗ ស្តាប់ទៅដូច Raise the flag។ នេះគឺលើកទង់។"
+  }
  },
  {
   "id": "sports-kite-runner",
@@ -7491,7 +7866,10 @@
   "answer": "Kite runner",
   "accepts": [],
   "explanation": "kite + runner = kite runner.",
-  "source": "official"
+  "source": "official",
+  "km": {
+   "explanation": "“kite” + “runner” = kite runner។ នេះជាអ្នករត់តាមខ្លែង។"
+  }
  },
  {
   "id": "sports-butterfly-net",
@@ -7528,9 +7906,14 @@
    }
   ],
   "answer": "Butterfly net",
-  "accepts": [],
+  "accepts": [
+   "សំណាញ់ចាប់មេអំបៅ"
+  ],
   "explanation": "butter + fly + net = butterfly net.",
-  "source": "official"
+  "source": "official",
+  "km": {
+   "explanation": "“butter” + “fly” + “net” = butterfly net។ នេះគឺសំណាញ់ចាប់មេអំបៅ។"
+  }
  },
  {
   "id": "sports-tug-of-war",
@@ -7566,9 +7949,14 @@
    }
   ],
   "answer": "Tug of war",
-  "accepts": [],
+  "accepts": [
+   "ទាញព្រ័ត្រ"
+  ],
   "explanation": "tug + of + war = tug of war.",
-  "source": "official"
+  "source": "official",
+  "km": {
+   "explanation": "“tug” + “of” + “war” = tug of war។ នេះគឺទាញព្រ័ត្រ។"
+  }
  },
  {
   "id": "sports-whistle-blower",
@@ -7608,7 +7996,10 @@
    "whistleblower"
   ],
   "explanation": "whistle + blow + er = whistle blower.",
-  "source": "official"
+  "source": "official",
+  "km": {
+   "explanation": "“whistle” + “blow” + “er” = whistle blower។ នេះជាអ្នកបង្ហាញការពិតដែលគេលាក់បាំង។"
+  }
  },
  {
   "id": "sports-on-the-ball",
@@ -7637,7 +8028,10 @@
   "answer": "On the ball",
   "accepts": [],
   "explanation": "on the + ball = on the ball.",
-  "source": "official"
+  "source": "official",
+  "km": {
+   "explanation": "“on the” + “ball” = on the ball។ នេះជាអ្នកដែលរហ័សរហួន។"
+  }
  },
  {
   "id": "sports-rugby",
@@ -7667,7 +8061,10 @@
   "answer": "Rugby",
   "accepts": [],
   "explanation": "rug + bee, said fast, sounds like rugby.",
-  "source": "official"
+  "source": "official",
+  "km": {
+   "explanation": "“rug” + “bee” ប្រកាសលឿនៗ ស្តាប់ទៅដូច rugby។ នេះជាកីឡាបាល់ដែលលេងដោយដៃនិងជើង។"
+  }
  },
  {
   "id": "sports-hockey",
@@ -7697,7 +8094,10 @@
   "answer": "Hockey",
   "accepts": [],
   "explanation": "hawk + key, said fast, sounds like hockey.",
-  "source": "official"
+  "source": "official",
+  "km": {
+   "explanation": "“hawk” + “key” ប្រកាសលឿនៗ ស្តាប់ទៅដូច hockey។ នេះជាកីឡាប្រើដំបងវាយបាល់។"
+  }
  },
  {
   "id": "sports-karate",
@@ -7725,9 +8125,14 @@
    }
   ],
   "answer": "Karate",
-  "accepts": [],
+  "accepts": [
+   "ការ៉ាតេ"
+  ],
   "explanation": "carrot + tea, said fast, sounds like karate.",
-  "source": "official"
+  "source": "official",
+  "km": {
+   "explanation": "“carrot” + “tea” ប្រកាសលឿនៗ ស្តាប់ទៅដូច karate។ នេះគឺការ៉ាតេ។"
+  }
  },
  {
   "id": "sports-team",
@@ -7754,9 +8159,14 @@
    }
   ],
   "answer": "Team",
-  "accepts": [],
+  "accepts": [
+   "ក្រុម"
+  ],
   "explanation": "tea + m, said fast, sounds like team.",
-  "source": "official"
+  "source": "official",
+  "km": {
+   "explanation": "“tea” + “m” ប្រកាសលឿនៗ ស្តាប់ទៅដូច team។ នេះគឺក្រុម។"
+  }
  },
  {
   "id": "sports-final",
@@ -7785,7 +8195,10 @@
   "answer": "Final",
   "accepts": [],
   "explanation": "fin + al, said fast, sounds like final.",
-  "source": "official"
+  "source": "official",
+  "km": {
+   "explanation": "“fin” + “al” ប្រកាសលឿនៗ ស្តាប់ទៅដូច final។ នេះជាការប្រកួតចុងក្រោយ។"
+  }
  },
  {
   "id": "sports-captain",
@@ -7813,9 +8226,14 @@
    }
   ],
   "answer": "Captain",
-  "accepts": [],
+  "accepts": [
+   "ប្រធានក្រុម"
+  ],
   "explanation": "cap + tin, said fast, sounds like captain.",
-  "source": "official"
+  "source": "official",
+  "km": {
+   "explanation": "“cap” + “tin” ប្រកាសលឿនៗ ស្តាប់ទៅដូច captain។ នេះគឺប្រធានក្រុម។"
+  }
  },
  {
   "id": "sports-goalkeeper",
@@ -7851,9 +8269,14 @@
    }
   ],
   "answer": "Goalkeeper",
-  "accepts": [],
+  "accepts": [
+   "អ្នកចាំទី"
+  ],
   "explanation": "goal + key + per, said fast, sounds like goalkeeper.",
-  "source": "official"
+  "source": "official",
+  "km": {
+   "explanation": "“goal” + “key” + “per” ប្រកាសលឿនៗ ស្តាប់ទៅដូច goalkeeper។ នេះគឺអ្នកចាំទី។"
+  }
  },
  {
   "id": "sports-water-polo",
@@ -7891,7 +8314,10 @@
   "answer": "Water polo",
   "accepts": [],
   "explanation": "water + pole + o, said fast, sounds like water polo.",
-  "source": "official"
+  "source": "official",
+  "km": {
+   "explanation": "“water” + “pole” + “o” ប្រកាសលឿនៗ ស្តាប់ទៅដូច water polo។ នេះជាកីឡាបាល់លេងក្នុងទឹក។"
+  }
  },
  {
   "id": "food-buttercup",
@@ -25117,9 +25543,14 @@
    }
   ],
   "answer": "Pencil and ruler",
-  "accepts": [],
+  "accepts": [
+   "ខ្មៅដៃនិងបន្ទាត់"
+  ],
   "explanation": "pencil + ruler = pencil and ruler.",
-  "source": "official"
+  "source": "official",
+  "km": {
+   "explanation": "“pencil” + “ruler” = pencil and ruler។ នេះគឺខ្មៅដៃនិងបន្ទាត់។"
+  }
  },
  {
   "id": "school-foot-ruler",
@@ -25149,7 +25580,10 @@
   "answer": "Foot ruler",
   "accepts": [],
   "explanation": "foot + ruler = foot ruler.",
-  "source": "official"
+  "source": "official",
+  "km": {
+   "explanation": "“foot” + “ruler” = foot ruler។ នេះជាបន្ទាត់វែងមួយហ្វីត។"
+  }
  },
  {
   "id": "school-rulebook",
@@ -25177,9 +25611,14 @@
    }
   ],
   "answer": "Rulebook",
-  "accepts": [],
+  "accepts": [
+   "សៀវភៅច្បាប់"
+  ],
   "explanation": "rule + book = rulebook.",
-  "source": "official"
+  "source": "official",
+  "km": {
+   "explanation": "“rule” + “book” = rulebook។ នេះគឺសៀវភៅច្បាប់។"
+  }
  },
  {
   "id": "school-home-rule",
@@ -25209,7 +25648,10 @@
   "answer": "Home rule",
   "accepts": [],
   "explanation": "home + rule = home rule.",
-  "source": "official"
+  "source": "official",
+  "km": {
+   "explanation": "“home” + “rule” = home rule។ នេះជាការគ្រប់គ្រងខ្លួនឯង។"
+  }
  },
  {
   "id": "school-rule-of-thumb",
@@ -25247,7 +25689,10 @@
   "answer": "Rule of thumb",
   "accepts": [],
   "explanation": "rule + of + thumb = rule of thumb.",
-  "source": "official"
+  "source": "official",
+  "km": {
+   "explanation": "“rule” + “of” + “thumb” = rule of thumb។ នេះជាវិធីសាមញ្ញដែលគេប្រើជាទូទៅ។"
+  }
  },
  {
   "id": "school-rock-paper-scissors",
@@ -25284,9 +25729,14 @@
    }
   ],
   "answer": "Rock paper scissors",
-  "accepts": [],
+  "accepts": [
+   "ថ្ម ក្រដាស កន្ត្រៃ"
+  ],
   "explanation": "rock + paper + scissors = rock paper scissors.",
-  "source": "official"
+  "source": "official",
+  "km": {
+   "explanation": "“rock” + “paper” + “scissors” = rock paper scissors។ នេះគឺថ្ម ក្រដាស កន្ត្រៃ។"
+  }
  },
  {
   "id": "school-nail-scissors",
@@ -25314,9 +25764,14 @@
    }
   ],
   "answer": "Nail scissors",
-  "accepts": [],
+  "accepts": [
+   "កន្ត្រៃកាត់ក្រចក"
+  ],
   "explanation": "nail + scissors = nail scissors.",
-  "source": "official"
+  "source": "official",
+  "km": {
+   "explanation": "“nail” + “scissors” = nail scissors។ នេះគឺកន្ត្រៃកាត់ក្រចក។"
+  }
  },
  {
   "id": "school-hair-scissors",
@@ -25344,9 +25799,14 @@
    }
   ],
   "answer": "Hair scissors",
-  "accepts": [],
+  "accepts": [
+   "កន្ត្រៃកាត់សក់"
+  ],
   "explanation": "hair + scissors = hair scissors.",
-  "source": "official"
+  "source": "official",
+  "km": {
+   "explanation": "“hair” + “scissors” = hair scissors។ នេះគឺកន្ត្រៃកាត់សក់។"
+  }
  },
  {
   "id": "school-scissors-and-glue",
@@ -25374,9 +25834,14 @@
    }
   ],
   "answer": "Scissors and glue",
-  "accepts": [],
+  "accepts": [
+   "កន្ត្រៃនិងកាវ"
+  ],
   "explanation": "scissors + glue = scissors and glue.",
-  "source": "official"
+  "source": "official",
+  "km": {
+   "explanation": "“scissors” + “glue” = scissors and glue។ នេះគឺកន្ត្រៃនិងកាវ។"
+  }
  },
  {
   "id": "school-paper-and-scissors",
@@ -25404,9 +25869,14 @@
    }
   ],
   "answer": "Paper and scissors",
-  "accepts": [],
+  "accepts": [
+   "ក្រដាសនិងកន្ត្រៃ"
+  ],
   "explanation": "paper + scissors = paper and scissors.",
-  "source": "official"
+  "source": "official",
+  "km": {
+   "explanation": "“paper” + “scissors” = paper and scissors។ នេះគឺក្រដាសនិងកន្ត្រៃ។"
+  }
  },
  {
   "id": "school-glue-and-paper",
@@ -25434,9 +25904,14 @@
    }
   ],
   "answer": "Glue and paper",
-  "accepts": [],
+  "accepts": [
+   "កាវនិងក្រដាស"
+  ],
   "explanation": "glue + paper = glue and paper.",
-  "source": "official"
+  "source": "official",
+  "km": {
+   "explanation": "“glue” + “paper” = glue and paper។ នេះគឺកាវនិងក្រដាស។"
+  }
  },
  {
   "id": "school-paper-glue",
@@ -25464,9 +25939,14 @@
    }
   ],
   "answer": "Paper glue",
-  "accepts": [],
+  "accepts": [
+   "កាវបិទក្រដាស"
+  ],
   "explanation": "paper + glue = paper glue.",
-  "source": "official"
+  "source": "official",
+  "km": {
+   "explanation": "“paper” + “glue” = paper glue។ នេះគឺកាវបិទក្រដាស។"
+  }
  },
  {
   "id": "school-wood-glue",
@@ -25494,9 +25974,14 @@
    }
   ],
   "answer": "Wood glue",
-  "accepts": [],
+  "accepts": [
+   "កាវបិទឈើ"
+  ],
   "explanation": "wood + glue = wood glue.",
-  "source": "official"
+  "source": "official",
+  "km": {
+   "explanation": "“wood” + “glue” = wood glue។ នេះគឺកាវបិទឈើ។"
+  }
  },
  {
   "id": "school-school-glue",
@@ -25526,7 +26011,10 @@
   "answer": "School glue",
   "accepts": [],
   "explanation": "school + glue = school glue.",
-  "source": "official"
+  "source": "official",
+  "km": {
+   "explanation": "“school” + “glue” = school glue។ នេះជាកាវសម្រាប់ប្រើនៅសាលា។"
+  }
  },
  {
   "id": "school-glue-pot",
@@ -25556,7 +26044,10 @@
   "answer": "Glue pot",
   "accepts": [],
   "explanation": "glue + pot = glue pot.",
-  "source": "official"
+  "source": "official",
+  "km": {
+   "explanation": "“glue” + “pot” = glue pot។ នេះជាឆ្នាំងតូចដាក់កាវ។"
+  }
  },
  {
   "id": "school-hot-glue",
@@ -25584,9 +26075,14 @@
    }
   ],
   "answer": "Hot glue",
-  "accepts": [],
+  "accepts": [
+   "កាវក្តៅ"
+  ],
   "explanation": "hot + glue = hot glue.",
-  "source": "official"
+  "source": "official",
+  "km": {
+   "explanation": "“hot” + “glue” = hot glue។ នេះគឺកាវក្តៅ។"
+  }
  },
  {
   "id": "school-crayon-box",
@@ -25614,9 +26110,14 @@
    }
   ],
   "answer": "Crayon box",
-  "accepts": [],
+  "accepts": [
+   "ប្រអប់ដីសពណ៌"
+  ],
   "explanation": "crayon + box = crayon box.",
-  "source": "official"
+  "source": "official",
+  "km": {
+   "explanation": "“crayon” + “box” = crayon box។ នេះគឺប្រអប់ដីសពណ៌។"
+  }
  },
  {
   "id": "school-crayon-and-paper",
@@ -25644,9 +26145,14 @@
    }
   ],
   "answer": "Crayon and paper",
-  "accepts": [],
+  "accepts": [
+   "ដីសពណ៌និងក្រដាស"
+  ],
   "explanation": "crayon + paper = crayon and paper.",
-  "source": "official"
+  "source": "official",
+  "km": {
+   "explanation": "“crayon” + “paper” = crayon and paper។ នេះគឺដីសពណ៌និងក្រដាស។"
+  }
  },
  {
   "id": "school-crayon-case",
@@ -25676,7 +26182,10 @@
   "answer": "Crayon case",
   "accepts": [],
   "explanation": "crayon + case = crayon case.",
-  "source": "official"
+  "source": "official",
+  "km": {
+   "explanation": "“crayon” + “case” = crayon case។ នេះជាប្រអប់សម្រាប់ដាក់ដីសពណ៌។"
+  }
  },
  {
   "id": "school-pencil-eraser",
@@ -25704,9 +26213,14 @@
    }
   ],
   "answer": "Pencil eraser",
-  "accepts": [],
+  "accepts": [
+   "ជ័រលុបខ្មៅដៃ"
+  ],
   "explanation": "pencil + eraser = pencil eraser.",
-  "source": "official"
+  "source": "official",
+  "km": {
+   "explanation": "“pencil” + “eraser” = pencil eraser។ នេះគឺជ័រលុបខ្មៅដៃ។"
+  }
  },
  {
   "id": "school-board-eraser",
@@ -25734,9 +26248,14 @@
    }
   ],
   "answer": "Board eraser",
-  "accepts": [],
+  "accepts": [
+   "ជ័រលុបក្តារ"
+  ],
   "explanation": "board + eraser = board eraser.",
-  "source": "official"
+  "source": "official",
+  "km": {
+   "explanation": "“board” + “eraser” = board eraser។ នេះគឺជ័រលុបក្តារ។"
+  }
  },
  {
   "id": "school-eraser-head",
@@ -25766,7 +26285,10 @@
   "answer": "Eraser head",
   "accepts": [],
   "explanation": "eraser + head = eraser head.",
-  "source": "official"
+  "source": "official",
+  "km": {
+   "explanation": "“eraser” + “head” = eraser head។ នេះជាក្បាលរបស់ជ័រលុប។"
+  }
  },
  {
   "id": "school-pencil-and-eraser",
@@ -25794,9 +26316,14 @@
    }
   ],
   "answer": "Pencil and eraser",
-  "accepts": [],
+  "accepts": [
+   "ខ្មៅដៃនិងជ័រលុប"
+  ],
   "explanation": "pencil + eraser = pencil and eraser.",
-  "source": "official"
+  "source": "official",
+  "km": {
+   "explanation": "“pencil” + “eraser” = pencil and eraser។ នេះគឺខ្មៅដៃនិងជ័រលុប។"
+  }
  },
  {
   "id": "school-calculator-watch",
@@ -25828,7 +26355,10 @@
    "calculator clock"
   ],
   "explanation": "calculator + watch = calculator watch.",
-  "source": "official"
+  "source": "official",
+  "km": {
+   "explanation": "“calculator” + “watch” = calculator watch។ នេះជានាឡិកាដៃដែលអាចគិតលេខបាន។"
+  }
  },
  {
   "id": "school-solar-calculator",
@@ -25858,7 +26388,10 @@
   "answer": "Solar calculator",
   "accepts": [],
   "explanation": "sun + calculator = solar calculator.",
-  "source": "official"
+  "source": "official",
+  "km": {
+   "explanation": "“sun” + “calculator” = solar calculator។ នេះជាម៉ាស៊ីនគិតលេខដែលប្រើថាមពលព្រះអាទិត្យ។"
+  }
  },
  {
   "id": "school-desk-lamp",
@@ -25886,9 +26419,14 @@
    }
   ],
   "answer": "Desk lamp",
-  "accepts": [],
+  "accepts": [
+   "ចង្កៀងតុ"
+  ],
   "explanation": "desk + lamp = desk lamp.",
-  "source": "official"
+  "source": "official",
+  "km": {
+   "explanation": "“desk” + “lamp” = desk lamp។ នេះគឺចង្កៀងតុ។"
+  }
  },
  {
   "id": "school-desktop",
@@ -25917,7 +26455,10 @@
   "answer": "Desktop",
   "accepts": [],
   "explanation": "desk + top = desktop.",
-  "source": "official"
+  "source": "official",
+  "km": {
+   "explanation": "“desk” + “top” = desktop។ នេះជាផ្ទៃខាងលើនៃតុ។"
+  }
  },
  {
   "id": "school-school-desk",
@@ -25947,7 +26488,10 @@
   "answer": "School desk",
   "accepts": [],
   "explanation": "school + desk = school desk.",
-  "source": "official"
+  "source": "official",
+  "km": {
+   "explanation": "“school” + “desk” = school desk។ នេះគឺតុរៀន។"
+  }
  },
  {
   "id": "school-desk-chair",
@@ -25977,7 +26521,10 @@
   "answer": "Desk chair",
   "accepts": [],
   "explanation": "desk + chair = desk chair.",
-  "source": "official"
+  "source": "official",
+  "km": {
+   "explanation": "“desk” + “chair” = desk chair។ នេះជាកៅអីសម្រាប់អង្គុយនៅតុ។"
+  }
  },
  {
   "id": "school-desk-work",
@@ -26007,7 +26554,10 @@
   "answer": "Desk work",
   "accepts": [],
   "explanation": "desk + work = desk work.",
-  "source": "official"
+  "source": "official",
+  "km": {
+   "explanation": "“desk” + “work” = desk work។ នេះជាការងារធ្វើនៅលើតុ។"
+  }
  },
  {
   "id": "school-desk-bell",
@@ -26037,7 +26587,10 @@
   "answer": "Desk bell",
   "accepts": [],
   "explanation": "desk + bell = desk bell.",
-  "source": "official"
+  "source": "official",
+  "km": {
+   "explanation": "“desk” + “bell” = desk bell។ នេះជាកណ្តឹងតូចដាក់លើតុ។"
+  }
  },
  {
   "id": "school-school-backpack",
@@ -26065,9 +26618,14 @@
    }
   ],
   "answer": "School backpack",
-  "accepts": [],
+  "accepts": [
+   "កាបូបស្ពាយរៀន"
+  ],
   "explanation": "school + backpack = school backpack.",
-  "source": "official"
+  "source": "official",
+  "km": {
+   "explanation": "“school” + “backpack” = school backpack។ នេះគឺកាបូបស្ពាយរៀន។"
+  }
  },
  {
   "id": "school-book-backpack",
@@ -26095,9 +26653,14 @@
    }
   ],
   "answer": "Book backpack",
-  "accepts": [],
+  "accepts": [
+   "កាបូបស្ពាយសៀវភៅ"
+  ],
   "explanation": "book + backpack = book backpack.",
-  "source": "official"
+  "source": "official",
+  "km": {
+   "explanation": "“book” + “backpack” = book backpack។ នេះគឺកាបូបស្ពាយសៀវភៅ។"
+  }
  },
  {
   "id": "school-chalkboard",
@@ -26127,7 +26690,10 @@
   "answer": "Chalkboard",
   "accepts": [],
   "explanation": "chalk + board = chalkboard.",
-  "source": "official"
+  "source": "official",
+  "km": {
+   "explanation": "“chalk” + “board” = chalkboard។ នេះគឺក្តារខៀន។"
+  }
  },
  {
   "id": "school-chalk-and-cheese",
@@ -26157,7 +26723,10 @@
   "answer": "Chalk and cheese",
   "accepts": [],
   "explanation": "chalk + cheese = chalk and cheese.",
-  "source": "official"
+  "source": "official",
+  "km": {
+   "explanation": "“chalk” + “cheese” = Chalk and cheese។ ជារបស់ពីរដែលខុសគ្នាស្រលះ។"
+  }
  },
  {
   "id": "school-white-chalk",
@@ -26185,9 +26754,14 @@
    }
   ],
   "answer": "White chalk",
-  "accepts": [],
+  "accepts": [
+   "ដីសស"
+  ],
   "explanation": "white + chalk = white chalk.",
-  "source": "official"
+  "source": "official",
+  "km": {
+   "explanation": "“white” + “chalk” = white chalk។ នេះគឺដីសស។"
+  }
  },
  {
   "id": "school-chalk-box",
@@ -26215,9 +26789,14 @@
    }
   ],
   "answer": "Chalk box",
-  "accepts": [],
+  "accepts": [
+   "ប្រអប់ដីស"
+  ],
   "explanation": "chalk + box = chalk box.",
-  "source": "official"
+  "source": "official",
+  "km": {
+   "explanation": "“chalk” + “box” = chalk box។ នេះគឺប្រអប់ដីស។"
+  }
  },
  {
   "id": "school-snow-globe",
@@ -26247,7 +26826,10 @@
   "answer": "Snow globe",
   "accepts": [],
   "explanation": "snow + globe = snow globe.",
-  "source": "official"
+  "source": "official",
+  "km": {
+   "explanation": "“snow” + “globe” = snow globe។ នេះជាកែវមូលដែលមានព្រិលធ្លាក់នៅខាងក្នុង។"
+  }
  },
  {
   "id": "school-globefish",
@@ -26277,7 +26859,10 @@
   "answer": "Globefish",
   "accepts": [],
   "explanation": "globe + fish = globefish.",
-  "source": "official"
+  "source": "official",
+  "km": {
+   "explanation": "“globe” + “fish” = globefish។ នេះជាត្រីដែលអាចធ្វើឱ្យខ្លួនប៉ោង។"
+  }
  },
  {
   "id": "school-light-globe",
@@ -26305,9 +26890,14 @@
    }
   ],
   "answer": "Light globe",
-  "accepts": [],
+  "accepts": [
+   "អំពូលភ្លើង"
+  ],
   "explanation": "light + globe = light globe.",
-  "source": "official"
+  "source": "official",
+  "km": {
+   "explanation": "“light” + “globe” = light globe។ នេះគឺអំពូលភ្លើង។"
+  }
  },
  {
   "id": "school-desk-globe",
@@ -26337,7 +26927,10 @@
   "answer": "Desk globe",
   "accepts": [],
   "explanation": "desk + globe = desk globe.",
-  "source": "official"
+  "source": "official",
+  "km": {
+   "explanation": "“desk” + “globe” = desk globe។ នេះជាបាល់ផែនដីតូចដាក់លើតុ។"
+  }
  },
  {
   "id": "school-school-globe",
@@ -26367,7 +26960,10 @@
   "answer": "School globe",
   "accepts": [],
   "explanation": "school + globe = school globe.",
-  "source": "official"
+  "source": "official",
+  "km": {
+   "explanation": "“school” + “globe” = school globe។ នេះជាបាល់ផែនដីសម្រាប់ប្រើនៅសាលា។"
+  }
  },
  {
   "id": "school-globeflower",
@@ -26397,7 +26993,10 @@
   "answer": "Globeflower",
   "accepts": [],
   "explanation": "globe + flower = globeflower.",
-  "source": "official"
+  "source": "official",
+  "km": {
+   "explanation": "“globe” + “flower” = globeflower។ នេះជាផ្កាមូលមួយប្រភេទ។"
+  }
  },
  {
   "id": "school-road-map",
@@ -26425,9 +27024,14 @@
    }
   ],
   "answer": "Road map",
-  "accepts": [],
+  "accepts": [
+   "ផែនទីផ្លូវ"
+  ],
   "explanation": "road + map = road map.",
-  "source": "official"
+  "source": "official",
+  "km": {
+   "explanation": "“road” + “map” = road map។ នេះគឺផែនទីផ្លូវ។"
+  }
  },
  {
   "id": "school-star-map",
@@ -26455,9 +27059,14 @@
    }
   ],
   "answer": "Star map",
-  "accepts": [],
+  "accepts": [
+   "ផែនទីផ្កាយ"
+  ],
   "explanation": "star + map = star map.",
-  "source": "official"
+  "source": "official",
+  "km": {
+   "explanation": "“star” + “map” = star map។ នេះគឺផែនទីផ្កាយ។"
+  }
  },
  {
   "id": "school-map-pin",
@@ -26487,7 +27096,10 @@
   "answer": "Map pin",
   "accepts": [],
   "explanation": "map + pin = map pin.",
-  "source": "official"
+  "source": "official",
+  "km": {
+   "explanation": "“map” + “pin” = map pin។ នេះជាម្ជុលសម្គាល់នៅលើផែនទី។"
+  }
  },
  {
   "id": "school-wind-map",
@@ -26515,9 +27127,14 @@
    }
   ],
   "answer": "Wind map",
-  "accepts": [],
+  "accepts": [
+   "ផែនទីខ្យល់"
+  ],
   "explanation": "wind + map = wind map.",
-  "source": "official"
+  "source": "official",
+  "km": {
+   "explanation": "“wind” + “map” = wind map។ នេះគឺផែនទីខ្យល់។"
+  }
  },
  {
   "id": "school-school-map",
@@ -26545,9 +27162,14 @@
    }
   ],
   "answer": "School map",
-  "accepts": [],
+  "accepts": [
+   "ផែនទីសាលា"
+  ],
   "explanation": "school + map = school map.",
-  "source": "official"
+  "source": "official",
+  "km": {
+   "explanation": "“school” + “map” = school map។ នេះគឺផែនទីសាលា។"
+  }
  },
  {
   "id": "science-magnet-pole",
