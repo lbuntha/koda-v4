@@ -34364,6 +34364,1191 @@
   "source": "official"
  },
  {
+  "id": "kmplay-head-cow",
+  "category": "animals",
+  "ages": [
+   6,
+   10
+  ],
+  "difficulty": 1,
+  "trick": "compound",
+  "pieces": [
+   {
+    "kind": "icon",
+    "id": "rebus-head",
+    "name": "ក្បាល"
+   },
+   {
+    "kind": "op",
+    "op": "+"
+   },
+   {
+    "kind": "icon",
+    "id": "rebus-cow",
+    "name": "គោ"
+   }
+  ],
+  "answer": "ក្បាលគោ",
+  "accepts": [],
+  "explanation": "ក្បាល + គោ = ក្បាលគោ។",
+  "onlyIn": "km",
+  "source": "official"
+ },
+ {
+  "id": "kmplay-head-horse",
+  "category": "animals",
+  "ages": [
+   6,
+   10
+  ],
+  "difficulty": 1,
+  "trick": "compound",
+  "pieces": [
+   {
+    "kind": "icon",
+    "id": "rebus-head",
+    "name": "ក្បាល"
+   },
+   {
+    "kind": "op",
+    "op": "+"
+   },
+   {
+    "kind": "icon",
+    "id": "rebus-horse",
+    "name": "សេះ"
+   }
+  ],
+  "answer": "ក្បាលសេះ",
+  "accepts": [],
+  "explanation": "ក្បាល + សេះ = ក្បាលសេះ។",
+  "onlyIn": "km",
+  "source": "official"
+ },
+ {
+  "id": "kmplay-head-elephant",
+  "category": "animals",
+  "ages": [
+   6,
+   10
+  ],
+  "difficulty": 1,
+  "trick": "compound",
+  "pieces": [
+   {
+    "kind": "icon",
+    "id": "rebus-head",
+    "name": "ក្បាល"
+   },
+   {
+    "kind": "op",
+    "op": "+"
+   },
+   {
+    "kind": "icon",
+    "id": "rebus-elephant",
+    "name": "ដំរី"
+   }
+  ],
+  "answer": "ក្បាលដំរី",
+  "accepts": [],
+  "explanation": "ក្បាល + ដំរី = ក្បាលដំរី។",
+  "onlyIn": "km",
+  "source": "official"
+ },
+ {
+  "id": "kmplay-foot-duck",
+  "category": "animals",
+  "ages": [
+   6,
+   10
+  ],
+  "difficulty": 1,
+  "trick": "compound",
+  "pieces": [
+   {
+    "kind": "icon",
+    "id": "rebus-foot",
+    "name": "ជើង"
+   },
+   {
+    "kind": "op",
+    "op": "+"
+   },
+   {
+    "kind": "icon",
+    "id": "rebus-duck",
+    "name": "ទា"
+   }
+  ],
+  "answer": "ជើងទា",
+  "accepts": [],
+  "explanation": "ជើង + ទា = ជើងទា។",
+  "onlyIn": "km",
+  "source": "official"
+ },
+ {
+  "id": "kmplay-foot-cow",
+  "category": "animals",
+  "ages": [
+   6,
+   10
+  ],
+  "difficulty": 1,
+  "trick": "compound",
+  "pieces": [
+   {
+    "kind": "icon",
+    "id": "rebus-foot",
+    "name": "ជើង"
+   },
+   {
+    "kind": "op",
+    "op": "+"
+   },
+   {
+    "kind": "icon",
+    "id": "rebus-cow",
+    "name": "គោ"
+   }
+  ],
+  "answer": "ជើងគោ",
+  "accepts": [],
+  "explanation": "ជើង + គោ = ជើងគោ។",
+  "onlyIn": "km",
+  "source": "official"
+ },
+ {
+  "id": "kmplay-eye-cat",
+  "category": "animals",
+  "ages": [
+   6,
+   10
+  ],
+  "difficulty": 1,
+  "trick": "compound",
+  "pieces": [
+   {
+    "kind": "icon",
+    "id": "rebus-eye",
+    "name": "ភ្នែក"
+   },
+   {
+    "kind": "op",
+    "op": "+"
+   },
+   {
+    "kind": "icon",
+    "id": "rebus-cat",
+    "name": "ឆ្មា"
+   }
+  ],
+  "answer": "ភ្នែកឆ្មា",
+  "accepts": [],
+  "explanation": "ភ្នែក + ឆ្មា = ភ្នែកឆ្មា។",
+  "onlyIn": "km",
+  "source": "official"
+ },
+ {
+  "id": "kmplay-skin-snake",
+  "category": "animals",
+  "ages": [
+   7,
+   12
+  ],
+  "difficulty": 2,
+  "trick": "compound",
+  "pieces": [
+   {
+    "kind": "word",
+    "text": "ស្បែក"
+   },
+   {
+    "kind": "op",
+    "op": "+"
+   },
+   {
+    "kind": "icon",
+    "id": "rebus-snake",
+    "name": "ពស់"
+   }
+  ],
+  "answer": "ស្បែកពស់",
+  "accepts": [],
+  "explanation": "ស្បែក + ពស់ = ស្បែកពស់។",
+  "onlyIn": "km",
+  "source": "official"
+ },
+ {
+  "id": "kmplay-skin-cow",
+  "category": "animals",
+  "ages": [
+   7,
+   12
+  ],
+  "difficulty": 2,
+  "trick": "compound",
+  "pieces": [
+   {
+    "kind": "word",
+    "text": "ស្បែក"
+   },
+   {
+    "kind": "op",
+    "op": "+"
+   },
+   {
+    "kind": "icon",
+    "id": "rebus-cow",
+    "name": "គោ"
+   }
+  ],
+  "answer": "ស្បែកគោ",
+  "accepts": [],
+  "explanation": "ស្បែក + គោ = ស្បែកគោ។",
+  "onlyIn": "km",
+  "source": "official"
+ },
+ {
+  "id": "kmplay-skin-tiger",
+  "category": "animals",
+  "ages": [
+   7,
+   12
+  ],
+  "difficulty": 2,
+  "trick": "compound",
+  "pieces": [
+   {
+    "kind": "word",
+    "text": "ស្បែក"
+   },
+   {
+    "kind": "op",
+    "op": "+"
+   },
+   {
+    "kind": "icon",
+    "id": "rebus-tiger",
+    "name": "ខ្លា"
+   }
+  ],
+  "answer": "ស្បែកខ្លា",
+  "accepts": [],
+  "explanation": "ស្បែក + ខ្លា = ស្បែកខ្លា។",
+  "onlyIn": "km",
+  "source": "official"
+ },
+ {
+  "id": "kmplay-young-parrot",
+  "category": "animals",
+  "ages": [
+   5,
+   9
+  ],
+  "difficulty": 1,
+  "trick": "compound",
+  "pieces": [
+   {
+    "kind": "word",
+    "text": "កូន"
+   },
+   {
+    "kind": "op",
+    "op": "+"
+   },
+   {
+    "kind": "icon",
+    "id": "rebus-parrot",
+    "name": "សេក"
+   }
+  ],
+  "answer": "កូនសេក",
+  "accepts": [],
+  "explanation": "កូន + សេក = កូនសេក។ កូនសត្វតូចៗ។",
+  "onlyIn": "km",
+  "source": "official"
+ },
+ {
+  "id": "kmplay-young-crow",
+  "category": "animals",
+  "ages": [
+   5,
+   9
+  ],
+  "difficulty": 1,
+  "trick": "compound",
+  "pieces": [
+   {
+    "kind": "word",
+    "text": "កូន"
+   },
+   {
+    "kind": "op",
+    "op": "+"
+   },
+   {
+    "kind": "icon",
+    "id": "rebus-crow",
+    "name": "ក្អែក"
+   }
+  ],
+  "answer": "កូនក្អែក",
+  "accepts": [],
+  "explanation": "កូន + ក្អែក = កូនក្អែក។ កូនសត្វតូចៗ។",
+  "onlyIn": "km",
+  "source": "official"
+ },
+ {
+  "id": "kmplay-young-eagle",
+  "category": "animals",
+  "ages": [
+   5,
+   9
+  ],
+  "difficulty": 1,
+  "trick": "compound",
+  "pieces": [
+   {
+    "kind": "word",
+    "text": "កូន"
+   },
+   {
+    "kind": "op",
+    "op": "+"
+   },
+   {
+    "kind": "icon",
+    "id": "rebus-eagle",
+    "name": "ឥន្ទ្រី"
+   }
+  ],
+  "answer": "កូនឥន្ទ្រី",
+  "accepts": [],
+  "explanation": "កូន + ឥន្ទ្រី = កូនឥន្ទ្រី។ កូនសត្វតូចៗ។",
+  "onlyIn": "km",
+  "source": "official"
+ },
+ {
+  "id": "kmplay-young-owl",
+  "category": "animals",
+  "ages": [
+   5,
+   9
+  ],
+  "difficulty": 1,
+  "trick": "compound",
+  "pieces": [
+   {
+    "kind": "word",
+    "text": "កូន"
+   },
+   {
+    "kind": "op",
+    "op": "+"
+   },
+   {
+    "kind": "icon",
+    "id": "rebus-owl",
+    "name": "ទីទុយ"
+   }
+  ],
+  "answer": "កូនទីទុយ",
+  "accepts": [],
+  "explanation": "កូន + ទីទុយ = កូនទីទុយ។ កូនសត្វតូចៗ។",
+  "onlyIn": "km",
+  "source": "official"
+ },
+ {
+  "id": "kmplay-sugar-water",
+  "category": "food",
+  "ages": [
+   6,
+   10
+  ],
+  "difficulty": 1,
+  "trick": "compound",
+  "pieces": [
+   {
+    "kind": "icon",
+    "id": "rebus-water",
+    "name": "ទឹក"
+   },
+   {
+    "kind": "op",
+    "op": "+"
+   },
+   {
+    "kind": "icon",
+    "id": "rebus-sugar",
+    "name": "ស្ករ"
+   }
+  ],
+  "answer": "ទឹកស្ករ",
+  "accepts": [],
+  "explanation": "ទឹក + ស្ករ = ទឹកស្ករ។",
+  "onlyIn": "km",
+  "source": "official"
+ },
+ {
+  "id": "kmplay-soup-water",
+  "category": "food",
+  "ages": [
+   7,
+   12
+  ],
+  "difficulty": 2,
+  "trick": "compound",
+  "pieces": [
+   {
+    "kind": "icon",
+    "id": "rebus-water",
+    "name": "ទឹក"
+   },
+   {
+    "kind": "op",
+    "op": "+"
+   },
+   {
+    "kind": "icon",
+    "id": "rebus-soup",
+    "name": "ស៊ុប"
+   }
+  ],
+  "answer": "ទឹកស៊ុប",
+  "accepts": [],
+  "explanation": "ទឹក + ស៊ុប = ទឹកស៊ុប។",
+  "onlyIn": "km",
+  "source": "official"
+ },
+ {
+  "id": "kmplay-meat-crab",
+  "category": "food",
+  "ages": [
+   6,
+   10
+  ],
+  "difficulty": 1,
+  "trick": "compound",
+  "pieces": [
+   {
+    "kind": "word",
+    "text": "សាច់"
+   },
+   {
+    "kind": "op",
+    "op": "+"
+   },
+   {
+    "kind": "icon",
+    "id": "rebus-crab",
+    "name": "ក្តាម"
+   }
+  ],
+  "answer": "សាច់ក្តាម",
+  "accepts": [],
+  "explanation": "សាច់ + ក្តាម = សាច់ក្តាម។",
+  "onlyIn": "km",
+  "source": "official"
+ },
+ {
+  "id": "kmplay-meat-rabbit",
+  "category": "food",
+  "ages": [
+   6,
+   10
+  ],
+  "difficulty": 1,
+  "trick": "compound",
+  "pieces": [
+   {
+    "kind": "word",
+    "text": "សាច់"
+   },
+   {
+    "kind": "op",
+    "op": "+"
+   },
+   {
+    "kind": "icon",
+    "id": "rebus-rabbit",
+    "name": "ទន្សាយ"
+   }
+  ],
+  "answer": "សាច់ទន្សាយ",
+  "accepts": [],
+  "explanation": "សាច់ + ទន្សាយ = សាច់ទន្សាយ។",
+  "onlyIn": "km",
+  "source": "official"
+ },
+ {
+  "id": "kmplay-meat-goose",
+  "category": "food",
+  "ages": [
+   6,
+   10
+  ],
+  "difficulty": 1,
+  "trick": "compound",
+  "pieces": [
+   {
+    "kind": "word",
+    "text": "សាច់"
+   },
+   {
+    "kind": "op",
+    "op": "+"
+   },
+   {
+    "kind": "icon",
+    "id": "rebus-goose",
+    "name": "ក្ងាន"
+   }
+  ],
+  "answer": "សាច់ក្ងាន",
+  "accepts": [],
+  "explanation": "សាច់ + ក្ងាន = សាច់ក្ងាន។",
+  "onlyIn": "km",
+  "source": "official"
+ },
+ {
+  "id": "kmplay-soup-cow",
+  "category": "food",
+  "ages": [
+   6,
+   10
+  ],
+  "difficulty": 1,
+  "trick": "compound",
+  "pieces": [
+   {
+    "kind": "icon",
+    "id": "rebus-soup",
+    "name": "ស៊ុប"
+   },
+   {
+    "kind": "op",
+    "op": "+"
+   },
+   {
+    "kind": "icon",
+    "id": "rebus-cow",
+    "name": "គោ"
+   }
+  ],
+  "answer": "ស៊ុបគោ",
+  "accepts": [],
+  "explanation": "ស៊ុប + គោ = ស៊ុបគោ។",
+  "onlyIn": "km",
+  "source": "official"
+ },
+ {
+  "id": "kmplay-national-flag",
+  "category": "sports",
+  "ages": [
+   7,
+   12
+  ],
+  "difficulty": 2,
+  "trick": "compound",
+  "pieces": [
+   {
+    "kind": "icon",
+    "id": "rebus-flag",
+    "name": "ទង់"
+   },
+   {
+    "kind": "op",
+    "op": "+"
+   },
+   {
+    "kind": "word",
+    "text": "ជាតិ"
+   }
+  ],
+  "answer": "ទង់ជាតិ",
+  "accepts": [],
+  "explanation": "ទង់ + ជាតិ = ទង់ជាតិ។",
+  "onlyIn": "km",
+  "source": "official"
+ },
+ {
+  "id": "kmplay-read-book",
+  "category": "school",
+  "ages": [
+   6,
+   10
+  ],
+  "difficulty": 1,
+  "trick": "compound",
+  "pieces": [
+   {
+    "kind": "word",
+    "text": "អាន"
+   },
+   {
+    "kind": "op",
+    "op": "+"
+   },
+   {
+    "kind": "icon",
+    "id": "rebus-book",
+    "name": "សៀវភៅ"
+   }
+  ],
+  "answer": "អានសៀវភៅ",
+  "accepts": [],
+  "explanation": "អាន + សៀវភៅ = អានសៀវភៅ។",
+  "onlyIn": "km",
+  "source": "official"
+ },
+ {
+  "id": "kmplay-draw-map",
+  "category": "school",
+  "ages": [
+   7,
+   12
+  ],
+  "difficulty": 2,
+  "trick": "compound",
+  "pieces": [
+   {
+    "kind": "word",
+    "text": "គូរ"
+   },
+   {
+    "kind": "op",
+    "op": "+"
+   },
+   {
+    "kind": "icon",
+    "id": "rebus-map",
+    "name": "ផែនទី"
+   }
+  ],
+  "answer": "គូរផែនទី",
+  "accepts": [],
+  "explanation": "គូរ + ផែនទី = គូរផែនទី។",
+  "onlyIn": "km",
+  "source": "official"
+ },
+ {
+  "id": "kmplay-cut-paper",
+  "category": "school",
+  "ages": [
+   6,
+   10
+  ],
+  "difficulty": 1,
+  "trick": "compound",
+  "pieces": [
+   {
+    "kind": "word",
+    "text": "កាត់"
+   },
+   {
+    "kind": "op",
+    "op": "+"
+   },
+   {
+    "kind": "icon",
+    "id": "rebus-paper",
+    "name": "ក្រដាស"
+   }
+  ],
+  "answer": "កាត់ក្រដាស",
+  "accepts": [],
+  "explanation": "កាត់ + ក្រដាស = កាត់ក្រដាស។",
+  "onlyIn": "km",
+  "source": "official"
+ },
+ {
+  "id": "kmplay-colour-chalk",
+  "category": "school",
+  "ages": [
+   6,
+   10
+  ],
+  "difficulty": 1,
+  "trick": "compound",
+  "pieces": [
+   {
+    "kind": "icon",
+    "id": "rebus-chalk",
+    "name": "ដីស"
+   },
+   {
+    "kind": "op",
+    "op": "+"
+   },
+   {
+    "kind": "word",
+    "text": "ពណ៌"
+   }
+  ],
+  "answer": "ដីសពណ៌",
+  "accepts": [],
+  "explanation": "ដីស + ពណ៌ = ដីសពណ៌។",
+  "onlyIn": "km",
+  "source": "official"
+ },
+ {
+  "id": "kmplay-colour-pencil",
+  "category": "school",
+  "ages": [
+   6,
+   10
+  ],
+  "difficulty": 1,
+  "trick": "compound",
+  "pieces": [
+   {
+    "kind": "icon",
+    "id": "rebus-pencil",
+    "name": "ខ្មៅដៃ"
+   },
+   {
+    "kind": "op",
+    "op": "+"
+   },
+   {
+    "kind": "word",
+    "text": "ពណ៌"
+   }
+  ],
+  "answer": "ខ្មៅដៃពណ៌",
+  "accepts": [],
+  "explanation": "ខ្មៅដៃ + ពណ៌ = ខ្មៅដៃពណ៌។",
+  "onlyIn": "km",
+  "source": "official"
+ },
+ {
+  "id": "kmplay-write-book",
+  "category": "school",
+  "ages": [
+   6,
+   10
+  ],
+  "difficulty": 1,
+  "trick": "compound",
+  "pieces": [
+   {
+    "kind": "word",
+    "text": "សរសេរ"
+   },
+   {
+    "kind": "op",
+    "op": "+"
+   },
+   {
+    "kind": "icon",
+    "id": "rebus-book",
+    "name": "សៀវភៅ"
+   }
+  ],
+  "answer": "សរសេរសៀវភៅ",
+  "accepts": [],
+  "explanation": "សរសេរ + សៀវភៅ = សរសេរសៀវភៅ។",
+  "onlyIn": "km",
+  "source": "official"
+ },
+ {
+  "id": "kmplay-tree-banana",
+  "category": "science",
+  "ages": [
+   6,
+   10
+  ],
+  "difficulty": 1,
+  "trick": "compound",
+  "pieces": [
+   {
+    "kind": "word",
+    "text": "ដើម"
+   },
+   {
+    "kind": "op",
+    "op": "+"
+   },
+   {
+    "kind": "icon",
+    "id": "rebus-banana",
+    "name": "ចេក"
+   }
+  ],
+  "answer": "ដើមចេក",
+  "accepts": [],
+  "explanation": "ដើម + ចេក = ដើមចេក។",
+  "onlyIn": "km",
+  "source": "official"
+ },
+ {
+  "id": "kmplay-tree-orange",
+  "category": "science",
+  "ages": [
+   6,
+   10
+  ],
+  "difficulty": 1,
+  "trick": "compound",
+  "pieces": [
+   {
+    "kind": "word",
+    "text": "ដើម"
+   },
+   {
+    "kind": "op",
+    "op": "+"
+   },
+   {
+    "kind": "icon",
+    "id": "rebus-orange",
+    "name": "ក្រូច"
+   }
+  ],
+  "answer": "ដើមក្រូច",
+  "accepts": [],
+  "explanation": "ដើម + ក្រូច = ដើមក្រូច។",
+  "onlyIn": "km",
+  "source": "official"
+ },
+ {
+  "id": "kmplay-tree-apple",
+  "category": "science",
+  "ages": [
+   6,
+   10
+  ],
+  "difficulty": 1,
+  "trick": "compound",
+  "pieces": [
+   {
+    "kind": "word",
+    "text": "ដើម"
+   },
+   {
+    "kind": "op",
+    "op": "+"
+   },
+   {
+    "kind": "icon",
+    "id": "rebus-apple",
+    "name": "ប៉ោម"
+   }
+  ],
+  "answer": "ដើមប៉ោម",
+  "accepts": [],
+  "explanation": "ដើម + ប៉ោម = ដើមប៉ោម។",
+  "onlyIn": "km",
+  "source": "official"
+ },
+ {
+  "id": "kmplay-leaf-banana",
+  "category": "science",
+  "ages": [
+   6,
+   10
+  ],
+  "difficulty": 1,
+  "trick": "compound",
+  "pieces": [
+   {
+    "kind": "word",
+    "text": "ស្លឹក"
+   },
+   {
+    "kind": "op",
+    "op": "+"
+   },
+   {
+    "kind": "icon",
+    "id": "rebus-banana",
+    "name": "ចេក"
+   }
+  ],
+  "answer": "ស្លឹកចេក",
+  "accepts": [],
+  "explanation": "ស្លឹក + ចេក = ស្លឹកចេក។",
+  "onlyIn": "km",
+  "source": "official"
+ },
+ {
+  "id": "kmplay-bean-seed",
+  "category": "science",
+  "ages": [
+   6,
+   10
+  ],
+  "difficulty": 1,
+  "trick": "compound",
+  "pieces": [
+   {
+    "kind": "word",
+    "text": "គ្រាប់"
+   },
+   {
+    "kind": "op",
+    "op": "+"
+   },
+   {
+    "kind": "icon",
+    "id": "rebus-bean",
+    "name": "សណ្តែក"
+   }
+  ],
+  "answer": "គ្រាប់សណ្តែក",
+  "accepts": [],
+  "explanation": "គ្រាប់ + សណ្តែក = គ្រាប់សណ្តែក។",
+  "onlyIn": "km",
+  "source": "official"
+ },
+ {
+  "id": "kmplay-rainstorm",
+  "category": "science",
+  "ages": [
+   7,
+   12
+  ],
+  "difficulty": 2,
+  "trick": "compound",
+  "pieces": [
+   {
+    "kind": "icon",
+    "id": "rebus-storm",
+    "name": "ព្យុះ"
+   },
+   {
+    "kind": "op",
+    "op": "+"
+   },
+   {
+    "kind": "icon",
+    "id": "rebus-rain",
+    "name": "ភ្លៀង"
+   }
+  ],
+  "answer": "ព្យុះភ្លៀង",
+  "accepts": [],
+  "explanation": "ព្យុះ + ភ្លៀង = ព្យុះភ្លៀង។",
+  "onlyIn": "km",
+  "source": "official"
+ },
+ {
+  "id": "kmplay-snowstorm",
+  "category": "science",
+  "ages": [
+   8,
+   13
+  ],
+  "difficulty": 2,
+  "trick": "compound",
+  "pieces": [
+   {
+    "kind": "icon",
+    "id": "rebus-storm",
+    "name": "ព្យុះ"
+   },
+   {
+    "kind": "op",
+    "op": "+"
+   },
+   {
+    "kind": "icon",
+    "id": "rebus-snow",
+    "name": "ព្រិល"
+   }
+  ],
+  "answer": "ព្យុះព្រិល",
+  "accepts": [],
+  "explanation": "ព្យុះ + ព្រិល = ព្យុះព្រិល។",
+  "onlyIn": "km",
+  "source": "official"
+ },
+ {
+  "id": "kmplay-sandstorm",
+  "category": "science",
+  "ages": [
+   8,
+   13
+  ],
+  "difficulty": 2,
+  "trick": "compound",
+  "pieces": [
+   {
+    "kind": "icon",
+    "id": "rebus-storm",
+    "name": "ព្យុះ"
+   },
+   {
+    "kind": "op",
+    "op": "+"
+   },
+   {
+    "kind": "icon",
+    "id": "rebus-sand",
+    "name": "ខ្សាច់"
+   }
+  ],
+  "answer": "ព្យុះខ្សាច់",
+  "accepts": [],
+  "explanation": "ព្យុះ + ខ្សាច់ = ព្យុះខ្សាច់។",
+  "onlyIn": "km",
+  "source": "official"
+ },
+ {
+  "id": "kmplay-stone-piece",
+  "category": "science",
+  "ages": [
+   6,
+   10
+  ],
+  "difficulty": 1,
+  "trick": "compound",
+  "pieces": [
+   {
+    "kind": "word",
+    "text": "ដុំ"
+   },
+   {
+    "kind": "op",
+    "op": "+"
+   },
+   {
+    "kind": "icon",
+    "id": "rebus-stone",
+    "name": "ថ្ម"
+   }
+  ],
+  "answer": "ដុំថ្ម",
+  "accepts": [],
+  "explanation": "ដុំ + ថ្ម = ដុំថ្ម។",
+  "onlyIn": "km",
+  "source": "official"
+ },
+ {
+  "id": "kmplay-ice-cube",
+  "category": "science",
+  "ages": [
+   6,
+   10
+  ],
+  "difficulty": 1,
+  "trick": "compound",
+  "pieces": [
+   {
+    "kind": "word",
+    "text": "ដុំ"
+   },
+   {
+    "kind": "op",
+    "op": "+"
+   },
+   {
+    "kind": "icon",
+    "id": "rebus-ice",
+    "name": "ទឹកកក"
+   }
+  ],
+  "answer": "ដុំទឹកកក",
+  "accepts": [],
+  "explanation": "ដុំ + ទឹកកក = ដុំទឹកកក។",
+  "onlyIn": "km",
+  "source": "official"
+ },
+ {
+  "id": "kmplay-mountain-foot",
+  "category": "science",
+  "ages": [
+   8,
+   13
+  ],
+  "difficulty": 2,
+  "trick": "compound",
+  "pieces": [
+   {
+    "kind": "icon",
+    "id": "rebus-foot",
+    "name": "ជើង"
+   },
+   {
+    "kind": "op",
+    "op": "+"
+   },
+   {
+    "kind": "icon",
+    "id": "rebus-mountain",
+    "name": "ភ្នំ"
+   }
+  ],
+  "answer": "ជើងភ្នំ",
+  "accepts": [],
+  "explanation": "ជើង + ភ្នំ = ជើងភ្នំ។ ផ្នែកខាងក្រោមបំផុតនៃភ្នំ។",
+  "onlyIn": "km",
+  "source": "official"
+ },
+ {
+  "id": "kmplay-river-mouth",
+  "category": "science",
+  "ages": [
+   8,
+   13
+  ],
+  "difficulty": 2,
+  "trick": "compound",
+  "pieces": [
+   {
+    "kind": "icon",
+    "id": "rebus-mouth",
+    "name": "មាត់"
+   },
+   {
+    "kind": "op",
+    "op": "+"
+   },
+   {
+    "kind": "icon",
+    "id": "rebus-river",
+    "name": "ទន្លេ"
+   }
+  ],
+  "answer": "មាត់ទន្លេ",
+  "accepts": [],
+  "explanation": "មាត់ + ទន្លេ = មាត់ទន្លេ។ កន្លែងដែលទន្លេហូរចូលសមុទ្រ។",
+  "onlyIn": "km",
+  "source": "official"
+ },
+ {
+  "id": "kmplay-seashore",
+  "category": "science",
+  "ages": [
+   8,
+   13
+  ],
+  "difficulty": 2,
+  "trick": "compound",
+  "pieces": [
+   {
+    "kind": "icon",
+    "id": "rebus-mouth",
+    "name": "មាត់"
+   },
+   {
+    "kind": "op",
+    "op": "+"
+   },
+   {
+    "kind": "icon",
+    "id": "rebus-sea",
+    "name": "សមុទ្រ"
+   }
+  ],
+  "answer": "មាត់សមុទ្រ",
+  "accepts": [],
+  "explanation": "មាត់ + សមុទ្រ = មាត់សមុទ្រ។",
+  "onlyIn": "km",
+  "source": "official"
+ },
+ {
   "id": "math-3-plus-4-result",
   "category": "math",
   "ages": [
