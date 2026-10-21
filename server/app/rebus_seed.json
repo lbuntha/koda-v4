@@ -4278,9 +4278,14 @@
    }
   ],
   "answer": "Rainbow",
-  "accepts": [],
+  "accepts": [
+   "ឥន្ទធនូ"
+  ],
   "explanation": "rain + bow = rainbow.",
-  "source": "official"
+  "source": "official",
+  "km": {
+   "explanation": "“rain” + “bow” = rainbow។ នេះគឺឥន្ទធនូ។"
+  }
  },
  {
   "id": "science-sunflower",
@@ -4308,9 +4313,14 @@
    }
   ],
   "answer": "Sunflower",
-  "accepts": [],
+  "accepts": [
+   "ផ្កាអាទិត្យ"
+  ],
   "explanation": "sun + flower = sunflower.",
-  "source": "official"
+  "source": "official",
+  "km": {
+   "explanation": "“sun” + “flower” = sunflower។ នេះគឺផ្កាអាទិត្យ។"
+  }
  },
  {
   "id": "science-sunlight",
@@ -4340,7 +4350,10 @@
   "answer": "Sunlight",
   "accepts": [],
   "explanation": "sun + light = sunlight.",
-  "source": "official"
+  "source": "official",
+  "km": {
+   "explanation": "“sun” + “light” = sunlight។ នេះគឺពន្លឺថ្ងៃ។"
+  }
  },
  {
   "id": "science-moonlight",
@@ -4370,7 +4383,10 @@
   "answer": "Moonlight",
   "accepts": [],
   "explanation": "moon + light = moonlight.",
-  "source": "official"
+  "source": "official",
+  "km": {
+   "explanation": "“moon” + “light” = moonlight។ នេះគឺពន្លឺខែ។"
+  }
  },
  {
   "id": "science-starlight",
@@ -4400,7 +4416,10 @@
   "answer": "Starlight",
   "accepts": [],
   "explanation": "star + light = starlight.",
-  "source": "official"
+  "source": "official",
+  "km": {
+   "explanation": "“star” + “light” = starlight។ នេះគឺពន្លឺផ្កាយ។"
+  }
  },
  {
   "id": "science-raindrop",
@@ -4428,9 +4447,14 @@
    }
   ],
   "answer": "Raindrop",
-  "accepts": [],
+  "accepts": [
+   "ដំណក់ទឹកភ្លៀង"
+  ],
   "explanation": "rain + drop = raindrop.",
-  "source": "official"
+  "source": "official",
+  "km": {
+   "explanation": "“rain” + “drop” = raindrop។ នេះគឺដំណក់ទឹកភ្លៀង។"
+  }
  },
  {
   "id": "science-snowman",
@@ -4458,9 +4482,14 @@
    }
   ],
   "answer": "Snowman",
-  "accepts": [],
+  "accepts": [
+   "មនុស្សព្រិល"
+  ],
   "explanation": "snow + man = snowman.",
-  "source": "official"
+  "source": "official",
+  "km": {
+   "explanation": "“snow” + “man” = snowman។ នេះគឺមនុស្សព្រិល។"
+  }
  },
  {
   "id": "science-ice-cube",
@@ -4492,7 +4521,10 @@
    "icecube"
   ],
   "explanation": "ice + cube = ice cube.",
-  "source": "official"
+  "source": "official",
+  "km": {
+   "explanation": "“ice” + “cube” = ice cube។ នេះគឺដុំទឹកកក។"
+  }
  },
  {
   "id": "science-eggshell",
@@ -4520,9 +4552,14 @@
    }
   ],
   "answer": "Eggshell",
-  "accepts": [],
+  "accepts": [
+   "សំបកពង"
+  ],
   "explanation": "egg + shell = eggshell.",
-  "source": "official"
+  "source": "official",
+  "km": {
+   "explanation": "“egg” + “shell” = eggshell។ នេះគឺសំបកពង។"
+  }
  },
  {
   "id": "science-seashell",
@@ -4550,9 +4587,14 @@
    }
   ],
   "answer": "Seashell",
-  "accepts": [],
+  "accepts": [
+   "សំបកខ្យង"
+  ],
   "explanation": "sea + shell = seashell.",
-  "source": "official"
+  "source": "official",
+  "km": {
+   "explanation": "“sea” + “shell” = seashell។ នេះគឺសំបកខ្យង។"
+  }
  },
  {
   "id": "science-seaweed",
@@ -4580,9 +4622,14 @@
    }
   ],
   "answer": "Seaweed",
-  "accepts": [],
+  "accepts": [
+   "សារាយសមុទ្រ"
+  ],
   "explanation": "sea + weed = seaweed.",
-  "source": "official"
+  "source": "official",
+  "km": {
+   "explanation": "“sea” + “weed” = seaweed។ នេះគឺសារាយសមុទ្រ។"
+  }
  },
  {
   "id": "science-firewood",
@@ -4610,9 +4657,14 @@
    }
   ],
   "answer": "Firewood",
-  "accepts": [],
+  "accepts": [
+   "អុស"
+  ],
   "explanation": "fire + wood = firewood.",
-  "source": "official"
+  "source": "official",
+  "km": {
+   "explanation": "“fire” + “wood” = firewood។ នេះគឺអុស។"
+  }
  },
  {
   "id": "science-flower-pot",
@@ -4644,7 +4696,10 @@
    "flowerpot"
   ],
   "explanation": "flower + pot = flower pot.",
-  "source": "official"
+  "source": "official",
+  "km": {
+   "explanation": "“flower” + “pot” = flower pot។ នេះជាថូសម្រាប់ដាំផ្កា។"
+  }
  },
  {
   "id": "science-lighthouse",
@@ -4674,7 +4729,10 @@
   "answer": "Lighthouse",
   "accepts": [],
   "explanation": "light + house = lighthouse.",
-  "source": "official"
+  "source": "official",
+  "km": {
+   "explanation": "“light” + “house” = lighthouse។ នេះជាប៉មដែលមានភ្លើងបំភ្លឺសម្រាប់ទូកក្នុងសមុទ្រ។"
+  }
  },
  {
   "id": "science-earthquake",
@@ -4702,9 +4760,14 @@
    }
   ],
   "answer": "Earthquake",
-  "accepts": [],
+  "accepts": [
+   "រញ្ជួយដី"
+  ],
   "explanation": "earth + quake = earthquake.",
-  "source": "official"
+  "source": "official",
+  "km": {
+   "explanation": "“earth” + “quake” = earthquake។ នេះគឺរញ្ជួយដី។"
+  }
  },
  {
   "id": "science-spaceship",
@@ -4732,9 +4795,14 @@
    }
   ],
   "answer": "Spaceship",
-  "accepts": [],
+  "accepts": [
+   "យានអវកាស"
+  ],
   "explanation": "space + ship = spaceship.",
-  "source": "official"
+  "source": "official",
+  "km": {
+   "explanation": "“space” + “ship” = spaceship។ នេះគឺយានអវកាស។"
+  }
  },
  {
   "id": "science-airplane",
@@ -4763,10 +4831,14 @@
   ],
   "answer": "Airplane",
   "accepts": [
-   "aeroplane"
+   "aeroplane",
+   "យន្តហោះ"
   ],
   "explanation": "air + plane = airplane.",
-  "source": "official"
+  "source": "official",
+  "km": {
+   "explanation": "“air” + “plane” = airplane។ នេះគឺយន្តហោះ។"
+  }
  },
  {
   "id": "science-sunrise",
@@ -4794,9 +4866,14 @@
    }
   ],
   "answer": "Sunrise",
-  "accepts": [],
+  "accepts": [
+   "ថ្ងៃរះ"
+  ],
   "explanation": "sun + rise = sunrise.",
-  "source": "official"
+  "source": "official",
+  "km": {
+   "explanation": "“sun” + “rise” = sunrise។ នេះគឺថ្ងៃរះ។"
+  }
  },
  {
   "id": "science-hailstone",
@@ -4826,7 +4903,10 @@
   "answer": "Hailstone",
   "accepts": [],
   "explanation": "hail + stone = hailstone.",
-  "source": "official"
+  "source": "official",
+  "km": {
+   "explanation": "“hail” + “stone” = hailstone។ នេះជាគ្រាប់ទឹកកកដែលធ្លាក់ពីមេឃ។"
+  }
  },
  {
   "id": "science-snowstorm",
@@ -4856,7 +4936,10 @@
   "answer": "Snowstorm",
   "accepts": [],
   "explanation": "snow + storm = snowstorm.",
-  "source": "official"
+  "source": "official",
+  "km": {
+   "explanation": "“snow” + “storm” = snowstorm។ នេះគឺព្យុះព្រិល។"
+  }
  },
  {
   "id": "science-rainstorm",
@@ -4886,7 +4969,10 @@
   "answer": "Rainstorm",
   "accepts": [],
   "explanation": "rain + storm = rainstorm.",
-  "source": "official"
+  "source": "official",
+  "km": {
+   "explanation": "“rain” + “storm” = rainstorm។ នេះគឺព្យុះភ្លៀង។"
+  }
  },
  {
   "id": "science-sunburn",
@@ -4914,9 +5000,14 @@
    }
   ],
   "answer": "Sunburn",
-  "accepts": [],
+  "accepts": [
+   "រលាកថ្ងៃ"
+  ],
   "explanation": "sun + burn = sunburn.",
-  "source": "official"
+  "source": "official",
+  "km": {
+   "explanation": "“sun” + “burn” = sunburn។ នេះគឺរលាកថ្ងៃ។"
+  }
  },
  {
   "id": "science-rainwater",
@@ -5050,7 +5141,10 @@
   "answer": "Starship",
   "accepts": [],
   "explanation": "star + ship = starship.",
-  "source": "official"
+  "source": "official",
+  "km": {
+   "explanation": "“star” + “ship” = starship។ នេះជាយានអវកាសធំដែលធ្វើដំណើរទៅឆ្ងាយ។"
+  }
  },
  {
   "id": "science-rainforest",
@@ -5078,9 +5172,14 @@
    }
   ],
   "answer": "Rainforest",
-  "accepts": [],
+  "accepts": [
+   "ព្រៃត្រូពិច"
+  ],
   "explanation": "rain + forest = rainforest.",
-  "source": "official"
+  "source": "official",
+  "km": {
+   "explanation": "“rain” + “forest” = rainforest។ នេះគឺព្រៃត្រូពិច។"
+  }
  },
  {
   "id": "science-greenhouse",
@@ -5108,9 +5207,14 @@
    }
   ],
   "answer": "Greenhouse",
-  "accepts": [],
+  "accepts": [
+   "ផ្ទះកញ្ចក់"
+  ],
   "explanation": "green + house = greenhouse.",
-  "source": "official"
+  "source": "official",
+  "km": {
+   "explanation": "“green” + “house” = greenhouse។ នេះគឺផ្ទះកញ្ចក់។"
+  }
  },
  {
   "id": "science-black-hole",
@@ -5138,9 +5242,14 @@
    }
   ],
   "answer": "Black hole",
-  "accepts": [],
+  "accepts": [
+   "រន្ធខ្មៅ"
+  ],
   "explanation": "black + hole = black hole.",
-  "source": "official"
+  "source": "official",
+  "km": {
+   "explanation": "“black” + “hole” = black hole។ នេះគឺរន្ធខ្មៅ។"
+  }
  },
  {
   "id": "science-space-time",
@@ -5169,10 +5278,14 @@
   ],
   "answer": "Space time",
   "accepts": [
-   "spacetime"
+   "spacetime",
+   "លំហនិងពេលវេលា"
   ],
   "explanation": "space + time = space time.",
-  "source": "official"
+  "source": "official",
+  "km": {
+   "explanation": "“space” + “time” = space time។ នេះគឺលំហនិងពេលវេលា។"
+  }
  },
  {
   "id": "science-hot-air",
@@ -5200,9 +5313,14 @@
    }
   ],
   "answer": "Hot air",
-  "accepts": [],
+  "accepts": [
+   "ខ្យល់ក្តៅ"
+  ],
   "explanation": "hot + air = hot air.",
-  "source": "official"
+  "source": "official",
+  "km": {
+   "explanation": "“hot” + “air” = hot air។ នេះគឺខ្យល់ក្តៅ។"
+  }
  },
  {
   "id": "science-thundercloud",
@@ -5230,9 +5348,14 @@
    }
   ],
   "answer": "Thundercloud",
-  "accepts": [],
+  "accepts": [
+   "ពពកផ្គរ"
+  ],
   "explanation": "thunder + cloud = thundercloud.",
-  "source": "official"
+  "source": "official",
+  "km": {
+   "explanation": "“thunder” + “cloud” = thundercloud។ នេះគឺពពកផ្គរ។"
+  }
  },
  {
   "id": "science-thunderstorm",
@@ -5260,9 +5383,14 @@
    }
   ],
   "answer": "Thunderstorm",
-  "accepts": [],
+  "accepts": [
+   "ព្យុះផ្គរ"
+  ],
   "explanation": "thunder + storm = thunderstorm.",
-  "source": "official"
+  "source": "official",
+  "km": {
+   "explanation": "“thunder” + “storm” = thunderstorm។ នេះគឺព្យុះផ្គរ។"
+  }
  },
  {
   "id": "sports-football",
@@ -9432,7 +9560,10 @@
   "answer": "Moonstone",
   "accepts": [],
   "explanation": "moon + stone = moonstone.",
-  "source": "official"
+  "source": "official",
+  "km": {
+   "explanation": "“moon” + “stone” = moonstone។ នេះជាត្បូងមួយប្រភេទ។"
+  }
  },
  {
   "id": "science-snowdrop",
@@ -9462,7 +9593,10 @@
   "answer": "Snowdrop",
   "accepts": [],
   "explanation": "snow + drop = snowdrop.",
-  "source": "official"
+  "source": "official",
+  "km": {
+   "explanation": "“snow” + “drop” = snowdrop។ នេះជាផ្កាពណ៌សដែលរីកក្នុងរដូវរងា។"
+  }
  },
  {
   "id": "science-sandstone",
@@ -9490,9 +9624,14 @@
    }
   ],
   "answer": "Sandstone",
-  "accepts": [],
+  "accepts": [
+   "ថ្មភក់"
+  ],
   "explanation": "sand + stone = sandstone.",
-  "source": "official"
+  "source": "official",
+  "km": {
+   "explanation": "“sand” + “stone” = sandstone។ នេះគឺថ្មភក់។"
+  }
  },
  {
   "id": "science-sandstorm",
@@ -9522,7 +9661,10 @@
   "answer": "Sandstorm",
   "accepts": [],
   "explanation": "sand + storm = sandstorm.",
-  "source": "official"
+  "source": "official",
+  "km": {
+   "explanation": "“sand” + “storm” = sandstorm។ នេះគឺព្យុះខ្សាច់។"
+  }
  },
  {
   "id": "science-fireman",
@@ -9550,9 +9692,14 @@
    }
   ],
   "answer": "Fireman",
-  "accepts": [],
+  "accepts": [
+   "អ្នកពន្លត់អគ្គិភ័យ"
+  ],
   "explanation": "fire + man = fireman.",
-  "source": "official"
+  "source": "official",
+  "km": {
+   "explanation": "“fire” + “man” = fireman។ នេះគឺអ្នកពន្លត់អគ្គិភ័យ។"
+  }
  },
  {
   "id": "science-icebox",
@@ -9580,9 +9727,14 @@
    }
   ],
   "answer": "Icebox",
-  "accepts": [],
+  "accepts": [
+   "ទូទឹកកក"
+  ],
   "explanation": "ice + box = icebox.",
-  "source": "official"
+  "source": "official",
+  "km": {
+   "explanation": "“ice” + “box” = icebox។ នេះគឺទូទឹកកក។"
+  }
  },
  {
   "id": "science-pine-tree",
@@ -9610,9 +9762,14 @@
    }
   ],
   "answer": "Pine tree",
-  "accepts": [],
+  "accepts": [
+   "ដើមស្រល់"
+  ],
   "explanation": "pine + tree = pine tree.",
-  "source": "official"
+  "source": "official",
+  "km": {
+   "explanation": "“pine” + “tree” = pine tree។ នេះគឺដើមស្រល់។"
+  }
  },
  {
   "id": "science-tree-house",
@@ -9640,9 +9797,14 @@
    }
   ],
   "answer": "Tree house",
-  "accepts": [],
+  "accepts": [
+   "ផ្ទះលើដើមឈើ"
+  ],
   "explanation": "tree + house = tree house.",
-  "source": "official"
+  "source": "official",
+  "km": {
+   "explanation": "“tree” + “house” = tree house។ នេះគឺផ្ទះលើដើមឈើ។"
+  }
  },
  {
   "id": "science-woodland",
@@ -9670,9 +9832,14 @@
    }
   ],
   "answer": "Woodland",
-  "accepts": [],
+  "accepts": [
+   "ព្រៃឈើ"
+  ],
   "explanation": "wood + land = woodland.",
-  "source": "official"
+  "source": "official",
+  "km": {
+   "explanation": "“wood” + “land” = woodland។ នេះគឺព្រៃឈើ។"
+  }
  },
  {
   "id": "science-spaceman",
@@ -9700,9 +9867,14 @@
    }
   ],
   "answer": "Spaceman",
-  "accepts": [],
+  "accepts": [
+   "អវកាសយានិក"
+  ],
   "explanation": "space + man = spaceman.",
-  "source": "official"
+  "source": "official",
+  "km": {
+   "explanation": "“space” + “man” = spaceman។ នេះគឺអវកាសយានិក។"
+  }
  },
  {
   "id": "science-plant-pot",
@@ -9732,7 +9904,10 @@
   "answer": "Plant pot",
   "accepts": [],
   "explanation": "plant + pot = plant pot.",
-  "source": "official"
+  "source": "official",
+  "km": {
+   "explanation": "“plant” + “pot” = plant pot។ នេះជាថូសម្រាប់ដាំដើមឈើ។"
+  }
  },
  {
   "id": "science-raincloud",
@@ -9760,9 +9935,14 @@
    }
   ],
   "answer": "Raincloud",
-  "accepts": [],
+  "accepts": [
+   "ពពកភ្លៀង"
+  ],
   "explanation": "rain + cloud = raincloud.",
-  "source": "official"
+  "source": "official",
+  "km": {
+   "explanation": "“rain” + “cloud” = raincloud។ នេះគឺពពកភ្លៀង។"
+  }
  },
  {
   "id": "science-windstorm",
@@ -9790,9 +9970,14 @@
    }
   ],
   "answer": "Windstorm",
-  "accepts": [],
+  "accepts": [
+   "ព្យុះខ្យល់"
+  ],
   "explanation": "wind + storm = windstorm.",
-  "source": "official"
+  "source": "official",
+  "km": {
+   "explanation": "“wind” + “storm” = windstorm។ នេះគឺព្យុះខ្យល់។"
+  }
  },
  {
   "id": "science-pothole",
@@ -9820,9 +10005,14 @@
    }
   ],
   "answer": "Pothole",
-  "accepts": [],
+  "accepts": [
+   "ប្រហោងលើផ្លូវ"
+  ],
   "explanation": "pot + hole = pothole.",
-  "source": "official"
+  "source": "official",
+  "km": {
+   "explanation": "“pot” + “hole” = pothole។ នេះគឺប្រហោងលើផ្លូវ។"
+  }
  },
  {
   "id": "science-keyhole",
@@ -9850,9 +10040,14 @@
    }
   ],
   "answer": "Keyhole",
-  "accepts": [],
+  "accepts": [
+   "រន្ធសោ"
+  ],
   "explanation": "key + hole = keyhole.",
-  "source": "official"
+  "source": "official",
+  "km": {
+   "explanation": "“key” + “hole” = keyhole។ នេះគឺរន្ធសោ។"
+  }
  },
  {
   "id": "science-moonrise",
@@ -9880,9 +10075,14 @@
    }
   ],
   "answer": "Moonrise",
-  "accepts": [],
+  "accepts": [
+   "ព្រះច័ន្ទរះ"
+  ],
   "explanation": "moon + rise = moonrise.",
-  "source": "official"
+  "source": "official",
+  "km": {
+   "explanation": "“moon” + “rise” = moonrise។ នេះគឺព្រះច័ន្ទរះ។"
+  }
  },
  {
   "id": "science-snowflake",
@@ -9909,9 +10109,14 @@
    }
   ],
   "answer": "Snowflake",
-  "accepts": [],
+  "accepts": [
+   "ផ្កាព្រិល"
+  ],
   "explanation": "snow + flake = snowflake.",
-  "source": "official"
+  "source": "official",
+  "km": {
+   "explanation": "“snow” + “flake” = snowflake។ នេះគឺផ្កាព្រិល។"
+  }
  },
  {
   "id": "science-sun-and-moon",
@@ -9939,9 +10144,14 @@
    }
   ],
   "answer": "Sun and moon",
-  "accepts": [],
+  "accepts": [
+   "ថ្ងៃនិងខែ"
+  ],
   "explanation": "sun + moon = sun and moon.",
-  "source": "official"
+  "source": "official",
+  "km": {
+   "explanation": "“sun” + “moon” = sun and moon។ នេះគឺថ្ងៃនិងខែ។"
+  }
  },
  {
   "id": "science-rain-and-snow",
@@ -9969,9 +10179,14 @@
    }
   ],
   "answer": "Rain and snow",
-  "accepts": [],
+  "accepts": [
+   "ភ្លៀងនិងព្រិល"
+  ],
   "explanation": "rain + snow = rain and snow.",
-  "source": "official"
+  "source": "official",
+  "km": {
+   "explanation": "“rain” + “snow” = rain and snow។ នេះគឺភ្លៀងនិងព្រិល។"
+  }
  },
  {
   "id": "science-fire-and-ice",
@@ -9999,9 +10214,14 @@
    }
   ],
   "answer": "Fire and ice",
-  "accepts": [],
+  "accepts": [
+   "ភ្លើងនិងទឹកកក"
+  ],
   "explanation": "fire + ice = fire and ice.",
-  "source": "official"
+  "source": "official",
+  "km": {
+   "explanation": "“fire” + “ice” = fire and ice។ នេះគឺភ្លើងនិងទឹកកក។"
+  }
  },
  {
   "id": "science-sea-and-sky",
@@ -10028,9 +10248,14 @@
    }
   ],
   "answer": "Sea and sky",
-  "accepts": [],
+  "accepts": [
+   "សមុទ្រនិងមេឃ"
+  ],
   "explanation": "sea + sky = sea and sky.",
-  "source": "official"
+  "source": "official",
+  "km": {
+   "explanation": "“sea” + “sky” = sea and sky។ នេះគឺសមុទ្រនិងមេឃ។"
+  }
  },
  {
   "id": "science-water-and-sand",
@@ -10058,9 +10283,14 @@
    }
   ],
   "answer": "Water and sand",
-  "accepts": [],
+  "accepts": [
+   "ទឹកនិងខ្សាច់"
+  ],
   "explanation": "water + sand = water and sand.",
-  "source": "official"
+  "source": "official",
+  "km": {
+   "explanation": "“water” + “sand” = water and sand។ នេះគឺទឹកនិងខ្សាច់។"
+  }
  },
  {
   "id": "science-wind-and-rain",
@@ -10088,9 +10318,14 @@
    }
   ],
   "answer": "Wind and rain",
-  "accepts": [],
+  "accepts": [
+   "ខ្យល់និងភ្លៀង"
+  ],
   "explanation": "wind + rain = wind and rain.",
-  "source": "official"
+  "source": "official",
+  "km": {
+   "explanation": "“wind” + “rain” = wind and rain។ នេះគឺខ្យល់និងភ្លៀង។"
+  }
  },
  {
   "id": "science-sun-and-rain",
@@ -10118,9 +10353,14 @@
    }
   ],
   "answer": "Sun and rain",
-  "accepts": [],
+  "accepts": [
+   "ថ្ងៃនិងភ្លៀង"
+  ],
   "explanation": "sun + rain = sun and rain.",
-  "source": "official"
+  "source": "official",
+  "km": {
+   "explanation": "“sun” + “rain” = sun and rain។ នេះគឺថ្ងៃនិងភ្លៀង។"
+  }
  },
  {
   "id": "science-star-and-moon",
@@ -10148,9 +10388,14 @@
    }
   ],
   "answer": "Star and moon",
-  "accepts": [],
+  "accepts": [
+   "ផ្កាយនិងខែ"
+  ],
   "explanation": "star + moon = star and moon.",
-  "source": "official"
+  "source": "official",
+  "km": {
+   "explanation": "“star” + “moon” = star and moon។ នេះគឺផ្កាយនិងខែ។"
+  }
  },
  {
   "id": "science-tree-and-flower",
@@ -10178,9 +10423,14 @@
    }
   ],
   "answer": "Tree and flower",
-  "accepts": [],
+  "accepts": [
+   "ដើមឈើនិងផ្កា"
+  ],
   "explanation": "tree + flower = tree and flower.",
-  "source": "official"
+  "source": "official",
+  "km": {
+   "explanation": "“tree” + “flower” = tree and flower។ នេះគឺដើមឈើនិងផ្កា។"
+  }
  },
  {
   "id": "science-leaf-and-flower",
@@ -10208,9 +10458,14 @@
    }
   ],
   "answer": "Leaf and flower",
-  "accepts": [],
+  "accepts": [
+   "ស្លឹកនិងផ្កា"
+  ],
   "explanation": "leaf + flower = leaf and flower.",
-  "source": "official"
+  "source": "official",
+  "km": {
+   "explanation": "“leaf” + “flower” = leaf and flower។ នេះគឺស្លឹកនិងផ្កា។"
+  }
  },
  {
   "id": "science-fire-and-water",
@@ -10238,9 +10493,14 @@
    }
   ],
   "answer": "Fire and water",
-  "accepts": [],
+  "accepts": [
+   "ភ្លើងនិងទឹក"
+  ],
   "explanation": "fire + water = fire and water.",
-  "source": "official"
+  "source": "official",
+  "km": {
+   "explanation": "“fire” + “water” = fire and water។ នេះគឺភ្លើងនិងទឹក។"
+  }
  },
  {
   "id": "science-earth-and-sea",
@@ -10268,9 +10528,14 @@
    }
   ],
   "answer": "Earth and sea",
-  "accepts": [],
+  "accepts": [
+   "ផែនដីនិងសមុទ្រ"
+  ],
   "explanation": "earth + sea = earth and sea.",
-  "source": "official"
+  "source": "official",
+  "km": {
+   "explanation": "“earth” + “sea” = earth and sea។ នេះគឺផែនដីនិងសមុទ្រ។"
+  }
  },
  {
   "id": "sayings-crossbow",
@@ -27198,10 +27463,14 @@
   ],
   "answer": "Magnet pole",
   "accepts": [
-   "magnetic pole"
+   "magnetic pole",
+   "ប៉ូលមេដែក"
   ],
   "explanation": "magnet + pole = magnet pole.",
-  "source": "official"
+  "source": "official",
+  "km": {
+   "explanation": "“magnet” + “pole” = magnet pole។ នេះគឺប៉ូលមេដែក។"
+  }
  },
  {
   "id": "science-magnet-school",
@@ -27231,7 +27500,10 @@
   "answer": "Magnet school",
   "accepts": [],
   "explanation": "magnet + school = magnet school.",
-  "source": "official"
+  "source": "official",
+  "km": {
+   "explanation": "“magnet” + “school” = magnet school។ នេះជាសាលាពិសេសមួយប្រភេទ។"
+  }
  },
  {
   "id": "science-magnet-board",
@@ -27260,10 +27532,14 @@
   ],
   "answer": "Magnet board",
   "accepts": [
-   "magnetic board"
+   "magnetic board",
+   "ក្តារមេដែក"
   ],
   "explanation": "magnet + board = magnet board.",
-  "source": "official"
+  "source": "official",
+  "km": {
+   "explanation": "“magnet” + “board” = magnet board។ នេះគឺក្តារមេដែក។"
+  }
  },
  {
   "id": "science-horseshoe-magnet",
@@ -27302,7 +27578,10 @@
   "answer": "Horseshoe magnet",
   "accepts": [],
   "explanation": "horse + shoe + magnet = horseshoe magnet.",
-  "source": "official"
+  "source": "official",
+  "km": {
+   "explanation": "“horse” + “shoe” + “magnet” = horseshoe magnet។ នេះជាមេដែកមានរាងដូចដែកជើងសេះ។"
+  }
  },
  {
   "id": "science-magnet-fish",
@@ -27334,7 +27613,10 @@
    "magnet fishing"
   ],
   "explanation": "magnet + fish = magnet fish.",
-  "source": "official"
+  "source": "official",
+  "km": {
+   "explanation": "“magnet” + “fish” = magnet fish។ នេះជាការស្ទូចរកលោហៈក្នុងទឹកដោយប្រើមេដែក។"
+  }
  },
  {
   "id": "science-eye-lens",
@@ -27364,7 +27646,10 @@
   "answer": "Eye lens",
   "accepts": [],
   "explanation": "eye + lens = eye lens.",
-  "source": "official"
+  "source": "official",
+  "km": {
+   "explanation": "“eye” + “lens” = eye lens។ នេះជាផ្នែកថ្លានៃភ្នែក។"
+  }
  },
  {
   "id": "science-lens-cap",
@@ -27392,9 +27677,14 @@
    }
   ],
   "answer": "Lens cap",
-  "accepts": [],
+  "accepts": [
+   "គម្របកែវថត"
+  ],
   "explanation": "lens + cap = lens cap.",
-  "source": "official"
+  "source": "official",
+  "km": {
+   "explanation": "“lens” + “cap” = lens cap។ នេះគឺគម្របកែវថត។"
+  }
  },
  {
   "id": "science-lens-case",
@@ -27424,7 +27714,10 @@
   "answer": "Lens case",
   "accepts": [],
   "explanation": "lens + case = lens case.",
-  "source": "official"
+  "source": "official",
+  "km": {
+   "explanation": "“lens” + “case” = lens case។ នេះជាប្រអប់សម្រាប់ដាក់កែវ។"
+  }
  },
  {
   "id": "science-hand-lens",
@@ -27452,9 +27745,14 @@
    }
   ],
   "answer": "Hand lens",
-  "accepts": [],
+  "accepts": [
+   "កែវពង្រីក"
+  ],
   "explanation": "hand + lens = hand lens.",
-  "source": "official"
+  "source": "official",
+  "km": {
+   "explanation": "“hand” + “lens” = hand lens។ នេះគឺកែវពង្រីក។"
+  }
  },
  {
   "id": "science-planet-earth",
@@ -27482,9 +27780,14 @@
    }
   ],
   "answer": "Planet Earth",
-  "accepts": [],
+  "accepts": [
+   "ភពផែនដី"
+  ],
   "explanation": "planet + earth = planet earth.",
-  "source": "official"
+  "source": "official",
+  "km": {
+   "explanation": "“planet” + “earth” = planet earth។ នេះគឺភពផែនដី។"
+  }
  },
  {
   "id": "science-planet-ring",
@@ -27514,7 +27817,10 @@
   "answer": "Planet ring",
   "accepts": [],
   "explanation": "planet + ring = planet ring.",
-  "source": "official"
+  "source": "official",
+  "km": {
+   "explanation": "“planet” + “ring” = planet ring។ នេះជារង្វង់ជុំវិញភព។"
+  }
  },
  {
   "id": "science-planet-and-moon",
@@ -27542,9 +27848,14 @@
    }
   ],
   "answer": "Planet and moon",
-  "accepts": [],
+  "accepts": [
+   "ភពនិងព្រះច័ន្ទ"
+  ],
   "explanation": "planet + moon = planet and moon.",
-  "source": "official"
+  "source": "official",
+  "km": {
+   "explanation": "“planet” + “moon” = planet and moon។ នេះគឺភពនិងព្រះច័ន្ទ។"
+  }
  },
  {
   "id": "science-blue-planet",
@@ -27572,9 +27883,14 @@
    }
   ],
   "answer": "Blue planet",
-  "accepts": [],
+  "accepts": [
+   "ភពពណ៌ខៀវ"
+  ],
   "explanation": "blue + planet = blue planet.",
-  "source": "official"
+  "source": "official",
+  "km": {
+   "explanation": "“blue” + “planet” = blue planet។ នេះគឺភពពណ៌ខៀវ។"
+  }
  },
  {
   "id": "science-green-planet",
@@ -27602,9 +27918,14 @@
    }
   ],
   "answer": "Green planet",
-  "accepts": [],
+  "accepts": [
+   "ភពពណ៌បៃតង"
+  ],
   "explanation": "green + planet = green planet.",
-  "source": "official"
+  "source": "official",
+  "km": {
+   "explanation": "“green” + “planet” = green planet។ នេះគឺភពពណ៌បៃតង។"
+  }
  },
  {
   "id": "science-ice-planet",
@@ -27632,9 +27953,14 @@
    }
   ],
   "answer": "Ice planet",
-  "accepts": [],
+  "accepts": [
+   "ភពទឹកកក"
+  ],
   "explanation": "ice + planet = ice planet.",
-  "source": "official"
+  "source": "official",
+  "km": {
+   "explanation": "“ice” + “planet” = ice planet។ នេះគឺភពទឹកកក។"
+  }
  },
  {
   "id": "science-planet-and-star",
@@ -27662,9 +27988,14 @@
    }
   ],
   "answer": "Planet and star",
-  "accepts": [],
+  "accepts": [
+   "ភពនិងផ្កាយ"
+  ],
   "explanation": "planet + star = planet and star.",
-  "source": "official"
+  "source": "official",
+  "km": {
+   "explanation": "“planet” + “star” = planet and star។ នេះគឺភពនិងផ្កាយ។"
+  }
  },
  {
   "id": "science-car-battery",
@@ -27692,9 +28023,14 @@
    }
   ],
   "answer": "Car battery",
-  "accepts": [],
+  "accepts": [
+   "ថ្មឡាន"
+  ],
   "explanation": "car + battery = car battery.",
-  "source": "official"
+  "source": "official",
+  "km": {
+   "explanation": "“car” + “battery” = car battery។ នេះគឺថ្មឡាន។"
+  }
  },
  {
   "id": "science-battery-hen",
@@ -27724,7 +28060,10 @@
   "answer": "Battery hen",
   "accepts": [],
   "explanation": "battery + hen = battery hen.",
-  "source": "official"
+  "source": "official",
+  "km": {
+   "explanation": "“battery” + “hen” = battery hen។ នេះជាមាន់ចិញ្ចឹមក្នុងទ្រុងតូចៗ។"
+  }
  },
  {
   "id": "science-battery-and-bulb",
@@ -27752,9 +28091,14 @@
    }
   ],
   "answer": "Battery and bulb",
-  "accepts": [],
+  "accepts": [
+   "ថ្មនិងអំពូល"
+  ],
   "explanation": "battery + bulb = battery and bulb.",
-  "source": "official"
+  "source": "official",
+  "km": {
+   "explanation": "“battery” + “bulb” = battery and bulb។ នេះគឺថ្មនិងអំពូល។"
+  }
  },
  {
   "id": "science-bike-battery",
@@ -27782,9 +28126,14 @@
    }
   ],
   "answer": "Bike battery",
-  "accepts": [],
+  "accepts": [
+   "ថ្មកង់"
+  ],
   "explanation": "bike + battery = bike battery.",
-  "source": "official"
+  "source": "official",
+  "km": {
+   "explanation": "“bike” + “battery” = bike battery។ នេះគឺថ្មកង់។"
+  }
  },
  {
   "id": "science-battery-case",
@@ -27814,7 +28163,10 @@
   "answer": "Battery case",
   "accepts": [],
   "explanation": "battery + case = battery case.",
-  "source": "official"
+  "source": "official",
+  "km": {
+   "explanation": "“battery” + “case” = battery case។ នេះជាប្រអប់សម្រាប់ដាក់ថ្ម។"
+  }
  },
  {
   "id": "science-light-bulb",
@@ -27842,9 +28194,14 @@
    }
   ],
   "answer": "Light bulb",
-  "accepts": [],
+  "accepts": [
+   "អំពូលភ្លើង"
+  ],
   "explanation": "light + bulb = light bulb.",
-  "source": "official"
+  "source": "official",
+  "km": {
+   "explanation": "“light” + “bulb” = light bulb។ នេះគឺអំពូលភ្លើង។"
+  }
  },
  {
   "id": "science-flower-bulb",
@@ -27874,7 +28231,10 @@
   "answer": "Flower bulb",
   "accepts": [],
   "explanation": "flower + bulb = flower bulb.",
-  "source": "official"
+  "source": "official",
+  "km": {
+   "explanation": "“flower” + “bulb” = flower bulb។ នេះជាមើមផ្កា។"
+  }
  },
  {
   "id": "science-bulb-and-lamp",
@@ -27902,9 +28262,14 @@
    }
   ],
   "answer": "Bulb and lamp",
-  "accepts": [],
+  "accepts": [
+   "អំពូលនិងចង្កៀង"
+  ],
   "explanation": "bulb + lamp = bulb and lamp.",
-  "source": "official"
+  "source": "official",
+  "km": {
+   "explanation": "“bulb” + “lamp” = bulb and lamp។ នេះគឺអំពូលនិងចង្កៀង។"
+  }
  },
  {
   "id": "science-space-telescope",
@@ -27932,9 +28297,14 @@
    }
   ],
   "answer": "Space telescope",
-  "accepts": [],
+  "accepts": [
+   "កែវយឹតអវកាស"
+  ],
   "explanation": "space + telescope = space telescope.",
-  "source": "official"
+  "source": "official",
+  "km": {
+   "explanation": "“space” + “telescope” = space telescope។ នេះគឺកែវយឹតអវកាស។"
+  }
  },
  {
   "id": "science-ship-telescope",
@@ -27962,9 +28332,14 @@
    }
   ],
   "answer": "Ship telescope",
-  "accepts": [],
+  "accepts": [
+   "កែវយឹតកប៉ាល់"
+  ],
   "explanation": "ship + telescope = ship telescope.",
-  "source": "official"
+  "source": "official",
+  "km": {
+   "explanation": "“ship” + “telescope” = ship telescope។ នេះគឺកែវយឹតកប៉ាល់។"
+  }
  },
  {
   "id": "science-telescope-lens",
@@ -27994,7 +28369,10 @@
   "answer": "Telescope lens",
   "accepts": [],
   "explanation": "telescope + lens = telescope lens.",
-  "source": "official"
+  "source": "official",
+  "km": {
+   "explanation": "“telescope” + “lens” = telescope lens។ នេះជាកែវរបស់កែវយឹត។"
+  }
  },
  {
   "id": "science-hand-telescope",
@@ -28022,9 +28400,14 @@
    }
   ],
   "answer": "Hand telescope",
-  "accepts": [],
+  "accepts": [
+   "កែវយឹតកាន់ដៃ"
+  ],
   "explanation": "hand + telescope = hand telescope.",
-  "source": "official"
+  "source": "official",
+  "km": {
+   "explanation": "“hand” + “telescope” = hand telescope។ នេះគឺកែវយឹតកាន់ដៃ។"
+  }
  },
  {
   "id": "science-microscope-lens",
@@ -28054,7 +28437,10 @@
   "answer": "Microscope lens",
   "accepts": [],
   "explanation": "microscope + lens = microscope lens.",
-  "source": "official"
+  "source": "official",
+  "km": {
+   "explanation": "“microscope” + “lens” = microscope lens។ នេះជាកែវរបស់មីក្រូទស្សន៍។"
+  }
  },
  {
   "id": "science-light-microscope",
@@ -28084,7 +28470,10 @@
   "answer": "Light microscope",
   "accepts": [],
   "explanation": "light + microscope = light microscope.",
-  "source": "official"
+  "source": "official",
+  "km": {
+   "explanation": "“light” + “microscope” = light microscope។ នេះជាមីក្រូទស្សន៍ដែលប្រើពន្លឺ។"
+  }
  },
  {
   "id": "science-school-microscope",
@@ -28114,7 +28503,10 @@
   "answer": "School microscope",
   "accepts": [],
   "explanation": "school + microscope = school microscope.",
-  "source": "official"
+  "source": "official",
+  "km": {
+   "explanation": "“school” + “microscope” = school microscope។ នេះជាមីក្រូទស្សន៍សម្រាប់ប្រើនៅសាលា។"
+  }
  },
  {
   "id": "science-germ-microscope",
@@ -28144,7 +28536,10 @@
   "answer": "Germ microscope",
   "accepts": [],
   "explanation": "germ + microscope = germ microscope.",
-  "source": "official"
+  "source": "official",
+  "km": {
+   "explanation": "“germ” + “microscope” = germ microscope។ នេះជាមីក្រូទស្សន៍សម្រាប់មើលមេរោគ។"
+  }
  },
  {
   "id": "science-gearbox",
@@ -28172,9 +28567,14 @@
    }
   ],
   "answer": "Gearbox",
-  "accepts": [],
+  "accepts": [
+   "ប្រអប់លេខ"
+  ],
   "explanation": "gear + box = gearbox.",
-  "source": "official"
+  "source": "official",
+  "km": {
+   "explanation": "“gear” + “box” = gearbox។ នេះគឺប្រអប់លេខ។"
+  }
  },
  {
   "id": "science-bike-gear",
@@ -28204,7 +28604,10 @@
   "answer": "Bike gear",
   "accepts": [],
   "explanation": "bike + gear = bike gear.",
-  "source": "official"
+  "source": "official",
+  "km": {
+   "explanation": "“bike” + “gear” = bike gear។ នេះជាធ្មេញចងច្រវាក់របស់កង់។"
+  }
  },
  {
   "id": "science-gear-wheel",
@@ -28234,7 +28637,10 @@
   "answer": "Gear wheel",
   "accepts": [],
   "explanation": "gear + wheel = gear wheel.",
-  "source": "official"
+  "source": "official",
+  "km": {
+   "explanation": "“gear” + “wheel” = gear wheel។ នេះជាកង់មានធ្មេញ។"
+  }
  },
  {
   "id": "science-rain-gear",
@@ -28264,7 +28670,10 @@
   "answer": "Rain gear",
   "accepts": [],
   "explanation": "rain + gear = rain gear.",
-  "source": "official"
+  "source": "official",
+  "km": {
+   "explanation": "“rain” + “gear” = rain gear។ នេះជាសម្លៀកបំពាក់ការពារភ្លៀង។"
+  }
  },
  {
   "id": "science-ski-gear",
@@ -28294,7 +28703,10 @@
   "answer": "Ski gear",
   "accepts": [],
   "explanation": "ski + gear = ski gear.",
-  "source": "official"
+  "source": "official",
+  "km": {
+   "explanation": "“ski” + “gear” = ski gear។ នេះជាសម្ភារៈសម្រាប់ជិះស្គី។"
+  }
  },
  {
   "id": "science-landing-gear",
@@ -28332,7 +28744,10 @@
   "answer": "Landing gear",
   "accepts": [],
   "explanation": "land + ing + gear = landing gear.",
-  "source": "official"
+  "source": "official",
+  "km": {
+   "explanation": "“land” + “ing” + “gear” = landing gear។ នេះជាកង់របស់យន្តហោះសម្រាប់ចុះចត។"
+  }
  },
  {
   "id": "science-gear-and-chain",
@@ -28362,7 +28777,10 @@
   "answer": "Gear and chain",
   "accepts": [],
   "explanation": "gear + chain = gear and chain.",
-  "source": "official"
+  "source": "official",
+  "km": {
+   "explanation": "“gear” + “chain” = gear and chain។ នេះជាធ្មេញនិងច្រវាក់របស់កង់។"
+  }
  },
  {
   "id": "science-robot-arm",
@@ -28390,9 +28808,14 @@
    }
   ],
   "answer": "Robot arm",
-  "accepts": [],
+  "accepts": [
+   "ដៃមនុស្សយន្ត"
+  ],
   "explanation": "robot + arm = robot arm.",
-  "source": "official"
+  "source": "official",
+  "km": {
+   "explanation": "“robot” + “arm” = robot arm។ នេះគឺដៃមនុស្សយន្ត។"
+  }
  },
  {
   "id": "science-robot-dog",
@@ -28420,9 +28843,14 @@
    }
   ],
   "answer": "Robot dog",
-  "accepts": [],
+  "accepts": [
+   "ឆ្កែមនុស្សយន្ត"
+  ],
   "explanation": "robot + dog = robot dog.",
-  "source": "official"
+  "source": "official",
+  "km": {
+   "explanation": "“robot” + “dog” = robot dog។ នេះគឺឆ្កែមនុស្សយន្ត។"
+  }
  },
  {
   "id": "science-robot-cat",
@@ -28450,9 +28878,14 @@
    }
   ],
   "answer": "Robot cat",
-  "accepts": [],
+  "accepts": [
+   "ឆ្មាមនុស្សយន្ត"
+  ],
   "explanation": "robot + cat = robot cat.",
-  "source": "official"
+  "source": "official",
+  "km": {
+   "explanation": "“robot” + “cat” = robot cat។ នេះគឺឆ្មាមនុស្សយន្ត។"
+  }
  },
  {
   "id": "science-robot-fish",
@@ -28480,9 +28913,14 @@
    }
   ],
   "answer": "Robot fish",
-  "accepts": [],
+  "accepts": [
+   "ត្រីមនុស្សយន្ត"
+  ],
   "explanation": "robot + fish = robot fish.",
-  "source": "official"
+  "source": "official",
+  "km": {
+   "explanation": "“robot” + “fish” = robot fish។ នេះគឺត្រីមនុស្សយន្ត។"
+  }
  },
  {
   "id": "science-space-robot",
@@ -28510,9 +28948,14 @@
    }
   ],
   "answer": "Space robot",
-  "accepts": [],
+  "accepts": [
+   "មនុស្សយន្តអវកាស"
+  ],
   "explanation": "space + robot = space robot.",
-  "source": "official"
+  "source": "official",
+  "km": {
+   "explanation": "“space” + “robot” = space robot។ នេះគឺមនុស្សយន្តអវកាស។"
+  }
  },
  {
   "id": "science-robot-hand",
@@ -28540,9 +28983,14 @@
    }
   ],
   "answer": "Robot hand",
-  "accepts": [],
+  "accepts": [
+   "ដៃមនុស្សយន្ត"
+  ],
   "explanation": "robot + hand = robot hand.",
-  "source": "official"
+  "source": "official",
+  "km": {
+   "explanation": "“robot” + “hand” = robot hand។ នេះគឺដៃមនុស្សយន្ត។"
+  }
  },
  {
   "id": "science-robot-head",
@@ -28570,9 +29018,14 @@
    }
   ],
   "answer": "Robot head",
-  "accepts": [],
+  "accepts": [
+   "ក្បាលមនុស្សយន្ត"
+  ],
   "explanation": "robot + head = robot head.",
-  "source": "official"
+  "source": "official",
+  "km": {
+   "explanation": "“robot” + “head” = robot head។ នេះគឺក្បាលមនុស្សយន្ត។"
+  }
  },
  {
   "id": "science-sea-volcano",
@@ -28600,9 +29053,14 @@
    }
   ],
   "answer": "Sea volcano",
-  "accepts": [],
+  "accepts": [
+   "ភ្នំភ្លើងក្នុងសមុទ្រ"
+  ],
   "explanation": "sea + volcano = sea volcano.",
-  "source": "official"
+  "source": "official",
+  "km": {
+   "explanation": "“sea” + “volcano” = sea volcano។ នេះគឺភ្នំភ្លើងក្នុងសមុទ្រ។"
+  }
  },
  {
   "id": "science-volcano-island",
@@ -28630,9 +29088,14 @@
    }
   ],
   "answer": "Volcano island",
-  "accepts": [],
+  "accepts": [
+   "កោះភ្នំភ្លើង"
+  ],
   "explanation": "volcano + island = volcano island.",
-  "source": "official"
+  "source": "official",
+  "km": {
+   "explanation": "“volcano” + “island” = volcano island។ នេះគឺកោះភ្នំភ្លើង។"
+  }
  },
  {
   "id": "science-volcano-lake",
@@ -28660,9 +29123,14 @@
    }
   ],
   "answer": "Volcano lake",
-  "accepts": [],
+  "accepts": [
+   "បឹងភ្នំភ្លើង"
+  ],
   "explanation": "volcano + lake = volcano lake.",
-  "source": "official"
+  "source": "official",
+  "km": {
+   "explanation": "“volcano” + “lake” = volcano lake។ នេះគឺបឹងភ្នំភ្លើង។"
+  }
  },
  {
   "id": "science-sleeping-volcano",
@@ -28700,7 +29168,10 @@
   "answer": "Sleeping volcano",
   "accepts": [],
   "explanation": "sleep + ing + volcano = sleeping volcano.",
-  "source": "official"
+  "source": "official",
+  "km": {
+   "explanation": "“sleep” + “ing” + “volcano” = sleeping volcano។ នេះជាភ្នំភ្លើងដែលមិនទាន់ផ្ទុះ។"
+  }
  },
  {
   "id": "science-mountain-bike",
@@ -28728,9 +29199,14 @@
    }
   ],
   "answer": "Mountain bike",
-  "accepts": [],
+  "accepts": [
+   "កង់ភ្នំ"
+  ],
   "explanation": "mountain + bike = mountain bike.",
-  "source": "official"
+  "source": "official",
+  "km": {
+   "explanation": "“mountain” + “bike” = mountain bike។ នេះគឺកង់ភ្នំ។"
+  }
  },
  {
   "id": "science-mountain-goat",
@@ -28758,9 +29234,14 @@
    }
   ],
   "answer": "Mountain goat",
-  "accepts": [],
+  "accepts": [
+   "ពពែភ្នំ"
+  ],
   "explanation": "mountain + goat = mountain goat.",
-  "source": "official"
+  "source": "official",
+  "km": {
+   "explanation": "“mountain” + “goat” = mountain goat។ នេះគឺពពែភ្នំ។"
+  }
  },
  {
   "id": "science-mountain-lion",
@@ -28788,9 +29269,14 @@
    }
   ],
   "answer": "Mountain lion",
-  "accepts": [],
+  "accepts": [
+   "តោភ្នំ"
+  ],
   "explanation": "mountain + lion = mountain lion.",
-  "source": "official"
+  "source": "official",
+  "km": {
+   "explanation": "“mountain” + “lion” = mountain lion។ នេះគឺតោភ្នំ។"
+  }
  },
  {
   "id": "science-snow-mountain",
@@ -28818,9 +29304,14 @@
    }
   ],
   "answer": "Snow mountain",
-  "accepts": [],
+  "accepts": [
+   "ភ្នំព្រិល"
+  ],
   "explanation": "snow + mountain = snow mountain.",
-  "source": "official"
+  "source": "official",
+  "km": {
+   "explanation": "“snow” + “mountain” = snow mountain។ នេះគឺភ្នំព្រិល។"
+  }
  },
  {
   "id": "science-ice-mountain",
@@ -28848,9 +29339,14 @@
    }
   ],
   "answer": "Ice mountain",
-  "accepts": [],
+  "accepts": [
+   "ភ្នំទឹកកក"
+  ],
   "explanation": "ice + mountain = ice mountain.",
-  "source": "official"
+  "source": "official",
+  "km": {
+   "explanation": "“ice” + “mountain” = ice mountain។ នេះគឺភ្នំទឹកកក។"
+  }
  },
  {
   "id": "science-mountain-road",
@@ -28878,9 +29374,14 @@
    }
   ],
   "answer": "Mountain road",
-  "accepts": [],
+  "accepts": [
+   "ផ្លូវភ្នំ"
+  ],
   "explanation": "mountain + road = mountain road.",
-  "source": "official"
+  "source": "official",
+  "km": {
+   "explanation": "“mountain” + “road” = mountain road។ នេះគឺផ្លូវភ្នំ។"
+  }
  },
  {
   "id": "science-mountain-water",
@@ -28908,9 +29409,14 @@
    }
   ],
   "answer": "Mountain water",
-  "accepts": [],
+  "accepts": [
+   "ទឹកភ្នំ"
+  ],
   "explanation": "mountain + water = mountain water.",
-  "source": "official"
+  "source": "official",
+  "km": {
+   "explanation": "“mountain” + “water” = mountain water។ នេះគឺទឹកភ្នំ។"
+  }
  },
  {
   "id": "science-mountain-sheep",
@@ -28938,9 +29444,14 @@
    }
   ],
   "answer": "Mountain sheep",
-  "accepts": [],
+  "accepts": [
+   "ចៀមភ្នំ"
+  ],
   "explanation": "mountain + sheep = mountain sheep.",
-  "source": "official"
+  "source": "official",
+  "km": {
+   "explanation": "“mountain” + “sheep” = mountain sheep។ នេះគឺចៀមភ្នំ។"
+  }
  },
  {
   "id": "science-mountain-lake",
@@ -28968,9 +29479,14 @@
    }
   ],
   "answer": "Mountain lake",
-  "accepts": [],
+  "accepts": [
+   "បឹងលើភ្នំ"
+  ],
   "explanation": "mountain + lake = mountain lake.",
-  "source": "official"
+  "source": "official",
+  "km": {
+   "explanation": "“mountain” + “lake” = mountain lake។ នេះគឺបឹងលើភ្នំ។"
+  }
  },
  {
   "id": "science-riverbed",
@@ -28998,9 +29514,14 @@
    }
   ],
   "answer": "Riverbed",
-  "accepts": [],
+  "accepts": [
+   "បាតទន្លេ"
+  ],
   "explanation": "river + bed = riverbed.",
-  "source": "official"
+  "source": "official",
+  "km": {
+   "explanation": "“river” + “bed” = riverbed។ នេះគឺបាតទន្លេ។"
+  }
  },
  {
   "id": "science-riverboat",
@@ -29028,9 +29549,14 @@
    }
   ],
   "answer": "Riverboat",
-  "accepts": [],
+  "accepts": [
+   "ទូកទន្លេ"
+  ],
   "explanation": "river + boat = riverboat.",
-  "source": "official"
+  "source": "official",
+  "km": {
+   "explanation": "“river” + “boat” = riverboat។ នេះគឺទូកទន្លេ។"
+  }
  },
  {
   "id": "science-river-horse",
@@ -29060,7 +29586,10 @@
   "answer": "River horse",
   "accepts": [],
   "explanation": "river + horse = river horse.",
-  "source": "official"
+  "source": "official",
+  "km": {
+   "explanation": "“river” + “horse” = river horse។ នេះជាឈ្មោះមួយទៀតរបស់សត្វហ៊ីបប៉ូ។"
+  }
  },
  {
   "id": "science-river-stone",
@@ -29088,9 +29617,14 @@
    }
   ],
   "answer": "River stone",
-  "accepts": [],
+  "accepts": [
+   "ថ្មទន្លេ"
+  ],
   "explanation": "river + stone = river stone.",
-  "source": "official"
+  "source": "official",
+  "km": {
+   "explanation": "“river” + “stone” = river stone។ នេះគឺថ្មទន្លេ។"
+  }
  },
  {
   "id": "science-river-fish",
@@ -29120,7 +29654,10 @@
   "answer": "River fish",
   "accepts": [],
   "explanation": "river + fish = river fish.",
-  "source": "official"
+  "source": "official",
+  "km": {
+   "explanation": "“river” + “fish” = river fish។ នេះគឺត្រីទន្លេ។"
+  }
  },
  {
   "id": "science-river-sand",
@@ -29148,9 +29685,14 @@
    }
   ],
   "answer": "River sand",
-  "accepts": [],
+  "accepts": [
+   "ខ្សាច់ទន្លេ"
+  ],
   "explanation": "river + sand = river sand.",
-  "source": "official"
+  "source": "official",
+  "km": {
+   "explanation": "“river” + “sand” = river sand។ នេះគឺខ្សាច់ទន្លេ។"
+  }
  },
  {
   "id": "science-river-bridge",
@@ -29178,9 +29720,14 @@
    }
   ],
   "answer": "River bridge",
-  "accepts": [],
+  "accepts": [
+   "ស្ពានទន្លេ"
+  ],
   "explanation": "river + bridge = river bridge.",
-  "source": "official"
+  "source": "official",
+  "km": {
+   "explanation": "“river” + “bridge” = river bridge។ នេះគឺស្ពានទន្លេ។"
+  }
  },
  {
   "id": "science-river-water",
@@ -29210,7 +29757,10 @@
   "answer": "River water",
   "accepts": [],
   "explanation": "river + water = river water.",
-  "source": "official"
+  "source": "official",
+  "km": {
+   "explanation": "“river” + “water” = river water។ នេះគឺទឹកទន្លេ។"
+  }
  },
  {
   "id": "science-lake-house",
@@ -29240,7 +29790,10 @@
   "answer": "Lake house",
   "accepts": [],
   "explanation": "lake + house = lake house.",
-  "source": "official"
+  "source": "official",
+  "km": {
+   "explanation": "“lake” + “house” = lake house។ នេះជាផ្ទះនៅក្បែរបឹង។"
+  }
  },
  {
   "id": "science-swan-lake",
@@ -29268,9 +29821,14 @@
    }
   ],
   "answer": "Swan lake",
-  "accepts": [],
+  "accepts": [
+   "បឹងហង្ស"
+  ],
   "explanation": "swan + lake = swan lake.",
-  "source": "official"
+  "source": "official",
+  "km": {
+   "explanation": "“swan” + “lake” = swan lake។ នេះគឺបឹងហង្ស។"
+  }
  },
  {
   "id": "science-lakeland",
@@ -29300,7 +29858,10 @@
   "answer": "Lakeland",
   "accepts": [],
   "explanation": "lake + land = lakeland.",
-  "source": "official"
+  "source": "official",
+  "km": {
+   "explanation": "“lake” + “land” = lakeland។ នេះជាតំបន់ដែលមានបឹងច្រើន។"
+  }
  },
  {
   "id": "science-lake-fish",
@@ -29330,7 +29891,10 @@
   "answer": "Lake fish",
   "accepts": [],
   "explanation": "lake + fish = lake fish.",
-  "source": "official"
+  "source": "official",
+  "km": {
+   "explanation": "“lake” + “fish” = lake fish។ នេះគឺត្រីបឹង។"
+  }
  },
  {
   "id": "science-lake-water",
@@ -29360,7 +29924,10 @@
   "answer": "Lake water",
   "accepts": [],
   "explanation": "lake + water = lake water.",
-  "source": "official"
+  "source": "official",
+  "km": {
+   "explanation": "“lake” + “water” = lake water។ នេះគឺទឹកបឹង។"
+  }
  },
  {
   "id": "science-ice-lake",
@@ -29388,9 +29955,14 @@
    }
   ],
   "answer": "Ice lake",
-  "accepts": [],
+  "accepts": [
+   "បឹងទឹកកក"
+  ],
   "explanation": "ice + lake = ice lake.",
-  "source": "official"
+  "source": "official",
+  "km": {
+   "explanation": "“ice” + “lake” = ice lake។ នេះគឺបឹងទឹកកក។"
+  }
  },
  {
   "id": "science-lake-bed",
@@ -29418,9 +29990,14 @@
    }
   ],
   "answer": "Lake bed",
-  "accepts": [],
+  "accepts": [
+   "បាតបឹង"
+  ],
   "explanation": "lake + bed = lake bed.",
-  "source": "official"
+  "source": "official",
+  "km": {
+   "explanation": "“lake” + “bed” = lake bed។ នេះគឺបាតបឹង។"
+  }
  },
  {
   "id": "science-lake-boat",
@@ -29448,9 +30025,14 @@
    }
   ],
   "answer": "Lake boat",
-  "accepts": [],
+  "accepts": [
+   "ទូកបឹង"
+  ],
   "explanation": "lake + boat = lake boat.",
-  "source": "official"
+  "source": "official",
+  "km": {
+   "explanation": "“lake” + “boat” = lake boat។ នេះគឺទូកបឹង។"
+  }
  },
  {
   "id": "science-island-fox",
@@ -29480,7 +30062,10 @@
   "answer": "Island fox",
   "accepts": [],
   "explanation": "island + fox = island fox.",
-  "source": "official"
+  "source": "official",
+  "km": {
+   "explanation": "“island” + “fox” = island fox។ នេះជាសត្វដែលរស់នៅលើកោះ។"
+  }
  },
  {
   "id": "science-island-bird",
@@ -29508,9 +30093,14 @@
    }
   ],
   "answer": "Island bird",
-  "accepts": [],
+  "accepts": [
+   "បក្សីកោះ"
+  ],
   "explanation": "island + bird = island bird.",
-  "source": "official"
+  "source": "official",
+  "km": {
+   "explanation": "“island” + “bird” = island bird។ នេះគឺបក្សីកោះ។"
+  }
  },
  {
   "id": "science-ice-island",
@@ -29538,9 +30128,14 @@
    }
   ],
   "answer": "Ice island",
-  "accepts": [],
+  "accepts": [
+   "កោះទឹកកក"
+  ],
   "explanation": "ice + island = ice island.",
-  "source": "official"
+  "source": "official",
+  "km": {
+   "explanation": "“ice” + “island” = ice island។ នេះគឺកោះទឹកកក។"
+  }
  },
  {
   "id": "science-sand-island",
@@ -29568,9 +30163,14 @@
    }
   ],
   "answer": "Sand island",
-  "accepts": [],
+  "accepts": [
+   "កោះខ្សាច់"
+  ],
   "explanation": "sand + island = sand island.",
-  "source": "official"
+  "source": "official",
+  "km": {
+   "explanation": "“sand” + “island” = sand island។ នេះគឺកោះខ្សាច់។"
+  }
  },
  {
   "id": "science-island-home",
@@ -29598,9 +30198,14 @@
    }
   ],
   "answer": "Island home",
-  "accepts": [],
+  "accepts": [
+   "ផ្ទះលើកោះ"
+  ],
   "explanation": "island + home = island home.",
-  "source": "official"
+  "source": "official",
+  "km": {
+   "explanation": "“island” + “home” = island home។ នេះគឺផ្ទះលើកោះ។"
+  }
  },
  {
   "id": "science-anthill",
@@ -29630,7 +30235,10 @@
   "answer": "Anthill",
   "accepts": [],
   "explanation": "ant + hill = anthill.",
-  "source": "official"
+  "source": "official",
+  "km": {
+   "explanation": "“ant” + “hill” = anthill។ នេះជាគំនរដីរបស់ស្រមោច។"
+  }
  },
  {
   "id": "science-foothill",
@@ -29660,7 +30268,10 @@
   "answer": "Foothill",
   "accepts": [],
   "explanation": "foot + hill = foothill.",
-  "source": "official"
+  "source": "official",
+  "km": {
+   "explanation": "“foot” + “hill” = foothill។ នេះជាភ្នំតូចនៅជើងភ្នំធំ។"
+  }
  },
  {
   "id": "science-uphill",
@@ -29689,7 +30300,10 @@
   "answer": "Uphill",
   "accepts": [],
   "explanation": "up + hill = uphill.",
-  "source": "official"
+  "source": "official",
+  "km": {
+   "explanation": "“up” + “hill” = uphill។ នេះជាផ្លូវឡើងទៅលើ។"
+  }
  },
  {
   "id": "science-downhill",
@@ -29718,7 +30332,10 @@
   "answer": "Downhill",
   "accepts": [],
   "explanation": "down + hill = downhill.",
-  "source": "official"
+  "source": "official",
+  "km": {
+   "explanation": "“down” + “hill” = downhill។ នេះជាផ្លូវចុះក្រោម។"
+  }
  },
  {
   "id": "science-hill-road",
@@ -29748,7 +30365,10 @@
   "answer": "Hill road",
   "accepts": [],
   "explanation": "hill + road = hill road.",
-  "source": "official"
+  "source": "official",
+  "km": {
+   "explanation": "“hill” + “road” = hill road។ នេះជាផ្លូវលើភ្នំតូច។"
+  }
  },
  {
   "id": "science-hill-house",
@@ -29778,7 +30398,10 @@
   "answer": "Hill house",
   "accepts": [],
   "explanation": "hill + house = hill house.",
-  "source": "official"
+  "source": "official",
+  "km": {
+   "explanation": "“hill” + “house” = hill house។ នេះជាផ្ទះលើភ្នំតូច។"
+  }
  },
  {
   "id": "science-sand-hill",
@@ -29806,9 +30429,14 @@
    }
   ],
   "answer": "Sand hill",
-  "accepts": [],
+  "accepts": [
+   "ភ្នំខ្សាច់"
+  ],
   "explanation": "sand + hill = sand hill.",
-  "source": "official"
+  "source": "official",
+  "km": {
+   "explanation": "“sand” + “hill” = sand hill។ នេះគឺភ្នំខ្សាច់។"
+  }
  },
  {
   "id": "science-snow-hill",
@@ -29838,7 +30466,10 @@
   "answer": "Snow hill",
   "accepts": [],
   "explanation": "snow + hill = snow hill.",
-  "source": "official"
+  "source": "official",
+  "km": {
+   "explanation": "“snow” + “hill” = snow hill។ នេះជាភ្នំតូចដែលមានព្រិល។"
+  }
  },
  {
   "id": "science-green-hill",
@@ -29866,9 +30497,14 @@
    }
   ],
   "answer": "Green hill",
-  "accepts": [],
+  "accepts": [
+   "ភ្នំពណ៌បៃតង"
+  ],
   "explanation": "green + hill = green hill.",
-  "source": "official"
+  "source": "official",
+  "km": {
+   "explanation": "“green” + “hill” = green hill។ នេះគឺភ្នំពណ៌បៃតង។"
+  }
  },
  {
   "id": "science-hilly",
@@ -29897,7 +30533,10 @@
   "answer": "Hilly",
   "accepts": [],
   "explanation": "hill + y = hilly.",
-  "source": "official"
+  "source": "official",
+  "km": {
+   "explanation": "“hill” + “y” = hilly។ នេះជាតំបន់ដែលមានភ្នំតូចៗច្រើន។"
+  }
  },
  {
   "id": "science-caveman",
@@ -29925,9 +30564,14 @@
    }
   ],
   "answer": "Caveman",
-  "accepts": [],
+  "accepts": [
+   "មនុស្សរូងភ្នំ"
+  ],
   "explanation": "cave + man = caveman.",
-  "source": "official"
+  "source": "official",
+  "km": {
+   "explanation": "“cave” + “man” = caveman។ នេះគឺមនុស្សរូងភ្នំ។"
+  }
  },
  {
   "id": "science-cave-bear",
@@ -29955,9 +30599,14 @@
    }
   ],
   "answer": "Cave bear",
-  "accepts": [],
+  "accepts": [
+   "ខ្លាឃ្មុំរូងភ្នំ"
+  ],
   "explanation": "cave + bear = cave bear.",
-  "source": "official"
+  "source": "official",
+  "km": {
+   "explanation": "“cave” + “bear” = cave bear។ នេះគឺខ្លាឃ្មុំរូងភ្នំ។"
+  }
  },
  {
   "id": "science-ice-cave",
@@ -29985,9 +30634,14 @@
    }
   ],
   "answer": "Ice cave",
-  "accepts": [],
+  "accepts": [
+   "រូងទឹកកក"
+  ],
   "explanation": "ice + cave = ice cave.",
-  "source": "official"
+  "source": "official",
+  "km": {
+   "explanation": "“ice” + “cave” = ice cave។ នេះគឺរូងទឹកកក។"
+  }
  },
  {
   "id": "science-sea-cave",
@@ -30015,9 +30669,14 @@
    }
   ],
   "answer": "Sea cave",
-  "accepts": [],
+  "accepts": [
+   "រូងសមុទ្រ"
+  ],
   "explanation": "sea + cave = sea cave.",
-  "source": "official"
+  "source": "official",
+  "km": {
+   "explanation": "“sea” + “cave” = sea cave។ នេះគឺរូងសមុទ្រ។"
+  }
  },
  {
   "id": "science-cave-fish",
@@ -30045,9 +30704,14 @@
    }
   ],
   "answer": "Cave fish",
-  "accepts": [],
+  "accepts": [
+   "ត្រីរូងភ្នំ"
+  ],
   "explanation": "cave + fish = cave fish.",
-  "source": "official"
+  "source": "official",
+  "km": {
+   "explanation": "“cave” + “fish” = cave fish។ នេះគឺត្រីរូងភ្នំ។"
+  }
  },
  {
   "id": "science-cave-lion",
@@ -30075,9 +30739,14 @@
    }
   ],
   "answer": "Cave lion",
-  "accepts": [],
+  "accepts": [
+   "តោរូងភ្នំ"
+  ],
   "explanation": "cave + lion = cave lion.",
-  "source": "official"
+  "source": "official",
+  "km": {
+   "explanation": "“cave” + “lion” = cave lion។ នេះគឺតោរូងភ្នំ។"
+  }
  },
  {
   "id": "science-cave-spider",
@@ -30105,9 +30774,14 @@
    }
   ],
   "answer": "Cave spider",
-  "accepts": [],
+  "accepts": [
+   "ពីងពាងរូងភ្នំ"
+  ],
   "explanation": "cave + spider = cave spider.",
-  "source": "official"
+  "source": "official",
+  "km": {
+   "explanation": "“cave” + “spider” = cave spider។ នេះគឺពីងពាងរូងភ្នំ។"
+  }
  },
  {
   "id": "science-cave-in",
@@ -30136,7 +30810,10 @@
   "answer": "Cave in",
   "accepts": [],
   "explanation": "cave + in = cave in.",
-  "source": "official"
+  "source": "official",
+  "km": {
+   "explanation": "“cave” + “in” = cave in។ នេះជារូងដែលរលំចូលខាងក្នុង។"
+  }
  },
  {
   "id": "science-cave-wall",
@@ -30164,9 +30841,14 @@
    }
   ],
   "answer": "Cave wall",
-  "accepts": [],
+  "accepts": [
+   "ជញ្ជាំងរូងភ្នំ"
+  ],
   "explanation": "cave + wall = cave wall.",
-  "source": "official"
+  "source": "official",
+  "km": {
+   "explanation": "“cave” + “wall” = cave wall។ នេះគឺជញ្ជាំងរូងភ្នំ។"
+  }
  },
  {
   "id": "science-bear-cave",
@@ -30194,9 +30876,14 @@
    }
   ],
   "answer": "Bear cave",
-  "accepts": [],
+  "accepts": [
+   "រូងខ្លាឃ្មុំ"
+  ],
   "explanation": "bear + cave = bear cave.",
-  "source": "official"
+  "source": "official",
+  "km": {
+   "explanation": "“bear” + “cave” = bear cave។ នេះគឺរូងខ្លាឃ្មុំ។"
+  }
  },
  {
   "id": "science-desert-island",
@@ -30226,7 +30913,10 @@
   "answer": "Desert island",
   "accepts": [],
   "explanation": "desert + island = desert island.",
-  "source": "official"
+  "source": "official",
+  "km": {
+   "explanation": "“desert” + “island” = desert island។ នេះជាកោះដែលគ្មានមនុស្សរស់នៅ។"
+  }
  },
  {
   "id": "science-desert-fox",
@@ -30256,7 +30946,10 @@
   "answer": "Desert fox",
   "accepts": [],
   "explanation": "desert + fox = desert fox.",
-  "source": "official"
+  "source": "official",
+  "km": {
+   "explanation": "“desert” + “fox” = desert fox។ នេះជាសត្វដែលរស់នៅវាលខ្សាច់។"
+  }
  },
  {
   "id": "science-desert-storm",
@@ -30284,9 +30977,14 @@
    }
   ],
   "answer": "Desert storm",
-  "accepts": [],
+  "accepts": [
+   "ព្យុះវាលខ្សាច់"
+  ],
   "explanation": "desert + storm = desert storm.",
-  "source": "official"
+  "source": "official",
+  "km": {
+   "explanation": "“desert” + “storm” = desert storm។ នេះគឺព្យុះវាលខ្សាច់។"
+  }
  },
  {
   "id": "science-desert-plant",
@@ -30314,9 +31012,14 @@
    }
   ],
   "answer": "Desert plant",
-  "accepts": [],
+  "accepts": [
+   "រុក្ខជាតិវាលខ្សាច់"
+  ],
   "explanation": "desert + plant = desert plant.",
-  "source": "official"
+  "source": "official",
+  "km": {
+   "explanation": "“desert” + “plant” = desert plant។ នេះគឺរុក្ខជាតិវាលខ្សាច់។"
+  }
  },
  {
   "id": "science-desert-snake",
@@ -30344,9 +31047,14 @@
    }
   ],
   "answer": "Desert snake",
-  "accepts": [],
+  "accepts": [
+   "ពស់វាលខ្សាច់"
+  ],
   "explanation": "desert + snake = desert snake.",
-  "source": "official"
+  "source": "official",
+  "km": {
+   "explanation": "“desert” + “snake” = desert snake។ នេះគឺពស់វាលខ្សាច់។"
+  }
  },
  {
   "id": "science-desert-wind",
@@ -30374,9 +31082,14 @@
    }
   ],
   "answer": "Desert wind",
-  "accepts": [],
+  "accepts": [
+   "ខ្យល់វាលខ្សាច់"
+  ],
   "explanation": "desert + wind = desert wind.",
-  "source": "official"
+  "source": "official",
+  "km": {
+   "explanation": "“desert” + “wind” = desert wind។ នេះគឺខ្យល់វាលខ្សាច់។"
+  }
  },
  {
   "id": "science-forest-fire",
@@ -30404,9 +31117,14 @@
    }
   ],
   "answer": "Forest fire",
-  "accepts": [],
+  "accepts": [
+   "ភ្លើងឆេះព្រៃ"
+  ],
   "explanation": "forest + fire = forest fire.",
-  "source": "official"
+  "source": "official",
+  "km": {
+   "explanation": "“forest” + “fire” = forest fire។ នេះគឺភ្លើងឆេះព្រៃ។"
+  }
  },
  {
   "id": "science-forest-house",
@@ -30434,9 +31152,14 @@
    }
   ],
   "answer": "Forest house",
-  "accepts": [],
+  "accepts": [
+   "ផ្ទះក្នុងព្រៃ"
+  ],
   "explanation": "forest + house = forest house.",
-  "source": "official"
+  "source": "official",
+  "km": {
+   "explanation": "“forest” + “house” = forest house។ នេះគឺផ្ទះក្នុងព្រៃ។"
+  }
  },
  {
   "id": "science-forest-owl",
@@ -30464,9 +31187,14 @@
    }
   ],
   "answer": "Forest owl",
-  "accepts": [],
+  "accepts": [
+   "ទីទុយព្រៃ"
+  ],
   "explanation": "forest + owl = forest owl.",
-  "source": "official"
+  "source": "official",
+  "km": {
+   "explanation": "“forest” + “owl” = forest owl។ នេះគឺទីទុយព្រៃ។"
+  }
  },
  {
   "id": "science-pine-forest",
@@ -30494,9 +31222,14 @@
    }
   ],
   "answer": "Pine forest",
-  "accepts": [],
+  "accepts": [
+   "ព្រៃស្រល់"
+  ],
   "explanation": "pine + forest = pine forest.",
-  "source": "official"
+  "source": "official",
+  "km": {
+   "explanation": "“pine” + “forest” = pine forest។ នេះគឺព្រៃស្រល់។"
+  }
  },
  {
   "id": "science-forest-elephant",
@@ -30524,9 +31257,14 @@
    }
   ],
   "answer": "Forest elephant",
-  "accepts": [],
+  "accepts": [
+   "ដំរីព្រៃ"
+  ],
   "explanation": "forest + elephant = forest elephant.",
-  "source": "official"
+  "source": "official",
+  "km": {
+   "explanation": "“forest” + “elephant” = forest elephant។ នេះគឺដំរីព្រៃ។"
+  }
  },
  {
   "id": "science-forest-fox",
@@ -30556,7 +31294,10 @@
   "answer": "Forest fox",
   "accepts": [],
   "explanation": "forest + fox = forest fox.",
-  "source": "official"
+  "source": "official",
+  "km": {
+   "explanation": "“forest” + “fox” = forest fox។ នេះជាសត្វដែលរស់នៅក្នុងព្រៃ។"
+  }
  },
  {
   "id": "science-skylight",
@@ -30586,7 +31327,10 @@
   "answer": "Skylight",
   "accepts": [],
   "explanation": "sky + light = skylight.",
-  "source": "official"
+  "source": "official",
+  "km": {
+   "explanation": "“sky” + “light” = skylight។ នេះជាបង្អួចនៅលើដំបូល។"
+  }
  },
  {
   "id": "science-sky-blue",
@@ -30614,9 +31358,14 @@
    }
   ],
   "answer": "Sky blue",
-  "accepts": [],
+  "accepts": [
+   "ពណ៌ខៀវមេឃ"
+  ],
   "explanation": "sky + blue = sky blue.",
-  "source": "official"
+  "source": "official",
+  "km": {
+   "explanation": "“sky” + “blue” = sky blue។ នេះគឺពណ៌ខៀវមេឃ។"
+  }
  },
  {
   "id": "science-sky-tower",
@@ -30646,7 +31395,10 @@
   "answer": "Sky tower",
   "accepts": [],
   "explanation": "sky + tower = sky tower.",
-  "source": "official"
+  "source": "official",
+  "km": {
+   "explanation": "“sky” + “tower” = sky tower។ នេះជាប៉មខ្ពស់ទាក់ដល់មេឃ។"
+  }
  },
  {
   "id": "science-sky-castle",
@@ -30674,9 +31426,14 @@
    }
   ],
   "answer": "Sky castle",
-  "accepts": [],
+  "accepts": [
+   "ប្រាសាទលើមេឃ"
+  ],
   "explanation": "sky + castle = sky castle.",
-  "source": "official"
+  "source": "official",
+  "km": {
+   "explanation": "“sky” + “castle” = sky castle។ នេះគឺប្រាសាទលើមេឃ។"
+  }
  },
  {
   "id": "science-sky-rocket",
@@ -30704,9 +31461,14 @@
    }
   ],
   "answer": "Sky rocket",
-  "accepts": [],
+  "accepts": [
+   "រ៉ុក្កែតលើមេឃ"
+  ],
   "explanation": "sky + rocket = sky rocket.",
-  "source": "official"
+  "source": "official",
+  "km": {
+   "explanation": "“sky” + “rocket” = sky rocket។ នេះគឺរ៉ុក្កែតលើមេឃ។"
+  }
  },
  {
   "id": "science-skyline",
@@ -30735,7 +31497,10 @@
   "answer": "Skyline",
   "accepts": [],
   "explanation": "sky + line = skyline.",
-  "source": "official"
+  "source": "official",
+  "km": {
+   "explanation": "“sky” + “line” = skyline។ នេះជាបន្ទាត់ដែលអាគារជួបនឹងមេឃ។"
+  }
  },
  {
   "id": "countries-congo",

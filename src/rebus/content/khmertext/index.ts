@@ -2,6 +2,7 @@ import type { Puzzle } from "../../types";
 import { ANIMALS_KM } from "./animals";
 import { COUNTRIES_KM } from "./countries";
 import { SCHOOL_KM } from "./school";
+import { SCIENCE_KM } from "./science";
 import { SPORTS_KM } from "./sports";
 
 /**
@@ -15,9 +16,9 @@ export interface KhmerText {
 }
 
 /** Categories whose every puzzle has its Khmer text, so a new puzzle added there must come with one. */
-export const CATEGORIES_WITH_KHMER_TEXT: readonly string[] = ["countries", "animals", "school", "sports"];
+export const CATEGORIES_WITH_KHMER_TEXT: readonly string[] = ["countries", "animals", "school", "science", "sports"];
 
-const BY_ID: Record<string, KhmerText> = { ...COUNTRIES_KM, ...ANIMALS_KM, ...SCHOOL_KM, ...SPORTS_KM };
+const BY_ID: Record<string, KhmerText> = { ...COUNTRIES_KM, ...ANIMALS_KM, ...SCHOOL_KM, ...SCIENCE_KM, ...SPORTS_KM };
 
 /** A puzzle with its Khmer text added (one that already has its own Khmer is left as it is). */
 export const withKhmerText = (puzzle: Puzzle): Puzzle => {
