@@ -1,4 +1,5 @@
 import type { Puzzle } from "../../types";
+import { ANIMALS_KM } from "./animals";
 import { COUNTRIES_KM } from "./countries";
 
 /**
@@ -12,9 +13,9 @@ export interface KhmerText {
 }
 
 /** Categories whose every puzzle has its Khmer text, so a new puzzle added there must come with one. */
-export const CATEGORIES_WITH_KHMER_TEXT: readonly string[] = ["countries"];
+export const CATEGORIES_WITH_KHMER_TEXT: readonly string[] = ["countries", "animals"];
 
-const BY_ID: Record<string, KhmerText> = { ...COUNTRIES_KM };
+const BY_ID: Record<string, KhmerText> = { ...COUNTRIES_KM, ...ANIMALS_KM };
 
 /** A puzzle with its Khmer text added (one that already has its own Khmer is left as it is). */
 export const withKhmerText = (puzzle: Puzzle): Puzzle => {
@@ -25,3 +26,6 @@ export const withKhmerText = (puzzle: Puzzle): Puzzle => {
 
 /** Ids with Khmer text here that no puzzle has: a typo to fix. */
 export const khmerTextIds = (): string[] => Object.keys(BY_ID);
+
+/** The Khmer text written for a puzzle, if any. */
+export const khmerTextOf = (id: string): KhmerText | undefined => BY_ID[id];

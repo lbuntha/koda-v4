@@ -1686,7 +1686,10 @@
   "answer": "Catfish",
   "accepts": [],
   "explanation": "cat + fish = catfish.",
-  "source": "official"
+  "source": "official",
+  "km": {
+   "explanation": "“cat” + “fish” = catfish។ នេះជាត្រីមួយប្រភេទដែលមានពុកមាត់ដូចឆ្មា។"
+  }
  },
  {
   "id": "animals-starfish",
@@ -1714,9 +1717,14 @@
    }
   ],
   "answer": "Starfish",
-  "accepts": [],
+  "accepts": [
+   "ផ្កាយសមុទ្រ"
+  ],
   "explanation": "star + fish = starfish.",
-  "source": "official"
+  "source": "official",
+  "km": {
+   "explanation": "“star” + “fish” = starfish។ នេះគឺផ្កាយសមុទ្រ។"
+  }
  },
  {
   "id": "animals-jellyfish",
@@ -1746,7 +1754,10 @@
   "answer": "Jellyfish",
   "accepts": [],
   "explanation": "jelly + fish = jellyfish.",
-  "source": "official"
+  "source": "official",
+  "km": {
+   "explanation": "“jelly” + “fish” = jellyfish។ នេះជាសត្វសមុទ្រទន់ៗ ដែលមានដៃវែងៗ។"
+  }
  },
  {
   "id": "animals-swordfish",
@@ -1774,9 +1785,14 @@
    }
   ],
   "answer": "Swordfish",
-  "accepts": [],
+  "accepts": [
+   "ត្រីដាវ"
+  ],
   "explanation": "sword + fish = swordfish.",
-  "source": "official"
+  "source": "official",
+  "km": {
+   "explanation": "“sword” + “fish” = swordfish។ នេះគឺត្រីដាវ។"
+  }
  },
  {
   "id": "animals-sunfish",
@@ -1806,7 +1822,10 @@
   "answer": "Sunfish",
   "accepts": [],
   "explanation": "sun + fish = sunfish.",
-  "source": "official"
+  "source": "official",
+  "km": {
+   "explanation": "“sun” + “fish” = sunfish។ នេះជាត្រីសមុទ្រដ៏ធំមួយប្រភេទ មានរាងមូលសំប៉ែត។"
+  }
  },
  {
   "id": "animals-butterfly",
@@ -1834,9 +1853,14 @@
    }
   ],
   "answer": "Butterfly",
-  "accepts": [],
+  "accepts": [
+   "មេអំបៅ"
+  ],
   "explanation": "butter + fly = butterfly.",
-  "source": "official"
+  "source": "official",
+  "km": {
+   "explanation": "“butter” + “fly” = butterfly។ នេះគឺមេអំបៅ។"
+  }
  },
  {
   "id": "animals-dragonfly",
@@ -1866,7 +1890,10 @@
   "answer": "Dragonfly",
   "accepts": [],
   "explanation": "dragon + fly = dragonfly.",
-  "source": "official"
+  "source": "official",
+  "km": {
+   "explanation": "“dragon” + “fly” = dragonfly។ នេះជាសត្វល្អិតដែលមានស្លាបស្តើងៗ ហើយហោះលើទឹក។"
+  }
  },
  {
   "id": "animals-firefly",
@@ -1896,7 +1923,10 @@
   "answer": "Firefly",
   "accepts": [],
   "explanation": "fire + fly = firefly.",
-  "source": "official"
+  "source": "official",
+  "km": {
+   "explanation": "“fire” + “fly” = firefly។ នេះជាសត្វល្អិតដែលមានពន្លឺភ្លឺនៅពេលយប់។"
+  }
  },
  {
   "id": "animals-horsefly",
@@ -1926,7 +1956,10 @@
   "answer": "Horsefly",
   "accepts": [],
   "explanation": "horse + fly = horsefly.",
-  "source": "official"
+  "source": "official",
+  "km": {
+   "explanation": "“horse” + “fly” = horsefly។ នេះជាសត្វរុយធំមួយប្រភេទដែលខាំសត្វ។"
+  }
  },
  {
   "id": "animals-housefly",
@@ -1954,9 +1987,14 @@
    }
   ],
   "answer": "Housefly",
-  "accepts": [],
+  "accepts": [
+   "រុយ"
+  ],
   "explanation": "house + fly = housefly.",
-  "source": "official"
+  "source": "official",
+  "km": {
+   "explanation": "“house” + “fly” = housefly។ នេះគឺរុយ។"
+  }
  },
  {
   "id": "animals-bulldog",
@@ -1986,7 +2024,10 @@
   "answer": "Bulldog",
   "accepts": [],
   "explanation": "bull + dog = bulldog.",
-  "source": "official"
+  "source": "official",
+  "km": {
+   "explanation": "“bull” + “dog” = bulldog។ នេះជាឆ្កែមួយពូជដែលមានមុខជ្រួញ។"
+  }
  },
  {
   "id": "animals-bullfrog",
@@ -2016,7 +2057,10 @@
   "answer": "Bullfrog",
   "accepts": [],
   "explanation": "bull + frog = bullfrog.",
-  "source": "official"
+  "source": "official",
+  "km": {
+   "explanation": "“bull” + “frog” = bullfrog។ នេះជាកង្កែបធំមួយប្រភេទ។"
+  }
  },
  {
   "id": "animals-bluebird",
@@ -2044,9 +2088,14 @@
    }
   ],
   "answer": "Bluebird",
-  "accepts": [],
+  "accepts": [
+   "បក្សីពណ៌ខៀវ"
+  ],
   "explanation": "blue + bird = bluebird.",
-  "source": "official"
+  "source": "official",
+  "km": {
+   "explanation": "“blue” + “bird” = bluebird។ នេះគឺបក្សីពណ៌ខៀវ។"
+  }
  },
  {
   "id": "animals-blackbird",
@@ -2074,9 +2123,14 @@
    }
   ],
   "answer": "Blackbird",
-  "accepts": [],
+  "accepts": [
+   "បក្សីពណ៌ខ្មៅ"
+  ],
   "explanation": "black + bird = blackbird.",
-  "source": "official"
+  "source": "official",
+  "km": {
+   "explanation": "“black” + “bird” = blackbird។ នេះគឺបក្សីពណ៌ខ្មៅ។"
+  }
  },
  {
   "id": "animals-firebird",
@@ -2106,7 +2160,10 @@
   "answer": "Firebird",
   "accepts": [],
   "explanation": "fire + bird = firebird.",
-  "source": "official"
+  "source": "official",
+  "km": {
+   "explanation": "“fire” + “bird” = firebird។ នេះជាបក្សីក្នុងរឿងព្រេងដែលមានរោមដូចភ្លើង។"
+  }
  },
  {
   "id": "animals-ladybug",
@@ -2138,7 +2195,10 @@
    "ladybird"
   ],
   "explanation": "lady + bug = ladybug.",
-  "source": "official"
+  "source": "official",
+  "km": {
+   "explanation": "“lady” + “bug” = ladybug។ នេះជាសត្វល្អិតតូចមានស្លាបពណ៌ក្រហមមានចំណុចខ្មៅ។"
+  }
  },
  {
   "id": "animals-honeybee",
@@ -2166,9 +2226,14 @@
    }
   ],
   "answer": "Honeybee",
-  "accepts": [],
+  "accepts": [
+   "ឃ្មុំ"
+  ],
   "explanation": "honey + bee = honeybee.",
-  "source": "official"
+  "source": "official",
+  "km": {
+   "explanation": "“honey” + “bee” = honeybee។ នេះគឺឃ្មុំ។"
+  }
  },
  {
   "id": "animals-seahorse",
@@ -2196,9 +2261,14 @@
    }
   ],
   "answer": "Seahorse",
-  "accepts": [],
+  "accepts": [
+   "សេះសមុទ្រ"
+  ],
   "explanation": "sea + horse = seahorse.",
-  "source": "official"
+  "source": "official",
+  "km": {
+   "explanation": "“sea” + “horse” = seahorse។ នេះគឺសេះសមុទ្រ។"
+  }
  },
  {
   "id": "animals-sea-lion",
@@ -2227,10 +2297,14 @@
   ],
   "answer": "Sea lion",
   "accepts": [
-   "sealion"
+   "sealion",
+   "តោសមុទ្រ"
   ],
   "explanation": "sea + lion = sea lion.",
-  "source": "official"
+  "source": "official",
+  "km": {
+   "explanation": "“sea” + “lion” = sea lion។ នេះគឺតោសមុទ្រ។"
+  }
  },
  {
   "id": "animals-hedgehog",
@@ -2260,7 +2334,10 @@
   "answer": "Hedgehog",
   "accepts": [],
   "explanation": "hedge + hog = hedgehog.",
-  "source": "official"
+  "source": "official",
+  "km": {
+   "explanation": "“hedge” + “hog” = hedgehog។ នេះជាសត្វតូចដែលមានបន្លាពេញខ្នង។"
+  }
  },
  {
   "id": "animals-sheepdog",
@@ -2288,9 +2365,14 @@
    }
   ],
   "answer": "Sheepdog",
-  "accepts": [],
+  "accepts": [
+   "ឆ្កែឃ្វាលចៀម"
+  ],
   "explanation": "sheep + dog = sheepdog.",
-  "source": "official"
+  "source": "official",
+  "km": {
+   "explanation": "“sheep” + “dog” = sheepdog។ នេះគឺឆ្កែឃ្វាលចៀម។"
+  }
  },
  {
   "id": "animals-earthworm",
@@ -2318,9 +2400,14 @@
    }
   ],
   "answer": "Earthworm",
-  "accepts": [],
+  "accepts": [
+   "ជន្លេន"
+  ],
   "explanation": "earth + worm = earthworm.",
-  "source": "official"
+  "source": "official",
+  "km": {
+   "explanation": "“earth” + “worm” = earthworm។ នេះគឺជន្លេន។"
+  }
  },
  {
   "id": "animals-tree-frog",
@@ -2349,10 +2436,14 @@
   ],
   "answer": "Tree frog",
   "accepts": [
-   "treefrog"
+   "treefrog",
+   "កង្កែបដើមឈើ"
   ],
   "explanation": "tree + frog = tree frog.",
-  "source": "official"
+  "source": "official",
+  "km": {
+   "explanation": "“tree” + “frog” = tree frog។ នេះគឺកង្កែបដើមឈើ។"
+  }
  },
  {
   "id": "animals-bullseye",
@@ -2384,7 +2475,10 @@
    "bulls eye"
   ],
   "explanation": "bull + eye = bullseye.",
-  "source": "official"
+  "source": "official",
+  "km": {
+   "explanation": "“bull” + “eye” = bullseye។ នេះជាចំណុចកណ្តាលនៃគោលដៅបាញ់។"
+  }
  },
  {
   "id": "animals-cat-s-eye",
@@ -2416,7 +2510,10 @@
    "cats eye"
   ],
   "explanation": "cat + eye = cat's eye.",
-  "source": "official"
+  "source": "official",
+  "km": {
+   "explanation": "“cat” + “eye” = cat's eye។ នេះជាចំណុចឆ្លុះពន្លឺនៅលើផ្លូវ។"
+  }
  },
  {
   "id": "animals-dog-days",
@@ -2446,7 +2543,10 @@
   "answer": "Dog days",
   "accepts": [],
   "explanation": "dog + days: the hottest days of summer.",
-  "source": "official"
+  "source": "official",
+  "km": {
+   "explanation": "“dog” + “days” = Dog days។ ជាថ្ងៃក្តៅបំផុតនៃរដូវក្តៅ។"
+  }
  },
  {
   "id": "animals-dog-eat-dog",
@@ -2476,7 +2576,10 @@
   "answer": "Dog eat dog",
   "accepts": [],
   "explanation": "dog, eat, dog: a world where everyone fights to win.",
-  "source": "official"
+  "source": "official",
+  "km": {
+   "explanation": "“dog” “eat” “dog” = Dog eat dog។ ជាពិភពលោកដែលគ្រប់គ្នាប្រជែងគ្នាដើម្បីឈ្នះ។"
+  }
  },
  {
   "id": "animals-fish-out-of-water",
@@ -2506,7 +2609,10 @@
   "answer": "Fish out of water",
   "accepts": [],
   "explanation": "A fish, out of, water: someone who feels out of place.",
-  "source": "official"
+  "source": "official",
+  "km": {
+   "explanation": "ត្រីមួយ នៅក្រៅទឹក = Fish out of water។ ជាមនុស្សដែលមានអារម្មណ៍មិនស្រួលនៅកន្លែងថ្មី។"
+  }
  },
  {
   "id": "animals-monkey-business",
@@ -2536,7 +2642,10 @@
   "answer": "Monkey business",
   "accepts": [],
   "explanation": "monkey + business: silly or sneaky behaviour.",
-  "source": "official"
+  "source": "official",
+  "km": {
+   "explanation": "“monkey” + “business” = Monkey business។ ជាការប្រព្រឹត្តល្ងីល្ងើ ឬល្បិចកិច្ចកលៗ។"
+  }
  },
  {
   "id": "animals-doghouse",
@@ -2565,10 +2674,14 @@
   ],
   "answer": "Doghouse",
   "accepts": [
-   "dog house"
+   "dog house",
+   "ផ្ទះឆ្កែ"
   ],
   "explanation": "dog + house = doghouse.",
-  "source": "official"
+  "source": "official",
+  "km": {
+   "explanation": "“dog” + “house” = doghouse។ នេះគឺផ្ទះឆ្កែ។"
+  }
  },
  {
   "id": "animals-birdhouse",
@@ -2597,10 +2710,14 @@
   ],
   "answer": "Birdhouse",
   "accepts": [
-   "bird house"
+   "bird house",
+   "ផ្ទះបក្សី"
   ],
   "explanation": "bird + house = birdhouse.",
-  "source": "official"
+  "source": "official",
+  "km": {
+   "explanation": "“bird” + “house” = birdhouse។ នេះគឺផ្ទះបក្សី។"
+  }
  },
  {
   "id": "animals-flypaper",
@@ -2632,7 +2749,10 @@
    "fly paper"
   ],
   "explanation": "fly + paper = flypaper.",
-  "source": "official"
+  "source": "official",
+  "km": {
+   "explanation": "“fly” + “paper” = flypaper។ នេះជាក្រដាសស្អិតសម្រាប់ចាប់រុយ។"
+  }
  },
  {
   "id": "animals-blue-whale",
@@ -2661,10 +2781,14 @@
   ],
   "answer": "Blue whale",
   "accepts": [
-   "bluewhale"
+   "bluewhale",
+   "ត្រីបាឡែនខៀវ"
   ],
   "explanation": "blue + whale = blue whale.",
-  "source": "official"
+  "source": "official",
+  "km": {
+   "explanation": "“blue” + “whale” = blue whale។ នេះគឺត្រីបាឡែនខៀវ។"
+  }
  },
  {
   "id": "animals-black-cat",
@@ -2692,9 +2816,14 @@
    }
   ],
   "answer": "Black cat",
-  "accepts": [],
+  "accepts": [
+   "ឆ្មាខ្មៅ"
+  ],
   "explanation": "black + cat = black cat.",
-  "source": "official"
+  "source": "official",
+  "km": {
+   "explanation": "“black” + “cat” = black cat។ នេះគឺឆ្មាខ្មៅ។"
+  }
  },
  {
   "id": "animals-monkey",
@@ -2722,9 +2851,14 @@
    }
   ],
   "answer": "Monkey",
-  "accepts": [],
+  "accepts": [
+   "ស្វា"
+  ],
   "explanation": "monk + key = monkey.",
-  "source": "official"
+  "source": "official",
+  "km": {
+   "explanation": "“monk” + “key” = monkey។ នេះគឺស្វា។"
+  }
  },
  {
   "id": "animals-dolphin",
@@ -2752,9 +2886,14 @@
    }
   ],
   "answer": "Dolphin",
-  "accepts": [],
+  "accepts": [
+   "ផ្សោត"
+  ],
   "explanation": "doll + fin sounds like dolphin.",
-  "source": "official"
+  "source": "official",
+  "km": {
+   "explanation": "“doll” + “fin” ប្រកាសលឿនៗ ស្តាប់ទៅដូច dolphin។ នេះគឺផ្សោត។"
+  }
  },
  {
   "id": "sayings-broken-heart",
@@ -8356,7 +8495,10 @@
   "answer": "Dogfish",
   "accepts": [],
   "explanation": "dog + fish = dogfish.",
-  "source": "official"
+  "source": "official",
+  "km": {
+   "explanation": "“dog” + “fish” = dogfish។ នេះជាត្រីឆ្លាមតូចមួយប្រភេទ។"
+  }
  },
  {
   "id": "animals-glow-worm",
@@ -8386,7 +8528,10 @@
   "answer": "Glow worm",
   "accepts": [],
   "explanation": "glow + worm = glow worm.",
-  "source": "official"
+  "source": "official",
+  "km": {
+   "explanation": "“glow” + “worm” = glow worm។ នេះជាដង្កូវដែលមានពន្លឺភ្លឺនៅពេលយប់។"
+  }
  },
  {
   "id": "animals-cold-turkey",
@@ -8416,7 +8561,10 @@
   "answer": "Cold turkey",
   "accepts": [],
   "explanation": "cold + turkey = cold turkey.",
-  "source": "official"
+  "source": "official",
+  "km": {
+   "explanation": "“cold” + “turkey” = Cold turkey។ ជាការឈប់ធ្វើអ្វីមួយភ្លាមៗទាំងស្រុង។"
+  }
  },
  {
   "id": "animals-bull-ring",
@@ -8446,7 +8594,10 @@
   "answer": "Bull ring",
   "accepts": [],
   "explanation": "bull + ring = bull ring.",
-  "source": "official"
+  "source": "official",
+  "km": {
+   "explanation": "“bull” + “ring” = bull ring។ នេះជាកន្លែងមូលសម្រាប់ប្រកួតជាមួយគោឈ្មោល។"
+  }
  },
  {
   "id": "animals-monkfish",
@@ -8476,7 +8627,10 @@
   "answer": "Monkfish",
   "accepts": [],
   "explanation": "monk + fish = monkfish.",
-  "source": "official"
+  "source": "official",
+  "km": {
+   "explanation": "“monk” + “fish” = monkfish។ នេះជាត្រីសមុទ្រមួយប្រភេទដែលមានមាត់ធំ។"
+  }
  },
  {
   "id": "animals-seabird",
@@ -8504,9 +8658,14 @@
    }
   ],
   "answer": "Seabird",
-  "accepts": [],
+  "accepts": [
+   "បក្សីសមុទ្រ"
+  ],
   "explanation": "sea + bird = seabird.",
-  "source": "official"
+  "source": "official",
+  "km": {
+   "explanation": "“sea” + “bird” = seabird។ នេះគឺបក្សីសមុទ្រ។"
+  }
  },
  {
   "id": "animals-sea-dog",
@@ -8536,7 +8695,10 @@
   "answer": "Sea dog",
   "accepts": [],
   "explanation": "sea + dog = sea dog.",
-  "source": "official"
+  "source": "official",
+  "km": {
+   "explanation": "“sea” + “dog” = sea dog។ នេះជាពាក្យហៅនាវិកចំណាស់។"
+  }
  },
  {
   "id": "animals-green-frog",
@@ -8564,9 +8726,14 @@
    }
   ],
   "answer": "Green frog",
-  "accepts": [],
+  "accepts": [
+   "កង្កែបពណ៌បៃតង"
+  ],
   "explanation": "green + frog = green frog.",
-  "source": "official"
+  "source": "official",
+  "km": {
+   "explanation": "“green” + “frog” = green frog។ នេះគឺកង្កែបពណ៌បៃតង។"
+  }
  },
  {
   "id": "animals-white-cat",
@@ -8594,9 +8761,14 @@
    }
   ],
   "answer": "White cat",
-  "accepts": [],
+  "accepts": [
+   "ឆ្មាស"
+  ],
   "explanation": "white + cat = white cat.",
-  "source": "official"
+  "source": "official",
+  "km": {
+   "explanation": "“white” + “cat” = white cat។ នេះគឺឆ្មាស។"
+  }
  },
  {
   "id": "animals-white-horse",
@@ -8624,9 +8796,14 @@
    }
   ],
   "answer": "White horse",
-  "accepts": [],
+  "accepts": [
+   "សេះស"
+  ],
   "explanation": "white + horse = white horse.",
-  "source": "official"
+  "source": "official",
+  "km": {
+   "explanation": "“white” + “horse” = white horse។ នេះគឺសេះស។"
+  }
  },
  {
   "id": "animals-black-horse",
@@ -8654,9 +8831,14 @@
    }
   ],
   "answer": "Black horse",
-  "accepts": [],
+  "accepts": [
+   "សេះខ្មៅ"
+  ],
   "explanation": "black + horse = black horse.",
-  "source": "official"
+  "source": "official",
+  "km": {
+   "explanation": "“black” + “horse” = black horse។ នេះគឺសេះខ្មៅ។"
+  }
  },
  {
   "id": "animals-black-dog",
@@ -8684,9 +8866,14 @@
    }
   ],
   "answer": "Black dog",
-  "accepts": [],
+  "accepts": [
+   "ឆ្កែខ្មៅ"
+  ],
   "explanation": "black + dog = black dog.",
-  "source": "official"
+  "source": "official",
+  "km": {
+   "explanation": "“black” + “dog” = black dog។ នេះគឺឆ្កែខ្មៅ។"
+  }
  },
  {
   "id": "animals-white-dog",
@@ -8714,9 +8901,14 @@
    }
   ],
   "answer": "White dog",
-  "accepts": [],
+  "accepts": [
+   "ឆ្កែស"
+  ],
   "explanation": "white + dog = white dog.",
-  "source": "official"
+  "source": "official",
+  "km": {
+   "explanation": "“white” + “dog” = white dog។ នេះគឺឆ្កែស។"
+  }
  },
  {
   "id": "animals-white-whale",
@@ -8744,9 +8936,14 @@
    }
   ],
   "answer": "White whale",
-  "accepts": [],
+  "accepts": [
+   "ត្រីបាឡែនស"
+  ],
   "explanation": "white + whale = white whale.",
-  "source": "official"
+  "source": "official",
+  "km": {
+   "explanation": "“white” + “whale” = white whale។ នេះគឺត្រីបាឡែនស។"
+  }
  },
  {
   "id": "animals-lion-fish",
@@ -8776,7 +8973,10 @@
   "answer": "Lion fish",
   "accepts": [],
   "explanation": "lion + fish = lion fish.",
-  "source": "official"
+  "source": "official",
+  "km": {
+   "explanation": "“lion” + “fish” = lion fish។ នេះជាត្រីសមុទ្រដែលមានបន្លាពុល។"
+  }
  },
  {
   "id": "science-moonstone",
@@ -15851,9 +16051,14 @@
    }
   ],
   "answer": "Barefoot",
-  "accepts": [],
+  "accepts": [
+   "ជើងទទេ"
+  ],
   "explanation": "bear + foot, said fast, sounds like barefoot.",
-  "source": "official"
+  "source": "official",
+  "km": {
+   "explanation": "“bear” + “foot” ប្រកាសលឿនៗ ស្តាប់ទៅដូច barefoot។ នេះគឺជើងទទេ។"
+  }
  },
  {
   "id": "animals-sun-bear",
@@ -15883,7 +16088,10 @@
   "answer": "Sun bear",
   "accepts": [],
   "explanation": "sun + bear = sun bear.",
-  "source": "official"
+  "source": "official",
+  "km": {
+   "explanation": "“sun” + “bear” = sun bear។ នេះជាខ្លាឃ្មុំតូចជាងគេ។"
+  }
  },
  {
   "id": "animals-black-bear",
@@ -15911,9 +16119,14 @@
    }
   ],
   "answer": "Black bear",
-  "accepts": [],
+  "accepts": [
+   "ខ្លាឃ្មុំខ្មៅ"
+  ],
   "explanation": "black + bear = black bear.",
-  "source": "official"
+  "source": "official",
+  "km": {
+   "explanation": "“black” + “bear” = black bear។ នេះគឺខ្លាឃ្មុំខ្មៅ។"
+  }
  },
  {
   "id": "animals-water-bear",
@@ -15943,7 +16156,10 @@
   "answer": "Water bear",
   "accepts": [],
   "explanation": "water + bear = water bear.",
-  "source": "official"
+  "source": "official",
+  "km": {
+   "explanation": "“water” + “bear” = water bear។ នេះជាសត្វតូចៗមើលមិនឃើញដោយភ្នែកទទេ។"
+  }
  },
  {
   "id": "animals-bear-cub",
@@ -15972,7 +16188,10 @@
   "answer": "Bear cub",
   "accepts": [],
   "explanation": "bear + cub = bear cub.",
-  "source": "official"
+  "source": "official",
+  "km": {
+   "explanation": "“bear” + “cub” = bear cub។ នេះជាកូនរបស់ខ្លាឃ្មុំ។"
+  }
  },
  {
   "id": "animals-werewolf",
@@ -16001,7 +16220,10 @@
   "answer": "Werewolf",
   "accepts": [],
   "explanation": "were + wolf = werewolf.",
-  "source": "official"
+  "source": "official",
+  "km": {
+   "explanation": "“were” + “wolf” = werewolf។ នេះជាមនុស្សចចកក្នុងរឿងព្រេង។"
+  }
  },
  {
   "id": "animals-sea-wolf",
@@ -16031,7 +16253,10 @@
   "answer": "Sea wolf",
   "accepts": [],
   "explanation": "sea + wolf = sea wolf.",
-  "source": "official"
+  "source": "official",
+  "km": {
+   "explanation": "“sea” + “wolf” = sea wolf។ នេះជាត្រីសមុទ្រមួយប្រភេទ។"
+  }
  },
  {
   "id": "animals-wolffish",
@@ -16061,7 +16286,10 @@
   "answer": "Wolffish",
   "accepts": [],
   "explanation": "wolf + fish = wolffish.",
-  "source": "official"
+  "source": "official",
+  "km": {
+   "explanation": "“wolf” + “fish” = wolffish។ នេះជាត្រីសមុទ្រដែលមានធ្មេញមុតស្រួច។"
+  }
  },
  {
   "id": "animals-foxglove",
@@ -16091,7 +16319,10 @@
   "answer": "Foxglove",
   "accepts": [],
   "explanation": "fox + glove = foxglove.",
-  "source": "official"
+  "source": "official",
+  "km": {
+   "explanation": "“fox” + “glove” = foxglove។ នេះជាផ្កាមួយប្រភេទ។"
+  }
  },
  {
   "id": "animals-foxhole",
@@ -16121,7 +16352,10 @@
   "answer": "Foxhole",
   "accepts": [],
   "explanation": "fox + hole = foxhole.",
-  "source": "official"
+  "source": "official",
+  "km": {
+   "explanation": "“fox” + “hole” = foxhole។ នេះជាប្រហោងសម្រាប់ជ្រកកោន។"
+  }
  },
  {
   "id": "animals-firefox",
@@ -16151,7 +16385,10 @@
   "answer": "Firefox",
   "accepts": [],
   "explanation": "fire + fox = firefox.",
-  "source": "official"
+  "source": "official",
+  "km": {
+   "explanation": "“fire” + “fox” = firefox។ នេះជាឈ្មោះកម្មវិធីរុករកអ៊ីនធឺណិត។"
+  }
  },
  {
   "id": "animals-flying-fox",
@@ -16179,9 +16416,14 @@
    }
   ],
   "answer": "Flying fox",
-  "accepts": [],
+  "accepts": [
+   "ប្រចៀវ"
+  ],
   "explanation": "flying + fox = flying fox.",
-  "source": "official"
+  "source": "official",
+  "km": {
+   "explanation": "“flying” + “fox” = flying fox។ នេះគឺប្រចៀវ។"
+  }
  },
  {
   "id": "animals-reindeer",
@@ -16211,7 +16453,10 @@
   "answer": "Reindeer",
   "accepts": [],
   "explanation": "rain + deer, said fast, sounds like reindeer.",
-  "source": "official"
+  "source": "official",
+  "km": {
+   "explanation": "“rain” + “deer” ប្រកាសលឿនៗ ស្តាប់ទៅដូច reindeer។ នេះជាក្តាន់ដែលរស់នៅតំបន់ត្រជាក់។"
+  }
  },
  {
   "id": "animals-oh-dear",
@@ -16240,7 +16485,10 @@
   "answer": "Oh dear",
   "accepts": [],
   "explanation": "oh + deer, said fast, sounds like oh dear.",
-  "source": "official"
+  "source": "official",
+  "km": {
+   "explanation": "“oh” + “deer” ប្រកាសលឿនៗ ស្តាប់ទៅដូច Oh dear។ ជាពាក្យនិយាយពេលភ្ញាក់ផ្អើល ឬសោកស្តាយ។"
+  }
  },
  {
   "id": "animals-deerfly",
@@ -16270,7 +16518,10 @@
   "answer": "Deerfly",
   "accepts": [],
   "explanation": "deer + fly = deerfly.",
-  "source": "official"
+  "source": "official",
+  "km": {
+   "explanation": "“deer” + “fly” = deerfly។ នេះជាសត្វរុយមួយប្រភេទ។"
+  }
  },
  {
   "id": "animals-mouse-hole",
@@ -16298,9 +16549,14 @@
    }
   ],
   "answer": "Mouse hole",
-  "accepts": [],
+  "accepts": [
+   "រន្ធកណ្តុរ"
+  ],
   "explanation": "mouse + hole = mouse hole.",
-  "source": "official"
+  "source": "official",
+  "km": {
+   "explanation": "“mouse” + “hole” = mouse hole។ នេះគឺរន្ធកណ្តុរ។"
+  }
  },
  {
   "id": "animals-dormouse",
@@ -16330,7 +16586,10 @@
   "answer": "Dormouse",
   "accepts": [],
   "explanation": "door + mouse, said fast, sounds like dormouse.",
-  "source": "official"
+  "source": "official",
+  "km": {
+   "explanation": "“door” + “mouse” ប្រកាសលឿនៗ ស្តាប់ទៅដូច dormouse។ នេះជាកណ្តុរតូចដែលដេកស្រគត់ក្នុងរដូវរងា។"
+  }
  },
  {
   "id": "animals-cat-and-mouse",
@@ -16360,7 +16619,10 @@
   "answer": "Cat and mouse",
   "accepts": [],
   "explanation": "cat + mouse = cat and mouse.",
-  "source": "official"
+  "source": "official",
+  "km": {
+   "explanation": "“cat” + “mouse” = cat and mouse។ នេះជាល្បែងដេញចាប់គ្នា ឆ្មានិងកណ្តុរ។"
+  }
  },
  {
   "id": "animals-house-mouse",
@@ -16388,9 +16650,14 @@
    }
   ],
   "answer": "House mouse",
-  "accepts": [],
+  "accepts": [
+   "កណ្តុរផ្ទះ"
+  ],
   "explanation": "house + mouse = house mouse.",
-  "source": "official"
+  "source": "official",
+  "km": {
+   "explanation": "“house” + “mouse” = house mouse។ នេះគឺកណ្តុរផ្ទះ។"
+  }
  },
  {
   "id": "animals-mousetrap",
@@ -16417,9 +16684,14 @@
    }
   ],
   "answer": "Mousetrap",
-  "accepts": [],
+  "accepts": [
+   "អន្ទាក់កណ្តុរ"
+  ],
   "explanation": "mouse + trap = mousetrap.",
-  "source": "official"
+  "source": "official",
+  "km": {
+   "explanation": "“mouse” + “trap” = mousetrap។ នេះគឺអន្ទាក់កណ្តុរ។"
+  }
  },
  {
   "id": "animals-field-mouse",
@@ -16446,9 +16718,14 @@
    }
   ],
   "answer": "Field mouse",
-  "accepts": [],
+  "accepts": [
+   "កណ្តុរស្រែ"
+  ],
   "explanation": "mouse + field = field mouse.",
-  "source": "official"
+  "source": "official",
+  "km": {
+   "explanation": "“mouse” + “field” = field mouse។ នេះគឺកណ្តុរស្រែ។"
+  }
  },
  {
   "id": "animals-pigpen",
@@ -16476,9 +16753,14 @@
    }
   ],
   "answer": "Pigpen",
-  "accepts": [],
+  "accepts": [
+   "ទ្រុងជ្រូក"
+  ],
   "explanation": "pig + pen = pigpen.",
-  "source": "official"
+  "source": "official",
+  "km": {
+   "explanation": "“pig” + “pen” = pigpen។ នេះគឺទ្រុងជ្រូក។"
+  }
  },
  {
   "id": "animals-pig-out",
@@ -16507,7 +16789,10 @@
   "answer": "Pig out",
   "accepts": [],
   "explanation": "pig + out = pig out.",
-  "source": "official"
+  "source": "official",
+  "km": {
+   "explanation": "“pig” + “out” = pig out។ ការញ៉ាំច្រើនហួសប្រមាណ។"
+  }
  },
  {
   "id": "animals-piglet",
@@ -16536,7 +16821,10 @@
   "answer": "Piglet",
   "accepts": [],
   "explanation": "pig + let = piglet.",
-  "source": "official"
+  "source": "official",
+  "km": {
+   "explanation": "“pig” + “let” = piglet។ នេះជាកូនរបស់ជ្រូក។"
+  }
  },
  {
   "id": "animals-pigeon",
@@ -16563,9 +16851,14 @@
    }
   ],
   "answer": "Pigeon",
-  "accepts": [],
+  "accepts": [
+   "ព្រាប"
+  ],
   "explanation": "pig + eon, said fast, sounds like pigeon.",
-  "source": "official"
+  "source": "official",
+  "km": {
+   "explanation": "“pig” + “eon” ប្រកាសលឿនៗ ស្តាប់ទៅដូច pigeon។ នេះគឺព្រាប។"
+  }
  },
  {
   "id": "animals-flying-pig",
@@ -16593,9 +16886,14 @@
    }
   ],
   "answer": "Flying pig",
-  "accepts": [],
+  "accepts": [
+   "ជ្រូកហោះ"
+  ],
   "explanation": "flying + pig = flying pig.",
-  "source": "official"
+  "source": "official",
+  "km": {
+   "explanation": "“flying” + “pig” = flying pig។ នេះគឺជ្រូកហោះ។"
+  }
  },
  {
   "id": "animals-pigment",
@@ -16624,7 +16922,10 @@
   "answer": "Pigment",
   "accepts": [],
   "explanation": "pig + ment, said fast, sounds like pigment.",
-  "source": "official"
+  "source": "official",
+  "km": {
+   "explanation": "“pig” + “ment” ប្រកាសលឿនៗ ស្តាប់ទៅដូច pigment។ នេះជាសារធាតុដែលធ្វើឱ្យមានពណ៌។"
+  }
  },
  {
   "id": "animals-cowboy",
@@ -16651,9 +16952,14 @@
    }
   ],
   "answer": "Cowboy",
-  "accepts": [],
+  "accepts": [
+   "អ្នកគង្វាលគោ"
+  ],
   "explanation": "cow + boy = cowboy.",
-  "source": "official"
+  "source": "official",
+  "km": {
+   "explanation": "“cow” + “boy” = cowboy។ នេះគឺអ្នកគង្វាលគោ។"
+  }
  },
  {
   "id": "animals-cowgirl",
@@ -16680,9 +16986,14 @@
    }
   ],
   "answer": "Cowgirl",
-  "accepts": [],
+  "accepts": [
+   "ស្រីគង្វាលគោ"
+  ],
   "explanation": "cow + girl = cowgirl.",
-  "source": "official"
+  "source": "official",
+  "km": {
+   "explanation": "“cow” + “girl” = cowgirl។ នេះគឺស្រីគង្វាលគោ។"
+  }
  },
  {
   "id": "animals-cowbell",
@@ -16710,9 +17021,14 @@
    }
   ],
   "answer": "Cowbell",
-  "accepts": [],
+  "accepts": [
+   "កណ្តឹងគោ"
+  ],
   "explanation": "cow + bell = cowbell.",
-  "source": "official"
+  "source": "official",
+  "km": {
+   "explanation": "“cow” + “bell” = cowbell។ នេះគឺកណ្តឹងគោ។"
+  }
  },
  {
   "id": "animals-coward",
@@ -16739,9 +17055,14 @@
    }
   ],
   "answer": "Coward",
-  "accepts": [],
+  "accepts": [
+   "កំសាក"
+  ],
   "explanation": "cow + ard, said fast, sounds like coward.",
-  "source": "official"
+  "source": "official",
+  "km": {
+   "explanation": "“cow” + “ard” ប្រកាសលឿនៗ ស្តាប់ទៅដូច coward។ នេះគឺកំសាក។"
+  }
  },
  {
   "id": "animals-cowslip",
@@ -16770,7 +17091,10 @@
   "answer": "Cowslip",
   "accepts": [],
   "explanation": "cow + slip = cowslip.",
-  "source": "official"
+  "source": "official",
+  "km": {
+   "explanation": "“cow” + “slip” = cowslip។ នេះជាផ្កាព្រៃមួយប្រភេទ។"
+  }
  },
  {
   "id": "animals-sea-cow",
@@ -16800,7 +17124,10 @@
   "answer": "Sea cow",
   "accepts": [],
   "explanation": "sea + cow = sea cow.",
-  "source": "official"
+  "source": "official",
+  "km": {
+   "explanation": "“sea” + “cow” = sea cow។ នេះជាសត្វដែលរស់នៅក្នុងសមុទ្រ ហៅថាឌូហ្គុង។"
+  }
  },
  {
   "id": "animals-milk-cow",
@@ -16828,9 +17155,14 @@
    }
   ],
   "answer": "Milk cow",
-  "accepts": [],
+  "accepts": [
+   "គោទឹកដោះ"
+  ],
   "explanation": "milk + cow = milk cow.",
-  "source": "official"
+  "source": "official",
+  "km": {
+   "explanation": "“milk” + “cow” = milk cow។ នេះគឺគោទឹកដោះ។"
+  }
  },
  {
   "id": "animals-holy-cow",
@@ -16860,7 +17192,10 @@
   "answer": "Holy cow",
   "accepts": [],
   "explanation": "holy + cow, said fast, sounds like holy cow.",
-  "source": "official"
+  "source": "official",
+  "km": {
+   "explanation": "“holy” + “cow” ប្រកាសលឿនៗ ស្តាប់ទៅដូច Holy cow។ ជាពាក្យនិយាយពេលភ្ញាក់ផ្អើលខ្លាំង។"
+  }
  },
  {
   "id": "animals-cowpox",
@@ -16889,7 +17224,10 @@
   "answer": "Cowpox",
   "accepts": [],
   "explanation": "cow + pox = cowpox.",
-  "source": "official"
+  "source": "official",
+  "km": {
+   "explanation": "“cow” + “pox” = cowpox។ នេះជាជំងឺមួយប្រភេទរបស់គោ។"
+  }
  },
  {
   "id": "animals-goatee",
@@ -16918,7 +17256,10 @@
   "answer": "Goatee",
   "accepts": [],
   "explanation": "goat + ee, said fast, sounds like goatee.",
-  "source": "official"
+  "source": "official",
+  "km": {
+   "explanation": "“goat” + “ee” ប្រកាសលឿនៗ ស្តាប់ទៅដូច goatee។ នេះជាពុកចង្កាតូចៗនៅចង្កា។"
+  }
  },
  {
   "id": "animals-goat-cheese",
@@ -16946,9 +17287,14 @@
    }
   ],
   "answer": "Goat cheese",
-  "accepts": [],
+  "accepts": [
+   "ឈីសពពែ"
+  ],
   "explanation": "goat + cheese = goat cheese.",
-  "source": "official"
+  "source": "official",
+  "km": {
+   "explanation": "“goat” + “cheese” = goat cheese។ នេះគឺឈីសពពែ។"
+  }
  },
  {
   "id": "animals-goatherd",
@@ -16975,9 +17321,14 @@
    }
   ],
   "answer": "Goatherd",
-  "accepts": [],
+  "accepts": [
+   "អ្នកគង្វាលពពែ"
+  ],
   "explanation": "goat + herd = goatherd.",
-  "source": "official"
+  "source": "official",
+  "km": {
+   "explanation": "“goat” + “herd” = goatherd។ នេះគឺអ្នកគង្វាលពពែ។"
+  }
  },
  {
   "id": "animals-duckling",
@@ -17006,7 +17357,10 @@
   "answer": "Duckling",
   "accepts": [],
   "explanation": "duck + ling = duckling.",
-  "source": "official"
+  "source": "official",
+  "km": {
+   "explanation": "“duck” + “ling” = duckling។ នេះជាកូនរបស់ទា។"
+  }
  },
  {
   "id": "animals-duck-egg",
@@ -17036,7 +17390,10 @@
   "answer": "Duck egg",
   "accepts": [],
   "explanation": "duck + egg = duck egg.",
-  "source": "official"
+  "source": "official",
+  "km": {
+   "explanation": "“duck” + “egg” = duck egg។ នេះជាពងរបស់ទា។"
+  }
  },
  {
   "id": "animals-duckweed",
@@ -17066,7 +17423,10 @@
   "answer": "Duckweed",
   "accepts": [],
   "explanation": "duck + weed = duckweed.",
-  "source": "official"
+  "source": "official",
+  "km": {
+   "explanation": "“duck” + “weed” = duckweed។ នេះជារុក្ខជាតិតូចៗអណ្តែតលើទឹក។"
+  }
  },
  {
   "id": "animals-duck-soup",
@@ -17094,9 +17454,14 @@
    }
   ],
   "answer": "Duck soup",
-  "accepts": [],
+  "accepts": [
+   "ស៊ុបទា"
+  ],
   "explanation": "duck + soup = duck soup.",
-  "source": "official"
+  "source": "official",
+  "km": {
+   "explanation": "“duck” + “soup” = duck soup។ នេះគឺស៊ុបទា។"
+  }
  },
  {
   "id": "animals-goose-egg",
@@ -17126,7 +17491,10 @@
   "answer": "Goose egg",
   "accepts": [],
   "explanation": "goose + egg = goose egg.",
-  "source": "official"
+  "source": "official",
+  "km": {
+   "explanation": "“goose” + “egg” = goose egg។ នេះជាពងរបស់ក្ងាន។"
+  }
  },
  {
   "id": "animals-gooseberry",
@@ -17156,7 +17524,10 @@
   "answer": "Gooseberry",
   "accepts": [],
   "explanation": "goose + berry = gooseberry.",
-  "source": "official"
+  "source": "official",
+  "km": {
+   "explanation": "“goose” + “berry” = gooseberry។ នេះជាផ្លែឈើតូចៗមួយប្រភេទ។"
+  }
  },
  {
   "id": "animals-snow-goose",
@@ -17184,9 +17555,14 @@
    }
   ],
   "answer": "Snow goose",
-  "accepts": [],
+  "accepts": [
+   "ក្ងានព្រិល"
+  ],
   "explanation": "snow + goose = snow goose.",
-  "source": "official"
+  "source": "official",
+  "km": {
+   "explanation": "“snow” + “goose” = snow goose។ នេះគឺក្ងានព្រិល។"
+  }
  },
  {
   "id": "animals-goose-down",
@@ -17215,7 +17591,10 @@
   "answer": "Goose down",
   "accepts": [],
   "explanation": "goose + down = goose down.",
-  "source": "official"
+  "source": "official",
+  "km": {
+   "explanation": "“goose” + “down” = goose down។ នេះជារោមទន់ៗរបស់ក្ងាន។"
+  }
  },
  {
   "id": "animals-henhouse",
@@ -17243,9 +17622,14 @@
    }
   ],
   "answer": "Henhouse",
-  "accepts": [],
+  "accepts": [
+   "ទ្រុងមាន់"
+  ],
   "explanation": "hen + house = henhouse.",
-  "source": "official"
+  "source": "official",
+  "km": {
+   "explanation": "“hen” + “house” = henhouse។ នេះគឺទ្រុងមាន់។"
+  }
  },
  {
   "id": "animals-henna",
@@ -17274,7 +17658,10 @@
   "answer": "Henna",
   "accepts": [],
   "explanation": "hen + na, said fast, sounds like henna.",
-  "source": "official"
+  "source": "official",
+  "km": {
+   "explanation": "“hen” + “na” ប្រកាសលឿនៗ ស្តាប់ទៅដូច henna។ នេះជាថ្នាំជ្រលក់ធម្មជាតិពណ៌ក្រហមត្នោត។"
+  }
  },
  {
   "id": "animals-henry",
@@ -17303,7 +17690,10 @@
   "answer": "Henry",
   "accepts": [],
   "explanation": "hen + ry, said fast, sounds like henry.",
-  "source": "official"
+  "source": "official",
+  "km": {
+   "explanation": "“hen” + “ry” ប្រកាសលឿនៗ ស្តាប់ទៅដូច Henry។ ជាឈ្មោះមនុស្ស។"
+  }
  },
  {
   "id": "animals-hen-and-chicks",
@@ -17331,9 +17721,14 @@
    }
   ],
   "answer": "Hen and chicks",
-  "accepts": [],
+  "accepts": [
+   "មាន់មេនិងកូន"
+  ],
   "explanation": "hen + chick = hen and chicks.",
-  "source": "official"
+  "source": "official",
+  "km": {
+   "explanation": "“hen” + “chick” = hen and chicks។ នេះគឺមាន់មេនិងកូន។"
+  }
  },
  {
   "id": "animals-chickpea",
@@ -17363,7 +17758,10 @@
   "answer": "Chickpea",
   "accepts": [],
   "explanation": "chick + pea = chickpea.",
-  "source": "official"
+  "source": "official",
+  "km": {
+   "explanation": "“chick” + “pea” = chickpea។ នេះជាគ្រាប់សណ្តែកមួយប្រភេទ។"
+  }
  },
  {
   "id": "animals-chicken",
@@ -17390,9 +17788,14 @@
    }
   ],
   "answer": "Chicken",
-  "accepts": [],
+  "accepts": [
+   "មាន់"
+  ],
   "explanation": "chick + en = chicken.",
-  "source": "official"
+  "source": "official",
+  "km": {
+   "explanation": "“chick” + “en” = chicken។ នេះគឺមាន់។"
+  }
  },
  {
   "id": "animals-chickweed",
@@ -17422,7 +17825,10 @@
   "answer": "Chickweed",
   "accepts": [],
   "explanation": "chick + weed = chickweed.",
-  "source": "official"
+  "source": "official",
+  "km": {
+   "explanation": "“chick” + “weed” = chickweed។ នេះជាស្មៅតូចៗមួយប្រភេទ។"
+  }
  },
  {
   "id": "animals-night-owl",
@@ -17452,7 +17858,10 @@
   "answer": "Night owl",
   "accepts": [],
   "explanation": "night + owl = night owl.",
-  "source": "official"
+  "source": "official",
+  "km": {
+   "explanation": "“night” + “owl” = night owl។ នេះជាមនុស្សដែលចូលចិត្តភ្ញាក់នៅពេលយប់។"
+  }
  },
  {
   "id": "animals-owlet",
@@ -17481,7 +17890,10 @@
   "answer": "Owlet",
   "accepts": [],
   "explanation": "owl + et = owlet.",
-  "source": "official"
+  "source": "official",
+  "km": {
+   "explanation": "“owl” + “et” = owlet។ នេះជាកូនរបស់ទីទុយ។"
+  }
  },
  {
   "id": "animals-snow-owl",
@@ -17510,10 +17922,14 @@
   ],
   "answer": "Snow owl",
   "accepts": [
-   "snowy owl"
+   "snowy owl",
+   "ទីទុយព្រិល"
   ],
   "explanation": "snow + owl = snow owl.",
-  "source": "official"
+  "source": "official",
+  "km": {
+   "explanation": "“snow” + “owl” = snow owl។ នេះគឺទីទុយព្រិល។"
+  }
  },
  {
   "id": "animals-crowbar",
@@ -17542,7 +17958,10 @@
   "answer": "Crowbar",
   "accepts": [],
   "explanation": "crow + bar = crowbar.",
-  "source": "official"
+  "source": "official",
+  "km": {
+   "explanation": "“crow” + “bar” = crowbar។ នេះជាដែកវែងសម្រាប់ងាក់របស់ធ្ងន់ៗ។"
+  }
  },
  {
   "id": "animals-crowd",
@@ -17569,9 +17988,14 @@
    }
   ],
   "answer": "Crowd",
-  "accepts": [],
+  "accepts": [
+   "ហ្វូងមនុស្ស"
+  ],
   "explanation": "crow + d = crowd.",
-  "source": "official"
+  "source": "official",
+  "km": {
+   "explanation": "“crow” + “d” = crowd។ នេះគឺហ្វូងមនុស្ស។"
+  }
  },
  {
   "id": "animals-crowfoot",
@@ -17601,7 +18025,10 @@
   "answer": "Crowfoot",
   "accepts": [],
   "explanation": "crow + foot = crowfoot.",
-  "source": "official"
+  "source": "official",
+  "km": {
+   "explanation": "“crow” + “foot” = crowfoot។ នេះជាផ្កាព្រៃមួយប្រភេទ។"
+  }
  },
  {
   "id": "animals-crowing",
@@ -17630,7 +18057,10 @@
   "answer": "Crowing",
   "accepts": [],
   "explanation": "crow + ing = crowing.",
-  "source": "official"
+  "source": "official",
+  "km": {
+   "explanation": "“crow” + “ing” = crowing។ នេះជាសំឡេងរងាវរបស់មាន់ឈ្មោល។"
+  }
  },
  {
   "id": "animals-eagle-eye",
@@ -17660,7 +18090,10 @@
   "answer": "Eagle eye",
   "accepts": [],
   "explanation": "eagle + eye = eagle eye.",
-  "source": "official"
+  "source": "official",
+  "km": {
+   "explanation": "“eagle” + “eye” = eagle eye។ នេះជាអ្នកមានភ្នែកមុតស្រួច។"
+  }
  },
  {
   "id": "animals-sea-eagle",
@@ -17688,9 +18121,14 @@
    }
   ],
   "answer": "Sea eagle",
-  "accepts": [],
+  "accepts": [
+   "ឥន្ទ្រីសមុទ្រ"
+  ],
   "explanation": "sea + eagle = sea eagle.",
-  "source": "official"
+  "source": "official",
+  "km": {
+   "explanation": "“sea” + “eagle” = sea eagle។ នេះគឺឥន្ទ្រីសមុទ្រ។"
+  }
  },
  {
   "id": "animals-eagle-owl",
@@ -17720,7 +18158,10 @@
   "answer": "Eagle owl",
   "accepts": [],
   "explanation": "eagle + owl = eagle owl.",
-  "source": "official"
+  "source": "official",
+  "km": {
+   "explanation": "“eagle” + “owl” = eagle owl។ នេះជាទីទុយធំមួយប្រភេទ។"
+  }
  },
  {
   "id": "animals-eaglet",
@@ -17749,7 +18190,10 @@
   "answer": "Eaglet",
   "accepts": [],
   "explanation": "eagle + et = eaglet.",
-  "source": "official"
+  "source": "official",
+  "km": {
+   "explanation": "“eagle” + “et” = eaglet។ នេះជាកូនរបស់ឥន្ទ្រី។"
+  }
  },
  {
   "id": "animals-fish-eagle",
@@ -17777,9 +18221,14 @@
    }
   ],
   "answer": "Fish eagle",
-  "accepts": [],
+  "accepts": [
+   "ឥន្ទ្រីចាប់ត្រី"
+  ],
   "explanation": "fish + eagle = fish eagle.",
-  "source": "official"
+  "source": "official",
+  "km": {
+   "explanation": "“fish” + “eagle” = fish eagle។ នេះគឺឥន្ទ្រីចាប់ត្រី។"
+  }
  },
  {
   "id": "animals-swansea",
@@ -17809,7 +18258,10 @@
   "answer": "Swansea",
   "accepts": [],
   "explanation": "swan + sea = swansea.",
-  "source": "official"
+  "source": "official",
+  "km": {
+   "explanation": "“swan” + “sea” = swansea។ នេះជាឈ្មោះក្រុងមួយនៅប្រទេសអង់គ្លេស។"
+  }
  },
  {
   "id": "animals-black-swan",
@@ -17837,9 +18289,14 @@
    }
   ],
   "answer": "Black swan",
-  "accepts": [],
+  "accepts": [
+   "ហង្សខ្មៅ"
+  ],
   "explanation": "black + swan = black swan.",
-  "source": "official"
+  "source": "official",
+  "km": {
+   "explanation": "“black” + “swan” = black swan។ នេះគឺហង្សខ្មៅ។"
+  }
  },
  {
   "id": "animals-white-swan",
@@ -17867,9 +18324,14 @@
    }
   ],
   "answer": "White swan",
-  "accepts": [],
+  "accepts": [
+   "ហង្សស"
+  ],
   "explanation": "white + swan = white swan.",
-  "source": "official"
+  "source": "official",
+  "km": {
+   "explanation": "“white” + “swan” = white swan។ នេះគឺហង្សស។"
+  }
  },
  {
   "id": "animals-swan-boat",
@@ -17897,9 +18359,14 @@
    }
   ],
   "answer": "Swan boat",
-  "accepts": [],
+  "accepts": [
+   "ទូកហង្ស"
+  ],
   "explanation": "swan + boat = swan boat.",
-  "source": "official"
+  "source": "official",
+  "km": {
+   "explanation": "“swan” + “boat” = swan boat។ នេះគឺទូកហង្ស។"
+  }
  },
  {
   "id": "animals-swan-song",
@@ -17928,7 +18395,10 @@
   "answer": "Swan song",
   "accepts": [],
   "explanation": "swan + song = swan song.",
-  "source": "official"
+  "source": "official",
+  "km": {
+   "explanation": "“swan” + “song” = swan song។ នេះជាការសម្តែងចុងក្រោយ។"
+  }
  },
  {
   "id": "animals-ice-penguin",
@@ -17958,7 +18428,10 @@
   "answer": "Ice penguin",
   "accepts": [],
   "explanation": "ice + penguin = ice penguin.",
-  "source": "official"
+  "source": "official",
+  "km": {
+   "explanation": "“ice” + “penguin” = ice penguin។ នេះជាសត្វភេនឃ្វីនរស់នៅលើទឹកកក។"
+  }
  },
  {
   "id": "animals-penguin-egg",
@@ -17988,7 +18461,10 @@
   "answer": "Penguin egg",
   "accepts": [],
   "explanation": "penguin + egg = penguin egg.",
-  "source": "official"
+  "source": "official",
+  "km": {
+   "explanation": "“penguin” + “egg” = penguin egg។ នេះជាពងរបស់សត្វភេនឃ្វីន។"
+  }
  },
  {
   "id": "animals-penguin-slide",
@@ -18017,7 +18493,10 @@
   "answer": "Penguin slide",
   "accepts": [],
   "explanation": "penguin + slide = penguin slide.",
-  "source": "official"
+  "source": "official",
+  "km": {
+   "explanation": "“penguin” + “slide” = penguin slide។ នេះជាភេនឃ្វីនដែលរអិលលើទឹកកក។"
+  }
  },
  {
   "id": "animals-snow-penguin",
@@ -18047,7 +18526,10 @@
   "answer": "Snow penguin",
   "accepts": [],
   "explanation": "snow + penguin = snow penguin.",
-  "source": "official"
+  "source": "official",
+  "km": {
+   "explanation": "“snow” + “penguin” = snow penguin។ នេះជាសត្វភេនឃ្វីនរស់នៅលើព្រិល។"
+  }
  },
  {
   "id": "animals-sea-snake",
@@ -18075,9 +18557,14 @@
    }
   ],
   "answer": "Sea snake",
-  "accepts": [],
+  "accepts": [
+   "ពស់សមុទ្រ"
+  ],
   "explanation": "sea + snake = sea snake.",
-  "source": "official"
+  "source": "official",
+  "km": {
+   "explanation": "“sea” + “snake” = sea snake។ នេះគឺពស់សមុទ្រ។"
+  }
  },
  {
   "id": "animals-snakes-and-ladders",
@@ -18109,7 +18596,10 @@
    "snakes and ladder"
   ],
   "explanation": "snake + ladder = snakes and ladders.",
-  "source": "official"
+  "source": "official",
+  "km": {
+   "explanation": "“snake” + “ladder” = snakes and ladders។ នេះជាល្បែងក្តារដែលមានពស់និងជណ្តើរ។"
+  }
  },
  {
   "id": "animals-water-snake",
@@ -18139,7 +18629,10 @@
   "answer": "Water snake",
   "accepts": [],
   "explanation": "water + snake = water snake.",
-  "source": "official"
+  "source": "official",
+  "km": {
+   "explanation": "“water” + “snake” = water snake។ នេះជាពស់ដែលរស់នៅក្នុងទឹក។"
+  }
  },
  {
   "id": "animals-sand-snake",
@@ -18167,9 +18660,14 @@
    }
   ],
   "answer": "Sand snake",
-  "accepts": [],
+  "accepts": [
+   "ពស់ខ្សាច់"
+  ],
   "explanation": "sand + snake = sand snake.",
-  "source": "official"
+  "source": "official",
+  "km": {
+   "explanation": "“sand” + “snake” = sand snake។ នេះគឺពស់ខ្សាច់។"
+  }
  },
  {
   "id": "animals-snakehead",
@@ -18197,9 +18695,14 @@
    }
   ],
   "answer": "Snakehead",
-  "accepts": [],
+  "accepts": [
+   "ត្រីឆ្តោ"
+  ],
   "explanation": "snake + head = snakehead.",
-  "source": "official"
+  "source": "official",
+  "km": {
+   "explanation": "“snake” + “head” = snakehead។ នេះគឺត្រីឆ្តោ។"
+  }
  },
  {
   "id": "animals-turtleneck",
@@ -18228,7 +18731,10 @@
   "answer": "Turtleneck",
   "accepts": [],
   "explanation": "turtle + neck = turtleneck.",
-  "source": "official"
+  "source": "official",
+  "km": {
+   "explanation": "“turtle” + “neck” = turtleneck។ នេះជាអាវដែលមានកអាវខ្ពស់។"
+  }
  },
  {
   "id": "animals-sea-turtle",
@@ -18258,7 +18764,10 @@
   "answer": "Sea turtle",
   "accepts": [],
   "explanation": "sea + turtle = sea turtle.",
-  "source": "official"
+  "source": "official",
+  "km": {
+   "explanation": "“sea” + “turtle” = sea turtle។ នេះជាអណ្តើកដែលរស់នៅក្នុងសមុទ្រ។"
+  }
  },
  {
   "id": "animals-turtle-shell",
@@ -18286,9 +18795,14 @@
    }
   ],
   "answer": "Turtle shell",
-  "accepts": [],
+  "accepts": [
+   "សំបកអណ្តើក"
+  ],
   "explanation": "turtle + shell = turtle shell.",
-  "source": "official"
+  "source": "official",
+  "km": {
+   "explanation": "“turtle” + “shell” = turtle shell។ នេះគឺសំបកអណ្តើក។"
+  }
  },
  {
   "id": "animals-turtle-soup",
@@ -18316,9 +18830,14 @@
    }
   ],
   "answer": "Turtle soup",
-  "accepts": [],
+  "accepts": [
+   "ស៊ុបអណ្តើក"
+  ],
   "explanation": "turtle + soup = turtle soup.",
-  "source": "official"
+  "source": "official",
+  "km": {
+   "explanation": "“turtle” + “soup” = turtle soup។ នេះគឺស៊ុបអណ្តើក។"
+  }
  },
  {
   "id": "animals-land-turtle",
@@ -18346,9 +18865,14 @@
    }
   ],
   "answer": "Land turtle",
-  "accepts": [],
+  "accepts": [
+   "អណ្តើកគោក"
+  ],
   "explanation": "land + turtle = land turtle.",
-  "source": "official"
+  "source": "official",
+  "km": {
+   "explanation": "“land” + “turtle” = land turtle។ នេះគឺអណ្តើកគោក។"
+  }
  },
  {
   "id": "animals-turtle-egg",
@@ -18378,7 +18902,10 @@
   "answer": "Turtle egg",
   "accepts": [],
   "explanation": "turtle + egg = turtle egg.",
-  "source": "official"
+  "source": "official",
+  "km": {
+   "explanation": "“turtle” + “egg” = turtle egg។ នេះជាពងរបស់អណ្តើក។"
+  }
  },
  {
   "id": "animals-crabapple",
@@ -18408,7 +18935,10 @@
   "answer": "Crabapple",
   "accepts": [],
   "explanation": "crab + apple = crabapple.",
-  "source": "official"
+  "source": "official",
+  "km": {
+   "explanation": "“crab” + “apple” = crabapple។ នេះជាផ្លែប៉ោមព្រៃតូចៗ។"
+  }
  },
  {
   "id": "animals-crab-cake",
@@ -18438,7 +18968,10 @@
   "answer": "Crab cake",
   "accepts": [],
   "explanation": "crab + cake = crab cake.",
-  "source": "official"
+  "source": "official",
+  "km": {
+   "explanation": "“crab” + “cake” = crab cake។ នេះជានំធ្វើពីសាច់ក្តាម។"
+  }
  },
  {
   "id": "animals-sand-crab",
@@ -18466,9 +18999,14 @@
    }
   ],
   "answer": "Sand crab",
-  "accepts": [],
+  "accepts": [
+   "ក្តាមខ្សាច់"
+  ],
   "explanation": "sand + crab = sand crab.",
-  "source": "official"
+  "source": "official",
+  "km": {
+   "explanation": "“sand” + “crab” = sand crab។ នេះគឺក្តាមខ្សាច់។"
+  }
  },
  {
   "id": "animals-crabby",
@@ -18497,7 +19035,10 @@
   "answer": "Crabby",
   "accepts": [],
   "explanation": "crab + by = crabby.",
-  "source": "official"
+  "source": "official",
+  "km": {
+   "explanation": "“crab” + “by” = crabby។ នេះជាអ្នកដែលខឹងរហ័ស។"
+  }
  },
  {
   "id": "animals-crab-soup",
@@ -18525,9 +19066,14 @@
    }
   ],
   "answer": "Crab soup",
-  "accepts": [],
+  "accepts": [
+   "ស៊ុបក្តាម"
+  ],
   "explanation": "crab + soup = crab soup.",
-  "source": "official"
+  "source": "official",
+  "km": {
+   "explanation": "“crab” + “soup” = crab soup។ នេះគឺស៊ុបក្តាម។"
+  }
  },
  {
   "id": "animals-crab-meat",
@@ -18557,7 +19103,10 @@
   "answer": "Crab meat",
   "accepts": [],
   "explanation": "crab + meat = crab meat.",
-  "source": "official"
+  "source": "official",
+  "km": {
+   "explanation": "“crab” + “meat” = crab meat។ នេះជាសាច់របស់ក្តាម។"
+  }
  },
  {
   "id": "animals-hammerhead-shark",
@@ -18596,7 +19145,10 @@
   "answer": "Hammerhead shark",
   "accepts": [],
   "explanation": "hammer + head + shark = hammerhead shark.",
-  "source": "official"
+  "source": "official",
+  "km": {
+   "explanation": "“hammer” + “head” + “shark” = hammerhead shark។ នេះជាត្រីឆ្លាមដែលមានក្បាលដូចញញួរ។"
+  }
  },
  {
   "id": "animals-shark-fin",
@@ -18624,9 +19176,14 @@
    }
   ],
   "answer": "Shark fin",
-  "accepts": [],
+  "accepts": [
+   "ព្រុយឆ្លាម"
+  ],
   "explanation": "shark + fin = shark fin.",
-  "source": "official"
+  "source": "official",
+  "km": {
+   "explanation": "“shark” + “fin” = shark fin។ នេះគឺព្រុយឆ្លាម។"
+  }
  },
  {
   "id": "animals-whale-shark",
@@ -18654,9 +19211,14 @@
    }
   ],
   "answer": "Whale shark",
-  "accepts": [],
+  "accepts": [
+   "ឆ្លាមត្រីបាឡែន"
+  ],
   "explanation": "whale + shark = whale shark.",
-  "source": "official"
+  "source": "official",
+  "km": {
+   "explanation": "“whale” + “shark” = whale shark។ នេះគឺឆ្លាមត្រីបាឡែន។"
+  }
  },
  {
   "id": "animals-tiger-shark",
@@ -18684,9 +19246,14 @@
    }
   ],
   "answer": "Tiger shark",
-  "accepts": [],
+  "accepts": [
+   "ឆ្លាមខ្លា"
+  ],
   "explanation": "tiger + shark = tiger shark.",
-  "source": "official"
+  "source": "official",
+  "km": {
+   "explanation": "“tiger” + “shark” = tiger shark។ នេះគឺឆ្លាមខ្លា។"
+  }
  },
  {
   "id": "animals-loan-shark",
@@ -18716,7 +19283,10 @@
   "answer": "Loan shark",
   "accepts": [],
   "explanation": "loan + shark = loan shark.",
-  "source": "official"
+  "source": "official",
+  "km": {
+   "explanation": "“loan” + “shark” = loan shark។ នេះជាអ្នកឱ្យខ្ចីប្រាក់ដែលយកការប្រាក់ខ្ពស់ពេក។"
+  }
  },
  {
   "id": "animals-sand-shark",
@@ -18744,9 +19314,14 @@
    }
   ],
   "answer": "Sand shark",
-  "accepts": [],
+  "accepts": [
+   "ឆ្លាមខ្សាច់"
+  ],
   "explanation": "sand + shark = sand shark.",
-  "source": "official"
+  "source": "official",
+  "km": {
+   "explanation": "“sand” + “shark” = sand shark។ នេះគឺឆ្លាមខ្សាច់។"
+  }
  },
  {
   "id": "animals-blue-shark",
@@ -18774,9 +19349,14 @@
    }
   ],
   "answer": "Blue shark",
-  "accepts": [],
+  "accepts": [
+   "ឆ្លាមខៀវ"
+  ],
   "explanation": "blue + shark = blue shark.",
-  "source": "official"
+  "source": "official",
+  "km": {
+   "explanation": "“blue” + “shark” = blue shark។ នេះគឺឆ្លាមខៀវ។"
+  }
  },
  {
   "id": "animals-zebra-shark",
@@ -18804,9 +19384,14 @@
    }
   ],
   "answer": "Zebra shark",
-  "accepts": [],
+  "accepts": [
+   "ឆ្លាមសេះបង្កង់"
+  ],
   "explanation": "zebra + shark = zebra shark.",
-  "source": "official"
+  "source": "official",
+  "km": {
+   "explanation": "“zebra” + “shark” = zebra shark។ នេះគឺឆ្លាមសេះបង្កង់។"
+  }
  },
  {
   "id": "animals-octopus-arm",
@@ -18836,7 +19421,10 @@
   "answer": "Octopus arm",
   "accepts": [],
   "explanation": "octopus + arm = octopus arm.",
-  "source": "official"
+  "source": "official",
+  "km": {
+   "explanation": "“octopus” + “arm” = octopus arm។ នេះជាដៃរបស់សត្វសមុទ្រដែលមានដៃ ៨។"
+  }
  },
  {
   "id": "animals-octopus-ink",
@@ -18865,7 +19453,10 @@
   "answer": "Octopus ink",
   "accepts": [],
   "explanation": "octopus + ink = octopus ink.",
-  "source": "official"
+  "source": "official",
+  "km": {
+   "explanation": "“octopus” + “ink” = octopus ink។ នេះជាទឹកខ្មៅរបស់សត្វសមុទ្រដែលមានដៃ ៨។"
+  }
  },
  {
   "id": "animals-blue-octopus",
@@ -18895,7 +19486,10 @@
   "answer": "Blue octopus",
   "accepts": [],
   "explanation": "blue + octopus = blue octopus.",
-  "source": "official"
+  "source": "official",
+  "km": {
+   "explanation": "“blue” + “octopus” = blue octopus។ នេះជាសត្វសមុទ្រដែលមានដៃ ៨ ពណ៌ខៀវ។"
+  }
  },
  {
   "id": "animals-anteater",
@@ -18922,9 +19516,14 @@
    }
   ],
   "answer": "Anteater",
-  "accepts": [],
+  "accepts": [
+   "សត្វស៊ីស្រមោច"
+  ],
   "explanation": "ant + eater = anteater.",
-  "source": "official"
+  "source": "official",
+  "km": {
+   "explanation": "“ant” + “eater” = anteater។ នេះគឺសត្វស៊ីស្រមោច។"
+  }
  },
  {
   "id": "animals-fire-ant",
@@ -18952,9 +19551,14 @@
    }
   ],
   "answer": "Fire ant",
-  "accepts": [],
+  "accepts": [
+   "ស្រមោចភ្លើង"
+  ],
   "explanation": "fire + ant = fire ant.",
-  "source": "official"
+  "source": "official",
+  "km": {
+   "explanation": "“fire” + “ant” = fire ant។ នេះគឺស្រមោចភ្លើង។"
+  }
  },
  {
   "id": "animals-antler",
@@ -18981,9 +19585,14 @@
    }
   ],
   "answer": "Antler",
-  "accepts": [],
+  "accepts": [
+   "ស្នែង"
+  ],
   "explanation": "ant + ler, said fast, sounds like antler.",
-  "source": "official"
+  "source": "official",
+  "km": {
+   "explanation": "“ant” + “ler” ប្រកាសលឿនៗ ស្តាប់ទៅដូច antler។ នេះគឺស្នែង។"
+  }
  },
  {
   "id": "animals-anthem",
@@ -19012,7 +19621,10 @@
   "answer": "Anthem",
   "accepts": [],
   "explanation": "ant + hem, said fast, sounds like anthem.",
-  "source": "official"
+  "source": "official",
+  "km": {
+   "explanation": "“ant” + “hem” ប្រកាសលឿនៗ ស្តាប់ទៅដូច anthem។ នេះជាបទចម្រៀងជាតិ។"
+  }
  },
  {
   "id": "animals-giant",
@@ -19039,9 +19651,14 @@
    }
   ],
   "answer": "Giant",
-  "accepts": [],
+  "accepts": [
+   "យក្ស"
+  ],
   "explanation": "gi + ant, said fast, sounds like giant.",
-  "source": "official"
+  "source": "official",
+  "km": {
+   "explanation": "“gi” + “ant” ប្រកាសលឿនៗ ស្តាប់ទៅដូច giant។ នេះគឺយក្ស។"
+  }
  },
  {
   "id": "animals-spider-web",
@@ -19068,9 +19685,14 @@
    }
   ],
   "answer": "Spider web",
-  "accepts": [],
+  "accepts": [
+   "សំណាញ់ពីងពាង"
+  ],
   "explanation": "spider + web = spider web.",
-  "source": "official"
+  "source": "official",
+  "km": {
+   "explanation": "“spider” + “web” = spider web។ នេះគឺសំណាញ់ពីងពាង។"
+  }
  },
  {
   "id": "animals-spider-man",
@@ -19098,9 +19720,14 @@
    }
   ],
   "answer": "Spider man",
-  "accepts": [],
+  "accepts": [
+   "បុរសពីងពាង"
+  ],
   "explanation": "spider + man = spider man.",
-  "source": "official"
+  "source": "official",
+  "km": {
+   "explanation": "“spider” + “man” = spider man។ នេះគឺបុរសពីងពាង។"
+  }
  },
  {
   "id": "animals-water-spider",
@@ -19128,9 +19755,14 @@
    }
   ],
   "answer": "Water spider",
-  "accepts": [],
+  "accepts": [
+   "ពីងពាងទឹក"
+  ],
   "explanation": "water + spider = water spider.",
-  "source": "official"
+  "source": "official",
+  "km": {
+   "explanation": "“water” + “spider” = water spider។ នេះគឺពីងពាងទឹក។"
+  }
  },
  {
   "id": "animals-spider-monkey",
@@ -19158,9 +19790,14 @@
    }
   ],
   "answer": "Spider monkey",
-  "accepts": [],
+  "accepts": [
+   "ស្វាពីងពាង"
+  ],
   "explanation": "spider + monkey = spider monkey.",
-  "source": "official"
+  "source": "official",
+  "km": {
+   "explanation": "“spider” + “monkey” = spider monkey។ នេះគឺស្វាពីងពាង។"
+  }
  },
  {
   "id": "animals-spider-crab",
@@ -19188,9 +19825,14 @@
    }
   ],
   "answer": "Spider crab",
-  "accepts": [],
+  "accepts": [
+   "ក្តាមពីងពាង"
+  ],
   "explanation": "spider + crab = spider crab.",
-  "source": "official"
+  "source": "official",
+  "km": {
+   "explanation": "“spider” + “crab” = spider crab។ នេះគឺក្តាមពីងពាង។"
+  }
  },
  {
   "id": "animals-spider-plant",
@@ -19220,7 +19862,10 @@
   "answer": "Spider plant",
   "accepts": [],
   "explanation": "spider + plant = spider plant.",
-  "source": "official"
+  "source": "official",
+  "km": {
+   "explanation": "“spider” + “plant” = spider plant។ នេះជាដើមឈើដាំក្នុងផ្ទះមួយប្រភេទ។"
+  }
  },
  {
   "id": "animals-rabbit-hole",
@@ -19248,9 +19893,14 @@
    }
   ],
   "answer": "Rabbit hole",
-  "accepts": [],
+  "accepts": [
+   "រន្ធទន្សាយ"
+  ],
   "explanation": "rabbit + hole = rabbit hole.",
-  "source": "official"
+  "source": "official",
+  "km": {
+   "explanation": "“rabbit” + “hole” = rabbit hole។ នេះគឺរន្ធទន្សាយ។"
+  }
  },
  {
   "id": "animals-white-rabbit",
@@ -19278,9 +19928,14 @@
    }
   ],
   "answer": "White rabbit",
-  "accepts": [],
+  "accepts": [
+   "ទន្សាយស"
+  ],
   "explanation": "white + rabbit = white rabbit.",
-  "source": "official"
+  "source": "official",
+  "km": {
+   "explanation": "“white” + “rabbit” = white rabbit។ នេះគឺទន្សាយស។"
+  }
  },
  {
   "id": "animals-rabbit-ears",
@@ -19309,10 +19964,14 @@
   ],
   "answer": "Rabbit ears",
   "accepts": [
-   "rabbit ear"
+   "rabbit ear",
+   "ត្រចៀកទន្សាយ"
   ],
   "explanation": "rabbit + ear = rabbit ears.",
-  "source": "official"
+  "source": "official",
+  "km": {
+   "explanation": "“rabbit” + “ear” = rabbit ears។ នេះគឺត្រចៀកទន្សាយ។"
+  }
  },
  {
   "id": "animals-rabbit-foot",
@@ -19340,9 +19999,14 @@
    }
   ],
   "answer": "Rabbit foot",
-  "accepts": [],
+  "accepts": [
+   "ជើងទន្សាយ"
+  ],
   "explanation": "rabbit + foot = rabbit foot.",
-  "source": "official"
+  "source": "official",
+  "km": {
+   "explanation": "“rabbit” + “foot” = rabbit foot។ នេះគឺជើងទន្សាយ។"
+  }
  },
  {
   "id": "animals-rabbit-pie",
@@ -19372,7 +20036,10 @@
   "answer": "Rabbit pie",
   "accepts": [],
   "explanation": "rabbit + pie = rabbit pie.",
-  "source": "official"
+  "source": "official",
+  "km": {
+   "explanation": "“rabbit” + “pie” = rabbit pie។ នេះជានំបុ័ងបំពេញដោយសាច់ទន្សាយ។"
+  }
  },
  {
   "id": "animals-moon-rabbit",
@@ -19400,9 +20067,14 @@
    }
   ],
   "answer": "Moon rabbit",
-  "accepts": [],
+  "accepts": [
+   "ទន្សាយព្រះចន្ទ"
+  ],
   "explanation": "moon + rabbit = moon rabbit.",
-  "source": "official"
+  "source": "official",
+  "km": {
+   "explanation": "“moon” + “rabbit” = moon rabbit។ នេះគឺទន្សាយព្រះចន្ទ។"
+  }
  },
  {
   "id": "animals-snow-rabbit",
@@ -19430,9 +20102,14 @@
    }
   ],
   "answer": "Snow rabbit",
-  "accepts": [],
+  "accepts": [
+   "ទន្សាយព្រិល"
+  ],
   "explanation": "snow + rabbit = snow rabbit.",
-  "source": "official"
+  "source": "official",
+  "km": {
+   "explanation": "“snow” + “rabbit” = snow rabbit។ នេះគឺទន្សាយព្រិល។"
+  }
  },
  {
   "id": "animals-elephant-seal",
@@ -19462,7 +20139,10 @@
   "answer": "Elephant seal",
   "accepts": [],
   "explanation": "elephant + seal = elephant seal.",
-  "source": "official"
+  "source": "official",
+  "km": {
+   "explanation": "“elephant” + “seal” = elephant seal។ នេះជាសត្វសមុទ្រធំដែលមានច្រមុះវែង។"
+  }
  },
  {
   "id": "animals-elephant-ear",
@@ -19490,9 +20170,14 @@
    }
   ],
   "answer": "Elephant ear",
-  "accepts": [],
+  "accepts": [
+   "ត្រចៀកដំរី"
+  ],
   "explanation": "elephant + ear = elephant ear.",
-  "source": "official"
+  "source": "official",
+  "km": {
+   "explanation": "“elephant” + “ear” = elephant ear។ នេះគឺត្រចៀកដំរី។"
+  }
  },
  {
   "id": "animals-elephant-foot",
@@ -19520,9 +20205,14 @@
    }
   ],
   "answer": "Elephant foot",
-  "accepts": [],
+  "accepts": [
+   "ជើងដំរី"
+  ],
   "explanation": "elephant + foot = elephant foot.",
-  "source": "official"
+  "source": "official",
+  "km": {
+   "explanation": "“elephant” + “foot” = elephant foot។ នេះគឺជើងដំរី។"
+  }
  },
  {
   "id": "animals-white-elephant",
@@ -19550,9 +20240,14 @@
    }
   ],
   "answer": "White elephant",
-  "accepts": [],
+  "accepts": [
+   "ដំរីស"
+  ],
   "explanation": "white + elephant = white elephant.",
-  "source": "official"
+  "source": "official",
+  "km": {
+   "explanation": "“white” + “elephant” = white elephant។ នេះគឺដំរីស។"
+  }
  },
  {
   "id": "animals-sea-elephant",
@@ -19582,7 +20277,10 @@
   "answer": "Sea elephant",
   "accepts": [],
   "explanation": "sea + elephant = sea elephant.",
-  "source": "official"
+  "source": "official",
+  "km": {
+   "explanation": "“sea” + “elephant” = sea elephant។ នេះជាសត្វសមុទ្រធំដែលមានច្រមុះវែង។"
+  }
  },
  {
   "id": "animals-elephant-bird",
@@ -19612,7 +20310,10 @@
   "answer": "Elephant bird",
   "accepts": [],
   "explanation": "elephant + bird = elephant bird.",
-  "source": "official"
+  "source": "official",
+  "km": {
+   "explanation": "“elephant” + “bird” = elephant bird។ នេះជាបក្សីធំដែលបានផុតពូជ។"
+  }
  },
  {
   "id": "animals-giraffe-and-zebra",
@@ -19640,9 +20341,14 @@
    }
   ],
   "answer": "Giraffe and zebra",
-  "accepts": [],
+  "accepts": [
+   "សត្វហ្ស៊ីរ៉ាហ្វនិងសេះបង្កង់"
+  ],
   "explanation": "giraffe + zebra = giraffe and zebra.",
-  "source": "official"
+  "source": "official",
+  "km": {
+   "explanation": "“giraffe” + “zebra” = giraffe and zebra។ នេះគឺសត្វហ្ស៊ីរ៉ាហ្វនិងសេះបង្កង់។"
+  }
  },
  {
   "id": "animals-giraffe-and-elephant",
@@ -19670,9 +20376,14 @@
    }
   ],
   "answer": "Giraffe and elephant",
-  "accepts": [],
+  "accepts": [
+   "សត្វហ្ស៊ីរ៉ាហ្វនិងដំរី"
+  ],
   "explanation": "giraffe + elephant = giraffe and elephant.",
-  "source": "official"
+  "source": "official",
+  "km": {
+   "explanation": "“giraffe” + “elephant” = giraffe and elephant។ នេះគឺសត្វហ្ស៊ីរ៉ាហ្វនិងដំរី។"
+  }
  },
  {
   "id": "animals-zebra-and-giraffe",
@@ -19700,9 +20411,14 @@
    }
   ],
   "answer": "Zebra and giraffe",
-  "accepts": [],
+  "accepts": [
+   "សេះបង្កង់និងសត្វហ្ស៊ីរ៉ាហ្វ"
+  ],
   "explanation": "zebra + giraffe = zebra and giraffe.",
-  "source": "official"
+  "source": "official",
+  "km": {
+   "explanation": "“zebra” + “giraffe” = zebra and giraffe។ នេះគឺសេះបង្កង់និងសត្វហ្ស៊ីរ៉ាហ្វ។"
+  }
  },
  {
   "id": "animals-zebra-crossing",
@@ -19740,7 +20456,10 @@
   "answer": "Zebra crossing",
   "accepts": [],
   "explanation": "zebra + cross + ing = zebra crossing.",
-  "source": "official"
+  "source": "official",
+  "km": {
+   "explanation": "“zebra” + “cross” + “ing” = zebra crossing។ នេះជាកន្លែងសម្រាប់ដើរឆ្លងផ្លូវ។"
+  }
  },
  {
   "id": "animals-zebrafish",
@@ -19770,7 +20489,10 @@
   "answer": "Zebrafish",
   "accepts": [],
   "explanation": "zebra + fish = zebrafish.",
-  "source": "official"
+  "source": "official",
+  "km": {
+   "explanation": "“zebra” + “fish” = zebrafish។ នេះជាត្រីតូចមានឆ្នូត។"
+  }
  },
  {
   "id": "animals-zebra-plant",
@@ -19800,7 +20522,10 @@
   "answer": "Zebra plant",
   "accepts": [],
   "explanation": "zebra + plant = zebra plant.",
-  "source": "official"
+  "source": "official",
+  "km": {
+   "explanation": "“zebra” + “plant” = zebra plant។ នេះជាដើមឈើដាំក្នុងផ្ទះមានស្លឹកឆ្នូត។"
+  }
  },
  {
   "id": "animals-white-tiger",
@@ -19828,9 +20553,14 @@
    }
   ],
   "answer": "White tiger",
-  "accepts": [],
+  "accepts": [
+   "ខ្លាស"
+  ],
   "explanation": "white + tiger = white tiger.",
-  "source": "official"
+  "source": "official",
+  "km": {
+   "explanation": "“white” + “tiger” = white tiger។ នេះគឺខ្លាស។"
+  }
  },
  {
   "id": "animals-paper-tiger",
@@ -19860,7 +20590,10 @@
   "answer": "Paper tiger",
   "accepts": [],
   "explanation": "paper + tiger = paper tiger.",
-  "source": "official"
+  "source": "official",
+  "km": {
+   "explanation": "“paper” + “tiger” = paper tiger។ នេះជាអ្នកដែលមើលទៅខ្លាំង តែតាមពិតខ្សោយ។"
+  }
  },
  {
   "id": "animals-tiger-eye",
@@ -19888,9 +20621,14 @@
    }
   ],
   "answer": "Tiger eye",
-  "accepts": [],
+  "accepts": [
+   "ភ្នែកខ្លា"
+  ],
   "explanation": "tiger + eye = tiger eye.",
-  "source": "official"
+  "source": "official",
+  "km": {
+   "explanation": "“tiger” + “eye” = tiger eye។ នេះគឺភ្នែកខ្លា។"
+  }
  },
  {
   "id": "animals-tigerfish",
@@ -19920,7 +20658,10 @@
   "answer": "Tigerfish",
   "accepts": [],
   "explanation": "tiger + fish = tigerfish.",
-  "source": "official"
+  "source": "official",
+  "km": {
+   "explanation": "“tiger” + “fish” = tigerfish។ នេះជាត្រីមួយប្រភេទដែលមានឆ្នូត។"
+  }
  },
  {
   "id": "animals-snow-tiger",
@@ -19948,9 +20689,14 @@
    }
   ],
   "answer": "Snow tiger",
-  "accepts": [],
+  "accepts": [
+   "ខ្លាព្រិល"
+  ],
   "explanation": "snow + tiger = snow tiger.",
-  "source": "official"
+  "source": "official",
+  "km": {
+   "explanation": "“snow” + “tiger” = snow tiger។ នេះគឺខ្លាព្រិល។"
+  }
  },
  {
   "id": "animals-lion-and-tiger",
@@ -19978,9 +20724,14 @@
    }
   ],
   "answer": "Lion and tiger",
-  "accepts": [],
+  "accepts": [
+   "តោនិងខ្លា"
+  ],
   "explanation": "lion + tiger = lion and tiger.",
-  "source": "official"
+  "source": "official",
+  "km": {
+   "explanation": "“lion” + “tiger” = lion and tiger។ នេះគឺតោនិងខ្លា។"
+  }
  },
  {
   "id": "animals-camelot",
@@ -20009,7 +20760,10 @@
   "answer": "Camelot",
   "accepts": [],
   "explanation": "camel + ot, said fast, sounds like camelot.",
-  "source": "official"
+  "source": "official",
+  "km": {
+   "explanation": "“camel” + “ot” ប្រកាសលឿនៗ ស្តាប់ទៅដូច camelot។ នេះជាឈ្មោះដែនដីក្នុងរឿងព្រេង។"
+  }
  },
  {
   "id": "animals-camel-milk",
@@ -20037,9 +20791,14 @@
    }
   ],
   "answer": "Camel milk",
-  "accepts": [],
+  "accepts": [
+   "ទឹកដោះអូដ្ឋ"
+  ],
   "explanation": "camel + milk = camel milk.",
-  "source": "official"
+  "source": "official",
+  "km": {
+   "explanation": "“camel” + “milk” = camel milk។ នេះគឺទឹកដោះអូដ្ឋ។"
+  }
  },
  {
   "id": "animals-camel-hair",
@@ -20067,9 +20826,14 @@
    }
   ],
   "answer": "Camel hair",
-  "accepts": [],
+  "accepts": [
+   "រោមអូដ្ឋ"
+  ],
   "explanation": "camel + hair = camel hair.",
-  "source": "official"
+  "source": "official",
+  "km": {
+   "explanation": "“camel” + “hair” = camel hair។ នេះគឺរោមអូដ្ឋ។"
+  }
  },
  {
   "id": "animals-camel-coat",
@@ -20097,9 +20861,14 @@
    }
   ],
   "answer": "Camel coat",
-  "accepts": [],
+  "accepts": [
+   "អាវធំរោមអូដ្ឋ"
+  ],
   "explanation": "camel + coat = camel coat.",
-  "source": "official"
+  "source": "official",
+  "km": {
+   "explanation": "“camel” + “coat” = camel coat។ នេះគឺអាវធំរោមអូដ្ឋ។"
+  }
  },
  {
   "id": "animals-camel-spider",
@@ -20129,7 +20898,10 @@
   "answer": "Camel spider",
   "accepts": [],
   "explanation": "camel + spider = camel spider.",
-  "source": "official"
+  "source": "official",
+  "km": {
+   "explanation": "“camel” + “spider” = camel spider។ នេះជាសត្វមួយប្រភេទដែលរស់នៅវាលខ្សាច់។"
+  }
  },
  {
   "id": "animals-parrotfish",
@@ -20159,7 +20931,10 @@
   "answer": "Parrotfish",
   "accepts": [],
   "explanation": "parrot + fish = parrotfish.",
-  "source": "official"
+  "source": "official",
+  "km": {
+   "explanation": "“parrot” + “fish” = parrotfish។ នេះជាត្រីសមុទ្រពណ៌ស្រស់ស្អាត។"
+  }
  },
  {
   "id": "animals-parrot-egg",
@@ -20187,9 +20962,14 @@
    }
   ],
   "answer": "Parrot egg",
-  "accepts": [],
+  "accepts": [
+   "ពងសេក"
+  ],
   "explanation": "parrot + egg = parrot egg.",
-  "source": "official"
+  "source": "official",
+  "km": {
+   "explanation": "“parrot” + “egg” = parrot egg។ នេះគឺពងសេក។"
+  }
  },
  {
   "id": "animals-green-parrot",
@@ -20217,9 +20997,14 @@
    }
   ],
   "answer": "Green parrot",
-  "accepts": [],
+  "accepts": [
+   "សេកបៃតង"
+  ],
   "explanation": "green + parrot = green parrot.",
-  "source": "official"
+  "source": "official",
+  "km": {
+   "explanation": "“green” + “parrot” = green parrot។ នេះគឺសេកបៃតង។"
+  }
  },
  {
   "id": "animals-blue-parrot",
@@ -20247,9 +21032,14 @@
    }
   ],
   "answer": "Blue parrot",
-  "accepts": [],
+  "accepts": [
+   "សេកខៀវ"
+  ],
   "explanation": "blue + parrot = blue parrot.",
-  "source": "official"
+  "source": "official",
+  "km": {
+   "explanation": "“blue” + “parrot” = blue parrot។ នេះគឺសេកខៀវ។"
+  }
  },
  {
   "id": "animals-monk-seal",
@@ -20279,7 +21069,10 @@
   "answer": "Monk seal",
   "accepts": [],
   "explanation": "monk + seal = monk seal.",
-  "source": "official"
+  "source": "official",
+  "km": {
+   "explanation": "“monk” + “seal” = monk seal។ នេះជាសត្វសមុទ្រមួយប្រភេទ។"
+  }
  },
  {
   "id": "animals-seal-ring",
@@ -20309,7 +21102,10 @@
   "answer": "Seal ring",
   "accepts": [],
   "explanation": "seal + ring = seal ring.",
-  "source": "official"
+  "source": "official",
+  "km": {
+   "explanation": "“seal” + “ring” = seal ring។ នេះជាចិញ្ចៀនដែលមានត្រា។"
+  }
  },
  {
   "id": "food-orange-juice",
