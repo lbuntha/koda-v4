@@ -25,9 +25,15 @@
    }
   ],
   "answer": "Iceland",
-  "accepts": [],
+  "accepts": [
+   "អ៊ីស្លង់",
+   "ប្រទេសអ៊ីស្លង់"
+  ],
   "explanation": "ice + land = Iceland.",
-  "source": "official"
+  "source": "official",
+  "km": {
+   "explanation": "“ice” + “land” = Iceland។ នេះជាប្រទេសអ៊ីស្លង់។"
+  }
  },
  {
   "id": "countries-greenland",
@@ -55,9 +61,15 @@
    }
   ],
   "answer": "Greenland",
-  "accepts": [],
+  "accepts": [
+   "ហ្គ្រីនឡង់",
+   "ប្រទេសហ្គ្រីនឡង់"
+  ],
   "explanation": "green + land = Greenland.",
-  "source": "official"
+  "source": "official",
+  "km": {
+   "explanation": "“green” + “land” = Greenland។ នេះជាប្រទេសហ្គ្រីនឡង់។"
+  }
  },
  {
   "id": "countries-turkey",
@@ -76,9 +88,15 @@
    }
   ],
   "answer": "Turkey",
-  "accepts": [],
+  "accepts": [
+   "តួកគី",
+   "ប្រទេសតួកគី"
+  ],
   "explanation": "A turkey bird: the bird and the country share a name.",
-  "source": "official"
+  "source": "official",
+  "km": {
+   "explanation": "Turkey ជាបក្សីមួយប្រភេទ ហើយក៏ជាឈ្មោះប្រទេសតួកគីដែរ។"
+  }
  },
  {
   "id": "countries-wales",
@@ -97,9 +115,15 @@
    }
   ],
   "answer": "Wales",
-  "accepts": [],
+  "accepts": [
+   "វែល",
+   "ប្រទេសវែល"
+  ],
   "explanation": "Whales sounds just like Wales.",
-  "source": "official"
+  "source": "official",
+  "km": {
+   "explanation": "“whales” (ត្រីបាឡែន) ស្តាប់ទៅដូច Wales។ នេះជាប្រទេសវែល។"
+  }
  },
  {
   "id": "countries-chile",
@@ -118,9 +142,15 @@
    }
   ],
   "answer": "Chile",
-  "accepts": [],
+  "accepts": [
+   "ឈីលី",
+   "ប្រទេសឈីលី"
+  ],
   "explanation": "A chili pepper sounds like Chile.",
-  "source": "official"
+  "source": "official",
+  "km": {
+   "explanation": "“chili” (ម្ទេស) ស្តាប់ទៅដូច Chile។ នេះជាប្រទេសឈីលី។"
+  }
  },
  {
   "id": "countries-finland",
@@ -148,9 +178,15 @@
    }
   ],
   "answer": "Finland",
-  "accepts": [],
+  "accepts": [
+   "ហ្វាំងឡង់",
+   "ប្រទេសហ្វាំងឡង់"
+  ],
   "explanation": "fin + land = Finland.",
-  "source": "official"
+  "source": "official",
+  "km": {
+   "explanation": "“fin” + “land” = Finland។ នេះជាប្រទេសហ្វាំងឡង់។"
+  }
  },
  {
   "id": "countries-thailand",
@@ -178,9 +214,15 @@
    }
   ],
   "answer": "Thailand",
-  "accepts": [],
+  "accepts": [
+   "ថៃ",
+   "ប្រទេសថៃ"
+  ],
   "explanation": "tie + land sounds like Thailand.",
-  "source": "official"
+  "source": "official",
+  "km": {
+   "explanation": "“tie” + “land” ប្រកាសលឿនៗ ស្តាប់ទៅដូច Thailand។ នេះជាប្រទេសថៃ។"
+  }
  },
  {
   "id": "countries-poland",
@@ -208,9 +250,15 @@
    }
   ],
   "answer": "Poland",
-  "accepts": [],
+  "accepts": [
+   "ប៉ូឡូញ",
+   "ប្រទេសប៉ូឡូញ"
+  ],
   "explanation": "pole + land = Poland.",
-  "source": "official"
+  "source": "official",
+  "km": {
+   "explanation": "“pole” + “land” = Poland។ នេះជាប្រទេសប៉ូឡូញ។"
+  }
  },
  {
   "id": "countries-holland",
@@ -238,9 +286,15 @@
    }
   ],
   "answer": "Holland",
-  "accepts": [],
+  "accepts": [
+   "ហូឡង់",
+   "ប្រទេសហូឡង់"
+  ],
   "explanation": "hole + land sounds like Holland.",
-  "source": "official"
+  "source": "official",
+  "km": {
+   "explanation": "“hole” + “land” ប្រកាសលឿនៗ ស្តាប់ទៅដូច Holland។ នេះជាប្រទេសហូឡង់។"
+  }
  },
  {
   "id": "countries-norway",
@@ -268,9 +322,15 @@
    }
   ],
   "answer": "Norway",
-  "accepts": [],
+  "accepts": [
+   "ន័រវែស",
+   "ប្រទេសន័រវែស"
+  ],
   "explanation": "no + way = Norway.",
-  "source": "official"
+  "source": "official",
+  "km": {
+   "explanation": "“no” + “way” = Norway។ នេះជាប្រទេសន័រវែស។"
+  }
  },
  {
   "id": "countries-spain",
@@ -297,9 +357,15 @@
    }
   ],
   "answer": "Spain",
-  "accepts": [],
+  "accepts": [
+   "អេស្ប៉ាញ",
+   "ប្រទេសអេស្ប៉ាញ"
+  ],
   "explanation": "S + pain = Spain.",
-  "source": "official"
+  "source": "official",
+  "km": {
+   "explanation": "“S” + “pain” = Spain។ នេះជាប្រទេសអេស្ប៉ាញ។"
+  }
  },
  {
   "id": "countries-germany",
@@ -327,9 +393,15 @@
    }
   ],
   "answer": "Germany",
-  "accepts": [],
+  "accepts": [
+   "អាល្លឺម៉ង់",
+   "ប្រទេសអាល្លឺម៉ង់"
+  ],
   "explanation": "germ + money, said fast, sounds like Germany.",
-  "source": "official"
+  "source": "official",
+  "km": {
+   "explanation": "“germ” + “money” ប្រកាសលឿនៗ ស្តាប់ទៅដូច Germany។ នេះជាប្រទេសអាល្លឺម៉ង់។"
+  }
  },
  {
   "id": "countries-japan",
@@ -357,9 +429,15 @@
    }
   ],
   "answer": "Japan",
-  "accepts": [],
+  "accepts": [
+   "ជប៉ុន",
+   "ប្រទេសជប៉ុន"
+  ],
   "explanation": "jam + pan sounds like Japan.",
-  "source": "official"
+  "source": "official",
+  "km": {
+   "explanation": "“jam” + “pan” ប្រកាសលឿនៗ ស្តាប់ទៅដូច Japan។ នេះជាប្រទេសជប៉ុន។"
+  }
  },
  {
   "id": "countries-cuba",
@@ -386,9 +464,15 @@
    }
   ],
   "answer": "Cuba",
-  "accepts": [],
+  "accepts": [
+   "គុយបា",
+   "ប្រទេសគុយបា"
+  ],
   "explanation": "cube + a sounds like Cuba.",
-  "source": "official"
+  "source": "official",
+  "km": {
+   "explanation": "“cube” + “a” ប្រកាសលឿនៗ ស្តាប់ទៅដូច Cuba។ នេះជាប្រទេសគុយបា។"
+  }
  },
  {
   "id": "countries-ireland",
@@ -416,9 +500,15 @@
    }
   ],
   "answer": "Ireland",
-  "accepts": [],
+  "accepts": [
+   "អៀរឡង់",
+   "ប្រទេសអៀរឡង់"
+  ],
   "explanation": "eye + land sounds like Ireland.",
-  "source": "official"
+  "source": "official",
+  "km": {
+   "explanation": "“eye” + “land” ប្រកាសលឿនៗ ស្តាប់ទៅដូច Ireland។ នេះជាប្រទេសអៀរឡង់។"
+  }
  },
  {
   "id": "countries-haiti",
@@ -446,9 +536,15 @@
    }
   ],
   "answer": "Haiti",
-  "accepts": [],
+  "accepts": [
+   "ហៃទី",
+   "ប្រទេសហៃទី"
+  ],
   "explanation": "hay + tea sounds like Haiti.",
-  "source": "official"
+  "source": "official",
+  "km": {
+   "explanation": "“hay” + “tea” ប្រកាសលឿនៗ ស្តាប់ទៅដូច Haiti។ នេះជាប្រទេសហៃទី។"
+  }
  },
  {
   "id": "food-honeymoon",
@@ -29248,9 +29344,15 @@
    }
   ],
   "answer": "Congo",
-  "accepts": [],
+  "accepts": [
+   "កុងហ្គោ",
+   "ប្រទេសកុងហ្គោ"
+  ],
   "explanation": "cone + go, said fast, sounds like congo.",
-  "source": "official"
+  "source": "official",
+  "km": {
+   "explanation": "“cone” + “go” ប្រកាសលឿនៗ ស្តាប់ទៅដូច Congo។ នេះជាប្រទេសកុងហ្គោ។"
+  }
  },
  {
   "id": "countries-oman",
@@ -29277,9 +29379,15 @@
    }
   ],
   "answer": "Oman",
-  "accepts": [],
+  "accepts": [
+   "អូម៉ង់",
+   "ប្រទេសអូម៉ង់"
+  ],
   "explanation": "o + man, said fast, sounds like oman.",
-  "source": "official"
+  "source": "official",
+  "km": {
+   "explanation": "“o” + “man” ប្រកាសលឿនៗ ស្តាប់ទៅដូច Oman។ នេះជាប្រទេសអូម៉ង់។"
+  }
  },
  {
   "id": "countries-iran",
@@ -29306,9 +29414,15 @@
    }
   ],
   "answer": "Iran",
-  "accepts": [],
+  "accepts": [
+   "អ៊ីរ៉ង់",
+   "ប្រទេសអ៊ីរ៉ង់"
+  ],
   "explanation": "i + ran, said fast, sounds like iran.",
-  "source": "official"
+  "source": "official",
+  "km": {
+   "explanation": "“i” + “ran” ប្រកាសលឿនៗ ស្តាប់ទៅដូច Iran។ នេះជាប្រទេសអ៊ីរ៉ង់។"
+  }
  },
  {
   "id": "countries-togo",
@@ -29335,9 +29449,15 @@
    }
   ],
   "answer": "Togo",
-  "accepts": [],
+  "accepts": [
+   "តូហ្គោ",
+   "ប្រទេសតូហ្គោ"
+  ],
   "explanation": "toe + go, said fast, sounds like togo.",
-  "source": "official"
+  "source": "official",
+  "km": {
+   "explanation": "“toe” + “go” ប្រកាសលឿនៗ ស្តាប់ទៅដូច Togo។ នេះជាប្រទេសតូហ្គោ។"
+  }
  },
  {
   "id": "countries-panama",
@@ -29364,9 +29484,15 @@
    }
   ],
   "answer": "Panama",
-  "accepts": [],
+  "accepts": [
+   "ប៉ាណាម៉ា",
+   "ប្រទេសប៉ាណាម៉ា"
+  ],
   "explanation": "pan + ama, said fast, sounds like panama.",
-  "source": "official"
+  "source": "official",
+  "km": {
+   "explanation": "“pan” + “ama” ប្រកាសលឿនៗ ស្តាប់ទៅដូច Panama។ នេះជាប្រទេសប៉ាណាម៉ា។"
+  }
  },
  {
   "id": "countries-bhutan",
@@ -29393,9 +29519,15 @@
    }
   ],
   "answer": "Bhutan",
-  "accepts": [],
+  "accepts": [
+   "ប៊ូតង់",
+   "ប្រទេសប៊ូតង់"
+  ],
   "explanation": "boot + tan, said fast, sounds like bhutan.",
-  "source": "official"
+  "source": "official",
+  "km": {
+   "explanation": "“boot” + “tan” ប្រកាសលឿនៗ ស្តាប់ទៅដូច Bhutan។ នេះជាប្រទេសប៊ូតង់។"
+  }
  },
  {
   "id": "countries-italy",
@@ -29422,9 +29554,15 @@
    }
   ],
   "answer": "Italy",
-  "accepts": [],
+  "accepts": [
+   "អ៊ីតាលី",
+   "ប្រទេសអ៊ីតាលី"
+  ],
   "explanation": "eye + tally, said fast, sounds like italy.",
-  "source": "official"
+  "source": "official",
+  "km": {
+   "explanation": "“eye” + “tally” ប្រកាសលឿនៗ ស្តាប់ទៅដូច Italy។ នេះជាប្រទេសអ៊ីតាលី។"
+  }
  },
  {
   "id": "countries-china",
@@ -29451,9 +29589,15 @@
    }
   ],
   "answer": "China",
-  "accepts": [],
+  "accepts": [
+   "ចិន",
+   "ប្រទេសចិន"
+  ],
   "explanation": "chain + a, said fast, sounds like china.",
-  "source": "official"
+  "source": "official",
+  "km": {
+   "explanation": "“chain” + “a” ប្រកាសលឿនៗ ស្តាប់ទៅដូច China។ នេះជាប្រទេសចិន។"
+  }
  },
  {
   "id": "countries-tibet",
@@ -29480,9 +29624,15 @@
    }
   ],
   "answer": "Tibet",
-  "accepts": [],
+  "accepts": [
+   "ទីបេ",
+   "ទីបេ"
+  ],
   "explanation": "tea + bet, said fast, sounds like tibet.",
-  "source": "official"
+  "source": "official",
+  "km": {
+   "explanation": "“tea” + “bet” ប្រកាសលឿនៗ ស្តាប់ទៅដូច Tibet។ នេះជាទីបេ។"
+  }
  },
  {
   "id": "countries-cambodia",
@@ -29517,9 +29667,15 @@
    }
   ],
   "answer": "Cambodia",
-  "accepts": [],
+  "accepts": [
+   "កម្ពុជា",
+   "ប្រទេសកម្ពុជា"
+  ],
   "explanation": "cam + bow + dia, said fast, sounds like cambodia.",
-  "source": "official"
+  "source": "official",
+  "km": {
+   "explanation": "“cam” + “bow” + “dia” ប្រកាសលឿនៗ ស្តាប់ទៅដូច Cambodia។ នេះជាប្រទេសកម្ពុជា។"
+  }
  },
  {
   "id": "khmer-sun",

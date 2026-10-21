@@ -131,7 +131,7 @@ async def ensure_seed(db: AsyncIOMotorDatabase, puzzles: list[dict[str, Any]]) -
                 continue
             # A question that gained a Khmer version since it was seeded gets it; one that has its own is left alone.
             if puzzle.get("km") and not have.get("km"):
-                await db.rebus_puzzles.update_one({"_id": have["_id"]}, {"$set": {"km": puzzle["km"]}})
+                await db.rebus_puzzles.update_one({"_id": have["_id"]}, {"$set": {"km": puzzle["km"]}, "$addToSet": {"accepts": {"$each": puzzle.get("accepts", [])}}})
                 filled += 1
             continue
         stamp = now()

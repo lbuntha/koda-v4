@@ -12,6 +12,7 @@ import { CHOICE } from "./choice";
 import { COUNTRIES } from "./countries";
 import { FOOD } from "./food";
 import { KHMER } from "./khmer";
+import { withKhmerText } from "./khmertext";
 import { MATH } from "./math";
 import { MATH_GRADES } from "./mathq";
 import { SAYINGS } from "./sayings";
@@ -23,4 +24,4 @@ import { COUNTRIES_MORE, SCHOOL_MORE, SCIENCE_MORE } from "./more4";
 import { SCIENCE } from "./science";
 import { SPORTS } from "./sports";
 
-export const OFFICIAL_PUZZLES: readonly Puzzle[] = [...COUNTRIES, ...FOOD, ...ANIMALS, ...SAYINGS, ...SCHOOL, ...SCIENCE, ...SPORTS, ...MORE_FOOD, ...MORE_ANIMALS, ...MORE_SCIENCE, ...MORE_SAYINGS, ...HOME_SAYINGS, ...LIVING_ANIMALS, ...LIVING_FOOD, ...SCHOOL_MORE, ...SCIENCE_MORE, ...COUNTRIES_MORE, ...KHMER, ...MATH, ...MATH_GRADES, ...CHOICE];
+export const OFFICIAL_PUZZLES: readonly Puzzle[] = [...COUNTRIES, ...FOOD, ...ANIMALS, ...SAYINGS, ...SCHOOL, ...SCIENCE, ...SPORTS, ...MORE_FOOD, ...MORE_ANIMALS, ...MORE_SCIENCE, ...MORE_SAYINGS, ...HOME_SAYINGS, ...LIVING_ANIMALS, ...LIVING_FOOD, ...SCHOOL_MORE, ...SCIENCE_MORE, ...COUNTRIES_MORE, ...KHMER, ...MATH, ...MATH_GRADES, ...CHOICE].map(withKhmerText);
