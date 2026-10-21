@@ -7,7 +7,7 @@ const KHMER_SCRIPT = /^[ក-៿]+$/u;
 
 describe("the Khmer puzzles for Khmer players", () => {
   it("are written in Khmer, for the Khmer topics they belong to, and not shown to English players", () => {
-    expect(KHMER_PLAY.length).toBeGreaterThanOrEqual(30);
+    expect(KHMER_PLAY.length).toBeGreaterThanOrEqual(80);
     for (const p of KHMER_PLAY) {
       expect(p.answer, p.id).toMatch(KHMER_SCRIPT);
       expect(p.onlyIn, p.id).toBe("km");
