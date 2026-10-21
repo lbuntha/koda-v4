@@ -14,6 +14,7 @@ vi.mock("./bank", async () => {
   return {
     useRebusBank: () => (emptyBank.on ? { puzzles: [], counts: { ...bank.counts, food: 0 }, loaded: emptyBank.loaded } : bank),
     bankForAge: (b: typeof bank) => b,
+    bankForLanguage: (b: typeof bank) => b,
     useRebusCategories: () => BUILT_IN_CATEGORIES,
   };
 });

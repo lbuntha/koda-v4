@@ -23,6 +23,8 @@ export interface OpenRoomBody {
   difficulty: 1 | 2 | 3 | null;
   name: string;
   avatar: string;
+  /** The host's language: in Khmer, only puzzles playable in Khmer are dealt. */
+  language?: string;
 }
 
 export const GroupAPI = {

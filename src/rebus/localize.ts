@@ -77,3 +77,12 @@ export const answerInputMode = (puzzle: Pick<Puzzle, "kind" | "answer">): "numer
 
 /** Whether the answer is a number, so it is typed on a pad and not built from letter tiles. */
 export const isNumberAnswer = (puzzle: Pick<Puzzle, "kind" | "answer">): boolean => puzzle.kind === "math" || (puzzle.kind === "quiz" && /^[-\d.,/\s]+$/.test(puzzle.answer));
+
+/**
+ * Whether a child reading Khmer can play this puzzle. A sum is numbers; a question
+ * with Khmer words, answers or its own Khmer answer is playable. A picture puzzle
+ * that is English wordplay (with at most a Khmer "why") is not, so it is left out
+ * of a Khmer player's rounds instead of being a puzzle they cannot solve.
+ * `server/app/rebus_verify.py` has the same rule for group rooms.
+ */
+export const playableIn = (puzzle: Puzzle, language: string): boolean => language !== "km" || puzzle.kind === "math" || Boolean(puzzle.km?.pieces || puzzle.km?.answer || puzzle.km?.options);

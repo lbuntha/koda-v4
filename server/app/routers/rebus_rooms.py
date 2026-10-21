@@ -24,6 +24,7 @@ from fastapi import APIRouter, Depends, Header, Request
 from fastapi.security import HTTPAuthorizationCredentials
 
 from app import rebus_room as rules
+from app import rebus_verify
 from app.deps import Db, require
 from app.errors import AppError, Conflict, Forbidden, NotFound
 from app.models.auth import Principal
@@ -187,6 +188,7 @@ async def create_room(body: RoomCreateIn, db: Db, p: CanRead) -> dict[str, Any]:
         "category": body.category,
         "count": body.count,
         "difficulty": body.difficulty,
+        "language": body.language,
         "maxPlayers": owner.maxPlayers,
         "hintDelaySec": owner.hintDelaySec,
         "puzzleLimitSec": owner.puzzleLimitSec,
@@ -259,8 +261,11 @@ async def start_room(code: str, db: Db, x_player_token: Annotated[str | None, He
     if len(room["players"]) < 2:
         raise Conflict("Wait for at least one friend to join.", "need_players")
     s = room["settings"]
+    bank = await puzzles_repo.published(db)
+    if s.get("language") == "km":
+        bank = [x for x in bank if rebus_verify.khmer_playable(x)]
     chosen = rules.pick_puzzles(
-        await puzzles_repo.published(db), category=s["category"], count=s["count"], difficulty=s.get("difficulty"), seed=room["seed"]
+        bank, category=s["category"], count=s["count"], difficulty=s.get("difficulty"), seed=room["seed"]
     )
     if len(chosen) < 3:
         raise Conflict("There are not enough puzzles for that topic yet.", "not_enough_puzzles")

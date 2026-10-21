@@ -24,7 +24,7 @@ export interface HostFormProps {
 const LEVELS = ["easy", "medium", "hard"] as const;
 
 export const HostForm: React.FC<HostFormProps> = ({ userToken, settings, counts, onOpened }) => {
-  const { t } = useT();
+  const { t, language } = useT();
   const cats = useRebusCategories();
   const topics = [...cats.map((c) => c.id as string), "mixed"].filter((id) => id === "mixed" || !counts || (counts[id] ?? 0) > 0);
   const [category, setCategory] = useState(topics[0] ?? "mixed");
@@ -39,7 +39,7 @@ export const HostForm: React.FC<HostFormProps> = ({ userToken, settings, counts,
     setBusy(true);
     setError("");
     try {
-      onOpened(await GroupAPI.open({ category, count, difficulty: difficulty === 0 ? null : difficulty, name, avatar }, userToken));
+      onOpened(await GroupAPI.open({ category, count, difficulty: difficulty === 0 ? null : difficulty, name, avatar, language: language === "km" ? "km" : "en" }, userToken));
     } catch (e) {
       setError(t(roomErrorKey(e)));
     } finally {

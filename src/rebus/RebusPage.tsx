@@ -11,7 +11,7 @@ import React, { useEffect, useMemo, useRef, useState } from "react";
 import { useT } from "../lib/i18n";
 import { themeSystem } from "../lib/themeSystem";
 import { useAudienceViewer } from "../skills/viewer";
-import { bankForAge, useRebusBank } from "./bank";
+import { bankForAge, bankForLanguage, useRebusBank } from "./bank";
 import { localizePuzzle } from "./localize";
 import { buildRound, filterPuzzles } from "./round";
 import { loadAdaptive, saveAdaptive } from "./prefs";
@@ -54,7 +54,8 @@ export const RebusPage: React.FC<RebusPageProps> = ({ age: ageOverride, settings
   const settings = settingsProp ?? ownerSettings;
   const viewer = useAudienceViewer();
   const age = ageOverride === undefined ? viewer.age : ageOverride;
-  const fullBank = useRebusBank();
+  const loadedBank = useRebusBank();
+  const fullBank = useMemo(() => bankForLanguage(loadedBank, language), [loadedBank, language]);
   // The setup screen counts what this child can actually be given, so a topic they have no puzzles for is "Soon", not a dead end.
   const bank = useMemo(() => bankForAge(fullBank, age), [fullBank, age]);
   const round = useRebusRound();

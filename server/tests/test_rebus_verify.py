@@ -124,3 +124,14 @@ def test_numbers_keep_the_marks_that_change_them():
     assert v.matches("1.2", [], "1,2", exact=True)
     assert not v.matches("1.2", [], "12", exact=True)
     assert v.matches("1000", [], "1,000", exact=True)
+
+
+def test_khmer_playable_leaves_out_english_wordplay():
+    from app.rebus_verify import khmer_playable
+
+    assert not khmer_playable({"kind": "picture", "pieces": [], "km": {"explanation": "ពន្យល់"}})
+    assert not khmer_playable({"pieces": []})
+    assert khmer_playable({"kind": "math"})
+    assert khmer_playable({"km": {"pieces": [{"kind": "word", "text": "ស្វា"}]}})
+    assert khmer_playable({"km": {"answer": "ស្វា"}})
+    assert khmer_playable({"km": {"options": ["ក", "ខ"]}})

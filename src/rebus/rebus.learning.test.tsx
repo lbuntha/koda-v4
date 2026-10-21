@@ -13,7 +13,7 @@ vi.mock("./bank", async () => {
   const { BUILT_IN_CATEGORIES } = await import("./categories");
   const puzzles = SAMPLE_PUZZLES.filter((p) => p.answer === "Hot dog" || p.answer === "Honeymoon");
   const bank = { puzzles, counts: { countries: 0, food: puzzles.length, sayings: 0, animals: 0, sports: 0, school: 0, science: 0 }, loaded: true };
-  return { useRebusBank: () => bank, bankForAge: (b: typeof bank) => b, useRebusCategories: () => BUILT_IN_CATEGORIES };
+  return { useRebusBank: () => bank, bankForAge: (b: typeof bank) => b, bankForLanguage: (b: typeof bank) => b, useRebusCategories: () => BUILT_IN_CATEGORIES };
 });
 vi.mock("../utils/audio", () => ({ isVoiceEnabled: () => false, playSound: () => {} }));
 

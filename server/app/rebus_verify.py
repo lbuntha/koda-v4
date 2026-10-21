@@ -254,3 +254,9 @@ ISSUE_MESSAGES: dict[str, str] = {
 
 def describe(codes: list[str]) -> str:
     return " ".join(ISSUE_MESSAGES.get(code, code) for code in codes)
+
+
+def khmer_playable(puzzle: dict) -> bool:
+    """Whether a child reading Khmer can play this puzzle (`playableIn` in `src/rebus/localize.ts`)."""
+    km = puzzle.get("km") or {}
+    return puzzle.get("kind") == "math" or bool(km.get("pieces") or km.get("answer") or km.get("options"))

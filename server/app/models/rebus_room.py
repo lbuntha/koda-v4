@@ -14,6 +14,8 @@ class RoomCreateIn(Model):
     difficulty: Literal[1, 2, 3] | None = None
     name: str = Field(min_length=2, max_length=30)
     avatar: str = Field(min_length=2, max_length=20)
+    #: The host's language: in Khmer, only puzzles that can be played in Khmer are dealt.
+    language: Literal["en", "km"] = "en"
 
 
 class RoomJoinIn(Model):

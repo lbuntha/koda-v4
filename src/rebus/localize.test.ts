@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { matchAnswer } from "./answer";
-import { answerInputMode, isNumberAnswer, localizePuzzle, optionAsAuthored, optionAsShown, toKhmerDigits } from "./localize";
+import { answerInputMode, isNumberAnswer, localizePuzzle, optionAsAuthored, optionAsShown, playableIn, toKhmerDigits } from "./localize";
 import { validatePuzzle } from "./puzzle";
 import type { Puzzle } from "./types";
 
@@ -108,5 +108,22 @@ describe("a multiple-choice question with its answers in Khmer", () => {
   it("ignores Khmer answers that do not line up with the English ones", () => {
     const view = localizePuzzle({ ...puzzle, km: { ...puzzle.km, options: ["គោ"] } }, "km");
     expect(view.choice?.options).toEqual(["Cow", "Duck", "Spider ៨"]);
+  });
+});
+
+describe("what a child reading Khmer can play", () => {
+  const picture = (km?: Puzzle["km"]): Puzzle => ({ id: "p", category: "animals", ages: [6, 9], difficulty: 1, trick: "compound", pieces: [{ kind: "word", text: "monk" }], answer: "Monkey", accepts: [], explanation: "monk + key", ...(km ? { km } : {}), source: "official" });
+
+  it("leaves out English wordplay, even one with a Khmer explanation", () => {
+    expect(playableIn(picture(), "km")).toBe(false);
+    expect(playableIn(picture({ explanation: "ពន្យល់" }), "km")).toBe(false);
+    expect(playableIn(picture(), "en")).toBe(true);
+  });
+
+  it("keeps sums, questions with Khmer words or answers, and puzzles with a Khmer answer", () => {
+    expect(playableIn({ ...picture(), kind: "math" }, "km")).toBe(true);
+    expect(playableIn(picture({ pieces: [{ kind: "word", text: "ស្វា" }] }), "km")).toBe(true);
+    expect(playableIn(picture({ answer: "ស្វា" }), "km")).toBe(true);
+    expect(playableIn(picture({ options: ["ក", "ខ"] }), "km")).toBe(true);
   });
 });

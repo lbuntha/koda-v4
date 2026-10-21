@@ -8,6 +8,7 @@ import { useEffect, useMemo, useSyncExternalStore } from "react";
 import { fitsAge } from "../lib/ages";
 import { bankSnapshot, refreshBank, subscribeBank } from "./bankStore";
 import { categories, categorySnapshot, subscribeCategories, type Category } from "./categories";
+import { playableIn } from "./localize";
 import type { CategoryId, Puzzle } from "./types";
 
 export interface RebusBank {
@@ -47,6 +48,9 @@ export const useRebusBank = (): RebusBank => {
 
 /** The bank as one child sees it: only the puzzles that suit their age, counted. */
 export const bankForAge = (bank: RebusBank, age: number | null | undefined): RebusBank => makeBank(bank.puzzles.filter((p) => fitsAge(p.ages, age)), bank.loaded);
+
+/** The bank as one child reads it: in Khmer, only the puzzles that can be played in Khmer (see `playableIn`). */
+export const bankForLanguage = (bank: RebusBank, language: string): RebusBank => (language === "km" ? makeBank(bank.puzzles.filter((p) => playableIn(p, language)), bank.loaded) : bank);
 
 /** The categories a child can pick, in the owner's order, re-read whenever the server's list changes. */
 export const useRebusCategories = (): readonly Category[] => {
