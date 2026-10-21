@@ -85,4 +85,7 @@ export const isNumberAnswer = (puzzle: Pick<Puzzle, "kind" | "answer">): boolean
  * of a Khmer player's rounds instead of being a puzzle they cannot solve.
  * `server/app/rebus_verify.py` has the same rule for group rooms.
  */
-export const playableIn = (puzzle: Puzzle, language: string): boolean => language !== "km" || puzzle.kind === "math" || Boolean(puzzle.km?.pieces || puzzle.km?.answer || puzzle.km?.options);
+export const playableIn = (puzzle: Puzzle, language: string): boolean => {
+  if (language !== "km") return puzzle.onlyIn !== "km";
+  return puzzle.onlyIn === "km" || puzzle.kind === "math" || Boolean(puzzle.km?.pieces || puzzle.km?.answer || puzzle.km?.options);
+};

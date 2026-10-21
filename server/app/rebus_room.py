@@ -98,6 +98,23 @@ def answer_key(puzzle: dict[str, Any]) -> str:
     return "".join(ch for ch in str(puzzle.get("answer", "")).lower() if ch.isalnum())
 
 
+AGE_STRETCH = 1
+#: Below this many suited puzzles in a bank, age is ignored rather than leaving a room with nothing to play.
+MIN_SUITED = 30
+
+
+def suited_to_age(published: list[dict[str, Any]], age: int | None) -> list[dict[str, Any]]:
+    """The puzzles that suit a player of this age, to a year either side (`fitsAge` in `src/lib/ages.ts`)."""
+    if age is None:
+        return published
+    suited = [p for p in published if not _is_range(p.get("ages")) or p["ages"][0] - AGE_STRETCH <= age <= p["ages"][1] + AGE_STRETCH]
+    return suited if len(suited) >= MIN_SUITED else published
+
+
+def _is_range(value: Any) -> bool:
+    return isinstance(value, (list, tuple)) and len(value) == 2 and all(isinstance(n, int) for n in value)
+
+
 def pick_puzzles(published: list[dict[str, Any]], *, category: str, count: int, difficulty: int | None, seed: str) -> list[dict[str, Any]]:
     """The room's puzzles: one per answer, shuffled by the room's seed, easy to hard."""
     rng = random.Random(seed)

@@ -7,6 +7,7 @@ import { themeSystem } from "../../lib/themeSystem";
 import { UIButton, UITabs } from "../../components/ui";
 import { categoryLabel } from "../categoryNames";
 import { useRebusCategories } from "../bank";
+import { useAudienceViewer } from "../../skills/viewer";
 import type { RebusSettings } from "../settings";
 import { roomErrorKey } from "./errors";
 import { GroupAPI } from "./groupApi";
@@ -26,6 +27,7 @@ const LEVELS = ["easy", "medium", "hard"] as const;
 export const HostForm: React.FC<HostFormProps> = ({ userToken, settings, counts, onOpened }) => {
   const { t, language } = useT();
   const cats = useRebusCategories();
+  const viewer = useAudienceViewer();
   const topics = [...cats.map((c) => c.id as string), "mixed"].filter((id) => id === "mixed" || !counts || (counts[id] ?? 0) > 0);
   const [category, setCategory] = useState(topics[0] ?? "mixed");
   const [count, setCount] = useState(settings.questionChoices[0] ?? 5);
@@ -39,7 +41,7 @@ export const HostForm: React.FC<HostFormProps> = ({ userToken, settings, counts,
     setBusy(true);
     setError("");
     try {
-      onOpened(await GroupAPI.open({ category, count, difficulty: difficulty === 0 ? null : difficulty, name, avatar, language: language === "km" ? "km" : "en" }, userToken));
+      onOpened(await GroupAPI.open({ category, count, difficulty: difficulty === 0 ? null : difficulty, name, avatar, language: language === "km" ? "km" : "en", age: viewer.age ?? null }, userToken));
     } catch (e) {
       setError(t(roomErrorKey(e)));
     } finally {

@@ -90,6 +90,8 @@ class PuzzleIn(Model):
     math: MathSpecIn | None = None
     choice: ChoiceSpecIn | None = None
     km: KhmerIn | None = None
+    #: Written in Khmer for Khmer players: never dealt to a child reading English.
+    onlyIn: Literal["km"] | None = None
     pieces: list[Piece] = Field(default_factory=list, max_length=12)
     answer: str = Field(default="", max_length=80)
     accepts: list[Annotated[str, Field(max_length=80)]] = Field(default_factory=list, max_length=8)
@@ -114,6 +116,8 @@ class PuzzlePatch(Model):
     math: MathSpecIn | None = None
     choice: ChoiceSpecIn | None = None
     km: KhmerIn | None = None
+    #: Written in Khmer for Khmer players: never dealt to a child reading English.
+    onlyIn: Literal["km"] | None = None
     pieces: list[Piece] | None = Field(default=None, max_length=12)
     answer: str | None = Field(default=None, max_length=80)
     accepts: list[Annotated[str, Field(max_length=80)]] | None = Field(default=None, max_length=8)

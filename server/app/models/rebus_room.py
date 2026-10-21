@@ -16,6 +16,8 @@ class RoomCreateIn(Model):
     avatar: str = Field(min_length=2, max_length=20)
     #: The host's language: in Khmer, only puzzles that can be played in Khmer are dealt.
     language: Literal["en", "km"] = "en"
+    #: The host's age. Guests give none, so the room is dealt puzzles that suit the host, to a year either side.
+    age: int | None = Field(default=None, ge=3, le=25)
 
 
 class RoomJoinIn(Model):

@@ -126,4 +126,10 @@ describe("what a child reading Khmer can play", () => {
     expect(playableIn(picture({ answer: "ស្វា" }), "km")).toBe(true);
     expect(playableIn(picture({ options: ["ក", "ខ"] }), "km")).toBe(true);
   });
+
+  it("keeps what is written in Khmer away from a child reading English", () => {
+    const written = { ...picture(), onlyIn: "km" as const };
+    expect(playableIn(written, "km")).toBe(true);
+    expect(playableIn(written, "en")).toBe(false);
+  });
 });

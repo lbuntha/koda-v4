@@ -40,6 +40,7 @@ PUBLIC_FIELDS = (
     "math",
     "choice",
     "km",
+    "onlyIn",
     "pieces",
     "answer",
     "accepts",

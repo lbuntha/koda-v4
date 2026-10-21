@@ -53,6 +53,8 @@ export interface Puzzle {
   choice?: ChoiceSpec;
   /** The same question in Khmer. The answer, numbers and pictures are shared; only the words change. See `localize.ts`. */
   km?: { pieces?: Piece[]; explanation?: string; /** The answer in Khmer, typed and shown in Khmer; the English answer is accepted too. */ answer?: string; /** Multiple choice: the answers in Khmer, in the same order as `choice.options`. */ options?: string[] };
+  /** Written in Khmer for Khmer players: English players are never dealt it. */
+  onlyIn?: "km";
   pieces: Piece[];
   /** The answer as it is shown after the puzzle. */
   answer: string;

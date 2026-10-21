@@ -44,7 +44,7 @@ CanRead = Annotated[Principal, Depends(require("settings:read"))]
 CanOperate = Annotated[Principal, Depends(require("system:write"))]
 
 #: What a puzzle looks like to a player in a room: everything to show and check it, nothing about its authoring.
-PUZZLE_FIELDS = ("id", "category", "ages", "difficulty", "trick", "kind", "math", "choice", "km", "pieces", "answer", "accepts", "explanation")
+PUZZLE_FIELDS = ("id", "category", "ages", "difficulty", "trick", "kind", "math", "choice", "km", "onlyIn", "pieces", "answer", "accepts", "explanation")
 
 
 def _now_ms() -> int:
@@ -189,6 +189,7 @@ async def create_room(body: RoomCreateIn, db: Db, p: CanRead) -> dict[str, Any]:
         "count": body.count,
         "difficulty": body.difficulty,
         "language": body.language,
+        "age": body.age,
         "maxPlayers": owner.maxPlayers,
         "hintDelaySec": owner.hintDelaySec,
         "puzzleLimitSec": owner.puzzleLimitSec,
@@ -262,8 +263,9 @@ async def start_room(code: str, db: Db, x_player_token: Annotated[str | None, He
         raise Conflict("Wait for at least one friend to join.", "need_players")
     s = room["settings"]
     bank = await puzzles_repo.published(db)
-    if s.get("language") == "km":
-        bank = [x for x in bank if rebus_verify.khmer_playable(x)]
+    language = s.get("language") or "en"
+    bank = [x for x in bank if rebus_verify.playable_in(x, language)]
+    bank = rules.suited_to_age(bank, s.get("age"))
     chosen = rules.pick_puzzles(
         bank, category=s["category"], count=s["count"], difficulty=s.get("difficulty"), seed=room["seed"]
     )

@@ -126,12 +126,14 @@ def test_numbers_keep_the_marks_that_change_them():
     assert v.matches("1000", [], "1,000", exact=True)
 
 
-def test_khmer_playable_leaves_out_english_wordplay():
-    from app.rebus_verify import khmer_playable
+def test_playable_in_leaves_out_what_a_child_cannot_read():
+    from app.rebus_verify import playable_in
 
-    assert not khmer_playable({"kind": "picture", "pieces": [], "km": {"explanation": "ពន្យល់"}})
-    assert not khmer_playable({"pieces": []})
-    assert khmer_playable({"kind": "math"})
-    assert khmer_playable({"km": {"pieces": [{"kind": "word", "text": "ស្វា"}]}})
-    assert khmer_playable({"km": {"answer": "ស្វា"}})
-    assert khmer_playable({"km": {"options": ["ក", "ខ"]}})
+    wordplay = {"kind": "picture", "pieces": [], "km": {"explanation": "ពន្យល់"}}
+    assert not playable_in(wordplay, "km") and playable_in(wordplay, "en")
+    assert playable_in({"kind": "math"}, "km")
+    assert playable_in({"km": {"pieces": [{"kind": "word", "text": "ស្វា"}]}}, "km")
+    assert playable_in({"km": {"answer": "ស្វា"}}, "km")
+    assert playable_in({"km": {"options": ["ក", "ខ"]}}, "km")
+    written_in_khmer = {"onlyIn": "km", "pieces": []}
+    assert playable_in(written_in_khmer, "km") and not playable_in(written_in_khmer, "en")

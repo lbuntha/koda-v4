@@ -30993,6 +30993,1218 @@
   "source": "official"
  },
  {
+  "id": "kmplay-young-dog",
+  "category": "animals",
+  "ages": [
+   5,
+   9
+  ],
+  "difficulty": 1,
+  "trick": "compound",
+  "pieces": [
+   {
+    "kind": "word",
+    "text": "កូន"
+   },
+   {
+    "kind": "op",
+    "op": "+"
+   },
+   {
+    "kind": "icon",
+    "id": "rebus-dog",
+    "name": "ឆ្កែ"
+   }
+  ],
+  "answer": "កូនឆ្កែ",
+  "accepts": [],
+  "explanation": "កូន + ឆ្កែ = កូនឆ្កែ។ កូនសត្វតូចៗ។",
+  "onlyIn": "km",
+  "source": "official"
+ },
+ {
+  "id": "kmplay-young-cat",
+  "category": "animals",
+  "ages": [
+   5,
+   9
+  ],
+  "difficulty": 1,
+  "trick": "compound",
+  "pieces": [
+   {
+    "kind": "word",
+    "text": "កូន"
+   },
+   {
+    "kind": "op",
+    "op": "+"
+   },
+   {
+    "kind": "icon",
+    "id": "rebus-cat",
+    "name": "ឆ្មា"
+   }
+  ],
+  "answer": "កូនឆ្មា",
+  "accepts": [],
+  "explanation": "កូន + ឆ្មា = កូនឆ្មា។ កូនសត្វតូចៗ។",
+  "onlyIn": "km",
+  "source": "official"
+ },
+ {
+  "id": "kmplay-young-cow",
+  "category": "animals",
+  "ages": [
+   5,
+   9
+  ],
+  "difficulty": 1,
+  "trick": "compound",
+  "pieces": [
+   {
+    "kind": "word",
+    "text": "កូន"
+   },
+   {
+    "kind": "op",
+    "op": "+"
+   },
+   {
+    "kind": "icon",
+    "id": "rebus-cow",
+    "name": "គោ"
+   }
+  ],
+  "answer": "កូនគោ",
+  "accepts": [],
+  "explanation": "កូន + គោ = កូនគោ។ កូនសត្វតូចៗ។",
+  "onlyIn": "km",
+  "source": "official"
+ },
+ {
+  "id": "kmplay-young-duck",
+  "category": "animals",
+  "ages": [
+   5,
+   9
+  ],
+  "difficulty": 1,
+  "trick": "compound",
+  "pieces": [
+   {
+    "kind": "word",
+    "text": "កូន"
+   },
+   {
+    "kind": "op",
+    "op": "+"
+   },
+   {
+    "kind": "icon",
+    "id": "rebus-duck",
+    "name": "ទា"
+   }
+  ],
+  "answer": "កូនទា",
+  "accepts": [],
+  "explanation": "កូន + ទា = កូនទា។ កូនសត្វតូចៗ។",
+  "onlyIn": "km",
+  "source": "official"
+ },
+ {
+  "id": "kmplay-young-horse",
+  "category": "animals",
+  "ages": [
+   5,
+   9
+  ],
+  "difficulty": 1,
+  "trick": "compound",
+  "pieces": [
+   {
+    "kind": "word",
+    "text": "កូន"
+   },
+   {
+    "kind": "op",
+    "op": "+"
+   },
+   {
+    "kind": "icon",
+    "id": "rebus-horse",
+    "name": "សេះ"
+   }
+  ],
+  "answer": "កូនសេះ",
+  "accepts": [],
+  "explanation": "កូន + សេះ = កូនសេះ។ កូនសត្វតូចៗ។",
+  "onlyIn": "km",
+  "source": "official"
+ },
+ {
+  "id": "kmplay-young-sheep",
+  "category": "animals",
+  "ages": [
+   5,
+   9
+  ],
+  "difficulty": 1,
+  "trick": "compound",
+  "pieces": [
+   {
+    "kind": "word",
+    "text": "កូន"
+   },
+   {
+    "kind": "op",
+    "op": "+"
+   },
+   {
+    "kind": "icon",
+    "id": "rebus-sheep",
+    "name": "ចៀម"
+   }
+  ],
+  "answer": "កូនចៀម",
+  "accepts": [],
+  "explanation": "កូន + ចៀម = កូនចៀម។ កូនសត្វតូចៗ។",
+  "onlyIn": "km",
+  "source": "official"
+ },
+ {
+  "id": "kmplay-young-hen",
+  "category": "animals",
+  "ages": [
+   5,
+   9
+  ],
+  "difficulty": 1,
+  "trick": "compound",
+  "pieces": [
+   {
+    "kind": "word",
+    "text": "កូន"
+   },
+   {
+    "kind": "op",
+    "op": "+"
+   },
+   {
+    "kind": "icon",
+    "id": "rebus-hen",
+    "name": "មាន់"
+   }
+  ],
+  "answer": "កូនមាន់",
+  "accepts": [],
+  "explanation": "កូន + មាន់ = កូនមាន់។ កូនសត្វតូចៗ។",
+  "onlyIn": "km",
+  "source": "official"
+ },
+ {
+  "id": "kmplay-young-fish",
+  "category": "animals",
+  "ages": [
+   5,
+   9
+  ],
+  "difficulty": 1,
+  "trick": "compound",
+  "pieces": [
+   {
+    "kind": "word",
+    "text": "កូន"
+   },
+   {
+    "kind": "op",
+    "op": "+"
+   },
+   {
+    "kind": "icon",
+    "id": "rebus-fish",
+    "name": "ត្រី"
+   }
+  ],
+  "answer": "កូនត្រី",
+  "accepts": [],
+  "explanation": "កូន + ត្រី = កូនត្រី។ កូនសត្វតូចៗ។",
+  "onlyIn": "km",
+  "source": "official"
+ },
+ {
+  "id": "kmplay-young-pig",
+  "category": "animals",
+  "ages": [
+   5,
+   9
+  ],
+  "difficulty": 1,
+  "trick": "compound",
+  "pieces": [
+   {
+    "kind": "word",
+    "text": "កូន"
+   },
+   {
+    "kind": "op",
+    "op": "+"
+   },
+   {
+    "kind": "icon",
+    "id": "rebus-pig",
+    "name": "ជ្រូក"
+   }
+  ],
+  "answer": "កូនជ្រូក",
+  "accepts": [],
+  "explanation": "កូន + ជ្រូក = កូនជ្រូក។ កូនសត្វតូចៗ។",
+  "onlyIn": "km",
+  "source": "official"
+ },
+ {
+  "id": "kmplay-young-monkey",
+  "category": "animals",
+  "ages": [
+   5,
+   9
+  ],
+  "difficulty": 1,
+  "trick": "compound",
+  "pieces": [
+   {
+    "kind": "word",
+    "text": "កូន"
+   },
+   {
+    "kind": "op",
+    "op": "+"
+   },
+   {
+    "kind": "icon",
+    "id": "rebus-monkey",
+    "name": "ស្វា"
+   }
+  ],
+  "answer": "កូនស្វា",
+  "accepts": [],
+  "explanation": "កូន + ស្វា = កូនស្វា។ កូនសត្វតូចៗ។",
+  "onlyIn": "km",
+  "source": "official"
+ },
+ {
+  "id": "kmplay-young-goat",
+  "category": "animals",
+  "ages": [
+   5,
+   9
+  ],
+  "difficulty": 1,
+  "trick": "compound",
+  "pieces": [
+   {
+    "kind": "word",
+    "text": "កូន"
+   },
+   {
+    "kind": "op",
+    "op": "+"
+   },
+   {
+    "kind": "icon",
+    "id": "rebus-goat",
+    "name": "ពពែ"
+   }
+  ],
+  "answer": "កូនពពែ",
+  "accepts": [],
+  "explanation": "កូន + ពពែ = កូនពពែ។ កូនសត្វតូចៗ។",
+  "onlyIn": "km",
+  "source": "official"
+ },
+ {
+  "id": "kmplay-young-rabbit",
+  "category": "animals",
+  "ages": [
+   5,
+   9
+  ],
+  "difficulty": 1,
+  "trick": "compound",
+  "pieces": [
+   {
+    "kind": "word",
+    "text": "កូន"
+   },
+   {
+    "kind": "op",
+    "op": "+"
+   },
+   {
+    "kind": "icon",
+    "id": "rebus-rabbit",
+    "name": "ទន្សាយ"
+   }
+  ],
+  "answer": "កូនទន្សាយ",
+  "accepts": [],
+  "explanation": "កូន + ទន្សាយ = កូនទន្សាយ។ កូនសត្វតូចៗ។",
+  "onlyIn": "km",
+  "source": "official"
+ },
+ {
+  "id": "kmplay-young-elephant",
+  "category": "animals",
+  "ages": [
+   5,
+   9
+  ],
+  "difficulty": 1,
+  "trick": "compound",
+  "pieces": [
+   {
+    "kind": "word",
+    "text": "កូន"
+   },
+   {
+    "kind": "op",
+    "op": "+"
+   },
+   {
+    "kind": "icon",
+    "id": "rebus-elephant",
+    "name": "ដំរី"
+   }
+  ],
+  "answer": "កូនដំរី",
+  "accepts": [],
+  "explanation": "កូន + ដំរី = កូនដំរី។ កូនសត្វតូចៗ។",
+  "onlyIn": "km",
+  "source": "official"
+ },
+ {
+  "id": "kmplay-young-tiger",
+  "category": "animals",
+  "ages": [
+   5,
+   9
+  ],
+  "difficulty": 1,
+  "trick": "compound",
+  "pieces": [
+   {
+    "kind": "word",
+    "text": "កូន"
+   },
+   {
+    "kind": "op",
+    "op": "+"
+   },
+   {
+    "kind": "icon",
+    "id": "rebus-tiger",
+    "name": "ខ្លា"
+   }
+  ],
+  "answer": "កូនខ្លា",
+  "accepts": [],
+  "explanation": "កូន + ខ្លា = កូនខ្លា។ កូនសត្វតូចៗ។",
+  "onlyIn": "km",
+  "source": "official"
+ },
+ {
+  "id": "kmplay-wild-cat",
+  "category": "animals",
+  "ages": [
+   7,
+   12
+  ],
+  "difficulty": 2,
+  "trick": "compound",
+  "pieces": [
+   {
+    "kind": "icon",
+    "id": "rebus-cat",
+    "name": "ឆ្មា"
+   },
+   {
+    "kind": "op",
+    "op": "+"
+   },
+   {
+    "kind": "icon",
+    "id": "rebus-forest",
+    "name": "ព្រៃ"
+   }
+  ],
+  "answer": "ឆ្មាព្រៃ",
+  "accepts": [],
+  "explanation": "ឆ្មា + ព្រៃ = ឆ្មាព្រៃ។ សត្វដែលរស់នៅក្នុងព្រៃ។",
+  "onlyIn": "km",
+  "source": "official"
+ },
+ {
+  "id": "kmplay-wild-pig",
+  "category": "animals",
+  "ages": [
+   7,
+   12
+  ],
+  "difficulty": 2,
+  "trick": "compound",
+  "pieces": [
+   {
+    "kind": "icon",
+    "id": "rebus-pig",
+    "name": "ជ្រូក"
+   },
+   {
+    "kind": "op",
+    "op": "+"
+   },
+   {
+    "kind": "icon",
+    "id": "rebus-forest",
+    "name": "ព្រៃ"
+   }
+  ],
+  "answer": "ជ្រូកព្រៃ",
+  "accepts": [],
+  "explanation": "ជ្រូក + ព្រៃ = ជ្រូកព្រៃ។ សត្វដែលរស់នៅក្នុងព្រៃ។",
+  "onlyIn": "km",
+  "source": "official"
+ },
+ {
+  "id": "kmplay-wild-hen",
+  "category": "animals",
+  "ages": [
+   7,
+   12
+  ],
+  "difficulty": 2,
+  "trick": "compound",
+  "pieces": [
+   {
+    "kind": "icon",
+    "id": "rebus-hen",
+    "name": "មាន់"
+   },
+   {
+    "kind": "op",
+    "op": "+"
+   },
+   {
+    "kind": "icon",
+    "id": "rebus-forest",
+    "name": "ព្រៃ"
+   }
+  ],
+  "answer": "មាន់ព្រៃ",
+  "accepts": [],
+  "explanation": "មាន់ + ព្រៃ = មាន់ព្រៃ។ សត្វដែលរស់នៅក្នុងព្រៃ។",
+  "onlyIn": "km",
+  "source": "official"
+ },
+ {
+  "id": "kmplay-wild-duck",
+  "category": "animals",
+  "ages": [
+   7,
+   12
+  ],
+  "difficulty": 2,
+  "trick": "compound",
+  "pieces": [
+   {
+    "kind": "icon",
+    "id": "rebus-duck",
+    "name": "ទា"
+   },
+   {
+    "kind": "op",
+    "op": "+"
+   },
+   {
+    "kind": "icon",
+    "id": "rebus-forest",
+    "name": "ព្រៃ"
+   }
+  ],
+  "answer": "ទាព្រៃ",
+  "accepts": [],
+  "explanation": "ទា + ព្រៃ = ទាព្រៃ។ សត្វដែលរស់នៅក្នុងព្រៃ។",
+  "onlyIn": "km",
+  "source": "official"
+ },
+ {
+  "id": "kmplay-wild-cow",
+  "category": "animals",
+  "ages": [
+   7,
+   12
+  ],
+  "difficulty": 2,
+  "trick": "compound",
+  "pieces": [
+   {
+    "kind": "icon",
+    "id": "rebus-cow",
+    "name": "គោ"
+   },
+   {
+    "kind": "op",
+    "op": "+"
+   },
+   {
+    "kind": "icon",
+    "id": "rebus-forest",
+    "name": "ព្រៃ"
+   }
+  ],
+  "answer": "គោព្រៃ",
+  "accepts": [],
+  "explanation": "គោ + ព្រៃ = គោព្រៃ។ សត្វដែលរស់នៅក្នុងព្រៃ។",
+  "onlyIn": "km",
+  "source": "official"
+ },
+ {
+  "id": "kmplay-fish-sea",
+  "category": "animals",
+  "ages": [
+   7,
+   12
+  ],
+  "difficulty": 2,
+  "trick": "compound",
+  "pieces": [
+   {
+    "kind": "icon",
+    "id": "rebus-fish",
+    "name": "ត្រី"
+   },
+   {
+    "kind": "op",
+    "op": "+"
+   },
+   {
+    "kind": "icon",
+    "id": "rebus-sea",
+    "name": "សមុទ្រ"
+   }
+  ],
+  "answer": "ត្រីសមុទ្រ",
+  "accepts": [],
+  "explanation": "ត្រី + សមុទ្រ = ត្រីសមុទ្រ។ ត្រីដែលរស់នៅក្នុងសមុទ្រ។",
+  "onlyIn": "km",
+  "source": "official"
+ },
+ {
+  "id": "kmplay-fish-river",
+  "category": "animals",
+  "ages": [
+   7,
+   12
+  ],
+  "difficulty": 2,
+  "trick": "compound",
+  "pieces": [
+   {
+    "kind": "icon",
+    "id": "rebus-fish",
+    "name": "ត្រី"
+   },
+   {
+    "kind": "op",
+    "op": "+"
+   },
+   {
+    "kind": "icon",
+    "id": "rebus-river",
+    "name": "ទន្លេ"
+   }
+  ],
+  "answer": "ត្រីទន្លេ",
+  "accepts": [],
+  "explanation": "ត្រី + ទន្លេ = ត្រីទន្លេ។ ត្រីដែលរស់នៅក្នុងទន្លេ។",
+  "onlyIn": "km",
+  "source": "official"
+ },
+ {
+  "id": "kmplay-fish-lake",
+  "category": "animals",
+  "ages": [
+   7,
+   12
+  ],
+  "difficulty": 2,
+  "trick": "compound",
+  "pieces": [
+   {
+    "kind": "icon",
+    "id": "rebus-fish",
+    "name": "ត្រី"
+   },
+   {
+    "kind": "op",
+    "op": "+"
+   },
+   {
+    "kind": "icon",
+    "id": "rebus-lake",
+    "name": "បឹង"
+   }
+  ],
+  "answer": "ត្រីបឹង",
+  "accepts": [],
+  "explanation": "ត្រី + បឹង = ត្រីបឹង។ ត្រីដែលរស់នៅក្នុងបឹង។",
+  "onlyIn": "km",
+  "source": "official"
+ },
+ {
+  "id": "kmplay-meat-cow",
+  "category": "food",
+  "ages": [
+   6,
+   10
+  ],
+  "difficulty": 1,
+  "trick": "compound",
+  "pieces": [
+   {
+    "kind": "word",
+    "text": "សាច់"
+   },
+   {
+    "kind": "op",
+    "op": "+"
+   },
+   {
+    "kind": "icon",
+    "id": "rebus-cow",
+    "name": "គោ"
+   }
+  ],
+  "answer": "សាច់គោ",
+  "accepts": [],
+  "explanation": "សាច់ + គោ = សាច់គោ។",
+  "onlyIn": "km",
+  "source": "official"
+ },
+ {
+  "id": "kmplay-meat-pig",
+  "category": "food",
+  "ages": [
+   6,
+   10
+  ],
+  "difficulty": 1,
+  "trick": "compound",
+  "pieces": [
+   {
+    "kind": "word",
+    "text": "សាច់"
+   },
+   {
+    "kind": "op",
+    "op": "+"
+   },
+   {
+    "kind": "icon",
+    "id": "rebus-pig",
+    "name": "ជ្រូក"
+   }
+  ],
+  "answer": "សាច់ជ្រូក",
+  "accepts": [],
+  "explanation": "សាច់ + ជ្រូក = សាច់ជ្រូក។",
+  "onlyIn": "km",
+  "source": "official"
+ },
+ {
+  "id": "kmplay-meat-hen",
+  "category": "food",
+  "ages": [
+   6,
+   10
+  ],
+  "difficulty": 1,
+  "trick": "compound",
+  "pieces": [
+   {
+    "kind": "word",
+    "text": "សាច់"
+   },
+   {
+    "kind": "op",
+    "op": "+"
+   },
+   {
+    "kind": "icon",
+    "id": "rebus-hen",
+    "name": "មាន់"
+   }
+  ],
+  "answer": "សាច់មាន់",
+  "accepts": [],
+  "explanation": "សាច់ + មាន់ = សាច់មាន់។",
+  "onlyIn": "km",
+  "source": "official"
+ },
+ {
+  "id": "kmplay-meat-duck",
+  "category": "food",
+  "ages": [
+   6,
+   10
+  ],
+  "difficulty": 1,
+  "trick": "compound",
+  "pieces": [
+   {
+    "kind": "word",
+    "text": "សាច់"
+   },
+   {
+    "kind": "op",
+    "op": "+"
+   },
+   {
+    "kind": "icon",
+    "id": "rebus-duck",
+    "name": "ទា"
+   }
+  ],
+  "answer": "សាច់ទា",
+  "accepts": [],
+  "explanation": "សាច់ + ទា = សាច់ទា។",
+  "onlyIn": "km",
+  "source": "official"
+ },
+ {
+  "id": "kmplay-meat-fish",
+  "category": "food",
+  "ages": [
+   6,
+   10
+  ],
+  "difficulty": 1,
+  "trick": "compound",
+  "pieces": [
+   {
+    "kind": "word",
+    "text": "សាច់"
+   },
+   {
+    "kind": "op",
+    "op": "+"
+   },
+   {
+    "kind": "icon",
+    "id": "rebus-fish",
+    "name": "ត្រី"
+   }
+  ],
+  "answer": "សាច់ត្រី",
+  "accepts": [],
+  "explanation": "សាច់ + ត្រី = សាច់ត្រី។",
+  "onlyIn": "km",
+  "source": "official"
+ },
+ {
+  "id": "kmplay-meat-sheep",
+  "category": "food",
+  "ages": [
+   6,
+   10
+  ],
+  "difficulty": 1,
+  "trick": "compound",
+  "pieces": [
+   {
+    "kind": "word",
+    "text": "សាច់"
+   },
+   {
+    "kind": "op",
+    "op": "+"
+   },
+   {
+    "kind": "icon",
+    "id": "rebus-sheep",
+    "name": "ចៀម"
+   }
+  ],
+  "answer": "សាច់ចៀម",
+  "accepts": [],
+  "explanation": "សាច់ + ចៀម = សាច់ចៀម។",
+  "onlyIn": "km",
+  "source": "official"
+ },
+ {
+  "id": "kmplay-meat-goat",
+  "category": "food",
+  "ages": [
+   6,
+   10
+  ],
+  "difficulty": 1,
+  "trick": "compound",
+  "pieces": [
+   {
+    "kind": "word",
+    "text": "សាច់"
+   },
+   {
+    "kind": "op",
+    "op": "+"
+   },
+   {
+    "kind": "icon",
+    "id": "rebus-goat",
+    "name": "ពពែ"
+   }
+  ],
+  "answer": "សាច់ពពែ",
+  "accepts": [],
+  "explanation": "សាច់ + ពពែ = សាច់ពពែ។",
+  "onlyIn": "km",
+  "source": "official"
+ },
+ {
+  "id": "kmplay-soup-hen",
+  "category": "food",
+  "ages": [
+   6,
+   10
+  ],
+  "difficulty": 1,
+  "trick": "compound",
+  "pieces": [
+   {
+    "kind": "icon",
+    "id": "rebus-soup",
+    "name": "ស៊ុប"
+   },
+   {
+    "kind": "op",
+    "op": "+"
+   },
+   {
+    "kind": "icon",
+    "id": "rebus-hen",
+    "name": "មាន់"
+   }
+  ],
+  "answer": "ស៊ុបមាន់",
+  "accepts": [],
+  "explanation": "ស៊ុប + មាន់ = ស៊ុបមាន់។",
+  "onlyIn": "km",
+  "source": "official"
+ },
+ {
+  "id": "kmplay-soup-fish",
+  "category": "food",
+  "ages": [
+   6,
+   10
+  ],
+  "difficulty": 1,
+  "trick": "compound",
+  "pieces": [
+   {
+    "kind": "icon",
+    "id": "rebus-soup",
+    "name": "ស៊ុប"
+   },
+   {
+    "kind": "op",
+    "op": "+"
+   },
+   {
+    "kind": "icon",
+    "id": "rebus-fish",
+    "name": "ត្រី"
+   }
+  ],
+  "answer": "ស៊ុបត្រី",
+  "accepts": [],
+  "explanation": "ស៊ុប + ត្រី = ស៊ុបត្រី។",
+  "onlyIn": "km",
+  "source": "official"
+ },
+ {
+  "id": "kmplay-rice-hen",
+  "category": "food",
+  "ages": [
+   6,
+   10
+  ],
+  "difficulty": 1,
+  "trick": "compound",
+  "pieces": [
+   {
+    "kind": "icon",
+    "id": "rebus-rice",
+    "name": "បាយ"
+   },
+   {
+    "kind": "op",
+    "op": "+"
+   },
+   {
+    "kind": "icon",
+    "id": "rebus-hen",
+    "name": "មាន់"
+   }
+  ],
+  "answer": "បាយមាន់",
+  "accepts": [],
+  "explanation": "បាយ + មាន់ = បាយមាន់។",
+  "onlyIn": "km",
+  "source": "official"
+ },
+ {
+  "id": "kmplay-juice-orange",
+  "category": "food",
+  "ages": [
+   6,
+   10
+  ],
+  "difficulty": 1,
+  "trick": "compound",
+  "pieces": [
+   {
+    "kind": "word",
+    "text": "ទឹក"
+   },
+   {
+    "kind": "op",
+    "op": "+"
+   },
+   {
+    "kind": "icon",
+    "id": "rebus-orange",
+    "name": "ក្រូច"
+   }
+  ],
+  "answer": "ទឹកក្រូច",
+  "accepts": [],
+  "explanation": "ទឹក + ក្រូច = ទឹកក្រូច។ ភេសជ្ជៈធ្វើពីក្រូច។",
+  "onlyIn": "km",
+  "source": "official"
+ },
+ {
+  "id": "kmplay-salt-water",
+  "category": "food",
+  "ages": [
+   7,
+   12
+  ],
+  "difficulty": 2,
+  "trick": "compound",
+  "pieces": [
+   {
+    "kind": "word",
+    "text": "ទឹក"
+   },
+   {
+    "kind": "op",
+    "op": "+"
+   },
+   {
+    "kind": "icon",
+    "id": "rebus-salt",
+    "name": "អំបិល"
+   }
+  ],
+  "answer": "ទឹកអំបិល",
+  "accepts": [],
+  "explanation": "ទឹក + អំបិល = ទឹកអំបិល។ ទឹកដែលមានអំបិលលាយ។",
+  "onlyIn": "km",
+  "source": "official"
+ },
+ {
+  "id": "kmplay-sugar-palm",
+  "category": "food",
+  "ages": [
+   7,
+   12
+  ],
+  "difficulty": 2,
+  "trick": "compound",
+  "pieces": [
+   {
+    "kind": "icon",
+    "id": "rebus-sugar",
+    "name": "ស្ករ"
+   },
+   {
+    "kind": "op",
+    "op": "+"
+   },
+   {
+    "kind": "word",
+    "text": "ត្នោត"
+   }
+  ],
+  "answer": "ស្ករត្នោត",
+  "accepts": [],
+  "explanation": "ស្ករ + ត្នោត = ស្ករត្នោត។ ស្ករធ្វើពីដើមត្នោត។",
+  "onlyIn": "km",
+  "source": "official"
+ },
+ {
+  "id": "kmplay-egg-duck",
+  "category": "food",
+  "ages": [
+   6,
+   10
+  ],
+  "difficulty": 1,
+  "trick": "compound",
+  "pieces": [
+   {
+    "kind": "icon",
+    "id": "rebus-egg",
+    "name": "ពង"
+   },
+   {
+    "kind": "op",
+    "op": "+"
+   },
+   {
+    "kind": "icon",
+    "id": "rebus-duck",
+    "name": "ទា"
+   }
+  ],
+  "answer": "ពងទា",
+  "accepts": [],
+  "explanation": "ពង + ទា = ពងទា។",
+  "onlyIn": "km",
+  "source": "official"
+ },
+ {
+  "id": "kmplay-fruit-apple",
+  "category": "food",
+  "ages": [
+   6,
+   10
+  ],
+  "difficulty": 1,
+  "trick": "compound",
+  "pieces": [
+   {
+    "kind": "word",
+    "text": "ផ្លែ"
+   },
+   {
+    "kind": "op",
+    "op": "+"
+   },
+   {
+    "kind": "icon",
+    "id": "rebus-apple",
+    "name": "ប៉ោម"
+   }
+  ],
+  "answer": "ផ្លែប៉ោម",
+  "accepts": [],
+  "explanation": "ផ្លែ + ប៉ោម = ផ្លែប៉ោម។",
+  "onlyIn": "km",
+  "source": "official"
+ },
+ {
+  "id": "kmplay-fruit-banana",
+  "category": "food",
+  "ages": [
+   6,
+   10
+  ],
+  "difficulty": 1,
+  "trick": "compound",
+  "pieces": [
+   {
+    "kind": "word",
+    "text": "ផ្លែ"
+   },
+   {
+    "kind": "op",
+    "op": "+"
+   },
+   {
+    "kind": "icon",
+    "id": "rebus-banana",
+    "name": "ចេក"
+   }
+  ],
+  "answer": "ផ្លែចេក",
+  "accepts": [],
+  "explanation": "ផ្លែ + ចេក = ផ្លែចេក។",
+  "onlyIn": "km",
+  "source": "official"
+ },
+ {
+  "id": "kmplay-fruit-orange",
+  "category": "food",
+  "ages": [
+   6,
+   10
+  ],
+  "difficulty": 1,
+  "trick": "compound",
+  "pieces": [
+   {
+    "kind": "word",
+    "text": "ផ្លែ"
+   },
+   {
+    "kind": "op",
+    "op": "+"
+   },
+   {
+    "kind": "icon",
+    "id": "rebus-orange",
+    "name": "ក្រូច"
+   }
+  ],
+  "answer": "ផ្លែក្រូច",
+  "accepts": [],
+  "explanation": "ផ្លែ + ក្រូច = ផ្លែក្រូច។",
+  "onlyIn": "km",
+  "source": "official"
+ },
+ {
+  "id": "kmplay-fruit-wood",
+  "category": "food",
+  "ages": [
+   7,
+   12
+  ],
+  "difficulty": 2,
+  "trick": "compound",
+  "pieces": [
+   {
+    "kind": "word",
+    "text": "ផ្លែ"
+   },
+   {
+    "kind": "op",
+    "op": "+"
+   },
+   {
+    "kind": "icon",
+    "id": "rebus-wood",
+    "name": "ឈើ"
+   }
+  ],
+  "answer": "ផ្លែឈើ",
+  "accepts": [],
+  "explanation": "ផ្លែ + ឈើ = ផ្លែឈើ។ ផ្លែឈើដែលយើងបរិភោគ។",
+  "onlyIn": "km",
+  "source": "official"
+ },
+ {
   "id": "math-3-plus-4-result",
   "category": "math",
   "ages": [

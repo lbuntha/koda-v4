@@ -256,7 +256,13 @@ def describe(codes: list[str]) -> str:
     return " ".join(ISSUE_MESSAGES.get(code, code) for code in codes)
 
 
-def khmer_playable(puzzle: dict) -> bool:
-    """Whether a child reading Khmer can play this puzzle (`playableIn` in `src/rebus/localize.ts`)."""
+def playable_in(puzzle: dict, language: str) -> bool:
+    """Whether a child reading this language can play the puzzle (`playableIn` in `src/rebus/localize.ts`).
+
+    In Khmer: a sum, a question with Khmer words or answers, or a puzzle written in Khmer. English wordplay
+    with at most a Khmer "why" is left out. In English: everything except what is written in Khmer.
+    """
+    if language != "km":
+        return puzzle.get("onlyIn") != "km"
     km = puzzle.get("km") or {}
-    return puzzle.get("kind") == "math" or bool(km.get("pieces") or km.get("answer") or km.get("options"))
+    return puzzle.get("onlyIn") == "km" or puzzle.get("kind") == "math" or bool(km.get("pieces") or km.get("answer") or km.get("options"))

@@ -25,6 +25,8 @@ export interface OpenRoomBody {
   avatar: string;
   /** The host's language: in Khmer, only puzzles playable in Khmer are dealt. */
   language?: string;
+  /** The host's age: the room is dealt puzzles that suit it (to a year either side), when there are enough. */
+  age?: number | null;
 }
 
 export const GroupAPI = {
