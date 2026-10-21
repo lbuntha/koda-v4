@@ -185,7 +185,7 @@ export const PlayView: React.FC<{ round: RebusRound; letterTiles: boolean }> = (
           }}
         />
       ) : letterTiles && !isNumberAnswer(run.puzzle) ? (
-        <LetterTiles key={run.puzzle.id} answer={run.puzzle.answer} seed={run.puzzle.id} onSubmit={(value) => send({ type: "answer", text: value })} />
+        <LetterTiles key={run.puzzle.id} answer={view.answer} seed={run.puzzle.id} onSubmit={(value) => send({ type: "answer", text: value })} />
       ) : (
         <form onSubmit={submit} className="flex gap-2">
           <input

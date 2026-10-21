@@ -133,3 +133,21 @@ async def test_a_seeded_question_gains_its_khmer_answers_without_losing_an_edit(
     await db.rebus_puzzles.update_one({"id": first["id"]}, {"$set": {"km": {"explanation": "edited"}}})
     await repo.ensure_seed(db, SEED)
     assert (await db.rebus_puzzles.find_one({"id": first["id"]}))["km"] == {"explanation": "edited"}
+
+
+async def test_the_old_khmer_words_move_to_their_topics_and_the_khmer_only_twins_retire(db):
+    dog = next(p for p in SEED if p["id"] == "khmer-dog")
+    assert dog["category"] == "animals" and dog["km"]["answer"] == "ឆ្កែ" and "ឆ្កែ" in dog["accepts"]
+
+    # As an earlier start left them: Khmer-only, in the Khmer category, live.
+    await db.rebus_puzzles.update_one({"id": dog["id"]}, {"$set": {"category": "khmer", "answer": "ឆ្កែ", "status": "published"}, "$unset": {"km": ""}})
+    await db.rebus_puzzles.update_one({"id": "choice-capital-cambodia"}, {"$set": {"status": "published"}})
+    await db.rebus_puzzles.insert_one({"id": "choice-km-capital", "category": "khmer", "status": "published", "seeded": True})
+    await db.rebus_categories.update_one({"_id": "khmer"}, {"$set": {"enabled": True}})
+
+    await repo.ensure_seed(db, SEED)
+    moved = await db.rebus_puzzles.find_one({"id": dog["id"]})
+    assert moved["category"] == "animals" and moved["answer"] == "dog" and moved["km"]["answer"] == "ឆ្កែ" and moved["status"] == "published"
+    assert (await db.rebus_puzzles.find_one({"id": "choice-km-capital"}))["status"] == "retired"
+    assert (await db.rebus_puzzles.find_one({"id": "choice-capital-cambodia"}))["status"] == "published"
+    assert (await db.rebus_categories.find_one({"_id": "khmer"}))["enabled"] is False

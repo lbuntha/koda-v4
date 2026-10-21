@@ -20,8 +20,8 @@ beforeEach(() => {
 });
 
 describe("categories on a device", () => {
-  it("stand in with the eight that shipped until the server has been heard from", () => {
-    expect(categories().map((c) => c.id)).toEqual(["countries", "food", "sayings", "animals", "sports", "school", "science", "khmer", "math"]);
+  it("stand in with the ones that shipped until the server has been heard from, the empty Khmer words topic switched off", () => {
+    expect(categories().map((c) => c.id)).toEqual(["countries", "food", "sayings", "animals", "sports", "school", "science", "math"]);
     expect(categoryLabel("khmer", "km")).toBe("ពាក្យខ្មែរ");
     expect(categoryLabel("khmer", "en")).toBe("Khmer words");
   });

@@ -18,6 +18,7 @@ import { useRebusCategories } from "../bank";
 import { AVATARS, NICKNAMES } from "../group/choices";
 import { NicknamePicker, useNickname } from "../group/NicknamePicker";
 import { RoomAvatar } from "../group/RoomAvatar";
+import { localizePuzzle } from "../localize";
 import { buildRound } from "../round";
 import { loadSeen, markSeen } from "../seenStore";
 import { seenSet } from "../seen";
@@ -42,7 +43,7 @@ const EACH_CHOICES = [2, 3, 5] as const;
 const starter = (i: number): TurnPlayer => ({ name: NICKNAMES[i * 2 + 1] ?? NICKNAMES[i], avatar: AVATARS[i] });
 
 export const TurnsHome: React.FC<TurnsHomeProps> = ({ puzzles, counts, settings, onExit }) => {
-  const { t } = useT();
+  const { t, language } = useT();
   const show = useNickname();
   const game = useTurns();
   const cats = useRebusCategories();
@@ -63,7 +64,7 @@ export const TurnsHome: React.FC<TurnsHomeProps> = ({ puzzles, counts, settings,
     setShort(false);
     markSeen(whole.map((p) => p.id));
     cue("start");
-    game.start({ puzzles: whole, players, settings });
+    game.start({ puzzles: whole.map((p) => localizePuzzle(p, language)), players, settings });
   };
 
   const change = (i: number, patch: Partial<TurnPlayer>) => setPlayers((list) => list.map((p, j) => (j === i ? { ...p, ...patch } : p)));

@@ -61,7 +61,7 @@ async def ensure_seed(db: AsyncIOMotorDatabase) -> int:
             continue
         stamp = now()
         await db[COLLECTION].insert_one(
-            {"_id": item["id"], "names": item["names"], "tone": item["tone"], "topic": item["topic"], "order": order, "enabled": True,
+            {"_id": item["id"], "names": item["names"], "tone": item["tone"], "topic": item["topic"], "order": order, "enabled": item["id"] != "khmer",
              "builtIn": True, "createdAt": stamp, "updatedAt": stamp}
         )
         created += 1

@@ -150,7 +150,7 @@ export const TurnPlay: React.FC<{ game: TurnsGame; letterTiles: boolean }> = ({ 
           }}
         />
       ) : letterTiles && !isNumberAnswer(puzzle) ? (
-        <LetterTiles key={puzzle.id} answer={puzzle.answer} seed={puzzle.id} onSubmit={(value) => send({ type: "answer", text: value })} />
+        <LetterTiles key={puzzle.id} answer={view.answer} seed={puzzle.id} onSubmit={(value) => send({ type: "answer", text: value })} />
       ) : (
         <form onSubmit={submit} className="flex gap-2">
           <input

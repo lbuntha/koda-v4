@@ -43,11 +43,13 @@ export interface PuzzleSpec {
   ages?: AgeRange;
   /** The id's tail, for an answer that is not written in Latin letters (a Khmer word slugs to nothing). */
   key?: string;
+  /** The same puzzle in Khmer, when it has one. */
+  km?: Puzzle["km"];
 }
 
 /** A category's puzzles from short specs. Difficulty defaults to 1 (easy). */
 export const puzzlesFor = (category: CategoryId, specs: readonly PuzzleSpec[]): Puzzle[] =>
-  specs.map(({ pieces, answer, why, trick, difficulty = 1, accepts = [], ages, key }) => ({
+  specs.map(({ pieces, answer, why, trick, difficulty = 1, accepts = [], ages, key, km }) => ({
     id: `${category}-${key ?? slug(answer)}`,
     category,
     ages: ages ?? AGES[difficulty],
@@ -57,5 +59,6 @@ export const puzzlesFor = (category: CategoryId, specs: readonly PuzzleSpec[]): 
     answer,
     accepts,
     explanation: why,
+    ...(km ? { km } : {}),
     source: "official",
   }));

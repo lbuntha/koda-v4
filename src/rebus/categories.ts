@@ -33,7 +33,7 @@ export const BUILT_IN_CATEGORIES: readonly Category[] = [
   { id: "sports", names: { en: "Sports", km: "កីឡា" }, tone: "cyan", topic: "health", order: 4, enabled: true },
   { id: "school", names: { en: "School", km: "សាលា" }, tone: "indigo", topic: "school", order: 5, enabled: true },
   { id: "science", names: { en: "Science", km: "វិទ្យាសាស្ត្រ" }, tone: "cyan", topic: "nature", order: 6, enabled: true },
-  { id: "khmer", names: { en: "Khmer words", km: "ពាក្យខ្មែរ" }, tone: "purple", topic: "words", order: 7, enabled: true },
+  { id: "khmer", names: { en: "Khmer words", km: "ពាក្យខ្មែរ" }, tone: "purple", topic: "words", order: 7, enabled: false },
   { id: "math", names: { en: "Math", km: "គណិតវិទ្យា" }, tone: "cyan", topic: "numbers", order: 8, enabled: true },
 ];
 

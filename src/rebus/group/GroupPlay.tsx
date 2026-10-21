@@ -93,7 +93,7 @@ export const GroupPlay: React.FC<GroupPlayProps> = ({ room, token, skewMs, apply
   const takeHint = () => {
     if (hint.state !== "ready" || !live) return;
     cue("hintTaken");
-    setMine((m) => ({ ...m, hints: [...m.hints, hintFor(puzzle, hint.rung)], lastHintMs: now }));
+    setMine((m) => ({ ...m, hints: [...m.hints, hintFor(view, hint.rung)], lastHintMs: now }));
   };
 
   const submit = (e: React.FormEvent) => {

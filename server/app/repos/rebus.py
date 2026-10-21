@@ -99,6 +99,14 @@ async def names(db: AsyncIOMotorDatabase, ids: set[str]) -> dict[str, str]:
     return out
 
 
+#: Seed puzzles that were folded into others (the Khmer-only twins of a question that now carries both languages).
+#: The next start retires the ones that were published and rejects the ones still waiting.
+RETIRED_SEED = ("choice-km-capital", "choice-km-days-week", "choice-km-leaf-colour", "khmer-water-sea", "khmer-water-rain")
+
+#: The fields of a puzzle that moved out of the old "khmer" category, which are the seed's to set again.
+MOVED_FIELDS = ("category", "pieces", "answer", "accepts", "explanation", "km", "ages", "difficulty")
+
+
 async def ensure_seed(db: AsyncIOMotorDatabase, puzzles: list[dict[str, Any]]) -> int:
     """Create the seed puzzles that are not here yet, as drafts by the admin. Returns how many.
 
@@ -114,8 +122,13 @@ async def ensure_seed(db: AsyncIOMotorDatabase, puzzles: list[dict[str, Any]]) -
     new_categories = await rebus_categories.ensure_seed(db)
     owner = await first_admin_id(db) or SYSTEM
     for puzzle in puzzles:
-        have = await db.rebus_puzzles.find_one({"id": puzzle["id"]}, {"_id": 1, "km": 1})
+        have = await db.rebus_puzzles.find_one({"id": puzzle["id"]}, {"_id": 1, "km": 1, "category": 1})
         if have:
+            # The old "Khmer words" puzzles now sit in animals, science and the rest, in both languages.
+            if have.get("category") == "khmer" and puzzle["category"] != "khmer":
+                await db.rebus_puzzles.update_one({"_id": have["_id"]}, {"$set": {f: puzzle[f] for f in MOVED_FIELDS if f in puzzle}})
+                filled += 1
+                continue
             # A question that gained a Khmer version since it was seeded gets it; one that has its own is left alone.
             if puzzle.get("km") and not have.get("km"):
                 await db.rebus_puzzles.update_one({"_id": have["_id"]}, {"$set": {"km": puzzle["km"]}})
@@ -137,6 +150,14 @@ async def ensure_seed(db: AsyncIOMotorDatabase, puzzles: list[dict[str, Any]]) -
             }
         )
         created += 1
+    retired = await db.rebus_puzzles.update_many({"id": {"$in": list(RETIRED_SEED)}, "status": "published"}, {"$set": {"status": "retired"}})
+    filled += retired.modified_count
+    unlaunched = await db.rebus_puzzles.update_many({"id": {"$in": list(RETIRED_SEED)}, "status": {"$in": ["draft", "approved"]}}, {"$set": {"status": "rejected"}})
+    filled += unlaunched.modified_count
+    # The Khmer words topic has nothing left in it: hide it, as the Studio's Categories tab would.
+    if not await db.rebus_puzzles.find_one({"category": "khmer", "status": {"$in": ["draft", "approved", "published"]}}, {"_id": 1}):
+        hidden = await db.rebus_categories.update_one({"_id": "khmer", "enabled": True}, {"$set": {"enabled": False}})
+        filled += hidden.modified_count
     adopted = await adopt_seed(db, owner) if owner != SYSTEM else 0
     if created or filled or adopted or new_categories:
         await bump(db)

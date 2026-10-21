@@ -4609,8 +4609,30 @@
    }
   ],
   "answer": "Rainwater",
-  "accepts": [],
+  "accepts": [
+   "ទឹកភ្លៀង"
+  ],
   "explanation": "rain + water = rainwater.",
+  "km": {
+   "pieces": [
+    {
+     "kind": "icon",
+     "id": "rebus-water",
+     "name": "ទឹក"
+    },
+    {
+     "kind": "op",
+     "op": "+"
+    },
+    {
+     "kind": "icon",
+     "id": "rebus-rain",
+     "name": "ភ្លៀង"
+    }
+   ],
+   "answer": "ទឹកភ្លៀង",
+   "explanation": "ទឹក + ភ្លៀង = ទឹកភ្លៀង។"
+  },
   "source": "official"
  },
  {
@@ -4639,8 +4661,30 @@
    }
   ],
   "answer": "Seawater",
-  "accepts": [],
+  "accepts": [
+   "ទឹកសមុទ្រ"
+  ],
   "explanation": "sea + water = seawater.",
+  "km": {
+   "pieces": [
+    {
+     "kind": "icon",
+     "id": "rebus-water",
+     "name": "ទឹក"
+    },
+    {
+     "kind": "op",
+     "op": "+"
+    },
+    {
+     "kind": "icon",
+     "id": "rebus-sea",
+     "name": "សមុទ្រ"
+    }
+   ],
+   "answer": "ទឹកសមុទ្រ",
+   "explanation": "ទឹក + សមុទ្រ = ទឹកសមុទ្រ។"
+  },
   "source": "official"
  },
  {
@@ -29479,7 +29523,7 @@
  },
  {
   "id": "khmer-sun",
-  "category": "khmer",
+  "category": "science",
   "ages": [
    5,
    10
@@ -29490,19 +29534,31 @@
    {
     "kind": "icon",
     "id": "rebus-sun",
-    "name": "ព្រះអាទិត្យ"
+    "name": "sun"
    }
   ],
-  "answer": "ព្រះអាទិត្យ",
+  "answer": "sun",
   "accepts": [
+   "ព្រះអាទិត្យ",
    "ថ្ងៃ"
   ],
-  "explanation": "រូបនេះជាព្រះអាទិត្យ។",
+  "explanation": "This picture is read as \"sun\".",
+  "km": {
+   "pieces": [
+    {
+     "kind": "icon",
+     "id": "rebus-sun",
+     "name": "ព្រះអាទិត្យ"
+    }
+   ],
+   "answer": "ព្រះអាទិត្យ",
+   "explanation": "រូបនេះជាព្រះអាទិត្យ។"
+  },
   "source": "official"
  },
  {
   "id": "khmer-moon",
-  "category": "khmer",
+  "category": "science",
   "ages": [
    5,
    10
@@ -29513,19 +29569,31 @@
    {
     "kind": "icon",
     "id": "rebus-moon",
-    "name": "ព្រះច័ន្ទ"
+    "name": "moon"
    }
   ],
-  "answer": "ព្រះច័ន្ទ",
+  "answer": "moon",
   "accepts": [
+   "ព្រះច័ន្ទ",
    "ខែ"
   ],
-  "explanation": "រូបនេះជាព្រះច័ន្ទ។",
+  "explanation": "This picture is read as \"moon\".",
+  "km": {
+   "pieces": [
+    {
+     "kind": "icon",
+     "id": "rebus-moon",
+     "name": "ព្រះច័ន្ទ"
+    }
+   ],
+   "answer": "ព្រះច័ន្ទ",
+   "explanation": "រូបនេះជាព្រះច័ន្ទ។"
+  },
   "source": "official"
  },
  {
   "id": "khmer-star",
-  "category": "khmer",
+  "category": "science",
   "ages": [
    5,
    10
@@ -29536,17 +29604,30 @@
    {
     "kind": "icon",
     "id": "rebus-star",
-    "name": "ផ្កាយ"
+    "name": "star"
    }
   ],
-  "answer": "ផ្កាយ",
-  "accepts": [],
-  "explanation": "រូបនេះជាផ្កាយ។",
+  "answer": "star",
+  "accepts": [
+   "ផ្កាយ"
+  ],
+  "explanation": "This picture is read as \"star\".",
+  "km": {
+   "pieces": [
+    {
+     "kind": "icon",
+     "id": "rebus-star",
+     "name": "ផ្កាយ"
+    }
+   ],
+   "answer": "ផ្កាយ",
+   "explanation": "រូបនេះជាផ្កាយ។"
+  },
   "source": "official"
  },
  {
   "id": "khmer-fish",
-  "category": "khmer",
+  "category": "animals",
   "ages": [
    5,
    10
@@ -29557,17 +29638,30 @@
    {
     "kind": "icon",
     "id": "rebus-fish",
-    "name": "ត្រី"
+    "name": "fish"
    }
   ],
-  "answer": "ត្រី",
-  "accepts": [],
-  "explanation": "រូបនេះជាត្រី។",
+  "answer": "fish",
+  "accepts": [
+   "ត្រី"
+  ],
+  "explanation": "This picture is read as \"fish\".",
+  "km": {
+   "pieces": [
+    {
+     "kind": "icon",
+     "id": "rebus-fish",
+     "name": "ត្រី"
+    }
+   ],
+   "answer": "ត្រី",
+   "explanation": "រូបនេះជាត្រី។"
+  },
   "source": "official"
  },
  {
   "id": "khmer-bird",
-  "category": "khmer",
+  "category": "animals",
   "ages": [
    5,
    10
@@ -29578,20 +29672,32 @@
    {
     "kind": "icon",
     "id": "rebus-bird",
-    "name": "បក្សី"
+    "name": "bird"
    }
   ],
-  "answer": "បក្សី",
+  "answer": "bird",
   "accepts": [
+   "បក្សី",
    "សត្វស្លាប",
    "សត្វបក្សី"
   ],
-  "explanation": "រូបនេះជាបក្សី។",
+  "explanation": "This picture is read as \"bird\".",
+  "km": {
+   "pieces": [
+    {
+     "kind": "icon",
+     "id": "rebus-bird",
+     "name": "បក្សី"
+    }
+   ],
+   "answer": "បក្សី",
+   "explanation": "រូបនេះជាបក្សី។"
+  },
   "source": "official"
  },
  {
   "id": "khmer-dog",
-  "category": "khmer",
+  "category": "animals",
   "ages": [
    5,
    10
@@ -29602,19 +29708,31 @@
    {
     "kind": "icon",
     "id": "rebus-dog",
-    "name": "ឆ្កែ"
+    "name": "dog"
    }
   ],
-  "answer": "ឆ្កែ",
+  "answer": "dog",
   "accepts": [
+   "ឆ្កែ",
    "សត្វឆ្កែ"
   ],
-  "explanation": "រូបនេះជាឆ្កែ។",
+  "explanation": "This picture is read as \"dog\".",
+  "km": {
+   "pieces": [
+    {
+     "kind": "icon",
+     "id": "rebus-dog",
+     "name": "ឆ្កែ"
+    }
+   ],
+   "answer": "ឆ្កែ",
+   "explanation": "រូបនេះជាឆ្កែ។"
+  },
   "source": "official"
  },
  {
   "id": "khmer-cat",
-  "category": "khmer",
+  "category": "animals",
   "ages": [
    5,
    10
@@ -29625,19 +29743,31 @@
    {
     "kind": "icon",
     "id": "rebus-cat",
-    "name": "ឆ្មា"
+    "name": "cat"
    }
   ],
-  "answer": "ឆ្មា",
+  "answer": "cat",
   "accepts": [
+   "ឆ្មា",
    "សត្វឆ្មា"
   ],
-  "explanation": "រូបនេះជាឆ្មា។",
+  "explanation": "This picture is read as \"cat\".",
+  "km": {
+   "pieces": [
+    {
+     "kind": "icon",
+     "id": "rebus-cat",
+     "name": "ឆ្មា"
+    }
+   ],
+   "answer": "ឆ្មា",
+   "explanation": "រូបនេះជាឆ្មា។"
+  },
   "source": "official"
  },
  {
   "id": "khmer-egg",
-  "category": "khmer",
+  "category": "food",
   "ages": [
    5,
    10
@@ -29648,19 +29778,31 @@
    {
     "kind": "icon",
     "id": "rebus-egg",
-    "name": "ពង"
+    "name": "egg"
    }
   ],
-  "answer": "ពងមាន់",
+  "answer": "egg",
   "accepts": [
+   "ពងមាន់",
    "ពង"
   ],
-  "explanation": "រូបនេះជាពង។",
+  "explanation": "This picture is read as \"egg\".",
+  "km": {
+   "pieces": [
+    {
+     "kind": "icon",
+     "id": "rebus-egg",
+     "name": "ពង"
+    }
+   ],
+   "answer": "ពងមាន់",
+   "explanation": "រូបនេះជាពង។"
+  },
   "source": "official"
  },
  {
   "id": "khmer-house",
-  "category": "khmer",
+  "category": "school",
   "ages": [
    5,
    10
@@ -29671,17 +29813,30 @@
    {
     "kind": "icon",
     "id": "rebus-house",
-    "name": "ផ្ទះ"
+    "name": "house"
    }
   ],
-  "answer": "ផ្ទះ",
-  "accepts": [],
-  "explanation": "រូបនេះជាផ្ទះ។",
+  "answer": "house",
+  "accepts": [
+   "ផ្ទះ"
+  ],
+  "explanation": "This picture is read as \"house\".",
+  "km": {
+   "pieces": [
+    {
+     "kind": "icon",
+     "id": "rebus-house",
+     "name": "ផ្ទះ"
+    }
+   ],
+   "answer": "ផ្ទះ",
+   "explanation": "រូបនេះជាផ្ទះ។"
+  },
   "source": "official"
  },
  {
   "id": "khmer-flower",
-  "category": "khmer",
+  "category": "science",
   "ages": [
    5,
    10
@@ -29692,17 +29847,30 @@
    {
     "kind": "icon",
     "id": "rebus-flower",
-    "name": "ផ្កា"
+    "name": "flower"
    }
   ],
-  "answer": "ផ្កា",
-  "accepts": [],
-  "explanation": "រូបនេះជាផ្កា។",
+  "answer": "flower",
+  "accepts": [
+   "ផ្កា"
+  ],
+  "explanation": "This picture is read as \"flower\".",
+  "km": {
+   "pieces": [
+    {
+     "kind": "icon",
+     "id": "rebus-flower",
+     "name": "ផ្កា"
+    }
+   ],
+   "answer": "ផ្កា",
+   "explanation": "រូបនេះជាផ្កា។"
+  },
   "source": "official"
  },
  {
   "id": "khmer-book",
-  "category": "khmer",
+  "category": "school",
   "ages": [
    5,
    10
@@ -29713,17 +29881,30 @@
    {
     "kind": "icon",
     "id": "rebus-book",
-    "name": "សៀវភៅ"
+    "name": "book"
    }
   ],
-  "answer": "សៀវភៅ",
-  "accepts": [],
-  "explanation": "រូបនេះជាសៀវភៅ។",
+  "answer": "book",
+  "accepts": [
+   "សៀវភៅ"
+  ],
+  "explanation": "This picture is read as \"book\".",
+  "km": {
+   "pieces": [
+    {
+     "kind": "icon",
+     "id": "rebus-book",
+     "name": "សៀវភៅ"
+    }
+   ],
+   "answer": "សៀវភៅ",
+   "explanation": "រូបនេះជាសៀវភៅ។"
+  },
   "source": "official"
  },
  {
   "id": "khmer-water",
-  "category": "khmer",
+  "category": "science",
   "ages": [
    5,
    10
@@ -29734,17 +29915,30 @@
    {
     "kind": "icon",
     "id": "rebus-water",
-    "name": "ទឹក"
+    "name": "water"
    }
   ],
-  "answer": "ទឹក",
-  "accepts": [],
-  "explanation": "រូបនេះជាទឹក។",
+  "answer": "water",
+  "accepts": [
+   "ទឹក"
+  ],
+  "explanation": "This picture is read as \"water\".",
+  "km": {
+   "pieces": [
+    {
+     "kind": "icon",
+     "id": "rebus-water",
+     "name": "ទឹក"
+    }
+   ],
+   "answer": "ទឹក",
+   "explanation": "រូបនេះជាទឹក។"
+  },
   "source": "official"
  },
  {
   "id": "khmer-fire",
-  "category": "khmer",
+  "category": "science",
   "ages": [
    5,
    10
@@ -29755,17 +29949,30 @@
    {
     "kind": "icon",
     "id": "rebus-fire",
-    "name": "ភ្លើង"
+    "name": "fire"
    }
   ],
-  "answer": "ភ្លើង",
-  "accepts": [],
-  "explanation": "រូបនេះជាភ្លើង។",
+  "answer": "fire",
+  "accepts": [
+   "ភ្លើង"
+  ],
+  "explanation": "This picture is read as \"fire\".",
+  "km": {
+   "pieces": [
+    {
+     "kind": "icon",
+     "id": "rebus-fire",
+     "name": "ភ្លើង"
+    }
+   ],
+   "answer": "ភ្លើង",
+   "explanation": "រូបនេះជាភ្លើង។"
+  },
   "source": "official"
  },
  {
   "id": "khmer-rain",
-  "category": "khmer",
+  "category": "science",
   "ages": [
    5,
    10
@@ -29776,17 +29983,30 @@
    {
     "kind": "icon",
     "id": "rebus-rain",
-    "name": "ភ្លៀង"
+    "name": "rain"
    }
   ],
-  "answer": "ភ្លៀង",
-  "accepts": [],
-  "explanation": "រូបនេះជាភ្លៀង។",
+  "answer": "rain",
+  "accepts": [
+   "ភ្លៀង"
+  ],
+  "explanation": "This picture is read as \"rain\".",
+  "km": {
+   "pieces": [
+    {
+     "kind": "icon",
+     "id": "rebus-rain",
+     "name": "ភ្លៀង"
+    }
+   ],
+   "answer": "ភ្លៀង",
+   "explanation": "រូបនេះជាភ្លៀង។"
+  },
   "source": "official"
  },
  {
   "id": "khmer-leaf",
-  "category": "khmer",
+  "category": "science",
   "ages": [
    5,
    10
@@ -29797,17 +30017,30 @@
    {
     "kind": "icon",
     "id": "rebus-leaf",
-    "name": "ស្លឹក"
+    "name": "leaf"
    }
   ],
-  "answer": "ស្លឹក",
-  "accepts": [],
-  "explanation": "រូបនេះជាស្លឹក។",
+  "answer": "leaf",
+  "accepts": [
+   "ស្លឹក"
+  ],
+  "explanation": "This picture is read as \"leaf\".",
+  "km": {
+   "pieces": [
+    {
+     "kind": "icon",
+     "id": "rebus-leaf",
+     "name": "ស្លឹក"
+    }
+   ],
+   "answer": "ស្លឹក",
+   "explanation": "រូបនេះជាស្លឹក។"
+  },
   "source": "official"
  },
  {
   "id": "khmer-key",
-  "category": "khmer",
+  "category": "school",
   "ages": [
    5,
    10
@@ -29818,20 +30051,32 @@
    {
     "kind": "icon",
     "id": "rebus-key",
-    "name": "កូនសោ"
+    "name": "key"
    }
   ],
-  "answer": "កូនសោ",
+  "answer": "key",
   "accepts": [
+   "កូនសោ",
    "សោ",
    "សោរ"
   ],
-  "explanation": "រូបនេះជាកូនសោ។",
+  "explanation": "This picture is read as \"key\".",
+  "km": {
+   "pieces": [
+    {
+     "kind": "icon",
+     "id": "rebus-key",
+     "name": "កូនសោ"
+    }
+   ],
+   "answer": "កូនសោ",
+   "explanation": "រូបនេះជាកូនសោ។"
+  },
   "source": "official"
  },
  {
   "id": "khmer-horse",
-  "category": "khmer",
+  "category": "animals",
   "ages": [
    5,
    10
@@ -29842,19 +30087,31 @@
    {
     "kind": "icon",
     "id": "rebus-horse",
-    "name": "សេះ"
+    "name": "horse"
    }
   ],
-  "answer": "សេះ",
+  "answer": "horse",
   "accepts": [
+   "សេះ",
    "សត្វសេះ"
   ],
-  "explanation": "រូបនេះជាសេះ។",
+  "explanation": "This picture is read as \"horse\".",
+  "km": {
+   "pieces": [
+    {
+     "kind": "icon",
+     "id": "rebus-horse",
+     "name": "សេះ"
+    }
+   ],
+   "answer": "សេះ",
+   "explanation": "រូបនេះជាសេះ។"
+  },
   "source": "official"
  },
  {
   "id": "khmer-sheep",
-  "category": "khmer",
+  "category": "animals",
   "ages": [
    5,
    10
@@ -29865,19 +30122,31 @@
    {
     "kind": "icon",
     "id": "rebus-sheep",
-    "name": "ចៀម"
+    "name": "sheep"
    }
   ],
-  "answer": "ចៀម",
+  "answer": "sheep",
   "accepts": [
+   "ចៀម",
    "សត្វចៀម"
   ],
-  "explanation": "រូបនេះជាចៀម។",
+  "explanation": "This picture is read as \"sheep\".",
+  "km": {
+   "pieces": [
+    {
+     "kind": "icon",
+     "id": "rebus-sheep",
+     "name": "ចៀម"
+    }
+   ],
+   "answer": "ចៀម",
+   "explanation": "រូបនេះជាចៀម។"
+  },
   "source": "official"
  },
  {
   "id": "khmer-frog",
-  "category": "khmer",
+  "category": "animals",
   "ages": [
    5,
    10
@@ -29888,19 +30157,31 @@
    {
     "kind": "icon",
     "id": "rebus-frog",
-    "name": "កង្កែប"
+    "name": "frog"
    }
   ],
-  "answer": "កង្កែប",
+  "answer": "frog",
   "accepts": [
+   "កង្កែប",
    "សត្វកង្កែប"
   ],
-  "explanation": "រូបនេះជាកង្កែប។",
+  "explanation": "This picture is read as \"frog\".",
+  "km": {
+   "pieces": [
+    {
+     "kind": "icon",
+     "id": "rebus-frog",
+     "name": "កង្កែប"
+    }
+   ],
+   "answer": "កង្កែប",
+   "explanation": "រូបនេះជាកង្កែប។"
+  },
   "source": "official"
  },
  {
   "id": "khmer-monkey",
-  "category": "khmer",
+  "category": "animals",
   "ages": [
    5,
    10
@@ -29911,19 +30192,31 @@
    {
     "kind": "icon",
     "id": "rebus-monkey",
-    "name": "ស្វា"
+    "name": "monkey"
    }
   ],
-  "answer": "ស្វា",
+  "answer": "monkeys",
   "accepts": [
+   "ស្វា",
    "សត្វស្វា"
   ],
-  "explanation": "រូបនេះជាស្វា។",
+  "explanation": "This picture is read as \"monkey\".",
+  "km": {
+   "pieces": [
+    {
+     "kind": "icon",
+     "id": "rebus-monkey",
+     "name": "ស្វា"
+    }
+   ],
+   "answer": "ស្វា",
+   "explanation": "រូបនេះជាស្វា។"
+  },
   "source": "official"
  },
  {
   "id": "khmer-pencil",
-  "category": "khmer",
+  "category": "school",
   "ages": [
    5,
    10
@@ -29934,17 +30227,30 @@
    {
     "kind": "icon",
     "id": "rebus-pencil",
-    "name": "ខ្មៅដៃ"
+    "name": "pencil"
    }
   ],
-  "answer": "ខ្មៅដៃ",
-  "accepts": [],
-  "explanation": "រូបនេះជាខ្មៅដៃ។",
+  "answer": "pencil",
+  "accepts": [
+   "ខ្មៅដៃ"
+  ],
+  "explanation": "This picture is read as \"pencil\".",
+  "km": {
+   "pieces": [
+    {
+     "kind": "icon",
+     "id": "rebus-pencil",
+     "name": "ខ្មៅដៃ"
+    }
+   ],
+   "answer": "ខ្មៅដៃ",
+   "explanation": "រូបនេះជាខ្មៅដៃ។"
+  },
   "source": "official"
  },
  {
   "id": "khmer-cloud",
-  "category": "khmer",
+  "category": "science",
   "ages": [
    5,
    10
@@ -29955,17 +30261,30 @@
    {
     "kind": "icon",
     "id": "rebus-cloud",
-    "name": "ពពក"
+    "name": "cloud"
    }
   ],
-  "answer": "ពពក",
-  "accepts": [],
-  "explanation": "រូបនេះជាពពក។",
+  "answer": "cloud",
+  "accepts": [
+   "ពពក"
+  ],
+  "explanation": "This picture is read as \"cloud\".",
+  "km": {
+   "pieces": [
+    {
+     "kind": "icon",
+     "id": "rebus-cloud",
+     "name": "ពពក"
+    }
+   ],
+   "answer": "ពពក",
+   "explanation": "រូបនេះជាពពក។"
+  },
   "source": "official"
  },
  {
   "id": "khmer-wind",
-  "category": "khmer",
+  "category": "science",
   "ages": [
    5,
    10
@@ -29976,17 +30295,30 @@
    {
     "kind": "icon",
     "id": "rebus-wind",
-    "name": "ខ្យល់"
+    "name": "wind"
    }
   ],
-  "answer": "ខ្យល់",
-  "accepts": [],
-  "explanation": "រូបនេះជាខ្យល់។",
+  "answer": "wind",
+  "accepts": [
+   "ខ្យល់"
+  ],
+  "explanation": "This picture is read as \"wind\".",
+  "km": {
+   "pieces": [
+    {
+     "kind": "icon",
+     "id": "rebus-wind",
+     "name": "ខ្យល់"
+    }
+   ],
+   "answer": "ខ្យល់",
+   "explanation": "រូបនេះជាខ្យល់។"
+  },
   "source": "official"
  },
  {
   "id": "khmer-sea",
-  "category": "khmer",
+  "category": "science",
   "ages": [
    5,
    10
@@ -29997,17 +30329,30 @@
    {
     "kind": "icon",
     "id": "rebus-sea",
-    "name": "សមុទ្រ"
+    "name": "sea"
    }
   ],
-  "answer": "សមុទ្រ",
-  "accepts": [],
-  "explanation": "រូបនេះជាសមុទ្រ។",
+  "answer": "sea",
+  "accepts": [
+   "សមុទ្រ"
+  ],
+  "explanation": "This picture is read as \"sea\".",
+  "km": {
+   "pieces": [
+    {
+     "kind": "icon",
+     "id": "rebus-sea",
+     "name": "សមុទ្រ"
+    }
+   ],
+   "answer": "សមុទ្រ",
+   "explanation": "រូបនេះជាសមុទ្រ។"
+  },
   "source": "official"
  },
  {
   "id": "khmer-bee",
-  "category": "khmer",
+  "category": "animals",
   "ages": [
    5,
    10
@@ -30018,19 +30363,31 @@
    {
     "kind": "icon",
     "id": "rebus-bee",
-    "name": "ឃ្មុំ"
+    "name": "bee"
    }
   ],
-  "answer": "ឃ្មុំ",
+  "answer": "bee",
   "accepts": [
+   "ឃ្មុំ",
    "សត្វឃ្មុំ"
   ],
-  "explanation": "រូបនេះជាឃ្មុំ។",
+  "explanation": "This picture is read as \"bee\".",
+  "km": {
+   "pieces": [
+    {
+     "kind": "icon",
+     "id": "rebus-bee",
+     "name": "ឃ្មុំ"
+    }
+   ],
+   "answer": "ឃ្មុំ",
+   "explanation": "រូបនេះជាឃ្មុំ។"
+  },
   "source": "official"
  },
  {
   "id": "khmer-corn",
-  "category": "khmer",
+  "category": "food",
   "ages": [
    5,
    10
@@ -30041,17 +30398,30 @@
    {
     "kind": "icon",
     "id": "rebus-corn",
-    "name": "ពោត"
+    "name": "corn"
    }
   ],
-  "answer": "ពោត",
-  "accepts": [],
-  "explanation": "រូបនេះជាពោត។",
+  "answer": "corn",
+  "accepts": [
+   "ពោត"
+  ],
+  "explanation": "This picture is read as \"corn\".",
+  "km": {
+   "pieces": [
+    {
+     "kind": "icon",
+     "id": "rebus-corn",
+     "name": "ពោត"
+    }
+   ],
+   "answer": "ពោត",
+   "explanation": "រូបនេះជាពោត។"
+  },
   "source": "official"
  },
  {
   "id": "khmer-water-ice",
-  "category": "khmer",
+  "category": "sayings",
   "ages": [
    7,
    12
@@ -30062,7 +30432,7 @@
    {
     "kind": "icon",
     "id": "rebus-water",
-    "name": "ទឹក"
+    "name": "water"
    },
    {
     "kind": "op",
@@ -30071,17 +30441,39 @@
    {
     "kind": "icon",
     "id": "rebus-ice",
-    "name": "កក"
+    "name": "frozen"
    }
   ],
-  "answer": "ទឹកកក",
-  "accepts": [],
-  "explanation": "ទឹក + កក = ទឹកកក។",
+  "answer": "ice",
+  "accepts": [
+   "ទឹកកក"
+  ],
+  "explanation": "In Khmer, water + frozen (ទឹកកក) is ice.",
+  "km": {
+   "pieces": [
+    {
+     "kind": "icon",
+     "id": "rebus-water",
+     "name": "ទឹក"
+    },
+    {
+     "kind": "op",
+     "op": "+"
+    },
+    {
+     "kind": "icon",
+     "id": "rebus-ice",
+     "name": "កក"
+    }
+   ],
+   "answer": "ទឹកកក",
+   "explanation": "ទឹក + កក = ទឹកកក។"
+  },
   "source": "official"
  },
  {
   "id": "khmer-water-fish",
-  "category": "khmer",
+  "category": "sayings",
   "ages": [
    7,
    12
@@ -30092,7 +30484,7 @@
    {
     "kind": "icon",
     "id": "rebus-water",
-    "name": "ទឹក"
+    "name": "water"
    },
    {
     "kind": "op",
@@ -30101,47 +30493,39 @@
    {
     "kind": "icon",
     "id": "rebus-fish",
-    "name": "ត្រី"
+    "name": "fish"
    }
   ],
-  "answer": "ទឹកត្រី",
-  "accepts": [],
-  "explanation": "ទឹក + ត្រី = ទឹកត្រី។",
-  "source": "official"
- },
- {
-  "id": "khmer-water-sea",
-  "category": "khmer",
-  "ages": [
-   7,
-   12
+  "answer": "fish sauce",
+  "accepts": [
+   "ទឹកត្រី"
   ],
-  "difficulty": 2,
-  "trick": "compound",
-  "pieces": [
-   {
-    "kind": "icon",
-    "id": "rebus-water",
-    "name": "ទឹក"
-   },
-   {
-    "kind": "op",
-    "op": "+"
-   },
-   {
-    "kind": "icon",
-    "id": "rebus-sea",
-    "name": "សមុទ្រ"
-   }
-  ],
-  "answer": "ទឹកសមុទ្រ",
-  "accepts": [],
-  "explanation": "ទឹក + សមុទ្រ = ទឹកសមុទ្រ។",
+  "explanation": "In Khmer, water + fish (ទឹកត្រី) is fish sauce.",
+  "km": {
+   "pieces": [
+    {
+     "kind": "icon",
+     "id": "rebus-water",
+     "name": "ទឹក"
+    },
+    {
+     "kind": "op",
+     "op": "+"
+    },
+    {
+     "kind": "icon",
+     "id": "rebus-fish",
+     "name": "ត្រី"
+    }
+   ],
+   "answer": "ទឹកត្រី",
+   "explanation": "ទឹក + ត្រី = ទឹកត្រី។"
+  },
   "source": "official"
  },
  {
   "id": "khmer-water-bee",
-  "category": "khmer",
+  "category": "sayings",
   "ages": [
    7,
    12
@@ -30152,7 +30536,7 @@
    {
     "kind": "icon",
     "id": "rebus-water",
-    "name": "ទឹក"
+    "name": "water"
    },
    {
     "kind": "op",
@@ -30161,47 +30545,39 @@
    {
     "kind": "icon",
     "id": "rebus-bee",
-    "name": "ឃ្មុំ"
+    "name": "bee"
    }
   ],
-  "answer": "ទឹកឃ្មុំ",
-  "accepts": [],
-  "explanation": "ទឹក + ឃ្មុំ = ទឹកឃ្មុំ។",
-  "source": "official"
- },
- {
-  "id": "khmer-water-rain",
-  "category": "khmer",
-  "ages": [
-   7,
-   12
+  "answer": "honey",
+  "accepts": [
+   "ទឹកឃ្មុំ"
   ],
-  "difficulty": 2,
-  "trick": "compound",
-  "pieces": [
-   {
-    "kind": "icon",
-    "id": "rebus-water",
-    "name": "ទឹក"
-   },
-   {
-    "kind": "op",
-    "op": "+"
-   },
-   {
-    "kind": "icon",
-    "id": "rebus-rain",
-    "name": "ភ្លៀង"
-   }
-  ],
-  "answer": "ទឹកភ្លៀង",
-  "accepts": [],
-  "explanation": "ទឹក + ភ្លៀង = ទឹកភ្លៀង។",
+  "explanation": "In Khmer, water + bee (ទឹកឃ្មុំ) is honey.",
+  "km": {
+   "pieces": [
+    {
+     "kind": "icon",
+     "id": "rebus-water",
+     "name": "ទឹក"
+    },
+    {
+     "kind": "op",
+     "op": "+"
+    },
+    {
+     "kind": "icon",
+     "id": "rebus-bee",
+     "name": "ឃ្មុំ"
+    }
+   ],
+   "answer": "ទឹកឃ្មុំ",
+   "explanation": "ទឹក + ឃ្មុំ = ទឹកឃ្មុំ។"
+  },
   "source": "official"
  },
  {
   "id": "khmer-tree-wood",
-  "category": "khmer",
+  "category": "sayings",
   "ages": [
    7,
    12
@@ -30212,7 +30588,7 @@
    {
     "kind": "icon",
     "id": "rebus-tree",
-    "name": "ដើម"
+    "name": "tree trunk"
    },
    {
     "kind": "op",
@@ -30221,17 +30597,39 @@
    {
     "kind": "icon",
     "id": "rebus-wood",
-    "name": "ឈើ"
+    "name": "wood"
    }
   ],
-  "answer": "ដើមឈើ",
-  "accepts": [],
-  "explanation": "ដើម + ឈើ = ដើមឈើ។",
+  "answer": "tree",
+  "accepts": [
+   "ដើមឈើ"
+  ],
+  "explanation": "In Khmer, trunk + wood (ដើមឈើ) is a tree.",
+  "km": {
+   "pieces": [
+    {
+     "kind": "icon",
+     "id": "rebus-tree",
+     "name": "ដើម"
+    },
+    {
+     "kind": "op",
+     "op": "+"
+    },
+    {
+     "kind": "icon",
+     "id": "rebus-wood",
+     "name": "ឈើ"
+    }
+   ],
+   "answer": "ដើមឈើ",
+   "explanation": "ដើម + ឈើ = ដើមឈើ។"
+  },
   "source": "official"
  },
  {
   "id": "khmer-leaf-wood",
-  "category": "khmer",
+  "category": "sayings",
   "ages": [
    7,
    12
@@ -30242,7 +30640,7 @@
    {
     "kind": "icon",
     "id": "rebus-leaf",
-    "name": "ស្លឹក"
+    "name": "leaf"
    },
    {
     "kind": "op",
@@ -30251,17 +30649,39 @@
    {
     "kind": "icon",
     "id": "rebus-wood",
-    "name": "ឈើ"
+    "name": "wood"
    }
   ],
-  "answer": "ស្លឹកឈើ",
-  "accepts": [],
-  "explanation": "ស្លឹក + ឈើ = ស្លឹកឈើ។",
+  "answer": "tree leaf",
+  "accepts": [
+   "ស្លឹកឈើ"
+  ],
+  "explanation": "In Khmer, leaf + wood (ស្លឹកឈើ) is a tree leaf.",
+  "km": {
+   "pieces": [
+    {
+     "kind": "icon",
+     "id": "rebus-leaf",
+     "name": "ស្លឹក"
+    },
+    {
+     "kind": "op",
+     "op": "+"
+    },
+    {
+     "kind": "icon",
+     "id": "rebus-wood",
+     "name": "ឈើ"
+    }
+   ],
+   "answer": "ស្លឹកឈើ",
+   "explanation": "ស្លឹក + ឈើ = ស្លឹកឈើ។"
+  },
   "source": "official"
  },
  {
   "id": "khmer-wind-storm",
-  "category": "khmer",
+  "category": "sayings",
   "ages": [
    7,
    12
@@ -30272,7 +30692,7 @@
    {
     "kind": "icon",
     "id": "rebus-wind",
-    "name": "ខ្យល់"
+    "name": "wind"
    },
    {
     "kind": "op",
@@ -30281,17 +30701,39 @@
    {
     "kind": "icon",
     "id": "rebus-storm",
-    "name": "ព្យុះ"
+    "name": "storm"
    }
   ],
-  "answer": "ខ្យល់ព្យុះ",
-  "accepts": [],
-  "explanation": "ខ្យល់ + ព្យុះ = ខ្យល់ព្យុះ។",
+  "answer": "storm",
+  "accepts": [
+   "ខ្យល់ព្យុះ"
+  ],
+  "explanation": "In Khmer, wind + storm (ខ្យល់ព្យុះ) is a storm.",
+  "km": {
+   "pieces": [
+    {
+     "kind": "icon",
+     "id": "rebus-wind",
+     "name": "ខ្យល់"
+    },
+    {
+     "kind": "op",
+     "op": "+"
+    },
+    {
+     "kind": "icon",
+     "id": "rebus-storm",
+     "name": "ព្យុះ"
+    }
+   ],
+   "answer": "ខ្យល់ព្យុះ",
+   "explanation": "ខ្យល់ + ព្យុះ = ខ្យល់ព្យុះ។"
+  },
   "source": "official"
  },
  {
   "id": "khmer-earth-sand",
-  "category": "khmer",
+  "category": "sayings",
   "ages": [
    7,
    12
@@ -30302,7 +30744,7 @@
    {
     "kind": "icon",
     "id": "rebus-earth",
-    "name": "ដី"
+    "name": "soil"
    },
    {
     "kind": "op",
@@ -30311,17 +30753,39 @@
    {
     "kind": "icon",
     "id": "rebus-sand",
-    "name": "ខ្សាច់"
+    "name": "sand"
    }
   ],
-  "answer": "ដីខ្សាច់",
-  "accepts": [],
-  "explanation": "ដី + ខ្សាច់ = ដីខ្សាច់។",
+  "answer": "sandy soil",
+  "accepts": [
+   "ដីខ្សាច់"
+  ],
+  "explanation": "In Khmer, soil + sand (ដីខ្សាច់) is sandy soil.",
+  "km": {
+   "pieces": [
+    {
+     "kind": "icon",
+     "id": "rebus-earth",
+     "name": "ដី"
+    },
+    {
+     "kind": "op",
+     "op": "+"
+    },
+    {
+     "kind": "icon",
+     "id": "rebus-sand",
+     "name": "ខ្សាច់"
+    }
+   ],
+   "answer": "ដីខ្សាច់",
+   "explanation": "ដី + ខ្សាច់ = ដីខ្សាច់។"
+  },
   "source": "official"
  },
  {
   "id": "khmer-water-earth",
-  "category": "khmer",
+  "category": "sayings",
   "ages": [
    9,
    14
@@ -30332,7 +30796,7 @@
    {
     "kind": "icon",
     "id": "rebus-water",
-    "name": "ទឹក"
+    "name": "water"
    },
    {
     "kind": "op",
@@ -30341,12 +30805,35 @@
    {
     "kind": "icon",
     "id": "rebus-earth",
-    "name": "ដី"
+    "name": "soil"
    }
   ],
-  "answer": "ទឹកដី",
-  "accepts": [],
-  "explanation": "ទឹក + ដី = ទឹកដី ជាកន្លែងដែលជាប្រទេសរបស់យើង។",
+  "answer": "homeland",
+  "accepts": [
+   "ទឹកដី",
+   "country"
+  ],
+  "explanation": "In Khmer, water + land (ទឹកដី) is a homeland: the country we belong to.",
+  "km": {
+   "pieces": [
+    {
+     "kind": "icon",
+     "id": "rebus-water",
+     "name": "ទឹក"
+    },
+    {
+     "kind": "op",
+     "op": "+"
+    },
+    {
+     "kind": "icon",
+     "id": "rebus-earth",
+     "name": "ដី"
+    }
+   ],
+   "answer": "ទឹកដី",
+   "explanation": "ទឹក + ដី = ទឹកដី ជាកន្លែងដែលជាប្រទេសរបស់យើង។"
+  },
   "source": "official"
  },
  {

@@ -12,6 +12,7 @@ import { useT } from "../lib/i18n";
 import { themeSystem } from "../lib/themeSystem";
 import { useAudienceViewer } from "../skills/viewer";
 import { bankForAge, useRebusBank } from "./bank";
+import { localizePuzzle } from "./localize";
 import { buildRound, filterPuzzles } from "./round";
 import { loadAdaptive, saveAdaptive } from "./prefs";
 import { loadResults, saveOutcome } from "./resultsStore";
@@ -48,7 +49,7 @@ export interface RebusPageProps {
 }
 
 export const RebusPage: React.FC<RebusPageProps> = ({ age: ageOverride, settings: settingsProp, onDeepChange, onAwardXp, onExit, joinCode = null, onJoinCodeUsed }) => {
-  const { t } = useT();
+  const { t, language } = useT();
   const ownerSettings = useRebusSettings();
   const settings = settingsProp ?? ownerSettings;
   const viewer = useAudienceViewer();
@@ -119,7 +120,7 @@ export const RebusPage: React.FC<RebusPageProps> = ({ age: ageOverride, settings
       setPass(null);
     }
     markSeen(built.puzzles.map((p) => p.id));
-    round.start({ puzzles: built.puzzles, settings, level: pick.level, adaptiveStart: loadAdaptive(), seed: `${Date.now()}` });
+    round.start({ puzzles: built.puzzles.map((p) => localizePuzzle(p, language)), settings, level: pick.level, adaptiveStart: loadAdaptive(), seed: `${Date.now()}` });
   };
 
   if (group) {

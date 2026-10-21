@@ -56,11 +56,13 @@ export const localizePuzzle = (puzzle: Puzzle, language: string): Puzzle => {
       choice: { ...puzzle.choice, options: words },
     };
   }
+  const khmerAnswer = puzzle.km?.answer;
   return {
     ...puzzle,
     pieces: (puzzle.km?.pieces ?? puzzle.pieces).map(inKhmer),
     explanation: toKhmerDigits(puzzle.km?.explanation ?? puzzle.explanation),
-    answer: numeric ? toKhmerDigits(puzzle.answer) : puzzle.answer,
+    // With its own Khmer answer, a puzzle is typed in Khmer; the English answer is still taken.
+    ...(khmerAnswer ? { answer: khmerAnswer, accepts: [puzzle.answer, ...puzzle.accepts.filter((a) => a !== khmerAnswer)] } : { answer: numeric ? toKhmerDigits(puzzle.answer) : puzzle.answer }),
     ...(puzzle.choice ? { choice: { ...puzzle.choice, options: puzzle.choice.options.map(toKhmerDigits) } } : {}),
   };
 };
