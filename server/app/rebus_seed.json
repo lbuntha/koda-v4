@@ -33452,6 +33452,918 @@
   "source": "official"
  },
  {
+  "id": "kmplay-kick-ball",
+  "category": "sports",
+  "ages": [
+   6,
+   10
+  ],
+  "difficulty": 1,
+  "trick": "compound",
+  "pieces": [
+   {
+    "kind": "icon",
+    "id": "rebus-ball",
+    "name": "បាល់"
+   },
+   {
+    "kind": "op",
+    "op": "+"
+   },
+   {
+    "kind": "word",
+    "text": "ទាត់"
+   }
+  ],
+  "answer": "បាល់ទាត់",
+  "accepts": [],
+  "explanation": "បាល់ + ទាត់ = បាល់ទាត់។ កីឡាបាល់ទាត់។",
+  "onlyIn": "km",
+  "source": "official"
+ },
+ {
+  "id": "kmplay-throw-ball",
+  "category": "sports",
+  "ages": [
+   6,
+   10
+  ],
+  "difficulty": 1,
+  "trick": "compound",
+  "pieces": [
+   {
+    "kind": "icon",
+    "id": "rebus-ball",
+    "name": "បាល់"
+   },
+   {
+    "kind": "op",
+    "op": "+"
+   },
+   {
+    "kind": "word",
+    "text": "បោះ"
+   }
+  ],
+  "answer": "បាល់បោះ",
+  "accepts": [],
+  "explanation": "បាល់ + បោះ = បាល់បោះ។ កីឡាបាល់បោះ។",
+  "onlyIn": "km",
+  "source": "official"
+ },
+ {
+  "id": "kmplay-slap-ball",
+  "category": "sports",
+  "ages": [
+   6,
+   10
+  ],
+  "difficulty": 1,
+  "trick": "compound",
+  "pieces": [
+   {
+    "kind": "icon",
+    "id": "rebus-ball",
+    "name": "បាល់"
+   },
+   {
+    "kind": "op",
+    "op": "+"
+   },
+   {
+    "kind": "word",
+    "text": "ទះ"
+   }
+  ],
+  "answer": "បាល់ទះ",
+  "accepts": [],
+  "explanation": "បាល់ + ទះ = បាល់ទះ។ កីឡាបាល់ទះ។",
+  "onlyIn": "km",
+  "source": "official"
+ },
+ {
+  "id": "kmplay-dive",
+  "category": "sports",
+  "ages": [
+   7,
+   12
+  ],
+  "difficulty": 2,
+  "trick": "compound",
+  "pieces": [
+   {
+    "kind": "word",
+    "text": "លោត"
+   },
+   {
+    "kind": "op",
+    "op": "+"
+   },
+   {
+    "kind": "icon",
+    "id": "rebus-water",
+    "name": "ទឹក"
+   }
+  ],
+  "answer": "លោតទឹក",
+  "accepts": [],
+  "explanation": "លោត + ទឹក = លោតទឹក។",
+  "onlyIn": "km",
+  "source": "official"
+ },
+ {
+  "id": "kmplay-archery",
+  "category": "sports",
+  "ages": [
+   7,
+   12
+  ],
+  "difficulty": 2,
+  "trick": "compound",
+  "pieces": [
+   {
+    "kind": "word",
+    "text": "បាញ់"
+   },
+   {
+    "kind": "op",
+    "op": "+"
+   },
+   {
+    "kind": "icon",
+    "id": "rebus-arrow",
+    "name": "ព្រួញ"
+   }
+  ],
+  "answer": "បាញ់ព្រួញ",
+  "accepts": [],
+  "explanation": "បាញ់ + ព្រួញ = បាញ់ព្រួញ។",
+  "onlyIn": "km",
+  "source": "official"
+ },
+ {
+  "id": "kmplay-fishing",
+  "category": "sports",
+  "ages": [
+   6,
+   10
+  ],
+  "difficulty": 1,
+  "trick": "compound",
+  "pieces": [
+   {
+    "kind": "word",
+    "text": "ស្ទូច"
+   },
+   {
+    "kind": "op",
+    "op": "+"
+   },
+   {
+    "kind": "icon",
+    "id": "rebus-fish",
+    "name": "ត្រី"
+   }
+  ],
+  "answer": "ស្ទូចត្រី",
+  "accepts": [],
+  "explanation": "ស្ទូច + ត្រី = ស្ទូចត្រី។",
+  "onlyIn": "km",
+  "source": "official"
+ },
+ {
+  "id": "kmplay-row-boat",
+  "category": "sports",
+  "ages": [
+   7,
+   12
+  ],
+  "difficulty": 2,
+  "trick": "compound",
+  "pieces": [
+   {
+    "kind": "word",
+    "text": "ចែវ"
+   },
+   {
+    "kind": "op",
+    "op": "+"
+   },
+   {
+    "kind": "icon",
+    "id": "rebus-boat",
+    "name": "ទូក"
+   }
+  ],
+  "answer": "ចែវទូក",
+  "accepts": [],
+  "explanation": "ចែវ + ទូក = ចែវទូក។",
+  "onlyIn": "km",
+  "source": "official"
+ },
+ {
+  "id": "kmplay-shoe",
+  "category": "sports",
+  "ages": [
+   6,
+   10
+  ],
+  "difficulty": 1,
+  "trick": "compound",
+  "pieces": [
+   {
+    "kind": "word",
+    "text": "ស្បែក"
+   },
+   {
+    "kind": "op",
+    "op": "+"
+   },
+   {
+    "kind": "icon",
+    "id": "rebus-foot",
+    "name": "ជើង"
+   }
+  ],
+  "answer": "ស្បែកជើង",
+  "accepts": [],
+  "explanation": "ស្បែក + ជើង = ស្បែកជើង។ ពាក់នៅជើង។",
+  "onlyIn": "km",
+  "source": "official"
+ },
+ {
+  "id": "kmplay-glove",
+  "category": "sports",
+  "ages": [
+   6,
+   10
+  ],
+  "difficulty": 1,
+  "trick": "compound",
+  "pieces": [
+   {
+    "kind": "word",
+    "text": "ស្រោម"
+   },
+   {
+    "kind": "op",
+    "op": "+"
+   },
+   {
+    "kind": "icon",
+    "id": "rebus-hand",
+    "name": "ដៃ"
+   }
+  ],
+  "answer": "ស្រោមដៃ",
+  "accepts": [],
+  "explanation": "ស្រោម + ដៃ = ស្រោមដៃ។",
+  "onlyIn": "km",
+  "source": "official"
+ },
+ {
+  "id": "kmplay-sock",
+  "category": "sports",
+  "ages": [
+   6,
+   10
+  ],
+  "difficulty": 1,
+  "trick": "compound",
+  "pieces": [
+   {
+    "kind": "word",
+    "text": "ស្រោម"
+   },
+   {
+    "kind": "op",
+    "op": "+"
+   },
+   {
+    "kind": "icon",
+    "id": "rebus-foot",
+    "name": "ជើង"
+   }
+  ],
+  "answer": "ស្រោមជើង",
+  "accepts": [],
+  "explanation": "ស្រោម + ជើង = ស្រោមជើង។",
+  "onlyIn": "km",
+  "source": "official"
+ },
+ {
+  "id": "kmplay-pig-head",
+  "category": "animals",
+  "ages": [
+   6,
+   10
+  ],
+  "difficulty": 1,
+  "trick": "compound",
+  "pieces": [
+   {
+    "kind": "icon",
+    "id": "rebus-head",
+    "name": "ក្បាល"
+   },
+   {
+    "kind": "op",
+    "op": "+"
+   },
+   {
+    "kind": "icon",
+    "id": "rebus-pig",
+    "name": "ជ្រូក"
+   }
+  ],
+  "answer": "ក្បាលជ្រូក",
+  "accepts": [],
+  "explanation": "ក្បាល + ជ្រូក = ក្បាលជ្រូក។",
+  "onlyIn": "km",
+  "source": "official"
+ },
+ {
+  "id": "kmplay-fish-head",
+  "category": "animals",
+  "ages": [
+   6,
+   10
+  ],
+  "difficulty": 1,
+  "trick": "compound",
+  "pieces": [
+   {
+    "kind": "icon",
+    "id": "rebus-head",
+    "name": "ក្បាល"
+   },
+   {
+    "kind": "op",
+    "op": "+"
+   },
+   {
+    "kind": "icon",
+    "id": "rebus-fish",
+    "name": "ត្រី"
+   }
+  ],
+  "answer": "ក្បាលត្រី",
+  "accepts": [],
+  "explanation": "ក្បាល + ត្រី = ក្បាលត្រី។",
+  "onlyIn": "km",
+  "source": "official"
+ },
+ {
+  "id": "kmplay-hen-foot",
+  "category": "animals",
+  "ages": [
+   6,
+   10
+  ],
+  "difficulty": 1,
+  "trick": "compound",
+  "pieces": [
+   {
+    "kind": "icon",
+    "id": "rebus-foot",
+    "name": "ជើង"
+   },
+   {
+    "kind": "op",
+    "op": "+"
+   },
+   {
+    "kind": "icon",
+    "id": "rebus-hen",
+    "name": "មាន់"
+   }
+  ],
+  "answer": "ជើងមាន់",
+  "accepts": [],
+  "explanation": "ជើង + មាន់ = ជើងមាន់។",
+  "onlyIn": "km",
+  "source": "official"
+ },
+ {
+  "id": "kmplay-egg-fish",
+  "category": "animals",
+  "ages": [
+   7,
+   12
+  ],
+  "difficulty": 2,
+  "trick": "compound",
+  "pieces": [
+   {
+    "kind": "icon",
+    "id": "rebus-egg",
+    "name": "ពង"
+   },
+   {
+    "kind": "op",
+    "op": "+"
+   },
+   {
+    "kind": "icon",
+    "id": "rebus-fish",
+    "name": "ត្រី"
+   }
+  ],
+  "answer": "ពងត្រី",
+  "accepts": [],
+  "explanation": "ពង + ត្រី = ពងត្រី។",
+  "onlyIn": "km",
+  "source": "official"
+ },
+ {
+  "id": "kmplay-milk",
+  "category": "food",
+  "ages": [
+   6,
+   11
+  ],
+  "difficulty": 2,
+  "trick": "compound",
+  "pieces": [
+   {
+    "kind": "word",
+    "text": "ទឹកដោះ"
+   },
+   {
+    "kind": "op",
+    "op": "+"
+   },
+   {
+    "kind": "icon",
+    "id": "rebus-cow",
+    "name": "គោ"
+   }
+  ],
+  "answer": "ទឹកដោះគោ",
+  "accepts": [],
+  "explanation": "ទឹកដោះ + គោ = ទឹកដោះគោ។",
+  "onlyIn": "km",
+  "source": "official"
+ },
+ {
+  "id": "kmplay-tea",
+  "category": "food",
+  "ages": [
+   6,
+   10
+  ],
+  "difficulty": 1,
+  "trick": "compound",
+  "pieces": [
+   {
+    "kind": "icon",
+    "id": "rebus-water",
+    "name": "ទឹក"
+   },
+   {
+    "kind": "op",
+    "op": "+"
+   },
+   {
+    "kind": "icon",
+    "id": "rebus-tea",
+    "name": "តែ"
+   }
+  ],
+  "answer": "ទឹកតែ",
+  "accepts": [],
+  "explanation": "ទឹក + តែ = ទឹកតែ។",
+  "onlyIn": "km",
+  "source": "official"
+ },
+ {
+  "id": "kmplay-lemon-juice",
+  "category": "food",
+  "ages": [
+   7,
+   12
+  ],
+  "difficulty": 2,
+  "trick": "compound",
+  "pieces": [
+   {
+    "kind": "icon",
+    "id": "rebus-water",
+    "name": "ទឹក"
+   },
+   {
+    "kind": "op",
+    "op": "+"
+   },
+   {
+    "kind": "icon",
+    "id": "rebus-lemon",
+    "name": "ក្រូចឆ្មារ"
+   }
+  ],
+  "answer": "ទឹកក្រូចឆ្មារ",
+  "accepts": [],
+  "explanation": "ទឹក + ក្រូចឆ្មារ = ទឹកក្រូចឆ្មារ។",
+  "onlyIn": "km",
+  "source": "official"
+ },
+ {
+  "id": "kmplay-fruit-tomato",
+  "category": "food",
+  "ages": [
+   6,
+   10
+  ],
+  "difficulty": 1,
+  "trick": "compound",
+  "pieces": [
+   {
+    "kind": "word",
+    "text": "ផ្លែ"
+   },
+   {
+    "kind": "op",
+    "op": "+"
+   },
+   {
+    "kind": "icon",
+    "id": "rebus-tomato",
+    "name": "ប៉េងប៉ោះ"
+   }
+  ],
+  "answer": "ផ្លែប៉េងប៉ោះ",
+  "accepts": [],
+  "explanation": "ផ្លែ + ប៉េងប៉ោះ = ផ្លែប៉េងប៉ោះ។",
+  "onlyIn": "km",
+  "source": "official"
+ },
+ {
+  "id": "kmplay-fruit-lemon",
+  "category": "food",
+  "ages": [
+   6,
+   10
+  ],
+  "difficulty": 1,
+  "trick": "compound",
+  "pieces": [
+   {
+    "kind": "word",
+    "text": "ផ្លែ"
+   },
+   {
+    "kind": "op",
+    "op": "+"
+   },
+   {
+    "kind": "icon",
+    "id": "rebus-lemon",
+    "name": "ក្រូចឆ្មារ"
+   }
+  ],
+  "answer": "ផ្លែក្រូចឆ្មារ",
+  "accepts": [],
+  "explanation": "ផ្លែ + ក្រូចឆ្មារ = ផ្លែក្រូចឆ្មារ។",
+  "onlyIn": "km",
+  "source": "official"
+ },
+ {
+  "id": "kmplay-nail-hand",
+  "category": "science",
+  "ages": [
+   6,
+   10
+  ],
+  "difficulty": 1,
+  "trick": "compound",
+  "pieces": [
+   {
+    "kind": "icon",
+    "id": "rebus-nail",
+    "name": "ក្រចក"
+   },
+   {
+    "kind": "op",
+    "op": "+"
+   },
+   {
+    "kind": "icon",
+    "id": "rebus-hand",
+    "name": "ដៃ"
+   }
+  ],
+  "answer": "ក្រចកដៃ",
+  "accepts": [],
+  "explanation": "ក្រចក + ដៃ = ក្រចកដៃ។",
+  "onlyIn": "km",
+  "source": "official"
+ },
+ {
+  "id": "kmplay-nail-foot",
+  "category": "science",
+  "ages": [
+   6,
+   10
+  ],
+  "difficulty": 1,
+  "trick": "compound",
+  "pieces": [
+   {
+    "kind": "icon",
+    "id": "rebus-nail",
+    "name": "ក្រចក"
+   },
+   {
+    "kind": "op",
+    "op": "+"
+   },
+   {
+    "kind": "icon",
+    "id": "rebus-foot",
+    "name": "ជើង"
+   }
+  ],
+  "answer": "ក្រចកជើង",
+  "accepts": [],
+  "explanation": "ក្រចក + ជើង = ក្រចកជើង។",
+  "onlyIn": "km",
+  "source": "official"
+ },
+ {
+  "id": "kmplay-arm-bone",
+  "category": "science",
+  "ages": [
+   8,
+   13
+  ],
+  "difficulty": 2,
+  "trick": "compound",
+  "pieces": [
+   {
+    "kind": "icon",
+    "id": "rebus-bone",
+    "name": "ឆ្អឹង"
+   },
+   {
+    "kind": "op",
+    "op": "+"
+   },
+   {
+    "kind": "icon",
+    "id": "rebus-hand",
+    "name": "ដៃ"
+   }
+  ],
+  "answer": "ឆ្អឹងដៃ",
+  "accepts": [],
+  "explanation": "ឆ្អឹង + ដៃ = ឆ្អឹងដៃ។",
+  "onlyIn": "km",
+  "source": "official"
+ },
+ {
+  "id": "kmplay-skull",
+  "category": "science",
+  "ages": [
+   8,
+   13
+  ],
+  "difficulty": 2,
+  "trick": "compound",
+  "pieces": [
+   {
+    "kind": "icon",
+    "id": "rebus-bone",
+    "name": "ឆ្អឹង"
+   },
+   {
+    "kind": "op",
+    "op": "+"
+   },
+   {
+    "kind": "icon",
+    "id": "rebus-head",
+    "name": "ក្បាល"
+   }
+  ],
+  "answer": "ឆ្អឹងក្បាល",
+  "accepts": [],
+  "explanation": "ឆ្អឹង + ក្បាល = ឆ្អឹងក្បាល។",
+  "onlyIn": "km",
+  "source": "official"
+ },
+ {
+  "id": "kmplay-lamp-light",
+  "category": "science",
+  "ages": [
+   6,
+   10
+  ],
+  "difficulty": 1,
+  "trick": "compound",
+  "pieces": [
+   {
+    "kind": "word",
+    "text": "ពន្លឺ"
+   },
+   {
+    "kind": "op",
+    "op": "+"
+   },
+   {
+    "kind": "icon",
+    "id": "rebus-lamp",
+    "name": "ចង្កៀង"
+   }
+  ],
+  "answer": "ពន្លឺចង្កៀង",
+  "accepts": [],
+  "explanation": "ពន្លឺ + ចង្កៀង = ពន្លឺចង្កៀង។",
+  "onlyIn": "km",
+  "source": "official"
+ },
+ {
+  "id": "kmplay-sea-breeze",
+  "category": "science",
+  "ages": [
+   8,
+   13
+  ],
+  "difficulty": 2,
+  "trick": "compound",
+  "pieces": [
+   {
+    "kind": "icon",
+    "id": "rebus-wind",
+    "name": "ខ្យល់"
+   },
+   {
+    "kind": "op",
+    "op": "+"
+   },
+   {
+    "kind": "icon",
+    "id": "rebus-sea",
+    "name": "សមុទ្រ"
+   }
+  ],
+  "answer": "ខ្យល់សមុទ្រ",
+  "accepts": [],
+  "explanation": "ខ្យល់ + សមុទ្រ = ខ្យល់សមុទ្រ។",
+  "onlyIn": "km",
+  "source": "official"
+ },
+ {
+  "id": "kmplay-book-learn",
+  "category": "school",
+  "ages": [
+   6,
+   10
+  ],
+  "difficulty": 1,
+  "trick": "compound",
+  "pieces": [
+   {
+    "kind": "icon",
+    "id": "rebus-book",
+    "name": "សៀវភៅ"
+   },
+   {
+    "kind": "op",
+    "op": "+"
+   },
+   {
+    "kind": "word",
+    "text": "រៀន"
+   }
+  ],
+  "answer": "សៀវភៅរៀន",
+  "accepts": [],
+  "explanation": "សៀវភៅ + រៀន = សៀវភៅរៀន។",
+  "onlyIn": "km",
+  "source": "official"
+ },
+ {
+  "id": "kmplay-chair-learn",
+  "category": "school",
+  "ages": [
+   6,
+   10
+  ],
+  "difficulty": 1,
+  "trick": "compound",
+  "pieces": [
+   {
+    "kind": "icon",
+    "id": "rebus-chair",
+    "name": "កៅអី"
+   },
+   {
+    "kind": "op",
+    "op": "+"
+   },
+   {
+    "kind": "word",
+    "text": "រៀន"
+   }
+  ],
+  "answer": "កៅអីរៀន",
+  "accepts": [],
+  "explanation": "កៅអី + រៀន = កៅអីរៀន។",
+  "onlyIn": "km",
+  "source": "official"
+ },
+ {
+  "id": "kmplay-table-learn",
+  "category": "school",
+  "ages": [
+   6,
+   10
+  ],
+  "difficulty": 1,
+  "trick": "compound",
+  "pieces": [
+   {
+    "kind": "icon",
+    "id": "rebus-table",
+    "name": "តុ"
+   },
+   {
+    "kind": "op",
+    "op": "+"
+   },
+   {
+    "kind": "word",
+    "text": "រៀន"
+   }
+  ],
+  "answer": "តុរៀន",
+  "accepts": [],
+  "explanation": "តុ + រៀន = តុរៀន។",
+  "onlyIn": "km",
+  "source": "official"
+ },
+ {
+  "id": "kmplay-board-black",
+  "category": "school",
+  "ages": [
+   6,
+   10
+  ],
+  "difficulty": 1,
+  "trick": "compound",
+  "pieces": [
+   {
+    "kind": "icon",
+    "id": "rebus-board",
+    "name": "ក្តារ"
+   },
+   {
+    "kind": "op",
+    "op": "+"
+   },
+   {
+    "kind": "icon",
+    "id": "rebus-black",
+    "name": "ខ្មៅ"
+   }
+  ],
+  "answer": "ក្តារខ្មៅ",
+  "accepts": [],
+  "explanation": "ក្តារ + ខ្មៅ = ក្តារខ្មៅ។",
+  "onlyIn": "km",
+  "source": "official"
+ },
+ {
+  "id": "kmplay-bag-learn",
+  "category": "school",
+  "ages": [
+   6,
+   10
+  ],
+  "difficulty": 1,
+  "trick": "compound",
+  "pieces": [
+   {
+    "kind": "icon",
+    "id": "rebus-bag",
+    "name": "កាបូប"
+   },
+   {
+    "kind": "op",
+    "op": "+"
+   },
+   {
+    "kind": "word",
+    "text": "រៀន"
+   }
+  ],
+  "answer": "កាបូបរៀន",
+  "accepts": [],
+  "explanation": "កាបូប + រៀន = កាបូបរៀន។",
+  "onlyIn": "km",
+  "source": "official"
+ },
+ {
   "id": "math-3-plus-4-result",
   "category": "math",
   "ages": [
