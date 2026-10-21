@@ -70775,6 +70775,21 @@
   "answer": "Paris",
   "accepts": [],
   "explanation": "Paris is the capital of France.",
+  "km": {
+   "pieces": [
+    {
+     "kind": "word",
+     "text": "រាជធានីនៃប្រទេសបារាំងគឺអ្វី?"
+    }
+   ],
+   "options": [
+    "ប៉ារីស",
+    "រ៉ូម",
+    "ម៉ាឌ្រីដ",
+    "បែរឡាំង"
+   ],
+   "explanation": "ប៉ារីសជារាជធានីនៃប្រទេសបារាំង។"
+  },
   "source": "official"
  },
  {
@@ -70805,6 +70820,21 @@
   "answer": "Italy",
   "accepts": [],
   "explanation": "Italy looks like a boot on the map.",
+  "km": {
+   "pieces": [
+    {
+     "kind": "word",
+     "text": "ប្រទេសមួយណាមានរាងដូចស្បែកជើងកវែង?"
+    }
+   ],
+   "options": [
+    "អ៊ីតាលី",
+    "អេស្ប៉ាញ",
+    "ជប៉ុន",
+    "អេហ្ស៊ីប"
+   ],
+   "explanation": "អ៊ីតាលីមើលទៅដូចស្បែកជើងកវែងនៅលើផែនទី។"
+  },
   "source": "official"
  },
  {
@@ -70835,6 +70865,21 @@
   "answer": "Phnom Penh",
   "accepts": [],
   "explanation": "Phnom Penh is the capital of Cambodia.",
+  "km": {
+   "pieces": [
+    {
+     "kind": "word",
+     "text": "រាជធានីនៃប្រទេសកម្ពុជាគឺអ្វី?"
+    }
+   ],
+   "options": [
+    "ភ្នំពេញ",
+    "សៀមរាប",
+    "បាត់ដំបង",
+    "កំពត"
+   ],
+   "explanation": "ភ្នំពេញជារាជធានីនៃប្រទេសកម្ពុជា។"
+  },
   "source": "official"
  },
  {
@@ -70865,6 +70910,21 @@
   "answer": "Cow",
   "accepts": [],
   "explanation": "A cow says moo.",
+  "km": {
+   "pieces": [
+    {
+     "kind": "word",
+     "text": "សត្វអ្វីស្រែកម៉ូ?"
+    }
+   ],
+   "options": [
+    "គោ",
+    "ទា",
+    "ឆ្មា",
+    "ចៀម"
+   ],
+   "explanation": "គោស្រែកម៉ូ។"
+  },
   "source": "official"
  },
  {
@@ -70900,6 +70960,26 @@
   "answer": "Cat",
   "accepts": [],
   "explanation": "The picture shows a cat.",
+  "km": {
+   "pieces": [
+    {
+     "kind": "word",
+     "text": "នេះជាសត្វអ្វី?"
+    },
+    {
+     "kind": "icon",
+     "id": "rebus-cat",
+     "name": "animal"
+    }
+   ],
+   "options": [
+    "ឆ្មា",
+    "ឆ្កែ",
+    "ត្រី",
+    "សេះ"
+   ],
+   "explanation": "រូបនេះជាឆ្មា។"
+  },
   "source": "official"
  },
  {
@@ -70930,6 +71010,21 @@
   "answer": "Eagle",
   "accepts": [],
   "explanation": "An eagle is a bird. It has feathers and wings.",
+  "km": {
+   "pieces": [
+    {
+     "kind": "word",
+     "text": "តើមួយណាជាបក្សី?"
+    }
+   ],
+   "options": [
+    "ឥន្ទ្រី",
+    "ត្រីឆ្លាម",
+    "កង្កែប",
+    "សេះ"
+   ],
+   "explanation": "ឥន្ទ្រីជាបក្សី។ វាមានស្លាប និងរោមស្លាប។"
+  },
   "source": "official"
  },
  {
@@ -70965,6 +71060,26 @@
   "answer": "The sun",
   "accepts": [],
   "explanation": "The picture shows the sun.",
+  "km": {
+   "pieces": [
+    {
+     "kind": "word",
+     "text": "នេះជាអ្វី?"
+    },
+    {
+     "kind": "icon",
+     "id": "rebus-sun",
+     "name": "picture"
+    }
+   ],
+   "options": [
+    "ព្រះអាទិត្យ",
+    "ព្រះច័ន្ទ",
+    "ផ្កាយ",
+    "ពពក"
+   ],
+   "explanation": "រូបនេះជាព្រះអាទិត្យ។"
+  },
   "source": "official"
  },
  {
@@ -70995,6 +71110,21 @@
   "answer": "Sunlight",
   "accepts": [],
   "explanation": "A plant uses sunlight, water and air to make its food.",
+  "km": {
+   "pieces": [
+    {
+     "kind": "word",
+     "text": "តើអ្វីជួយឲ្យរុក្ខជាតិផលិតអាហាររបស់វា?"
+    }
+   ],
+   "options": [
+    "ពន្លឺព្រះអាទិត្យ",
+    "ផ្លាស្ទិក",
+    "ខ្សាច់",
+    "លោហៈ"
+   ],
+   "explanation": "រុក្ខជាតិប្រើពន្លឺព្រះអាទិត្យ ទឹក និងខ្យល់ ដើម្បីផលិតអាហាររបស់វា។"
+  },
   "source": "official"
  },
  {
@@ -71025,6 +71155,21 @@
   "answer": "8",
   "accepts": [],
   "explanation": "A spider has 8 legs.",
+  "km": {
+   "pieces": [
+    {
+     "kind": "word",
+     "text": "ពីងពាងមានជើងប៉ុន្មាន?"
+    }
+   ],
+   "options": [
+    "6",
+    "8",
+    "10",
+    "4"
+   ],
+   "explanation": "ពីងពាងមាន 8 ជើង។"
+  },
   "source": "official"
  },
  {
@@ -71055,6 +71200,21 @@
   "answer": "Carrot",
   "accepts": [],
   "explanation": "A carrot is a vegetable. The others are fruit.",
+  "km": {
+   "pieces": [
+    {
+     "kind": "word",
+     "text": "មួយណាជាបន្លែ?"
+    }
+   ],
+   "options": [
+    "ការ៉ុត",
+    "ប៉ោម",
+    "ចេក",
+    "ស្វាយ"
+   ],
+   "explanation": "ការ៉ុតជាបន្លែ។ ផ្សេងទៀតជាផ្លែឈើ។"
+  },
   "source": "official"
  },
  {
@@ -71085,6 +71245,21 @@
   "answer": "7",
   "accepts": [],
   "explanation": "A week has 7 days.",
+  "km": {
+   "pieces": [
+    {
+     "kind": "word",
+     "text": "មួយសប្តាហ៍មានប៉ុន្មានថ្ងៃ?"
+    }
+   ],
+   "options": [
+    "5",
+    "7",
+    "10",
+    "12"
+   ],
+   "explanation": "មួយសប្តាហ៍មាន 7 ថ្ងៃ។"
+  },
   "source": "official"
  },
  {
@@ -71115,6 +71290,66 @@
   "answer": "Very easy",
   "accepts": [],
   "explanation": "If something is a piece of cake, it is very easy to do.",
+  "km": {
+   "pieces": [
+    {
+     "kind": "word",
+     "text": "តើ \"a piece of cake\" មានន័យថាអ្វី?"
+    }
+   ],
+   "options": [
+    "ងាយស្រួលណាស់",
+    "ផ្អែមណាស់",
+    "ខួបកំណើត",
+    "អំណោយតូចមួយ"
+   ],
+   "explanation": "បើអ្វីមួយជា \"a piece of cake\" មានន័យថាធ្វើបានយ៉ាងងាយ។"
+  },
+  "source": "official"
+ },
+ {
+  "id": "choice-leaf-colour",
+  "category": "science",
+  "ages": [
+   5,
+   9
+  ],
+  "difficulty": 1,
+  "trick": "compound",
+  "kind": "choice",
+  "choice": {
+   "options": [
+    "Green",
+    "Red",
+    "Black",
+    "White"
+   ],
+   "correct": 0
+  },
+  "pieces": [
+   {
+    "kind": "word",
+    "text": "What colour are most leaves?"
+   }
+  ],
+  "answer": "Green",
+  "accepts": [],
+  "explanation": "Most leaves are green.",
+  "km": {
+   "pieces": [
+    {
+     "kind": "word",
+     "text": "ស្លឹកឈើភាគច្រើនមានពណ៌អ្វី?"
+    }
+   ],
+   "options": [
+    "បៃតង",
+    "ក្រហម",
+    "ខ្មៅ",
+    "ស"
+   ],
+   "explanation": "ស្លឹកឈើភាគច្រើនមានពណ៌បៃតង។"
+  },
   "source": "official"
  },
  {
@@ -71145,96 +71380,21 @@
   "answer": "24",
   "accepts": [],
   "explanation": "12 + 12 = 24.",
-  "source": "official"
- },
- {
-  "id": "choice-km-capital",
-  "category": "khmer",
-  "ages": [
-   6,
-   12
-  ],
-  "difficulty": 1,
-  "trick": "compound",
-  "kind": "choice",
-  "choice": {
-   "options": [
-    "ភ្នំពេញ",
-    "សៀមរាប",
-    "បាត់ដំបង",
-    "កំពត"
+  "km": {
+   "pieces": [
+    {
+     "kind": "word",
+     "text": "ប្រអប់មួយមានពងមាន់ 12។ ប្រអប់ 2 មានពងមាន់ប៉ុន្មាន?"
+    }
    ],
-   "correct": 0
-  },
-  "pieces": [
-   {
-    "kind": "word",
-    "text": "រាជធានីនៃប្រទេសកម្ពុជាគឺអ្វី?"
-   }
-  ],
-  "answer": "ភ្នំពេញ",
-  "accepts": [],
-  "explanation": "ភ្នំពេញជារាជធានីនៃប្រទេសកម្ពុជា។",
-  "source": "official"
- },
- {
-  "id": "choice-km-leaf-colour",
-  "category": "khmer",
-  "ages": [
-   5,
-   9
-  ],
-  "difficulty": 1,
-  "trick": "compound",
-  "kind": "choice",
-  "choice": {
    "options": [
-    "បៃតង",
-    "ក្រហម",
-    "ខ្មៅ",
-    "ស"
+    "14",
+    "24",
+    "122",
+    "20"
    ],
-   "correct": 0
+   "explanation": "12 + 12 = 24។"
   },
-  "pieces": [
-   {
-    "kind": "word",
-    "text": "ស្លឹកឈើមានពណ៌អ្វី?"
-   }
-  ],
-  "answer": "បៃតង",
-  "accepts": [],
-  "explanation": "ស្លឹកឈើភាគច្រើនមានពណ៌បៃតង។",
-  "source": "official"
- },
- {
-  "id": "choice-km-days-week",
-  "category": "khmer",
-  "ages": [
-   6,
-   10
-  ],
-  "difficulty": 1,
-  "trick": "compound",
-  "kind": "choice",
-  "choice": {
-   "options": [
-    "5",
-    "7",
-    "10",
-    "12"
-   ],
-   "correct": 1
-  },
-  "pieces": [
-   {
-    "kind": "word",
-    "text": "មួយសប្តាហ៍មានប៉ុន្មានថ្ងៃ?"
-   }
-  ],
-  "answer": "7",
-  "accepts": [],
-  "explanation": "មួយសប្តាហ៍មាន ៧ ថ្ងៃ។",
   "source": "official"
  }
 ]

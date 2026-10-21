@@ -19,8 +19,9 @@ describe("the multiple-choice samples", () => {
     expect(CHOICE.some((p) => p.choice?.correct !== 0)).toBe(true);
   });
 
-  it("include Khmer questions, a question with a picture, and options in each language", () => {
-    expect(CHOICE.filter((p) => p.category === "khmer").length).toBeGreaterThanOrEqual(3);
+  it("each carry a Khmer version, with as many Khmer answers as English ones, and include a question with a picture", () => {
+    for (const p of CHOICE) expect(p.km?.options?.length, p.id).toBe(p.choice?.options.length);
+    expect(CHOICE.filter((p) => p.category === "khmer")).toEqual([]);
     expect(CHOICE.some((p) => p.pieces.some((x) => x.kind === "icon"))).toBe(true);
   });
 });

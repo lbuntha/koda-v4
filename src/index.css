@@ -910,3 +910,8 @@ html.theme-light,
     transform: none;
   }
 }
+
+/* The reader tries a page at several sizes in one frame (fitPage.ts) and reads how tall each came out; a transition would hand back the size it started from. */
+[data-fitting], [data-fitting] * {
+  transition: none !important;
+}

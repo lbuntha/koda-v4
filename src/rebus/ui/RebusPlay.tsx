@@ -15,7 +15,7 @@ import { themeSystem } from "../../lib/themeSystem";
 import { UIButton, UIChoiceGrid, UICountdown, UICountUp, UIHintPanel, UIKidMessage, UIOutcome, UIPointsPop, UIProgressBar } from "../../components/ui";
 import { isChoiceSpec, visibleOptions } from "../choice";
 import { matchAnswer } from "../answer";
-import { answerInputMode, isNumberAnswer, localizePuzzle } from "../localize";
+import { answerInputMode, isNumberAnswer, localizePuzzle, optionAsAuthored } from "../localize";
 import { elapsedOf, hintStatus, machineLockedOut, machineProgress, type RoundState } from "../engine";
 import { LetterTiles } from "./LetterTiles";
 import { PuzzleCanvas } from "./PieceView";
@@ -179,8 +179,9 @@ export const PlayView: React.FC<{ round: RebusRound; letterTiles: boolean }> = (
           options={visibleOptions(view.choice, run.hints.length, run.puzzle.id)}
           tried={tried}
           onPick={(option) => {
-            if (!matchAnswer(run.puzzle, option).ok) setTried((s) => new Set(s).add(option));
-            send({ type: "answer", text: option });
+            const picked = optionAsAuthored(run.puzzle, language, option);
+            if (!matchAnswer(run.puzzle, picked).ok) setTried((s) => new Set(s).add(option));
+            send({ type: "answer", text: picked });
           }}
         />
       ) : letterTiles && !isNumberAnswer(run.puzzle) ? (

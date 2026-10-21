@@ -20,12 +20,42 @@ const inKhmer = (piece: Piece): Piece => {
   return piece;
 };
 
+/** The answers in Khmer, when the question has them and they line up with the English ones. */
+const khmerOptions = (puzzle: Puzzle): string[] | null => {
+  const words = puzzle.km?.options;
+  return puzzle.choice && words && words.length === puzzle.choice.options.length ? words.map(toKhmerDigits) : null;
+};
+
+/** The English answer behind an option the child tapped on screen (the same text when the answers are not translated). */
+export const optionAsAuthored = (puzzle: Puzzle, language: string, shown: string): string => {
+  const words = language === "km" ? khmerOptions(puzzle) : null;
+  const at = words ? words.indexOf(shown) : -1;
+  return at >= 0 && puzzle.choice ? puzzle.choice.options[at] : shown;
+};
+
+/** An authored answer as it reads on screen: what a child sees for an answer the room or the game remembers. */
+export const optionAsShown = (puzzle: Puzzle, language: string, authored: string): string => {
+  const words = language === "km" ? khmerOptions(puzzle) : null;
+  const at = words && puzzle.choice ? puzzle.choice.options.indexOf(authored) : -1;
+  return words && at >= 0 ? words[at] : authored;
+};
+
 /** Whether a question has something to show in Khmer: its own words, or numbers to write in Khmer numerals. */
 const hasKhmer = (puzzle: Puzzle): boolean => puzzle.kind === "math" || puzzle.kind === "quiz" || puzzle.km !== undefined;
 
 export const localizePuzzle = (puzzle: Puzzle, language: string): Puzzle => {
   if (language !== "km" || !hasKhmer(puzzle)) return puzzle;
   const numeric = puzzle.kind === "math" || puzzle.kind === "quiz" || puzzle.kind === "choice";
+  const words = khmerOptions(puzzle);
+  if (words && puzzle.choice) {
+    return {
+      ...puzzle,
+      pieces: (puzzle.km?.pieces ?? puzzle.pieces).map(inKhmer),
+      explanation: toKhmerDigits(puzzle.km?.explanation ?? puzzle.explanation),
+      answer: words[puzzle.choice.correct],
+      choice: { ...puzzle.choice, options: words },
+    };
+  }
   return {
     ...puzzle,
     pieces: (puzzle.km?.pieces ?? puzzle.pieces).map(inKhmer),

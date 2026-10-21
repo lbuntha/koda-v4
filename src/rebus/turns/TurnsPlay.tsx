@@ -14,7 +14,7 @@ import { Podium } from "../group/Podium";
 import { RoomAvatar } from "../group/RoomAvatar";
 import type { RoomPlayer } from "../group/types";
 import { matchAnswer } from "../answer";
-import { answerInputMode, isNumberAnswer, localizePuzzle } from "../localize";
+import { answerInputMode, isNumberAnswer, localizePuzzle, optionAsAuthored } from "../localize";
 import { isChoiceSpec, visibleOptions } from "../choice";
 import { cue } from "../sound";
 import { LetterTiles } from "../ui/LetterTiles";
@@ -144,8 +144,9 @@ export const TurnPlay: React.FC<{ game: TurnsGame; letterTiles: boolean }> = ({ 
           options={visibleOptions(view.choice, state.hints.length, puzzle.id)}
           tried={tried}
           onPick={(option) => {
-            if (!matchAnswer(puzzle, option).ok) setTried((s) => new Set(s).add(option));
-            send({ type: "answer", text: option });
+            const picked = optionAsAuthored(puzzle, language, option);
+            if (!matchAnswer(puzzle, picked).ok) setTried((s) => new Set(s).add(option));
+            send({ type: "answer", text: picked });
           }}
         />
       ) : letterTiles && !isNumberAnswer(puzzle) ? (

@@ -108,12 +108,18 @@ async def ensure_seed(db: AsyncIOMotorDatabase, puzzles: list[dict[str, Any]]) -
     an unwanted one is rejected or retired instead.
     """
     created = 0
+    filled = 0
     from app.repos import rebus_categories
 
     new_categories = await rebus_categories.ensure_seed(db)
     owner = await first_admin_id(db) or SYSTEM
     for puzzle in puzzles:
-        if await db.rebus_puzzles.find_one({"id": puzzle["id"]}, {"_id": 1}):
+        have = await db.rebus_puzzles.find_one({"id": puzzle["id"]}, {"_id": 1, "km": 1})
+        if have:
+            # A question that gained a Khmer version since it was seeded gets it; one that has its own is left alone.
+            if puzzle.get("km") and not have.get("km"):
+                await db.rebus_puzzles.update_one({"_id": have["_id"]}, {"$set": {"km": puzzle["km"]}})
+                filled += 1
             continue
         stamp = now()
         await db.rebus_puzzles.insert_one(
@@ -132,7 +138,7 @@ async def ensure_seed(db: AsyncIOMotorDatabase, puzzles: list[dict[str, Any]]) -
         )
         created += 1
     adopted = await adopt_seed(db, owner) if owner != SYSTEM else 0
-    if created or adopted or new_categories:
+    if created or filled or adopted or new_categories:
         await bump(db)
     return created
 

@@ -13,7 +13,7 @@ import { useT } from "../../lib/i18n";
 import { themeSystem } from "../../lib/themeSystem";
 import { UIButton, UIChoiceGrid, UICountdown, UIHintPanel, UIKidMessage, UIOutcome, UIProgressBar } from "../../components/ui";
 import { matchAnswer } from "../answer";
-import { answerInputMode, isNumberAnswer, localizePuzzle } from "../localize";
+import { answerInputMode, isNumberAnswer, localizePuzzle, optionAsAuthored } from "../localize";
 import { isChoiceSpec, visibleOptions } from "../choice";
 import { hintFor, hintState, type Hint } from "../hints";
 import { cue } from "../sound";
@@ -104,7 +104,7 @@ export const GroupPlay: React.FC<GroupPlayProps> = ({ room, token, skewMs, apply
   /** An answer, typed or tapped: wrong ones are counted here, a right one is claimed from the server. */
   const attempt = async (given: string) => {
     if (!live || mine.claimed || !given.trim()) return;
-    if (!matchAnswer(puzzle, given).ok) {
+    if (!matchAnswer(puzzle, optionAsAuthored(puzzle, language, given)).ok) {
       cue("wrong");
       setMine((m) => ({ ...m, wrong: m.wrong + 1, tried: [...m.tried, given] }));
       setText("");

@@ -67,6 +67,8 @@ class KhmerIn(Model):
 
     pieces: list[Piece] | None = Field(default=None, max_length=12)
     explanation: str | None = Field(default=None, max_length=300)
+    #: Multiple choice: the answers in Khmer, in the same order as the English ones.
+    options: list[Annotated[str, Field(min_length=1, max_length=40)]] | None = Field(default=None, max_length=4)
 
 
 class PuzzleIn(Model):

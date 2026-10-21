@@ -5069,6 +5069,7 @@
       "khmer": "Khmer version",
       "khmerQuestion": "Question in Khmer",
       "khmerExplanation": "Why, in Khmer",
+      "khmerAnswers": "Answers in Khmer",
       "saveAsDraft": "Save as draft",
       "approvedCount": "Approved {count} puzzles. They go live in the next release.",
       "approveNow": "Approve {count} now",

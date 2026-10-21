@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { matchAnswer } from "./answer";
-import { answerInputMode, isNumberAnswer, localizePuzzle, toKhmerDigits } from "./localize";
+import { answerInputMode, isNumberAnswer, localizePuzzle, optionAsAuthored, optionAsShown, toKhmerDigits } from "./localize";
 import { validatePuzzle } from "./puzzle";
 import type { Puzzle } from "./types";
 
@@ -71,5 +71,42 @@ describe("numbers keep the marks that change them", () => {
     expect(matchAnswer(p("1.2"), "1,2").ok).toBe(true);
     expect(matchAnswer(p("1.2"), "12").ok).toBe(false);
     expect(matchAnswer(p("1000"), "1,000").ok).toBe(true);
+  });
+});
+
+describe("a multiple-choice question with its answers in Khmer", () => {
+  const puzzle: Puzzle = {
+    id: "choice-test",
+    category: "animals",
+    ages: [5, 9],
+    difficulty: 1,
+    trick: "compound",
+    kind: "choice",
+    choice: { options: ["Cow", "Duck", "Spider 8"], correct: 0 },
+    pieces: [{ kind: "word", text: "Which animal says moo?" }],
+    answer: "Cow",
+    accepts: [],
+    explanation: "A cow says moo.",
+    km: { pieces: [{ kind: "word", text: "សត្វអ្វីស្រែកម៉ូ?" }], options: ["គោ", "ទា", "ពីងពាង 8"], explanation: "គោស្រែកម៉ូ។" },
+    source: "official",
+  };
+
+  it("shows the Khmer answers and the Khmer right answer in Khmer, and the English ones in English", () => {
+    const view = localizePuzzle(puzzle, "km");
+    expect(view.choice?.options).toEqual(["គោ", "ទា", "ពីងពាង ៨"]);
+    expect(view.answer).toBe("គោ");
+    expect(localizePuzzle(puzzle, "en")).toBe(puzzle);
+  });
+
+  it("turns a tapped Khmer answer back into the English one, and back again", () => {
+    expect(optionAsAuthored(puzzle, "km", "ទា")).toBe("Duck");
+    expect(optionAsAuthored(puzzle, "km", "ពីងពាង ៨")).toBe("Spider 8");
+    expect(optionAsShown(puzzle, "km", "Duck")).toBe("ទា");
+    expect(optionAsAuthored(puzzle, "en", "Duck")).toBe("Duck");
+  });
+
+  it("ignores Khmer answers that do not line up with the English ones", () => {
+    const view = localizePuzzle({ ...puzzle, km: { ...puzzle.km, options: ["គោ"] } }, "km");
+    expect(view.choice?.options).toEqual(["Cow", "Duck", "Spider ៨"]);
   });
 });

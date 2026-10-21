@@ -52,7 +52,7 @@ export interface Puzzle {
   /** A multiple-choice question's answers and which is right. Its `answer` is that option, worked out from it. */
   choice?: ChoiceSpec;
   /** The same question in Khmer. The answer, numbers and pictures are shared; only the words change. See `localize.ts`. */
-  km?: { pieces?: Piece[]; explanation?: string };
+  km?: { pieces?: Piece[]; explanation?: string; /** Multiple choice: the answers in Khmer, in the same order as `choice.options`. */ options?: string[] };
   pieces: Piece[];
   /** The answer as it is shown after the puzzle. */
   answer: string;

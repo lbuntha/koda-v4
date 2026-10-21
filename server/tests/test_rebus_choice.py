@@ -118,3 +118,18 @@ def test_every_multiple_choice_sample_that_ships_is_sound_and_in_step():
     known = frozenset({p["category"] for p in samples})
     assert [(p["id"], codes) for p in samples if (codes := validate_puzzle(p, known_categories=known))] == []
     assert all(p["choice"]["options"][p["choice"]["correct"]] == p["answer"] for p in samples)
+
+
+async def test_a_seeded_question_gains_its_khmer_answers_without_losing_an_edit(db):
+    first = next(p for p in SEED if p["id"] == "choice-capital-france")
+    assert first["km"]["options"] and len(first["km"]["options"]) == len(first["choice"]["options"])
+
+    # Seeded before it had a Khmer version: the version is added on the next start.
+    await db.rebus_puzzles.update_one({"id": first["id"]}, {"$unset": {"km": ""}})
+    await repo.ensure_seed(db, SEED)
+    assert (await db.rebus_puzzles.find_one({"id": first["id"]}))["km"] == first["km"]
+
+    # One an admin already gave Khmer words is left alone.
+    await db.rebus_puzzles.update_one({"id": first["id"]}, {"$set": {"km": {"explanation": "edited"}}})
+    await repo.ensure_seed(db, SEED)
+    assert (await db.rebus_puzzles.find_one({"id": first["id"]}))["km"] == {"explanation": "edited"}

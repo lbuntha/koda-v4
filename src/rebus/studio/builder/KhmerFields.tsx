@@ -5,7 +5,7 @@
 
 import React from "react";
 import { useT } from "../../../lib/i18n";
-import { UITextarea } from "../../../components/ui";
+import { UIInput, UITextarea } from "../../../components/ui";
 import type { PuzzleDraft } from "../studioApi";
 
 export const KhmerFields: React.FC<{ draft: PuzzleDraft; onChange(patch: Partial<PuzzleDraft>): void }> = ({ draft, onChange }) => {
@@ -19,6 +19,12 @@ export const KhmerFields: React.FC<{ draft: PuzzleDraft; onChange(patch: Partial
     if (index < 0) return;
     onChange({ km: { ...draft.km, pieces: base.map((p, i) => (i === index && p.kind === "word" ? { ...p, text } : p)) } });
   };
+  const options = draft.kind === "choice" ? draft.choice?.options : undefined;
+  const khmerOptions = draft.km?.options ?? [];
+  const setOption = (index: number, text: string) => {
+    const next = (options ?? []).map((_, i) => (i === index ? text : (khmerOptions[i] ?? "")));
+    onChange({ km: { ...draft.km, options: next } });
+  };
   return (
     <section className="flex flex-col gap-3" lang="km">
       <h3 className="text-xs font-extrabold uppercase tracking-wider text-muted">{t("rebus.studio.khmer")}</h3>
@@ -26,6 +32,14 @@ export const KhmerFields: React.FC<{ draft: PuzzleDraft; onChange(patch: Partial
         <span className="text-xs font-extrabold uppercase tracking-wider text-muted">{t("rebus.studio.khmerQuestion")}</span>
         <UITextarea rows={2} value={question} onChange={(e) => setQuestion(e.target.value)} maxLength={240} disabled={at < 0} />
       </label>
+      {options && (
+        <div className="flex flex-col gap-1.5">
+          <span className="text-xs font-extrabold uppercase tracking-wider text-muted">{t("rebus.studio.khmerAnswers")}</span>
+          {options.map((english, i) => (
+            <UIInput key={i} value={khmerOptions[i] ?? ""} placeholder={english} onChange={(e) => setOption(i, e.target.value)} maxLength={40} aria-label={english} />
+          ))}
+        </div>
+      )}
       <label className="flex flex-col gap-1">
         <span className="text-xs font-extrabold uppercase tracking-wider text-muted">{t("rebus.studio.khmerExplanation")}</span>
         <UITextarea rows={2} value={draft.km?.explanation ?? ""} onChange={(e) => onChange({ km: { ...draft.km, explanation: e.target.value } })} maxLength={300} />
