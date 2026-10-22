@@ -26,6 +26,7 @@ import { RoomAvatar } from "./RoomAvatar";
 import { Scoreboard } from "./Scoreboard";
 import type { RoomView } from "./types";
 import { useServerClock } from "./useServerClock";
+import { NO_SUGGESTIONS } from "../noSuggestions";
 
 export interface GroupPlayProps {
   room: RoomView;
@@ -215,10 +216,7 @@ export const GroupPlay: React.FC<GroupPlayProps> = ({ room, token, skewMs, apply
                   aria-label={t("rebus.answerLabel")}
                   placeholder={isNumberAnswer(puzzle) ? t("rebus.answerPlaceholderMath") : t("rebus.answerPlaceholder")}
                   inputMode={answerInputMode(puzzle)}
-                  autoComplete="off"
-                  autoCapitalize="off"
-                  autoCorrect="off"
-                  spellCheck={false}
+                  {...NO_SUGGESTIONS}
                   disabled={mine.claimed}
                   className={`${themeSystem.field("lg")} min-w-0 flex-1`}
                 />

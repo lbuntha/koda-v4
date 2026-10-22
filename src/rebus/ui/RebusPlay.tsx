@@ -20,6 +20,7 @@ import { elapsedOf, hintStatus, machineLockedOut, machineProgress, type RoundSta
 import { LetterTiles } from "./LetterTiles";
 import { PuzzleCanvas } from "./PieceView";
 import type { RebusRound } from "./useRebusRound";
+import { NO_SUGGESTIONS } from "../noSuggestions";
 
 /** How long a puzzle's answer stays up before the next one, when the player chose to move on by themselves. */
 export const AUTO_NEXT_MS = 3000;
@@ -197,10 +198,7 @@ export const PlayView: React.FC<{ round: RebusRound; letterTiles: boolean }> = (
             aria-label={t("rebus.answerLabel")}
             placeholder={isNumberAnswer(run.puzzle) ? t("rebus.answerPlaceholderMath") : t("rebus.answerPlaceholder")}
             inputMode={answerInputMode(run.puzzle)}
-            autoComplete="off"
-            autoCapitalize="off"
-            autoCorrect="off"
-            spellCheck={false}
+            {...NO_SUGGESTIONS}
             className={`${themeSystem.field("lg")} min-w-0 flex-1`}
           />
           <UIButton type="submit" disabled={!text.trim()}>

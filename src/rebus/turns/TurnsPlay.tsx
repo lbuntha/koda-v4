@@ -21,6 +21,7 @@ import { LetterTiles } from "../ui/LetterTiles";
 import { PuzzleCanvas } from "../ui/PieceView";
 import { elapsedOf, hintStatus, playerOf, standingsOf, type TurnsState } from "./engine";
 import type { TurnsGame } from "./useTurns";
+import { NO_SUGGESTIONS } from "../noSuggestions";
 
 const WRONG_MS = 2500;
 
@@ -162,10 +163,7 @@ export const TurnPlay: React.FC<{ game: TurnsGame; letterTiles: boolean }> = ({ 
             aria-label={t("rebus.answerLabel")}
             placeholder={isNumberAnswer(puzzle) ? t("rebus.answerPlaceholderMath") : t("rebus.answerPlaceholder")}
             inputMode={answerInputMode(puzzle)}
-            autoComplete="off"
-            autoCapitalize="off"
-            autoCorrect="off"
-            spellCheck={false}
+            {...NO_SUGGESTIONS}
             className={`${themeSystem.field("lg")} min-w-0 flex-1`}
           />
           <UIButton type="submit" disabled={!text.trim()}>

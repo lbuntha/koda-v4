@@ -10,6 +10,7 @@ import { GroupAPI } from "./groupApi";
 import { NicknamePicker } from "./NicknamePicker";
 import { CODE_PATTERN, cleanCode } from "./roomLink";
 import type { Seat } from "./types";
+import { NO_SUGGESTIONS } from "../noSuggestions";
 
 export interface JoinFormProps {
   /** A code from the invitation link. */
@@ -55,10 +56,8 @@ export const JoinForm: React.FC<JoinFormProps> = ({ initialCode, userToken, onJo
           value={code}
           onChange={(e) => setCode(cleanCode(e.target.value))}
           inputMode="text"
+          {...NO_SUGGESTIONS}
           autoCapitalize="characters"
-          autoComplete="off"
-          autoCorrect="off"
-          spellCheck={false}
           maxLength={11}
           placeholder="ABC123"
           className="text-center text-2xl font-black tracking-[0.3em]"
