@@ -63,6 +63,35 @@ def merge_trace_progress(existing: dict[str, Any], incoming: dict[str, Any]) -> 
     return merged
 
 
+REBUS_SEEN_CAP = 2000
+REBUS_RESULTS_CAP = 3000
+
+
+def merge_rebus_play(existing: dict[str, Any], incoming: dict[str, Any]) -> dict[str, Any]:
+    """What two devices each know of a child's Rebus Rush, joined.
+
+    `seen` is an oldest-first list: ids the incoming device has met go to the
+    newest end, the rest keep their place, and the oldest fall off past the cap.
+    `results` keeps, per puzzle, the record with more plays (the incoming one on
+    a tie) so a device that played it more is never rolled back.
+    """
+    new_seen = [i for i in incoming.get("seen") or [] if isinstance(i, str)]
+    taken = set(new_seen)
+    old_seen = [i for i in existing.get("seen") or [] if isinstance(i, str) and i not in taken]
+    seen = (old_seen + list(dict.fromkeys(new_seen)))[-REBUS_SEEN_CAP:]
+
+    results: dict[str, Any] = {k: v for k, v in (existing.get("results") or {}).items() if isinstance(v, dict)}
+    for puzzle_id, record in (incoming.get("results") or {}).items():
+        if not isinstance(record, dict):
+            continue
+        have = results.get(puzzle_id)
+        if not isinstance(have, dict) or (record.get("plays") or 0) >= (have.get("plays") or 0):
+            results[puzzle_id] = record
+    if len(results) > REBUS_RESULTS_CAP:
+        results = dict(list(results.items())[-REBUS_RESULTS_CAP:])
+    return {"seen": seen, "results": results}
+
+
 def merge_progress(existing: dict[str, Any], incoming: dict[str, Any]) -> dict[str, Any]:
     """Last write wins, except where the later write is not the better answer.
 
@@ -234,6 +263,8 @@ async def _apply_mutation(
         elif mutation.kind == "traceProgress" and not mutation.deleted:
             # Item by item: two tablets the same child uses each know some items best.
             body = merge_trace_progress(existing.get("body") or {}, mutation.body)
+        elif mutation.kind == "rebusPlay" and not mutation.deleted:
+            body = merge_rebus_play(existing.get("body") or {}, mutation.body)
         else:
             return Conflict(opId=mutation.op_id, doc=_as_sync_doc(existing))
 

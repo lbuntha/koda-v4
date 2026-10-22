@@ -21,7 +21,8 @@ export type DocKind =
   | "art"
   | "childSettings"
   | "conceptBaseline"
-  | "traceProgress";
+  | "traceProgress"
+  | "rebusPlay";
 
 export interface KindSpec {
   /**
@@ -185,6 +186,16 @@ export const SYNC_KINDS: Record<DocKind, KindSpec> = {
     scope: "learner",
     shape: "whole",
     notify: nudge("koda_trace_progress_v2"),
+  },
+  /*
+   * Rebus Rush: the puzzles this child has met (oldest first) and how each one
+   * went. One document per child; the server joins two devices' copies.
+   */
+  rebusPlay: {
+    storageKey: "koda_rebus_play_v1",
+    scope: "learner",
+    shape: "whole",
+    notify: nudge("koda_rebus_play_v1"),
   },
 };
 

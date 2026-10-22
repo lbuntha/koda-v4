@@ -4587,6 +4587,7 @@
     "chooseTopic": "ជ្រើសរើសប្រធានបទ",
     "soon": "ឆាប់ៗនេះ",
     "puzzlesCount": "{count} សំណួរ",
+    "playedOf": "បានលេង {done} ក្នុងចំណោម {total}",
     "mixed": "ចម្រុះ",
     "choice": {"answers": "ចម្លើយ"},
     "chooseAnswer": "ជ្រើសចម្លើយរបស់អ្នក",

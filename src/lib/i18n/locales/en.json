@@ -4787,6 +4787,7 @@
     "chooseTopic": "Pick a topic",
     "soon": "Soon",
     "puzzlesCount": "{count} puzzles",
+    "playedOf": "{done} of {total} played",
     "mixed": "Mixed",
     "choice": {"answers": "The answers"},
     "chooseAnswer": "Choose your answer",

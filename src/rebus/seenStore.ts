@@ -1,30 +1,15 @@
 /**
- * The seen log, kept on this device.
- *
- * Plain localStorage for now (Phase 4a moves it beside the category packs).
- * Every read and write is guarded: storage can be missing or full on a child's
- * tablet, and the game must simply carry on, repeating a puzzle at worst.
+ * The seen log, for the child playing. It lives in `playStore.ts`, per child, and syncs with their account;
+ * the game carries on, repeating a puzzle at worst, if storage is missing or full.
  */
 
+import { loadPlay, savePlay } from "./playStore";
 import { recordSeen } from "./seen";
 
-const KEY = "koda.rebus.seen";
-
-export const loadSeen = (): string[] => {
-  try {
-    const raw = localStorage.getItem(KEY);
-    const parsed: unknown = raw ? JSON.parse(raw) : [];
-    return Array.isArray(parsed) ? parsed.filter((id): id is string => typeof id === "string") : [];
-  } catch {
-    return [];
-  }
-};
+export const loadSeen = (): string[] => loadPlay().seen;
 
 /** Remember that these puzzles were played. */
 export const markSeen = (ids: readonly string[]): void => {
-  try {
-    localStorage.setItem(KEY, JSON.stringify(recordSeen(loadSeen(), ids)));
-  } catch {
-    /* Not remembered this time; a puzzle may come round sooner than it should. */
-  }
+  const play = loadPlay();
+  savePlay({ ...play, seen: recordSeen(play.seen, ids) });
 };

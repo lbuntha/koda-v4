@@ -12,7 +12,7 @@ import React, { useMemo, useState } from "react";
 import { ArrowLeft, Hand, Play, Users } from "lucide-react";
 import { useT } from "../../lib/i18n";
 import { themeSystem } from "../../lib/themeSystem";
-import { UIBadge, UIButton, UITabs } from "../../components/ui";
+import { UIBadge, UIButton, UIProgressBar, UITabs } from "../../components/ui";
 import { cue } from "../sound";
 import { loadAutoNext, saveAutoNext } from "../prefs";
 import { categoryLabel } from "../categoryNames";
@@ -65,6 +65,19 @@ export const RebusSetup: React.FC<RebusSetupProps> = ({ bank, settings, results 
   const [filtering, setFiltering] = useState(false);
   const [difficulty, setDifficulty] = useState<Difficulty | null>(null);
   const [status, setStatus] = useState<StatusFilter>("all");
+
+  // How much of each topic this child has played, so working through everything can be seen.
+  const played = useMemo(() => {
+    const by: Record<string, { done: number; total: number }> = {};
+    for (const p of filterPuzzles(bank.puzzles, { category: "mixed" })) {
+      for (const key of [p.category, "mixed"]) {
+        const row = (by[key] ??= { done: 0, total: 0 });
+        row.total += 1;
+        if (results[p.id]) row.done += 1;
+      }
+    }
+    return by;
+  }, [bank.puzzles, results]);
 
   const available = useMemo(() => filterPuzzles(bank.puzzles, { category, difficulty, status, results }).length, [bank.puzzles, category, difficulty, status, results]);
   const filtered = difficulty !== null || status !== "all";
@@ -128,7 +141,19 @@ export const RebusSetup: React.FC<RebusSetupProps> = ({ bank, settings, results 
                       `flex items-center justify-between gap-3 px-4 py-3 text-left pointer-coarse:min-h-14 disabled:cursor-not-allowed disabled:opacity-50 ${selected ? "!border-indigo-500 ring-2 ring-indigo-200 dark:ring-indigo-800" : ""}`,
                     )}
                   >
-                    <span className="text-base font-black text-ink">{name}</span>
+                    <span className="flex min-w-0 flex-1 flex-col gap-1.5">
+                      <span className="text-base font-black text-ink">{name}</span>
+                      {!empty && played[id] && (
+                        <UIProgressBar
+                          value={played[id].done}
+                          max={played[id].total}
+                          size="sm"
+                          tone="emerald"
+                          label={t("rebus.playedOf", { done: played[id].done, total: played[id].total })}
+                          caption={t("rebus.playedOf", { done: played[id].done, total: played[id].total })}
+                        />
+                      )}
+                    </span>
                     <UIBadge variant={empty ? "neutral" : selected ? "primary" : "info"}>{empty ? t("rebus.soon") : t("rebus.puzzlesCount", { count: n })}</UIBadge>
                   </button>
                 );
