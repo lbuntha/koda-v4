@@ -111,7 +111,9 @@ def test_khmer_numerals_are_the_digits_they_stand_for():
 
 
 def test_a_worked_question_needs_no_picture_to_spell_and_a_number_is_a_fine_answer():
-    quiz = puzzle(kind="quiz", pieces=[{"kind": "word", "text": "A pack has 6 pens. How many in 7 packs?"}], answer="42", explanation="6 × 7 = 42.")
+    quiz = puzzle(
+        kind="quiz", pieces=[{"kind": "word", "text": "A pack has 6 pens. How many in 7 packs?"}], answer="42", explanation="6 × 7 = 42.",
+    )
     assert codes(quiz) == []
     assert v.answer_key(quiz) != v.answer_key({**quiz, "pieces": [{"kind": "word", "text": "A box has 7 pens. How many in 6 boxes?"}]})
 

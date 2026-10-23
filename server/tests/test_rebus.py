@@ -442,7 +442,10 @@ async def test_a_worked_question_keeps_its_khmer_words_all_the_way_to_a_device(c
 
 async def test_a_worked_question_may_show_a_counted_row_of_pictures_but_a_picture_puzzle_may_not(client, admin):
     row = [{"kind": "icon", "id": "rebus-cheese", "name": "cheese"}] * 9
-    quiz = draft(category="math", kind="quiz", pieces=[*row, {"kind": "word", "text": "How many cheeses are there?"}], answer="9", explanation="Count them: 9.")
+    quiz = draft(
+        category="math", kind="quiz", pieces=[*row, {"kind": "word", "text": "How many cheeses are there?"}],
+        answer="9", explanation="Count them: 9.",
+    )
     assert (await client.post("/rebus/studio/puzzles", json=quiz, headers=admin)).json()["issues"] == []
     picture = draft(pieces=[*row, {"kind": "word", "text": "cheese"}])
     assert "too-many-pieces" in (await client.post("/rebus/studio/puzzles", json=picture, headers=admin)).json()["issues"]

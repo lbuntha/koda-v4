@@ -140,7 +140,9 @@ async def test_the_old_khmer_words_move_to_their_topics_and_the_khmer_only_twins
     assert dog["category"] == "animals" and dog["km"]["answer"] == "ឆ្កែ" and "ឆ្កែ" in dog["accepts"]
 
     # As an earlier start left them: Khmer-only, in the Khmer category, live.
-    await db.rebus_puzzles.update_one({"id": dog["id"]}, {"$set": {"category": "khmer", "answer": "ឆ្កែ", "status": "published"}, "$unset": {"km": ""}})
+    await db.rebus_puzzles.update_one(
+        {"id": dog["id"]}, {"$set": {"category": "khmer", "answer": "ឆ្កែ", "status": "published"}, "$unset": {"km": ""}}
+    )
     await db.rebus_puzzles.update_one({"id": "choice-capital-cambodia"}, {"$set": {"status": "published"}})
     await db.rebus_puzzles.insert_one({"id": "choice-km-capital", "category": "khmer", "status": "published", "seeded": True})
     await db.rebus_categories.update_one({"_id": "khmer"}, {"$set": {"enabled": True}})

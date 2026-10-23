@@ -132,7 +132,10 @@ async def ensure_seed(db: AsyncIOMotorDatabase, puzzles: list[dict[str, Any]]) -
                 continue
             # A question that gained a Khmer version since it was seeded gets it; one that has its own is left alone.
             if puzzle.get("km") and not have.get("km"):
-                await db.rebus_puzzles.update_one({"_id": have["_id"]}, {"$set": {"km": puzzle["km"]}, "$addToSet": {"accepts": {"$each": puzzle.get("accepts", [])}}})
+                await db.rebus_puzzles.update_one(
+                    {"_id": have["_id"]},
+                    {"$set": {"km": puzzle["km"]}, "$addToSet": {"accepts": {"$each": puzzle.get("accepts", [])}}},
+                )
                 filled += 1
             continue
         stamp = now()
@@ -151,9 +154,13 @@ async def ensure_seed(db: AsyncIOMotorDatabase, puzzles: list[dict[str, Any]]) -
             }
         )
         created += 1
-    retired = await db.rebus_puzzles.update_many({"id": {"$in": list(RETIRED_SEED)}, "status": "published"}, {"$set": {"status": "retired"}})
+    retired = await db.rebus_puzzles.update_many(
+        {"id": {"$in": list(RETIRED_SEED)}, "status": "published"}, {"$set": {"status": "retired"}}
+    )
     filled += retired.modified_count
-    unlaunched = await db.rebus_puzzles.update_many({"id": {"$in": list(RETIRED_SEED)}, "status": {"$in": ["draft", "approved"]}}, {"$set": {"status": "rejected"}})
+    unlaunched = await db.rebus_puzzles.update_many(
+        {"id": {"$in": list(RETIRED_SEED)}, "status": {"$in": ["draft", "approved"]}}, {"$set": {"status": "rejected"}}
+    )
     filled += unlaunched.modified_count
     # The Khmer words topic has nothing left in it: hide it, as the Studio's Categories tab would.
     if not await db.rebus_puzzles.find_one({"category": "khmer", "status": {"$in": ["draft", "approved", "published"]}}, {"_id": 1}):
