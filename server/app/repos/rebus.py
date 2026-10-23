@@ -24,6 +24,7 @@ import re
 from typing import Any
 
 from motor.motor_asyncio import AsyncIOMotorDatabase
+from pymongo import UpdateOne
 
 from app.models.common import now
 
@@ -122,24 +123,35 @@ async def ensure_seed(db: AsyncIOMotorDatabase, puzzles: list[dict[str, Any]]) -
 
     new_categories = await rebus_categories.ensure_seed(db)
     owner = await first_admin_id(db) or SYSTEM
+    # One read for every existing puzzle and one bulk write for the rest: this
+    # used to be a round trip per puzzle, which at ~220 ms each outlasted Cloud
+    # Run's startup probe once the seed passed two thousand puzzles.
+    existing = {
+        row["id"]: row
+        async for row in db.rebus_puzzles.find({"id": {"$in": [p["id"] for p in puzzles]}}, {"_id": 1, "id": 1, "km": 1, "category": 1})
+    }
+    updates: list[UpdateOne] = []
+    fresh: list[dict[str, Any]] = []
     for puzzle in puzzles:
-        have = await db.rebus_puzzles.find_one({"id": puzzle["id"]}, {"_id": 1, "km": 1, "category": 1})
+        have = existing.get(puzzle["id"])
         if have:
             # The old "Khmer words" puzzles now sit in animals, science and the rest, in both languages.
             if have.get("category") == "khmer" and puzzle["category"] != "khmer":
-                await db.rebus_puzzles.update_one({"_id": have["_id"]}, {"$set": {f: puzzle[f] for f in MOVED_FIELDS if f in puzzle}})
+                updates.append(UpdateOne({"_id": have["_id"]}, {"$set": {f: puzzle[f] for f in MOVED_FIELDS if f in puzzle}}))
                 filled += 1
                 continue
             # A question that gained a Khmer version since it was seeded gets it; one that has its own is left alone.
             if puzzle.get("km") and not have.get("km"):
-                await db.rebus_puzzles.update_one(
-                    {"_id": have["_id"]},
-                    {"$set": {"km": puzzle["km"]}, "$addToSet": {"accepts": {"$each": puzzle.get("accepts", [])}}},
+                updates.append(
+                    UpdateOne(
+                        {"_id": have["_id"]},
+                        {"$set": {"km": puzzle["km"]}, "$addToSet": {"accepts": {"$each": puzzle.get("accepts", [])}}},
+                    )
                 )
                 filled += 1
             continue
         stamp = now()
-        await db.rebus_puzzles.insert_one(
+        fresh.append(
             {
                 **puzzle,
                 "status": "draft",
@@ -153,7 +165,11 @@ async def ensure_seed(db: AsyncIOMotorDatabase, puzzles: list[dict[str, Any]]) -
                 "release": None,
             }
         )
-        created += 1
+    if fresh:
+        await db.rebus_puzzles.insert_many(fresh, ordered=False)
+    if updates:
+        await db.rebus_puzzles.bulk_write(updates, ordered=False)
+    created = len(fresh)
     retired = await db.rebus_puzzles.update_many(
         {"id": {"$in": list(RETIRED_SEED)}, "status": "published"}, {"$set": {"status": "retired"}}
     )
