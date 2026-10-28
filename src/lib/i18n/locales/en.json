@@ -2685,6 +2685,8 @@
       "shownToAParentChoosingNothing": "Shown to a parent choosing. Nothing switches automatically."
     },
     "kodaPage": {
+      "kodaMascot": "Koda mascot",
+      "kodaMascotBlurb": "The floating Koda character. On, it stays on screen even when Ask Koda is off (a tap just says hello). Off, it is hidden everywhere.",
       "voiceConversation": "Voice conversation",
       "theLiveSpokenCoachAChild": "The live spoken coach — a child talks, Koda answers out loud. What a tap on Ask Koda opens, and the most expensive call in the app.",
       "writtenHelp": "Written help",

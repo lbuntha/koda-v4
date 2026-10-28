@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { KeyRound, MessageCircle, Mic, PenTool, Volume2 } from "lucide-react";
+import { KeyRound, MessageCircle, Mic, PenTool, Smile, Volume2 } from "lucide-react";
 
 import { ApiError, accessToken, refreshSystem, request, usePermissions } from "../../lib/sync";
 import { KODA_MASTER, KODA_SETTINGS, type KodaCapability } from "../../lib/koda";
@@ -229,6 +229,26 @@ export const KodaPage: React.FC<{ embedded?: boolean; onOpenKeys?: () => void }>
               />
             </div>
           </section>
+
+          {/* The character, apart from the assistant: it has its own switch
+              because the master above must be able to be off (the MVP runs
+              that way) while Koda still stands on the page. Not held off by
+              the master, so it is not disabled by it. */}
+          {rowFor("ui.kodaMascot") && (
+            <section
+              className={themeSystem.card("default", `${themeSystem.spacing.card} space-y-4`)}
+            >
+              <UIToggleRow
+                title={translate("admin.kodaPage.kodaMascot")}
+                description={translate("admin.kodaPage.kodaMascotBlurb")}
+                icon={<Smile className="h-4 w-4" />}
+                checked={isOn("ui.kodaMascot")}
+                disabled={busy === "ui.kodaMascot"}
+                onChange={() => void write("ui.kodaMascot", !isOn("ui.kodaMascot"))}
+                tone="emerald"
+              />
+            </section>
+          )}
 
           {/* 2. What it may do. Greyed together when the master is off, rather
               than hidden: an operator has to be able to see what will come back
