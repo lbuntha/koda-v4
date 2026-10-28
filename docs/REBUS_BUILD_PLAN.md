@@ -131,7 +131,7 @@ New skill needs `docker compose restart api` so `skill_registry` re-seeds before
 
 ## 11. Addendum — scale, community, group play (added 2026-10-17)
 
-Mock: `docs/rebus-flow-mock.html` (Koda theme; Process / Demo / Owner / Studio panels).
+Mock: removed from the tree 2026-10-28; recover with `git show pre-mvp-cut:docs/rebus-flow-mock.html`.
 
 ### 11.1 1,000+ puzzles per category, growing with users
 - **Goal per category: 1,000 puzzles**, shown as a progress bar so gaps (e.g. Sports at 987) are visible to staff and to makers.
@@ -184,7 +184,7 @@ Original Phase 5 (Studio authoring) is absorbed by 4b; voice/polish stays last.
 - **Pack size growth** — 7 categories × 350 KB is fine; monitor if puzzles gain images.
 
 ### 11.7 Rebus Studio — AI-assisted content (supersedes the cautious line in §4)
-Mock: `docs/rebus-studio-mock.html` (responsive web: side rail ≥ 860 px, scrolling tab bar below).
+Mock: removed from the tree 2026-10-28; recover with `git show pre-mvp-cut:docs/rebus-studio-mock.html`.
 **Decision:** puzzles are created with AI, but only inside a staff Studio. Children never wait on AI and never see an unreviewed puzzle.
 
 **Flow: Brief → Generate → Review → Publish** (plus Coverage, Community queue, Releases)
