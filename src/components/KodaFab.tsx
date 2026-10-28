@@ -44,7 +44,21 @@ export const KodaFab: React.FC<{ onAsk: (mode: KodaAskMode) => void }> = ({ onAs
      read as allowed, so a deployment that has never heard of this setting gets
      the tile — which is the intended default. */
   const { allows } = useSystem();
-  if (!mode) return null;
+  // The mascot switch hides the character everywhere, AI or not.
+  if (!allows("ui.kodaMascot")) return null;
+
+  // Ask Koda is off: the character stays as a friendly face and a tap only
+  // says hello. Nothing is asked of the plan, the parent or the network.
+  if (!mode) {
+    return (
+      <KodaBuddy
+        storageKey="koda.fab.place.v3"
+        backdrop={allows("ui.kodaBackdrop")}
+        onPress={() => playSound("pop")}
+        className={["fixed right-4 sm:right-6 z-40", themeSystem.appShell.aboveTabBar].join(" ")}
+      />
+    );
+  }
 
   return (
     <KodaBuddy

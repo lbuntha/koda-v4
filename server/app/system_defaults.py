@@ -122,6 +122,22 @@ DEFAULT_SETTINGS: list[dict] = [
         "value": True,
         "order": 44,
     },
+    {
+        # Appearance, not a capability. It is the character, not the AI: with
+        # Ask Koda switched off the floating Koda can still stand on the page
+        # as a friendly face, and this switch is what removes it too.
+        "settingId": "ui.kodaMascot",
+        "group": "Ask Koda",
+        "label": "Koda mascot",
+        "description": (
+            "The floating Koda character. On, it shows even when Ask Koda is "
+            "off (a tap just says hello). Off, it is hidden everywhere, whatever "
+            "the Ask Koda switches say."
+        ),
+        "type": "bool",
+        "value": True,
+        "order": 42,
+    },
     # ---- Artwork. A different job with different keys: the Art page drawing
     # ---- an SVG has nothing to do with a child asking Koda a question, and
     # ---- putting them under one heading made both harder to find.
