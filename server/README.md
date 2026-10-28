@@ -19,6 +19,26 @@ python -m app.cli migrate
 python -m app.cli create-admin --email you@example.com --password '…'
 ```
 
+## Moving authored content to another database
+
+Library books (with their pictures and recordings) and trace collections are made
+in the Studios, so a new server starts without them. A content pack carries them;
+see `app/content_pack.py`.
+
+```bash
+# where the content was made — inside the compose api container for local dev
+docker compose exec api python -m app.cli content-export /tmp/pack
+docker compose cp api:/tmp/pack ./content-pack        # ignored by git
+
+# the target (MONGODB_URI / MONGODB_DB / LIBRARY_AUDIO_BUCKET set for it)
+python -m app.cli content-import ./content-pack --dry-run
+python -m app.cli content-import ./content-pack
+```
+
+Import adds what is missing and never overwrites a correction made on the server;
+`--update` replaces a book or collection only when the pack has a newer revision.
+Only published content is exported, so publish in the Studio first.
+
 ## Google sign-in
 
 Koda uses Google only to prove identity; the API then issues its normal Koda
@@ -84,7 +104,8 @@ app/
   rbac.py        the permission table; the only place a role is named
   deps.py        principal() · require(*perms)
   errors.py      AppError → one JSON shape
-  cli.py         migrate · create-admin
+  cli.py         migrate · create-admin · content-export · content-import
+  content_pack.py  export/import of published Library and Trace content
   models/        the wire, and nothing about storage
   repos/         data access, one module per collection; base.py enforces tenancy
   services/      rules that span collections

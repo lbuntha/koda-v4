@@ -123,6 +123,33 @@ async def put(data: bytes, mime: str) -> tuple[str, int]:
     return clip_id, len(encoded)
 
 
+async def put_raw(clip_id: str, data: bytes) -> None:
+    """Store bytes that are already encoded, under the id they hash to.
+
+    `put` re-encodes, which would change the hash and so the id a book points
+    at. A content pack carries finished clips, so it must keep them exactly.
+    """
+    if hashlib.sha256(data).hexdigest() != clip_id:
+        raise ValueError("The clip does not match its id.")
+    bucket_name = settings().library_audio_bucket
+    if bucket_name:
+        def upload() -> None:
+            blob = _gcs_bucket().blob(object_name(clip_id))
+            if not blob.exists():
+                blob.upload_from_string(data, content_type=CONTENT_TYPE)
+
+        await asyncio.to_thread(upload)
+        return
+    path = _local_path(clip_id)
+
+    def store_local() -> None:
+        path.parent.mkdir(parents=True, exist_ok=True)
+        if not path.exists():
+            path.write_bytes(data)
+
+    await asyncio.to_thread(store_local)
+
+
 async def get(clip_id: str) -> bytes | None:
     if settings().library_audio_bucket:
         def download() -> bytes | None:

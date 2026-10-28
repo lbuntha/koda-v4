@@ -16,6 +16,8 @@ __pycache__/
 .ruff_cache/
 .venv/
 server/data/library-audio/
+# Exported content packs: generated, large, and moved by hand.
+content-pack/
 
 # Local compose overrides carry host paths and personal credentials.
 docker-compose.override.yml
