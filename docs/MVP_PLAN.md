@@ -73,8 +73,6 @@ reaches into ages 13–14 and its later lessons stay gated.
 | Dev scaffolding | four Rebus HTML mockups in `docs/`, `scripts/seed-push-demo.js` | **Cut — done 2026-10-28** | Throwaway design mocks and a demo-data script. Kept: `skills/kit/example` (the documented starting point for any new skill), the per-skill build plans (every skill stays), design specs, `generate-observation-art.mjs`. |
 | Dependencies | `@anthropic-ai/sdk`, `@dicebear/*`, `firebase`, `@google/genai` | **Audit after the cuts** | Remove only what `grep` shows unused once the Live coach and tutor are gone. `@google/genai` stays if Studio image/voice generation stays. |
 
-Add one MVP step: a **Grade 4+ gate** so lessons above age 9 exist but are not offered, and the home/recommender never reaches for them.
-
 Keep untouched: sync/offline layer, auth, family/learners/devices, roles, translations
 (en + km), menu, theme/UI kit, PWA/push delivery, Rebus Studio, Trace Studio, Library Studio.
 
@@ -95,32 +93,38 @@ No skills, billing, leaderboard, group rooms or Ask Koda are cut. Then a final f
 - **Menu and routes**: `sidebarNav.json` and `menu_defaults.py` list 21 destinations. The MVP
   learner and parent need about 7: Home, Learn, Profile, Children, Notifications, Settings, plus
   Studios for the owner. Seed the trimmed menu; the server prunes dead entries on boot already.
-- **One place for "Grade"**. See 4.1.
 - Run an unused-export pass (e.g. `knip`) *after* the cuts. A quick filename scan found almost no
   orphan files, so the weight is in what is wired in, not in leftovers.
 
 ## 4. Gaps and fixes (what the search turned up)
 
-### 4.1 "Grade" does not exist as data — fix before seeding
-Everything is gated by **age bands**; Rebus puzzles have `ages` but no grade, and 787 of 2,324
-are the broad `[6,12]`. Define one mapping (`grade 1 = 5–7`, `2 = 7–8`, `3 = 8–9`; the bands overlap, so it must be decided once) in `src/lib/ages.ts` /
-`server/app/ages.py` and have Rebus, Library and Trace filter by it. 1,878 of 2,324 Rebus puzzles (743 math) start at age 9 or younger. Check how many of the
-181 `math` and 828 `quiz` puzzles are really readable at Grade 1 vs 3.
+### 4.1 Grades — already defined; no mapping or gate to build (corrected 2026-10-28)
+`src/lib/ages.ts` already says **grade = age − 5** (Grade 1 = age 6, Grade 3 = age 8), the
+Studios author in grades and store ages, and lessons are hidden when they start more than a
+year above the child. So an age-8 Grade 3 child sees lessons starting at ≤ 9 and content
+tagged for ages 7–9. That is the "ages 5–9" band used above. Earlier drafts of this plan
+said otherwise; they were wrong.
+Consequences: (a) no "Grade 4+ gate" is needed — a 10-year-old simply gets the ages 10–12
+fractions and division lessons that already exist; (b) the open item is *content* for the
+oldest children, not code. Rebus puzzles carry `ages` (1,878 of 2,324 start at 9 or
+younger), so nothing needs a new field; spot-check the 181 `math` and 828 `quiz` puzzles for
+reading level at Grade 1 vs 3.
 
-### 4.2 Content seeding is uneven — your deploy plan depends on this
-| Content | Seeded on boot today? |
+### 4.2 Content moves to production by a content pack, not by boot seed
+| Content | Reaches a fresh server today? |
 |---|---|
-| Skills, art, menu, plans, settings, personas, roles | Yes |
-| Rebus puzzles | Yes (`rebus_seed.json`, create-if-absent, in bulk) |
-| **Library books** | **No.** Only the Studio writes them; `docs/library-books/*.json` are drafts, `starter-*.json` are bundled passages. |
-| **Trace items/collections** | **No.** Only the Studio writes them. `englishSet.ts` is a generator, not a seed. |
+| Skills, art, menu, plans, settings, personas, roles | Yes — seeded on boot |
+| Rebus puzzles | Yes — `rebus_seed.json`, create-if-absent, in bulk |
+| **Library books** | **No.** Local DB: 6 books, 55 images (7.4 MB), 16 audio clips (3.2 MB), 3 unit voices |
+| **Trace items/collections** | **No.** Local DB: 76 items (3.9 MB), 4 collections, 1 painting |
 
-Fix: a `library_seed.json` and `trace_seed.json` next to `rebus_seed.json` in `server/app/`,
-loaded the same way (create-if-absent, bulk, `published`), plus an export button/CLI in each
-Studio so what you author locally becomes the seed file. Note `boot.py` fingerprints the whole
-`app` package, so a changed seed file re-runs the seed on the next release — which is what we
-want — but a seed that is slow will again miss Cloud Run's startup probe, as it did before
-`3122e8e`. Keep it bulk, and measure it with the Library and Trace sets in.
+Boot seed is the wrong tool for these: ≈15 MB of authored images and audio, while
+`boot.py` hashes every file in the `app` package on each start and a slow seed already missed
+Cloud Run's probe once (`3122e8e`). Instead: `python -m app.cli content-export <dir>` writes
+the published Library and Trace content (plus its images/audio) to a folder or zip;
+`content-import <dir>` loads it create-if-absent, so a re-run never overwrites an admin's edits.
+Run it once per deploy against the production database, as `create-admin` already is.
+The pack is generated from your local Studio, so authoring stays where it is.
 
 ### 4.3 Reading content is thin
 Library has 1 of 12 Grade 1 books published and nothing planned for Grades 2–3 (the 12-book plan is band A, ages 5–7 only); book 2 (`sleepy-night-animals`) is waiting on
@@ -160,7 +164,7 @@ data by design, so test with a real family. Also confirm Cloud Scheduler is actu
 | 0 | Commit WIP, tag, baseline lint/tests | Clean tree, baseline recorded |
 | 1 | Cuts 2c(1)–(7), one commit each | Lint + scoped tests green per commit; app opens at 390 px |
 | 2 | Clean-up §3 (App split, trimmed menu, grade-1 home) | Full vitest + pytest; you review in the app |
-| 3 | Grade mapping §4.1, seed files + Studio export §4.2 | Fresh empty DB boots under Cloud Run's probe with all content present |
+| 3 | Content pack export/import §4.2 | A fresh empty database plus `content-import` shows the same books and trace items as local |
 | 4 | Content: Library books 2–6 for Grade 1 then a Grade 2–3 shelf, Trace English + Khmer, Rebus pass by grade | You read each in the app |
 | 5 | Parent loop §4.5, production check with `gcloud` | A real family receives a real summary |
 | 6 | Deploy; seed; smoke test on a phone on weak internet | Launch |
