@@ -15,7 +15,9 @@ Three grades (Grades 1–3, ages 5–9), four things a child does, one thing a p
 | Drawing | Koda Trace (`src/trace`) + paint | Engine built. English A–Z / a–z / 0–9 drafted, not published. No seed path. |
 | Parent | weekly summary, daily reminder, child report | Built (server `tasks.py`, `email_notify.py`, `push.py`). |
 
-Everything else is out of scope until after launch.
+Grades 1–3 is where the launch content is focused, **not a trim**: no lesson, puzzle, book or
+skill is removed for any grade, and Grades 4–6 content will be provided later. Higher-grade
+lessons already in the code (e.g. ages 10–12 division and fractions) stay as they are.
 
 ## 1. Before touching anything (Phase 0)
 
@@ -170,6 +172,8 @@ data by design, so test with a real family. Also confirm Cloud Scheduler is actu
 | 6 | Deploy; seed; smoke test on a phone on weak internet | Launch |
 
 ## 6. Decisions (made 2026-10-28)
+
+0. **No grade is trimmed.** Launch focus is Grades 1–3; content for Grades 4–6 follows later.
 
 1. **Color Sweeper, Bottle Sort, Observation** — keep all three. No skill is cut.
 2. **Rebus group rooms and leaderboard** — keep both.
