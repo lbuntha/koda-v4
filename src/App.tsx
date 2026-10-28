@@ -1,4 +1,4 @@
-import React, { Suspense, lazy, useState, useEffect, useRef, useSyncExternalStore, useTransition } from "react";
+import { useState, useEffect, useRef, useSyncExternalStore, useTransition } from "react";
 import { Megaphone } from "lucide-react";
 
 import { UserProgress } from "./types";
@@ -30,7 +30,7 @@ import { SkillCatalogPage } from "./components/SkillCatalogPage";
 import { AppNav } from "./components/AppNav";
 import { SidebarNav } from "./components/SidebarNav";
 import { MainLayout } from "./components/layout/MainLayout";
-import { UIPageLoader, UIModal } from "./components/ui";
+import { UIModal } from "./components/ui";
 import { SkillHost } from "./skills/host/SkillHost";
 import {
   getCourseLessons,
@@ -48,11 +48,6 @@ import { VerifyEmailScreen, verificationTokenFromUrl } from "./components/accoun
 import { clearRoomFromUrl, roomCodeFromUrl } from "./rebus/group/roomLink";
 import { LearnersPage } from "./components/account/LearnersPage";
 import { DevicesPage } from "./components/account/DevicesPage";
-const NotificationsPage = lazy(() =>
-  import("./components/account/NotificationsPage").then((m) => ({
-    default: m.NotificationsPage,
-  })),
-);
 import { ProfilePage } from "./components/account/ProfilePage";
 import { NotificationSettingsPage } from "./components/account/NotificationSettingsPage";
 import { KodaAskModal } from "./components/KodaAskModal";
@@ -81,72 +76,26 @@ import { listSvgAssets } from "./lib/svgAssetsApi";
 import { refreshSkillRegistry, useSkillRegistryVersion } from "./lib/skillRegistryApi";
 import { refreshMaintenanceVersions } from "./lib/maintenanceReset";
 
-/*
- * The operator's pages, fetched when one is opened rather than shipped to
- * everybody.
- *
- * These seven are the largest components in the app and the least used: the
- * Skill Manager alone is bigger than every learner-facing page put together,
- * and a five-year-old counting rockets downloaded all of it to render a screen
- * they have no right to open. Splitting them here costs an admin one fetch the
- * first time they open a page and saves every learner the whole weight.
- *
- * Gated *and* split: the `can(...)` checks below are unchanged, because a chunk
- * that is merely hard to fetch is not a permission. The split is about bytes;
- * the server is what refuses the data.
- *
- * Named exports, so each import is mapped onto the default a lazy chunk must
- * expose. `SkillManagerPage` is already imported this way by the round's top
- * bar for its Activity trail — with the eager import gone, that lazy import and
- * this one resolve to the same chunk instead of pinning the module into the
- * main bundle.
- */
-const SkillManagerPage = lazy(() =>
-  import("./components/skills/SkillManagerPage").then((m) => ({ default: m.SkillManagerPage })),
-);
-const GuestRoomScreen = lazy(() => import("./rebus/group/GuestRoomScreen").then((m) => ({ default: m.GuestRoomScreen })));
-const RebusPage = lazy(() => import("./rebus/RebusPage").then((m) => ({ default: m.RebusPage })));
-const RebusStudio = lazy(() => import("./rebus/studio/RebusStudio").then((m) => ({ default: m.RebusStudio })));
-const TraceStudio = lazy(() => import("./trace/studio/TraceStudio").then((m) => ({ default: m.TraceStudio })));
-const LibraryStudio = lazy(() => import("./library/studio/LibraryStudio").then((m) => ({ default: m.LibraryStudio })));
-const SvgAssetsPage = lazy(() =>
-  import("./components/SvgAssetsPage").then((m) => ({ default: m.SvgAssetsPage })),
-);
-const UsersPage = lazy(() =>
-  import("./components/account/UsersPage").then((m) => ({ default: m.UsersPage })),
-);
-const RolesPage = lazy(() =>
-  import("./components/account/RolesPage").then((m) => ({ default: m.RolesPage })),
-);
-const MenuPage = lazy(() =>
-  import("./components/account/MenuPage").then((m) => ({ default: m.MenuPage })),
-);
-const AdminPage = lazy(() =>
-  import("./components/account/AdminPage").then((m) => ({ default: m.AdminPage })),
-);
-const TranslationsPage = lazy(() => import("./components/account/TranslationsPage").then((m) => ({ default: m.TranslationsPage })));
-const SubjectsPage = lazy(() => import("./components/account/SubjectsPage").then((m) => ({ default: m.SubjectsPage })));
-const DataCleanupPage = lazy(() =>
-  import("./components/account/DataCleanupPage").then((m) => ({ default: m.DataCleanupPage })),
-);
-const KodaPage = lazy(() =>
-  import("./components/account/KodaPage").then((m) => ({ default: m.KodaPage })),
-);
-const LeaderboardPage = lazy(() =>
-  import("./components/LeaderboardPage").then((m) => ({ default: m.LeaderboardPage })),
-);
-
-/**
- * The wait, while one of those chunks arrives.
- *
- * One boundary per page slot rather than one around the whole tab area: a
- * shared boundary would blank the operator's notice and every sibling tab for
- * the fraction of a second a fetch takes, and a page that fails to load would
- * take its neighbours down with it.
- */
-const Deferred: React.FC<{ label: string; children: React.ReactNode }> = ({ label, children }) => (
-  <Suspense fallback={<UIPageLoader label={label} />}>{children}</Suspense>
-);
+import {
+  AdminPage,
+  DataCleanupPage,
+  Deferred,
+  GuestRoomScreen,
+  KodaPage,
+  LeaderboardPage,
+  LibraryStudio,
+  MenuPage,
+  NotificationsPage,
+  RebusPage,
+  RebusStudio,
+  RolesPage,
+  SkillManagerPage,
+  SubjectsPage,
+  SvgAssetsPage,
+  TraceStudio,
+  TranslationsPage,
+  UsersPage,
+} from "./lazyPages";
 
 export default function App() {
   // Publication is server-owned. Subscribing here makes every learner-facing
