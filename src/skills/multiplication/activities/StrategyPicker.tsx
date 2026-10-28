@@ -23,6 +23,8 @@ import { speechRate, tagLabelsFrom } from "../internal/data/multiplicationChrome
 import { ADJUSTMENT, EACH, GROUPS, NEUTRAL, PRODUCT } from "../internal/data/multiplicationPalette";
 import { TOUCH_TARGET } from "../internal/data/multiplicationLayout";
 import { useNudge } from "../internal/ui/useNudge";
+import { tm } from "../internal/i18n";
+import { useT } from "../../../lib/i18n";
 
 /**
  * Choosing a route, and then looking at another one.
@@ -117,7 +119,7 @@ export function buildQuestion(params: StrategyParams, index: number, seen?: Set<
     fits,
     offered: shuffle([...shown, ...wrong]),
     taskKind: "compare_strategies",
-    prompt: `${a} × ${b}. Which of these would work? Any route that fits is a good one.`,
+    prompt: tm("strategy.prompt", { a, b }),
     // Several answers are right; the log records the route the child took.
     expected: fits.map((id) => strategyById(id).label).join(" / "),
     itemCount: product,
@@ -133,18 +135,19 @@ export const promptFor = (question: StrategyQuestion): string => question.prompt
 export function printedFor(question: StrategyQuestion): PrintedQuestion | null {
   const { a, b, fits } = question;
   return {
-    text: `${a} × ${b}. Solve it two different ways, then say which was easier and why. ____`,
-    answer: `${question.product}. Routes that work: ${fits
-      .map((id) => `${strategyById(id).label} (${strategyById(id).route(a, b)})`)
-      .join("; ")}`,
+    text: tm("strategy.printed", { a, b }),
+    answer: tm("strategy.printedAnswer", {
+      product: question.product,
+      routes: fits.map((id) => `${strategyById(id).label} (${strategyById(id).route(a, b)})`).join("; "),
+    }),
   };
 }
 
 export function methodFor(_question: StrategyQuestion): string[] | null {
   return [
-    "Look at the two numbers before choosing how to start.",
-    "Some routes only work on certain numbers: halving needs an even one, doubling twice needs a four.",
-    "More than one route usually fits. Pick the one that makes the numbers easiest.",
+    tm("strategy.method1"),
+    tm("strategy.method2"),
+    tm("strategy.method3"),
   ];
 }
 
@@ -164,10 +167,10 @@ export function strategyHints(
   return composeHints(
     kidTip,
     state.chosen
-      ? `You took one route. Look at the other one beside it — did it need fewer steps?`
-      : `Look at ${a} and ${b}. Is either even, or next to a square?`,
+      ? tm("strategy.hintTook")
+      : tm("strategy.hintLook", { a, b }),
     // Never names a route: choosing is the question, and several are right.
-    `More than one fits. A route fits when its move suits these numbers.`,
+    tm("strategy.hintMore"),
   );
 }
 
@@ -176,6 +179,7 @@ export function strategyHints(
 /* -------------------------------------------------------------------------- */
 
 export const StrategyPicker: React.FC<ActivityProps<StrategyParams>> = ({ params, koda, onComplete, lesson }) => {
+  useT();
   const setup: StrategySetup = useMemo(() => ({ ...params, ...params.question }), [params]);
   const copy = playCopy(params);
   const practising = isPractice(setup);
@@ -240,7 +244,7 @@ export const StrategyPicker: React.FC<ActivityProps<StrategyParams>> = ({ params
     if (!strategy.fits(a, b)) {
       /* Not a wrong answer — a route that cannot be carried out. Nothing is
          scored, and the reason is arithmetic rather than preference. */
-      refuse(`${strategy.why(a, b)}`, "That one does not work here.");
+      refuse(`${strategy.why(a, b)}`, tm("strategy.refuseSay"));
       return;
     }
     setChosen(id);
@@ -252,8 +256,8 @@ export const StrategyPicker: React.FC<ActivityProps<StrategyParams>> = ({ params
       correct: true,
       given: strategy.label,
       expected: question.expected,
-      title: "That route works",
-      message: `${strategy.route(a, b)} — and ${a} × ${b} = ${question.product}.`,
+      title: tm("strategy.worksTitle"),
+      message: tm("strategy.worksMessage", { route: strategy.route(a, b), a, b, product: question.product }),
     });
   };
 
@@ -286,7 +290,7 @@ export const StrategyPicker: React.FC<ActivityProps<StrategyParams>> = ({ params
     <SkillRound
       koda={koda}
       lesson={lesson}
-      fallbackTitle="Choose a Route"
+      fallbackTitle={tm("strategy.title")}
       round={round}
       totalQuestions={total}
       prompt={promptFor(question)}
@@ -340,7 +344,7 @@ export const StrategyPicker: React.FC<ActivityProps<StrategyParams>> = ({ params
         {/* The second half of the lesson: another route that also works. */}
         {scaffold && chosen && alternative && (
           <div className={`w-full max-w-md rounded-2xl border-2 border-dashed ${ADJUSTMENT.border} px-4 py-3`}>
-            <p className={`text-sm font-bold ${NEUTRAL.text}`}>Another route that also works</p>
+            <p className={`text-sm font-bold ${NEUTRAL.text}`}>{tm("strategy.another")}</p>
             <p className={`text-base font-black ${ADJUSTMENT.text}`}>
               {strategyById(alternative).label}
             </p>

@@ -248,3 +248,19 @@ export function layoutBook(book: Pick<Passage, "band" | "language" | "sentences"
   const chosen = story.map((pg) => pagePicture(pg, book));
   return { story, pictures: chosen.map((c) => c.key), places: chosen.map((c) => c.at), texts: story.map(pageText), keys, count: story.length + 1 };
 }
+
+/**
+ * The sheet that decides how large the whole book's words are set: the page with
+ * the most characters, since that is the one that runs out of room first. A page
+ * whose size the author chose is left out — they picked it for that page, and it
+ * should not make every other page smaller — unless every page was chosen. Sheet
+ * numbers, so 1 is the first story page; null for a book with none.
+ */
+export function widestPage(pages: Pick<BookPages, "story" | "texts">): number | null {
+  const size = (i: number) => pages.story[i].reduce((n, s) => n + [...s.sentence.text].length, 0);
+  const all = pages.story.map((_, i) => i);
+  const automatic = all.filter((i) => (pages.texts[i]?.size ?? "normal") === "normal");
+  const pool = automatic.length ? automatic : all;
+  if (!pool.length) return null;
+  return pool.reduce((best, i) => (size(i) > size(best) ? i : best)) + 1;
+}

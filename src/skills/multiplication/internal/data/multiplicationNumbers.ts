@@ -12,6 +12,8 @@
  * never silently relaxed, because a relaxed constraint is a lesson quietly
  * teaching something else.
  */
+import { catalogRecord, tm } from "../i18n";
+
 
 const ATTEMPTS = 200;
 
@@ -33,11 +35,7 @@ export function shuffle<T>(items: readonly T[]): T[] {
   return out;
 }
 
-const NUMBER_WORDS = [
-  "zero", "one", "two", "three", "four", "five", "six", "seven", "eight", "nine",
-  "ten", "eleven", "twelve", "thirteen", "fourteen", "fifteen", "sixteen",
-  "seventeen", "eighteen", "nineteen", "twenty",
-];
+const NUMBER_WORD_LIMIT = 20;
 
 /**
  * A number as a child hears it.
@@ -46,7 +44,7 @@ const NUMBER_WORDS = [
  * engine is not reliably "twelve". Past twenty the digits are read, which is
  * where the counting stops being one-at-a-time anyway.
  */
-export const numberWord = (n: number): string => NUMBER_WORDS[n] ?? String(n);
+export const numberWord = (n: number): string => (Number.isInteger(n) && n >= 0 && n <= NUMBER_WORD_LIMIT ? tm(`numbers.${n}`) : String(n));
 
 /* -------------------------------------------------------------------------- */
 /* Place value                                                                 */
@@ -801,12 +799,10 @@ export function drawScaledProduct(kind: ScaleKind, spec: ScaleSpec = {}): Scaled
 }
 
 /** Which column a place belongs to, named the way the desk labels it. */
-export const PLACE_NAMES: Readonly<Record<number, string>> = Object.freeze({
-  1: "ones",
-  10: "tens",
-  100: "hundreds",
-  1000: "thousands",
-});
+export const PLACE_NAMES: Readonly<Record<number, string>> = Object.freeze(catalogRecord("places", [1, 10, 100, 1000] as const));
+
+/** The same places as a quantity: "5 tens", where PLACE_NAMES says which column. */
+export const PLACE_UNITS: Readonly<Record<number, string>> = Object.freeze(catalogRecord("placeUnits", [1, 10, 100, 1000] as const));
 
 /**
  * The heading over each column.
@@ -815,12 +811,7 @@ export const PLACE_NAMES: Readonly<Record<number, string>> = Object.freeze({
  * thousands and tens the same "T" — on a chart whose entire purpose is telling
  * one column from the next.
  */
-export const PLACE_ABBREV: Readonly<Record<number, string>> = Object.freeze({
-  1: "O",
-  10: "T",
-  100: "H",
-  1000: "Th",
-});
+export const PLACE_ABBREV: Readonly<Record<number, string>> = Object.freeze(catalogRecord("placeAbbrev", [1, 10, 100, 1000] as const));
 
 /* -------------------------------------------------------------------------- */
 /* Estimation                                                                  */

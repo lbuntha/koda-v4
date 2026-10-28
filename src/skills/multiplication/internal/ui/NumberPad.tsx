@@ -1,5 +1,7 @@
 import React from "react";
 import { themeSystem } from "../../../../lib/themeSystem";
+import { useT } from "../../../../lib/i18n";
+import { tm } from "../i18n";
 
 /**
  * Ten digits and a delete.
@@ -20,7 +22,9 @@ export interface NumberPadProps {
 
 const DIGITS = ["1", "2", "3", "4", "5", "6", "7", "8", "9", "0"];
 
-export const NumberPad: React.FC<NumberPadProps> = ({ onDigit, onDelete, disabled }) => (
+export const NumberPad: React.FC<NumberPadProps> = ({ onDigit, onDelete, disabled }) => {
+  useT();
+  return (
   <div className="mx-auto flex max-w-[24rem] flex-wrap items-center justify-center gap-2">
     {DIGITS.map((digit) => (
       <button
@@ -28,7 +32,7 @@ export const NumberPad: React.FC<NumberPadProps> = ({ onDigit, onDelete, disable
         type="button"
         onClick={() => onDigit(digit)}
         disabled={disabled}
-        aria-label={`Digit ${digit}`}
+        aria-label={tm("pad.digit", { digit })}
         className={themeSystem.button("secondary", "choice")}
       >
         {digit}
@@ -38,10 +42,11 @@ export const NumberPad: React.FC<NumberPadProps> = ({ onDigit, onDelete, disable
       type="button"
       onClick={onDelete}
       disabled={disabled}
-      aria-label="Delete"
+      aria-label={tm("pad.delete")}
       className={themeSystem.button("secondary", "choice")}
     >
       ⌫
     </button>
   </div>
-);
+  );
+};

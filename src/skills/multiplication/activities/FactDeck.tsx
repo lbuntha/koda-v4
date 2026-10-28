@@ -38,6 +38,8 @@ import { SCENE, TOUCH_TARGET } from "../internal/data/multiplicationLayout";
 import { TimesTableChart } from "../internal/ui/TimesTableChart";
 import { useNudge } from "../internal/ui/useNudge";
 import { NumberPad } from "../internal/ui/NumberPad";
+import { joinAnd, tm } from "../internal/i18n";
+import { useT } from "../../../lib/i18n";
 
 /**
  * Facts, and the facts that get you to them.
@@ -128,6 +130,8 @@ export interface FactQuestion extends RoundQuestion {
   /** `known_fact`: four true facts, exactly one of which helps. */
   candidates: (ShownFact & { helps: boolean })[];
   choices: number[];
+  /** The step after the helper fact, kept as data so its words follow the language on screen. */
+  adjust?: Adjust;
 }
 
 /* -------------------------------------------------------------------------- */
@@ -145,20 +149,16 @@ const key = (a: number, b: number): string => (a <= b ? `${a}x${b}` : `${b}x${a}
  * Read off the ladder's own `adjust` rather than written per mode, so a
  * strategy that changes its adjustment cannot leave its wording behind.
  */
-export const adjustmentWords = (adjust: Adjust): string => {
-  switch (adjust.kind) {
-    case "double":
-      return "Now double it.";
-    case "halve":
-      return "Now halve it.";
-    case "add_group":
-      return `Now add one more ${adjust.of}.`;
-    case "subtract_group":
-      return `Now take one ${adjust.of} away.`;
-    case "sum":
-      return "Now add them together.";
-  }
-};
+/**
+ * What to do next, in words. `now` opens a sentence ("Now double it."), `then`
+ * stands alone ("Double it."), and `lower` runs on after a colon.
+ */
+export const adjustmentWords = (adjust: Adjust, form: "now" | "then" | "lower" = "now"): string =>
+  tm(`fact.adjust.${adjust.kind}.${form}`, "of" in adjust ? { of: adjust.of } : undefined);
+
+/** The question's step in words, in the language on screen right now. */
+const adjustLine = (question: FactQuestion, form: "now" | "then" | "lower" = "now"): string =>
+  question.adjust ? adjustmentWords(question.adjust, form) : "";
 
 /**
  * Every row this lesson may draw from.
@@ -354,6 +354,7 @@ export function buildQuestion(params: FactDeckParams, index: number, seen?: Set<
     partner: a === drawn.driver ? b : a,
     helpers,
     adjustment: drawn.adjust ? adjustmentWords(drawn.adjust) : "",
+    adjust: drawn.adjust,
     candidates: drawn.candidates,
     choices: choicesFor(a, b, stopShort),
     itemCount: product,
@@ -363,23 +364,23 @@ export function buildQuestion(params: FactDeckParams, index: number, seen?: Set<
 
   switch (mode) {
     case "tens":
-      return { ...base, taskKind: "fact_tens", prompt: `${fact}. What is ${a} tens?`, expected: String(product) };
+      return { ...base, taskKind: "fact_tens", prompt: tm("fact.promptTens", { fact, a }), expected: String(product) };
     case "fives":
-      return { ...base, taskKind: "fact_fives", prompt: `${fact}. Halve the ten times fact.`, expected: String(product) };
+      return { ...base, taskKind: "fact_fives", prompt: tm("fact.promptFives", { fact }), expected: String(product) };
     case "double_double":
-      return { ...base, taskKind: "fact_double_double", prompt: `${fact}. Double, then double again.`, expected: String(product) };
+      return { ...base, taskKind: "fact_double_double", prompt: tm("fact.promptDoubleDouble", { fact }), expected: String(product) };
     case "triple_double":
-      return { ...base, taskKind: "fact_triple_double", prompt: `${fact}. Double three times over.`, expected: String(product) };
+      return { ...base, taskKind: "fact_triple_double", prompt: tm("fact.promptTripleDouble", { fact }), expected: String(product) };
     case "add_a_group":
-      return { ...base, taskKind: "fact_add_a_group", prompt: `${fact}. One group more than a fact you know.`, expected: String(product) };
+      return { ...base, taskKind: "fact_add_a_group", prompt: tm("fact.promptAddGroup", { fact }), expected: String(product) };
     case "subtract_a_group":
-      return { ...base, taskKind: "fact_subtract_a_group", prompt: `${fact}. One group less than the ten times fact.`, expected: String(product) };
+      return { ...base, taskKind: "fact_subtract_a_group", prompt: tm("fact.promptSubtractGroup", { fact }), expected: String(product) };
     case "break_apart":
-      return { ...base, taskKind: "fact_break_apart", prompt: `${fact}. Break it into two facts you know.`, expected: String(product) };
+      return { ...base, taskKind: "fact_break_apart", prompt: tm("fact.promptBreakApart", { fact }), expected: String(product) };
     case "near_square":
-      return { ...base, taskKind: "fact_near_square", prompt: `${fact}. One more ${a} than ${a} × ${a}.`, expected: String(product) };
+      return { ...base, taskKind: "fact_near_square", prompt: tm("fact.promptNearSquare", { fact, a }), expected: String(product) };
     case "known_fact":
-      return { ...base, taskKind: "fact_known_fact", prompt: `${fact}. Which fact would help?`, expected: String(product) };
+      return { ...base, taskKind: "fact_known_fact", prompt: tm("fact.promptKnown", { fact }), expected: String(product) };
     case "doubles":
     default:
       return {
@@ -390,8 +391,8 @@ export function buildQuestion(params: FactDeckParams, index: number, seen?: Set<
         // route the child met at level 10. Calling both of them "double 7"
         // would quietly drop the difference the skill spent a lesson on.
         prompt: a === 2
-          ? `${fact}. What is double ${b}?`
-          : `${fact}. What is ${a} twos — the same as double ${a}?`,
+          ? tm("fact.promptDoubleTwo", { fact, b })
+          : tm("fact.promptDouble", { fact, a }),
         expected: String(product),
       };
   }
@@ -405,21 +406,21 @@ export const promptFor = (question: FactQuestion): string => question.prompt ?? 
 
 /** The helper chain as one written line, for a sheet with no card to turn over. */
 const helperLine = (question: FactQuestion): string =>
-  question.helpers.map((h) => `${h.a} × ${h.b} = ${h.product}`).join(" and ");
+  joinAnd(question.helpers.map((h) => `${h.a} × ${h.b} = ${h.product}`));
 
 export function printedFor(question: FactQuestion): PrintedQuestion | null {
   const { a, b, product } = question;
   if (question.mode === "known_fact") {
     return {
-      text: `${a} × ${b} = ____. Write down the fact you used to work it out.`,
-      answer: `${product}, using ${helperLine(question)}`,
+      text: tm("fact.printedKnown", { a, b }),
+      answer: tm("fact.printedKnownAnswer", { product, line: helperLine(question) }),
     };
   }
   if (question.helpers.length === 0) {
-    return { text: `${a} × ${b} = ____`, answer: String(product) };
+    return { text: tm("fact.printedBare", { a, b }), answer: String(product) };
   }
   return {
-    text: `You know ${helperLine(question)}. ${question.adjustment} ${a} × ${b} = ____`,
+    text: tm("fact.printedHelp", { line: helperLine(question), adjustment: adjustLine(question), a, b }),
     answer: String(product),
   };
 }
@@ -429,31 +430,31 @@ export function methodFor(question: FactQuestion): string[] | null {
     case "doubles":
       return question.a === 2
         ? [
-          `Two ${question.b}s is ${question.b} twice over.`,
-          "Doubles are the facts worth knowing by heart.",
+          tm("fact.methodDoubleTwo1", { b: question.b }),
+          tm("fact.methodDoubleTwo2"),
         ]
         : [
-          `${question.a} twos is two counted ${question.a} times.`,
-          `It comes to the same as double ${question.a}.`,
+          tm("fact.methodDouble1", { a: question.a }),
+          tm("fact.methodDouble2", { a: question.a }),
         ];
     case "tens":
       // §12 trap 5. The digits move one place; the zero is what is left behind.
       return [
-        `${question.a} tens is ${question.a} sticks of ten.`,
-        "Each one moves up a place: ones become tens.",
-        "The zero appears because the ones column emptied, not because a rule said to write one.",
+        tm("fact.methodTens1", { a: question.a }),
+        tm("fact.methodTens2"),
+        tm("fact.methodTens3"),
       ];
     case "known_fact":
       return [
-        "Look for a fact you already know inside this one.",
-        `Here it is ${helperLine(question)}.`,
-        `${question.adjustment.replace(/^Now /, "").replace(/^./, (c) => c.toUpperCase())}`,
+        tm("fact.methodKnown1"),
+        tm("fact.methodKnown2", { line: helperLine(question) }),
+        adjustLine(question, "then"),
       ];
     default:
       return [
-        `Start from a fact you know: ${helperLine(question)}.`,
-        question.adjustment.replace(/^Now /, "").replace(/^./, (c) => c.toUpperCase()),
-        `That gives ${question.a} × ${question.b}.`,
+        tm("fact.methodStart", { line: helperLine(question) }),
+        adjustLine(question, "then"),
+        tm("fact.methodGives", { a: question.a, b: question.b }),
       ];
   }
 }
@@ -481,37 +482,37 @@ export function factHints(
     case "doubles":
       return composeHints(
         kidTip,
-        `${a} groups of ${b}. Count one group, then the next.`,
-        a === 2 ? `${b} and another ${b}.` : `Two counted ${a} times is double ${a}.`,
+        tm("fact.hintDouble1", { a, b }),
+        a === 2 ? tm("fact.hintDoubleTwo", { b }) : tm("fact.hintDouble2", { a }),
       );
     case "tens":
       return composeHints(
         kidTip,
-        `${a} tens. Count the sticks of ten.`,
+        tm("fact.hintTens1", { a }),
         // Never "put a zero on the end": the rule breaks the first time a
         // decimal appears, and this is the age it gets installed.
-        `The ones move up into the tens column, and the ones column is left empty.`,
+        tm("fact.hintTens2"),
       );
     case "known_fact":
       return composeHints(
         kidTip,
         state.revealed
-          ? `You have ${helperLine(question)}. ${question.adjustment}`
-          : `Look for a fact that is one small move from ${a} × ${b}.`,
+          ? tm("fact.hintKnownRevealed", { line: helperLine(question), adjustment: adjustLine(question) })
+          : tm("fact.hintKnownLook", { a, b }),
         // Stops short of naming the card: choosing it is the question.
-        `A fact helps when one move gets you from it to ${a} × ${b}.`,
+        tm("fact.hintKnownHelps", { a, b }),
       );
     default:
       return composeHints(
         kidTip,
         state.revealed
-          ? `${helperLine(question)}. ${question.adjustment}`
+          ? tm("fact.hintRevealed", { line: helperLine(question), adjustment: adjustLine(question) })
           : first
-            ? `Turn the card over. You already know ${first.a} × ${first.b}.`
-            : `Start from a fact you already know.`,
-        question.adjustment
-          ? `From ${helperLine(question)}: ${question.adjustment.toLowerCase().replace(/^now /, "")}`
-          : `Work it out from a fact you know.`,
+            ? tm("fact.hintTurn", { a: first.a, b: first.b })
+            : tm("fact.hintStartKnown"),
+        question.adjust
+          ? tm("fact.hintFrom", { line: helperLine(question), adjustment: adjustLine(question, "lower") })
+          : tm("fact.hintWork"),
       );
   }
 }
@@ -531,7 +532,7 @@ export function factHints(
  * relying on colour to carry meaning.
  */
 const DotGrid: React.FC<{ rows: number; cols: number }> = ({ rows, cols }) => (
-  <div className="flex flex-col gap-1.5" role="img" aria-label={`${rows} groups of ${cols}`}>
+  <div className="flex flex-col gap-1.5" role="img" aria-label={tm("fact.groupsOf", { rows, cols })}>
     {Array.from({ length: rows }, (_, r) => (
       <div key={r} className="flex justify-center gap-1.5">
         {Array.from({ length: cols }, (_, c) => (
@@ -554,7 +555,7 @@ const DotGrid: React.FC<{ rows: number; cols: number }> = ({ rows, cols }) => (
  * that stops working the first time they meet 0.7 × 10.
  */
 const TenSticks: React.FC<{ count: number }> = ({ count }) => (
-  <div className="flex flex-wrap justify-center gap-1.5" role="img" aria-label={`${count} sticks of ten`}>
+  <div className="flex flex-wrap justify-center gap-1.5" role="img" aria-label={tm("fact.sticks", { count })}>
     {Array.from({ length: count }, (_, i) => (
       <span
         key={i}
@@ -567,6 +568,7 @@ const TenSticks: React.FC<{ count: number }> = ({ count }) => (
 );
 
 export const FactDeck: React.FC<ActivityProps<FactDeckParams>> = ({ params, koda, onComplete, lesson }) => {
+  useT();
   const setup: FactSetup = useMemo(() => ({ ...params, ...params.question }), [params]);
   const copy = playCopy(params);
   const practising = isPractice(setup);
@@ -685,7 +687,7 @@ export const FactDeck: React.FC<ActivityProps<FactDeckParams>> = ({ params, koda
     round.useSupport("walkthrough");
     chime(koda, "reached");
     if (hapticsEnabled) koda.haptics.tap();
-    speak(`${first.a} times ${first.b} is ${first.product}.`);
+    speak(tm("fact.said", { a: first.a, b: first.b, product: first.product }));
   };
 
   const chooseCandidate = (candidate: ShownFact & { helps: boolean }) => {
@@ -694,8 +696,8 @@ export const FactDeck: React.FC<ActivityProps<FactDeckParams>> = ({ params, koda
       // A wrong route, not a wrong answer: the child has not said what the
       // product is, so nothing may be filed against them for it.
       refuse(
-        `${candidate.a} × ${candidate.b} = ${candidate.product} is a real fact, but no single move gets from it to ${a} × ${b}.`,
-        "That one does not help.",
+        tm("fact.notHelp", { a: candidate.a, b: candidate.b, product: candidate.product, x: a, y: b }),
+        tm("fact.notHelpSay"),
       );
       return;
     }
@@ -703,7 +705,7 @@ export const FactDeck: React.FC<ActivityProps<FactDeckParams>> = ({ params, koda
     round.useSupport("walkthrough");
     chime(koda, "reached");
     if (hapticsEnabled) koda.haptics.success();
-    speak(`${candidate.a} times ${candidate.b} is ${candidate.product}.`);
+    speak(tm("fact.said", { a: candidate.a, b: candidate.b, product: candidate.product }));
   };
 
   const answer = (value: number) => {
@@ -716,18 +718,18 @@ export const FactDeck: React.FC<ActivityProps<FactDeckParams>> = ({ params, koda
     judge(
       correct,
       String(value),
-      correct ? "That is the fact!" : stoppedShort ? "Nearly — one move short" : "Not quite",
+      correct ? tm("fact.rightTitle") : stoppedShort ? tm("fact.shortTitle") : tm("fact.wrongTitle"),
       stoppedShort
-        ? `${value} is ${question.helpers.find((h) => h.product === value)!.a} × ${question.helpers.find((h) => h.product === value)!.b}. ${question.adjustment}`
+        ? tm("fact.shortMessage", { value, a: question.helpers.find((h) => h.product === value)!.a, b: question.helpers.find((h) => h.product === value)!.b, adjustment: adjustLine(question) })
         : question.helpers.length > 0
-          ? `${helperLine(question)}, so ${a} × ${b} = ${question.product}.`
-          : `${a} × ${b} = ${question.product}.`,
+          ? tm("fact.rightMessageHelpers", { line: helperLine(question), a, b, product: question.product })
+          : tm("fact.rightMessage", { a, b, product: question.product }),
     );
   };
 
   const submitTyped = () => {
     if (typed === "") {
-      refuse("Type a number first.", "Type a number first.");
+      refuse(tm("fact.typeFirst"), tm("fact.typeFirst"));
       return;
     }
     answer(Number(typed));
@@ -749,10 +751,10 @@ export const FactDeck: React.FC<ActivityProps<FactDeckParams>> = ({ params, koda
         <button
           type="button"
           onClick={reveal}
-          aria-label={`Turn over the helper card, ${first.a} times ${first.b}`}
+          aria-label={tm("fact.turnOver", { a: first.a, b: first.b })}
           className={themeSystem.button("secondary", "md")}
         >
-          I know {first.a} × {first.b}
+          {tm("fact.iKnow", { a: first.a, b: first.b })}
         </button>
       );
     }
@@ -763,7 +765,7 @@ export const FactDeck: React.FC<ActivityProps<FactDeckParams>> = ({ params, koda
             {helper.a} × {helper.b} = {helper.product}
           </p>
         ))}
-        <p className={`text-base font-black ${ADJUSTMENT.text}`}>{question.adjustment}</p>
+        <p className={`text-base font-black ${ADJUSTMENT.text}`}>{adjustLine(question)}</p>
       </div>
     );
   })();
@@ -771,7 +773,7 @@ export const FactDeck: React.FC<ActivityProps<FactDeckParams>> = ({ params, koda
   const numericAnswer = usePad ? (
     <div className="flex flex-col items-center gap-3">
       <output
-        aria-label="Your answer"
+        aria-label={tm("fact.yourAnswer")}
         className={`min-h-11 min-w-24 rounded-xl border-2 px-4 py-2 text-center text-2xl font-black tabular-nums ${PRODUCT.border} ${PRODUCT.text}`}
       >
         {typed || "—"}
@@ -782,7 +784,7 @@ export const FactDeck: React.FC<ActivityProps<FactDeckParams>> = ({ params, koda
         disabled={!!round.feedback}
       />
       <button type="button" onClick={submitTyped} disabled={!!round.feedback} className={themeSystem.button("primary", "md")}>
-        Check
+        {tm("fact.check")}
       </button>
     </div>
   ) : (
@@ -831,7 +833,7 @@ export const FactDeck: React.FC<ActivityProps<FactDeckParams>> = ({ params, koda
     <SkillRound
       koda={koda}
       lesson={lesson}
-      fallbackTitle="Fact Deck"
+      fallbackTitle={tm("fact.title")}
       round={round}
       totalQuestions={total}
       prompt={promptFor(question)}
@@ -877,7 +879,7 @@ export const FactDeck: React.FC<ActivityProps<FactDeckParams>> = ({ params, koda
                   type="button"
                   onClick={() => chooseCandidate(candidate)}
                   disabled={!!round.feedback}
-                  aria-label={`Use ${candidate.a} times ${candidate.b}`}
+                  aria-label={tm("fact.use", { a: candidate.a, b: candidate.b })}
                   className={`${TOUCH_TARGET} rounded-2xl border-2 px-4 py-3 text-lg font-bold tabular-nums text-ink focus:outline-none focus-visible:ring-2 focus-visible:ring-sky-500 ${EACH.border} bg-surface`}
                 >
                   {candidate.a} × {candidate.b}
@@ -893,7 +895,7 @@ export const FactDeck: React.FC<ActivityProps<FactDeckParams>> = ({ params, koda
                   {helper.a} × {helper.b} = {helper.product}
                 </p>
               ))}
-              <p className={`text-base font-black ${ADJUSTMENT.text}`}>{question.adjustment}</p>
+              <p className={`text-base font-black ${ADJUSTMENT.text}`}>{adjustLine(question)}</p>
             </div>
           )}
         </div>
@@ -903,13 +905,13 @@ export const FactDeck: React.FC<ActivityProps<FactDeckParams>> = ({ params, koda
         {chartOffered && (
           chartOpen ? (
             <div className="flex w-full flex-col items-center gap-2">
-              <TimesTableChart ceiling={ceiling} label={`Times table up to ${ceiling}`} />
+              <TimesTableChart ceiling={ceiling} label={tm("chart.upTo", { ceiling })} />
               <button
                 type="button"
                 onClick={() => setChartOpen(false)}
                 className={themeSystem.button("secondary", "md")}
               >
-                Hide the times table
+                {tm("fact.hideTable")}
               </button>
             </div>
           ) : (
@@ -919,7 +921,7 @@ export const FactDeck: React.FC<ActivityProps<FactDeckParams>> = ({ params, koda
               disabled={!!round.feedback}
               className={themeSystem.button("secondary", "md")}
             >
-              Show the times table
+              {tm("fact.showTable")}
             </button>
           )
         )}

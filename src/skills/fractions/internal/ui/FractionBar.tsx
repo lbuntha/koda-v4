@@ -1,4 +1,5 @@
 import React from "react";
+import { tf } from "../i18n";
 
 /**
  * A whole, cut into equal parts, with some of them shaded.
@@ -68,8 +69,8 @@ export const FractionBar: React.FC<FractionBarProps> = ({
       width={FULL + 4}
       height={52}
       role="img"
-      aria-label={`${label ?? `${shaded.length} of ${parts} parts shaded`}${
-        lit === undefined ? "" : `, part ${lit + 1} next`
+      aria-label={`${label ?? tf("fbar.shaded", { shaded: shaded.length, parts })}${
+        lit === undefined ? "" : tf("fbar.next", { n: lit + 1 })
       }`}
       className="text-ink"
       opacity={ghost ? 0.35 : 1}
@@ -123,8 +124,8 @@ export const FractionCircle: React.FC<{
       width={120}
       height={120}
       role="img"
-      aria-label={`${label ?? `${shaded.length} of ${parts} parts shaded`}${
-        lit === undefined ? "" : `, part ${lit + 1} next`
+      aria-label={`${label ?? tf("fbar.shaded", { shaded: shaded.length, parts })}${
+        lit === undefined ? "" : tf("fbar.next", { n: lit + 1 })
       }`}
       className="text-ink"
     >

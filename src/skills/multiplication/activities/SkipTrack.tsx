@@ -35,6 +35,8 @@ import {
 } from "../internal/data/multiplicationLayout";
 import { useNudge } from "../internal/ui/useNudge";
 import { NumberPad } from "../internal/ui/NumberPad";
+import { tm } from "../internal/i18n";
+import { useT } from "../../../lib/i18n";
 
 /**
  * The number line — equal groups laid end to end.
@@ -200,21 +202,21 @@ export function buildQuestion(params: TrackParams, index: number, seen?: Set<str
       return {
         ...base,
         taskKind: "multiply_on_a_line",
-        prompt: `${hops} × ${step}. Make ${hops} hops of ${step}, then say where you land.`,
+        prompt: tm("skip.promptHops", { hops, step }),
         expected: String(landing),
       };
     case "missing_hop":
       return {
         ...base,
         taskKind: "count_the_hops",
-        prompt: `Hops of ${step} land on ${landing}. How many hops is that?`,
+        prompt: tm("skip.promptMissing", { step, landing }),
         expected: String(hops),
       };
     case "count_multiples":
       return {
         ...base,
         taskKind: "spot_the_multiple",
-        prompt: `Is ${value} a multiple of ${step}?`,
+        prompt: tm("skip.promptMultiple", { value, step }),
         expected: isMultiple ? "Yes" : "No",
       };
     case "skip_count":
@@ -222,7 +224,7 @@ export function buildQuestion(params: TrackParams, index: number, seen?: Set<str
       return {
         ...base,
         taskKind: "skip_count_hops",
-        prompt: `Count in ${step}s. Make ${hops} hops from zero, then say where you land.`,
+        prompt: tm("skip.promptSkip", { step, hops }),
         expected: String(landing),
       };
   }
@@ -239,23 +241,23 @@ export function printedFor(question: HopQuestion): PrintedQuestion | null {
   switch (question.mode) {
     case "hops_to_product":
       return {
-        text: `Draw ${hops} hops of ${step} on the line. ${hops} × ${step} = ____`,
+        text: tm("skip.printedHops", { hops, step }),
         answer: String(landing),
       };
     case "missing_hop":
       return {
-        text: `Hops of ${step} from 0 land on ${landing}. How many hops? ____`,
+        text: tm("skip.printedMissing", { step, landing }),
         answer: String(hops),
       };
     case "count_multiples":
       return {
-        text: `Hop along the line in ${step}s. Is ${value} a multiple of ${step}? ____`,
-        answer: isMultiple ? "Yes" : "No",
+        text: tm("skip.printedMultiple", { step, value }),
+        answer: isMultiple ? tm("skip.yes") : tm("skip.no"),
       };
     case "skip_count":
     default:
       return {
-        text: `Count in ${step}s. Make ${hops} hops from 0. Where do you land? ____`,
+        text: tm("skip.printedSkip", { step, hops }),
         answer: String(landing),
       };
   }
@@ -265,28 +267,28 @@ export function methodFor(question: HopQuestion): string[] | null {
   switch (question.mode) {
     case "hops_to_product":
       return [
-        `${question.hops} × ${question.step} is ${question.hops} hops of ${question.step}.`,
-        "Start at zero and hop that far, that many times.",
-        "The number you land on is the answer.",
+        tm("skip.methodHops1", { hops: question.hops, step: question.step }),
+        tm("skip.methodHops2"),
+        tm("skip.methodHops3"),
       ];
     case "missing_hop":
       return [
-        `Every hop is ${question.step} long.`,
-        `Hop from 0 towards ${question.landing}, and count the hops as you go.`,
-        "How many hops it took is the answer.",
+        tm("skip.methodMissing1", { step: question.step }),
+        tm("skip.methodMissing2", { landing: question.landing }),
+        tm("skip.methodMissing3"),
       ];
     case "count_multiples":
       return [
-        `Hop along in ${question.step}s from 0.`,
-        `If a hop lands exactly on ${question.value}, it is a multiple of ${question.step}.`,
-        "If the hops step over it, it is not.",
+        tm("skip.methodMultiple1", { step: question.step }),
+        tm("skip.methodMultiple2", { value: question.value, step: question.step }),
+        tm("skip.methodMultiple3"),
       ];
     case "skip_count":
     default:
       return [
-        `Start at 0 and add ${question.step} for every hop.`,
-        "Write down each number you land on.",
-        "The last one is the total.",
+        tm("skip.methodSkip1", { step: question.step }),
+        tm("skip.methodSkip2"),
+        tm("skip.methodSkip3"),
       ];
   }
 }
@@ -309,7 +311,7 @@ export function figureFor(question: HopQuestion): React.ReactNode | null {
       viewBox="-14 0 328 34"
       width="100%"
       role="img"
-      aria-label={`A number line with ticks every ${step}`}
+      aria-label={tm("skip.lineLabel", { step })}
     >
       <line x1={0} y1={14} x2={width} y2={14} stroke="#334155" strokeWidth="1.5" />
       {Array.from({ length: stops + 1 }, (_, i) => (
@@ -347,32 +349,32 @@ export function trackHints(
       return composeHints(
         kidTip,
         state.made === hops
-          ? `All ${hops} hops are made. Read the number under the last one.`
-          : `${hops} × ${step} means ${hops} hops of ${step}. You have made ${state.made}.`,
-        `Start at zero and add ${step} once for every hop.`,
+          ? tm("skip.hintHopsAll", { hops })
+          : tm("skip.hintHopsSome", { hops, step, made: state.made }),
+        tm("skip.hintHops2", { step }),
       );
     case "missing_hop":
       return composeHints(
         kidTip,
         state.made === 0
-          ? `Start at zero and hop in ${step}s towards ${landing}.`
-          : `You are on ${state.made * step}. Keep hopping until you reach ${landing}.`,
-        `Count the hops as you make them. How many it takes is the answer.`,
+          ? tm("skip.hintMissingStart", { step, landing })
+          : tm("skip.hintMissingOn", { on: state.made * step, landing }),
+        tm("skip.hintMissing2"),
       );
     case "count_multiples":
       return composeHints(
         kidTip,
-        `Hop along in ${step}s and watch whether a hop lands exactly on ${value}.`,
-        `A multiple of ${step} is a number a hop of ${step} lands on.`,
+        tm("skip.hintMultiple1", { step, value }),
+        tm("skip.hintMultiple2", { step }),
       );
     case "skip_count":
     default:
       return composeHints(
         kidTip,
         state.made === hops
-          ? `All ${hops} hops are made. The number under the last hop is the total.`
-          : `You have made ${state.made} hops of ${step}. You need ${hops}.`,
-        `Every hop adds another ${step}. Say each landing out loud as you go.`,
+          ? tm("skip.hintSkipAll", { hops })
+          : tm("skip.hintSkipSome", { made: state.made, step, hops }),
+        tm("skip.hintSkip2", { step }),
       );
   }
 }
@@ -382,6 +384,7 @@ export function trackHints(
 /* -------------------------------------------------------------------------- */
 
 export const SkipTrack: React.FC<ActivityProps<TrackParams>> = ({ params, koda, onComplete, lesson }) => {
+  useT();
   const setup: TrackSetup = useMemo(() => ({ ...params, ...params.question }), [params]);
   const copy = playCopy(params);
   const practising = isPractice(setup);
@@ -500,11 +503,11 @@ export const SkipTrack: React.FC<ActivityProps<TrackParams>> = ({ params, koda, 
     if (round.feedback) return;
     const next = made + by;
     if (next < 0) {
-      refuse("You are already at the start of the line.", "You are at the start.");
+      refuse(tm("skip.atStart"), tm("skip.atStartSay"));
       return;
     }
     if (next > stops) {
-      refuse(`This line stops at ${lineMax}.`, "The line stops there.");
+      refuse(tm("skip.lineStops", { max: lineMax }), tm("skip.lineStopsSay"));
       return;
     }
     setMade(next);
@@ -521,8 +524,8 @@ export const SkipTrack: React.FC<ActivityProps<TrackParams>> = ({ params, koda, 
     if (round.feedback) return;
     if (made !== question.hops) {
       refuse(
-        `You have made ${made} hop${made === 1 ? "" : "s"} of ${step}. You need ${question.hops}.`,
-        "Make the hops first.",
+        tm("skip.hopsFirst", { count: made, step, hops: question.hops }),
+        tm("skip.hopsFirstSay"),
       );
       return;
     }
@@ -530,16 +533,16 @@ export const SkipTrack: React.FC<ActivityProps<TrackParams>> = ({ params, koda, 
     judge(
       correct,
       String(value),
-      correct ? "That is where it lands" : "Not quite",
+      correct ? tm("skip.landsTitle") : tm("skip.notQuite"),
       // Right or wrong, the run is named as a product. That naming is the
       // whole difference between a skip count and a multiplication.
-      `${question.hops} hops of ${step} is ${question.hops} × ${step} = ${question.landing}.`,
+      tm("skip.landsMessage", { hops: question.hops, step, landing: question.landing }),
     );
   };
 
   const submitTyped = () => {
     if (typed === "") {
-      refuse("Type a number first.", "Type a number first.");
+      refuse(tm("skip.typeFirst"), tm("skip.typeFirst"));
       return;
     }
     answerLanding(Number(typed));
@@ -552,10 +555,10 @@ export const SkipTrack: React.FC<ActivityProps<TrackParams>> = ({ params, koda, 
     judge(
       correct,
       String(made),
-      correct ? "That is how many" : "Not that many",
+      correct ? tm("skip.howManyTitle") : tm("skip.notThatMany"),
       correct
-        ? `${question.hops} hops of ${step} lands on ${question.landing}.`
-        : `Count on in ${step}s from zero until you reach ${question.landing}.`,
+        ? tm("skip.howManyRight", { hops: question.hops, step, landing: question.landing })
+        : tm("skip.howManyWrong", { step, landing: question.landing }),
     );
   };
 
@@ -565,10 +568,10 @@ export const SkipTrack: React.FC<ActivityProps<TrackParams>> = ({ params, koda, 
     judge(
       correct,
       said ? "Yes" : "No",
-      correct ? "Yes!" : "Not quite",
+      correct ? tm("skip.yesTitle") : tm("skip.notQuite"),
       question.isMultiple
-        ? `${question.value} is ${question.value / step} hops of ${step}, so a hop lands right on it.`
-        : `Hops of ${step} go straight past ${question.value}.`,
+        ? tm("skip.multipleYes", { value: question.value, hops: question.value / step, step })
+        : tm("skip.multipleNo", { step, value: question.value }),
     );
   };
 
@@ -610,7 +613,7 @@ export const SkipTrack: React.FC<ActivityProps<TrackParams>> = ({ params, koda, 
         width="100%"
         className="mx-auto max-w-lg"
         role="img"
-        aria-label={`Number line: ${made} hops of ${step}, on ${landed}`}
+        aria-label={tm("skip.numberLine", { made, step, landed })}
       >
         <g className={NEUTRAL.text}>
           <line
@@ -691,7 +694,7 @@ export const SkipTrack: React.FC<ActivityProps<TrackParams>> = ({ params, koda, 
     <div className="flex items-center gap-2">
       <button
         type="button"
-        aria-label="Hop back"
+        aria-label={tm("skip.hopBack")}
         onClick={() => hop(-1)}
         disabled={!!round.feedback}
         className={themeSystem.button("secondary", "choice")}
@@ -699,11 +702,11 @@ export const SkipTrack: React.FC<ActivityProps<TrackParams>> = ({ params, koda, 
         −
       </button>
       <span className={`min-w-32 text-center text-sm font-bold ${GROUPS.text}`}>
-        {made} hop{made === 1 ? "" : "s"} of {step}
+        {tm("skip.hopCount", { count: made, step })}
       </span>
       <button
         type="button"
-        aria-label={`Hop forward${guide.target === 0 ? ", take this jump next" : ""}`}
+        aria-label={tm("skip.hopForward", { next: guide.target === 0 ? tm("skip.takeNext") : "" })}
         onClick={() => hop(1)}
         disabled={!!round.feedback}
         className={`${themeSystem.button("secondary", "choice")}${
@@ -718,7 +721,7 @@ export const SkipTrack: React.FC<ActivityProps<TrackParams>> = ({ params, koda, 
   const numericAnswer = usePad ? (
     <div className="flex flex-col items-center gap-3">
       <output
-        aria-label="Your answer"
+        aria-label={tm("skip.yourAnswer")}
         className={`min-h-11 min-w-24 rounded-xl border-2 px-4 py-2 text-center text-2xl font-black tabular-nums ${PRODUCT.border} ${PRODUCT.text}`}
       >
         {typed || "—"}
@@ -729,7 +732,7 @@ export const SkipTrack: React.FC<ActivityProps<TrackParams>> = ({ params, koda, 
         disabled={!!round.feedback}
       />
       <button type="button" onClick={submitTyped} disabled={!!round.feedback} className={themeSystem.button("primary", "md")}>
-        Check
+        {tm("skip.check")}
       </button>
     </div>
   ) : (
@@ -738,7 +741,7 @@ export const SkipTrack: React.FC<ActivityProps<TrackParams>> = ({ params, koda, 
         <button
           key={value}
           type="button"
-          aria-label={`Land on ${value}`}
+          aria-label={tm("skip.landOn", { value })}
           onClick={() => answerLanding(value)}
           disabled={!!round.feedback}
           className={themeSystem.button("secondary", "choice")}
@@ -757,14 +760,14 @@ export const SkipTrack: React.FC<ActivityProps<TrackParams>> = ({ params, koda, 
         return `? × ${step} = ${question.landing}`;
       case "count_multiples":
         return made === 0
-          ? `Hop in ${step}s and see where they land.`
-          : `${made} hops of ${step} reaches ${landed}.`;
+          ? tm("skip.scaffoldHop", { step })
+          : tm("skip.scaffoldReach", { made, step, landed });
       case "skip_count":
       default:
         // The repeated addition, written as it is built. A route to the answer,
         // never the definition of it (§12 trap 1).
         return made === 0
-          ? `Start at 0 and hop ${step}.`
+          ? tm("skip.scaffoldStart", { step })
           : `${Array.from({ length: made }, () => step).join(" + ")} = ${landed}`;
     }
   })();
@@ -776,7 +779,7 @@ export const SkipTrack: React.FC<ActivityProps<TrackParams>> = ({ params, koda, 
           <div className="flex flex-col items-center gap-3">
             {hopControls}
             <button type="button" onClick={checkHops} disabled={!!round.feedback} className={themeSystem.button("primary", "md")}>
-              Check
+              {tm("skip.check")}
             </button>
           </div>
         );
@@ -789,14 +792,14 @@ export const SkipTrack: React.FC<ActivityProps<TrackParams>> = ({ params, koda, 
                 <button
                   key={String(said)}
                   type="button"
-                  aria-label={said ? `Yes, ${question.value} is a multiple of ${step}` : `No, ${question.value} is not a multiple of ${step}`}
+                  aria-label={said ? tm("skip.ariaYes", { value: question.value, step }) : tm("skip.ariaNo", { value: question.value, step })}
                   onClick={() => answerMultiple(said)}
                   disabled={!!round.feedback}
                   className={`${TOUCH_TARGET} rounded-2xl border-2 px-6 py-3 text-lg font-black text-ink focus:outline-none focus-visible:ring-2 focus-visible:ring-sky-500 ${
                     said ? `${PRODUCT.border} ${PRODUCT.soft}` : `${ADJUSTMENT.border} ${ADJUSTMENT.soft}`
                   }`}
                 >
-                  {said ? "Yes" : "No"}
+                  {said ? tm("skip.yes") : tm("skip.no")}
                 </button>
               ))}
             </div>
@@ -819,7 +822,7 @@ export const SkipTrack: React.FC<ActivityProps<TrackParams>> = ({ params, koda, 
     <SkillRound
       koda={koda}
       lesson={lesson}
-      fallbackTitle="Hops on a Line"
+      fallbackTitle={tm("skip.title")}
       round={round}
       totalQuestions={total}
       prompt={promptFor(question)}

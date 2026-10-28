@@ -17,6 +17,9 @@ import {
   type StripQuestion,
   type StripSetup,
 } from "../internal/data/fractionStrip";
+import { tf } from "../internal/i18n";
+import { useT } from "../../../lib/i18n";
+import { wholeName } from "../internal/data/fractionNumbers";
 
 /**
  * The folding strip — where a fraction stops being two numbers.
@@ -54,39 +57,39 @@ export function stripHints(question: StripQuestion): string[] {
   switch (question.mode) {
     case "equal_or_not":
       return composeHints(
-        "Look along the parts, not at how many there are.",
-        "A fraction only works when every part is the same size.",
-        "One pair that differ is enough to settle it. Look for a widest and a narrowest.",
+        tf("strip.hintEqual1"),
+        tf("strip.hintEqual2"),
+        tf("strip.hintEqual3"),
       );
     case "name_unit":
       return composeHints(
-        `Count the parts the whole is cut into. There are ${parts}.`,
-        `One of ${parts} equal parts is called one ${partWord(parts)}.`,
-        "The number of parts goes underneath. The number shaded goes on top.",
+        tf("strip.hintName1", { parts }),
+        tf("strip.hintName2", { parts, word: partWord(parts) }),
+        tf("strip.hintName3"),
       );
     case "which_whole":
       return composeHints(
-        "The same fraction is shaded on both. That is not the question.",
-        "Look at how big the two wholes are to start with.",
-        "The same fraction of a bigger whole is a bigger amount.",
+        tf("strip.hintWhich1"),
+        tf("strip.hintWhich2"),
+        tf("strip.hintWhich3"),
       );
     case "build":
       return composeHints(
-        `Each part is one ${partWord(parts)} of the whole.`,
-        `Shade them one at a time and count as you go.`,
-        "Stop when you have shaded as many as the question asked for.",
+        tf("strip.hintBuild1", { word: partWord(parts) }),
+        tf("strip.hintBuild2"),
+        tf("strip.hintBuild3"),
       );
     case "to_notation":
       return composeHints(
-        "Count the shaded parts, then count all the parts.",
-        "The shaded ones go on top; all of them go underneath.",
-        "If you write it the other way up, you have said something bigger than the whole.",
+        tf("strip.hintNotation1"),
+        tf("strip.hintNotation2"),
+        tf("strip.hintNotation3"),
       );
     default:
       return composeHints(
-        `The set is split into ${parts} equal groups.`,
-        "Work out how many are in one group first.",
-        "Then take as many groups as the fraction asks for.",
+        tf("strip.hintSet1", { parts }),
+        tf("strip.hintSet2"),
+        tf("strip.hintSet3"),
       );
   }
 }
@@ -100,6 +103,7 @@ export function stripHints(question: StripQuestion): string[] {
  */
 
 export const FoldStrip: React.FC<ActivityProps<StripParams>> = ({ params, koda, onComplete, lesson }) => {
+  useT();
   const setup: StripSetup = useMemo(() => ({ ...params, ...params.question }), [params]);
   const practising = isPractice(setup);
   const total = setup.questionsPerRound ?? 5;
@@ -190,7 +194,7 @@ export const FoldStrip: React.FC<ActivityProps<StripParams>> = ({ params, koda, 
       if (correct) koda.haptics.success();
       else koda.haptics.pulse("error");
     }
-    round.submit({ correct, given, expected: question.expected, title: correct ? "Yes!" : "Not yet", message });
+    round.submit({ correct, given, expected: question.expected, title: correct ? tf("strip.yes") : tf("strip.notYet"), message });
   };
 
   const answerYesNo = (said: boolean): void => {
@@ -252,7 +256,7 @@ export const FoldStrip: React.FC<ActivityProps<StripParams>> = ({ params, koda, 
     <SkillRound
       koda={koda}
       lesson={lesson}
-      fallbackTitle="Equal Parts"
+      fallbackTitle={tf("strip.title")}
       round={round}
       totalQuestions={total}
       prompt={promptFor(question)}
@@ -283,7 +287,7 @@ export const FoldStrip: React.FC<ActivityProps<StripParams>> = ({ params, koda, 
         {question.mode === "of_a_set" ? (
           <div
             data-testid="set"
-            aria-label={`${fraction.whole.size} things`}
+            aria-label={tf("strip.setLabel", { count: fraction.whole.size ?? 12 })}
             className="flex flex-wrap justify-center gap-2 rounded-2xl bg-surface p-3"
           >
             {Array.from({ length: fraction.whole.size ?? 12 }, (_, i) => (
@@ -300,7 +304,7 @@ export const FoldStrip: React.FC<ActivityProps<StripParams>> = ({ params, koda, 
             {drawWhole(fraction, shaded, 1, question.shadesIt ? toggle : undefined)}
             {labelsEnabled && !practising && question.mode !== "equal_or_not" ? (
               <span className="text-xs text-muted">
-                each part is 1/{fraction.parts} of {fraction.whole.name}
+                {tf("strip.eachPart", { parts: fraction.parts, whole: wholeName(fraction.whole) })}
               </span>
             ) : null}
           </div>
@@ -322,7 +326,7 @@ export const FoldStrip: React.FC<ActivityProps<StripParams>> = ({ params, koda, 
                 disabled={!!round.feedback}
                 className="min-h-11 min-w-24 rounded-2xl bg-surface px-6 py-3 text-lg font-bold text-ink shadow-sm focus:outline-none focus-visible:ring-2 focus-visible:ring-violet-500"
               >
-                {word === "yes" ? "Yes" : "No"}
+                {word === "yes" ? tf("strip.yesWord") : tf("strip.noWord")}
               </button>
             ))}
           </div>
@@ -336,7 +340,7 @@ export const FoldStrip: React.FC<ActivityProps<StripParams>> = ({ params, koda, 
               disabled={!!round.feedback}
               className="min-h-11 rounded-2xl bg-surface px-5 py-3 text-base font-bold text-ink shadow-sm"
             >
-              The long one
+              {tf("strip.longOne")}
             </button>
             <button
               type="button"
@@ -344,7 +348,7 @@ export const FoldStrip: React.FC<ActivityProps<StripParams>> = ({ params, koda, 
               disabled={!!round.feedback}
               className="min-h-11 rounded-2xl bg-surface px-5 py-3 text-base font-bold text-ink shadow-sm"
             >
-              The short one
+              {tf("strip.shortOne")}
             </button>
           </div>
         ) : null}
@@ -384,7 +388,7 @@ export const FoldStrip: React.FC<ActivityProps<StripParams>> = ({ params, koda, 
         {question.shadesIt ? (
           <>
             <p className="text-sm text-muted" data-testid="count">
-              {shaded.length} shaded
+              {tf("strip.shadedCount", { count: shaded.length })}
             </p>
             <button
               type="button"
@@ -392,7 +396,7 @@ export const FoldStrip: React.FC<ActivityProps<StripParams>> = ({ params, koda, 
               disabled={shaded.length === 0 || !!round.feedback}
               className="min-h-11 rounded-2xl bg-violet-600 px-6 py-2 text-base font-bold text-white shadow-sm disabled:opacity-40"
             >
-              That is {question.target} of them
+              {tf("strip.thatIs", { target: question.target })}
             </button>
           </>
         ) : null}
@@ -417,31 +421,31 @@ export function printedFor(question: StripQuestion): { text: string; answer: str
   switch (question.mode) {
     case "equal_or_not":
       return {
-        text: "Is this cut into equal parts? Write yes or no.",
+        text: tf("strip.printEqual"),
         answer: question.expected,
       };
     case "name_unit":
       return {
-        text: `One part of this is shaded. Write what that one part is called.`,
+        text: tf("strip.printName"),
         answer: question.expected,
       };
     case "which_whole":
       return {
-        text: "Both ribbons have half of them shaded. Which shaded half is bigger — the long ribbon or the short one?",
-        answer: "the long ribbon",
+        text: tf("strip.printWhich"),
+        answer: tf("strip.printWhichAnswer"),
       };
     case "build":
       return {
-        text: `Shade ${question.target} of the ${fraction.parts} parts.`,
-        answer: `${question.target} of ${fraction.parts}`,
+        text: tf("strip.printBuild", { target: question.target, parts: fraction.parts }),
+        answer: tf("strip.printBuildAnswer", { target: question.target, parts: fraction.parts }),
       };
     case "of_a_set":
       return {
-        text: `Circle ${nameOf(fraction)} of these ${fraction.whole.size ?? 12}. How many did you circle?`,
+        text: tf("strip.printSet", { fraction: nameOf(fraction), size: fraction.whole.size ?? 12 }),
         answer: question.expected,
       };
     default:
-      return { text: "Write the fraction for the shaded part.", answer: question.expected };
+      return { text: tf("strip.printNotation"), answer: question.expected };
   }
 }
 
@@ -452,8 +456,8 @@ export const figureFor = (question: StripQuestion): React.ReactNode | null => {
   if (question.mode === "which_whole") {
     return (
       <div className="flex flex-col gap-1">
-        {printBar(fraction.parts, fraction.taken, { width: 220, label: "the long ribbon" })}
-        {printBar(fraction.parts, fraction.taken, { width: 120, label: "the short ribbon" })}
+        {printBar(fraction.parts, fraction.taken, { width: 220, label: tf("strip.longRibbon") })}
+        {printBar(fraction.parts, fraction.taken, { width: 120, label: tf("strip.shortRibbon") })}
       </div>
     );
   }
@@ -467,23 +471,23 @@ export function methodFor(question: StripQuestion): string[] | null {
   switch (question.mode) {
     case "equal_or_not":
       return [
-        "Equal parts means every piece is the same size as every other one.",
-        "Cut into four pieces is not the same as cut into quarters.",
+        tf("strip.methodEqual1"),
+        tf("strip.methodEqual2"),
       ];
     case "which_whole":
       return [
-        "A fraction is always a fraction of something.",
-        "Half of a long ribbon is longer than half of a short one, even though both are halves.",
+        tf("strip.methodWhich1"),
+        tf("strip.methodWhich2"),
       ];
     case "of_a_set":
       return [
-        "The bottom number says how many equal groups to make.",
-        "The top number says how many of those groups to take.",
+        tf("strip.methodSet1"),
+        tf("strip.methodSet2"),
       ];
     default:
       return [
-        "The bottom number says how many equal parts the whole is cut into.",
-        "The top number says how many of those parts you have.",
+        tf("strip.methodDefault1"),
+        tf("strip.methodDefault2"),
       ];
   }
 }

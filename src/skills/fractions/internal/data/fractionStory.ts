@@ -19,6 +19,7 @@
  */
 
 import { pick, shuffle, simplify, valueOf, withoutRepeat, type Fraction, type Whole } from "./fractionNumbers";
+import { tf } from "../i18n";
 
 export type StoryMode =
   /** A fraction of an amount, in words. */
@@ -111,8 +112,9 @@ export function buildStoryQuestion(
   const totalMax = setup.totalMax ?? 120;
 
   const draw = (): StoryQuestion => {
-    const who = pick([...NAMES]);
-    const other = pick(NAMES.filter((n) => n !== who));
+    const whoKey = pick([...NAMES]);
+    const who = tf(`story.names.${whoKey}`);
+    const other = tf(`story.names.${pick(NAMES.filter((n) => n !== whoKey))}`);
 
     switch (mode) {
       case "of_amount": {
@@ -120,13 +122,13 @@ export function buildStoryQuestion(
         const per = roll(2, Math.max(3, Math.floor(totalMax / parts)));
         const total = parts * per;
         const taken = roll(1, parts - 1);
-        const thing = pick([...THINGS]);
+        const thing = tf(`story.things.${pick([...THINGS])}`);
         const answer = per * taken;
         return {
           id: `fractions-of_amount-${index}-${taken}-${parts}-${total}`,
           taskKind: "fractions_of_amount",
           prompt: "",
-          story: `${who} has ${total} ${thing} and gives away ${taken}/${parts} of them. How many is that?`,
+          story: tf("story.ofAmount", { who, total, thing, taken, parts }),
           expected: String(answer),
           itemCount: total,
           mode,
@@ -164,7 +166,7 @@ export function buildStoryQuestion(
         const people = roll(2, 6);
         let cakes = roll(people + 1, people * 2 + 1);
         for (let i = 0; i < 30 && cakes % people === 0; i += 1) cakes = roll(people + 1, people * 2 + 1);
-        const food = pick([...FOODS]);
+        const food = tf(`story.things.${pick([...FOODS])}`);
         const ones = Math.floor(cakes / people);
         const rest = cakes % people;
         const share = { ones, fraction: simplify({ whole: BAR, parts: people, taken: rest }) };
@@ -173,7 +175,7 @@ export function buildStoryQuestion(
           id: `fractions-share_leftover-${index}-${cakes}-${people}`,
           taskKind: "fractions_share_leftover",
           prompt: "",
-          story: `${cakes} ${food} are shared equally between ${people} people. How much does each person get?`,
+          story: tf("story.shareLeftover", { cakes, food, people }),
           expected: answer,
           itemCount: cakes,
           mode,
@@ -205,19 +207,19 @@ export function buildStoryQuestion(
         const left: Fraction = { whole: BAR, parts: p, taken: 1 };
         const right: Fraction = { whole: BAR, parts: q, taken: 1 };
         const sum = simplify({ whole: BAR, parts: common, taken: q + p });
-        const drink = pick([...DRINKS]);
+        const drink = tf(`story.things.${pick([...DRINKS])}`);
         return {
           id: `fractions-add_context-${index}-${p}-${q}`,
           taskKind: "fractions_add_context",
           prompt: "",
-          story: `${who} drinks ${nameOf(left)} of a bottle of ${drink} and ${other} drinks ${nameOf(right)} of it. How much is gone?`,
+          story: tf("story.addContext", { who, left: nameOf(left), drink, other, right: nameOf(right) }),
           expected: nameOf(sum),
           itemCount: common,
           mode,
           whole: 1,
           parts: common,
           shaded: q + p,
-          unit: `of a bottle`,
+          unit: tf("story.unitBottle"),
           options: options(
             nameOf(sum),
             // The bottoms added, which is the error the whole skill hunts.
@@ -243,19 +245,19 @@ export function buildStoryQuestion(
               : simplify({ whole: BAR, parts, taken: totalParts % parts }),
         };
         const written = mixedText(answer.ones, answer.fraction);
-        const thing = pick(["flour", "sugar", "oats", "rice"]);
+        const thing = tf(`story.things.${pick(["flour", "sugar", "oats", "rice"])}`);
         return {
           id: `fractions-scale-${index}-${ones}-${taken}-${parts}-x${times}`,
           taskKind: "fractions_scale",
           prompt: "",
-          story: `A recipe needs ${mixedText(ones, { whole: BAR, parts, taken })} cups of ${thing}. ${who} is making ${times} times as much. How many cups?`,
+          story: tf("story.scale", { amount: mixedText(ones, { whole: BAR, parts, taken }), thing, who, times }),
           expected: written,
           itemCount: totalParts,
           mode,
           whole: times,
           parts,
           shaded: taken,
-          unit: "cups",
+          unit: tf("story.unitCups"),
           options: options(
             written,
             // The whole ones multiplied and the fraction left behind.
@@ -286,20 +288,20 @@ export function buildStoryQuestion(
         const times = roll(2, Math.min(4, parts - 1));
         const small = roll(1, Math.max(1, Math.floor((parts - 1) / times)));
         const big = small * times;
-        const thing = pick([...THINGS]);
+        const thing = tf(`story.things.${pick([...THINGS])}`);
         const difference = simplify({ whole: BAR, parts, taken: big - small });
         return {
           id: `fractions-compare_context-${index}-${small}-${big}-${parts}`,
           taskKind: "fractions_compare_context",
           prompt: "",
-          story: `${who} fills ${nameOf({ whole: BAR, parts, taken: big })} of a box with ${thing} and ${other} fills ${nameOf({ whole: BAR, parts, taken: small })} of an identical box. How many times as much does ${who} have?`,
+          story: tf("story.compare", { who, big: nameOf({ whole: BAR, parts, taken: big }), thing, other, small: nameOf({ whole: BAR, parts, taken: small }) }),
           expected: String(times),
           itemCount: parts,
           mode,
           whole: 1,
           parts,
           shaded: big,
-          unit: "of a box",
+          unit: tf("story.unitBox"),
           options: options(
             String(times),
             // The difference — the subtractive answer to a division question.
@@ -324,13 +326,13 @@ export function buildStoryQuestion(
         const taken = roll(1, parts - 1);
         const given = per * taken;
         const extra = roll(2, 9);
-        const thing = pick([...THINGS]);
+        const thing = tf(`story.things.${pick([...THINGS])}`);
         const answer = total - given + extra;
         return {
           id: `fractions-multi_step-${index}-${total}-${taken}-${parts}-${extra}`,
           taskKind: "fractions_multi_step",
           prompt: "",
-          story: `${who} has ${total} ${thing} and gives ${taken}/${parts} of them to ${other}. Then ${who} finds ${extra} more. How many now?`,
+          story: tf("story.multi", { who, total, thing, taken, parts, other, extra }),
           expected: String(answer),
           itemCount: total,
           mode,
@@ -379,33 +381,33 @@ export function explainStory(q: StoryQuestion, correct: boolean): string {
   if (!correct) {
     switch (q.mode) {
       case "of_amount":
-        return "Cut the whole amount into the groups the bottom number asks for, then take that many groups.";
+        return tf("story.missAmount");
       case "share_leftover":
-        return "The one left over does not stay left over. It gets cut up and shared as well.";
+        return tf("story.missShare");
       case "add_context":
-        return "Both pieces have to be the same size before they can be counted together.";
+        return tf("story.missAdd");
       case "scale":
-        return "The whole ones and the fraction both get multiplied. Neither one stays behind.";
+        return tf("story.missScale");
       case "compare_context":
-        return "How many times as much is a division. Taking one away from the other answers a different question.";
+        return tf("story.missCompare");
       default:
-        return "There are two steps here. Work out the first one, then do the second to that answer.";
+        return tf("story.missMulti");
     }
   }
 
   switch (q.mode) {
     case "of_amount":
-      return `Cut the ${q.whole} into ${q.parts} equal groups and take ${q.shaded} of them — that is ${q.expected}.`;
+      return tf("story.rightAmount", { whole: q.whole, parts: q.parts, shaded: q.shaded, expected: q.expected });
     case "share_leftover":
-      return `Everybody gets a whole one first, and what is left is cut between them — ${q.expected} each.`;
+      return tf("story.rightShare", { expected: q.expected });
     case "add_context":
-      return `Cut both into the same-sized pieces and count them together: ${q.expected} of the bottle.`;
+      return tf("story.rightAdd", { expected: q.expected });
     case "scale":
-      return `Multiply the whole cups and the part cups, then gather the parts into whole ones — ${q.expected}.`;
+      return tf("story.rightScale", { expected: q.expected });
     case "compare_context":
-      return `Ask how many of the smaller fill the larger, and the answer is ${q.expected} times as much.`;
+      return tf("story.rightCompare", { expected: q.expected });
     default:
-      return `Give some away first, then add what turned up afterwards — ${q.expected} at the end.`;
+      return tf("story.rightMulti", { expected: q.expected });
   }
 }
 

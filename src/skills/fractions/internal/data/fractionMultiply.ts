@@ -29,6 +29,7 @@ import {
   type Fraction,
   type Whole,
 } from "./fractionNumbers";
+import { tf } from "../i18n";
 
 export type MultiplyMode =
   /** `a/b` of a whole amount, coming out exact. */
@@ -113,12 +114,12 @@ export function asMixed(f: Fraction): { ones: number; fraction: Fraction } {
 }
 
 const PROMPTS: Record<MultiplyMode, (q: Omit<MultiplyQuestion, "prompt">) => string> = {
-  of_whole: (q) => `${nameOf(q.fraction)} of ${q.total}`,
+  of_whole: (q) => tf("mult.promptOf", { fraction: nameOf(q.fraction), total: q.total ?? 0 }),
   whole_times: (q) => `${q.copies} × ${nameOf(q.fraction)}`,
   area_model: (q) => `${nameOf(q.fraction)} of ${nameOf(q.other as Fraction)}`,
   simplify_first: (q) => `${nameOf(q.fraction)} × ${nameOf(q.other as Fraction)}`,
   scaling: (q) =>
-    `Is ${nameOf(q.fraction)} × ${q.total} bigger than ${q.total}, smaller, or exactly the same?`,
+    tf("mult.promptScaling", { fraction: nameOf(q.fraction), total: q.total ?? 0 }),
 };
 
 export function buildMultiplyQuestion(
@@ -405,8 +406,8 @@ export function multiplyBlockedBecause(
 }
 
 export const MULTIPLY_REFUSALS: Record<Exclude<MultiplyBlock, null>, string> = {
-  "shade-across": "Shade the first fraction across the grid before you answer.",
-  "shade-down": "Now shade the second one down the grid. The answer is where they cross.",
+  get "shade-across"() { return tf("mult.shadeAcross"); },
+  get "shade-down"() { return tf("mult.shadeDown"); },
 };
 
 export { gcd, partWord, simplify, valueOf };
@@ -421,34 +422,34 @@ export function explainMultiply(q: MultiplyQuestion, correct: boolean): string {
   if (!correct) {
     switch (q.mode) {
       case "of_whole":
-        return `Share the ${total} into ${f.parts} equal groups first, then take ${f.taken} of those groups.`;
+        return tf("mult.missOf", { total: total ?? 0, parts: f.parts, taken: f.taken });
       case "whole_times":
-        return "The pieces stay the same size however many copies there are, so only the count goes up.";
+        return tf("mult.missTimes");
       case "area_model":
-        return "Count only the squares shaded both ways, out of every square in the grid.";
+        return tf("mult.missArea");
       case "simplify_first":
-        return "Cancel the shared factor across the diagonal first, then multiply the small numbers.";
+        return tf("mult.missSimplify");
       default:
-        return "Compare the multiplying fraction with one whole. Less than one takes a part of the amount away.";
+        return tf("mult.missScaling");
     }
   }
 
   switch (q.mode) {
     case "of_whole": {
       const per = (total as number) / f.parts;
-      return `${total} shared into ${f.parts} groups is ${per} in each, and ${f.taken} of those groups is ${q.expected}.`;
+      return tf("mult.rightOf", { total: total ?? 0, parts: f.parts, per, taken: f.taken, expected: q.expected });
     }
     case "whole_times":
-      return `${copies} copies of ${f.taken} ${partWord(f.parts, true)} is ${(copies as number) * f.taken} of them, which is ${q.expected}.`;
+      return tf("mult.rightTimes", { copies: copies ?? 0, taken: f.taken, words: partWord(f.parts, true), sum: (copies as number) * f.taken, expected: q.expected });
     case "area_model":
-      return `${f.taken * (other as Fraction).taken} squares are shaded both ways out of ${f.parts * (other as Fraction).parts}, which is ${q.expected}.`;
+      return tf("mult.rightArea", { shaded: f.taken * (other as Fraction).taken, all: f.parts * (other as Fraction).parts, expected: q.expected });
     case "simplify_first":
-      return `Cancelling across the diagonal first leaves small numbers to multiply, and they give ${q.expected}.`;
+      return tf("mult.rightSimplify", { expected: q.expected });
     default:
       return q.verdict === "smaller"
-        ? `${nameOf(f)} is less than one whole, so taking that much of ${total} leaves less than ${total}.`
+        ? tf("mult.rightSmaller", { fraction: nameOf(f), total: total ?? 0 })
         : q.verdict === "same"
-          ? `${nameOf(f)} is exactly one whole, so the amount is untouched.`
-          : `${nameOf(f)} is more than one whole, so there is more here than the ${total} you started with.`;
+          ? tf("mult.rightSame", { fraction: nameOf(f) })
+          : tf("mult.rightBigger", { fraction: nameOf(f), total: total ?? 0 });
   }
 }

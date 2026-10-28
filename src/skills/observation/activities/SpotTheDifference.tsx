@@ -8,6 +8,8 @@ import { buildDifferencePair, type DifferenceKind, type SceneDifference } from "
 import { seedHash, seededShuffle } from "../internal/placement";
 import { keyOf, type ObjectHuntSetup, type ObservationRegion, type ObservationScene, type SceneObject } from "../internal/types";
 import { observationGuideMethod, useObservationGuide } from "../internal/useObservationGuide";
+import { regionName, sceneName, to } from "../internal/i18n";
+import { useT } from "../../../lib/i18n";
 
 export interface SpotTheDifferenceParams extends ObjectHuntSetup {
   question?: ObjectHuntSetup & { differenceCount?: number; kinds?: DifferenceKind[] };
@@ -59,7 +61,7 @@ export function buildQuestion(setup: SpotTheDifferenceParams, index: number): Di
   return {
     id: `spot-difference-${seedHash(seed).toString(36)}`,
     taskKind: `spot_difference_${scene.id}`,
-    prompt: targets.length === 1 ? "Find the one difference." : `Find ${targets.length} differences.`,
+    prompt: targets.length === 1 ? to("spot.promptOne") : to("spot.promptMany", { count: String(targets.length) }),
     expected: [...targets].sort().join(","),
     itemCount: left.length,
     scene,
@@ -79,15 +81,15 @@ export function differenceHints(
 ): string[] {
   const next = question.targets.find((key) => !found.has(key));
   const placement = question.left.find((object) => keyOf(object) === next);
-  const region = placement?.region.replace("-", " ");
+  const region = placement ? regionName(placement.region) : undefined;
   return composeHints(
-    kidTip ?? "Compare one small part of both pictures at a time.",
-    region ? `Look near the ${region} part of the scene.` : undefined,
-    region ? `Focus on the ${region} area. Check around objects that could partly hide it.` : undefined,
+    kidTip ?? to("spot.hintCompare"),
+    region ? to("spot.hintNear", { region }) : undefined,
+    region ? to("spot.hintFocus", { region }) : undefined,
   );
 }
 
-export const promptFor = (question: DifferenceQuestion): string => question.prompt ?? "Find the differences.";
+export const promptFor = (question: DifferenceQuestion): string => question.prompt ?? to("spot.promptFallback");
 export const printedFor = (): null => null;
 
 /** One picture of the pair. Both panes share a tappable grid, so nothing leaks. */
@@ -118,7 +120,7 @@ const Pane: React.FC<{
           const isDifference = question.targets.includes(key);
           const drawn = byKey.has(key);
           return (
-            <button key={key} type="button" aria-label={`${label} item ${index + 1}`}
+            <button key={key} type="button" aria-label={to("spot.paneItem", { pane: label, n: String(index + 1) })}
               data-difference-key={key} data-pane={label}
               data-match-state={isFound ? "found" : "searching"}
               onClick={() => onChoose(key)}
@@ -143,7 +145,7 @@ const Pane: React.FC<{
         })}
       </div>
       {regionHint && (
-        <div aria-label={`Highlighted ${regionHint} search region`} className={`pointer-events-none absolute h-1/2 w-1/2 border-4 border-indigo-400 bg-indigo-300/20 motion-safe:animate-pulse ${regionHint.includes("bottom") ? "bottom-0" : "top-0"} ${regionHint.includes("right") ? "right-0" : "left-0"}`} />
+        <div aria-label={to("spot.highlighted", { region: regionName(regionHint) })} className={`pointer-events-none absolute h-1/2 w-1/2 border-4 border-indigo-400 bg-indigo-300/20 motion-safe:animate-pulse ${regionHint.includes("bottom") ? "bottom-0" : "top-0"} ${regionHint.includes("right") ? "right-0" : "left-0"}`} />
       )}
       <span className="pointer-events-none absolute bottom-2 left-2 rounded-full bg-white/85 px-2 py-0.5 text-[11px] font-bold text-slate-700">{label}</span>
     </div>
@@ -151,6 +153,7 @@ const Pane: React.FC<{
 };
 
 export const SpotTheDifference: React.FC<ActivityProps<SpotTheDifferenceParams>> = ({ params, koda, onComplete, lesson }) => {
+  useT();
   const setup = useMemo<SpotTheDifferenceParams>(() => ({ ...params, ...params.question }), [params]);
   const [roundSeed] = useState(() => setup.seed ?? `spot-${Date.now().toString(36)}`);
   const roundSetup = useMemo(() => ({ ...setup, seed: roundSeed }), [setup, roundSeed]);
@@ -210,14 +213,14 @@ export const SpotTheDifference: React.FC<ActivityProps<SpotTheDifferenceParams>>
     if (round.feedback) return;
     if (!question.targets.includes(key)) {
       koda.speech.stop(); chime("error"); pulse("error");
-      setNudge("These two look the same. Keep comparing!");
-      round.submit({ correct: false, given: key, expected: question.expected, errorKind: "miscounted_items", title: "Not a difference", message: "These two look the same. Keep comparing!" });
+      setNudge(to("spot.sameNudge"));
+      round.submit({ correct: false, given: key, expected: question.expected, errorKind: "miscounted_items", title: to("spot.sameTitle"), message: to("spot.sameNudge") });
       return;
     }
     if (found.has(key)) {
-      setNudge("You already found that difference.");
+      setNudge(to("spot.alreadyNudge"));
       guide.stumbled();
-      if (speechEnabled) { koda.speech.stop(); void koda.speech.say("You already found that one.", { rate: speechRate }).catch(() => {}); }
+      if (speechEnabled) { koda.speech.stop(); void koda.speech.say(to("spot.alreadySay"), { rate: speechRate }).catch(() => {}); }
       return;
     }
     const next = new Set(found); next.add(key); setFound(next); setNudge(null);
@@ -227,7 +230,7 @@ export const SpotTheDifference: React.FC<ActivityProps<SpotTheDifferenceParams>>
     chime(complete ? "success" : "pop");
     pulse(complete ? "success" : "tap");
     if (!complete) return;
-    round.submit({ correct: true, given: [...next].sort().join(","), expected: question.expected, title: "Congratulations!", message: "You found every difference!" });
+    round.submit({ correct: true, given: [...next].sort().join(","), expected: question.expected, title: to("spot.doneTitle"), message: to("spot.doneMessage") });
   };
 
   useEffect(() => {
@@ -246,23 +249,23 @@ export const SpotTheDifference: React.FC<ActivityProps<SpotTheDifferenceParams>>
   }, [question]);
 
   return (
-    <SkillRound koda={koda} lesson={lesson} fallbackTitle="Spot the Difference" round={round} totalQuestions={total}
+    <SkillRound koda={koda} lesson={lesson} fallbackTitle={to("spot.title")} round={round} totalQuestions={total}
       prompt={promptFor(question)} onExit={() => koda.ui.exit()} hints={hints}
       guide={practising ? undefined : guide} guideMethod={observationGuideMethod(params)} nudge={nudge}
       iconName="Search" iconTone="cyan"
       onReadAloud={practising || !speechEnabled ? undefined : () => { round.useSupport("audio_replay"); void koda.speech.say(promptFor(question), { rate: speechRate }); }}>
-      <section aria-label={`${question.scene.name} spot the difference`} className="mx-auto w-full max-w-[760px] space-y-2">
-        <p className="sr-only" aria-live="polite">{found.size} of {question.targets.length} differences found.</p>
+      <section aria-label={to("spot.sceneLabel", { scene: sceneName(question.scene.id) })} className="mx-auto w-full max-w-[760px] space-y-2">
+        <p className="sr-only" aria-live="polite">{to("spot.foundCount", { found: String(found.size), total: String(question.targets.length) })}</p>
         <div className="grid gap-2 md:grid-cols-2">
-          <Pane label="Top picture" scene={question.scene} objects={question.left} grid={grid} question={question}
+          <Pane label={to("spot.topPicture")} scene={question.scene} objects={question.left} grid={grid} question={question}
             found={found} regionHint={regionHint} motionOK={motionOK} onChoose={choose} />
-          <Pane label="Bottom picture" scene={question.scene} objects={question.right} grid={grid} question={question}
+          <Pane label={to("spot.bottomPicture")} scene={question.scene} objects={question.right} grid={grid} question={question}
             found={found} regionHint={regionHint} motionOK={motionOK} onChoose={choose} />
         </div>
-        <div className="flex items-center justify-center py-1" aria-label="Differences to find">
+        <div className="flex items-center justify-center py-1" aria-label={to("spot.toFind")}>
           <div data-difference-progress={`${found.size}/${question.targets.length}`}
             className="flex items-center gap-3 rounded-2xl bg-slate-100 px-4 py-2 dark:bg-slate-800">
-            <span className="text-sm font-semibold text-slate-700 dark:text-slate-200">Differences</span>
+            <span className="text-sm font-semibold text-slate-700 dark:text-slate-200">{to("spot.differences")}</span>
             <span className="text-lg font-bold tabular-nums text-cyan-600 dark:text-cyan-400">{found.size} / {question.targets.length}</span>
           </div>
         </div>

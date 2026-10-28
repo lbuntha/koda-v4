@@ -1,4 +1,6 @@
 import React from "react";
+import { useT } from "../../../../lib/i18n";
+import { tm } from "../i18n";
 import { CHART_CELL, CHART_GAP, SCROLL_BOX, TRACED } from "../data/multiplicationLayout";
 import { EACH, GROUPS, NEUTRAL, PRODUCT } from "../data/multiplicationPalette";
 
@@ -57,13 +59,14 @@ export const TimesTableChart: React.FC<TimesTableChartProps> = ({
   disabled,
   label,
 }) => {
+  useT();
   const factors = Array.from({ length: ceiling }, (_, i) => i + 1);
 
   return (
     <div className={SCROLL_BOX}>
       <div
         role={onCell ? "grid" : "img"}
-        aria-label={label ?? `Times table up to ${ceiling}`}
+        aria-label={label ?? tm("chart.upTo", { ceiling })}
         className={`mx-auto flex w-fit flex-col ${CHART_GAP}`}
       >
         <div className={`flex ${CHART_GAP}`}>
@@ -87,7 +90,7 @@ export const TimesTableChart: React.FC<TimesTableChartProps> = ({
                 <button
                   key={col}
                   type="button"
-                  aria-label={`${row} times ${col}`}
+                  aria-label={tm("chart.cell", { row, col })}
                   onClick={() => onCell(row, col)}
                   disabled={disabled}
                   className={`${shared} focus:outline-none focus-visible:ring-2 focus-visible:ring-sky-500`}

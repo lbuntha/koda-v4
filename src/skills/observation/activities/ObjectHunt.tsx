@@ -5,6 +5,8 @@ import { SvgAsset } from "../../../assets/svg";
 import type { ActivityProps } from "../../types";
 import { SkillRound, SPRING, composeHints, isPractice, playCopy, stagger, useMotionOK, useSkillRound, type RoundQuestion } from "../../kit";
 import { CATEGORY_LABELS, OBJECT_BY_ID, SWARM_OBJECT_ID } from "../internal/data";
+import { objectName, placeName, regionName, sceneName, to } from "../internal/i18n";
+import { useT } from "../../../lib/i18n";
 import { SCENE_BY_ID } from "../internal/scenes";
 import { placeObjects, seedHash, seededShuffle } from "../internal/placement";
 import { keyOf, type ObjectHuntSetup, type ObservationMode, type ObservationRegion, type ObservationScene, type SceneObject } from "../internal/types";
@@ -99,12 +101,11 @@ function buildSwarmQuestion(setup: ObjectHuntSetup, scene: ObservationScene, see
     };
   });
   const targets = live.map(keyOf);
-  const name = OBJECT_BY_ID.get(swarmObjectId)?.name ?? "frog";
   const visibility = visibilityProfile(setup.level, setup);
   return {
     id: `object-hunt-${hash(seed).toString(36)}`,
     taskKind: `find_swarm_${scene.id}`,
-    prompt: `Find all ${targets.length} ${name}s.`,
+    prompt: to("hunt.promptSwarm", { count: String(targets.length), name: to(`swarmNames.${swarmObjectId}`) }),
     expected: [...targets].sort().join(","),
     itemCount: objects.length,
     mode: "swarm",
@@ -152,7 +153,7 @@ function buildCategoryQuestion(setup: ObjectHuntSetup, scene: ObservationScene, 
   return {
     id: `object-hunt-${hash(seed).toString(36)}`,
     taskKind: `find_category_${category}_${scene.id}`,
-    prompt: `Find ${targets.length} ${CATEGORY_LABELS[category] ?? category}.`,
+    prompt: to("hunt.promptCategory", { count: String(targets.length), label: CATEGORY_LABELS[category] ?? category }),
     expected: [...targets].sort().join(","),
     itemCount: objects.length,
     mode: "category",
@@ -228,12 +229,11 @@ export function buildQuestion(setup: ObjectHuntSetup, index: number): ObjectHunt
     return object;
   });
   const targets = targetObjects.map(keyOf);
-  const names = targetObjects.map((object) => OBJECT_BY_ID.get(object.id)?.name ?? object.id);
   const visibility = visibilityProfile(setup.level, setup);
   return {
     id: `object-hunt-${hash(seed).toString(36)}`,
     taskKind: `find_${mode}_${scene.id}`,
-    prompt: targetCount === 1 ? `Find the ${names[0]}.` : `Find ${targetCount} hidden objects.`,
+    prompt: targetCount === 1 ? to("hunt.promptOne", { name: objectName(targetObjects[0].id) }) : to("hunt.promptMany", { count: String(targetCount) }),
     expected: targets.join(","),
     itemCount: objects.length,
     mode,
@@ -246,19 +246,19 @@ export function buildQuestion(setup: ObjectHuntSetup, index: number): ObjectHunt
 
 const searchMove = (mode: ObservationMode): string => {
   switch (mode) {
-    case "silhouette": return "Match the outside shape first; colour is hidden on purpose.";
-    case "near_decoys": return "Check two details together. A lookalike matches one detail but not both.";
-    case "rotation": return "Turn the target in your mind; its parts stay in the same order.";
-    case "scale": return "Ignore size and match the shape, parts, and colours.";
-    case "occluded": return "Complete the hidden outline in your mind and follow the visible edges.";
-    case "clutter": return "Divide the busy scene into small areas and finish one before moving on.";
-    case "swarm": return "Count each matching copy once and scan past every place it could hide.";
-    case "overlap": return "Follow one outline at a time through the pile without switching objects.";
-    case "mirror": return "Check handed details: a mirrored object points the opposite way.";
-    case "camouflage": return "Trust the outline and parts when the background disguises the colour.";
-    case "shadow": return "Match the silhouette's bumps, gaps, and direction instead of its colour.";
-    case "category": return "Name the category first, then reject anything that does not belong.";
-    default: return "Match the target's shape and details, then scan left to right.";
+    case "silhouette": return to("moves.silhouette");
+    case "near_decoys": return to("moves.near_decoys");
+    case "rotation": return to("moves.rotation");
+    case "scale": return to("moves.scale");
+    case "occluded": return to("moves.occluded");
+    case "clutter": return to("moves.clutter");
+    case "swarm": return to("moves.swarm");
+    case "overlap": return to("moves.overlap");
+    case "mirror": return to("moves.mirror");
+    case "camouflage": return to("moves.camouflage");
+    case "shadow": return to("moves.shadow");
+    case "category": return to("moves.category");
+    default: return to("moves.default");
   }
 };
 
@@ -270,15 +270,15 @@ export function objectHuntHints(
   const next = question.targets.find((key) => !found.has(key));
   const placement = question.objects.find((object) => keyOf(object) === next);
   const name = placement ? OBJECT_BY_ID.get(placement.id)?.name : undefined;
-  const region = placement?.region.replace("-", " ");
+  const region = placement ? regionName(placement.region) : undefined;
   return composeHints(
     kidTip ?? searchMove(question.mode),
-    region && name ? `Look near the ${region} part of the scene.` : undefined,
-    region ? `Focus on the ${region} area. Check around objects that could partly hide it.` : undefined,
+    region && name ? to("hunt.hintNear", { region }) : undefined,
+    region ? to("hunt.hintFocus", { region }) : undefined,
   );
 }
 
-export const promptFor = (question: ObjectHuntQuestion): string => question.prompt ?? "Find the hidden objects.";
+export const promptFor = (question: ObjectHuntQuestion): string => question.prompt ?? to("hunt.promptFallback");
 export const printedFor = (): null => null;
 
 const TargetPreview: React.FC<{ object: SceneObject; mode: ObservationMode; found: boolean }> = ({ object, mode, found }) => {
@@ -305,6 +305,7 @@ const MatchBurst: React.FC = () => (
 );
 
 export const ObjectHunt: React.FC<ActivityProps<ObjectHuntParams>> = ({ params, koda, onComplete, lesson }) => {
+  useT();
   const setup = useMemo<ObjectHuntSetup>(() => ({ ...params, ...params.question }), [params]);
   const [roundSeed] = useState(() => setup.seed ?? createRoundSeed());
   const roundSetup = useMemo<ObjectHuntSetup>(() => ({ ...setup, seed: roundSeed }), [setup, roundSeed]);
@@ -392,8 +393,8 @@ export const ObjectHunt: React.FC<ActivityProps<ObjectHuntParams>> = ({ params, 
     if (!question.targets.includes(key)) {
       // One voice at a time: stop unfinished speech, play the short error
       // chime, then let `round.submit` start its delayed recorded reaction.
-      koda.speech.stop(); chime("error"); pulse("error"); setNudge("Not a match. Look carefully and try again!");
-      round.submit({ correct: false, given: object.id, expected: question.expected, errorKind: "miscounted_items", title: "Not a match", message: "Look carefully and try again!" });
+      koda.speech.stop(); chime("error"); pulse("error"); setNudge(to("hunt.noMatchNudge"));
+      round.submit({ correct: false, given: object.id, expected: question.expected, errorKind: "miscounted_items", title: to("hunt.noMatchTitle"), message: to("hunt.noMatchMessage") });
       return;
     }
     if (found.has(key)) {
@@ -401,11 +402,11 @@ export const ObjectHunt: React.FC<ActivityProps<ObjectHuntParams>> = ({ params, 
       // the spoken reminder the audio plan lists as a required fixed phrase.
       // The line stays generic because a swarm scene has fourteen frogs and
       // recording "you already found the frog" per copy would say no more.
-      setNudge(`You already found the ${OBJECT_BY_ID.get(object.id)?.name}.`);
+      setNudge(to("hunt.alreadyNudge", { name: objectName(object.id) }));
       guide.stumbled();
       if (speechEnabled) {
         koda.speech.stop();
-        void koda.speech.say("You already found that one.", { rate: speechRate }).catch(() => {});
+        void koda.speech.say(to("hunt.alreadySay"), { rate: speechRate }).catch(() => {});
       }
       return;
     }
@@ -440,7 +441,7 @@ export const ObjectHunt: React.FC<ActivityProps<ObjectHuntParams>> = ({ params, 
     if (!complete) {
       return;
     }
-    round.submit({ correct: true, given: [...next].join(","), expected: question.expected, title: "Congratulations!", message: "You found every hidden object!" });
+    round.submit({ correct: true, given: [...next].join(","), expected: question.expected, title: to("hunt.doneTitle"), message: to("hunt.doneMessage") });
   };
 
   useEffect(() => {
@@ -451,25 +452,25 @@ export const ObjectHunt: React.FC<ActivityProps<ObjectHuntParams>> = ({ params, 
   }, [round.hint.level, guide.cue?.level, question, found]);
 
   return (
-    <SkillRound koda={koda} lesson={lesson} fallbackTitle="Hidden Object Hunt" round={round} totalQuestions={total}
+    <SkillRound koda={koda} lesson={lesson} fallbackTitle={to("hunt.title")} round={round} totalQuestions={total}
       prompt={promptFor(question)} onExit={() => koda.ui.exit()} hints={hints}
       guide={practising ? undefined : guide} guideMethod={observationGuideMethod(params)} nudge={nudge}
       iconName="Search" iconTone="indigo"
       onReadAloud={practising || !speechEnabled ? undefined : () => { round.useSupport("audio_replay"); void koda.speech.say(promptFor(question), { rate: speechRate }); }}>
-      <section aria-label={`${question.scene.name} hidden object game`} className="mx-auto w-full max-w-[760px] space-y-3 md:space-y-2">
+      <section aria-label={to("hunt.sceneLabel", { scene: sceneName(question.scene.id) })} className="mx-auto w-full max-w-[760px] space-y-3 md:space-y-2">
         {listViewEnabled && (
-        <div className="flex items-center justify-end gap-1" role="group" aria-label="Search view">
+        <div className="flex items-center justify-end gap-1" role="group" aria-label={to("hunt.searchView")}>
           <button type="button" aria-pressed={view === "scene"} onClick={() => setViewMode("scene")}
             className={`flex min-h-11 items-center gap-1.5 rounded-xl px-3 text-xs font-semibold transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-sky-500 ${view === "scene" ? "bg-slate-800 text-white dark:bg-white dark:text-slate-900" : "text-slate-600 hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-800"}`}>
-            <ImageIcon aria-hidden className="h-4 w-4" />Scene
+            <ImageIcon aria-hidden className="h-4 w-4" />{to("hunt.viewScene")}
           </button>
           <button type="button" aria-pressed={view === "list"} onClick={() => setViewMode("list")}
             className={`flex min-h-11 items-center gap-1.5 rounded-xl px-3 text-xs font-semibold transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-sky-500 ${view === "list" ? "bg-slate-800 text-white dark:bg-white dark:text-slate-900" : "text-slate-600 hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-800"}`}>
-            <List aria-hidden className="h-4 w-4" />List
+            <List aria-hidden className="h-4 w-4" />{to("hunt.viewList")}
           </button>
         </div>
         )}
-        <p className="sr-only" aria-live="polite">{found.size} of {question.targets.length} target objects found.</p>
+        <p className="sr-only" aria-live="polite">{to("hunt.foundCount", { found: String(found.size), total: String(question.targets.length) })}</p>
         {view === "scene" ? (
         <motion.div initial={motionOK ? { scale: .975, opacity: 0 } : false} animate={{ scale: 1, opacity: 1 }} transition={SPRING.settle}
           className="relative aspect-[4/3] w-full overflow-hidden rounded-[2rem] border-[6px] border-white bg-sky-100 shadow-[0_22px_55px_rgba(30,70,100,0.22)] ring-1 ring-sky-200/60">
@@ -488,7 +489,7 @@ export const ObjectHunt: React.FC<ActivityProps<ObjectHuntParams>> = ({ params, 
             const isCelebrating = celebratingId === key;
             const baseRotation = object.rotation ?? 0;
             return (
-              <motion.button key={key} type="button" aria-label={`Search item ${index + 1}`}
+              <motion.button key={key} type="button" aria-label={to("hunt.searchItem", { n: String(index + 1) })}
                 ref={(node) => { if (node) sceneObjectRefs.current.set(key, node); else sceneObjectRefs.current.delete(key); }}
                 data-object-id={key} data-match-state={isCelebrating ? "celebrating" : isFound ? "found" : "searching"}
                 onClick={() => choose(object)} initial={motionOK ? { opacity: 0, y: 8, rotate: baseRotation } : false} whileTap={motionOK ? { scale: .88 } : undefined} whileHover={motionOK && !isFound ? { scale: 1.05 } : undefined}
@@ -517,21 +518,21 @@ export const ObjectHunt: React.FC<ActivityProps<ObjectHuntParams>> = ({ params, 
               </motion.button>
             );
           })}
-          {regionHint && <div aria-label={`Highlighted ${regionHint} search region`} className={`pointer-events-none absolute h-1/2 w-1/2 motion-safe:animate-pulse border-4 border-indigo-400 bg-indigo-300/20 ${regionHint.includes("bottom") ? "bottom-0" : "top-0"} ${regionHint.includes("right") ? "right-0" : "left-0"}`} />}
-          <div className="pointer-events-none absolute bottom-3 left-3 flex items-center gap-1 rounded-full bg-white/85 px-3 py-1 text-xs font-bold text-slate-700"><MapPin aria-hidden className="h-4 w-4 text-rose-500" />{question.scene.place}</div>
+          {regionHint && <div aria-label={to("hunt.highlighted", { region: regionName(regionHint) })} className={`pointer-events-none absolute h-1/2 w-1/2 motion-safe:animate-pulse border-4 border-indigo-400 bg-indigo-300/20 ${regionHint.includes("bottom") ? "bottom-0" : "top-0"} ${regionHint.includes("right") ? "right-0" : "left-0"}`} />}
+          <div className="pointer-events-none absolute bottom-3 left-3 flex items-center gap-1 rounded-full bg-white/85 px-3 py-1 text-xs font-bold text-slate-700"><MapPin aria-hidden className="h-4 w-4 text-rose-500" />{placeName(question.scene.place)}</div>
         </motion.div>
         ) : (
           <motion.div initial={motionOK ? { opacity: 0, y: 6 } : false} animate={{ opacity: 1, y: 0 }} transition={SPRING.settle}
             className="grid min-h-[320px] grid-cols-2 content-center gap-2 rounded-[2rem] bg-slate-50 p-4 shadow-inner sm:grid-cols-5 dark:bg-slate-900/60"
-            aria-label="Labelled search candidates">
+            aria-label={to("hunt.candidates")}>
             {question.objects.map((object, index) => {
               const key = keyOf(object);
-              const base = OBJECT_BY_ID.get(object.id)?.name ?? object.id;
+              const base = objectName(object.id);
               // Swarm copies share a name, so number them: a screen-reader user
               // has to be able to tell "frog 3" from "frog 7" to find them all.
               const name = object.instanceId ? `${base} ${index + 1}` : base;
               const isFound = found.has(key);
-              return <button key={key} type="button" aria-label={`Choose ${name}`} onClick={() => choose(object)}
+              return <button key={key} type="button" aria-label={to("hunt.choose", { name })} onClick={() => choose(object)}
                 ref={(node) => { if (node) sceneObjectRefs.current.set(key, node); else sceneObjectRefs.current.delete(key); }}
                 data-object-id={key} data-match-state={isFound ? "found" : "searching"}
                 className="flex min-h-24 flex-col items-center justify-center gap-1 rounded-2xl bg-transparent px-2 py-2 text-slate-600 transition-colors hover:bg-white focus:outline-none focus-visible:ring-2 focus-visible:ring-sky-500 dark:text-slate-300 dark:hover:bg-slate-800">
@@ -542,7 +543,7 @@ export const ObjectHunt: React.FC<ActivityProps<ObjectHuntParams>> = ({ params, 
           </motion.div>
         )}
         <motion.div initial={motionOK ? { y: 10, opacity: 0 } : false} animate={{ y: 0, opacity: 1 }} transition={SPRING.enter}
-          className="flex items-center justify-center gap-5 overflow-x-auto px-3 py-2" aria-label="Objects to find">
+          className="flex items-center justify-center gap-5 overflow-x-auto px-3 py-2" aria-label={to("hunt.toFind")}>
           {question.category ? (
             // No preview art: showing pictures would hand back the template the
             // level exists to remove. The card names the group and counts down.
@@ -558,7 +559,7 @@ export const ObjectHunt: React.FC<ActivityProps<ObjectHuntParams>> = ({ params, 
             // One card for the whole swarm. A tray of fourteen identical frog
             // previews would say nothing the counter does not say better.
             const swarmId = question.swarmObjectId;
-            const name = OBJECT_BY_ID.get(swarmId)?.name ?? "frog";
+            const name = to(`swarmNames.${swarmId}`);
             const sample = question.objects.find((object) => object.id === swarmId);
             const remaining = question.targets.length - found.size;
             return <motion.div ref={(node) => { if (node) targetRefs.current.set(swarmId, node); else targetRefs.current.delete(swarmId); }}
@@ -570,13 +571,13 @@ export const ObjectHunt: React.FC<ActivityProps<ObjectHuntParams>> = ({ params, 
                 ? <TargetPreview object={sample} mode="exact" found={remaining === 0} />
                 : <span className="grid h-14 w-14 place-items-center text-2xl font-medium text-slate-500">?</span>}
               <span className="flex flex-col leading-tight">
-                <span className="text-sm font-semibold capitalize text-slate-700 dark:text-slate-200">{name}s</span>
+                <span className="text-sm font-semibold capitalize text-slate-700 dark:text-slate-200">{name}</span>
                 <span className="text-lg font-bold tabular-nums text-indigo-600 dark:text-indigo-400">{found.size} / {question.targets.length}</span>
               </span>
             </motion.div>;
           })() : question.targets.map((id) => {
             const object = question.objects.find((item) => keyOf(item) === id)!;
-            const name = OBJECT_BY_ID.get(object.id)?.name ?? id;
+            const name = objectName(object.id);
             const isCelebrating = celebratingId === id;
             return <motion.div key={id} ref={(node) => { if (node) targetRefs.current.set(id, node); else targetRefs.current.delete(id); }} data-target-id={id} data-match-state={isCelebrating ? "celebrating" : found.has(id) ? "found" : "searching"}
               initial={motionOK ? { scale: .8, opacity: 0 } : false}

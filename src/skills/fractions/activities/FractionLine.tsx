@@ -17,6 +17,8 @@ import {
   type LineQuestion,
   type LineSetup,
 } from "../internal/data/fractionLine";
+import { tf } from "../internal/i18n";
+import { useT } from "../../../lib/i18n";
 
 /**
  * A fraction with a place of its own.
@@ -50,38 +52,39 @@ export function lineHints(question: LineQuestion): string[] {
   switch (question.mode) {
     case "place_unit":
       return composeHints(
-        `The line from 0 to 1 is cut into ${parts} equal jumps, each one ${partWord(parts)}.`,
-        "One of those jumps is the fraction you want.",
-        "Count one jump from zero and stop there.",
+        tf("line.hintUnit1", { parts, word: partWord(parts) }),
+        tf("line.hintUnit2"),
+        tf("line.hintUnit3"),
       );
     case "place_any":
       return composeHints(
-        `Every jump along this line is one ${partWord(parts)}.`,
-        `Count ${taken} jumps from zero.`,
-        "The number on top tells you how many jumps, not where to stop guessing.",
+        tf("line.hintAny1", { word: partWord(parts) }),
+        tf("line.hintAny2", { taken }),
+        tf("line.hintAny3"),
       );
     case "read_point":
       return composeHints(
-        "Count the jumps from zero to the marker.",
-        `The line is cut into ${parts} jumps altogether, so ${parts} goes underneath.`,
-        "Count the jumps, not the marks. There is always one more mark than jump.",
+        tf("line.hintRead1"),
+        tf("line.hintRead2", { parts }),
+        tf("line.hintRead3"),
       );
     case "makes_one":
       return composeHints(
-        "Count the jumps from 0 all the way to 1.",
-        `However many jumps that is, that many ${partWord(parts, true)} make one whole.`,
-        "Any fraction with the same number top and bottom is one whole.",
+        tf("line.hintOne1"),
+        tf("line.hintOne2", { words: partWord(parts, true) }),
+        tf("line.hintOne3"),
       );
     default:
       return composeHints(
-        "This line goes past 1, so the fraction can too.",
-        `Count ${taken} jumps of one ${partWord(parts)} from zero, straight past the 1.`,
-        "A fraction bigger than one is still one number with one place.",
+        tf("line.hintImp1"),
+        tf("line.hintImp2", { taken, word: partWord(parts) }),
+        tf("line.hintImp3"),
       );
   }
 }
 
 export const FractionLine: React.FC<ActivityProps<LineParams>> = ({ params, koda, onComplete, lesson }) => {
+  useT();
   const setup: LineSetup = useMemo(() => ({ ...params, ...params.question }), [params]);
   const practising = isPractice(setup);
   const total = setup.questionsPerRound ?? 5;
@@ -146,7 +149,7 @@ export const FractionLine: React.FC<ActivityProps<LineParams>> = ({ params, koda
       if (correct) koda.haptics.success();
       else koda.haptics.pulse("error");
     }
-    round.submit({ correct, given, expected: question.expected, title: correct ? "Yes!" : "Not yet", message });
+    round.submit({ correct, given, expected: question.expected, title: correct ? tf("line.yes") : tf("line.notYet"), message });
   };
 
   const checkPlacement = (): void => {
@@ -170,7 +173,7 @@ export const FractionLine: React.FC<ActivityProps<LineParams>> = ({ params, koda
     <SkillRound
       koda={koda}
       lesson={lesson}
-      fallbackTitle="On the Line"
+      fallbackTitle={tf("line.title")}
       round={round}
       totalQuestions={total}
       prompt={promptFor(question)}
@@ -200,7 +203,7 @@ export const FractionLine: React.FC<ActivityProps<LineParams>> = ({ params, koda
       <div className="mx-auto flex w-full max-w-xl flex-col items-center gap-4">
         <div
           data-testid="line"
-          aria-label={`Number line in ${intervals} jumps, marker ${marker === null ? "not placed" : `on jump ${marker}`}`}
+          aria-label={tf("line.ariaLine", { intervals, state: marker === null ? tf("line.notPlacedState") : tf("line.onJump", { marker }) })}
           className="w-full overflow-x-auto rounded-2xl bg-surface p-3"
         >
           <svg viewBox="-14 0 328 64" width={328} height={64} className="mx-auto text-ink">
@@ -272,7 +275,7 @@ export const FractionLine: React.FC<ActivityProps<LineParams>> = ({ params, koda
             disabled={!!round.feedback}
             className="min-h-11 rounded-2xl bg-violet-600 px-6 py-2 text-base font-bold text-white shadow-sm"
           >
-            That is where it goes
+            {tf("line.thatIs")}
           </button>
         )}
       </div>
@@ -295,16 +298,16 @@ export function printedFor(question: LineQuestion): { text: string; answer: stri
   const { fraction } = question;
   switch (question.mode) {
     case "read_point":
-      return { text: "A cross is marked on the line. Write the fraction it sits on.", answer: question.expected };
+      return { text: tf("line.printRead"), answer: question.expected };
     case "makes_one":
       return {
-        text: `Start at ${nameOf(fraction)} and mark where one whole is. How much further is it?`,
+        text: tf("line.printOne", { fraction: nameOf(fraction) }),
         answer: question.expected,
       };
     case "improper":
-      return { text: `Mark ${nameOf(fraction)} on the line. Write it as a mixed number.`, answer: question.expected };
+      return { text: tf("line.printImproper", { fraction: nameOf(fraction) }), answer: question.expected };
     default:
-      return { text: `Mark ${nameOf(fraction)} on the line.`, answer: nameOf(fraction) };
+      return { text: tf("line.printMark", { fraction: nameOf(fraction) }), answer: nameOf(fraction) };
   }
 }
 
@@ -314,13 +317,13 @@ export const figureFor = (question: LineQuestion): React.ReactNode =>
 export function methodFor(question: LineQuestion): string[] | null {
   if (question.mode === "makes_one") {
     return [
-      "One whole is where every part has been counted.",
-      "Count the parts still to go from where you are to the whole number.",
+      tf("line.methodOne1"),
+      tf("line.methodOne2"),
     ];
   }
   return [
-    "The bottom number says how many jumps there are between one whole number and the next.",
-    "The top number says how many of those jumps to count from zero.",
-    "Land on a mark, not between two.",
+    tf("line.method1"),
+    tf("line.method2"),
+    tf("line.method3"),
   ];
 }

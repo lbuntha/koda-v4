@@ -6,6 +6,7 @@
  */
 
 import type { TraceItem, TraceKind, Zone } from "../geometry/types";
+import { englishGuide } from "./englishSet";
 
 const MAX = 200;
 /** Old Khmer letters no longer taught: ឝ ឞ, and the deprecated independent vowels. */
@@ -88,6 +89,6 @@ export function itemFor(entry: string, id: string, d: ListDefaults): TraceItem {
     strokes: [],
     ...(kind === "mark" ? { carrier: { text: "ក", box: { x: 150, y: 350, w: 450, h: 450 } }, zone } : {}),
     // The typed guide: the mark is shown on its letter, so its place is clear.
-    guide: { glyph: { text: kind === "mark" ? `ក${entry}` : entry, size: kind === "word" ? 360 : 720, x: 500, y: 780 } },
+    guide: { glyph: { text: kind === "mark" ? `ក${entry}` : entry, size: kind === "word" ? 360 : 720, x: 500, y: 780, ...(!khmer && kind !== "word" ? englishGuide(entry) : {}) } },
   };
 }

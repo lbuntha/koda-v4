@@ -1,4 +1,5 @@
 import React from "react";
+import { tf } from "../i18n";
 
 /**
  * The apparatus, redrawn for a pencil.
@@ -47,7 +48,7 @@ export function printBar(
       width={width}
       height={height}
       role="img"
-      aria-label={options.label ?? `A bar in ${parts} parts, ${shaded} shaded`}
+      aria-label={options.label ?? tf("print.bar", { parts, shaded })}
       className="text-slate-900"
     >
       <Hatch id={id} />
@@ -90,7 +91,7 @@ export function printCircle(parts: number, shaded = 0, label?: string): React.Re
       width={size}
       height={size}
       role="img"
-      aria-label={label ?? `A circle in ${parts} parts, ${shaded} shaded`}
+      aria-label={label ?? tf("print.circle", { parts, shaded })}
       className="text-slate-900"
     >
       <Hatch id={id} />
@@ -117,7 +118,7 @@ export function printLine(span: number, intervals: number, label?: string): Reac
       width={width + 12}
       height={height}
       role="img"
-      aria-label={label ?? `A number line from 0 to ${span} in ${intervals} jumps`}
+      aria-label={label ?? tf("print.line", { span, intervals })}
       className="text-slate-900"
     >
       <line x1="6" y1="18" x2={width + 6} y2="18" stroke={INK} strokeWidth="1.5" />
@@ -154,7 +155,7 @@ export function printGrid(columns: number, rows: number, label?: string): React.
       width={columns * cell + 2}
       height={rows * cell + 2}
       role="img"
-      aria-label={label ?? `An empty grid ${columns} across and ${rows} down`}
+      aria-label={label ?? tf("print.grid", { columns, rows })}
       className="text-slate-900"
     >
       {Array.from({ length: rows }).map((_, r) =>
@@ -185,7 +186,7 @@ export function printHundred(shaded: number, label?: string): React.ReactNode {
       width={cell * 10 + 2}
       height={cell * 10 + 2}
       role="img"
-      aria-label={label ?? `A hundred squares, ${shaded} shaded`}
+      aria-label={label ?? tf("print.hundred", { shaded })}
       className="text-slate-900"
     >
       <Hatch id={id} />
@@ -217,7 +218,7 @@ export function printSet(count: number, label?: string): React.ReactNode {
       width={perRow * gap + 4}
       height={rows * gap + 4}
       role="img"
-      aria-label={label ?? `${count} things`}
+      aria-label={label ?? tf("print.set", { count })}
       className="text-slate-900"
     >
       {Array.from({ length: count }).map((_, i) => (

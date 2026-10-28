@@ -12,6 +12,8 @@ import {
   type StoryQuestion,
   type StorySetup,
 } from "../internal/data/fractionStory";
+import { tf } from "../internal/i18n";
+import { useT } from "../../../lib/i18n";
 
 /**
  * Fractions in words, on a bar.
@@ -44,44 +46,45 @@ export function storyHints(question: StoryQuestion): string[] {
   switch (question.mode) {
     case "of_amount":
       return composeHints(
-        "The bottom number says how many equal groups the whole amount makes.",
-        "Cut the bar into that many, and work out how many are in one group.",
-        "Then take as many groups as the top number asks for.",
+        tf("story.hintAmount1"),
+        tf("story.hintAmount2"),
+        tf("story.hintAmount3"),
       );
     case "share_leftover":
       return composeHints(
-        "Give everybody a whole one first, and see what is left over.",
-        "The leftover does not stay left over — it gets cut up and shared too.",
-        "So each person gets some whole ones and a fraction of one more.",
+        tf("story.hintShare1"),
+        tf("story.hintShare2"),
+        tf("story.hintShare3"),
       );
     case "add_context":
       return composeHints(
-        "Two amounts of the same bottle, so they can be added — once they match.",
-        "Cut both into the same-sized pieces first.",
-        "Then count the pieces that are gone.",
+        tf("story.hintAdd1"),
+        tf("story.hintAdd2"),
+        tf("story.hintAdd3"),
       );
     case "scale":
       return composeHints(
-        "Both bits of the amount get multiplied: the whole cups and the part cups.",
-        "Do the whole cups first, then the parts.",
-        "If the parts make more than a whole cup, that cup joins the others.",
+        tf("story.hintScale1"),
+        tf("story.hintScale2"),
+        tf("story.hintScale3"),
       );
     case "compare_context":
       return composeHints(
-        "This asks how many times as much, which is a dividing question.",
-        "Ask how many of the smaller amount fit inside the bigger one.",
-        "Taking one away from the other answers a different question — how much more.",
+        tf("story.hintCompare1"),
+        tf("story.hintCompare2"),
+        tf("story.hintCompare3"),
       );
     default:
       return composeHints(
-        "There are two things happening here, one after the other.",
-        "Work out the fraction step first and write down what is left.",
-        "Then do the second step to that answer, not to the number you started with.",
+        tf("story.hintMulti1"),
+        tf("story.hintMulti2"),
+        tf("story.hintMulti3"),
       );
   }
 }
 
 export const StoryBoard: React.FC<ActivityProps<BoardParams>> = ({ params, koda, onComplete, lesson }) => {
+  useT();
   const setup: StorySetup = useMemo(() => ({ ...params, ...params.question }), [params]);
   const practising = isPractice(setup);
   const total = setup.questionsPerRound ?? 5;
@@ -136,7 +139,7 @@ export const StoryBoard: React.FC<ActivityProps<BoardParams>> = ({ params, koda,
       correct,
       given: text,
       expected: question.expected,
-      title: correct ? "Yes!" : "Not yet",
+      title: correct ? tf("story.yes") : tf("story.notYet"),
       message: explainStory(question, correct),
     });
   };
@@ -146,7 +149,7 @@ export const StoryBoard: React.FC<ActivityProps<BoardParams>> = ({ params, koda,
     <div className="flex w-full max-w-sm flex-col gap-1" data-testid="bar">
       <div
         role="img"
-        aria-label={`A bar in ${cut} ${cut === 1 ? "piece" : "pieces"}`}
+        aria-label={tf("story.barLabel", { count: cut })}
         className="flex h-8 w-full overflow-hidden rounded-xl border-2 border-line"
       >
         {Array.from({ length: cut }).map((_, i) => (
@@ -160,8 +163,8 @@ export const StoryBoard: React.FC<ActivityProps<BoardParams>> = ({ params, koda,
       </div>
       <p className="text-center text-xs text-muted">
         {cut === 1
-          ? `the whole thing — ${question.whole} ${question.unit}`
-          : `${cut} equal parts of ${question.whole} ${question.unit}`}
+          ? tf("story.barWhole", { whole: question.whole, unit: question.unit })
+          : tf("story.barParts", { cut, whole: question.whole, unit: question.unit })}
       </p>
     </div>
   );
@@ -170,7 +173,7 @@ export const StoryBoard: React.FC<ActivityProps<BoardParams>> = ({ params, koda,
     <SkillRound
       koda={koda}
       lesson={lesson}
-      fallbackTitle="In Words"
+      fallbackTitle={tf("story.title")}
       round={round}
       totalQuestions={total}
       prompt={promptFor(question)}
@@ -227,7 +230,7 @@ export const StoryBoard: React.FC<ActivityProps<BoardParams>> = ({ params, koda,
         </div>
 
         {labelsEnabled && !practising ? (
-          <p className="text-xs text-muted">cut the bar to match the story, then answer</p>
+          <p className="text-xs text-muted">{tf("story.cutToMatch")}</p>
         ) : null}
 
         <div className="flex flex-wrap justify-center gap-3" data-testid="answers">
@@ -259,29 +262,29 @@ export function printedFor(question: StoryQuestion): { text: string; answer: str
 
 /** An empty bar, ruled into nothing: the cutting is the child's decision. */
 export const figureFor = (_question: StoryQuestion): React.ReactNode | null =>
-  printBar(1, 0, { width: 220, label: "an empty bar to model the story on" });
+  printBar(1, 0, { width: 220, label: tf("story.emptyBar") });
 
 export function methodFor(question: StoryQuestion): string[] | null {
   switch (question.mode) {
     case "share_leftover":
       return [
-        "Give everybody a whole one first.",
-        "Then cut what is left between them — the leftover does not stay left over.",
+        tf("story.methodShare1"),
+        tf("story.methodShare2"),
       ];
     case "compare_context":
       return [
-        "How many times as much is a dividing question.",
-        "How much more is a taking-away question. Read which one is being asked.",
+        tf("story.methodCompare1"),
+        tf("story.methodCompare2"),
       ];
     case "multi_step":
       return [
-        "Do the fraction step first and write the middle number down.",
-        "Then do the second step to that number.",
+        tf("story.methodMulti1"),
+        tf("story.methodMulti2"),
       ];
     default:
       return [
-        "Draw the bar as the whole amount, then cut it as the fraction says.",
-        "Work out one part before taking several.",
+        tf("story.methodDef1"),
+        tf("story.methodDef2"),
       ];
   }
 }

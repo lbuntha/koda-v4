@@ -1,0 +1,94 @@
+{
+  "shapes": {
+    "circle": "circle",
+    "square": "square",
+    "triangle": "triangle",
+    "diamond": "diamond",
+    "cross": "cross",
+    "bar": "bar"
+  },
+  "colour": {
+    "name": "{shape} {n}"
+  },
+  "refuse": {
+    "different": "Pick a different bottle to pour into.",
+    "missing": "That bottle is not there.",
+    "corked": "That bottle is corked.",
+    "empty": "That bottle is empty.",
+    "oneWay": "That bottle only receives.",
+    "full": "That bottle is full.",
+    "notInOrder": "That bottle is not in order yet.",
+    "notNext": "That is not what comes next. {label}",
+    "colours": "Those colours do not match."
+  },
+  "goal": {
+    "ascending": "They go smallest to biggest.",
+    "descending": "They go biggest to smallest.",
+    "bySize": "They go from the smallest piece to the biggest.",
+    "twos": "They count up in twos.",
+    "pattern": "Every bottle ends up the same.",
+    "parity": "Odd numbers and even numbers go in different bottles."
+  },
+  "prompt": {
+    "order": "Put every bottle in order: {order}.",
+    "group": "Sort the odd numbers and the even numbers into different bottles.",
+    "both": "Sort both bottles.",
+    "all": "Sort all {count} colours.",
+    "fallback": "Sort every bottle."
+  },
+  "hint": {
+    "kidTip": "Look for a bottle you could empty completely.",
+    "corked": "Bottle {n} is corked. Finish bottle {by} to open it.",
+    "oneWay": "Bottle {n} only receives. Pour into it once you are sure of the colour.",
+    "left": {
+      "one": "One pour left. Work the rest out before you move.",
+      "other": "{count} pours left. Work the rest out before you move."
+    },
+    "noneEmpty": "Nothing is empty. Find the bottle you can clear first.",
+    "free": "Bottle {n} is free. Use it for the colour that is in the way.",
+    "try": "Try pouring bottle {from} onto bottle {to}."
+  },
+  "sorter": {
+    "title": "Bottle Sort",
+    "rack": "Bottle rack",
+    "sortedCount": "{done} of {total} bottles sorted.",
+    "bottle": "Bottle {n}, holds {cap}. {contents}.",
+    "hidden": "hidden",
+    "emptyBottle": "Empty",
+    "willPour": "{n} will pour.",
+    "corkedUntil": "Corked until bottle {n} is finished.",
+    "receivesOnly": "Receives only.",
+    "guideFocus": "Smart guide focus.",
+    "sortedTitle": "Sorted!",
+    "sortedMessage": "Every bottle holds one colour.",
+    "noPoursTitle": "No pours left",
+    "noPoursMessage": "That path ran out. The rack is back as it was dealt.",
+    "outOfTitle": "Out of pours",
+    "outOfMessage": "You are out of pours. The rack is back as it was dealt.",
+    "stepped": "Stepped back.",
+    "dealt": "Back to the dealt rack.",
+    "pours": "Pours: {poured} of {budget}",
+    "undo": "Undo",
+    "startOver": "Start over"
+  },
+  "predict": {
+    "title": "Which rack comes next?",
+    "section": "Predict the pour",
+    "move": "bottle {from} into bottle {to}",
+    "then": "{a}, then {b}",
+    "prompt": "Pour {moves}. Which rack comes next?",
+    "now": "Now",
+    "choice": "Choice {n}. {rack}",
+    "bottleLine": "bottle {n}: {contents}",
+    "empty": "empty",
+    "rightTitle": "That is the one",
+    "wrongTitle": "Not that one",
+    "rightMessage": "A pour moves the whole run of one colour.",
+    "wrongMessage": "Look again at how many move, and how much room there is.",
+    "tipOne": "A pour moves the whole top run, not one layer.",
+    "tipTwo": "Picture the first pour completely; the second pour starts from that new rack.",
+    "onTop": "Bottle {n} has {count} {name} on top.",
+    "roomOne": "Count the room in bottle {n}, then move as many as fit.",
+    "roomTwo": "Build the first result, then follow the second instruction from that rack."
+  }
+}

@@ -538,6 +538,12 @@ function BookPage({ book, onBack, onRead }: { book: Passage; onBack(): void; onR
               {progress?.stage === "done" ? tr("reader.readAgain") : progress ? tr("library.keepReading") : tr("library.read")}
             </UIButton>
           </div>
+          {book.learningTakeaway?.trim() && (
+            <section className="mt-5 rounded-2xl bg-indigo-50 px-4 py-3.5 dark:bg-indigo-950">
+              <h2 className="text-xs font-extrabold uppercase tracking-wider text-indigo-700 dark:text-indigo-300">{tr("library.coverLearn")}</h2>
+              <p className={`mt-1.5 text-lg leading-relaxed text-ink ${kh(book)}`}>{book.learningTakeaway.trim()}</p>
+            </section>
+          )}
           <ol className="mt-5 grid gap-2">
             {[
               [tr("library.step.read"), progress !== null],

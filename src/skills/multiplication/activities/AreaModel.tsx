@@ -27,6 +27,8 @@ import { speechRate, tagLabelsFrom } from "../internal/data/multiplicationChrome
 import { ADJUSTMENT, EACH, GROUPS, NEUTRAL, PRODUCT } from "../internal/data/multiplicationPalette";
 import { GRID_SIZES, SCROLL_BOX, TOUCH_TARGET, densityFor } from "../internal/data/multiplicationLayout";
 import { useNudge } from "../internal/ui/useNudge";
+import { tm, joinAnd } from "../internal/i18n";
+import { useT } from "../../../lib/i18n";
 
 /**
  * Multiplication as a rectangle, and the rectangle cut into pieces.
@@ -167,21 +169,21 @@ export function buildQuestion(params: AreaParams, index: number, seen?: Set<stri
       return {
         ...base,
         taskKind: "area_model_two_by_one",
-        prompt: `${a} × ${b}. Fill in each piece of the rectangle.`,
+        prompt: tm("area.prompt21", { a, b }),
         expected: String(product),
       };
     case "partial_products":
       return {
         ...base,
         taskKind: "record_partial_products",
-        prompt: `${a} × ${b}. Write each partial product on its own row.`,
+        prompt: tm("area.promptPartial", { a, b }),
         expected: String(product),
       };
     case "area_2x2":
       return {
         ...base,
         taskKind: "area_model_two_by_two",
-        prompt: `${a} × ${b}. Both sides split, so there are four pieces to fill.`,
+        prompt: tm("area.prompt22", { a, b }),
         expected: String(product),
       };
     case "rect_area":
@@ -189,7 +191,7 @@ export function buildQuestion(params: AreaParams, index: number, seen?: Set<stri
       return {
         ...base,
         taskKind: "area_of_a_rectangle",
-        prompt: `A rectangle ${a} across and ${b} down. How many squares does it cover?`,
+        prompt: tm("area.promptRect", { a, b }),
         expected: String(product),
       };
   }
@@ -210,18 +212,18 @@ export function printedFor(question: AreaQuestion): PrintedQuestion | null {
     case "area_2x1":
     case "area_2x2":
       return {
-        text: `${a} × ${b}. Split the rectangle by place value, label every piece, then add them. ${a} × ${b} = ____`,
-        answer: `${written(parts)} — total ${product}`,
+        text: tm("area.printedSplit", { a, b }),
+        answer: tm("area.printedTotal", { written: written(parts), product }),
       };
     case "partial_products":
       return {
-        text: `${a} × ${b}. Write out the partial products and total them. ${a} × ${b} = ____`,
-        answer: `${written(parts)} — total ${product}`,
+        text: tm("area.printedPartial", { a, b }),
+        answer: tm("area.printedTotal", { written: written(parts), product }),
       };
     case "rect_area":
     default:
       return {
-        text: `A rectangle is ${a} squares across and ${b} squares down. What is its area? ____`,
+        text: tm("area.printedRect", { a, b }),
         answer: String(product),
       };
   }
@@ -232,22 +234,22 @@ export function methodFor(question: AreaQuestion): string[] | null {
   switch (question.mode) {
     case "rect_area":
       return [
-        "The area of a rectangle is its width times its height.",
-        `${a} across and ${b} down covers ${a} × ${b} squares.`,
+        tm("area.methodRect1"),
+        tm("area.methodRect2", { a, b }),
       ];
     case "partial_products":
       return [
-        `Split ${a} into ${placeValueSplit(a).join(" and ")}.`,
-        "Multiply each piece separately and write each answer on its own row.",
-        "Add the rows.",
+        tm("area.methodPartial1", { a, parts: joinAnd(placeValueSplit(a).map(String)) }),
+        tm("area.methodPartial2"),
+        tm("area.methodPartial3"),
       ];
     default:
       return [
-        `Split ${a} into ${placeValueSplit(a).join(" and ")}${
-          placeValueSplit(b).length > 1 ? `, and ${b} into ${placeValueSplit(b).join(" and ")}` : ""
-        }.`,
-        `That makes ${parts.length} rectangles: ${written(parts)}.`,
-        "Add every piece together.",
+        placeValueSplit(b).length > 1
+          ? tm("area.methodSplitAB", { a, parts: joinAnd(placeValueSplit(a).map(String)), b, partsB: joinAnd(placeValueSplit(b).map(String)) })
+          : tm("area.methodSplitA", { a, parts: joinAnd(placeValueSplit(a).map(String)) }),
+        tm("area.methodMakes", { count: parts.length, written: written(parts) }),
+        tm("area.methodAddAll"),
       ];
   }
 }
@@ -283,7 +285,7 @@ export function figureFor(question: AreaQuestion): React.ReactNode | null {
   let y = 0;
 
   return (
-    <svg viewBox={`-24 -16 ${W + 32} ${H + 32}`} width="100%" role="img" aria-label="An area model to fill in">
+    <svg viewBox={`-24 -16 ${W + 32} ${H + 32}`} width="100%" role="img" aria-label={tm("area.figureLabel")}>
       {rightParts.map((right, r) => {
         const rowY = y;
         y += heights[r];
@@ -338,25 +340,25 @@ export function areaHints(
     case "rect_area":
       return composeHints(
         kidTip,
-        `Count along the top, then down the side.`,
-        `The area is ${a} rows of ${b} — the two sides multiplied.`,
+        tm("area.hintRect1"),
+        tm("area.hintRect2", { a, b }),
       );
     case "partial_products":
       return composeHints(
         kidTip,
         empty > 0
-          ? `Each row is one piece of ${a} multiplied by ${b}. ${empty} still to write.`
-          : `Every row is written. Now add them.`,
-        `Split ${a} into ${placeValueSplit(a).join(" and ")}, and multiply each one by ${b}.`,
+          ? tm("area.hintPartialEmpty", { a, b, empty })
+          : tm("area.hintPartialDone"),
+        tm("area.hintPartialSplit", { a, b, parts: joinAnd(placeValueSplit(a).map(String)) }),
       );
     default:
       return composeHints(
         kidTip,
         empty > 0
-          ? `${empty} piece${empty === 1 ? "" : "s"} still empty. Read the two numbers on that piece's edges.`
-          : `Every piece is filled. Check the total.`,
+          ? tm("area.hintPieces", { count: empty })
+          : tm("area.hintPiecesDone"),
         // Names the structure, never a cell's value.
-        `Each piece is its own multiplication. Add the ${parts.length} together.`,
+        tm("area.hintEach", { count: parts.length }),
       );
   }
 }
@@ -366,6 +368,7 @@ export function areaHints(
 /* -------------------------------------------------------------------------- */
 
 export const AreaModel: React.FC<ActivityProps<AreaParams>> = ({ params, koda, onComplete, lesson }) => {
+  useT();
   const setup: AreaSetup = useMemo(() => ({ ...params, ...params.question }), [params]);
   const copy = playCopy(params);
   const practising = isPractice(setup);
@@ -460,8 +463,8 @@ export const AreaModel: React.FC<ActivityProps<AreaParams>> = ({ params, koda, o
     judge(
       correct,
       String(value),
-      correct ? "That is the area" : "Not quite",
-      `${a} across and ${b} down covers ${a} × ${b} = ${question.product} squares.`,
+      correct ? tm("area.areaTitle") : tm("area.wrongTitle"),
+      tm("area.areaMessage", { a, b, product: question.product }),
     );
   };
 
@@ -497,8 +500,8 @@ export const AreaModel: React.FC<ActivityProps<AreaParams>> = ({ params, koda, o
     if (!allFilled) {
       const empty = filled.filter((v) => v === undefined).length;
       refuse(
-        `${empty} piece${empty === 1 ? " is" : "s are"} still empty. Every piece needs its own answer.`,
-        "Fill every piece first.",
+        tm("area.stillEmpty", { count: empty }),
+        tm("area.fillEvery"),
       );
       return;
     }
@@ -512,10 +515,10 @@ export const AreaModel: React.FC<ActivityProps<AreaParams>> = ({ params, koda, o
     judge(
       correct,
       String(filledTotal),
-      correct ? "Every piece" : "Check the pieces",
+      correct ? tm("area.everyPiece") : tm("area.checkPieces"),
       wrong.length > 0
-        ? `${wrong[0].part.left} × ${wrong[0].part.right} is ${wrong[0].part.product}, not ${wrong[0].given}.`
-        : `${written(parts)}. Together that is ${question.product}.`,
+        ? tm("area.pieceWrong", { l: wrong[0].part.left, r: wrong[0].part.right, product: wrong[0].part.product, given: wrong[0].given })
+        : tm("area.together", { written: written(parts), product: question.product }),
     );
   };
 
@@ -555,7 +558,7 @@ export const AreaModel: React.FC<ActivityProps<AreaParams>> = ({ params, koda, o
         <span className={`self-center text-sm font-black tabular-nums ${GROUPS.text}`} aria-hidden="true">{b}</span>
         <div className="flex flex-col items-center gap-1">
           <span className={`text-sm font-black tabular-nums ${EACH.text}`} aria-hidden="true">{a}</span>
-          <div role="img" aria-label={`A rectangle ${a} across and ${b} down`} className={`flex flex-col ${grid.gap}`}>
+          <div role="img" aria-label={tm("area.rectLabel", { a, b })} className={`flex flex-col ${grid.gap}`}>
             {Array.from({ length: b }, (_, r) => (
               <div key={r} className={`flex ${grid.gap}`}>
                 {Array.from({ length: a }, (_, c) => (
@@ -576,7 +579,7 @@ export const AreaModel: React.FC<ActivityProps<AreaParams>> = ({ params, koda, o
         <span className={`text-base font-black tabular-nums ${EACH.text}`}>{a}</span>
         <div
           role="img"
-          aria-label={`A rectangle ${a} across and ${b} down`}
+          aria-label={tm("area.rectLabel", { a, b })}
           className={`h-24 w-56 rounded-xl border-2 ${EACH.border} ${EACH.soft}`}
         />
       </div>
@@ -644,9 +647,9 @@ export const AreaModel: React.FC<ActivityProps<AreaParams>> = ({ params, koda, o
                   type="button"
                   aria-label={`${
                     value === undefined
-                      ? `${part.left} times ${part.right}, empty`
-                      : `${part.left} times ${part.right}, holding ${value}`
-                  }${guide.target === i ? ", fill this one next" : ""}`}
+                      ? tm("area.pieceEmpty", { l: part.left, r: part.right })
+                      : tm("area.pieceHolding", { l: part.left, r: part.right, value })
+                  }${guide.target === i ? tm("area.fillNext") : ""}`}
                   onClick={() => (value === undefined ? setTarget(i) : clearCell(i))}
                   disabled={!!round.feedback}
                   className={`flex flex-col items-center justify-center rounded-lg border-2 p-1 focus:outline-none focus-visible:ring-2 focus-visible:ring-sky-500 ${
@@ -691,8 +694,8 @@ export const AreaModel: React.FC<ActivityProps<AreaParams>> = ({ params, koda, o
               type="button"
               aria-label={
                 value === undefined
-                  ? `${part.left} times ${part.right}, empty`
-                  : `${part.left} times ${part.right}, holding ${value}`
+                  ? tm("area.pieceEmpty", { l: part.left, r: part.right })
+                  : tm("area.pieceHolding", { l: part.left, r: part.right, value })
               }
               onClick={() => (value === undefined ? setTarget(i) : clearCell(i))}
               disabled={!!round.feedback}
@@ -729,7 +732,7 @@ export const AreaModel: React.FC<ActivityProps<AreaParams>> = ({ params, koda, o
         <button
           key={value}
           type="button"
-          aria-label={`${value} squares`}
+          aria-label={tm("area.squares", { value })}
           onClick={() => answerArea(value)}
           disabled={!!round.feedback}
           className={themeSystem.button("secondary", "choice")}
@@ -745,7 +748,7 @@ export const AreaModel: React.FC<ActivityProps<AreaParams>> = ({ params, koda, o
           <button
             key={value}
             type="button"
-            aria-label={`Put ${value} in`}
+            aria-label={tm("area.putIn", { value })}
             onClick={() => place(value)}
             disabled={!!round.feedback}
             className={themeSystem.button("secondary", "choice")}
@@ -755,7 +758,7 @@ export const AreaModel: React.FC<ActivityProps<AreaParams>> = ({ params, koda, o
         ))}
       </div>
       <button type="button" onClick={checkParts} disabled={!!round.feedback} className={themeSystem.button("primary", "md")}>
-        Check
+        {tm("area.check")}
       </button>
     </div>
   );
@@ -765,7 +768,7 @@ export const AreaModel: React.FC<ActivityProps<AreaParams>> = ({ params, koda, o
     <SkillRound
       koda={koda}
       lesson={lesson}
-      fallbackTitle="Area Model"
+      fallbackTitle={tm("area.title")}
       round={round}
       totalQuestions={total}
       prompt={promptFor(question)}
@@ -792,7 +795,7 @@ export const AreaModel: React.FC<ActivityProps<AreaParams>> = ({ params, koda, o
           <p className={`text-center text-base font-black tabular-nums ${EACH.text}`} aria-live="polite">
             {allFilled
               ? `${filled.join(" + ")} = ${filledTotal}`
-              : `${filled.filter((v) => v !== undefined).length} of ${parts.length} pieces filled`}
+              : tm("area.filled", { filled: filled.filter((v) => v !== undefined).length, total: parts.length })}
           </p>
         )}
 

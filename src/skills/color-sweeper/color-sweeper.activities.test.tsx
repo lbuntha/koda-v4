@@ -102,7 +102,7 @@ describe("select_neighbors: which tiles touch this one", () => {
     const name = tileLabel(q.board, first);
     await h.press(name);
     await h.press(name);
-    expect(h.text()).toContain("Check ");
+    expect(h.text()).toContain("Check");
     expect(h.text()).not.toContain("Check (1)");
     h.unmount();
   });

@@ -4,7 +4,8 @@ import { SkillRound, composeHints, isPractice, modeAt, playCopy, useSkillRound, 
 import { quietWhenPractising } from "../../kit/practice";
 import { counted, selectionKey, type Color } from "../internal/board";
 import { BoardGrid, tileLabel } from "../internal/BoardGrid";
-import { PALETTE } from "../internal/palette";
+import { colourWord, tw } from "../internal/i18n";
+import { useT } from "../../../lib/i18n";
 import { generateLens, LENS_MODES, type Lens, type LensMode } from "../internal/lenses";
 import { chime, speechRate, tagLabelsFrom } from "../internal/sweeperChrome";
 import { useNudge } from "../internal/useNudge";
@@ -60,16 +61,16 @@ const promptText = (lens: Lens): string => {
          working out, and a prompt that states it turns the level into
          "tap until the number matches". It is rung three of the hint ladder
          instead, where a child who is stuck can ask for it. */
-      return "Tap every tile that touches the outlined one.";
+      return tw("lens.selectPrompt");
     case "count_same":
-      return "How many tiles touching the outlined one are the same colour as it?";
+      return tw("lens.countPrompt");
     case "read_clue":
-      return "What does this clue say?";
+      return tw("lens.readPrompt");
     case "complement": {
       const clue = lens.clue!;
-      const named = PALETTE[counted(clue)].name.toLowerCase();
-      const other = PALETTE[lens.otherColor!].name.toLowerCase();
-      return `This clue touches ${n} tiles and says ${clue.count} are ${named}. How many are ${other}?`;
+      const named = colourWord(counted(clue));
+      const other = colourWord(lens.otherColor!);
+      return tw("lens.complementPrompt", { n: String(n), count: String(clue.count), named, other });
     }
   }
 };
@@ -114,32 +115,39 @@ export const promptFor = (question: LensQuestion): string => question.prompt ?? 
 
 /** The board as paper needs it: the same picture, nothing to tap. */
 export const figureFor = (question: LensQuestion): React.ReactNode => (
-  <BoardGrid board={question.board} target={question.target} availableWidth={260} label="Board" />
+  <BoardGrid board={question.board} target={question.target} availableWidth={260} label={tw("grid.board")} />
 );
 
 export function printedFor(question: LensQuestion): PrintedQuestion | null {
-  const where = tileLabel(question.board, question.target).replace(", the outlined tile", "");
+  const where = tileLabel(question.board, question.target);
   switch (question.mode) {
     case "select_neighbors":
       return {
-        text: `Circle every tile that touches the outlined one (${where}). ____`,
-        answer: `${question.neighborhood.length} tiles: ${question.neighborhood
-          .map((cell) => tileLabel(question.board, cell))
-          .join("; ")}`,
+        text: tw("lens.printSelect", { where }),
+        answer: tw("lens.printSelectAnswer", {
+          n: String(question.neighborhood.length),
+          list: question.neighborhood.map((cell) => tileLabel(question.board, cell)).join("; "),
+        }),
       };
     case "count_same":
       return {
-        text: `How many tiles touching the outlined one (${where}) are the same colour as it? ____`,
+        text: tw("lens.printCount", { where }),
         answer: String(question.expectedCount),
       };
     case "read_clue":
       return {
-        text: `${where}. Write what this clue says. ____`,
+        text: tw("lens.printRead", { where }),
         answer: question.expected,
       };
     case "complement":
       return {
-        text: `${where}. It touches ${question.neighborhood.length} tiles and ${question.clue!.count} of them are ${PALETTE[counted(question.clue!)].name.toLowerCase()}. How many are ${PALETTE[question.otherColor!].name.toLowerCase()}? ____`,
+        text: tw("lens.printComplement", {
+          where,
+          n: String(question.neighborhood.length),
+          count: String(question.clue!.count),
+          named: colourWord(counted(question.clue!)),
+          other: colourWord(question.otherColor!),
+        }),
         answer: String(question.expectedCount),
       };
   }
@@ -147,9 +155,9 @@ export function printedFor(question: LensQuestion): PrintedQuestion | null {
 
 export function methodFor(): string[] | null {
   return [
-    "A tile touches the tiles beside it, above it, below it, and the four corners.",
-    "At an edge or a corner, only the tiles inside the board count.",
-    "A clue never counts its own tile.",
+    tw("lens.method1"),
+    tw("lens.method2"),
+    tw("lens.method3"),
   ];
 }
 
@@ -164,27 +172,27 @@ export function lensHints(question: LensQuestion, kidTip: string | undefined, st
       return composeHints(
         kidTip,
         state.chosen === 0
-          ? "Start with the tiles directly above, below, left and right."
-          : `You have ${state.chosen} of them. The corner-touching tiles count too.`,
-        `An outlined tile ${question.anchor === "center" ? "in the middle" : `at ${question.anchor === "corner" ? "a corner" : "an edge"}`} touches ${n} tiles — the ones off the board do not exist.`,
+          ? tw("lens.hintStart")
+          : tw("lens.hintHave", { count: String(state.chosen) }),
+        tw("lens.hintTouches", { where: tw(`lens.where.${question.anchor}`), n: String(n) }),
       );
     case "count_same":
       return composeHints(
         kidTip,
-        "Look at the outlined tile's own colour first. Then check each tile around it.",
-        "Each tile counts once, and the outlined one is left out.",
+        tw("lens.hintCount1"),
+        tw("lens.hintCount2"),
       );
     case "read_clue":
       return composeHints(
         kidTip,
-        "A clue has two parts: which colour it counts, and how many.",
-        `It counts the ${n} tiles it touches. Not itself, and all four corners count.`,
+        tw("lens.hintRead1"),
+        tw("lens.hintRead2", { n: String(n) }),
       );
     case "complement":
       return composeHints(
         kidTip,
-        `The clue touches ${n} tiles altogether.`,
-        `Some of those ${n} are ${PALETTE[counted(question.clue!)].name.toLowerCase()}. There are only two colours, so the rest are the other one.`,
+        tw("lens.hintComp1", { n: String(n) }),
+        tw("lens.hintComp2", { n: String(n), colour: colourWord(counted(question.clue!)) }),
       );
   }
 }
@@ -194,6 +202,7 @@ export function lensHints(question: LensQuestion, kidTip: string | undefined, st
 /* -------------------------------------------------------------------------- */
 
 export const NeighborLens: React.FC<ActivityProps<LensParams>> = ({ params, koda, onComplete, lesson }) => {
+  useT();
   const setup: LensSetup = useMemo(() => ({ ...params, ...params.question }), [params]);
   const copy = playCopy(params);
   const practising = isPractice(setup);
@@ -264,9 +273,9 @@ export const NeighborLens: React.FC<ActivityProps<LensParams>> = ({ params, koda
       /* Not a wrong answer. The child touched the tile the question is about,
          which is the commonest first move and is worth explaining rather than
          scoring. */
-      nudge.refuse("That is the outlined tile itself. A tile never touches itself.");
+      nudge.refuse(tw("lens.selfNudge"));
       guide.stumbled();
-      speak("That is the tile we are asking about.");
+      speak(tw("lens.selfSay"));
       return;
     }
     setPicked((current) => {
@@ -280,18 +289,18 @@ export const NeighborLens: React.FC<ActivityProps<LensParams>> = ({ params, koda
   const checkSelection = () => {
     if (round.feedback) return;
     if (!picked.length) {
-      nudge.refuse("Choose the tiles that touch the outlined one first.");
+      nudge.refuse(tw("lens.chooseFirst"));
       guide.stumbled();
       return;
     }
     const correct = selectionKey(picked, question.board.size) === question.expected;
     finish(
       correct,
-      `${picked.length} tiles`,
-      correct ? "Every one of them" : "Not quite that set",
+      tw("lens.tilesGiven", { count: String(picked.length) }),
+      correct ? tw("lens.setRight") : tw("lens.setWrong"),
       correct
-        ? `All ${question.neighborhood.length} tiles that touch it, and nothing else.`
-        : `It touches ${question.neighborhood.length} tiles — the four beside it and the four corners, minus any off the board.`,
+        ? tw("lens.setRightMsg", { n: String(question.neighborhood.length) })
+        : tw("lens.setWrongMsg", { n: String(question.neighborhood.length) }),
     );
   };
 
@@ -301,10 +310,16 @@ export const NeighborLens: React.FC<ActivityProps<LensParams>> = ({ params, koda
     finish(
       correct,
       String(value),
-      correct ? "That is the count" : "Count again",
+      correct ? tw("lens.countRight") : tw("lens.countWrong"),
       question.mode === "complement"
-        ? `${question.neighborhood.length} tiles touch it and ${question.clue!.count} are ${PALETTE[counted(question.clue!)].name.toLowerCase()}, so ${question.expectedCount} are ${PALETTE[question.otherColor!].name.toLowerCase()}.`
-        : `${question.expectedCount} of the ${question.neighborhood.length} tiles touching it match.`,
+        ? tw("lens.countMsgComp", {
+            n: String(question.neighborhood.length),
+            count: String(question.clue!.count),
+            named: colourWord(counted(question.clue!)),
+            answer: String(question.expectedCount),
+            other: colourWord(question.otherColor!),
+          })
+        : tw("lens.countMsg", { answer: String(question.expectedCount), n: String(question.neighborhood.length) }),
     );
   };
 
@@ -314,14 +329,14 @@ export const NeighborLens: React.FC<ActivityProps<LensParams>> = ({ params, koda
     finish(
       statement.correct,
       statement.text,
-      statement.correct ? "That is what it says" : "Read it once more",
+      statement.correct ? tw("lens.stmtRightTitle") : tw("lens.stmtWrongTitle"),
       statement.correct
-        ? "The colour it counts, and how many of the tiles it touches."
+        ? tw("lens.stmtRightMsg")
         : statement.trap === "counts-itself"
-          ? "A clue never counts its own tile."
+          ? tw("lens.trapSelf")
           : statement.trap === "skips-diagonals"
-            ? "The corner-touching tiles count too."
-            : "Check which colour the clue is counting.",
+            ? tw("lens.trapDiag")
+            : tw("lens.trapColor"),
     );
   };
 
@@ -332,7 +347,7 @@ export const NeighborLens: React.FC<ActivityProps<LensParams>> = ({ params, koda
     <SkillRound
       koda={koda}
       lesson={lesson}
-      fallbackTitle="Neighbours and Clues"
+      fallbackTitle={tw("lens.title")}
       round={round}
       totalQuestions={total}
       prompt={promptFor(question)}
@@ -359,7 +374,7 @@ export const NeighborLens: React.FC<ActivityProps<LensParams>> = ({ params, koda
           onTap={question.mode === "select_neighbors" ? toggle : undefined}
           locked={Boolean(round.feedback)}
           showBadges={badgesEnabled}
-          label={question.mode === "read_clue" || question.mode === "complement" ? "Board with one clue" : "Board"}
+          label={question.mode === "read_clue" || question.mode === "complement" ? tw("grid.oneClue") : tw("grid.board")}
         />
 
         {question.mode === "select_neighbors" && (
@@ -369,7 +384,7 @@ export const NeighborLens: React.FC<ActivityProps<LensParams>> = ({ params, koda
             disabled={Boolean(round.feedback)}
             className="min-h-11 rounded-2xl border-2 border-violet-500 bg-violet-500/10 px-6 py-3 text-base font-black text-ink focus:outline-none focus-visible:ring-2 focus-visible:ring-sky-500"
           >
-            Check {picked.length ? `(${picked.length})` : ""}
+            {picked.length ? tw("lens.checkCount", { count: String(picked.length) }) : tw("lens.check")}
           </button>
         )}
 

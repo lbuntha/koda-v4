@@ -27,6 +27,8 @@ import { speechRate, tagLabelsFrom } from "../internal/data/multiplicationChrome
 import { EACH, GROUPS, NEUTRAL, PRODUCT } from "../internal/data/multiplicationPalette";
 import { SCROLL_BOX } from "../internal/data/multiplicationLayout";
 import { useNudge } from "../internal/ui/useNudge";
+import { tm } from "../internal/i18n";
+import { useT } from "../../../lib/i18n";
 
 /**
  * Multiplication in words, and the bar that shows what the words mean.
@@ -93,23 +95,21 @@ export function sentenceFor(
   const { actor, other, container, item } = cast;
   switch (kind) {
     case "groups_unknown":
-      return `${actor} has ${count(values[0], item)}, packed ${values[1]} to a ${container.one}. How many ${container.many} is that?`;
+      return tm("story.groupsUnknown", { actor, items: count(values[0], item), size: values[1], container: container.one, containers: container.many });
     case "size_unknown":
-      return `${actor} shares ${count(values[0], item)} equally between ${count(values[1], container)}. How many ${item.many} in each one?`;
+      return tm("story.sizeUnknown", { actor, items: count(values[0], item), containers: count(values[1], container), many: item.many });
     case "times_as_many":
-      return `${actor} has ${count(values[0], item)}. ${other} has ${values[1]} times as many. How many ${item.many} does ${other} have?`;
+      return tm("story.timesAsMany", { actor, items: count(values[0], item), other, times: values[1], many: item.many });
     case "rate":
-      return `One ${container.one} holds ${count(values[0], item)}. How many ${item.many} are in ${count(values[1], container)}?`;
+      return tm("story.rate", { container: container.one, items: count(values[0], item), many: item.many, containers: count(values[1], container) });
     case "multi_step": {
       const second = steps?.[1];
       const adds = second?.operation === "add";
-      return `${actor} has ${count(values[0], container)} with ${values[1]} ${item.many} in each, then ${
-        adds ? `finds ${values[2]} more` : `gives ${values[2]} away`
-      }. How many ${item.many} now?`;
+      return tm(adds ? "story.multiAdd" : "story.multiSubtract", { actor, containers: count(values[0], container), size: values[1], many: item.many, extra: values[2] });
     }
     case "equal_groups_total":
     default:
-      return `${actor} has ${count(values[0], container)} of ${item.many}, with ${values[1]} in each. How many ${item.many} altogether?`;
+      return tm("story.equalTotal", { actor, containers: count(values[0], container), many: item.many, size: values[1] });
   }
 }
 
@@ -253,37 +253,37 @@ export function methodFor(question: StoryQuestion): string[] | null {
   switch (question.mode) {
     case "groups_unknown":
       return [
-        "The total and the size of each group are known.",
-        `How many ${values[1]}s make ${values[0]}?`,
-        "That is the number of groups.",
+        tm("story.methodGroups1"),
+        tm("story.methodGroups2", { size: values[1], total: values[0] }),
+        tm("story.methodGroups3"),
       ];
     case "size_unknown":
       return [
-        "The total and the number of groups are known.",
-        `Share ${values[0]} equally between ${values[1]}.`,
-        "That is the size of each group.",
+        tm("story.methodSize1"),
+        tm("story.methodSize2", { total: values[0], groups: values[1] }),
+        tm("story.methodSize3"),
       ];
     case "times_as_many":
       return [
         // §12 trap 15, said plainly on paper too.
-        `"${values[1]} times as many" means ${values[1]} lots of the first amount — not ${values[1]} more than it.`,
-        `${values[0]} × ${values[1]}.`,
+        tm("story.methodTimes1", { times: values[1] }),
+        tm("story.methodTimes2", { a: values[0], b: values[1] }),
       ];
     case "rate":
       return [
-        `Every one holds the same amount: ${values[0]}.`,
-        `So ${values[1]} of them hold ${values[1]} lots of ${values[0]}.`,
+        tm("story.methodRate1", { a: values[0] }),
+        tm("story.methodRate2", { a: values[0], b: values[1] }),
       ];
     case "multi_step":
       return [
-        `First the multiplication: ${values[0]} × ${values[1]} = ${question.intermediate}.`,
-        `Then ${question.steps?.[1].operation === "add" ? "add" : "subtract"} ${values[2]}.`,
+        tm("story.methodMulti1", { a: values[0], b: values[1], mid: question.intermediate ?? 0 }),
+        tm(question.steps?.[1].operation === "add" ? "story.methodMultiAdd" : "story.methodMultiSubtract", { c: values[2] }),
       ];
     case "equal_groups_total":
     default:
       return [
-        `${values[0]} groups with ${values[1]} in each.`,
-        "Multiply the number of groups by the size of a group.",
+        tm("story.methodTotal1", { a: values[0], b: values[1] }),
+        tm("story.methodTotal2"),
       ];
   }
 }
@@ -294,7 +294,7 @@ export function figureFor(question: StoryQuestion): React.ReactNode | null {
   const width = 280;
   const seg = width / segments;
   return (
-    <svg viewBox={`0 0 ${width + 4} 40`} width="100%" role="img" aria-label="A bar split into equal parts">
+    <svg viewBox={`0 0 ${width + 4} 40`} width="100%" role="img" aria-label={tm("story.figureLabel")}>
       {Array.from({ length: segments }, (_, i) => (
         <rect
           key={i}
@@ -322,45 +322,43 @@ export function storyHints(question: StoryQuestion, kidTip: string | undefined):
     case "groups_unknown":
       return composeHints(
         kidTip,
-        `Every ${cast.container.one} holds the same: ${values[1]}.`,
-        `Count up in ${values[1]}s until you reach ${values[0]}, and count how many that took.`,
+        tm("story.hintGroups1", { container: cast.container.one, size: values[1] }),
+        tm("story.hintGroups2", { size: values[1], total: values[0] }),
       );
     case "size_unknown":
       return composeHints(
         kidTip,
-        `${values[0]} split into ${values[1]} equal parts.`,
-        `What number, ${values[1]} times over, makes ${values[0]}?`,
+        tm("story.hintSize1", { total: values[0], groups: values[1] }),
+        tm("story.hintSize2", { groups: values[1], total: values[0] }),
       );
     case "times_as_many":
       return composeHints(
         kidTip,
-        `Look at the two bars. The second is ${values[1]} whole copies of the first.`,
+        tm("story.hintTimes1", { times: values[1] }),
         // Names the trap without naming the answer.
-        `"Times as many" is copies, not extra. ${values[1]} more would be a much shorter bar.`,
+        tm("story.hintTimes2", { times: values[1] }),
       );
     case "rate":
       return composeHints(
         kidTip,
-        `The ${values[0]} is the same for every ${cast.container.one}.`,
+        tm("story.hintRate1", { a: values[0], container: cast.container.one }),
         /* A rate is "so many each, this many times" — naming the *per* is what
            makes it a rate rather than a row of things, and the rows-and-columns
            story was being handed this same sentence. */
-        `${values[0]} per ${cast.container.one}, ${values[1]} of them.`,
+        tm("story.hintRate2", { a: values[0], container: cast.container.one, b: values[1] }),
       );
     case "multi_step":
       return composeHints(
         kidTip,
-        "There are two steps. Do the multiplication first.",
-        `${values[0]} × ${values[1]} first, then ${
-          question.steps?.[1].operation === "add" ? "add" : "take away"
-        } ${values[2]}.`,
+        tm("story.hintMulti1"),
+        tm(question.steps?.[1].operation === "add" ? "story.hintMultiAdd" : "story.hintMultiSubtract", { a: values[0], b: values[1], c: values[2] }),
       );
     case "equal_groups_total":
     default:
       return composeHints(
         kidTip,
-        `${values[0]} equal groups, ${values[1]} in each.`,
-        "Multiply the two numbers the sentence gives you.",
+        tm("story.hintTotal1", { a: values[0], b: values[1] }),
+        tm("story.hintTotal2"),
       );
   }
 }
@@ -370,6 +368,7 @@ export function storyHints(question: StoryQuestion, kidTip: string | undefined):
 /* -------------------------------------------------------------------------- */
 
 export const StoryBoard: React.FC<ActivityProps<StoryParams>> = ({ params, koda, onComplete, lesson }) => {
+  useT();
   const setup: StorySetup = useMemo(() => ({ ...params, ...params.question }), [params]);
   const copy = playCopy(params);
   const practising = isPractice(setup);
@@ -435,14 +434,12 @@ export const StoryBoard: React.FC<ActivityProps<StoryParams>> = ({ params, koda,
     judge(
       correct,
       String(value),
-      correct ? "That is it" : readAdditively ? "Times, not more" : "Not quite",
+      correct ? tm("story.thatIsIt") : readAdditively ? tm("story.timesNotMore") : tm("story.notQuite"),
       readAdditively
-        ? `${values[1]} more than ${values[0]} would be ${question.additiveAnswer}. ${values[1]} times as many is ${values[1]} whole copies: ${question.answer}.`
+        ? tm("story.additive", { a: values[0], b: values[1], additive: question.additiveAnswer ?? 0, answer: question.answer })
         : twoStep
-          ? `${values[0]} × ${values[1]} = ${question.intermediate}, then ${
-            question.steps?.[1].operation === "add" ? "add" : "take away"
-          } ${values[2]} to get ${question.answer}.`
-          : `${question.answer}.`,
+          ? tm(question.steps?.[1].operation === "add" ? "story.twoStepAdd" : "story.twoStepSubtract", { a: values[0], b: values[1], mid: question.intermediate ?? 0, c: values[2], answer: question.answer })
+          : tm("story.answerOnly", { answer: question.answer }),
     );
   };
 
@@ -451,7 +448,7 @@ export const StoryBoard: React.FC<ActivityProps<StoryParams>> = ({ params, koda,
     setFirstStep(true);
     round.useSupport("walkthrough");
     chime(koda, "reached");
-    speak(`${values[0]} times ${values[1]} is ${question.intermediate}.`);
+    speak(tm("story.saidFirst", { a: values[0], b: values[1], mid: question.intermediate ?? 0 }));
   };
 
   /* ---- the bar model ---- */
@@ -478,11 +475,11 @@ export const StoryBoard: React.FC<ActivityProps<StoryParams>> = ({ params, koda,
           <div className="mx-auto flex w-fit flex-col gap-2">
             <div className="flex items-center gap-2">
               <span className={`w-14 text-right text-xs font-bold ${NEUTRAL.text}`}>{cast.actor}</span>
-              {bar(1, `${cast.actor} has one bar of ${values[0]}`, GROUPS)}
+              {bar(1, tm("story.barLabel1", { actor: cast.actor, a: values[0] }), GROUPS)}
             </div>
             <div className="flex items-center gap-2">
               <span className={`w-14 text-right text-xs font-bold ${NEUTRAL.text}`}>{cast.other}</span>
-              {bar(values[1], `${cast.other} has ${values[1]} bars of ${values[0]}`, EACH)}
+              {bar(values[1], tm("story.barLabelN", { actor: cast.other, n: values[1], a: values[0] }), EACH)}
             </div>
           </div>
         </div>
@@ -495,8 +492,8 @@ export const StoryBoard: React.FC<ActivityProps<StoryParams>> = ({ params, koda,
           {bar(
             question.segments,
             unknown
-              ? `A bar of ${question.segments} equal parts, each unknown`
-              : `A bar of ${question.segments} parts of ${question.segmentValue}`,
+              ? tm("story.barUnknown", { n: question.segments })
+              : tm("story.barKnown", { n: question.segments, value: question.segmentValue }),
             GROUPS,
             unknown,
           )}
@@ -534,7 +531,7 @@ export const StoryBoard: React.FC<ActivityProps<StoryParams>> = ({ params, koda,
     <SkillRound
       koda={koda}
       lesson={lesson}
-      fallbackTitle="Story Problems"
+      fallbackTitle={tm("story.title")}
       round={round}
       totalQuestions={total}
       prompt={promptFor(question)}
@@ -564,10 +561,10 @@ export const StoryBoard: React.FC<ActivityProps<StoryParams>> = ({ params, koda,
               type="button"
               onClick={workFirstStep}
               disabled={!!round.feedback}
-              aria-label={`Work out ${values[0]} times ${values[1]} first`}
+              aria-label={tm("story.workLabel", { a: values[0], b: values[1] })}
               className={themeSystem.button("secondary", "md")}
             >
-              Do the first step
+              {tm("story.doFirst")}
             </button>
           )
         )}

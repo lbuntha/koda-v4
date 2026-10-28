@@ -20,6 +20,8 @@ import {
   type FractionSpec,
   type Whole,
 } from "./fractionNumbers";
+import { tf } from "../i18n";
+import { wholeName } from "./fractionNumbers";
 
 export type StripMode =
   /** Are these parts the same size? */
@@ -111,12 +113,12 @@ export function unequalWidths(parts: number): number[] {
 }
 
 const PROMPTS: Record<StripMode, (q: Omit<StripQuestion, "prompt">) => string> = {
-  equal_or_not: () => "Are all the parts the same size?",
-  name_unit: (q) => `One part of ${q.fraction.whole.name} is shaded. What is it called?`,
-  which_whole: (q) => `Both are ${nameOf(q.fraction)} shaded. Which is more?`,
-  build: (q) => `Shade ${q.target} of the ${q.fraction.parts} parts.`,
-  to_notation: (q) => `What fraction of ${q.fraction.whole.name} is shaded?`,
-  of_a_set: (q) => `What is ${nameOf(q.fraction)} of ${q.fraction.whole.name}?`,
+  equal_or_not: () => tf("strip.promptEqual"),
+  name_unit: (q) => tf("strip.promptName", { whole: wholeName(q.fraction.whole) }),
+  which_whole: (q) => tf("strip.promptWhich", { fraction: nameOf(q.fraction) }),
+  build: (q) => tf("strip.promptBuild", { target: q.target, parts: q.fraction.parts }),
+  to_notation: (q) => tf("strip.promptNotation", { whole: wholeName(q.fraction.whole) }),
+  of_a_set: (q) => tf("strip.promptSet", { fraction: nameOf(q.fraction), whole: wholeName(q.fraction.whole) }),
 };
 
 export function buildStripQuestion(
@@ -249,8 +251,8 @@ export function stripBlockedBecause(question: StripQuestion, shaded: number): St
 }
 
 export const STRIP_REFUSALS: Record<Exclude<StripBlock, null>, string> = {
-  "shade-more": "Shade more of them — count how many the question asked for.",
-  "shade-fewer": "That is too many. Take one off.",
+  get "shade-more"() { return tf("strip.shadeMore"); },
+  get "shade-fewer"() { return tf("strip.shadeFewer"); },
 };
 
 export { canPartition };
@@ -279,36 +281,36 @@ export function explainStrip(q: StripQuestion, correct: boolean, given?: string)
   if (!correct) {
     switch (q.mode) {
       case "equal_or_not":
-        return "Compare two parts side by side. If one is wider than another, the split is not fair.";
+        return tf("strip.missEqual");
       case "name_unit":
-        return `Count the parts the whole is cut into — there are ${f.parts}. One of them is one ${partWord(f.parts)}.`;
+        return tf("strip.missName", { parts: f.parts, word: partWord(f.parts) });
       case "which_whole":
-        return "The same fraction is shaded on both. What differs is how big each whole was to start with.";
+        return tf("strip.missWhich");
       case "to_notation":
         return given && given.startsWith(String(f.parts))
-          ? "That is the two numbers the wrong way up. The shaded parts go on top."
-          : "Count the shaded parts for the top number, and all of them for the bottom.";
+          ? tf("strip.missNotationFlip")
+          : tf("strip.missNotation");
       case "of_a_set":
-        return `Split the ${size} into ${f.parts} equal groups first — that is ${perGroup} in each.`;
+        return tf("strip.missSet", { size, parts: f.parts, per: perGroup });
       default:
-        return "Shade one part at a time and count as you go.";
+        return tf("strip.missBuild");
     }
   }
 
   switch (q.mode) {
     case "equal_or_not":
       return q.areEqual
-        ? "Every part is the same size, so each one really is one of that many equal parts."
-        : "The parts are different sizes, so they are not fractions of this whole at all.";
+        ? tf("strip.rightEqualYes")
+        : tf("strip.rightEqualNo");
     case "name_unit":
-      return `The whole is cut into ${f.parts} equal parts, so one of them is one ${partWord(f.parts)} — 1/${f.parts}.`;
+      return tf("strip.rightName", { parts: f.parts, word: partWord(f.parts) });
     case "which_whole":
-      return "Same fraction, different whole. A fraction is not an amount until you say what it is a fraction of.";
+      return tf("strip.rightWhich");
     case "build":
-      return `${f.taken} copies of 1/${f.parts} is ${f.taken}/${f.parts}. One number, not two.`;
+      return tf("strip.rightBuild", { taken: f.taken, parts: f.parts });
     case "to_notation":
-      return `${f.taken} parts shaded out of ${f.parts} altogether — ${f.taken}/${f.parts}.`;
+      return tf("strip.rightNotation", { taken: f.taken, parts: f.parts });
     default:
-      return `${size} split into ${f.parts} groups is ${perGroup} in each, and ${f.taken} ${f.taken === 1 ? "group" : "groups"} is ${perGroup * f.taken}.`;
+      return tf("strip.rightSet", { size, parts: f.parts, per: perGroup, count: f.taken, taken: f.taken, answer: perGroup * f.taken });
   }
 }

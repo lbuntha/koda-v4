@@ -7,6 +7,8 @@ import { deduce } from "../internal/deduction";
 import { clueName } from "../internal/reasons";
 import { BoardGrid, tileLabel } from "../internal/BoardGrid";
 import { PALETTE } from "../internal/palette";
+import { colourTitle, colourWord, tw, whereLower } from "../internal/i18n";
+import { useT } from "../../../lib/i18n";
 import { BOARD_MODES, generatePuzzle, type BoardMode, type PatternKind } from "../internal/puzzles";
 import { chime, speechRate, tagLabelsFrom } from "../internal/sweeperChrome";
 import { useNudge } from "../internal/useNudge";
@@ -92,10 +94,8 @@ const DEFAULTS = { questionsPerRound: 3 };
 /* -------------------------------------------------------------------------- */
 
 const promptText = (board: Board, partial: boolean): string => {
-  const names = board.palette.map((c) => PALETTE[c].name.toLowerCase()).join(" and ");
-  return partial
-    ? `Colour only the tiles these clues can settle, and leave the rest blank. Use ${names}.`
-    : `Colour every blank tile so all the clues are true. Use ${names}.`;
+  const names = board.palette.map(colourWord).reduce((a, b) => tw("and", { a, b }));
+  return partial ? tw("board.partialPrompt", { names }) : tw("board.fullPrompt", { names });
 };
 
 export function buildQuestion(params: SweeperParams, index: number, seen?: Set<string>): SweeperQuestion {
@@ -178,7 +178,7 @@ export const promptFor = (question: SweeperQuestion): string => question.prompt 
 /* -------------------------------------------------------------------------- */
 
 export const figureFor = (question: SweeperQuestion): React.ReactNode => (
-  <BoardGrid board={question.board} availableWidth={260} label="Board" />
+  <BoardGrid board={question.board} availableWidth={260} label={tw("grid.board")} />
 );
 
 export function printedFor(question: SweeperQuestion): PrintedQuestion | null {
@@ -188,31 +188,26 @@ export function printedFor(question: SweeperQuestion): PrintedQuestion | null {
     .split(",")
     .map((pair) => {
       const [cell, color] = pair.split(":");
-      return `${tileLabel(question.board, Number(cell))} → ${PALETTE[color as Color].name}`;
+      return `${tileLabel(question.board, Number(cell))} → ${colourTitle(color as Color)}`;
     })
     .join("; ");
   return {
-    text: `Colour every blank tile so all the clues are true. Each clue counts the tiles it touches, including corners, and never itself. ____`,
+    text: tw("board.printed"),
     answer,
   };
 }
 
 export function methodFor(): string[] | null {
   return [
-    "Read each clue: which colour it counts, and how many.",
-    "A clue that has all its matches already leaves nothing else that colour.",
-    "A clue that needs as many as there are spaces left fills every one of them.",
+    tw("board.method1"),
+    tw("board.method2"),
+    tw("board.method3"),
   ];
 }
 
 /* -------------------------------------------------------------------------- */
 /* Hints — read off the board as it stands, never off an answer                 */
 /* -------------------------------------------------------------------------- */
-
-const where = (board: Board, cell: number) => {
-  const [row, col] = [Math.floor(cell / board.size) + 1, (cell % board.size) + 1];
-  return `row ${row}, column ${col}`;
-};
 
 /** The next move the supported rules can justify, in words. */
 export function nextStep(
@@ -224,22 +219,22 @@ export function nextStep(
   if (!step) return null;
   const [evidence] = step.evidence;
   const clue = board.clues.find((c) => c.id === evidence.clueId)!;
-  const colour = PALETTE[step.color].name.toLowerCase();
+  const colour = colourWord(step.color);
   // Named by what it counts: a line or board-total clue has no tile of its own.
-  const name = `Look at ${clueName(board, clue)}.`;
-  const first = step.changes[0] ? where(board, step.changes[0].cell) : "the next open tile";
+  const name = tw("board.lookAt", { name: clueName(board, clue) });
+  const first = step.changes[0] ? whereLower(board, step.changes[0].cell) : tw("board.firstFallback");
   const worked =
     step.rule === "zero"
-      ? `It allows no ${colour} neighbours at all, so every blank tile it touches is the other colour.`
+      ? tw("board.stepZero", { colour })
       : step.rule === "full"
-        ? `It needs every touching tile to be ${colour}. Start at ${first}.`
+        ? tw("board.stepFull", { colour, first })
         : step.rule === "remaining-exclude"
-          ? `It already has ${clue.count} ${colour} tiles. ${first} must be another colour.`
+          ? tw("board.stepExclude", { count: String(clue.count), colour, first })
           : step.rule === "remaining-fill"
-            ? `It needs ${evidence.remaining} more ${colour}, exactly the open choices left. Start at ${first}.`
+            ? tw("board.stepFill", { remaining: String(evidence.remaining), colour, first })
             : step.rule === "overlap-exclude"
-              ? `Shared tiles already use the ${colour} count. ${first} cannot be ${colour}.`
-              : `Comparing the clues leaves ${colour} for ${first}. Colour that tile next.`;
+              ? tw("board.stepOverExclude", { colour, first })
+              : tw("board.stepOverFill", { colour, first });
   /* Focus the next actionable tile, never a whole answer pattern. Once it is
      painted, `deduce` recalculates and this focus moves with the learner. */
   const target = step.changes[0]?.cell ?? -1;
@@ -254,8 +249,8 @@ export function sweeperHints(
   const step = nextStep(question.board, assignment);
   return composeHints(
     kidTip,
-    step ? step.name : "Every clue that can still say something has said it. Check what you have.",
-    step ? step.worked : "Read each clue again and count the tiles it touches.",
+    step ? step.name : tw("board.hintDone"),
+    step ? step.worked : tw("board.hintReread"),
   );
 }
 
@@ -264,6 +259,7 @@ export function sweeperHints(
 /* -------------------------------------------------------------------------- */
 
 export const SweeperBoard: React.FC<ActivityProps<SweeperParams>> = ({ params, koda, onComplete, lesson }) => {
+  useT();
   const setup: SweeperSetup = useMemo(() => ({ ...params, ...params.question }), [params]);
   const copy = playCopy(params);
   const practising = isPractice(setup);
@@ -374,7 +370,7 @@ export const SweeperBoard: React.FC<ActivityProps<SweeperParams>> = ({ params, k
       const guessed = question.blanks.filter((c) => !question.asked.includes(c) && assignment[c] !== null);
       const missing = question.asked.filter((c) => assignment[c] === null);
       if (missing.length) {
-        nudge.refuse(`${missing.length} tile${missing.length === 1 ? "" : "s"} the clues do settle ${missing.length === 1 ? "is" : "are"} still blank.`);
+        nudge.refuse(tw("board.missing", { count: missing.length }));
         guide.stumbled();
         return;
       }
@@ -383,19 +379,19 @@ export const SweeperBoard: React.FC<ActivityProps<SweeperParams>> = ({ params, k
       if (hapticsEnabled && correct) koda.haptics.success();
       round.submit({
         correct, given, expected: question.expected,
-        title: correct ? "Exactly what they settle" : guessed.length ? "One of those was a guess" : "Not quite",
+        title: correct ? tw("board.partialRight") : guessed.length ? tw("board.partialGuess") : tw("board.partialWrong"),
         message: correct
-          ? "And you left the rest blank, because these clues cannot decide them yet."
+          ? tw("board.partialRightMsg")
           : guessed.length
-            ? "These two clues cannot decide every tile. Where they cannot, the answer is to leave it blank and look for another clue."
-            : "Compare what the two clues share against what only one of them touches.",
+            ? tw("board.partialGuessMsg")
+            : tw("board.partialWrongMsg"),
       });
       return;
     }
     if (remaining > 0) {
       /* Not a wrong answer: an unfinished board is not an answer at all, and
          scoring it would cost a child a star for not having finished. */
-      nudge.refuse(`${remaining} tile${remaining === 1 ? "" : "s"} still to colour.`);
+      nudge.refuse(tw("board.toColour", { count: remaining }));
       guide.stumbled();
       return;
     }
@@ -410,12 +406,12 @@ export const SweeperBoard: React.FC<ActivityProps<SweeperParams>> = ({ params, k
       correct,
       given: assignment.map((c, i) => (board.givens[i] === null ? `${i}:${c}` : null)).filter(Boolean).join(","),
       expected: question.expected,
-      title: correct ? "Every clue is true" : "One clue is not true yet",
+      title: correct ? tw("board.solvedTitle") : tw("board.unsolvedTitle"),
       message: correct
-        ? "Each tile has a reason, and all the clues agree."
+        ? tw("board.solvedMsg")
         : clue
-          ? `${scopeOf(clue).kind === "neighborhood" ? "Count around" : "Recount"} ${clueName(board, clue)} and compare it with what it says.`
-          : "Check each clue against the tiles it touches.",
+          ? tw(scopeOf(clue).kind === "neighborhood" ? "board.recountAround" : "board.recount", { name: clueName(board, clue) })
+          : tw("board.checkEach"),
     });
   };
 
@@ -444,7 +440,7 @@ export const SweeperBoard: React.FC<ActivityProps<SweeperParams>> = ({ params, k
     <SkillRound
       koda={koda}
       lesson={lesson}
-      fallbackTitle="Colour the Board"
+      fallbackTitle={tw("board.title")}
       round={round}
       totalQuestions={total}
       prompt={promptFor(question)}
@@ -470,12 +466,12 @@ export const SweeperBoard: React.FC<ActivityProps<SweeperParams>> = ({ params, k
           onTap={paint}
           locked={Boolean(round.feedback)}
           availableWidth={board.size === 4 ? 380 : 320}
-          label="Board to colour"
+          label={tw("grid.toColour")}
         />
 
         <div className="flex flex-wrap items-center justify-center gap-2">
-          {board.palette.map((c) => brushButton(c, PALETTE[c].name, PALETTE[c].symbol))}
-          {brushButton("erase", "Erase", "⌫")}
+          {board.palette.map((c) => brushButton(c, colourTitle(c), PALETTE[c].symbol))}
+          {brushButton("erase", tw("board.erase"), "⌫")}
         </div>
 
         <div className="flex flex-wrap items-center justify-center gap-2">
@@ -485,7 +481,7 @@ export const SweeperBoard: React.FC<ActivityProps<SweeperParams>> = ({ params, k
             disabled={Boolean(round.feedback) || !history.length}
             className="min-h-11 rounded-2xl border-2 border-ink/20 px-5 py-2 text-base font-bold text-ink disabled:opacity-40 focus:outline-none focus-visible:ring-2 focus-visible:ring-sky-500"
           >
-            Undo
+            {tw("board.undo")}
           </button>
           <button
             type="button"
@@ -493,7 +489,7 @@ export const SweeperBoard: React.FC<ActivityProps<SweeperParams>> = ({ params, k
             disabled={Boolean(round.feedback)}
             className="min-h-11 rounded-2xl border-2 border-violet-500 bg-violet-500/10 px-6 py-2 text-base font-black text-ink focus:outline-none focus-visible:ring-2 focus-visible:ring-sky-500"
           >
-            Check {!question.partial && remaining ? `(${remaining} left)` : ""}
+            {!question.partial && remaining ? tw("board.checkLeft", { count: remaining }) : tw("board.check")}
           </button>
         </div>
       </div>

@@ -613,8 +613,9 @@ function DraftEditor({ id, onClose }: { id: string; onClose(): void }) {
             <ShapePicker onPick={addPrimitive} />
             <AutoStrokesButton
               item={item}
-              onStrokes={(strokes) => {
-                edit({ ...item, strokes: renumber(strokes) });
+              onStrokes={(strokes, size) => {
+                const glyph = item.guide?.glyph;
+                edit({ ...item, strokes: renumber(strokes), ...(size && glyph && item.guide ? { guide: { ...item.guide, glyph: { ...glyph, ...size } } } : {}) });
                 select(strokes.length ? 0 : null);
                 setMode("adjust");
               }}

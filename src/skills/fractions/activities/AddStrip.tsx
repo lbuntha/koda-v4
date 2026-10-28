@@ -21,6 +21,8 @@ import {
   type AddSetup,
 } from "../internal/data/fractionAdd";
 import type { Fraction } from "../internal/data/fractionNumbers";
+import { tf } from "../internal/i18n";
+import { useT } from "../../../lib/i18n";
 
 /**
  * Adding and taking away — which is counting, once the pieces match.
@@ -55,56 +57,57 @@ export function addHints(question: AddQuestion): string[] {
   switch (question.mode) {
     case "add_like":
       return composeHints(
-        `Both are ${partWord(left.parts, true)}, so the pieces are already the same size.`,
-        "That means you can simply count them together.",
-        "The bottom number does not change — you have not cut anything.",
+        tf("add.hintLike1", { words: partWord(left.parts, true) }),
+        tf("add.hintLike2"),
+        tf("add.hintLike3"),
       );
     case "subtract_like":
       return composeHints(
-        `Both are ${partWord(left.parts, true)}, so you can take one count from the other.`,
-        "Count what is left on the strip.",
-        "The bottom number stays put. Only how many you have changes.",
+        tf("add.hintSub1", { words: partWord(left.parts, true) }),
+        tf("add.hintSub2"),
+        tf("add.hintSub3"),
       );
     case "refute":
       return composeHints(
-        "Lay both fractions along the strip, one after the other.",
-        `Cut them both into ${piece} so the pieces are the same size.`,
-        "The claim is smaller than a starting piece, so it cannot be the total.",
+        tf("add.hintRef1"),
+        tf("add.hintRef2", { words: piece }),
+        tf("add.hintRef3"),
       );
     case "add_nested":
       return composeHints(
-        `One bottom number goes into the other, so only one bar needs cutting.`,
-        `Cut the ${partWord(Math.min(left.parts, right.parts), true)} into ${partWord(Math.max(left.parts, right.parts), true)}.`,
-        "Now both are the same size, so count them together.",
+        tf("add.hintNest1"),
+        tf("add.hintNest2", { small: partWord(Math.min(left.parts, right.parts), true), big: partWord(Math.max(left.parts, right.parts), true) }),
+        tf("add.hintNest3"),
       );
     case "add_mixed":
       return composeHints(
-        "Deal with the whole ones first, then the parts.",
-        `Cut both fraction parts to ${piece} so they match.`,
-        "If the parts make more than one whole, that whole joins the others.",
+        tf("add.hintMix1"),
+        tf("add.hintMix2", { words: piece }),
+        tf("add.hintMix3"),
       );
     case "subtract_mixed":
       return composeHints(
-        "There are not enough loose parts to take that many away.",
-        `Break one whole up — it gives you ${common} more ${piece}.`,
-        "Now take them away, and count the whole ones that are left.",
+        tf("add.hintSM1"),
+        tf("add.hintSM2", { common, words: piece }),
+        tf("add.hintSM3"),
       );
     case "subtract_unlike":
       return composeHints(
-        "The pieces differ, so you cannot take one count from the other yet.",
-        `Cut both bars into ${piece}; ${common} works for these.`,
-        "Now subtract the matching pieces and keep their common bottom number.",
+        tf("add.hintSU1"),
+        tf("add.hintSU2", { words: piece, common }),
+        tf("add.hintSU3"),
       );
     default:
       return composeHints(
-        "The pieces are different sizes, so counting them now would mean nothing.",
-        `Find a size both fit into — ${common} works for these.`,
-        "Cut both bars to that size, then count.",
+        tf("add.hintUn1"),
+        tf("add.hintUn2", { common }),
+        tf("add.hintUn3"),
       );
   }
 }
 
 export const AddStrip: React.FC<ActivityProps<AddParams>> = ({ params, koda, onComplete, lesson }) => {
+  useT();
   const setup: AddSetup = useMemo(() => ({ ...params, ...params.question }), [params]);
   const practising = isPractice(setup);
   const total = setup.questionsPerRound ?? 5;
@@ -190,7 +193,7 @@ export const AddStrip: React.FC<ActivityProps<AddParams>> = ({ params, koda, onC
       correct,
       given: text,
       expected: question.expected,
-      title: correct ? "Yes!" : "Not yet",
+      title: correct ? tf("add.yes") : tf("add.notYet"),
       message: explainAdd(question, correct),
     });
   };
@@ -199,7 +202,7 @@ export const AddStrip: React.FC<ActivityProps<AddParams>> = ({ params, koda, onC
     <SkillRound
       koda={koda}
       lesson={lesson}
-      fallbackTitle="Adding Pieces"
+      fallbackTitle={tf("add.title")}
       round={round}
       totalQuestions={total}
       prompt={promptFor(question)}
@@ -257,7 +260,7 @@ export const AddStrip: React.FC<ActivityProps<AddParams>> = ({ params, koda, onC
             disabled={!!round.feedback}
             className="min-h-11 rounded-2xl bg-surface px-5 py-2 text-sm font-semibold text-ink shadow-sm focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500"
           >
-            Cut them to match
+            {tf("add.cutMatch")}
           </button>
         ) : null}
 
@@ -303,8 +306,8 @@ export const AddStrip: React.FC<ActivityProps<AddParams>> = ({ params, koda, onC
 export function printedFor(question: AddQuestion): { text: string; answer: string } | null {
   if (question.mode === "refute") {
     return {
-      text: `Somebody says ${nameOf(question.left)} + ${nameOf(question.right)} = ${nameOf(question.claim as Fraction)}. Work out the real answer, and say why theirs is too small.`,
-      answer: `${question.expected} — the claim is smaller than ${nameOf(question.left)} on its own`,
+      text: tf("add.printRefute", { left: nameOf(question.left), right: nameOf(question.right), claim: nameOf(question.claim as Fraction) }),
+      answer: tf("add.printRefuteAnswer", { expected: question.expected, left: nameOf(question.left) }),
     };
   }
   const sign = question.operation === "add" ? "+" : "−";
@@ -327,26 +330,26 @@ export const figureFor = (question: AddQuestion): React.ReactNode | null => {
 export function methodFor(question: AddQuestion): string[] | null {
   if (question.mode === "refute") {
     return [
-      "Lay both fractions end to end and see how far they reach.",
-      "An answer smaller than one of the pieces you started with cannot be their total.",
+      tf("add.methodRef1"),
+      tf("add.methodRef2"),
     ];
   }
   if (question.mode === "subtract_mixed") {
     return [
-      "Cut both fractions to the same-sized pieces first.",
-      "If there are not enough loose parts, break one whole one up — it gives you a whole set more.",
-      "Then take them away and count the whole ones left.",
+      tf("add.methodSM1"),
+      tf("add.methodSM2"),
+      tf("add.methodSM3"),
     ];
   }
   if (!question.mustMatch) {
     return [
-      "The bottom numbers are the same, so the pieces are the same size.",
-      "Count them together. The bottom number does not change.",
+      tf("add.methodLike1"),
+      tf("add.methodLike2"),
     ];
   }
   return [
-    "The pieces are different sizes, so they cannot be counted yet.",
-    "Find a size they both fit into, and re-write both fractions in it.",
-    "Now the pieces match, so counting them together gives the answer.",
+    tf("add.methodDef1"),
+    tf("add.methodDef2"),
+    tf("add.methodDef3"),
   ];
 }

@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 import { renderActivity, expectStandardRound, type ActivityHarness } from "../kit/testing";
 import { skill } from ".";
 import { buildQuestion, sentenceFor, type StoryMode } from "./activities/StoryBoard";
-import { ACTORS, castFor } from "./internal/data/storyCast";
+import { actors, castFor } from "./internal/data/storyCast";
 import { drawMultiplicationStory } from "./internal/data/multiplicationNumbers";
 
 /**
@@ -185,8 +185,8 @@ describe("the cast is fixed, and steady within a question", () => {
     for (let i = 0; i < 400; i += 1) {
       const cast = castFor(`story-times_as_many-${i}`);
       expect(cast.actor).not.toBe(cast.other);
-      expect(ACTORS).toContain(cast.actor);
-      expect(ACTORS).toContain(cast.other);
+      expect(actors()).toContain(cast.actor);
+      expect(actors()).toContain(cast.other);
     }
   });
 

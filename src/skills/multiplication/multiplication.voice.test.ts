@@ -3,6 +3,11 @@ import { readFileSync, readdirSync } from "node:fs";
 import { join } from "node:path";
 import voice from "./voice.json";
 import lessons from "./lessons.json";
+import english from "./locales/en.json";
+
+/** An English line of the catalog, by its dotted key. */
+const line = (key: string): string =>
+  key.split(".").reduce<any>((node, part) => node?.[part], english) as string;
 
 /**
  * The spoken inventory and the engines agree.
@@ -73,7 +78,9 @@ function spokenRefusals(text: string): string[] {
     if (split === -1) continue;
     const spoken = inside.slice(split + 1);
     // A conditional spoken line offers more than one; both are recorded.
-    lines.push(...[...spoken.matchAll(/"([^"\\]*)"/g)].map((m) => m[1]).filter(Boolean));
+    lines.push(...[...spoken.replace(/\btm\("[\w.]+"\)/g, "").matchAll(/"([^"\\]*)"/g)].map((m) => m[1]).filter(Boolean));
+    // Lines now live in the catalog: `tm("table.tapCell")` is the English under that key.
+    lines.push(...[...spoken.matchAll(/\btm\("([\w.]+)"\)/g)].map((m) => line(m[1])));
   }
   return lines;
 }
@@ -90,7 +97,7 @@ describe("the voice inventory matches what the engines say", () => {
 
   it("declares nothing the engine never says", () => {
     for (const phrase of voice.phrases) {
-      expect(source.includes(`"${phrase}"`), `"${phrase}" is declared but never spoken`).toBe(true);
+      expect(new Set(spokenRefusals(source)).has(phrase), `"${phrase}" is declared but never spoken`).toBe(true);
     }
   });
 

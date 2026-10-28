@@ -17,6 +17,7 @@ import { drawProduct, randInt, withoutRepeat } from "../internal/data/multiplica
 import {
   drawPatternHunt,
   noteFor,
+  ruleById,
   type PatternRuleId,
 } from "../internal/data/tablePatterns";
 import { chime } from "../internal/data/multiplicationSound";
@@ -26,6 +27,8 @@ import { GRID_SIZES } from "../internal/data/multiplicationLayout";
 import { TimesTableChart, type CellTone } from "../internal/ui/TimesTableChart";
 import { useNudge } from "../internal/ui/useNudge";
 import { NumberPad } from "../internal/ui/NumberPad";
+import { tm } from "../internal/i18n";
+import { useT } from "../../../lib/i18n";
 
 /**
  * The whole table at once.
@@ -146,21 +149,21 @@ export function buildQuestion(params: TableParams, index: number, seen?: Set<str
       return {
         ...base,
         taskKind: "table_pattern_hunt",
-        prompt: `In the ${a} times row, tap every answer that ${base.ruleAsks}.`,
+        prompt: tm("table.promptHunt", { a, asks: base.ruleAsks ?? "" }),
         expected: base.matches.map((partner) => a * partner).join(", "),
       };
     case "squares":
       return {
         ...base,
         taskKind: "table_squares",
-        prompt: `${a} × ${a}. Find the square on the diagonal.`,
+        prompt: tm("table.promptSquares", { a }),
         expected: String(product),
       };
     case "commutative_pairs":
       return {
         ...base,
         taskKind: "table_commutative_pairs",
-        prompt: `${a} × ${b} is shaded. Tap the other cell that holds the same answer.`,
+        prompt: tm("table.promptPairs", { a, b }),
         expected: `${b} × ${a}`,
       };
     case "find_cell":
@@ -168,7 +171,7 @@ export function buildQuestion(params: TableParams, index: number, seen?: Set<str
       return {
         ...base,
         taskKind: "table_find_cell",
-        prompt: `Find ${a} × ${b}. Go along row ${a} and down column ${b}.`,
+        prompt: tm("table.promptFind", { a, b }),
         expected: String(product),
       };
   }
@@ -188,16 +191,16 @@ export function printedFor(question: TableQuestion): PrintedQuestion | null {
       // and rewriting it as "list them" would be different arithmetic (§9).
       return null;
     case "squares":
-      return { text: `${a} × ${a} = ____`, answer: String(product) };
+      return { text: tm("table.printedSquare", { a }), answer: String(product) };
     case "commutative_pairs":
       return {
-        text: `${a} × ${b} = ${product}. Write the other multiplication that gives ${product}.`,
-        answer: `${b} × ${a} = ${product}`,
+        text: tm("table.printedPairs", { a, b, product }),
+        answer: tm("table.printedPairsAnswer", { a, b, product }),
       };
     case "find_cell":
     default:
       return {
-        text: `Use a times table. Go along row ${a} and down column ${b}. ${a} × ${b} = ____`,
+        text: tm("table.printedFind", { a, b }),
         answer: String(product),
       };
   }
@@ -209,22 +212,22 @@ export function methodFor(question: TableQuestion): string[] | null {
       return null;
     case "squares":
       return [
-        `A square number is a number times itself.`,
-        `${question.a} rows of ${question.a} makes a true square.`,
-        "They sit on the diagonal of the times table.",
+        tm("table.methodSquare1"),
+        tm("table.methodSquare2", { a: question.a }),
+        tm("table.methodSquare3"),
       ];
     case "commutative_pairs":
       return [
-        "Every fact in the table appears twice.",
-        "Swap the two numbers over and the answer does not change.",
-        "The two cells sit either side of the diagonal.",
+        tm("table.methodPairs1"),
+        tm("table.methodPairs2"),
+        tm("table.methodPairs3"),
       ];
     case "find_cell":
     default:
       return [
-        `Find row ${question.a} down the side.`,
-        `Find column ${question.b} along the top.`,
-        "The answer is where they meet.",
+        tm("table.methodFind1", { a: question.a }),
+        tm("table.methodFind2", { b: question.b }),
+        tm("table.methodFind3"),
       ];
   }
 }
@@ -240,7 +243,7 @@ export function figureFor(question: TableQuestion): React.ReactNode | null {
       viewBox={`0 0 ${a * cell + pad * 2} ${a * cell + pad * 2}`}
       width="100%"
       role="img"
-      aria-label={`A square of ${a} rows of ${a}`}
+      aria-label={tm("table.squareLabel", { a })}
     >
       {Array.from({ length: a }, (_, r) =>
         Array.from({ length: a }, (_, c) => (
@@ -280,29 +283,29 @@ export function tableHints(
       return composeHints(
         kidTip,
         state.picked.length === 0
-          ? `Read along the ${a} times row and check each answer against the rule.`
-          : `You have ${state.picked.length} so far. Keep going to the end of the row.`,
+          ? tm("table.hintHunt1", { a })
+          : tm("table.hintHuntSoFar", { count: state.picked.length }),
         // Stops short of naming a cell: which ones fit is the question.
-        `Work along the row one cell at a time rather than looking for a shape.`,
+        tm("table.hintHunt2"),
       );
     case "squares":
       return composeHints(
         kidTip,
-        `A square number is a number times itself: ${a} rows of ${a}.`,
-        `Follow row ${a} across until it meets column ${a}. That cell is on the diagonal.`,
+        tm("table.hintSquare1", { a }),
+        tm("table.hintSquare2", { a }),
       );
     case "commutative_pairs":
       return composeHints(
         kidTip,
-        `The partner of ${a} × ${b} has the same two numbers the other way round.`,
-        `Look in row ${b}, and go across to column ${a}.`,
+        tm("table.hintPairs1", { a, b }),
+        tm("table.hintPairs2", { a, b }),
       );
     case "find_cell":
     default:
       return composeHints(
         kidTip,
-        `One finger on row ${a}, one on column ${b}. Slide them together.`,
-        "Slide them together. The answer is the cell where they meet.",
+        tm("table.hintFind1", { a, b }),
+        tm("table.hintFind2"),
       );
   }
 }
@@ -312,6 +315,7 @@ export function tableHints(
 /* -------------------------------------------------------------------------- */
 
 export const TableGrid: React.FC<ActivityProps<TableParams>> = ({ params, koda, onComplete, lesson }) => {
+  useT();
   const setup: TableSetup = useMemo(() => ({ ...params, ...params.question }), [params]);
   const copy = playCopy(params);
   const practising = isPractice(setup);
@@ -409,14 +413,18 @@ export const TableGrid: React.FC<ActivityProps<TableParams>> = ({ params, koda, 
   };
 
   /** Right or wrong, the pattern gets said. A round that only says "correct" has taught tapping. */
-  const withNote = (text: string) => (question.note ? `${text} ${question.note}` : text);
+  const withNote = (text: string) => {
+    const note = noteFor(a);
+    return note ? `${text} ${note}` : text;
+  };
+  const asks = question.rule ? ruleById(question.rule).asks : "";
 
   const tapCell = (row: number, col: number) => {
     if (round.feedback) return;
 
     if (mode === "pattern_hunt") {
       if (row !== a) {
-        refuse(`This hunt is the ${a} times row. That cell is in row ${row}.`, "Stay in the row.");
+        refuse(tm("table.stayRow", { a, row }), tm("table.stayRowSay"));
         return;
       }
       setPicked((current) =>
@@ -431,15 +439,15 @@ export const TableGrid: React.FC<ActivityProps<TableParams>> = ({ params, koda, 
 
     if (mode === "commutative_pairs") {
       if (row === a && col === b) {
-        refuse("That is the cell already shaded. Its partner is the other way round.", "That is the one you were given.");
+        refuse(tm("table.alreadyShaded"), tm("table.alreadyShadedSay"));
         return;
       }
       const correct = row === b && col === a;
       judge(
         correct,
         `${row} × ${col}`,
-        correct ? "That is its twin" : "Not its twin",
-        `${a} × ${b} and ${b} × ${a} both hold ${question.product}. They sit either side of the diagonal.`,
+        correct ? tm("table.twinTitle") : tm("table.notTwinTitle"),
+        tm("table.twinMessage", { a, b, product: question.product }),
       );
       return;
     }
@@ -449,17 +457,17 @@ export const TableGrid: React.FC<ActivityProps<TableParams>> = ({ params, koda, 
     judge(
       correct,
       `${row} × ${col}`,
-      correct ? "That is the cell" : "Not that cell",
+      correct ? tm("table.cellTitle") : tm("table.notCellTitle"),
       mode === "squares"
-        ? `${a} × ${a} = ${question.product}. Squares sit on the diagonal.`
-        : `Row ${a} and column ${b} meet at ${question.product}. Row ${b}, column ${a} holds it too.`,
+        ? tm("table.squareMessage", { a, product: question.product })
+        : tm("table.meetMessage", { a, b, product: question.product }),
     );
   };
 
   const checkHunt = () => {
     if (round.feedback) return;
     if (picked.length === 0) {
-      refuse("Tap the answers that fit the rule first.", "Tap a cell first.");
+      refuse(tm("table.tapFirst"), tm("table.tapCell"));
       return;
     }
     const wanted = question.matches.map((partner) => cellId(a, partner)).sort((x, y) => x - y);
@@ -468,11 +476,11 @@ export const TableGrid: React.FC<ActivityProps<TableParams>> = ({ params, koda, 
     judge(
       correct,
       given.map((id) => `${Math.floor(id / 100)} × ${id % 100}`).join(", "),
-      correct ? "Every one of them" : "Not the whole set",
+      correct ? tm("table.huntRightTitle") : tm("table.huntWrongTitle"),
       withNote(
         correct
-          ? `All ${wanted.length} of them.`
-          : `${wanted.length} answers in this row ${question.ruleAsks}.`,
+          ? tm("table.huntAll", { count: wanted.length })
+          : tm("table.huntCount", { count: wanted.length, asks }),
       ),
     );
   };
@@ -483,14 +491,14 @@ export const TableGrid: React.FC<ActivityProps<TableParams>> = ({ params, koda, 
     judge(
       correct,
       String(value),
-      correct ? "That is it" : "Not quite",
-      `${a} × ${b} = ${question.product}.`,
+      correct ? tm("table.rightTitle") : tm("table.wrongTitle"),
+      tm("table.answerLine", { a, b, product: question.product }),
     );
   };
 
   const submitTyped = () => {
     if (typed === "") {
-      refuse("Type a number first.", "Type a number first.");
+      refuse(tm("table.typeFirst"), tm("table.typeFirst"));
       return;
     }
     answerProduct(Number(typed));
@@ -519,14 +527,14 @@ export const TableGrid: React.FC<ActivityProps<TableParams>> = ({ params, koda, 
       toneOf={toneOf}
       onCell={tapCell}
       disabled={!!round.feedback}
-      label={`Times table up to ${question.ceiling}`}
+      label={tm("chart.upTo", { ceiling: question.ceiling })}
     />
   );
 
   const squareFigure = mode === "squares" && (
     <div
       role="img"
-      aria-label={`${a} rows of ${a}`}
+      aria-label={tm("table.rowsOf", { a })}
       className={`flex flex-col ${GRID_SIZES.dense.gap}`}
     >
       {Array.from({ length: a }, (_, r) => (
@@ -546,7 +554,7 @@ export const TableGrid: React.FC<ActivityProps<TableParams>> = ({ params, koda, 
   const numericAnswer = usePad ? (
     <div className="flex flex-col items-center gap-3">
       <output
-        aria-label="Your answer"
+        aria-label={tm("table.yourAnswer")}
         className={`min-h-11 min-w-24 rounded-xl border-2 px-4 py-2 text-center text-2xl font-black tabular-nums ${PRODUCT.border} ${PRODUCT.text}`}
       >
         {typed || "—"}
@@ -557,7 +565,7 @@ export const TableGrid: React.FC<ActivityProps<TableParams>> = ({ params, koda, 
         disabled={!!round.feedback}
       />
       <button type="button" onClick={submitTyped} disabled={!!round.feedback} className={themeSystem.button("primary", "md")}>
-        Check
+        {tm("table.check")}
       </button>
     </div>
   ) : null;
@@ -591,7 +599,7 @@ export const TableGrid: React.FC<ActivityProps<TableParams>> = ({ params, koda, 
     <SkillRound
       koda={koda}
       lesson={lesson}
-      fallbackTitle="Times Table"
+      fallbackTitle={tm("table.title")}
       round={round}
       totalQuestions={total}
       prompt={promptFor(question)}
@@ -619,11 +627,11 @@ export const TableGrid: React.FC<ActivityProps<TableParams>> = ({ params, koda, 
           <div className="flex flex-col items-center gap-3">
             {scaffold && (
               <p className={`text-center text-sm font-bold ${GROUPS.text}`} aria-live="polite">
-                {picked.length} chosen in the {a} times row
+                {tm("table.chosen", { count: picked.length, a })}
               </p>
             )}
             <button type="button" onClick={checkHunt} disabled={!!round.feedback} className={themeSystem.button("primary", "md")}>
-              Check
+              {tm("table.check")}
             </button>
           </div>
         )}

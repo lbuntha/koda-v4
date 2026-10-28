@@ -15,6 +15,7 @@ import { tutorHeaders } from "../../lib/tutorApi";
 import { polylineLength } from "../geometry/polyline";
 import type { Stroke, TraceItem } from "../geometry/types";
 import type { Mask, Piece, StrokePlanEntry } from "../geometry/vectorize";
+import { englishGuide, englishStrokes } from "./englishSet";
 import { cleanPlan, pieces as toPieces, readingOrder, strokesFromPlan } from "../geometry/vectorize";
 
 export type Source = "glyph" | "image";
@@ -226,6 +227,8 @@ export interface AutoResult {
   /** Why the AI was not used, when it was asked for. */
   aiError?: string;
   pieceCount: number;
+  /** Set when the strokes were made for a guide letter's size and place (the English set): the guide should follow. */
+  guide?: { size: number; y: number };
 }
 
 /**
@@ -233,6 +236,12 @@ export interface AutoResult {
  * falls back to reading order and says why — the creator always gets a draft.
  */
 export async function autoStrokes(item: TraceItem, { source, useAi, newId }: { source: Source; useAi: boolean; newId(): string }): Promise<AutoResult | null> {
+  // English letters and numbers have a hand-made stroke order: no tracing of the font, no AI.
+  const text = item.guide?.glyph?.text;
+  if (source === "glyph" && item.script === "latin" && text) {
+    const made = englishStrokes(text, newId);
+    if (made) return { strokes: made, usedAi: false, pieceCount: made.length, guide: englishGuide(text) };
+  }
   const mask = await rasterizeGuide(item, source);
   if (!mask) return null;
   const list = toPieces(mask);

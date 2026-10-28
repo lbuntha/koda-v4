@@ -10,6 +10,7 @@ Goal: a reading habit. Short enough to finish in one sitting, ends on a small qu
 3. **Title check**: search Google Books and Amazon for the exact title. Rename if it clashes.
 4. **Questions**: 5 comprehension (each with an evidence sentence), 4–5 picture words, 5 spelling words.
 5. **JSON**: `src/library/data/passages/starter-<slug>.json`, `provenance: "Original story written for Koda, 2026"`, `band: "A"`, `ages: [5,7]`, topics from `src/lib/topics.ts`.
+5b. **Check**: `npx vitest run src/library/data/docBooks.test.ts` runs the Studio's own checks with the reading list. The server's check skips rule 4, so never trust it alone. Only the picture-confirmation lines may remain.
 6. **Register** in `starterPassages.ts` and run the scoped vitest (`starterPassages`, `verifyPassage`).
 7. **Pictures**: use only picture keys the library has; list any missing ones and draw them before publishing.
 8. **Read it in the app** at 390px: page turns, text size, quiz. Fix, then commit locally.
@@ -22,8 +23,8 @@ Order is easiest first, then books that match a lesson the child may be doing.
 
 | # | Slug | Title | Topic | Fact learned | Refrain | Status |
 |---|------|-------|-------|--------------|---------|--------|
-| 1 | bot-and-the-seed | Bot and the Seed | nature | A plant grows from a seed, and it needs time; a helper can be unsure; draw new things | "Not yet," said Mia. | Draft in Library Studio |
-| 2 | sleepy-night-animals | Sleepy Night Animals | animals | Some animals wake when we sleep | a different night sound each page | |
+| 1 | bot-and-the-seed | Bot and the Seed | nature | A plant grows from a seed, and it needs time; a helper can be unsure; draw new things | "Not yet," said Mia. | Published 2026-10-22 |
+| 2 | sleepy-night-animals | Sleepy Night Animals | animals | Some animals wake when we sleep | a different night sound each page Draft in Library Studio; owner adds pictures |
 | 3 | water-goes-round | Water Goes Round | nature | The water cycle, told by one drop | "And round it goes!" | |
 | 4 | the-bus-that-said-please | The Bus That Said Please | feelings, school | Please, thank you, sorry | "Please," said the bus. | |
 | 5 | zero-hero | The Zero Hero | numbers | Zero means none; it holds a place | counting up, page by page | |
@@ -74,3 +75,32 @@ Rules: no real product names, no scary AI, the child is always the one who decid
 1. Bot and Mia across the series, or a fresh cast each time?
 2. Khmer versions: after all 12 English books, or one at a time? A native speaker must read each before it ships.
 3. Pictures: draw by hand, or use the existing image generation API in the Library?
+
+## Status and push checklist (saved 2026-10-23)
+
+**Books**
+- Book 1, Bot and the Seed: published on the local app (rev 1, photo cover).
+- Book 2, Sleepy Night Animals: draft in the local Studio. The owner adds pictures (bat, moon, fox, moth, cricket are not in the art library) and confirms owl, lantern and tent. No images are generated.
+- Decision 2026-10-23: books 1 and 2 are enough to test with children. Do not start Book 3 until the owner asks. When asked: send the brief first, then write, check, seed.
+
+**What is in git and what is not**
+- Books live in each environment's database, not in git. Pushing code does not move Book 1 or 2 to the server.
+- `docs/library-books/*.json` are the drafted text. On the server, seed them as drafts, confirm the pictures in that Studio, then publish. Pictures the owner added or photos uploaded here are not in these files.
+- Before seeding or pushing a book, run `npx vitest run src/library/data/docBooks.test.ts` (Studio checks with the reading list).
+
+**Code changes waiting to be committed (library only)**
+- Page fit: `fitPage.ts` (`solveFit`), `BookReader.tsx`, `Picture.tsx`, `bookLayout.ts`, `index.css`, and their tests. One text size per book, each page fits before it is shown.
+- Cover and book page show "What you will learn": `BookReader.tsx`, `LibraryPage.tsx`, key `library.coverLearn` in the English and Khmer text files.
+- `src/library/data/docBooks.test.ts` and the two book files above.
+- Other modified files in the working tree (Rebus, sync, server) are separate work.
+
+**Still to build (layout, in order)**
+1. Short pages grow to a larger size.
+2. Side-by-side layout in landscape.
+3. Preview step: device switch, per-page fit badge, whole-book layout report.
+4. Khmer line-height in the fit. Landscape, tablet and Khmer text are not tested yet.
+
+**Before any book goes live**
+- Pictures confirmed by a person; no yellow in covers.
+- "What you will learn" in kid words; clear the "Draft: not reviewed" line once a person has read the book.
+- Test books 1 and 2 with a few real Grade 1 children before writing the rest.

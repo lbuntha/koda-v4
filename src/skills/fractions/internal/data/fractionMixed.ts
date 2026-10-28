@@ -29,6 +29,7 @@ import {
   type MixedNumber,
   type Whole,
 } from "./fractionNumbers";
+import { tf } from "../i18n";
 
 export type MixedMode =
   /** Loose parts into wholes: `7/4` becomes `1 3/4`. */
@@ -90,9 +91,9 @@ export interface MixedQuestion {
 }
 
 const PROMPTS: Record<MixedMode, (q: Omit<MixedQuestion, "prompt">) => string> = {
-  to_mixed: (q) => `Group these ${partWord(q.improper.parts, true)} into whole ones.`,
-  to_improper: (q) => `Break the whole ones back into ${partWord(q.improper.parts, true)}.`,
-  on_line: (q) => `Put the marker on ${mixedName(q.mixed)}.`,
+  to_mixed: (q) => tf("mixed.promptGroup", { words: partWord(q.improper.parts, true) }),
+  to_improper: (q) => tf("mixed.promptBreak", { words: partWord(q.improper.parts, true) }),
+  on_line: (q) => tf("mixed.promptLine", { name: mixedName(q.mixed) }),
 };
 
 export function buildMixedQuestion(
@@ -210,9 +211,9 @@ export function mixedBlockedBecause(q: MixedQuestion, board: Board): MixedBlock 
 }
 
 export const MIXED_REFUSALS: Record<Exclude<MixedBlock, null>, string> = {
-  "group-more": "There are still enough loose ones to make another whole.",
-  "break-more": "There is still a whole one to break up.",
-  "not-placed": "Put the marker on the line first.",
+  get "group-more"() { return tf("mixed.groupMore"); },
+  get "break-more"() { return tf("mixed.breakMore"); },
+  get "not-placed"() { return tf("mixed.notPlaced"); },
 };
 
 export { toImproper, toMixed, valueOf, pick, shuffle };
@@ -238,19 +239,19 @@ export function explainMixed(q: MixedQuestion, correct: boolean): string {
   if (!correct) {
     switch (q.direction) {
       case "group":
-        return `Keep grouping while ${f.parts} loose ${piece} are still left.`;
+        return tf("mixed.missGroup", { parts: f.parts, words: piece });
       case "break":
-        return `Every whole one you break gives you ${f.parts} more ${piece}.`;
+        return tf("mixed.missBreak", { parts: f.parts, words: piece });
       default:
-        return `Count on in ${piece} past the whole numbers.`;
+        return tf("mixed.missLine", { words: piece });
     }
   }
   switch (q.direction) {
     case "group":
-      return `${f.taken} ${piece} makes ${m.ones} whole ${m.ones === 1 ? "one" : "ones"} and ${m.taken} left over — ${mixedName(m)}.`;
+      return tf("mixed.rightGroup", { count: m.ones, taken: f.taken, words: piece, ones: m.ones, left: m.taken, name: mixedName(m) });
     case "break":
-      return `${m.ones} whole ${m.ones === 1 ? "one" : "ones"} is ${m.ones * f.parts} ${piece}, and ${m.taken} more makes ${f.taken}.`;
+      return tf("mixed.rightBreak", { count: m.ones, ones: m.ones, total: m.ones * f.parts, words: piece, left: m.taken, taken: f.taken });
     default:
-      return `${mixedName(m)} and ${improperName(f)} are the same place on the line.`;
+      return tf("mixed.rightLine", { mixed: mixedName(m), improper: improperName(f) });
   }
 }

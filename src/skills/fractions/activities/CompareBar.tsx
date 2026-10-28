@@ -22,6 +22,9 @@ import {
   type CompareSetup,
   type Verdict,
 } from "../internal/data/fractionCompare";
+import { tf } from "../internal/i18n";
+import { useT } from "../../../lib/i18n";
+import { wholeName } from "../internal/data/fractionNumbers";
 
 /**
  * Which is more — and the two levels where that is the wrong question.
@@ -57,38 +60,39 @@ export function compareHints(question: CompareQuestion): string[] {
   switch (question.mode) {
     case "same_denominator":
       return composeHints(
-        "Both bars are cut the same way, so every piece is the same size.",
-        "That means you can just count the coloured pieces.",
-        "More pieces of the same size is more.",
+        tf("cmp.hintSameDen1"),
+        tf("cmp.hintSameDen2"),
+        tf("cmp.hintSameDen3"),
       );
     case "same_numerator":
       return composeHints(
-        "Count the coloured pieces on each. There are the same number.",
-        "So the pieces themselves must be doing the work. Look at how big they are.",
-        `${withArticle(Math.max(left.parts, right.parts))[0].toUpperCase()}${withArticle(Math.max(left.parts, right.parts)).slice(1)} is smaller: a bigger bottom number means smaller pieces.`,
+        tf("cmp.hintNum1"),
+        tf("cmp.hintNum2"),
+        tf("cmp.hintNum3", { piece: withArticle(Math.max(left.parts, right.parts)).replace(/^./, (ch) => ch.toUpperCase()) }),
       );
     case "different_wholes":
       return composeHints(
-        "Look at the two wholes before you look at the colour.",
-        "They are not the same size to start with.",
-        "A fraction of one thing cannot be compared with a fraction of a different thing. There is no answer.",
+        tf("cmp.hintWh1"),
+        tf("cmp.hintWh2"),
+        tf("cmp.hintWh3"),
       );
     case "benchmark_half":
       return composeHints(
-        "You are not comparing it with another fraction, but with one half.",
-        `Half of ${left.parts} is ${left.parts / 2}.`,
-        `So more than ${left.parts / 2} pieces is more than a half, and fewer is less.`,
+        tf("cmp.hintHalf1"),
+        tf("cmp.hintHalf2", { parts: left.parts, half: left.parts / 2 }),
+        tf("cmp.hintHalf3", { half: left.parts / 2 }),
       );
     default:
       return composeHints(
-        "The pieces are different sizes, so counting them tells you nothing yet.",
-        "Cut both bars until every piece is the same size.",
-        `Both ${left.parts} and ${right.parts} go into the number you are looking for.`,
+        tf("cmp.hintCommon1"),
+        tf("cmp.hintCommon2"),
+        tf("cmp.hintCommon3", { a: left.parts, b: right.parts }),
       );
   }
 }
 
 export const CompareBar: React.FC<ActivityProps<CompareParams>> = ({ params, koda, onComplete, lesson }) => {
+  useT();
   const setup: CompareSetup = useMemo(() => ({ ...params, ...params.question }), [params]);
   const practising = isPractice(setup);
   const total = setup.questionsPerRound ?? 5;
@@ -182,7 +186,7 @@ export const CompareBar: React.FC<ActivityProps<CompareParams>> = ({ params, kod
       correct,
       given: verdict,
       expected: question.expected,
-      title: correct ? "Yes!" : "Not that one",
+      title: correct ? tf("cmp.yes") : tf("cmp.notThat"),
       message: explainCompare(question, correct, verdict),
     });
   };
@@ -191,7 +195,7 @@ export const CompareBar: React.FC<ActivityProps<CompareParams>> = ({ params, kod
     <SkillRound
       koda={koda}
       lesson={lesson}
-      fallbackTitle="Which Is More?"
+      fallbackTitle={tf("cmp.title")}
       round={round}
       totalQuestions={total}
       prompt={promptFor(question)}
@@ -224,12 +228,12 @@ export const CompareBar: React.FC<ActivityProps<CompareParams>> = ({ params, kod
             <FractionBar
               parts={shown.left.parts}
               shaded={shadedOf(shown.left)}
-              label={`top bar, ${shown.left.taken} of ${shown.left.parts}`}
+              label={tf("cmp.topBar", { taken: shown.left.taken, parts: shown.left.parts })}
             />
             <span className="text-sm font-bold text-ink">
               {shown.left.taken}/{shown.left.parts}
               {labelsEnabled && !practising ? (
-                <span className="pl-2 text-xs font-normal text-muted">of {question.left.whole.name}</span>
+                <span className="pl-2 text-xs font-normal text-muted">{tf("cmp.ofWhole", { whole: wholeName(question.left.whole) })}</span>
               ) : null}
             </span>
           </div>
@@ -238,12 +242,12 @@ export const CompareBar: React.FC<ActivityProps<CompareParams>> = ({ params, kod
               parts={shown.right.parts}
               shaded={shadedOf(shown.right)}
               scale={rightScale}
-              label={`bottom bar, ${shown.right.taken} of ${shown.right.parts}`}
+              label={tf("cmp.bottomBar", { taken: shown.right.taken, parts: shown.right.parts })}
             />
             <span className="text-sm font-bold text-ink">
               {shown.right.taken}/{shown.right.parts}
               {labelsEnabled && !practising ? (
-                <span className="pl-2 text-xs font-normal text-muted">of {question.right.whole.name}</span>
+                <span className="pl-2 text-xs font-normal text-muted">{tf("cmp.ofWhole", { whole: wholeName(question.right.whole) })}</span>
               ) : null}
             </span>
           </div>
@@ -256,7 +260,7 @@ export const CompareBar: React.FC<ActivityProps<CompareParams>> = ({ params, kod
             disabled={!!round.feedback}
             className="min-h-11 rounded-2xl bg-surface px-5 py-2 text-sm font-semibold text-ink shadow-sm focus:outline-none focus-visible:ring-2 focus-visible:ring-cyan-500"
           >
-            Make the pieces match
+            {tf("cmp.makeMatch")}
           </button>
         ) : null}
 
@@ -302,18 +306,18 @@ export function printedFor(question: CompareQuestion): { text: string; answer: s
   const words = question.mode === "benchmark_half" ? BENCHMARK_WORDS : VERDICT_WORDS;
   if (question.mode === "benchmark_half") {
     return {
-      text: `Is ${nameOf(question.left)} less than a half, exactly a half, or more than a half?`,
+      text: tf("cmp.printHalf", { fraction: nameOf(question.left) }),
       answer: words[question.expected],
     };
   }
   if (question.mode === "different_wholes") {
     return {
-      text: `${nameOf(question.left)} of a big pizza, and ${nameOf(question.right)} of a small one. Which is more — or can you not tell?`,
+      text: tf("cmp.printWholes", { a: nameOf(question.left), b: nameOf(question.right) }),
       answer: words[question.expected],
     };
   }
   return {
-    text: `Write < , > or = between ${nameOf(question.left)} and ${nameOf(question.right)}.`,
+    text: tf("cmp.printSign", { a: nameOf(question.left), b: nameOf(question.right) }),
     answer: question.expected === "less" ? "<" : question.expected === "more" ? ">" : "=",
   };
 }
@@ -340,26 +344,26 @@ export const figureFor = (question: CompareQuestion): React.ReactNode | null => 
 export function methodFor(question: CompareQuestion): string[] | null {
   switch (question.mode) {
     case "same_denominator":
-      return ["The pieces are the same size, so whoever has more pieces has more."];
+      return [tf("cmp.methodSameDen")];
     case "same_numerator":
       return [
-        "The same number of pieces, but the pieces are different sizes.",
-        "The more a whole is cut into, the smaller each piece is.",
+        tf("cmp.methodNum1"),
+        tf("cmp.methodNum2"),
       ];
     case "different_wholes":
       return [
-        "A fraction is a fraction of something.",
-        "Two fractions of different-sized wholes cannot be compared without knowing the wholes.",
+        tf("cmp.methodWh1"),
+        tf("cmp.methodWh2"),
       ];
     case "benchmark_half":
       return [
-        "Half is when the top number is exactly half of the bottom one.",
-        "More than half of the bottom number means more than a half.",
+        tf("cmp.methodHalf1"),
+        tf("cmp.methodHalf2"),
       ];
     default:
       return [
-        "Cut both into the same-sized pieces first.",
-        "Then it is just counting which has more pieces.",
+        tf("cmp.methodCommon1"),
+        tf("cmp.methodCommon2"),
       ];
   }
 }

@@ -26,6 +26,7 @@ import {
   type FractionSpec,
   type Whole,
 } from "./fractionNumbers";
+import { tf } from "../i18n";
 
 export type LineMode =
   /** Drag the marker to `1/d`. */
@@ -110,11 +111,11 @@ export const intervalsFor = (f: Fraction, span: number): number => f.parts * spa
 export const nameOf = (f: Fraction): string => `${f.taken}/${f.parts}`;
 
 const PROMPTS: Record<LineMode, (q: Omit<LineQuestion, "prompt">) => string> = {
-  place_unit: (q) => `Put the marker on ${nameOf(q.fraction)}.`,
-  place_any: (q) => `Put the marker on ${nameOf(q.fraction)}.`,
-  read_point: () => "What number is the marker on?",
-  makes_one: (q) => `How many ${partWord(q.fraction.parts, true)} make one whole?`,
-  improper: (q) => `Put the marker on ${nameOf(q.fraction)}.`,
+  place_unit: (q) => tf("line.promptPlace", { fraction: nameOf(q.fraction) }),
+  place_any: (q) => tf("line.promptPlace", { fraction: nameOf(q.fraction) }),
+  read_point: () => tf("line.promptRead"),
+  makes_one: (q) => tf("line.promptOne", { words: partWord(q.fraction.parts, true) }),
+  improper: (q) => tf("line.promptPlace", { fraction: nameOf(q.fraction) }),
 };
 
 export function buildLineQuestion(
@@ -214,7 +215,7 @@ export function lineBlockedBecause(question: LineQuestion, marker: number | null
 }
 
 export const LINE_REFUSALS: Record<Exclude<LineBlock, null>, string> = {
-  "not-placed": "Put the marker on the line first.",
+  get "not-placed"() { return tf("line.notPlaced"); },
 };
 
 /** Where each whole number falls, for labelling the line. */
@@ -237,31 +238,31 @@ export { toMixed };
  */
 export function explainLine(q: LineQuestion, correct: boolean, given?: string): string {
   const { fraction: f } = q;
-  const piece = `one ${partWord(f.parts)}`;
+  const piece = tf("line.piece", { word: partWord(f.parts) });
 
   if (!correct) {
     if (q.mode === "read_point" && given === `${f.parts}/${f.taken}`) {
-      return "That is the two numbers the wrong way up. The jumps counted go on top.";
+      return tf("line.missFlip");
     }
     if (q.mode === "read_point") {
-      return "Count the jumps from zero, not the marks. There is always one more mark than jump.";
+      return tf("line.missRead");
     }
     if (q.mode === "makes_one") {
-      return `Count the jumps from 0 all the way to 1, one ${partWord(f.parts)} at a time.`;
+      return tf("line.missOne", { word: partWord(f.parts) });
     }
-    return `Every jump is ${piece}. Count them from zero, one at a time.`;
+    return tf("line.missJump", { piece });
   }
 
   switch (q.mode) {
     case "place_unit":
-      return `One jump of ${piece} from zero. That is where 1/${f.parts} lives.`;
+      return tf("line.rightUnit", { piece, parts: f.parts });
     case "place_any":
-      return `${f.taken} jumps of ${piece} from zero lands on ${f.taken}/${f.parts}.`;
+      return tf("line.rightAny", { taken: f.taken, piece, parts: f.parts });
     case "read_point":
-      return `${f.taken} jumps from zero, out of ${f.parts} to reach one — ${f.taken}/${f.parts}.`;
+      return tf("line.rightRead", { taken: f.taken, parts: f.parts });
     case "makes_one":
-      return `${f.parts} jumps of ${piece} reach exactly 1, so ${f.parts}/${f.parts} is one whole.`;
+      return tf("line.rightOne", { parts: f.parts, piece });
     default:
-      return `${f.taken} jumps of ${piece} carries straight past 1. A fraction can be bigger than one and still be one number.`;
+      return tf("line.rightImproper", { taken: f.taken, piece });
   }
 }

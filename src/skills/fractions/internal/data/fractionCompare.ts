@@ -34,6 +34,7 @@ import {
   type PairSpec,
   type Whole,
 } from "./fractionNumbers";
+import { tf } from "../i18n";
 
 export type CompareMode =
   /** Same denominator: the pieces are the same size, so count them. */
@@ -97,11 +98,11 @@ export const verdictFor = (left: Fraction, right: Fraction): Verdict => {
 const HALF_NAME = "one half";
 
 const PROMPTS: Record<CompareMode, (q: Omit<CompareQuestion, "prompt">) => string> = {
-  same_denominator: () => "Which is more?",
-  same_numerator: () => "Which is more?",
-  different_wholes: () => "Which is more?",
-  benchmark_half: (q) => `Is ${q.left.taken}/${q.left.parts} more or less than a half?`,
-  common_denominator: () => "Which is more?",
+  same_denominator: () => tf("cmp.promptMore"),
+  same_numerator: () => tf("cmp.promptMore"),
+  different_wholes: () => tf("cmp.promptMore"),
+  benchmark_half: (q) => tf("cmp.promptHalf", { fraction: `${q.left.taken}/${q.left.parts}` }),
+  common_denominator: () => tf("cmp.promptMore"),
 };
 
 export function buildCompareQuestion(
@@ -234,7 +235,7 @@ export function compareBlockedBecause(q: CompareQuestion, matchedYet: boolean): 
 }
 
 export const COMPARE_REFUSALS: Record<Exclude<CompareBlock, null>, string> = {
-  "pieces-differ": "The pieces are different sizes. Make them match before you count.",
+  get "pieces-differ"() { return tf("cmp.piecesDiffer"); },
 };
 
 /** The answers offered, in the order they are shown. */
@@ -242,17 +243,17 @@ export const verdictsFor = (q: CompareQuestion): Verdict[] =>
   q.offersCannotTell ? ["less", "same", "more", "cannot-tell"] : ["less", "same", "more"];
 
 export const VERDICT_WORDS: Record<Verdict, string> = {
-  less: "the top one is less",
-  same: "they are the same",
-  more: "the top one is more",
-  "cannot-tell": "you cannot tell",
+  get less() { return tf("cmp.vLess"); },
+  get same() { return tf("cmp.vSame"); },
+  get more() { return tf("cmp.vMore"); },
+  get "cannot-tell"() { return tf("cmp.vCannot"); },
 };
 
 export const BENCHMARK_WORDS: Record<Verdict, string> = {
-  less: "less than a half",
-  same: "exactly a half",
-  more: "more than a half",
-  "cannot-tell": "you cannot tell",
+  get less() { return tf("cmp.bLess"); },
+  get same() { return tf("cmp.bSame"); },
+  get more() { return tf("cmp.bMore"); },
+  get "cannot-tell"() { return tf("cmp.vCannot"); },
 };
 
 export { canPartition, gcd, lcm, shuffle, valueOf, WHOLES, HALF_NAME };
@@ -277,31 +278,31 @@ export function explainCompare(q: CompareQuestion, correct: boolean, given?: Ver
     switch (q.mode) {
       case "same_numerator":
         return given === "same"
-          ? "The pieces are different sizes, so the amounts differ even though the counts match."
-          : "Careful: a bigger bottom number makes the pieces smaller, not bigger.";
+          ? tf("cmp.missSameNumSame")
+          : tf("cmp.missSameNum");
       case "different_wholes":
-        return "Look at the two wholes. They are not the same size, so neither answer can be right.";
+        return tf("cmp.missWholes");
       case "benchmark_half":
-        return `Half of ${left.parts} is ${left.parts / 2}. Compare the shaded count with that.`;
+        return tf("cmp.missHalf", { parts: left.parts, half: left.parts / 2 });
       case "common_denominator":
-        return "The pieces were different sizes. Make them match, then count.";
+        return tf("cmp.missCommon");
       default:
-        return "Both bars are cut the same way, so just count the shaded pieces.";
+        return tf("cmp.missDefault");
     }
   }
 
   switch (q.mode) {
     case "same_denominator":
-      return `Same size pieces, so more pieces is more: ${bigger.taken}/${bigger.parts} beats ${smaller.taken}/${smaller.parts}.`;
+      return tf("cmp.rightSameDen", { a: `${bigger.taken}/${bigger.parts}`, b: `${smaller.taken}/${smaller.parts}` });
     case "same_numerator":
-      return `The same number of pieces — but cutting into ${smaller.parts} makes them smaller than cutting into ${bigger.parts}.`;
+      return tf("cmp.rightSameNum", { small: smaller.parts, big: bigger.parts });
     case "different_wholes":
-      return "They are fractions of two different things, so there is nothing to compare.";
+      return tf("cmp.rightWholes");
     case "benchmark_half":
       return q.expected === "same"
-        ? `${left.taken} is exactly half of ${left.parts}, so it is exactly a half.`
-        : `Half of ${left.parts} is ${left.parts / 2}, and ${left.taken} is ${q.expected === "more" ? "more" : "less"} than that.`;
+        ? tf("cmp.rightHalfSame", { taken: left.taken, parts: left.parts })
+        : tf(q.expected === "more" ? "cmp.rightHalfMore" : "cmp.rightHalfLess", { parts: left.parts, half: left.parts / 2, taken: left.taken });
     default:
-      return `Cut to the same size pieces, ${bigger.taken}/${bigger.parts} is the bigger one.`;
+      return tf("cmp.rightDefault", { a: `${bigger.taken}/${bigger.parts}` });
   }
 }

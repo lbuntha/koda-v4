@@ -32,6 +32,8 @@ import { EACH, GROUPS, PRODUCT } from "../internal/data/multiplicationPalette";
 import { COUNT_BADGE, GROUP_BIN, TOKEN_COMPACT, TOUCH_TARGET, WORD_CHOICE } from "../internal/data/multiplicationLayout";
 import { useNudge } from "../internal/ui/useNudge";
 import { NumberPad } from "../internal/ui/NumberPad";
+import { tm } from "../internal/i18n";
+import { useT } from "../../../lib/i18n";
 
 /**
  * Equal groups — where multiplication starts.
@@ -228,42 +230,42 @@ export function buildQuestion(params: GroupParams, index: number, seen?: Set<str
       return {
         ...base,
         taskKind: "judge_equal_groups",
-        prompt: `Are all the ${base.container.name} holding the same number of ${base.asset.name}?`,
+        prompt: tm("group.promptEqual", { container: base.container.name, asset: base.asset.name }),
         expected: equal ? "equal" : "not equal",
       };
     case "repeated_addition":
       return {
         ...base,
         taskKind: "add_equal_groups",
-        prompt: `${groups} ${base.container.name} of ${size} ${base.asset.name}. Count them group by group.`,
+        prompt: tm("group.promptRepeated", { groups, container: base.container.name, size, asset: base.asset.name }),
         expected: String(total),
       };
     case "groups_to_equation":
       return {
         ...base,
         taskKind: "match_multiplication_equation",
-        prompt: `Which sentence matches ${groups} ${base.container.name} of ${size} ${base.asset.name}?`,
+        prompt: tm("group.promptEquation", { groups, container: base.container.name, size, asset: base.asset.name }),
         expected: `${groups} × ${size} = ${total}`,
       };
     case "factor_roles":
       return {
         ...base,
         taskKind: "label_the_factors",
-        prompt: `In ${groups} × ${size}, which number counts the ${base.container.name} and which counts the ${base.asset.name} in each one?`,
+        prompt: tm("group.promptRoles", { groups, size, container: base.container.name, asset: base.asset.name }),
         expected: `${groups} groups, ${size} in each`,
       };
     case "times_one":
       return {
         ...base,
         taskKind: "multiply_by_one",
-        prompt: `${groups} × ${size}. How many ${base.asset.name} altogether?`,
+        prompt: tm("group.promptTimesOne", { groups, size, asset: base.asset.name }),
         expected: String(total),
       };
     case "times_zero":
       return {
         ...base,
         taskKind: "multiply_by_zero",
-        prompt: `${groups} empty ${base.container.name}. How many ${base.asset.name} altogether?`,
+        prompt: tm("group.promptTimesZero", { groups, container: base.container.name, asset: base.asset.name }),
         expected: "0",
       };
     case "make_groups":
@@ -271,7 +273,7 @@ export function buildQuestion(params: GroupParams, index: number, seen?: Set<str
       return {
         ...base,
         taskKind: "make_equal_groups",
-        prompt: `Make ${groups} ${base.container.name} of ${size} ${base.asset.name}, then say how many altogether.`,
+        prompt: tm("group.promptMake", { groups, container: base.container.name, size, asset: base.asset.name }),
         expected: String(total),
       };
   }
@@ -288,34 +290,34 @@ export function printedFor(question: GroupQuestion): PrintedQuestion | null {
   switch (question.mode) {
     case "equal_or_not":
       return {
-        text: `${container.name}: ${question.bins.join(", ")} ${asset.name}. Are the groups equal? Write yes or no.`,
-        answer: question.equal ? "yes" : "no",
+        text: tm("group.printedEqual", { container: container.name, bins: question.bins.join(", "), asset: asset.name }),
+        answer: question.equal ? tm("group.yes") : tm("group.no"),
       };
     case "repeated_addition":
       return {
-        text: `Write the addition for ${groups} ${container.name} of ${size} ${asset.name}, then find the total.`,
+        text: tm("group.printedRepeated", { groups, container: container.name, size, asset: asset.name }),
         answer: `${Array.from({ length: groups }, () => size).join(" + ")} = ${total}`,
       };
     case "groups_to_equation":
       return {
-        text: `Write the multiplication sentence for ${groups} ${container.name} of ${size} ${asset.name}.`,
+        text: tm("group.printedEquation", { groups, container: container.name, size, asset: asset.name }),
         answer: `${groups} × ${size} = ${total}`,
       };
     case "factor_roles":
       return {
-        text: `In ${groups} × ${size}, which number counts the ${container.name}, and which counts the ${asset.name} in each one?`,
-        answer: `${groups} counts the ${container.name}; ${size} counts the ${asset.name} in each`,
+        text: tm("group.printedRoles", { groups, size, container: container.name, asset: asset.name }),
+        answer: tm("group.printedRolesAnswer", { groups, size, container: container.name, asset: asset.name }),
       };
     case "times_zero":
       return {
-        text: `${groups} ${container.name} are empty. ${groups} × 0 = ____`,
+        text: tm("group.printedZero", { groups, container: container.name }),
         answer: "0",
       };
     case "times_one":
     case "make_groups":
     default:
       return {
-        text: `${groups} ${container.name} hold ${size} ${asset.name} each. ${groups} × ${size} = ____`,
+        text: tm("group.printedPlain", { groups, container: container.name, size, asset: asset.name }),
         answer: String(total),
       };
   }
@@ -324,21 +326,21 @@ export function printedFor(question: GroupQuestion): PrintedQuestion | null {
 export function methodFor(question: GroupQuestion): string[] | null {
   switch (question.mode) {
     case "equal_or_not":
-      return ["Count what is in each group.", "If any group holds a different number, the groups are not equal."];
+      return [tm("group.methodEqual1"), tm("group.methodEqual2")];
     case "repeated_addition":
       return [
-        "Write the size of the first group.",
-        "Add the same number once for every group.",
-        "The total is the answer.",
+        tm("group.methodRep1"),
+        tm("group.methodRep2"),
+        tm("group.methodRep3"),
       ];
     case "factor_roles":
-      return ["The first number counts the groups.", "The second counts what is inside one group."];
+      return [tm("group.methodRoles1"), tm("group.methodRoles2")];
     case "times_zero":
-      return ["Empty groups hold nothing.", "However many groups there are, the total is zero."];
+      return [tm("group.methodZero1"), tm("group.methodZero2")];
     case "times_one":
-      return ["One group holds everything, or every group holds one.", "Either way the answer is the other number."];
+      return [tm("group.methodOne1"), tm("group.methodOne2")];
     default:
-      return ["Make every group the same size.", "Count the groups, then count what is in one.", "Multiply the two."];
+      return [tm("group.methodPlain1"), tm("group.methodPlain2"), tm("group.methodPlain3")];
   }
 }
 
@@ -346,7 +348,7 @@ export function figureFor(question: GroupQuestion): React.ReactNode | null {
   const counts = question.mode === "equal_or_not" ? question.bins : Array.from({ length: question.groups }, () => question.size);
   const width = Math.min(counts.length, 6) * 62 + 16;
   return (
-    <svg viewBox={`0 0 ${width} 86`} width="100%" role="img" aria-label={`${counts.length} groups`}>
+    <svg viewBox={`0 0 ${width} 86`} width="100%" role="img" aria-label={tm("group.figureLabel", { count: counts.length })}>
       {counts.slice(0, 6).map((count, i) => (
         <g key={i} transform={`translate(${12 + i * 62}, 10)`}>
           <rect x="0" y="0" width="50" height="50" rx="8" fill="none" stroke="#334155" strokeWidth="2" />
@@ -388,58 +390,58 @@ export function groupHints(question: GroupQuestion, kidTip: string | undefined, 
       return composeHints(
         kidTip,
         built === 0
-          ? `Tap a ${asset.one}, then tap a ${container.one} to put it in.`
-          : `You have filled ${fullBins} of the ${groups} ${container.name}.`,
+          ? tm("group.hintMakeTap", { asset: asset.one, container: container.one })
+          : tm("group.hintMakeFilled", { full: fullBins, groups, containers: container.name }),
         fullBins === groups
-          ? `Every ${container.one} holds ${size}. Count them: ${groups} groups of ${size}.`
-          : `Each ${container.one} needs ${size}. Keep going until all ${groups} match.`,
+          ? tm("group.hintMakeAll", { container: container.one, size, groups })
+          : tm("group.hintMakeNeed", { container: container.one, size, groups }),
       );
     case "equal_or_not":
       return composeHints(
         kidTip,
-        `Count what is in each ${container.one} and compare.`,
+        tm("group.hintEqual1", { container: container.one }),
         question.equal
-          ? `Every ${container.one} holds ${question.bins[0]}, so they are equal.`
-          : `One ${container.one} holds a different number from the rest.`,
+          ? tm("group.hintEqualYes", { container: container.one, count: question.bins[0] })
+          : tm("group.hintEqualNo", { container: container.one }),
       );
     case "repeated_addition": {
       const done = state.counted.filter(Boolean).length;
       return composeHints(
         kidTip,
         done === 0
-          ? `Tap the first ${container.one} to start the addition.`
-          : `You have counted ${done} of the ${groups} ${container.name}.`,
-        `Add them up: ${Array.from({ length: groups }, () => size).join(" + ")}.`,
+          ? tm("group.hintRepStart", { container: container.one })
+          : tm("group.hintRepDone", { done, groups, containers: container.name }),
+        tm("group.hintRepAdd", { sum: Array.from({ length: groups }, () => size).join(" + ") }),
       );
     }
     case "groups_to_equation":
       return composeHints(
         kidTip,
-        `There are ${groups} ${container.name}, and each holds ${size}.`,
-        `The first number counts the ${container.name}, the second counts what is inside one.`,
+        tm("group.hintEq1", { groups, containers: container.name, size }),
+        tm("group.hintEq2", { containers: container.name }),
       );
     case "factor_roles":
       return composeHints(
         kidTip,
         state.slotGroups === undefined && state.slotEach === undefined
-          ? "Tap a number, then tap the sentence it belongs to."
-          : "One slot is filled. Put the other number in the slot that is left.",
-        `Count the ${container.name}: there are ${groups}. Count inside one: there are ${size}.`,
+          ? tm("group.hintRolesTap")
+          : tm("group.hintRolesOne"),
+        tm("group.hintRoles2", { containers: container.name, groups, size }),
       );
     case "times_one":
       return composeHints(
         kidTip,
         question.singleGroup
-          ? `There is one ${container.one}, and everything is in it.`
-          : `Every ${container.one} holds just one ${asset.one}.`,
-        `So the answer is ${question.singleGroup ? size : groups}.`,
+          ? tm("group.hintOneSingle", { container: container.one })
+          : tm("group.hintOneEvery", { container: container.one, asset: asset.one }),
+        tm("group.hintOneAnswer", { answer: question.singleGroup ? size : groups }),
       );
     case "times_zero":
     default:
       return composeHints(
         kidTip,
-        `Look inside the ${container.name}. They are empty.`,
-        `${groups} groups of nothing is still nothing.`,
+        tm("group.hintZero1", { containers: container.name }),
+        tm("group.hintZero2", { groups }),
       );
   }
 }
@@ -470,6 +472,7 @@ const Thing: React.FC<{ asset: Countable; badge?: number }> = ({ asset, badge })
 );
 
 export const GroupTray: React.FC<ActivityProps<GroupParams>> = ({ params, koda, onComplete, lesson }) => {
+  useT();
   const setup: GroupSetup = useMemo(() => ({ ...params, ...params.question }), [params]);
   const copy = playCopy(params);
   const practising = isPractice(setup);
@@ -623,13 +626,13 @@ export const GroupTray: React.FC<ActivityProps<GroupParams>> = ({ params, koda, 
   const dropInto = (bin: number) => {
     if (round.feedback) return;
     if (!holding) {
-      refuse(`Tap a ${asset.one} first, then tap a ${container.one}.`, "Take one first.");
+      refuse(tm("group.tapFirst", { asset: asset.one, container: container.one }), tm("group.takeFirst"));
       return;
     }
     if (placed[bin] >= size) {
       refuse(
-        `Each ${container.one} needs ${size}. This one already has ${size}.`,
-        "Every group needs the same number.",
+        tm("group.binFull", { container: container.one, size }),
+        tm("group.sameNumber"),
       );
       return;
     }
@@ -650,7 +653,7 @@ export const GroupTray: React.FC<ActivityProps<GroupParams>> = ({ params, koda, 
   const countGroup = (bin: number) => {
     if (round.feedback) return;
     if (counted[bin]) {
-      refuse(`You have already counted that ${container.one}.`, "You have counted that group.");
+      refuse(tm("group.alreadyCounted", { container: container.one }), tm("group.alreadyCountedSay"));
       return;
     }
     const next = counted.slice();
@@ -673,14 +676,14 @@ export const GroupTray: React.FC<ActivityProps<GroupParams>> = ({ params, koda, 
   const fillSlot = (slot: "groups" | "each") => {
     if (round.feedback) return;
     if (held === undefined) {
-      refuse("Tap one of the two numbers first.", "Tap a number first.");
+      refuse(tm("group.tapNumber"), tm("group.tapNumberSay"));
       return;
     }
     const occupied = slot === "groups" ? slotGroups : slotEach;
     if (occupied !== undefined) {
       refuse(
-        "That sentence already has a number. Tap it again to take it back.",
-        "That one is already filled.",
+        tm("group.slotFilled"),
+        tm("group.slotFilledSay"),
       );
       return;
     }
@@ -700,7 +703,7 @@ export const GroupTray: React.FC<ActivityProps<GroupParams>> = ({ params, koda, 
 
   const checkRoles = () => {
     if (slotGroups === undefined || slotEach === undefined) {
-      refuse("Fill both sentences before checking.", "Fill both first.");
+      refuse(tm("group.fillBoth"), tm("group.fillBothSay"));
       return;
     }
     // Checked together, once: which number counts what is one idea, and
@@ -709,10 +712,10 @@ export const GroupTray: React.FC<ActivityProps<GroupParams>> = ({ params, koda, 
     judge(
       correct,
       `${slotGroups} groups, ${slotEach} in each`,
-      correct ? "That is right" : "Swap them over",
+      correct ? tm("group.rightTitle") : tm("group.swapTitle"),
       correct
-        ? `${groups} counts the ${container.name} and ${size} counts what is in one.`
-        : `The first number counts the ${container.name}.`,
+        ? tm("group.rolesRight", { groups, container: container.name, size })
+        : tm("group.rolesWrong", { container: container.name }),
     );
   };
 
@@ -721,15 +724,15 @@ export const GroupTray: React.FC<ActivityProps<GroupParams>> = ({ params, koda, 
     if (round.feedback) return;
     if (mode === "make_groups" && !trayComplete) {
       refuse(
-        `Finish the ${container.name} first — ${placed.filter((c) => c === size).length} of ${groups} are ready.`,
-        "Finish the groups first.",
+        tm("group.finishFirst", { container: container.name, ready: placed.filter((c) => c === size).length, groups }),
+        tm("group.finishFirstSay"),
       );
       return;
     }
     if (mode === "repeated_addition" && !allCounted) {
       refuse(
-        `Count every ${container.one} first. You have counted ${counted.filter(Boolean).length} of ${groups}.`,
-        "Count every group first.",
+        tm("group.countFirst", { container: container.one, done: counted.filter(Boolean).length, groups }),
+        tm("group.countFirstSay"),
       );
       return;
     }
@@ -737,16 +740,16 @@ export const GroupTray: React.FC<ActivityProps<GroupParams>> = ({ params, koda, 
     judge(
       correct,
       String(value),
-      correct ? "Yes!" : "Not quite",
+      correct ? tm("group.yesTitle") : tm("group.notQuite"),
       correct
-        ? `${groups} groups of ${size} is ${question.total}.`
-        : `Count again: ${groups} groups of ${size}.`,
+        ? tm("group.groupsOf", { groups, size, total: question.total })
+        : tm("group.countAgain", { groups, size }),
     );
   };
 
   const submitTyped = () => {
     if (typed === "") {
-      refuse("Type a number first.", "Type a number first.");
+      refuse(tm("group.typeFirst"), tm("group.typeFirst"));
       return;
     }
     answerTotal(Number(typed));
@@ -759,10 +762,10 @@ export const GroupTray: React.FC<ActivityProps<GroupParams>> = ({ params, koda, 
     judge(
       correct,
       saysEqual ? "equal" : "not equal",
-      correct ? "Well spotted" : "Look again",
+      correct ? tm("group.spottedTitle") : tm("group.lookAgain"),
       question.equal
-        ? `Every ${container.one} holds ${question.bins[0]}.`
-        : `The ${container.one} numbered ${question.oddBin + 1} holds ${question.bins[question.oddBin]}, not ${size}.`,
+        ? tm("group.allHold", { container: container.one, count: question.bins[0] })
+        : tm("group.oddHolds", { container: container.one, n: question.oddBin + 1, count: question.bins[question.oddBin], size }),
     );
   };
 
@@ -771,10 +774,10 @@ export const GroupTray: React.FC<ActivityProps<GroupParams>> = ({ params, koda, 
     judge(
       equation.correct,
       equation.text,
-      equation.correct ? "That is the one" : "Not that sentence",
+      equation.correct ? tm("group.oneTitle") : tm("group.notSentence"),
       equation.correct
-        ? `${groups} groups of ${size} is ${groups} × ${size}.`
-        : `Count the ${container.name}, then count inside one.`,
+        ? tm("group.equationRight", { groups, size })
+        : tm("group.equationWrong", { container: container.name }),
     );
   };
 
@@ -823,15 +826,15 @@ export const GroupTray: React.FC<ActivityProps<GroupParams>> = ({ params, koda, 
         const clickable = mode === "make_groups" || mode === "repeated_addition";
         const label =
           mode === "make_groups"
-            ? `${container.one} ${bin + 1}, holding ${count} of ${size}`
+            ? tm("group.binHolding", { container: container.one, n: bin + 1, count, size })
             : mode === "repeated_addition"
-              ? `${container.one} ${bin + 1}, ${count} ${asset.name}${isCounted ? ", counted" : ""}`
-              : `${container.one} ${bin + 1}, ${count} ${asset.name}`;
+              ? tm(isCounted ? "group.binCounted" : "group.binPlain", { container: container.one, n: bin + 1, count, asset: asset.name })
+              : tm("group.binPlain", { container: container.one, n: bin + 1, count, asset: asset.name });
         return (
           <button
             key={bin}
             type="button"
-            aria-label={`${label}${guide.target === bin ? ", this group next" : ""}`}
+            aria-label={`${label}${guide.target === bin ? tm("group.binNext") : ""}`}
             aria-pressed={clickable ? (mode === "make_groups" ? count === size : isCounted) : undefined}
             disabled={!clickable || !!round.feedback}
             onClick={() => (mode === "make_groups" ? dropInto(bin) : countGroup(bin))}
@@ -846,7 +849,7 @@ export const GroupTray: React.FC<ActivityProps<GroupParams>> = ({ params, koda, 
                 <Thing key={i} asset={asset} badge={badgesEnabled ? i + 1 : undefined} />
               ))}
               {count === 0 && (
-                <span className={`text-xs font-bold ${GROUPS.text}`}>empty</span>
+                <span className={`text-xs font-bold ${GROUPS.text}`}>{tm("group.empty")}</span>
               )}
             </span>
             <span className={`mt-1 text-xs font-black tabular-nums ${EACH.text}`}>{count}</span>
@@ -859,7 +862,7 @@ export const GroupTray: React.FC<ActivityProps<GroupParams>> = ({ params, koda, 
   const numericAnswer = usePad ? (
     <div className="flex flex-col items-center gap-3">
       <output
-        aria-label="Your answer"
+        aria-label={tm("group.yourAnswer")}
         className={`min-h-11 min-w-24 rounded-xl border-2 px-4 py-2 text-center text-2xl font-black tabular-nums ${PRODUCT.border} ${PRODUCT.text}`}
       >
         {typed || "—"}
@@ -875,7 +878,7 @@ export const GroupTray: React.FC<ActivityProps<GroupParams>> = ({ params, koda, 
         disabled={!!round.feedback}
         className={themeSystem.button("primary", "md")}
       >
-        Check
+        {tm("group.check")}
       </button>
     </div>
   ) : (
@@ -884,7 +887,7 @@ export const GroupTray: React.FC<ActivityProps<GroupParams>> = ({ params, koda, 
         <button
           key={value}
           type="button"
-          aria-label={`${value} altogether`}
+          aria-label={tm("group.altogether", { value })}
           onClick={() => answerTotal(value)}
           disabled={!!round.feedback}
           className={themeSystem.button("secondary", "choice")}
@@ -906,7 +909,7 @@ export const GroupTray: React.FC<ActivityProps<GroupParams>> = ({ params, koda, 
               disabled={!!round.feedback}
               className={`${WORD_CHOICE} ${EACH.border} bg-surface`}
             >
-              Yes, all equal
+              {tm("group.allEqual")}
             </button>
             <button
               type="button"
@@ -914,7 +917,7 @@ export const GroupTray: React.FC<ActivityProps<GroupParams>> = ({ params, koda, 
               disabled={!!round.feedback}
               className={`${WORD_CHOICE} ${EACH.border} bg-surface`}
             >
-              No, one is different
+              {tm("group.oneDifferent")}
             </button>
           </div>
         );
@@ -942,7 +945,7 @@ export const GroupTray: React.FC<ActivityProps<GroupParams>> = ({ params, koda, 
                 <button
                   key={`${value}-${i}`}
                   type="button"
-                  aria-label={`Number ${value}`}
+                  aria-label={tm("group.number", { value })}
                   aria-pressed={held === value}
                   onClick={() => holdFactor(value)}
                   disabled={!!round.feedback}
@@ -955,13 +958,13 @@ export const GroupTray: React.FC<ActivityProps<GroupParams>> = ({ params, koda, 
               ))}
             </div>
             {([
-              ["groups", slotGroups, `counts the ${container.name}`],
-              ["each", slotEach, `counts the ${asset.name} in each ${container.one}`],
+              ["groups", slotGroups, tm("group.countsContainers", { container: container.name })],
+              ["each", slotEach, tm("group.countsAssets", { asset: asset.name, one: container.one })],
             ] as const).map(([slot, value, label]) => (
               <button
                 key={slot}
                 type="button"
-                aria-label={`${label}: ${value ?? "empty"}`}
+                aria-label={tm("group.slotLabel", { label, value: value ?? tm("group.empty") })}
                 onClick={() => (value === undefined ? fillSlot(slot) : clearSlot(slot))}
                 disabled={!!round.feedback}
                 className={`${TOUCH_TARGET} flex items-center gap-3 rounded-2xl border-2 ${EACH.border} bg-surface px-4 py-3 text-left text-base font-bold text-ink focus:outline-none focus-visible:ring-2 focus-visible:ring-sky-500`}
@@ -978,7 +981,7 @@ export const GroupTray: React.FC<ActivityProps<GroupParams>> = ({ params, koda, 
               disabled={!!round.feedback}
               className={themeSystem.button("primary", "md")}
             >
-              Check
+              {tm("group.check")}
             </button>
           </div>
         );
@@ -1000,7 +1003,7 @@ export const GroupTray: React.FC<ActivityProps<GroupParams>> = ({ params, koda, 
     if (mode === "make_groups") {
       return (
         <p className={`text-center text-sm font-bold ${GROUPS.text}`} aria-live="polite">
-          {placed.filter((count) => count === size).length} of {groups} {container.name} ready
+          {tm("group.ready", { ready: placed.filter((count) => count === size).length, groups, container: container.name })}
         </p>
       );
     }
@@ -1012,7 +1015,7 @@ export const GroupTray: React.FC<ActivityProps<GroupParams>> = ({ params, koda, 
     <SkillRound
       koda={koda}
       lesson={lesson}
-      fallbackTitle="Equal Groups"
+      fallbackTitle={tm("group.title")}
       round={round}
       totalQuestions={total}
       prompt={promptFor(question)}
@@ -1036,7 +1039,7 @@ export const GroupTray: React.FC<ActivityProps<GroupParams>> = ({ params, koda, 
         {mode === "make_groups" && (
           <button
             type="button"
-            aria-label={`Take one ${asset.one}`}
+            aria-label={tm("group.takeOne", { asset: asset.one })}
             aria-pressed={holding}
             onClick={takeOne}
             disabled={!!round.feedback}
@@ -1045,7 +1048,7 @@ export const GroupTray: React.FC<ActivityProps<GroupParams>> = ({ params, koda, 
             } px-4 py-2 text-sm font-bold text-ink focus:outline-none focus-visible:ring-2 focus-visible:ring-violet-500`}
           >
             <Thing asset={asset} />
-            {holding ? `Holding a ${asset.one} — tap a ${container.one}` : `Take a ${asset.one}`}
+            {holding ? tm("group.holding", { asset: asset.one, container: container.one }) : tm("group.takeA", { asset: asset.one })}
           </button>
         )}
 
@@ -1054,7 +1057,7 @@ export const GroupTray: React.FC<ActivityProps<GroupParams>> = ({ params, koda, 
 
         {runningTotal && (mode === "make_groups" || mode === "repeated_addition") && (
           <p className={`text-sm font-black tabular-nums ${PRODUCT.text}`} aria-live="polite">
-            So far: {mode === "make_groups" ? builtTotal : countedTotal}
+            {tm("group.soFar", { total: mode === "make_groups" ? builtTotal : countedTotal })}
           </p>
         )}
 

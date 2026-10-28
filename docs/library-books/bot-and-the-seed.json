@@ -412,7 +412,7 @@
     {
       "id": "q4",
       "kind": "comprehension",
-      "prompt": "What does Mia say when Bot wants the plant now?",
+      "prompt": "What does Mia say when Bot looks at the dirt?",
       "options": [
         "Go away",
         "Not yet",
@@ -436,13 +436,13 @@
     {
       "id": "q6",
       "kind": "comprehension",
-      "prompt": "What colour is the flower?",
+      "prompt": "Which flower grows on the plant?",
       "options": [
-        "Green",
-        "Red",
-        "Blue"
+        "A red flower",
+        "A blue flower",
+        "A pink flower"
       ],
-      "answer": 1,
+      "answer": 0,
       "evidence": "s23"
     },
     {

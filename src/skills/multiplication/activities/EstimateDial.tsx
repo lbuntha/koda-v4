@@ -25,6 +25,8 @@ import { speechRate, tagLabelsFrom } from "../internal/data/multiplicationChrome
 import { ADJUSTMENT, EACH, GROUPS, NEUTRAL, PRODUCT } from "../internal/data/multiplicationPalette";
 import { FACTOR_TILE, TOUCH_TARGET } from "../internal/data/multiplicationLayout";
 import { useNudge } from "../internal/ui/useNudge";
+import { tm } from "../internal/i18n";
+import { useT } from "../../../lib/i18n";
 
 /**
  * Estimating, and deciding whether an answer is worth believing.
@@ -98,14 +100,14 @@ export function buildQuestion(params: EstimateParams, index: number, seen?: Set<
     return {
       ...base,
       taskKind: "is_it_reasonable",
-      prompt: `Someone says ${drawn.a} × ${drawn.b} = ${drawn.claim}. Could that be right?`,
+      prompt: tm("estimate.promptClaim", { a: drawn.a, b: drawn.b, claim: drawn.claim }),
       expected: drawn.reasonable ? "Yes" : "No",
     };
   }
   return {
     ...base,
     taskKind: "estimate_by_rounding",
-    prompt: `${drawn.a} × ${drawn.b}. Round to get close, without working it out.`,
+    prompt: tm("estimate.promptRound", { a: drawn.a, b: drawn.b }),
     expected: String(drawn.estimate),
   };
 }
@@ -116,33 +118,34 @@ export const promptFor = (question: EstimateQuestion): string => question.prompt
 /* Worksheet                                                                   */
 /* -------------------------------------------------------------------------- */
 
-const unitName = (unit: RoundingUnit): string => (unit === 100 ? "hundred" : "ten");
+const unitName = (unit: RoundingUnit): string => tm(`estimate.unitOne.${unit === 100 ? 100 : 10}`);
+const unitNames = (unit: RoundingUnit): string => tm(`estimate.unitMany.${unit === 100 ? 100 : 10}`);
 
 export function printedFor(question: EstimateQuestion): PrintedQuestion | null {
   const { a, b, product, roundedA, roundedB, estimate } = question;
   if (question.mode === "reasonable") {
     return {
-      text: `Someone says ${a} × ${b} = ${question.claim}. Estimate, then say whether that could be right. ____`,
-      answer: `${question.reasonable ? "Yes" : "No"} — about ${roundedA} × ${roundedB} = ${estimate}, and the real answer is ${product}`,
+      text: tm("estimate.printedClaim", { a, b, claim: question.claim }),
+      answer: tm("estimate.printedClaimAnswer", { verdict: question.reasonable ? tm("estimate.yes") : tm("estimate.no"), ra: roundedA, rb: roundedB, estimate, product }),
     };
   }
   return {
-    text: `Estimate ${a} × ${b} by rounding. ____`,
-    answer: `${roundedA} × ${roundedB} = ${estimate} (the real answer is ${product})`,
+    text: tm("estimate.printedRound", { a, b }),
+    answer: tm("estimate.printedRoundAnswer", { ra: roundedA, rb: roundedB, estimate, product }),
   };
 }
 
 export function methodFor(question: EstimateQuestion): string[] | null {
   const { a, b, unitA, unitB, roundedA, roundedB, estimate } = question;
   const lines = [
-    `Round ${a} to the nearest ${unitName(unitA)}: ${roundedA}.`,
+    tm("estimate.methodRoundA", { a, unit: unitName(unitA), rounded: roundedA }),
     unitB === 1
-      ? `${b} is already small enough to leave as it is.`
-      : `Round ${b} to the nearest ${unitName(unitB)}: ${roundedB}.`,
-    `${roundedA} × ${roundedB} = ${estimate}.`,
+      ? tm("estimate.methodLeaveB", { b })
+      : tm("estimate.methodRoundB", { b, unit: unitName(unitB), rounded: roundedB }),
+    tm("estimate.methodProduct", { ra: roundedA, rb: roundedB, estimate }),
   ];
   if (question.mode === "reasonable") {
-    lines.push(`Compare that with ${question.claim}. An answer ten times out is not close.`);
+    lines.push(tm("estimate.methodCompare", { claim: question.claim }));
   }
   return lines;
 }
@@ -170,20 +173,20 @@ export function estimateHints(
     return composeHints(
       kidTip,
       state.revealed
-        ? `The estimate is about ${question.estimate}. Is ${question.claim} anywhere near it?`
-        : `Round both numbers in your head first, then look at the claim again.`,
+        ? tm("estimate.hintClaimRevealed", { estimate: question.estimate, claim: question.claim })
+        : tm("estimate.hintClaimRound"),
       // Names the size of the error without saying which way the answer goes.
-      `Ten times too big, or ten times too small, is not close.`,
+      tm("estimate.hintClaimTen"),
     );
   }
   return composeHints(
     kidTip,
     state.dialA !== question.roundedA
-      ? `${a} is between two ${unitName(unitA)}s. Which one is it nearer?`
+      ? tm("estimate.hintBetween", { a, units: unitNames(unitA) })
       : unitB !== 1 && state.dialB !== question.roundedB
-        ? `Now do the same with ${b}.`
-        : `Both are rounded. What do they come to?`,
-    `Estimating means answering a near-enough question that is easier than the real one.`,
+        ? tm("estimate.hintNowB", { b })
+        : tm("estimate.hintBoth"),
+    tm("estimate.hintEasier"),
   );
 }
 
@@ -192,6 +195,7 @@ export function estimateHints(
 /* -------------------------------------------------------------------------- */
 
 export const EstimateDial: React.FC<ActivityProps<EstimateParams>> = ({ params, koda, onComplete, lesson }) => {
+  useT();
   const setup: EstimateSetup = useMemo(() => ({ ...params, ...params.question }), [params]);
   const copy = playCopy(params);
   const practising = isPractice(setup);
@@ -293,7 +297,7 @@ export const EstimateDial: React.FC<ActivityProps<EstimateParams>> = ({ params, 
     if (round.feedback) return;
     const unit = which === "a" ? unitA : unitB;
     if (unit === 1) {
-      refuse(`${b} is small enough to leave alone. Round the bigger number.`, "That one does not need rounding.");
+      refuse(tm("estimate.leaveAlone", { b }), tm("estimate.leaveAloneSay"));
       return;
     }
     const current = which === "a" ? dialA : dialB;
@@ -303,7 +307,7 @@ export const EstimateDial: React.FC<ActivityProps<EstimateParams>> = ({ params, 
     const base = roundTo(current, unit);
     const next = base === current ? current + by * unit : by > 0 ? Math.ceil(current / unit) * unit : Math.floor(current / unit) * unit;
     if (next <= 0) {
-      refuse("A rounded factor cannot be nothing.", "It cannot go lower.");
+      refuse(tm("estimate.notNothing"), tm("estimate.notNothingSay"));
       return;
     }
     if (which === "a") setDialA(next);
@@ -316,17 +320,19 @@ export const EstimateDial: React.FC<ActivityProps<EstimateParams>> = ({ params, 
   const checkEstimate = () => {
     if (round.feedback) return;
     if (dialA === a || (unitB !== 1 && dialB === b)) {
-      refuse("Both numbers still need rounding.", "Round them first.");
+      refuse(tm("estimate.stillRound"), tm("estimate.stillRoundSay"));
       return;
     }
     const correct = dialA === question.roundedA && dialB === question.roundedB;
     judge(
       correct,
       String(shownEstimate),
-      correct ? "Close enough" : "Not the nearest",
+      correct ? tm("estimate.closeTitle") : tm("estimate.notNearestTitle"),
       correct
-        ? `${question.roundedA} × ${question.roundedB} = ${question.estimate}, and the real answer is ${question.product}.`
-        : `${a} rounds to ${question.roundedA}${unitB === 1 ? "" : ` and ${b} rounds to ${question.roundedB}`}, giving ${question.estimate}.`,
+        ? tm("estimate.closeMessage", { ra: question.roundedA, rb: question.roundedB, estimate: question.estimate, product: question.product })
+        : unitB === 1
+          ? tm("estimate.roundsTo", { a, ra: question.roundedA, estimate: question.estimate })
+          : tm("estimate.roundsToBoth", { a, ra: question.roundedA, b, rb: question.roundedB, estimate: question.estimate }),
     );
   };
 
@@ -336,7 +342,7 @@ export const EstimateDial: React.FC<ActivityProps<EstimateParams>> = ({ params, 
     setRevealed(true);
     round.useSupport("reveal");
     chime(koda, "reached");
-    speak(`About ${question.estimate}.`);
+    speak(tm("estimate.about", { estimate: question.estimate }));
   };
 
   const answerClaim = (saidYes: boolean) => {
@@ -345,10 +351,10 @@ export const EstimateDial: React.FC<ActivityProps<EstimateParams>> = ({ params, 
     judge(
       correct,
       saidYes ? "Yes" : "No",
-      correct ? "Good judgement" : "Look again",
+      correct ? tm("estimate.judgeTitle") : tm("estimate.lookAgain"),
       question.reasonable
-        ? `${question.roundedA} × ${question.roundedB} is about ${question.estimate}, and ${question.claim} sits right beside it.`
-        : `${question.roundedA} × ${question.roundedB} is about ${question.estimate}. ${question.claim} is ten times out — the real answer is ${question.product}.`,
+        ? tm("estimate.claimClose", { ra: question.roundedA, rb: question.roundedB, estimate: question.estimate, claim: question.claim })
+        : tm("estimate.claimFar", { ra: question.roundedA, rb: question.roundedB, estimate: question.estimate, claim: question.claim, product: question.product }),
     );
   };
 
@@ -365,7 +371,7 @@ export const EstimateDial: React.FC<ActivityProps<EstimateParams>> = ({ params, 
         <div className="flex items-center gap-1">
           <button
             type="button"
-            aria-label={`Round ${original} down`}
+            aria-label={tm("estimate.roundDown", { original })}
             onClick={() => turn(which, -1)}
             disabled={!!round.feedback}
             className={themeSystem.button("secondary", "choice")}
@@ -373,14 +379,14 @@ export const EstimateDial: React.FC<ActivityProps<EstimateParams>> = ({ params, 
             −
           </button>
           <span
-            aria-label={`${original} rounded to ${value}`}
+            aria-label={tm("estimate.roundedTo", { original, value })}
             className={`${FACTOR_TILE} ${value === original ? `${NEUTRAL.border} bg-surface ${NEUTRAL.text}` : `${PRODUCT.border} ${PRODUCT.soft} ${PRODUCT.text}`}`}
           >
             {value}
           </span>
           <button
             type="button"
-            aria-label={`Round ${original} up`}
+            aria-label={tm("estimate.roundUp", { original })}
             onClick={() => turn(which, 1)}
             disabled={!!round.feedback}
             className={themeSystem.button("secondary", "choice")}
@@ -412,7 +418,7 @@ export const EstimateDial: React.FC<ActivityProps<EstimateParams>> = ({ params, 
           className={`text-center text-xl font-black tabular-nums ${untouched ? `${NEUTRAL.text} opacity-60` : PRODUCT.text}`}
           aria-live="polite"
         >
-          {untouched ? "Round them to see" : `About ${shownEstimate}`}
+          {untouched ? tm("estimate.roundToSee") : tm("estimate.aboutShown", { estimate: shownEstimate })}
         </p>
       )}
     </div>
@@ -427,17 +433,17 @@ export const EstimateDial: React.FC<ActivityProps<EstimateParams>> = ({ params, 
       </p>
       {revealed ? (
         <p className={`text-lg font-black tabular-nums ${PRODUCT.text}`} aria-live="polite">
-          {question.roundedA} × {question.roundedB} is about {question.estimate}
+          {tm("estimate.isAbout", { ra: question.roundedA, rb: question.roundedB, estimate: question.estimate })}
         </p>
       ) : (
         <button
           type="button"
           onClick={revealEstimate}
           disabled={!!round.feedback}
-          aria-label="Round them and see"
+          aria-label={tm("estimate.roundAndSee")}
           className={themeSystem.button("secondary", "md")}
         >
-          Round them and see
+          {tm("estimate.roundAndSee")}
         </button>
       )}
     </div>
@@ -445,7 +451,7 @@ export const EstimateDial: React.FC<ActivityProps<EstimateParams>> = ({ params, 
 
   const controls = estimating ? (
     <button type="button" onClick={checkEstimate} disabled={!!round.feedback} className={themeSystem.button("primary", "md")}>
-      Check
+      {tm("estimate.check")}
     </button>
   ) : (
     <div className="flex flex-wrap items-center justify-center gap-3">
@@ -453,14 +459,14 @@ export const EstimateDial: React.FC<ActivityProps<EstimateParams>> = ({ params, 
         <button
           key={String(saidYes)}
           type="button"
-          aria-label={saidYes ? `Yes, ${question.claim} could be right` : `No, ${question.claim} is not close`}
+          aria-label={saidYes ? tm("estimate.ariaYes", { claim: question.claim }) : tm("estimate.ariaNo", { claim: question.claim })}
           onClick={() => answerClaim(saidYes)}
           disabled={!!round.feedback}
           className={`${TOUCH_TARGET} rounded-2xl border-2 px-6 py-3 text-lg font-black text-ink focus:outline-none focus-visible:ring-2 focus-visible:ring-sky-500 ${
             saidYes ? `${PRODUCT.border} ${PRODUCT.soft}` : `${ADJUSTMENT.border} ${ADJUSTMENT.soft}`
           }`}
         >
-          {saidYes ? "Could be right" : "Not close"}
+          {saidYes ? tm("estimate.couldBe") : tm("estimate.notClose")}
         </button>
       ))}
     </div>
@@ -506,7 +512,7 @@ export const EstimateDial: React.FC<ActivityProps<EstimateParams>> = ({ params, 
     <SkillRound
       koda={koda}
       lesson={lesson}
-      fallbackTitle="Estimate"
+      fallbackTitle={tm("estimate.title")}
       round={round}
       totalQuestions={total}
       prompt={promptFor(question)}

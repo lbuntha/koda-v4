@@ -27,6 +27,8 @@ import { ADJUSTMENT, EACH, GROUPS, NEUTRAL, PRODUCT } from "../internal/data/mul
 import { DIGIT_CELL, SCROLL_BOX, TOUCH_TARGET } from "../internal/data/multiplicationLayout";
 import { useNudge } from "../internal/ui/useNudge";
 import { NumberPad } from "../internal/ui/NumberPad";
+import { tm, joinAnd } from "../internal/i18n";
+import { useT } from "../../../lib/i18n";
 
 /**
  * The written method, done in the order it is written.
@@ -118,14 +120,14 @@ export function buildQuestion(params: ColumnParams, index: number, seen?: Set<st
       return {
         ...base,
         taskKind: "column_with_regrouping",
-        prompt: `${a} × ${b}. Work right to left, and write each carry in its box.`,
+        prompt: tm("column.promptRegroup", { a, b }),
         expected: String(product),
       };
     case "two_digit":
       return {
         ...base,
         taskKind: "two_digit_column",
-        prompt: `${a} × ${b}. One row for the ones, one for the tens, then add them.`,
+        prompt: tm("column.promptTwoDigit", { a, b }),
         expected: String(product),
       };
     case "no_regroup":
@@ -133,7 +135,7 @@ export function buildQuestion(params: ColumnParams, index: number, seen?: Set<st
       return {
         ...base,
         taskKind: "column_no_regrouping",
-        prompt: `${a} × ${b}. Start with the ones and work left.`,
+        prompt: tm("column.promptPlain", { a, b }),
         expected: String(product),
       };
   }
@@ -149,12 +151,12 @@ export function printedFor(question: ColumnQuestion): PrintedQuestion | null {
   const { a, b, product, rows } = question;
   if (question.mode === "two_digit") {
     return {
-      text: `${a} × ${b} in columns. Write the ones row, then the tens row, then add them. ${a} × ${b} = ____`,
-      answer: `${rows.map((r) => `${a} × ${r.multiplier} = ${r.value}`).join(", ")} — total ${product}`,
+      text: tm("column.printedTwo", { a, b }),
+      answer: tm("column.printedTwoAnswer", { rows: rows.map((r) => `${a} × ${r.multiplier} = ${r.value}`).join(", "), product }),
     };
   }
   return {
-    text: `${a} × ${b} in columns, working right to left. ${a} × ${b} = ____`,
+    text: tm("column.printedPlain", { a, b }),
     answer: String(product),
   };
 }
@@ -164,23 +166,23 @@ export function methodFor(question: ColumnQuestion): string[] | null {
   switch (question.mode) {
     case "regroup":
       return [
-        "Start with the ones column and work left.",
-        "When a column comes to ten or more, write the ones digit and carry the rest.",
-        "Add the carry into the next column before writing it down.",
+        tm("column.methodRegroup1"),
+        tm("column.methodRegroup2"),
+        tm("column.methodRegroup3"),
       ];
     case "two_digit":
       return [
-        `The first row is ${a} × ${rows[0]?.multiplier ?? 0}.`,
+        tm("column.methodTwo1", { a, m: rows[0]?.multiplier ?? 0 }),
         // §12 trap 12: the second row is × the tens, and the zero follows.
-        `The second row is ${a} × ${rows[1]?.multiplier ?? 0} — the tens, not the digit on its own.`,
-        "That is why it ends in a zero. Add the two rows.",
+        tm("column.methodTwo2", { a, m: rows[1]?.multiplier ?? 0 }),
+        tm("column.methodTwo3"),
       ];
     case "no_regroup":
     default:
       return [
-        "Start with the ones column.",
-        `Multiply each digit of ${a} by ${b} in turn, working left.`,
-        "Write each answer under its own column.",
+        tm("column.methodPlain1"),
+        tm("column.methodPlain2", { a, b }),
+        tm("column.methodPlain3"),
       ];
   }
 }
@@ -209,7 +211,7 @@ export function figureFor(question: ColumnQuestion): React.ReactNode | null {
     ));
 
   return (
-    <svg viewBox={`0 0 ${right + 4} 96`} width="100%" role="img" aria-label={`A column frame for ${a} times ${b}`}>
+    <svg viewBox={`0 0 ${right + 4} 96`} width="100%" role="img" aria-label={tm("column.frameLabel", { a, b })}>
       {/* A blank row of boxes for the carries, above everything. */}
       {Array.from({ length: width }, (_, i) => (
         <rect
@@ -254,26 +256,26 @@ export function columnHints(
       return composeHints(
         kidTip,
         next?.kind === "carry"
-          ? `That column came to ten or more. The extra tens go in the carry box.`
-          : `Multiply the next digit, then add anything waiting in the carry box.`,
-        "A column only ever holds one digit. Everything above nine moves left.",
+          ? tm("column.hintCarry")
+          : tm("column.hintMultiply"),
+        tm("column.hintOneDigit"),
       );
     }
     case "two_digit":
       return composeHints(
         kidTip,
         state.chosen === undefined
-          ? `The bottom number is ${placeValueSplit(question.b).join(" and ")}. The second row uses the tens.`
-          : `The second row is ${a} × ${rows[1]?.multiplier}. Work it out like any other row.`,
+          ? tm("column.hintSplit", { parts: joinAnd(placeValueSplit(question.b).map(String)) })
+          : tm("column.hintSecond", { a, m: rows[1]?.multiplier ?? 0 }),
         // Names why the zero is there rather than telling anyone to type one.
-        `Multiplying by ${rows[1]?.multiplier} lands on whole tens, so that row ends in zero.`,
+        tm("column.hintZero", { m: rows[1]?.multiplier ?? 0 }),
       );
     case "no_regroup":
     default:
       return composeHints(
         kidTip,
-        `Start at the right. Every digit of ${a} gets multiplied in turn.`,
-        "Each answer goes under the column it came from.",
+        tm("column.hintRight", { a }),
+        tm("column.hintUnder"),
       );
   }
 }
@@ -283,6 +285,7 @@ export function columnHints(
 /* -------------------------------------------------------------------------- */
 
 export const ColumnPad: React.FC<ActivityProps<ColumnParams>> = ({ params, koda, onComplete, lesson }) => {
+  useT();
   const setup: ColumnSetup = useMemo(() => ({ ...params, ...params.question }), [params]);
   const copy = playCopy(params);
   const practising = isPractice(setup);
@@ -416,8 +419,8 @@ export const ColumnPad: React.FC<ActivityProps<ColumnParams>> = ({ params, koda,
     if (nextStep < steps.length) {
       const remaining = steps.length - nextStep;
       refuse(
-        `${remaining} more to write. Work right to left until the columns run out.`,
-        "Finish the columns first.",
+        tm("column.moreToWrite", { count: remaining }),
+        tm("column.finishFirst"),
       );
       return;
     }
@@ -433,10 +436,10 @@ export const ColumnPad: React.FC<ActivityProps<ColumnParams>> = ({ params, koda,
     judge(
       correct,
       String(value),
-      correct ? "That is the method" : "Check the columns",
+      correct ? tm("column.methodTitle") : tm("column.checkColumns"),
       firstWrong >= 0
-        ? `The ${placeName(steps[firstWrong].place)} ${steps[firstWrong].kind === "carry" ? "carry" : "column"} should be ${steps[firstWrong].value}.`
-        : `${a} × ${b} = ${question.product}.`,
+        ? tm(steps[firstWrong].kind === "carry" ? "column.wrongCarry" : "column.wrongColumn", { place: placeName(steps[firstWrong].place), value: steps[firstWrong].value })
+        : tm("column.answerLine", { a, b, product: question.product }),
     );
   };
 
@@ -448,9 +451,9 @@ export const ColumnPad: React.FC<ActivityProps<ColumnParams>> = ({ params, koda,
       // §12 trap 12, said out loud rather than marked.
       refuse(
         value * 10 === wanted
-          ? `The ${value} in ${b} is worth ${wanted}, not ${value}. The second row multiplies by ${wanted} — that is where its zero comes from.`
-          : `${value} is not one of the parts of ${b}. It splits into ${placeValueSplit(b).join(" and ")}.`,
-        "That is not what the second row multiplies by.",
+          ? tm("column.worthMore", { value, b, wanted })
+          : tm("column.notPart", { value, b, parts: joinAnd(placeValueSplit(b).map(String)) }),
+        tm("column.notMultiplier"),
       );
       return;
     }
@@ -466,11 +469,11 @@ export const ColumnPad: React.FC<ActivityProps<ColumnParams>> = ({ params, koda,
   const checkRows = () => {
     if (round.feedback) return;
     if (chosen === undefined) {
-      refuse("Say what the second row multiplies by first.", "Choose the multiplier first.");
+      refuse(tm("column.sayMultiplier"), tm("column.chooseMultiplier"));
       return;
     }
     if (typed.some((v) => v === "")) {
-      refuse("Both rows and the total need filling in.", "Fill both rows first.");
+      refuse(tm("column.fillRows"), tm("column.fillBoth"));
       return;
     }
     const [one, ten, sum] = typed.map(Number);
@@ -479,10 +482,10 @@ export const ColumnPad: React.FC<ActivityProps<ColumnParams>> = ({ params, koda,
     judge(
       correct,
       String(sum),
-      correct ? "That is the method" : "Check the rows",
+      correct ? tm("column.methodTitle") : tm("column.checkRows"),
       !correctRows
-        ? `${a} × ${rows[0].multiplier} is ${rows[0].value}, and ${a} × ${rows[1].multiplier} is ${rows[1].value}.`
-        : `${rows[0].value} + ${rows[1].value} = ${question.product}.`,
+        ? tm("column.rowsMessage", { a, m1: rows[0].multiplier, v1: rows[0].value, m2: rows[1].multiplier, v2: rows[1].value })
+        : tm("column.sumMessage", { v1: rows[0].value, v2: rows[1].value, product: question.product }),
     );
   };
 
@@ -519,8 +522,8 @@ export const ColumnPad: React.FC<ActivityProps<ColumnParams>> = ({ params, koda,
                   : `${NEUTRAL.border} border-dashed bg-surface`,
               `carry-${place}`,
               value === undefined
-                ? `Carry into the ${placeName(place)}, empty`
-                : `Carry into the ${placeName(place)}, ${value}`,
+                ? tm("column.carryEmpty", { place: placeName(place) })
+                : tm("column.carryValue", { place: placeName(place), value }),
             );
           })}
         </div>
@@ -543,8 +546,8 @@ export const ColumnPad: React.FC<ActivityProps<ColumnParams>> = ({ params, koda,
                   : `${NEUTRAL.border} border-dashed bg-surface`,
               `digit-${place}`,
               value === undefined
-                ? `The ${placeName(place)}, empty`
-                : `The ${placeName(place)}, ${value}`,
+                ? tm("column.placeEmpty", { place: placeName(place) })
+                : tm("column.placeValue", { place: placeName(place), value }),
             );
           })}
         </div>
@@ -582,9 +585,7 @@ export const ColumnPad: React.FC<ActivityProps<ColumnParams>> = ({ params, koda,
   const rowBox = (index: number, label: string, tone: string) => (
     <button
       type="button"
-      aria-label={`${label}, ${typed[index] || "empty"}${
-        guide.target === index ? ", write this one next" : ""
-      }`}
+      aria-label={tm("column.rowLabel", { label, value: typed[index] || tm("column.empty"), next: guide.target === index ? tm("column.writeNext") : "" })}
       aria-pressed={activeRow === index}
       onClick={() => {
         if (round.feedback) return;
@@ -615,13 +616,13 @@ export const ColumnPad: React.FC<ActivityProps<ColumnParams>> = ({ params, koda,
       {chosen === undefined ? (
         <div className="flex flex-col items-stretch gap-2">
           <p className={`text-center text-sm font-bold ${NEUTRAL.text}`}>
-            What does the second row multiply {a} by?
+            {tm("column.secondRowAsk", { a })}
           </p>
           {question.multiplierChoices.map((value) => (
             <button
               key={value}
               type="button"
-              aria-label={`The second row multiplies by ${value}`}
+              aria-label={tm("column.secondRowBy", { value })}
               onClick={() => chooseMultiplier(value)}
               disabled={!!round.feedback}
               className={`${TOUCH_TARGET} rounded-2xl border-2 ${EACH.border} bg-surface px-4 py-3 text-lg font-bold tabular-nums text-ink focus:outline-none focus-visible:ring-2 focus-visible:ring-sky-500`}
@@ -635,7 +636,7 @@ export const ColumnPad: React.FC<ActivityProps<ColumnParams>> = ({ params, koda,
           {rowBox(0, `${a} × ${rows[0].multiplier}`, `${PRODUCT.border} bg-surface`)}
           {rowBox(1, `${a} × ${rows[1].multiplier}`, `${PRODUCT.border} bg-surface`)}
           <div className={`h-0.5 w-full ${NEUTRAL.text} bg-current opacity-40`} />
-          {rowBox(2, "Total", `${PRODUCT.border} ${PRODUCT.soft}`)}
+          {rowBox(2, tm("column.total"), `${PRODUCT.border} ${PRODUCT.soft}`)}
         </>
       )}
     </div>
@@ -656,7 +657,7 @@ export const ColumnPad: React.FC<ActivityProps<ColumnParams>> = ({ params, koda,
       onDigit={(digit) => {
         if (wide) {
           if (chosen === undefined) {
-            refuse("Say what the second row multiplies by first.", "Choose the multiplier first.");
+            refuse(tm("column.sayMultiplier"), tm("column.chooseMultiplier"));
             return;
           }
           setTypedAt(activeRow, (typed[activeRow] + digit).slice(0, 5));
@@ -677,7 +678,7 @@ export const ColumnPad: React.FC<ActivityProps<ColumnParams>> = ({ params, koda,
     <SkillRound
       koda={koda}
       lesson={lesson}
-      fallbackTitle="Column Method"
+      fallbackTitle={tm("column.title")}
       round={round}
       totalQuestions={total}
       prompt={promptFor(question)}
@@ -703,10 +704,10 @@ export const ColumnPad: React.FC<ActivityProps<ColumnParams>> = ({ params, koda,
         {scaffold && !wide && (
           <p className={`text-center text-sm font-bold ${GROUPS.text}`} aria-live="polite">
             {nextStep >= steps.length
-              ? "Every column is written"
+              ? tm("column.allWritten")
               : steps[nextStep].kind === "carry"
-                ? `Now the carry into the ${placeName(steps[nextStep].place)}`
-                : `Now the ${placeName(steps[nextStep].place)}`}
+                ? tm("column.nowCarry", { place: placeName(steps[nextStep].place) })
+                : tm("column.nowPlace", { place: placeName(steps[nextStep].place) })}
           </p>
         )}
 
@@ -719,7 +720,7 @@ export const ColumnPad: React.FC<ActivityProps<ColumnParams>> = ({ params, koda,
             disabled={!!round.feedback}
             className={themeSystem.button("primary", "md")}
           >
-            Check
+            {tm("column.check")}
           </button>
         )}
       </div>
@@ -729,8 +730,5 @@ export const ColumnPad: React.FC<ActivityProps<ColumnParams>> = ({ params, koda,
 
 /** "ones", "tens", "hundreds" — what a column is called when it is talked about. */
 function placeName(place: number): string {
-  if (place === 1) return "ones";
-  if (place === 10) return "tens";
-  if (place === 100) return "hundreds";
-  return "thousands";
+  return tm(`places.${place === 1 || place === 10 || place === 100 ? place : 1000}`);
 }

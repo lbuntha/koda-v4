@@ -18,6 +18,8 @@ import {
   type MultiplyQuestion,
   type MultiplySetup,
 } from "../internal/data/fractionMultiply";
+import { tf } from "../internal/i18n";
+import { useT } from "../../../lib/i18n";
 
 /**
  * Multiplying — three pictures, because they are three different ideas.
@@ -58,47 +60,48 @@ export function multiplyHints(question: MultiplyQuestion): string[] {
        * "how many equal groups to make: 5" above a question whose answer is 5.
        */
       return composeHints(
-        "The bottom number says how many equal groups to make.",
-        "Share the whole amount out into that many groups, and see how many land in one group.",
-        "The top number says how many of those groups to take.",
+        tf("mult.hintOf1"),
+        tf("mult.hintOf2"),
+        tf("mult.hintOf3"),
       );
     case "whole_times":
       return composeHints(
-        `This is ${copies} copies of the same amount, laid end to end.`,
-        "Adding the same thing over and over is what multiplying is, so count the shaded pieces.",
-        "The pieces never changed size, so the bottom number never changes either.",
+        tf("mult.hintTimes1", { copies: copies ?? 0 }),
+        tf("mult.hintTimes2"),
+        tf("mult.hintTimes3"),
       );
     case "area_model":
       return composeHints(
-        `Shade ${nameOf(fraction)} across the grid, then ${nameOf(other!)} down it.`,
-        "Look at the squares that got shaded twice. That is the answer.",
-        `Count them, out of all ${fraction.parts * other!.parts} squares in the grid.`,
+        tf("mult.hintArea1", { a: nameOf(fraction), b: nameOf(other!) }),
+        tf("mult.hintArea2"),
+        tf("mult.hintArea3", { all: fraction.parts * other!.parts }),
       );
     case "simplify_first": {
       const across = gcd(fraction.parts, other!.taken) * gcd(fraction.taken, other!.parts);
       return composeHints(
-        "You could multiply straight away, but the numbers get big and then need cutting down.",
-        `Look diagonally: a number on the top and a number on the bottom share a factor of ${across}.`,
-        "Divide both of them by it first. The answer is the same and the numbers are small.",
+        tf("mult.hintSimp1"),
+        tf("mult.hintSimp2", { across }),
+        tf("mult.hintSimp3"),
       );
     }
     default:
       return composeHints(
-        "Do not work it out yet. Just look at the fraction doing the multiplying.",
-        "Less than one whole means you are taking a part of the amount, so the answer is less.",
-        "More than one whole means more than all of it. Exactly one means nothing changes.",
+        tf("mult.hintScal1"),
+        tf("mult.hintScal2"),
+        tf("mult.hintScal3"),
       );
   }
 }
 
 /** The three words level 37 answers with. */
 const VERDICT_WORDS: Record<string, string> = {
-  bigger: "Bigger than it was",
-  smaller: "Smaller than it was",
-  same: "Exactly the same",
+  get bigger() { return tf("mult.bigger"); },
+  get smaller() { return tf("mult.smaller"); },
+  get same() { return tf("mult.same"); },
 };
 
 export const AreaGrid: React.FC<ActivityProps<AreaParams>> = ({ params, koda, onComplete, lesson }) => {
+  useT();
   const setup: MultiplySetup = useMemo(() => ({ ...params, ...params.question }), [params]);
   const practising = isPractice(setup);
   const total = setup.questionsPerRound ?? 5;
@@ -181,7 +184,7 @@ export const AreaGrid: React.FC<ActivityProps<AreaParams>> = ({ params, koda, on
       correct,
       given: text,
       expected: question.expected,
-      title: correct ? "Yes!" : "Not yet",
+      title: correct ? tf("mult.yes") : tf("mult.notYet"),
       message: explainMultiply(question, correct),
     });
   };
@@ -194,9 +197,12 @@ export const AreaGrid: React.FC<ActivityProps<AreaParams>> = ({ params, koda, on
     return (
       <svg
         role="img"
-        aria-label={`Grid ${columns} across and ${rows} down${
-          across ? `, ${question.fraction.taken} columns shaded` : ""
-        }${down ? `, ${question.other!.taken} rows shaded` : ""}`}
+        aria-label={tf("mult.gridLabel", {
+          columns,
+          rows,
+          across: across ? tf("mult.colsShaded", { n: question.fraction.taken }) : "",
+          down: down ? tf("mult.rowsShaded", { n: question.other!.taken }) : "",
+        })}
         viewBox={`0 0 ${columns * cell} ${rows * cell}`}
         width={columns * cell}
         height={rows * cell}
@@ -248,7 +254,7 @@ export const AreaGrid: React.FC<ActivityProps<AreaParams>> = ({ params, koda, on
                 className={`rounded-xl px-2 py-1.5 ${
                   g < question.fraction.taken ? "bg-violet-100 dark:bg-violet-950/40" : "bg-surface-muted"
                 }`}
-                aria-label={`group ${g + 1} of ${question.fraction.parts}, ${perGroup} in it`}
+                aria-label={tf("mult.groupLabel", { g: g + 1, parts: question.fraction.parts, per: perGroup })}
               >
                 <div className="grid grid-cols-5 gap-0.5">
                   {Array.from({ length: perGroup }).map((_, i) => (
@@ -274,7 +280,7 @@ export const AreaGrid: React.FC<ActivityProps<AreaParams>> = ({ params, koda, on
                 parts={question.fraction.parts}
                 shaded={Array.from({ length: question.fraction.taken }, (_, k) => k)}
                 scale={0.7}
-                label={`copy ${i + 1}, ${nameOf(question.fraction)}`}
+                label={tf("mult.copyLabel", { i: i + 1, fraction: nameOf(question.fraction) })}
               />
             ))}
           </div>
@@ -313,7 +319,7 @@ export const AreaGrid: React.FC<ActivityProps<AreaParams>> = ({ params, koda, on
                 disabled={!!round.feedback}
                 className="min-h-11 rounded-2xl bg-surface px-5 py-2 text-sm font-semibold text-ink shadow-sm focus:outline-none focus-visible:ring-2 focus-visible:ring-violet-500"
               >
-                Cancel first
+                {tf("mult.cancelFirst")}
               </button>
             )}
           </div>
@@ -347,7 +353,7 @@ export const AreaGrid: React.FC<ActivityProps<AreaParams>> = ({ params, koda, on
     <SkillRound
       koda={koda}
       lesson={lesson}
-      fallbackTitle="A Fraction of Something"
+      fallbackTitle={tf("mult.title")}
       round={round}
       totalQuestions={total}
       prompt={promptFor(question)}
@@ -459,17 +465,17 @@ export function printedFor(question: MultiplyQuestion): { text: string; answer: 
       return { text: `${question.copies} × ${nameOf(question.fraction)} =`, answer: question.expected };
     case "area_model":
       return {
-        text: `Shade ${nameOf(question.fraction)} across the grid and ${nameOf(question.other!)} down it. What fraction is shaded both ways?`,
+        text: tf("mult.printArea", { a: nameOf(question.fraction), b: nameOf(question.other!) }),
         answer: question.expected,
       };
     case "simplify_first":
       return {
-        text: `${nameOf(question.fraction)} × ${nameOf(question.other!)} = (cancel first)`,
+        text: tf("mult.printSimplify", { a: nameOf(question.fraction), b: nameOf(question.other!) }),
         answer: question.expected,
       };
     default:
       return {
-        text: `Will ${nameOf(question.fraction)} × ${question.total} be bigger than ${question.total}, smaller, or the same? Do not work it out.`,
+        text: tf("mult.printScaling", { fraction: nameOf(question.fraction), total: question.total ?? 0 }),
         answer: question.expected,
       };
   }
@@ -493,29 +499,29 @@ export function methodFor(question: MultiplyQuestion): string[] | null {
   switch (question.mode) {
     case "of_whole":
       return [
-        "Divide by the bottom number to find one group.",
-        "Multiply by the top number to take that many groups.",
+        tf("mult.methodOf1"),
+        tf("mult.methodOf2"),
       ];
     case "whole_times":
       return [
-        "Multiplying by a whole number is making that many copies.",
-        "The pieces stay the same size, so only the top number changes.",
+        tf("mult.methodTimes1"),
+        tf("mult.methodTimes2"),
       ];
     case "area_model":
       return [
-        "Shade the first fraction across the grid, in columns.",
-        "Shade the second down it, in rows.",
-        "The squares shaded twice are the answer, out of all the squares.",
+        tf("mult.methodArea1"),
+        tf("mult.methodArea2"),
+        tf("mult.methodArea3"),
       ];
     case "simplify_first":
       return [
-        "Look diagonally for a number that divides a top and a bottom.",
-        "Divide both by it before multiplying. The answer does not change and the numbers stay small.",
+        tf("mult.methodSimp1"),
+        tf("mult.methodSimp2"),
       ];
     default:
       return [
-        "Multiplying by less than one whole makes the amount smaller.",
-        "Multiplying by more than one makes it bigger. By exactly one, nothing changes.",
+        tf("mult.methodScal1"),
+        tf("mult.methodScal2"),
       ];
   }
 }

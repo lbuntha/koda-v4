@@ -25,6 +25,8 @@ import {
   type MixedQuestion,
   type MixedSetup,
 } from "../internal/data/fractionMixed";
+import { tf } from "../internal/i18n";
+import { useT } from "../../../lib/i18n";
 
 /**
  * Loose parts, and whole ones, and the fact that they are the same amount.
@@ -56,21 +58,21 @@ export function mixedHints(question: MixedQuestion): string[] {
   switch (question.mode) {
     case "to_mixed":
       return composeHints(
-        `It takes ${f.parts} ${piece} to make one whole.`,
-        `So group them ${f.parts} at a time, and count how many whole ones you get.`,
-        "Whatever is left over when you cannot make another whole is the fraction part.",
+        tf("mixed.hintGroup1", { parts: f.parts, words: piece }),
+        tf("mixed.hintGroup2", { parts: f.parts }),
+        tf("mixed.hintGroup3"),
       );
     case "to_improper":
       return composeHints(
-        `Each whole one you break up gives you ${f.parts} ${piece}.`,
-        `${m.ones} whole ${m.ones === 1 ? "one" : "ones"} gives you ${m.ones * f.parts} of them.`,
-        "Add the ones that were already loose, and that is the whole answer.",
+        tf("mixed.hintBreak1", { parts: f.parts, words: piece }),
+        tf("mixed.hintBreak2", { count: m.ones, ones: m.ones, total: m.ones * f.parts }),
+        tf("mixed.hintBreak3"),
       );
     default:
       return composeHints(
-        "Find the whole number first and go to that mark.",
-        `Then count on in ${piece} from there.`,
-        "The two names sit on exactly the same mark, because they are the same number.",
+        tf("mixed.hintLine1"),
+        tf("mixed.hintLine2", { words: piece }),
+        tf("mixed.hintLine3"),
       );
   }
 }
@@ -80,6 +82,7 @@ const sameBoard = (a: Board, b: Board): boolean =>
   a.ones === b.ones && a.loose === b.loose && a.parts === b.parts;
 
 export const MixedBoard: React.FC<ActivityProps<MixedParams>> = ({ params, koda, onComplete, lesson }) => {
+  useT();
   const setup: MixedSetup = useMemo(() => ({ ...params, ...params.question }), [params]);
   const practising = isPractice(setup);
   const total = setup.questionsPerRound ?? 5;
@@ -147,7 +150,7 @@ export const MixedBoard: React.FC<ActivityProps<MixedParams>> = ({ params, koda,
       correct,
       given,
       expected: question.expected,
-      title: correct ? "Yes!" : "Not yet",
+      title: correct ? tf("mixed.yes") : tf("mixed.notYet"),
       message: explainMixed(question, correct),
     });
   };
@@ -182,7 +185,7 @@ export const MixedBoard: React.FC<ActivityProps<MixedParams>> = ({ params, koda,
     <SkillRound
       koda={koda}
       lesson={lesson}
-      fallbackTitle="Wholes and Parts"
+      fallbackTitle={tf("mixed.title")}
       round={round}
       totalQuestions={total}
       prompt={promptFor(question)}
@@ -215,7 +218,7 @@ export const MixedBoard: React.FC<ActivityProps<MixedParams>> = ({ params, koda,
           <>
             <div
               data-testid="line"
-              aria-label={`Line in ${question.intervals} jumps, marker ${marker === null ? "not placed" : `on ${marker}`}`}
+              aria-label={tf("mixed.ariaLine", { intervals: question.intervals ?? 0, state: marker === null ? tf("mixed.notPlacedState") : tf("mixed.onState", { marker }) })}
               className="w-full overflow-x-auto rounded-2xl bg-surface p-3"
             >
               <svg viewBox="-14 0 328 64" width={328} height={64} className="mx-auto text-ink">
@@ -260,7 +263,7 @@ export const MixedBoard: React.FC<ActivityProps<MixedParams>> = ({ params, koda,
               disabled={!!round.feedback}
               className="min-h-11 rounded-2xl bg-emerald-600 px-6 py-2 text-base font-bold text-white shadow-sm"
             >
-              That is where it goes
+              {tf("mixed.thatWhere")}
             </button>
           </>
         ) : (
@@ -268,13 +271,13 @@ export const MixedBoard: React.FC<ActivityProps<MixedParams>> = ({ params, koda,
             <div className="flex flex-wrap items-center justify-center gap-2" data-testid="board">
               {Array.from({ length: board.ones }, (_, i) => (
                 <div key={`w${i}`} className="flex flex-col items-center">
-                  <FractionBar parts={1} shaded={[0]} scale={0.3} label="one whole" />
+                  <FractionBar parts={1} shaded={[0]} scale={0.3} label={tf("mixed.oneWhole")} />
                   <span className="text-xs text-muted">1</span>
                 </div>
               ))}
               {board.loose > 0 ? (
                 <div className="flex flex-col items-center">
-                  <FractionBar parts={f.parts} shaded={shadedOf(board.loose)} scale={0.7} label={`${board.loose} loose parts`} />
+                  <FractionBar parts={f.parts} shaded={shadedOf(board.loose)} scale={0.7} label={tf("mixed.looseParts", { count: board.loose })} />
                   <span className="text-xs text-muted">
                     {board.loose}/{f.parts}
                   </span>
@@ -283,12 +286,12 @@ export const MixedBoard: React.FC<ActivityProps<MixedParams>> = ({ params, koda,
             </div>
 
             <p className="text-sm font-semibold text-ink" data-testid="total">
-              {board.ones > 0 ? `${board.ones} and ` : ""}
+              {board.ones > 0 ? tf("mixed.and", { ones: board.ones }) : ""}
               {board.loose}/{f.parts}
             </p>
             {labelsEnabled && !practising ? (
               <p className="text-xs text-muted" data-testid="running">
-                still {boardTotal(board)} {partWord(f.parts, true)} altogether
+                {tf("mixed.altogether", { total: boardTotal(board), words: partWord(f.parts, true) })}
               </p>
             ) : null}
 
@@ -299,7 +302,7 @@ export const MixedBoard: React.FC<ActivityProps<MixedParams>> = ({ params, koda,
                 disabled={!canGroup(board) || !!round.feedback}
                 className="min-h-11 rounded-2xl bg-surface px-4 py-2 text-sm font-semibold text-ink shadow-sm disabled:opacity-30"
               >
-                make a whole
+                {tf("mixed.makeWhole")}
               </button>
               <button
                 type="button"
@@ -307,7 +310,7 @@ export const MixedBoard: React.FC<ActivityProps<MixedParams>> = ({ params, koda,
                 disabled={!canBreak(board) || !!round.feedback}
                 className="min-h-11 rounded-2xl bg-surface px-4 py-2 text-sm font-semibold text-ink shadow-sm disabled:opacity-30"
               >
-                break one up
+                {tf("mixed.breakUp")}
               </button>
             </div>
 
@@ -323,7 +326,7 @@ export const MixedBoard: React.FC<ActivityProps<MixedParams>> = ({ params, koda,
               disabled={!!round.feedback}
               className="min-h-11 rounded-2xl bg-emerald-600 px-6 py-2 text-base font-bold text-white shadow-sm"
             >
-              That is it
+              {tf("mixed.thatIsIt")}
             </button>
             {/* Only once they have answered. Shown before, it is the answer. */}
             {round.feedback ? (
@@ -347,17 +350,17 @@ export function printedFor(question: MixedQuestion): { text: string; answer: str
   switch (question.mode) {
     case "to_mixed":
       return {
-        text: `Write ${improperName(question.improper)} as a whole number and a fraction.`,
+        text: tf("mixed.printMixed", { improper: improperName(question.improper) }),
         answer: question.expected,
       };
     case "to_improper":
       return {
-        text: `Write ${mixedName(question.mixed)} as one fraction.`,
+        text: tf("mixed.printImproper", { mixed: mixedName(question.mixed) }),
         answer: question.expected,
       };
     default:
       return {
-        text: `Mark ${mixedName(question.mixed)} on the line, and write its other name.`,
+        text: tf("mixed.printLine", { mixed: mixedName(question.mixed) }),
         answer: improperName(question.improper),
       };
   }
@@ -372,19 +375,19 @@ export const figureFor = (question: MixedQuestion): React.ReactNode | null =>
 export function methodFor(question: MixedQuestion): string[] | null {
   if (question.mode === "to_improper") {
     return [
-      "Every whole one breaks into as many parts as the bottom number says.",
-      "Break them all up, then add the parts that were already loose.",
+      tf("mixed.methodImp1"),
+      tf("mixed.methodImp2"),
     ];
   }
   if (question.mode === "to_mixed") {
     return [
-      "Gather the parts into whole ones: one whole for every full set of them.",
-      "Whatever is left over stays as a fraction.",
+      tf("mixed.methodMix1"),
+      tf("mixed.methodMix2"),
     ];
   }
   return [
-    "Find the whole number first and go to that mark.",
-    "Then count on in parts from there.",
-    "Both names belong to the same mark, because they are the same number.",
+    tf("mixed.methodLine1"),
+    tf("mixed.methodLine2"),
+    tf("mixed.methodLine3"),
   ];
 }

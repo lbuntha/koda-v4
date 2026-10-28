@@ -2,10 +2,10 @@ import { memo, useCallback, useEffect, useLayoutEffect, useMemo, useRef, useStat
 import { animate, motion, useMotionValue, useReducedMotion, useTransform } from "motion/react";
 import { Mic, Square, Volume2, X } from "lucide-react";
 import { BANDS, noteFor, PAGE_TEXT_SIZES, type Passage, type PicturePlace, type Sentence } from "./data/passage";
-import { layoutBook, type PageText, type SetSentence, type SetToken } from "./bookLayout";
-import { FIT_MAX, solveFit, wordsFit } from "./fitPage";
+import { layoutBook, type PageText, type SetSentence, type SetToken, widestPage } from "./bookLayout";
+import { FIT_MAX, FIT_MIN, WORDS_MIN, solveFit } from "./fitPage";
 import { FLAT, SPRING, TURNED, angularVelocity, castOf, completes, curlOf, dragAngle, shadeOf, type Dir } from "./pageTurn";
-import { Picture } from "./Picture";
+import { drawingRatio, Picture } from "./Picture";
 import { BANNER, PORTRAIT } from "./pictureShape";
 import { ReadingRecorder } from "./learning";
 import { LibraryProgress } from "./progress";
@@ -82,6 +82,7 @@ const readAutoTurn = (): boolean => {
     return false;
   }
 };
+const ignoreWord = () => undefined;
 const pause = (ms: number) => new Promise<void>((done) => setTimeout(done, ms));
 
 /**
@@ -102,52 +103,50 @@ const PICTURE_MAX = "65svh";
 const PICTURE_MAX_WIDE = "54svh";
 
 /**
- * Find the factor a page should be drawn at, and hand it back.
+ * Try a sheet at a handful of sizes straight in the DOM and keep the best.
  *
- * The page is tried at a handful of factors straight in the DOM — setting the
- * two CSS variables the page is sized by and reading how tall it came out — and
- * the largest that fits the reader's box wins (`solveFit`). That all happens
- * before the browser paints and costs one React render, not a render per
- * correction, so a page never shows at a size it is about to leave.
- *
- * A reader who has asked for text bigger than the page's own size is taken at
- * their word: nothing shrinks it back, and the page scrolls instead. Otherwise
- * "larger text" would quietly undo itself.
+ * `draw` sets the CSS variables the sheet is sized by and reads how tall the
+ * reader's box came out. A turn stacks two sheets in the one box and the taller
+ * decides its height, so every other sheet is taken out of layout for the
+ * instant of measuring and put back as it was — never painted. The sheet's own
+ * turn transform is set aside too, because a browser counts a rotated element's
+ * transformed bounds in the box's scroll height, which a page mid-turn would
+ * read as overflow. Transitions are off while it runs, or the height read would
+ * be the size a change started from.
+ * Returns what `measure` returned, or null when there was nothing to measure.
  */
-function usePageFit(box: RefObject<HTMLElement | null>, page: number, scale: number, turning: boolean): number {
-  const [fit, setFit] = useState(FIT_MAX);
-  const enlarged = scale > 1;
-  const solve = useCallback(() => {
-    const el = box.current;
-    const root = el?.querySelector<HTMLElement>("[data-fit-root]");
-    // Mid-turn two sheets are stacked in the same box and the taller one decides
-    // its height, so a page would be judged by the one it is replacing. The
-    // outgoing page's factor — a good guess, pages of a book being alike — is
-    // held until the sheet lands, and the page is measured for itself then.
-    if (!el || !root || enlarged || turning) return;
-    const draw = (f: number) => {
-      root.style.setProperty("--fit", String(f));
-      root.style.setProperty("--wfit", String(wordsFit(f)));
-      return el.scrollHeight;
-    };
-    el.setAttribute("data-fitting", "");
-    try {
-      const best = solveFit(draw, el.clientHeight);
-      draw(best);
-      setFit(best);
-    } finally {
-      el.removeAttribute("data-fitting");
-    }
-  }, [box, enlarged, turning]);
-  // A page just landed, or the reader chose a new size: solve it afresh, so each
-  // page is judged on its own rather than inheriting a squeeze the last one needed.
-  useLayoutEffect(() => {
-    if (!turning) setFit(FIT_MAX);
-    solve();
-  }, [page, scale, turning, solve]);
+function probeSheet<T>(box: HTMLElement, mine: HTMLElement, show: HTMLElement | null, measure: (root: HTMLElement) => T): T | null {
+  const root = mine.querySelector<HTMLElement>("[data-fit-root]");
+  if (!root) return null;
+  const others = [...box.querySelectorAll<HTMLElement>("[data-book-page]")].filter((s) => s !== mine).flatMap((s) => (s.parentElement && s.parentElement !== show ? [s.parentElement] : []));
+  const was = others.map((o) => o.style.display);
+  const top = box.scrollTop;
+  others.forEach((o) => { o.style.display = "none"; });
+  const shown = show?.style.display ?? "";
+  if (show) show.style.display = "";
+  const cell = mine.parentElement;
+  const turned = cell?.style.getPropertyValue("transform") ?? "";
+  const turnedPriority = cell?.style.getPropertyPriority("transform") ?? "";
+  cell?.style.setProperty("transform", "none", "important");
+  box.setAttribute("data-fitting", "");
+  try {
+    return measure(root);
+  } finally {
+    if (turned) cell?.style.setProperty("transform", turned, turnedPriority);
+    else cell?.style.removeProperty("transform");
+    others.forEach((o, i) => { o.style.display = was[i]; });
+    if (show) show.style.display = shown === "" ? "none" : shown;
+    box.removeAttribute("data-fitting");
+    box.scrollTop = top;
+  }
+}
+
+/** Solve now, again when the box or the page's own content changes size, and once fonts have settled. */
+function useResolve(box: RefObject<HTMLElement | null>, sheet: RefObject<HTMLElement | null>, solve: () => void) {
   useEffect(() => {
     const el = box.current;
-    if (!el || typeof ResizeObserver === "undefined") return;
+    const mine = sheet.current;
+    if (!el || !mine || typeof ResizeObserver === "undefined") return;
     // A rotated phone, a shown keyboard — the box changing size — and the page's
     // own content changing size inside a box that has not moved: a web font
     // arriving and re-flowing the words, a picture landing. Solving waits for the
@@ -159,15 +158,117 @@ function usePageFit(box: RefObject<HTMLElement | null>, page: number, scale: num
     };
     const watch = new ResizeObserver(later);
     watch.observe(el);
-    if (el.firstElementChild) watch.observe(el.firstElementChild);
-    // Fonts settle after first paint and re-flow every line; solve once they have.
+    if (mine.firstElementChild) watch.observe(mine.firstElementChild);
     void document.fonts?.ready.then(later);
     return () => {
       cancelAnimationFrame(frame);
       watch.disconnect();
     };
-  }, [box, solve]);
+  }, [sheet, box, solve]);
+}
+
+/**
+ * How much of its own size a sheet's picture is drawn at, given the book's words.
+ *
+ * Every sheet solves itself the moment it mounts or changes page, in a layout
+ * effect — before the browser paints, with one React render — so a page turned
+ * to arrives already fitted rather than at the last page's size and corrected
+ * when the turn lands. The words are not the sheet's to size: they are set once
+ * for the whole book (`useBookWords`), so what a page gives up to fit is its
+ * picture. A reader who has asked for text bigger than the page's own size is
+ * taken at their word: nothing shrinks it back, and the page scrolls instead.
+ */
+function useSheetFit(sheet: RefObject<HTMLElement | null>, box: RefObject<HTMLElement | null>, scale: number, words: number, index: number): number {
+  const [fit, setFit] = useState(FIT_MAX);
+  const enlarged = scale > 1;
+  const solve = useCallback(() => {
+    const el = box.current;
+    const mine = sheet.current;
+    if (!el || !mine) return;
+    if (enlarged) {
+      setFit(FIT_MAX);
+      return;
+    }
+    const best = probeSheet(el, mine, null, (root) => {
+      const draw = (f: number) => {
+        root.style.setProperty("--fit", String(f));
+        root.style.setProperty("--wfit", String(words));
+        return el.scrollHeight;
+      };
+      const found = solveFit(draw, el.clientHeight);
+      draw(found);
+      return found;
+    });
+    if (best !== null) setFit(best);
+  }, [sheet, box, enlarged, words]);
+  useLayoutEffect(solve, [solve, index]);
+  useResolve(box, sheet, solve);
   return fit;
+}
+
+/**
+ * The size the whole book's words are set at: the largest at which the page with
+ * the most to say still fits, with its picture at its smallest. Measured on a
+ * copy of that page that exists only for the instant it measures — mounted out of
+ * layout, read, and removed again, all before the browser paints — so the type is
+ * the same on every page, is known before the first one is drawn, and no second
+ * copy of a page's words is ever left in the document.
+ *
+ * `of` is whatever the copy was made from; a new one measures again.
+ */
+function BookWordsProbe({ index, count, box, scale, of, onWords, children }: { index: number; count: number; box: RefObject<HTMLElement | null>; scale: number; of: unknown; onWords(words: number): void; children: ReactNode }) {
+  const cell = useRef<HTMLDivElement>(null);
+  const sheet = useRef<HTMLDivElement>(null);
+  const [measuring, setMeasuring] = useState(true);
+  // What it measures changed: the page it copies, the reader's size, the book itself.
+  useLayoutEffect(() => setMeasuring(true), [index, scale, of]);
+  useLayoutEffect(() => {
+    if (!measuring) return;
+    const el = box.current;
+    const mine = sheet.current;
+    if (el && mine) {
+      const found = scale > 1 ? 1 : probeSheet(el, mine, cell.current, (root) => {
+        const draw = (w: number) => {
+          root.style.setProperty("--fit", String(FIT_MIN));
+          root.style.setProperty("--wfit", String(w));
+          return el.scrollHeight;
+        };
+        return solveFit(draw, el.clientHeight, WORDS_MIN, 1);
+      });
+      if (found !== null) onWords(found);
+    }
+    setMeasuring(false);
+  }, [measuring, box, scale, onWords]);
+  // The box changing size, and fonts arriving to re-flow every line.
+  useEffect(() => {
+    const el = box.current;
+    if (!el || typeof ResizeObserver === "undefined") return;
+    let frame = 0;
+    const later = () => {
+      cancelAnimationFrame(frame);
+      frame = requestAnimationFrame(() => setMeasuring(true));
+    };
+    const watch = new ResizeObserver(later);
+    watch.observe(el);
+    void document.fonts?.ready.then(later);
+    return () => {
+      cancelAnimationFrame(frame);
+      watch.disconnect();
+    };
+  }, [box]);
+  if (!measuring) return null;
+  return (
+    <div ref={cell} style={{ display: "none" }} aria-hidden="true" inert className="relative col-start-1 row-start-1 bg-surface">
+      <Sheet index={index} count={count} sheetRef={sheet}>{children}</Sheet>
+    </div>
+  );
+}
+
+/** One page of the book, fitted to the reader's box on its own. */
+function FittedSheet({ index, count, box, scale, words, children }: { index: number; count: number; box: RefObject<HTMLElement | null>; scale: number; words: number; children(fit: number): ReactNode }) {
+  const sheet = useRef<HTMLDivElement>(null);
+  const fit = useSheetFit(sheet, box, scale, words, index);
+  return <Sheet index={index} count={count} sheetRef={sheet}>{children(fit)}</Sheet>;
 }
 
 /** Match the audio clock to an approved word; old/manual clips use a duration-weighted fallback. */
@@ -564,15 +665,16 @@ export function BookReader({ book, onBack, onReady, preview = false, pageControl
   const peekNote = peek ? noteFor(book, peek) : undefined;
   const peekPic = peek ? book.pictures[peek.toLowerCase()] ?? book.pictures[peek] : undefined;
   const scale = TEXT_STEPS[textStep];
-  // One factor for the whole page: the words and the picture shrink together
-  // until the page fits the reader's box on this screen.
-  const fit = usePageFit(scrollEl, page, scale, turning !== null);
+  // The words are one size for the whole book, set by its fullest page; each
+  // page's picture then fits whatever room its own page has left (see FittedSheet).
+  const [words, setWords] = useState(1);
+  const widest = useMemo(() => widestPage(pages), [pages]);
   const sheet = (i: number) => (
-    <Sheet index={i} count={pages.count}>
-      {i === 0 ? <TitlePage book={book} km={km} fit={fit} intro={!opened && !reduce} /> : (
-        <StoryPage book={book} sentences={pages.story[i - 1]} picture={pages.pictures[i - 1]} at={pages.places[i - 1]} text={pages.texts[i - 1]} scale={scale} fit={fit} playing={playing} playingWord={playingWord} peek={peek} onWord={tapWord} end={i === last} />
+    <FittedSheet index={i} count={pages.count} box={scrollEl} scale={scale} words={words}>
+      {(fit) => i === 0 ? <TitlePage book={book} km={km} fit={fit} intro={!opened && !reduce} /> : (
+        <StoryPage book={book} sentences={pages.story[i - 1]} picture={pages.pictures[i - 1]} at={pages.places[i - 1]} text={pages.texts[i - 1]} scale={scale} fit={fit} words={words} playing={playing} playingWord={playingWord} peek={peek} onWord={tapWord} end={i === last} />
       )}
-    </Sheet>
+    </FittedSheet>
   );
   /*
    * What went wrong with the sound, for whoever is looking into it.
@@ -679,6 +781,11 @@ export function BookReader({ book, onBack, onReady, preview = false, pageControl
           e.preventDefault();
         }}
       >
+        {widest !== null && (
+          <BookWordsProbe index={widest} count={pages.count} box={scrollEl} scale={scale} of={pages} onWords={setWords}>
+            <StoryPage book={book} sentences={pages.story[widest - 1]} picture={pages.pictures[widest - 1]} at={pages.places[widest - 1]} text={pages.texts[widest - 1]} scale={scale} fit={FIT_MIN} words={1} playing={null} playingWord={null} peek={null} onWord={ignoreWord} end={widest === last} />
+          </BookWordsProbe>
+        )}
         <div className="relative col-start-1 row-start-1 bg-surface" aria-hidden={over !== null && over === page ? true : undefined} inert={over !== null && over === page ? true : undefined}>
           {sheet(under)}
           {over !== null && (
@@ -726,10 +833,11 @@ export function BookReader({ book, onBack, onReady, preview = false, pageControl
 }
 
 /** One sheet of the book. */
-function Sheet({ index, count, children }: { index: number; count: number; children: ReactNode }) {
+function Sheet({ index, count, sheetRef, children }: { index: number; count: number; sheetRef?: RefObject<HTMLDivElement | null>; children: ReactNode }) {
   const { t } = useT();
   return (
     <div
+      ref={sheetRef}
       role="group"
       aria-roledescription="page"
       aria-label={index === 0 ? t("reader.cover") : t("reader.pageOf", { page: index, total: count - 1 })}
@@ -743,7 +851,9 @@ function Sheet({ index, count, children }: { index: number; count: number; child
 
 /** The cover: the book's picture, edge to edge, with the title beneath it. */
 const TitlePage = memo(function TitlePage({ book, km, fit, intro }: { book: Passage; km: boolean; fit: number; intro: boolean }) {
+  const { t } = useT();
   const [lo, hi] = BANDS[book.band].ages;
+  const learn = book.learningTakeaway?.trim();
   return (
     <div data-fit-root className="flex flex-1 flex-col" style={{ "--fit": fit } as CSSProperties}>
       <div className={`relative min-h-56 flex-1 overflow-hidden rounded-3xl ${intro ? "koda-book-in" : ""}`}>
@@ -754,6 +864,12 @@ const TitlePage = memo(function TitlePage({ book, km, fit, intro }: { book: Pass
         <p className="mt-3 text-xs uppercase tracking-[0.18em] text-neutral-500 dark:text-neutral-400">
           Level {book.band} · Ages {lo}–{hi} · {minutesToRead(book)} min
         </p>
+        {learn && (
+          <div className="mx-auto mt-5 max-w-[30rem] border-t border-neutral-200 pt-4 dark:border-neutral-700">
+            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-neutral-500 dark:text-neutral-400">{t("library.coverLearn")}</p>
+            <p className={`mt-2 text-base leading-relaxed text-neutral-800 dark:text-neutral-200 ${km ? `${KHMER} leading-loose` : SERIF}`}>{learn}</p>
+          </div>
+        )}
       </div>
     </div>
   );
@@ -835,13 +951,15 @@ const ALIGN: Record<PageText["align"], string> = { left: "", center: "text-cente
  */
 const phoneSize = (size: number) => 1 + (size - 1) * 0.6;
 
-const StoryPage = memo(function StoryPage({ book, sentences, picture, at = "top", text = DEFAULT_TEXT, scale, fit, playing, playingWord, peek, onWord, end }: {
+const StoryPage = memo(function StoryPage({ book, sentences, picture, at = "top", text = DEFAULT_TEXT, scale, fit, words, playing, playingWord, peek, onWord, end }: {
   book: Passage;
   sentences: SetSentence[];
   /** The reader's text size, as a multiple of the page's own size; the page's fit is applied on top. */
   scale: number;
-  /** How far the page as a whole is scaled to fit this screen; the picture follows it too. */
+  /** How far the page's picture is scaled to fit this screen, once the words are set. */
   fit: number;
+  /** The book's one size for its words, from its fullest page. */
+  words: number;
   /** The page's illustration, drawn with the words as in a picture book. */
   picture: string | null;
   /** Where the illustration sits. */
@@ -867,7 +985,7 @@ const StoryPage = memo(function StoryPage({ book, sentences, picture, at = "top"
    */
   const [learned, setLearned] = useState<{ of: string; ratio: number } | null>(null);
   const shape = (learned?.of === picture ? learned.ratio : null)
-    ?? (picture ? shapes.get(picture) : undefined)
+    ?? (picture ? shapes.get(picture) ?? drawingRatio(picture) : undefined)
     ?? reservedShape(at);
   const learnShape = useCallback((ratio: number) => {
     if (!picture) return;
@@ -888,7 +1006,7 @@ const StoryPage = memo(function StoryPage({ book, sentences, picture, at = "top"
   const align = ALIGN[text.align] ?? "";
 
   return (
-    <div data-fit-root className="@container flex flex-1 flex-col [--cap:var(--picture-max)] sm:[--cap:var(--picture-max-wide)]" style={{ "--fit": fit, "--wfit": wordsFit(fit), "--picture-max": PICTURE_MAX, "--picture-max-wide": PICTURE_MAX_WIDE, "--shape": shape, "--picture-w": PICTURE_W, "--page-size-phone": phoneSize(size), "--page-size-wide": size } as CSSProperties}>
+    <div data-fit-root className="@container flex flex-1 flex-col [--cap:var(--picture-max)] sm:[--cap:var(--picture-max-wide)]" style={{ "--fit": fit, "--wfit": words, "--picture-max": PICTURE_MAX, "--picture-max-wide": PICTURE_MAX_WIDE, "--shape": shape, "--picture-w": PICTURE_W, "--page-size-phone": phoneSize(size), "--page-size-wide": size } as CSSProperties}>
       <div data-picture-at={picture ? at : undefined} className={`flex gap-6 sm:gap-8 ${picture ? PLACE[at].page : "my-auto flex-col"} ${picture && at !== "top" ? "my-auto" : ""}`}>
       {picture && (
         <div className={`overflow-hidden rounded-lg transition-[width] duration-200 ease-out motion-reduce:transition-none ${PLACE[at].frame}`}>
@@ -899,7 +1017,7 @@ const StoryPage = memo(function StoryPage({ book, sentences, picture, at = "top"
         </div>
       )}
       <div ref={wordsEl} className={`relative isolate grid gap-6 px-1 ${picture ? PLACE[at].words : "mx-auto w-full max-w-[34em]"}`}>
-        <ReadMarker box={wordsEl} word={playingWord} scale={scale * wordsFit(fit) * size} />
+        <ReadMarker box={wordsEl} word={playingWord} scale={scale * words * size} />
         {blocks.map((b, i) => (
           <div key={i}>
             {b.heading && (

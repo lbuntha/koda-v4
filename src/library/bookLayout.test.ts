@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { STARTER_PASSAGES } from "./data/starterPassages";
-import { hasOwnPages, headingLength, pageText, joinPageToPrevious, keyWordsOf, layoutBook, pagePicture, paginate, setSentence, withAutomaticPages, withPageBreak, withPageChoice, withPagePicture } from "./bookLayout";
+import { hasOwnPages, headingLength, pageText, joinPageToPrevious, keyWordsOf, layoutBook, pagePicture, paginate, setSentence, widestPage, withAutomaticPages, withPageBreak, withPageChoice, withPagePicture } from "./bookLayout";
 import type { Passage, Sentence } from "./data/passage";
 
 const [MARKET, RAINY, MARKET_KM] = STARTER_PASSAGES;
@@ -71,6 +71,26 @@ describe("a page's text size and alignment", () => {
     const back = withPageChoice(sized, ["s1", "s2"], { textSize: "normal", textAlign: "left" });
     expect(back.sentences[0]).not.toHaveProperty("textSize");
     expect(back.sentences[0]).not.toHaveProperty("textAlign");
+  });
+});
+
+describe("the page that sets the book's text size", () => {
+  const book = (sizes: Array<"normal" | "large">, texts: string[]) => ({
+    story: texts.map((text, i) => [{ sentence: s(`s${i + 1}`, text), heading: null, tokens: [] }]),
+    texts: sizes.map((size) => ({ size, align: "left" as const })),
+  });
+
+  it("is the page with the most to say, by sheet number", () => {
+    expect(widestPage(book(["normal", "normal", "normal"], ["Hi.", "A much longer page of words here.", "Okay then."]))).toBe(2);
+  });
+
+  it("ignores a page whose size the author chose", () => {
+    expect(widestPage(book(["normal", "large"], ["Short.", "This one is long but the author enlarged it."]))).toBe(1);
+  });
+
+  it("falls back to every page when the author chose them all, and to nothing for an empty book", () => {
+    expect(widestPage(book(["large", "large"], ["Short.", "This one is longer."]))).toBe(2);
+    expect(widestPage({ story: [], texts: [] })).toBeNull();
   });
 });
 

@@ -1,6 +1,6 @@
 import { counted, type Assignment, type Board, type Clue, type Color } from "./board";
 import { deduce, type ProofStep } from "./deduction";
-import { PALETTE } from "./palette";
+import { colourWord, joinOr, tw, whereLower } from "./i18n";
 import { generatePuzzle, type BoardMode } from "./puzzles";
 
 /**
@@ -55,18 +55,16 @@ function shuffled<T>(items: readonly T[], rand: () => number): T[] {
 /** A sentence that begins with a clue's name still begins with a capital. */
 const sentence = (text: string): string => text.charAt(0).toUpperCase() + text.slice(1);
 
-const where = (board: Board, cell: number) =>
-  `row ${Math.floor(cell / board.size) + 1}, column ${(cell % board.size) + 1}`;
-
 /** How a clue is referred to in a sentence. */
 export function clueName(board: Board, clue: Clue): string {
-  const colour = PALETTE[counted(clue)].name.toLowerCase();
+  const colour = colourWord(counted(clue));
+  const count = String(clue.count);
   const scope = clue.scope?.kind ?? "neighborhood";
-  if (scope === "neighborhood") return `the ${colour} ${clue.count} at ${where(board, clue.cell!)}`;
-  if (scope === "board") return `the board total of ${clue.count} ${colour}`;
-  if (scope === "region") return `the outlined area's ${clue.count} ${colour}`;
+  if (scope === "neighborhood") return tw("clue.neighborhood", { colour, count, where: whereLower(board, clue.cell!) });
+  if (scope === "board") return tw("clue.board", { colour, count });
+  if (scope === "region") return tw("clue.region", { colour, count });
   const line = clue.scope as { axis: "row" | "column"; index: number };
-  return `${line.axis === "row" ? "row" : "column"} ${line.index + 1}'s ${clue.count} ${colour}`;
+  return tw(line.axis === "row" ? "clue.row" : "clue.column", { n: String(line.index + 1), colour, count });
 }
 
 /**
@@ -84,52 +82,35 @@ export function forces(board: Board, clueIds: readonly string[], cell: number): 
 
 /** The words for a step, and an equally true way of saying the same thing. */
 function reasonsFor(board: Board, step: ProofStep, _cell: number): [string, string] {
-  const colour = PALETTE[step.color].name.toLowerCase();
+  const colour = colourWord(step.color);
   const clue = board.clues.find((c) => c.id === step.evidence[0].clueId)!;
   const name = clueName(board, clue);
-  const other = board.palette.filter((c) => c !== step.color).map((c) => PALETTE[c].name.toLowerCase()).join(" or ");
+  const other = joinOr(board.palette.filter((c) => c !== step.color).map(colourWord));
+  const say = (key: string): string => tw(key, { name, colour, other });
   switch (step.rule) {
-    case "zero":
-      return [`${name} allows no ${colour} at all, so this tile cannot be ${colour}.`,
-        `Nothing ${name} touches is ${colour}, and this tile touches it.`];
-    case "full":
-      return [`${name} needs every tile it touches, so this one is ${colour}.`,
-        `There are exactly as many tiles as ${name} needs, so none of them can be ${other}.`];
-    case "remaining-exclude":
-      return [`${name} already has all the ${colour} it needs, so this tile is not ${colour}.`,
-        `Counting the ${colour} already around ${name} reaches its number, leaving none for this tile.`];
-    case "remaining-fill":
-      return [`${name} still needs more ${colour}, and this is one of the only tiles left for it.`,
-        `Take the ${colour} already found away from ${name}, and what is missing exactly fills the spaces left.`];
-    case "overlap-exclude":
-      return [`Comparing ${name} with the other clue over the same tiles accounts for all its ${colour}, so this tile has none left.`,
-        `The tiles the two clues share already carry every ${colour} ${name} allows.`];
-    case "overlap-fill":
-      return [`Comparing ${name} with the other clue leaves this tile as the one that must be ${colour}.`,
-        `Subtracting the smaller clue from the larger one leaves ${colour} with nowhere else to go.`];
-    case "run":
-      return [`Every arrangement ${name} still allows puts ${colour} here.`,
-        `Ruling out the arrangements ${name} forbids leaves only ones where this tile is ${colour}.`];
+    case "zero": return [say("why.zeroA"), say("why.zeroB")];
+    case "full": return [say("why.fullA"), say("why.fullB")];
+    case "remaining-exclude": return [say("why.exclA"), say("why.exclB")];
+    case "remaining-fill": return [say("why.fillA"), say("why.fillB")];
+    case "overlap-exclude": return [say("why.overExclA"), say("why.overExclB")];
+    case "overlap-fill": return [say("why.overFillA"), say("why.overFillB")];
+    case "run": return [say("why.runA"), say("why.runB")];
   }
 }
 
 /** Wrong reasons, each one a misconception a child actually holds. */
 function wrongReasons(board: Board, step: ProofStep): LabOption[] {
-  const colour = PALETTE[step.color].name.toLowerCase();
+  const colour = colourWord(step.color);
   const clue = board.clues.find((c) => c.id === step.evidence[0].clueId)!;
   const name = clueName(board, clue);
   const options: LabOption[] = [
-    { id: "w-self", correct: false, trap: "counts-itself",
-      text: `${name} counts itself as well, and that is what settles this tile.` },
-    { id: "w-color", correct: false, trap: "wrong-color",
-      text: `${name} is about how many tiles are ${colour} somewhere on the board.` },
+    { id: "w-self", correct: false, trap: "counts-itself", text: tw("why.wSelf", { name }) },
+    { id: "w-color", correct: false, trap: "wrong-color", text: tw("why.wColor", { name, colour }) },
   ];
   if ((clue.scope?.kind ?? "neighborhood") === "neighborhood") {
-    options.push({ id: "w-diag", correct: false, trap: "skips-diagonals",
-      text: `${name} counts only the tiles beside it, not the corners.` });
+    options.push({ id: "w-diag", correct: false, trap: "skips-diagonals", text: tw("why.wDiag", { name }) });
   } else {
-    options.push({ id: "w-near", correct: false, trap: "unrelated",
-      text: `${name} counts the tiles nearest to it.` });
+    options.push({ id: "w-near", correct: false, trap: "unrelated", text: tw("why.wNear", { name }) });
   }
   return options;
 }
@@ -184,7 +165,7 @@ function buildOnce(spec: LabSpec, seed: number, attempt: number): Lab | null {
   if (!enough.length || !forces(board, enough, target)) return null;
   const others = board.clues.map((c) => c.id).filter((clueId) => !enough.includes(clueId));
   const candidates: LabOption[] = [
-    { id: "s-all", clueIds: enough, correct: true, text: enough.map((clueId) => clueName(board, board.clues.find((c) => c.id === clueId)!)).join(" and ") },
+    { id: "s-all", clueIds: enough, correct: true, text: enough.map((clueId) => clueName(board, board.clues.find((c) => c.id === clueId)!)).reduce((a, b) => tw("and", { a, b })) },
     ...enough.slice(0, 2).map((clueId, n) => ({ id: `s-one-${n}`, clueIds: [clueId], correct: false,
       trap: "not-enough" as const, text: clueName(board, board.clues.find((c) => c.id === clueId)!) })),
     ...others.slice(0, 1).map((clueId, n) => ({ id: `s-other-${n}`, clueIds: [clueId], correct: false,

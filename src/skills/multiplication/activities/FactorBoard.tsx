@@ -29,6 +29,8 @@ import { ADJUSTMENT, EACH, GROUPS, NEUTRAL, PRODUCT } from "../internal/data/mul
 import { CANDIDATE, FACTOR_TILE, SCROLL_BOX, TOUCH_TARGET } from "../internal/data/multiplicationLayout";
 import { useNudge } from "../internal/ui/useNudge";
 import { NumberPad } from "../internal/ui/NumberPad";
+import { tm } from "../internal/i18n";
+import { useT } from "../../../lib/i18n";
 
 /**
  * Factors, taken apart and put back together.
@@ -180,21 +182,21 @@ export function buildQuestion(params: FactorParams, index: number, seen?: Set<st
       return {
         ...base,
         taskKind: "halve_and_double",
-        prompt: `${a} × ${b}. Halve one number and double the other to make it easier.`,
+        prompt: tm("factor.promptHalve", { a, b }),
         expected: String(product),
       };
     case "factor_pairs":
       return {
         ...base,
         taskKind: "find_factor_pairs",
-        prompt: `Find every pair that makes ${value}. Tap one number from each pair.`,
+        prompt: tm("factor.promptPairs", { value }),
         expected: pairs.map(([x, y]) => `${x} × ${y}`).join(", "),
       };
     case "prime_composite":
       return {
         ...base,
         taskKind: "prime_or_composite",
-        prompt: `Is ${value} prime or composite? Try some numbers on the board.`,
+        prompt: tm("factor.promptPrime", { value }),
         expected: prime ? "Prime" : "Composite",
       };
     case "associative":
@@ -202,7 +204,7 @@ export function buildQuestion(params: FactorParams, index: number, seen?: Set<st
       return {
         ...base,
         taskKind: "multiply_three_numbers",
-        prompt: `${a} × ${b} × ${c}. Choose which two to multiply first.`,
+        prompt: tm("factor.promptThree", { a, b, c }),
         expected: String(product),
       };
   }
@@ -219,23 +221,23 @@ export function printedFor(question: FactorQuestion): PrintedQuestion | null {
   switch (question.mode) {
     case "halve_double":
       return {
-        text: `${a} × ${b}. Halve one number and double the other, then work it out. ${a} × ${b} = ____`,
+        text: tm("factor.printedHalve", { a, b }),
         answer: `${question.halved} × ${question.doubled} = ${product}`,
       };
     case "factor_pairs":
       return {
-        text: `Write every factor pair of ${value}. ____`,
+        text: tm("factor.printedPairs", { value }),
         answer: factorPairsOf(value).map(([x, y]) => `${x} × ${y}`).join(", "),
       };
     case "prime_composite":
       return {
-        text: `Is ${value} prime or composite? ____`,
-        answer: question.prime ? `Prime — nothing but 1 and ${value} divides it` : `Composite — ${factorPairsOf(value)[1].join(" × ")} = ${value}`,
+        text: tm("factor.printedPrime", { value }),
+        answer: question.prime ? tm("factor.printedPrimeYes", { value }) : tm("factor.printedPrimeNo", { pair: factorPairsOf(value)[1].join(" × "), value }),
       };
     case "associative":
     default:
       return {
-        text: `${a} × ${b} × ${c} = ____. Which two did you multiply first?`,
+        text: tm("factor.printedThree", { a, b, c }),
         answer: String(product),
       };
   }
@@ -245,28 +247,28 @@ export function methodFor(question: FactorQuestion): string[] | null {
   switch (question.mode) {
     case "halve_double":
       return [
-        "Halve the even number and double the other one.",
-        `${question.a} × ${question.b} becomes ${question.halved} × ${question.doubled}.`,
-        "The total does not change, because one side lost exactly what the other gained.",
+        tm("factor.methodHalve1"),
+        tm("factor.methodHalve2", { a: question.a, b: question.b, halved: question.halved, doubled: question.doubled }),
+        tm("factor.methodHalve3"),
       ];
     case "factor_pairs":
       return [
-        `Try 1, then 2, then 3, and so on up to 10.`,
-        `Each one that divides ${question.value} exactly is one half of a pair.`,
-        "Its partner is the answer to the division.",
+        tm("factor.methodPairs1"),
+        tm("factor.methodPairs2", { value: question.value }),
+        tm("factor.methodPairs3"),
       ];
     case "prime_composite":
       return [
-        `Try dividing ${question.value} by 2, 3, 4, 5 and so on.`,
-        "If any of them works, the number is composite: it has a pair.",
-        "If none of them works, it is prime.",
+        tm("factor.methodPrime1", { value: question.value }),
+        tm("factor.methodPrime2"),
+        tm("factor.methodPrime3"),
       ];
     case "associative":
     default:
       return [
-        "Multiply any two of the three first.",
-        "Then multiply that answer by the one left over.",
-        "Either pairing gives the same total, so choose the easier one.",
+        tm("factor.methodThree1"),
+        tm("factor.methodThree2"),
+        tm("factor.methodThree3"),
       ];
   }
 }
@@ -296,35 +298,35 @@ export function factorHints(
       return composeHints(
         kidTip,
         state.rewritten
-          ? `Now it is ${question.halved} × ${question.doubled}, which is a ten times fact.`
-          : `One of these two can be halved into whole groups. The other cannot.`,
-        `Halving one side and doubling the other takes nothing away from the total.`,
+          ? tm("factor.hintHalveDone", { halved: question.halved, doubled: question.doubled })
+          : tm("factor.hintHalveStart"),
+        tm("factor.hintHalve2"),
       );
     case "factor_pairs":
       return composeHints(
         kidTip,
         state.picked.length === 0
-          ? `Start at 1 and work up. Does 2 divide ${value}? Does 3?`
-          : `You have found ${state.picked.length}. Keep going up to 10.`,
+          ? tm("factor.hintPairsStart", { value })
+          : tm("factor.hintPairsFound", { count: state.picked.length }),
         // Stops short of naming a factor: finding them is the question.
-        `Every number that divides ${value} exactly is one half of a pair.`,
+        tm("factor.hintPairs2", { value }),
       );
     case "prime_composite":
       return composeHints(
         kidTip,
         state.tried.length === 0
-          ? `Try a number on the board. Does 2 go into ${value}? Does 3?`
-          : `You have tried ${state.tried.length}. If none of them divides it, it is prime.`,
-        `A composite number has a pair besides 1 and itself. A prime has none.`,
+          ? tm("factor.hintPrimeStart", { value })
+          : tm("factor.hintPrimeTried", { count: state.tried.length }),
+        tm("factor.hintPrime2"),
       );
     case "associative":
     default:
       return composeHints(
         kidTip,
         state.grouped
-          ? `You have the first step. Now multiply it by the number left over.`
-          : `${a} × ${b}, or ${b} × ${c} — pick whichever is easier to hold.`,
-        "Either pairing lands on the same total. Grouping is free.",
+          ? tm("factor.hintThreeDone")
+          : tm("factor.hintThreeStart", { a, b, c }),
+        tm("factor.hintThree2"),
       );
   }
 }
@@ -334,6 +336,7 @@ export function factorHints(
 /* -------------------------------------------------------------------------- */
 
 export const FactorBoard: React.FC<ActivityProps<FactorParams>> = ({ params, koda, onComplete, lesson }) => {
+  useT();
   const setup: FactorSetup = useMemo(() => ({ ...params, ...params.question }), [params]);
   const copy = playCopy(params);
   const practising = isPractice(setup);
@@ -452,8 +455,8 @@ export const FactorBoard: React.FC<ActivityProps<FactorParams>> = ({ params, kod
     const toDouble = halveFirst ? b : a;
     if (toHalve % 2 !== 0) {
       refuse(
-        `${toHalve} cannot be halved into whole groups. Halve the even number instead.`,
-        "That one cannot be halved.",
+        tm("factor.cannotHalve", { n: toHalve }),
+        tm("factor.cannotHalveSay"),
       );
       return;
     }
@@ -466,8 +469,8 @@ export const FactorBoard: React.FC<ActivityProps<FactorParams>> = ({ params, kod
      */
     if ((toDouble * 2) % 10 !== 0) {
       refuse(
-        `Doubling ${toDouble} gives ${toDouble * 2}, which is no easier. Try it the other way round.`,
-        "That way is no easier.",
+        tm("factor.noEasier", { n: toDouble, doubled: toDouble * 2 }),
+        tm("factor.noEasierSay"),
       );
       return;
     }
@@ -475,7 +478,7 @@ export const FactorBoard: React.FC<ActivityProps<FactorParams>> = ({ params, kod
     nudge.clear();
     chime(koda, "reached");
     if (hapticsEnabled) koda.haptics.success();
-    speak(`${question.halved} times ${question.doubled}.`);
+    speak(tm("factor.saidRewrite", { halved: question.halved, doubled: question.doubled }));
   };
 
   /* ---- the candidate board ---- */
@@ -499,7 +502,7 @@ export const FactorBoard: React.FC<ActivityProps<FactorParams>> = ({ params, kod
   const checkPairs = () => {
     if (round.feedback) return;
     if (picked.length === 0) {
-      refuse("Tap the numbers that divide it first.", "Tap a number first.");
+      refuse(tm("factor.tapDivide"), tm("factor.tapNumber"));
       return;
     }
     /*
@@ -520,10 +523,10 @@ export const FactorBoard: React.FC<ActivityProps<FactorParams>> = ({ params, kod
     judge(
       correct,
       [...found].join(", "),
-      correct ? "Every pair" : "Not the whole set",
+      correct ? tm("factor.everyPair") : tm("factor.notWhole"),
       strays.length > 0
-        ? `${strays[0]} does not divide ${value}. Its pairs are ${written}.`
-        : `${value} has ${wanted.size} pair${wanted.size === 1 ? "" : "s"}: ${written}.`,
+        ? tm("factor.stray", { n: strays[0], value, written })
+        : tm("factor.hasPairs", { value, count: wanted.size, written }),
     );
   };
 
@@ -531,7 +534,7 @@ export const FactorBoard: React.FC<ActivityProps<FactorParams>> = ({ params, kod
     if (round.feedback) return;
     if (tried.length === 0) {
       // §6.L: decided by attempting pairs on the board, not by recall.
-      refuse(`Try a number on the board first. Does 2 go into ${value}? Does 3?`, "Try a number first.");
+      refuse(tm("factor.tryFirst", { value }), tm("factor.tryFirstSay"));
       return;
     }
     const correct = saidPrime === question.prime;
@@ -539,37 +542,37 @@ export const FactorBoard: React.FC<ActivityProps<FactorParams>> = ({ params, kod
     judge(
       correct,
       saidPrime ? "Prime" : "Composite",
-      correct ? "Yes!" : "Not quite",
+      correct ? tm("factor.yes") : tm("factor.notQuite"),
       question.prime
-        ? `Nothing divides ${value} but 1 and ${value} itself, so it is prime.`
-        : `${pair![0]} × ${pair![1]} = ${value}, so it is composite.`,
+        ? tm("factor.isPrime", { value })
+        : tm("factor.isComposite", { x: pair![0], y: pair![1], value }),
     );
   };
 
   const answerProduct = (given: number) => {
     if (round.feedback) return;
     if (mode === "associative" && !grouped) {
-      refuse("Choose which two to multiply first.", "Choose a pair first.");
+      refuse(tm("factor.groupFirst"), tm("factor.groupFirstSay"));
       return;
     }
     if (mode === "halve_double" && !rewritten) {
-      refuse("Make the rewrite first, then work it out.", "Rewrite it first.");
+      refuse(tm("factor.rewriteFirst"), tm("factor.rewriteFirstSay"));
       return;
     }
     const correct = given === question.product;
     judge(
       correct,
       String(given),
-      correct ? "That is it" : "Not quite",
+      correct ? tm("factor.thatIsIt") : tm("factor.notQuite"),
       mode === "halve_double"
-        ? `${a} × ${b} is the same as ${question.halved} × ${question.doubled} = ${question.product}.`
-        : `${a} × ${b} × ${c} = ${question.product}, whichever two you multiply first.`,
+        ? tm("factor.sameHalve", { a, b, halved: question.halved, doubled: question.doubled, product: question.product })
+        : tm("factor.sameThree", { a, b, c, product: question.product }),
     );
   };
 
   const submitTyped = () => {
     if (typed === "") {
-      refuse("Type a number first.", "Type a number first.");
+      refuse(tm("factor.typeFirst"), tm("factor.typeFirst"));
       return;
     }
     answerProduct(Number(typed));
@@ -584,7 +587,7 @@ export const FactorBoard: React.FC<ActivityProps<FactorParams>> = ({ params, kod
   const numericAnswer = usePad ? (
     <div className="flex flex-col items-center gap-3">
       <output
-        aria-label="Your answer"
+        aria-label={tm("factor.yourAnswer")}
         className={`min-h-11 min-w-24 rounded-xl border-2 px-4 py-2 text-center text-2xl font-black tabular-nums ${PRODUCT.border} ${PRODUCT.text}`}
       >
         {typed || "—"}
@@ -595,7 +598,7 @@ export const FactorBoard: React.FC<ActivityProps<FactorParams>> = ({ params, kod
         disabled={!!round.feedback}
       />
       <button type="button" onClick={submitTyped} disabled={!!round.feedback} className={themeSystem.button("primary", "md")}>
-        Check
+        {tm("factor.check")}
       </button>
     </div>
   ) : (
@@ -639,8 +642,8 @@ export const FactorBoard: React.FC<ActivityProps<FactorParams>> = ({ params, kod
               aria-pressed={chosen}
               aria-label={
                 mode === "factor_pairs"
-                  ? `${n}${chosen ? (divides ? `, chosen, ${Math.min(n, value / n)} × ${Math.max(n, value / n)}` : ", chosen, does not divide") : ""}`
-                  : `Try ${n}${chosen ? (divides ? `, divides ${value}` : `, does not divide ${value}`) : ""}`
+                  ? `${n}${chosen ? (divides ? tm("factor.pairChosen", { x: Math.min(n, value / n), y: Math.max(n, value / n) }) : tm("factor.pairBad")) : ""}`
+                  : `${tm("factor.try", { n })}${chosen ? (divides ? tm("factor.divides", { value }) : tm("factor.notDivides", { value })) : ""}`
               }
               onClick={() => tryCandidate(n)}
               disabled={!!round.feedback}
@@ -672,14 +675,14 @@ export const FactorBoard: React.FC<ActivityProps<FactorParams>> = ({ params, kod
                   key={which}
                   type="button"
                   aria-pressed={grouped === which}
-                  aria-label={`Multiply ${label} first`}
+                  aria-label={tm("factor.multiplyFirst", { label })}
                   onClick={() => group(which)}
                   disabled={!!round.feedback}
                   className={`${TOUCH_TARGET} rounded-2xl border-2 px-4 py-3 text-base font-bold tabular-nums text-ink focus:outline-none focus-visible:ring-2 focus-visible:ring-sky-500 ${
                     grouped === which ? `${PRODUCT.border} ${PRODUCT.soft}` : `${EACH.border} bg-surface`
                   }`}
                 >
-                  ({label}) first{grouped === which ? ` = ${step}` : ""}
+                  {tm("factor.firstLabel", { label, eq: grouped === which ? ` = ${step}` : "" })}
                 </button>
               ))}
             </div>
@@ -705,12 +708,12 @@ export const FactorBoard: React.FC<ActivityProps<FactorParams>> = ({ params, kod
                   <button
                     key={String(halveFirst)}
                     type="button"
-                    aria-label={`Halve ${toHalve} and double ${toDouble}`}
+                    aria-label={tm("factor.halveDouble", { half: toHalve, dbl: toDouble })}
                     onClick={() => rewrite(halveFirst)}
                     disabled={!!round.feedback}
                     className={`${TOUCH_TARGET} rounded-2xl border-2 ${EACH.border} bg-surface px-4 py-3 text-base font-bold tabular-nums text-ink focus:outline-none focus-visible:ring-2 focus-visible:ring-sky-500`}
                   >
-                    Halve {toHalve}, double {toDouble}
+                    {tm("factor.halveDoubleButton", { half: toHalve, dbl: toDouble })}
                   </button>
                 ))}
               </div>
@@ -731,16 +734,16 @@ export const FactorBoard: React.FC<ActivityProps<FactorParams>> = ({ params, kod
             {scaffold && mode === "factor_pairs" && (
               <p className={`text-center text-sm font-bold ${GROUPS.text}`} aria-live="polite">
                 {picked.length === 0
-                  ? "Tap one number from each pair"
+                  ? tm("factor.tapOne")
                   : [...new Set(picked.filter((n) => value % n === 0)
                       .map((n) => `${Math.min(n, value / n)} × ${Math.max(n, value / n)}`))].join(",  ")
-                    || "None of those divides it"}
+                    || tm("factor.noneDivides")}
               </p>
             )}
             {scaffold && mode === "prime_composite" && tried.length > 0 && (
               <p className={`text-center text-sm font-bold ${GROUPS.text}`} aria-live="polite">
                 {tried.slice().sort((x, y) => x - y)
-                  .map((n) => (value % n === 0 ? `${n} divides it` : `${n} does not`))
+                  .map((n) => (value % n === 0 ? tm("factor.dividesIt", { n }) : tm("factor.doesNot", { n })))
                   .join(" · ")}
               </p>
             )}
@@ -754,7 +757,7 @@ export const FactorBoard: React.FC<ActivityProps<FactorParams>> = ({ params, kod
       case "factor_pairs":
         return (
           <button type="button" onClick={checkPairs} disabled={!!round.feedback} className={themeSystem.button("primary", "md")}>
-            Check
+            {tm("factor.check")}
           </button>
         );
       case "prime_composite":
@@ -764,14 +767,14 @@ export const FactorBoard: React.FC<ActivityProps<FactorParams>> = ({ params, kod
               <button
                 key={String(saidPrime)}
                 type="button"
-                aria-label={saidPrime ? `${value} is prime` : `${value} is composite`}
+                aria-label={saidPrime ? tm("factor.ariaPrime", { value }) : tm("factor.ariaComposite", { value })}
                 onClick={() => answerPrime(saidPrime)}
                 disabled={!!round.feedback}
                 className={`${TOUCH_TARGET} rounded-2xl border-2 px-6 py-3 text-lg font-black text-ink focus:outline-none focus-visible:ring-2 focus-visible:ring-sky-500 ${
                   saidPrime ? `${EACH.border} ${EACH.soft}` : `${PRODUCT.border} ${PRODUCT.soft}`
                 }`}
               >
-                {saidPrime ? "Prime" : "Composite"}
+                {saidPrime ? tm("factor.prime") : tm("factor.composite")}
               </button>
             ))}
           </div>
@@ -810,7 +813,7 @@ export const FactorBoard: React.FC<ActivityProps<FactorParams>> = ({ params, kod
     <SkillRound
       koda={koda}
       lesson={lesson}
-      fallbackTitle="Factor Board"
+      fallbackTitle={tm("factor.title")}
       round={round}
       totalQuestions={total}
       prompt={promptFor(question)}

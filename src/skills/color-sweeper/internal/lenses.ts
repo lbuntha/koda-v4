@@ -9,7 +9,7 @@ import {
   type Color,
   type PositionKind,
 } from "./board";
-import { PALETTE } from "./palette";
+import { colourWord, tw } from "./i18n";
 
 /**
  * Questions about reading a board, before anything is painted.
@@ -216,7 +216,7 @@ function buildOnce(spec: NormalSpec, rand: () => number, seed: number): Lens {
   const clue: Clue = { id: `c${target}`, cell: target, color: first, count };
   const board: Board = { size, palette: spec.palette, givens, clues: [clue] };
   validateBoard(board);
-  const name = PALETTE[first].name.toLowerCase();
+  const name = colourWord(first);
 
   if (spec.mode === "complement") {
     const answer = around.length - count;
@@ -237,13 +237,13 @@ function buildOnce(spec: NormalSpec, rand: () => number, seed: number): Lens {
     };
   }
 
-  const other = PALETTE[second].name.toLowerCase();
+  const other = colourWord(second);
   const statements: Statement[] = shuffled(
     [
-      { id: "s-correct", text: `${count} of the ${around.length} tiles touching it are ${name}.`, correct: true },
-      { id: "s-self", text: `${count} tiles, counting this one, are ${name}.`, correct: false, trap: "counts-itself" as const },
-      { id: "s-color", text: `${count} of the tiles touching it are ${other}.`, correct: false, trap: "wrong-color" as const },
-      { id: "s-diagonal", text: `${count} tiles beside it, not counting corners, are ${name}.`, correct: false, trap: "skips-diagonals" as const },
+      { id: "s-correct", text: tw("lens.stmtCorrect", { count: String(count), n: String(around.length), colour: name }), correct: true },
+      { id: "s-self", text: tw("lens.stmtSelf", { count: String(count), colour: name }), correct: false, trap: "counts-itself" as const },
+      { id: "s-color", text: tw("lens.stmtColor", { count: String(count), colour: other }), correct: false, trap: "wrong-color" as const },
+      { id: "s-diagonal", text: tw("lens.stmtDiagonal", { count: String(count), colour: name }), correct: false, trap: "skips-diagonals" as const },
     ],
     rand,
   );

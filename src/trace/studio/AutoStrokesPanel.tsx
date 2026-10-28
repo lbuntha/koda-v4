@@ -40,7 +40,7 @@ function AiSwitch({ allowed, on, onChange }: { allowed: boolean | null; on: bool
 }
 
 /** One item: a rail button that opens the panel. */
-export function AutoStrokesButton({ item, onStrokes }: { item: TraceItem; onStrokes(strokes: Stroke[]): void }) {
+export function AutoStrokesButton({ item, onStrokes }: { item: TraceItem; onStrokes(strokes: Stroke[], guide?: { size: number; y: number }): void }) {
   const { t } = useT();
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
@@ -74,7 +74,7 @@ export function AutoStrokesButton({ item, onStrokes }: { item: TraceItem; onStro
         setNote({ tone: "bad", text: t("traceStudio.auto.nothing") });
         return;
       }
-      onStrokes(r.strokes);
+      onStrokes(r.strokes, r.guide);
       setNote({
         tone: r.aiError ? "bad" : "good",
         text: r.aiError
@@ -147,7 +147,9 @@ export function AutoStrokesForSet({ itemIds, onDone }: { itemIds: string[]; onDo
       const source: Source = d.item.guide?.glyph?.text ? "glyph" : "image";
       const r = await autoStrokes(d.item, { source, useAi: ai && Boolean(allowed), newId: uid });
       if (r && r.strokes.length) {
-        TraceDrafts.save({ ...d, item: { ...d.item, strokes: r.strokes } });
+        const glyph = d.item.guide?.glyph;
+        const guide = r.guide && glyph ? { ...d.item.guide, glyph: { ...glyph, ...r.guide } } : d.item.guide;
+        TraceDrafts.save({ ...d, item: { ...d.item, strokes: r.strokes, ...(guide ? { guide } : {}) } });
         if (r.usedAi) ai_++;
       }
       setProgress({ done: i + 1, total, ai: ai_ });

@@ -22,6 +22,8 @@ import {
   type MillSetup,
 } from "../internal/data/fractionEquivalence";
 import type { Fraction } from "../internal/data/fractionNumbers";
+import { tf } from "../internal/i18n";
+import { useT } from "../../../lib/i18n";
 
 /**
  * The mill — where a fraction changes its name without changing its size.
@@ -56,33 +58,33 @@ export function millHints(question: MillQuestion): string[] {
   switch (question.mode) {
     case "split":
       return composeHints(
-        "Watch the shaded part while you cut. It does not move.",
-        `Every part turns into ${factor} smaller ones, so there are ${factor} times as many altogether.`,
-        "The shaded ones multiply by the same number, because they were cut too.",
+        tf("mill.hintSplit1"),
+        tf("mill.hintSplit2", { factor }),
+        tf("mill.hintSplit3"),
       );
     case "two_names":
       return composeHints(
-        "Both bars have the same amount coloured in.",
-        "Count the parts on each one — they are cut differently.",
-        "Two names, one amount. Check both halves of the pair before you choose.",
+        tf("mill.hintTwo1"),
+        tf("mill.hintTwo2"),
+        tf("mill.hintTwo3"),
       );
     case "scale_up":
       return composeHints(
-        `You need ${to.parts} parts, and you have ${from.parts}.`,
-        `That means cutting every part into ${to.parts / from.parts}.`,
-        "Cut the shaded parts too: multiply the top and bottom by the same number.",
+        tf("mill.hintUp1", { to: to.parts, from: from.parts }),
+        tf("mill.hintUp2", { n: to.parts / from.parts }),
+        tf("mill.hintUp3"),
       );
     case "scale_down":
       return composeHints(
-        `Both numbers can be divided by ${factor}.`,
-        "Joining parts back up is cutting in reverse.",
-        "The amount shaded stays exactly where it is.",
+        tf("mill.hintDown1", { factor }),
+        tf("mill.hintDown2"),
+        tf("mill.hintDown3"),
       );
     default:
       return composeHints(
-        "Keep joining parts up while both numbers still divide by something.",
-        "Stop when the only number that goes into both is one.",
-        "If you can still halve both, you are not finished.",
+        tf("mill.hintSimp1"),
+        tf("mill.hintSimp2"),
+        tf("mill.hintSimp3"),
       );
   }
 }
@@ -92,6 +94,7 @@ const sameFraction = (a: Fraction, b: Fraction): boolean =>
   a.parts === b.parts && a.taken === b.taken;
 
 export const EquivalenceMill: React.FC<ActivityProps<MillParams>> = ({ params, koda, onComplete, lesson }) => {
+  useT();
   const setup: MillSetup = useMemo(() => ({ ...params, ...params.question }), [params]);
   const practising = isPractice(setup);
   const total = setup.questionsPerRound ?? 5;
@@ -157,7 +160,7 @@ export const EquivalenceMill: React.FC<ActivityProps<MillParams>> = ({ params, k
       if (correct) koda.haptics.success();
       else koda.haptics.pulse("error");
     }
-    round.submit({ correct, given, expected: question.expected, title: correct ? "Yes!" : "Not yet", message });
+    round.submit({ correct, given, expected: question.expected, title: correct ? tf("strip.yes") : tf("strip.notYet"), message });
   };
 
   const check = (): void => {
@@ -180,7 +183,7 @@ export const EquivalenceMill: React.FC<ActivityProps<MillParams>> = ({ params, k
     <SkillRound
       koda={koda}
       lesson={lesson}
-      fallbackTitle="Same Amount, New Name"
+      fallbackTitle={tf("mill.title")}
       round={round}
       totalQuestions={total}
       prompt={promptFor(question)}
@@ -210,8 +213,8 @@ export const EquivalenceMill: React.FC<ActivityProps<MillParams>> = ({ params, k
       <div className="mx-auto flex w-full max-w-xl flex-col items-center gap-3">
         {question.mode === "two_names" ? (
           <div className="flex flex-col items-center gap-2" data-testid="two-bars">
-            <FractionBar parts={question.from.parts} shaded={shadedOf(question.from)} label="first bar" />
-            <FractionBar parts={question.to.parts} shaded={shadedOf(question.to)} label="second bar" />
+            <FractionBar parts={question.from.parts} shaded={shadedOf(question.from)} label={tf("mill.firstBar")} />
+            <FractionBar parts={question.to.parts} shaded={shadedOf(question.to)} label={tf("mill.secondBar")} />
           </div>
         ) : (
           <div className="flex flex-col items-center gap-1" data-testid="mill">
@@ -224,7 +227,7 @@ export const EquivalenceMill: React.FC<ActivityProps<MillParams>> = ({ params, k
                 label={`before: ${nameOf(question.from)}`}
               />
             ) : null}
-            <FractionBar parts={current.parts} shaded={shadedOf(current)} label={`now ${nameOf(current)}`} />
+            <FractionBar parts={current.parts} shaded={shadedOf(current)} label={tf("mill.nowBar", { fraction: nameOf(current) })} />
             <p className="text-base font-bold text-ink" data-testid="now">
               {nameOf(current)}
             </p>
@@ -249,10 +252,10 @@ export const EquivalenceMill: React.FC<ActivityProps<MillParams>> = ({ params, k
                   type="button"
                   onClick={() => work(applySplit(current, k))}
                   disabled={!!round.feedback}
-                  aria-label={`Cut every part into ${k}`}
+                  aria-label={tf("mill.cutLabel", { k })}
                   className="min-h-11 rounded-2xl bg-surface px-4 py-2 text-sm font-semibold text-ink shadow-sm focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500"
                 >
-                  cut into {k}
+                  {tf("mill.cutButton", { k })}
                 </button>
               ))}
               {moves.join.map((k) => (
@@ -261,10 +264,10 @@ export const EquivalenceMill: React.FC<ActivityProps<MillParams>> = ({ params, k
                   type="button"
                   onClick={() => work(applyJoin(current, k))}
                   disabled={!!round.feedback}
-                  aria-label={`Join every ${k} parts`}
+                  aria-label={tf("mill.joinLabel", { k })}
                   className="min-h-11 rounded-2xl bg-surface px-4 py-2 text-sm font-semibold text-ink shadow-sm focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500"
                 >
-                  join {k}
+                  {tf("mill.joinButton", { k })}
                 </button>
               ))}
             </div>
@@ -274,7 +277,7 @@ export const EquivalenceMill: React.FC<ActivityProps<MillParams>> = ({ params, k
               disabled={!!round.feedback}
               className="min-h-11 rounded-2xl bg-indigo-600 px-6 py-2 text-base font-bold text-white shadow-sm"
             >
-              That is it
+              {tf("mill.thatIsIt")}
             </button>
           </>
         ) : null}
@@ -322,23 +325,23 @@ export function printedFor(question: MillQuestion): { text: string; answer: stri
   switch (question.mode) {
     case "split":
       return {
-        text: `Cut every part of ${nameOf(from)} into ${factor}. Write the new name for the same amount.`,
+        text: tf("mill.printSplit", { from: nameOf(from), factor }),
         answer: question.expected,
       };
     case "two_names":
       return {
-        text: `Write two names for the shaded amount.`,
-        answer: `${nameOf(from)} and ${nameOf(to)}`,
+        text: tf("mill.printTwo"),
+        answer: tf("mill.pairAnd", { a: nameOf(from), b: nameOf(to) }),
       };
     case "scale_up":
-      return { text: `Write ${nameOf(from)} in ${partWord(to.parts, true)}.`, answer: question.expected };
+      return { text: tf("mill.printUp", { from: nameOf(from), words: partWord(to.parts, true) }), answer: question.expected };
     case "scale_down":
       return {
-        text: `Both numbers in ${nameOf(from)} divide by ${factor}. Write what it becomes.`,
+        text: tf("mill.printDown", { from: nameOf(from), factor }),
         answer: question.expected,
       };
     default:
-      return { text: `Write ${nameOf(from)} as simply as it will go.`, answer: question.expected };
+      return { text: tf("mill.promptSimplest", { fraction: nameOf(from) }), answer: question.expected };
   }
 }
 
@@ -348,13 +351,13 @@ export const figureFor = (question: MillQuestion): React.ReactNode =>
 export function methodFor(question: MillQuestion): string[] | null {
   if (question.mode === "simplest" || question.mode === "scale_down") {
     return [
-      "Look for a number that divides into the top and the bottom.",
-      "Divide both by it. The amount has not changed, only its name.",
-      "Keep going until nothing divides both any more.",
+      tf("mill.methodDown1"),
+      tf("mill.methodDown2"),
+      tf("mill.methodDown3"),
     ];
   }
   return [
-    "Cutting every part into the same number of pieces does not change how much there is.",
-    "Both numbers get multiplied, so the fraction keeps its value.",
+    tf("mill.methodUp1"),
+    tf("mill.methodUp2"),
   ];
 }

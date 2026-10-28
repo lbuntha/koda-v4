@@ -4,6 +4,8 @@ import { SPRING, useMotionOK } from "../../kit";
 import { counted, governed, neighbors, scopeOf, type Assignment, type Board, type Clue, type Color } from "./board";
 import { BOARD_LAYOUT, MOTION_PLAN, boardLayout } from "./layout";
 import { PALETTE } from "./palette";
+import { colourTitle, colourWord, tw, whereTitle } from "./i18n";
+import { useT } from "../../../lib/i18n";
 
 /**
  * The apparatus. Every engine in this skill draws its board through here.
@@ -61,28 +63,27 @@ export interface BoardGridProps {
   label?: string;
 }
 
-const rowCol = (cell: number, size: number) => [Math.floor(cell / size) + 1, (cell % size) + 1];
-
 /** What a clue drawn beside the board says it counts over. */
 export function scopeLabel(clue: Clue): string {
   const scope = scopeOf(clue);
   switch (scope.kind) {
-    case "board": return "Whole board";
-    case "line": return `${scope.axis === "row" ? "Row" : "Column"} ${scope.index + 1}`;
-    case "region": return "Outlined area";
-    case "neighborhood": return "Touching tiles";
+    case "board": return tw("scope.board");
+    case "line": return tw(scope.axis === "row" ? "scope.row" : "scope.column", { n: String(scope.index + 1) });
+    case "region": return tw("scope.region");
+    case "neighborhood": return tw("scope.neighborhood");
   }
 }
 
 /** A clue with no tile of its own, in words. */
 export const chipText = (clue: Clue): string => {
-  const colour = PALETTE[counted(clue)].name.toLowerCase();
+  const colour = colourWord(counted(clue));
+  const count = String(clue.count);
   /* Hexcells writes these `{n}` and `-n-`. Spelled out here as well, because a
      child meeting braces for the first time has nothing to read them with. */
-  const run = clue.run === "together" ? `${clue.count} ${colour} together`
-    : clue.run === "apart" ? `${clue.count} ${colour}, not together`
-    : `${clue.count} ${colour}`;
-  return `${scopeLabel(clue)}: ${run}`;
+  const run = clue.run === "together" ? tw("chip.together", { count, colour })
+    : clue.run === "apart" ? tw("chip.apart", { count, colour })
+    : tw("chip.plain", { count, colour });
+  return tw("chip.full", { scope: scopeLabel(clue), run });
 };
 
 /** Where the board's entrance starts. Readable on its own, so a dropped frame
@@ -91,16 +92,15 @@ export const BOARD_ENTER_FLOOR = 0.55;
 
 /** What a screen reader hears. The same facts the sighted child reads off the tile. */
 export function tileLabel(board: Board, cell: number, target?: number, assignment?: Assignment): string {
-  const [row, col] = rowCol(cell, board.size);
   const color = (assignment ?? board.givens)[cell];
   const clue = board.clues.find((c) => c.cell === cell);
-  const where = `Row ${row}, column ${col}`;
+  const where = whereTitle(board, cell);
   const fixed = board.givens[cell] !== null;
-  const what = color ? `${PALETTE[color].name}${fixed ? "" : ", painted"}` : "blank";
-  const says = clue ? `, clue counting ${PALETTE[counted(clue)].name.toLowerCase()}: ${clue.count}` : "";
+  const what = color ? (fixed ? colourTitle(color) : tw("tile.painted", { colour: colourTitle(color) })) : tw("tile.blank");
+  const says = clue ? tw("tile.says", { colour: colourWord(counted(clue)), count: String(clue.count) }) : "";
   const region = board.clues.some((c) => (c.scope?.kind === "region") && c.scope.cells.includes(cell))
-    ? ", inside the outlined area" : "";
-  return `${where}, ${what}${says}${region}${cell === target ? ", the outlined tile" : ""}`;
+    ? tw("tile.region") : "";
+  return tw("tile.full", { where, what, says, region, outlined: cell === target ? tw("tile.outlined") : "" });
 }
 
 export const BoardGrid: React.FC<BoardGridProps> = ({
@@ -116,13 +116,14 @@ export const BoardGrid: React.FC<BoardGridProps> = ({
   availableWidth = 320,
   label,
 }) => {
+  useT();
   const motionOK = useMotionOK();
   const layout = useMemo(() => boardLayout(board.size, availableWidth), [board.size, availableWidth]);
   const chosen = useMemo(() => new Map(selected.map((cell, i) => [cell, i + 1])), [selected]);
   /* Announced with the board so a child using a reader knows the shape of the
      thing before they start moving through nine buttons. */
   const around = target === undefined ? [] : neighbors(target, board.size);
-  const heading = label ?? `${board.size} by ${board.size} board`;
+  const heading = label ?? tw("grid.heading", { size: String(board.size) });
   const offBoard = board.clues.filter((c) => scopeOf(c).kind !== "neighborhood");
   /* Region membership is not something a child can work out from a position,
      so it has to be drawn on the tiles themselves. */
@@ -134,7 +135,7 @@ export const BoardGrid: React.FC<BoardGridProps> = ({
     <div
       className={layout.scrollInside ? "max-w-full overflow-x-auto min-w-0 -mx-2 px-2" : "min-w-0"}
       role="group"
-      aria-label={`${heading}. ${target === undefined ? "" : `The outlined tile touches ${around.length} tiles.`}`}
+      aria-label={tw("grid.aria", { heading, extra: target === undefined ? "" : tw("grid.touches", { count: String(around.length) }) })}
     >
       {/*
         * §18: one brief fade for the whole board, and no stagger.
@@ -218,7 +219,7 @@ export const BoardGrid: React.FC<BoardGridProps> = ({
                     transition: SPRING.tap,
                   }
                 : { role: "img" as const })}
-              aria-label={`${tileLabel(board, cell, target, assignment)}${isGuideTarget ? ", Smart guide focus" : ""}`}
+              aria-label={`${tileLabel(board, cell, target, assignment)}${isGuideTarget ? tw("tile.guide") : ""}`}
               /*
                * One outline, one meaning.
                *

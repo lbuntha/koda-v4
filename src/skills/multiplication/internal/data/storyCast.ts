@@ -12,6 +12,8 @@
  * so it does not need to guess: "Maya has four boxes" needs no pronoun, and
  * neither does anything else here.
  */
+import { tm } from "../i18n";
+
 
 export interface Container {
   /** "box" — used after a number: "4 boxes". */
@@ -24,33 +26,31 @@ export interface Item {
   many: string;
 }
 
-export const ACTORS: readonly string[] = Object.freeze([
-  "Maya", "Ben", "Priya", "Tom", "Ada", "Sam", "Nina", "Leo", "Zara", "Ravi",
-]);
+/** The cast's names, read from the catalog each time so they follow the language on screen. */
+const ACTOR_COUNT = 10;
+export const actors = (): readonly string[] => Array.from({ length: ACTOR_COUNT }, (_, i) => tm(`cast.actors.${i}`));
 
-export const CONTAINERS: readonly Container[] = Object.freeze([
-  { one: "box", many: "boxes" },
-  { one: "bag", many: "bags" },
-  { one: "tray", many: "trays" },
-  { one: "packet", many: "packets" },
-  { one: "basket", many: "baskets" },
-  { one: "shelf", many: "shelves" },
-]);
+/** A noun that reads its words from the catalog when asked, not when the module loads. */
+const noun = (section: "containers" | "items", key: string): Container & Item => ({
+  get one() {
+    return tm(`cast.${section}.${key}.one`);
+  },
+  get many() {
+    return tm(`cast.${section}.${key}.many`);
+  },
+});
 
-export const ITEMS: readonly Item[] = Object.freeze([
-  { one: "pencil", many: "pencils" },
-  { one: "apple", many: "apples" },
-  { one: "sticker", many: "stickers" },
-  { one: "marble", many: "marbles" },
-  { one: "card", many: "cards" },
-  { one: "button", many: "buttons" },
-  { one: "conker", many: "conkers" },
-  { one: "shell", many: "shells" },
-]);
+export const CONTAINERS: readonly Container[] = Object.freeze(
+  ["box", "bag", "tray", "packet", "basket", "shelf"].map((key) => noun("containers", key)),
+);
+
+export const ITEMS: readonly Item[] = Object.freeze(
+  ["pencil", "apple", "sticker", "marble", "card", "button", "conker", "shell"].map((key) => noun("items", key)),
+);
 
 /** A number and its noun, agreeing: "1 box", "4 boxes". */
-export const count = (n: number, noun: Container | Item): string =>
-  `${n} ${n === 1 ? noun.one : noun.many}`;
+export const count = (n: number, thing: Container | Item): string =>
+  tm("count", { n, noun: n === 1 ? thing.one : thing.many });
 
 export interface StoryCast {
   actor: string;
@@ -73,13 +73,14 @@ export function castFor(seed: string): StoryCast {
     hash = Math.imul(hash, 16777619);
   }
   const at = (offset: number, size: number) => Math.abs((hash >> offset) % size);
-  const first = at(0, ACTORS.length);
+  const names = actors();
+  const first = at(0, names.length);
   /* The offset is at least one and less than the cast size, so the second name
      can never come back round to the first — a story comparing someone with
      themselves is not a comparison. */
-  const step = 1 + at(8, ACTORS.length - 1);
-  const actor = ACTORS[first];
-  const other = ACTORS[(first + step) % ACTORS.length];
+  const step = 1 + at(8, names.length - 1);
+  const actor = names[first];
+  const other = names[(first + step) % names.length];
   return {
     actor,
     other,

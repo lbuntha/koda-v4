@@ -1,4 +1,5 @@
 import { topRun, type Bottle, type Pour, type Rack } from "./types";
+import { tb } from "./i18n";
 import { UNIFORM, accepts, bottleDone, refusalFor, type Goal } from "./goal";
 
 /**
@@ -17,13 +18,13 @@ import { UNIFORM, accepts, bottleDone, refusalFor, type Goal } from "./goal";
  * risk is that a refusal must never be recorded as a wrong answer.
  */
 export function refuseReason(rack: Rack, from: number, to: number, goal: Goal = UNIFORM): string | null {
-  if (from === to) return "Pick a different bottle to pour into.";
+  if (from === to) return tb("refuse.different");
   const a = rack[from], b = rack[to];
-  if (!a || !b) return "That bottle is not there.";
-  if (isCorked(rack, from) || isCorked(rack, to)) return "That bottle is corked.";
-  if (!a.seg.length) return "That bottle is empty.";
-  if (a.oneWay) return "That bottle only receives.";
-  if (b.seg.length >= b.cap) return "That bottle is full.";
+  if (!a || !b) return tb("refuse.missing");
+  if (isCorked(rack, from) || isCorked(rack, to)) return tb("refuse.corked");
+  if (!a.seg.length) return tb("refuse.empty");
+  if (a.oneWay) return tb("refuse.oneWay");
+  if (b.seg.length >= b.cap) return tb("refuse.full");
   // What may sit on what is the goal's business, not the rules': an ordering
   // goal wants the *next* colour, not the same one.
   if (accepts(goal, b, topRun(a).colour) === 0) return refusalFor(goal, b, topRun(a).colour);

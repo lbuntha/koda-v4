@@ -1,0 +1,467 @@
+{
+  "id": "sleepy-night-animals",
+  "rev": 0,
+  "language": "en",
+  "band": "A",
+  "ages": [
+    6,
+    7
+  ],
+  "topics": [
+    "animals",
+    "nature"
+  ],
+  "questionCounts": {
+    "understand": 7,
+    "words": 4,
+    "spell": 5
+  },
+  "title": "Sleepy Night Animals",
+  "category": "Animals",
+  "picture": "observation-forest-owl",
+  "sentences": [
+    {
+      "id": "s1",
+      "text": "Night comes to the forest.",
+      "words": [
+        "Night",
+        "comes",
+        "to",
+        "the",
+        "forest."
+      ]
+    },
+    {
+      "id": "s2",
+      "text": "Dara is in her tent.",
+      "words": [
+        "Dara",
+        "is",
+        "in",
+        "her",
+        "tent."
+      ]
+    },
+    {
+      "id": "s3",
+      "text": "Dara cannot sleep.",
+      "words": [
+        "Dara",
+        "cannot",
+        "sleep."
+      ]
+    },
+    {
+      "id": "s4",
+      "text": "“Who is awake?” asks Dara.",
+      "words": [
+        "“Who",
+        "is",
+        "awake?”",
+        "asks",
+        "Dara."
+      ]
+    },
+    {
+      "id": "s5",
+      "text": "“Hoo, hoo!” An owl is awake.",
+      "words": [
+        "“Hoo,",
+        "hoo!”",
+        "An",
+        "owl",
+        "is",
+        "awake."
+      ]
+    },
+    {
+      "id": "s6",
+      "text": "The owl looks for a mouse.",
+      "words": [
+        "The",
+        "owl",
+        "looks",
+        "for",
+        "a",
+        "mouse."
+      ]
+    },
+    {
+      "id": "s7",
+      "text": "“Who is awake?” asks Dara.",
+      "words": [
+        "“Who",
+        "is",
+        "awake?”",
+        "asks",
+        "Dara."
+      ]
+    },
+    {
+      "id": "s8",
+      "text": "“Squeak!” A bat is awake.",
+      "words": [
+        "“Squeak!”",
+        "A",
+        "bat",
+        "is",
+        "awake."
+      ]
+    },
+    {
+      "id": "s9",
+      "text": "The bat flies in the dark.",
+      "words": [
+        "The",
+        "bat",
+        "flies",
+        "in",
+        "the",
+        "dark."
+      ]
+    },
+    {
+      "id": "s10",
+      "text": "“Who is awake?” asks Dara.",
+      "words": [
+        "“Who",
+        "is",
+        "awake?”",
+        "asks",
+        "Dara."
+      ]
+    },
+    {
+      "id": "s11",
+      "text": "“Chirp, chirp!” A cricket is awake.",
+      "words": [
+        "“Chirp,",
+        "chirp!”",
+        "A",
+        "cricket",
+        "is",
+        "awake."
+      ]
+    },
+    {
+      "id": "s12",
+      "text": "The cricket sings to the moon.",
+      "words": [
+        "The",
+        "cricket",
+        "sings",
+        "to",
+        "the",
+        "moon."
+      ]
+    },
+    {
+      "id": "s13",
+      "text": "“Who is awake?” asks Dara.",
+      "words": [
+        "“Who",
+        "is",
+        "awake?”",
+        "asks",
+        "Dara."
+      ]
+    },
+    {
+      "id": "s14",
+      "text": "“Flap, flap!” A moth is awake.",
+      "words": [
+        "“Flap,",
+        "flap!”",
+        "A",
+        "moth",
+        "is",
+        "awake."
+      ]
+    },
+    {
+      "id": "s15",
+      "text": "The moth flies to the lantern.",
+      "words": [
+        "The",
+        "moth",
+        "flies",
+        "to",
+        "the",
+        "lantern."
+      ]
+    },
+    {
+      "id": "s16",
+      "text": "It likes the light.",
+      "words": [
+        "It",
+        "likes",
+        "the",
+        "light."
+      ]
+    },
+    {
+      "id": "s17",
+      "text": "Dara looks at a star.",
+      "words": [
+        "Dara",
+        "looks",
+        "at",
+        "a",
+        "star."
+      ]
+    },
+    {
+      "id": "s18",
+      "text": "“Many animals are awake at night.”",
+      "words": [
+        "“Many",
+        "animals",
+        "are",
+        "awake",
+        "at",
+        "night.”"
+      ]
+    },
+    {
+      "id": "s19",
+      "text": "“They sleep when the sun is up.”",
+      "words": [
+        "“They",
+        "sleep",
+        "when",
+        "the",
+        "sun",
+        "is",
+        "up.”"
+      ]
+    },
+    {
+      "id": "s20",
+      "text": "Dara yawns.",
+      "words": [
+        "Dara",
+        "yawns."
+      ]
+    },
+    {
+      "id": "s21",
+      "text": "“Who is awake?” asks Dara.",
+      "words": [
+        "“Who",
+        "is",
+        "awake?”",
+        "asks",
+        "Dara."
+      ]
+    },
+    {
+      "id": "s22",
+      "text": "The night animals are awake.",
+      "words": [
+        "The",
+        "night",
+        "animals",
+        "are",
+        "awake."
+      ]
+    },
+    {
+      "id": "s23",
+      "text": "Dara sleeps. Good night!",
+      "words": [
+        "Dara",
+        "sleeps.",
+        "Good",
+        "night!"
+      ]
+    },
+    {
+      "id": "s24",
+      "text": "What can you hear at night?",
+      "words": [
+        "What",
+        "can",
+        "you",
+        "hear",
+        "at",
+        "night?"
+      ]
+    }
+  ],
+  "questions": [
+    {
+      "id": "q1",
+      "kind": "comprehension",
+      "prompt": "Who cannot sleep?",
+      "options": [
+        "Dara",
+        "The owl",
+        "The bat"
+      ],
+      "answer": 0,
+      "evidence": "s3"
+    },
+    {
+      "id": "q2",
+      "kind": "comprehension",
+      "prompt": "What does the owl say?",
+      "options": [
+        "Hoo, hoo!",
+        "Squeak!",
+        "Chirp, chirp!"
+      ],
+      "answer": 0,
+      "evidence": "s5"
+    },
+    {
+      "id": "q3",
+      "kind": "comprehension",
+      "prompt": "What does the owl look for?",
+      "options": [
+        "A mouse",
+        "A moth",
+        "A cricket"
+      ],
+      "answer": 0,
+      "evidence": "s6"
+    },
+    {
+      "id": "q4",
+      "kind": "comprehension",
+      "prompt": "Who sings to the moon?",
+      "options": [
+        "The cricket",
+        "The big owl",
+        "The little bat"
+      ],
+      "answer": 0,
+      "evidence": "s12"
+    },
+    {
+      "id": "q5",
+      "kind": "comprehension",
+      "prompt": "Where does the moth go?",
+      "options": [
+        "To the lantern",
+        "To the moon at night",
+        "To the sun"
+      ],
+      "answer": 0,
+      "evidence": "s15"
+    },
+    {
+      "id": "q6",
+      "kind": "comprehension",
+      "prompt": "When are these animals awake?",
+      "options": [
+        "At night",
+        "In the sun",
+        "In the tent"
+      ],
+      "answer": 0,
+      "evidence": "s18"
+    },
+    {
+      "id": "q7",
+      "kind": "comprehension",
+      "prompt": "What does Dara do last?",
+      "options": [
+        "She sleeps",
+        "She looks for a mouse",
+        "She sings to the moon"
+      ],
+      "answer": 0,
+      "evidence": "s23"
+    },
+    {
+      "id": "q8",
+      "kind": "vocab",
+      "prompt": "Which picture is “owl”?",
+      "word": "owl",
+      "options": [
+        "observation-forest-owl",
+        "apple",
+        "cube"
+      ],
+      "answer": 0
+    },
+    {
+      "id": "q9",
+      "kind": "vocab",
+      "prompt": "Which picture is “star”?",
+      "word": "star",
+      "options": [
+        "apple",
+        "star",
+        "cube"
+      ],
+      "answer": 1
+    },
+    {
+      "id": "q10",
+      "kind": "vocab",
+      "prompt": "Which picture is “lantern”?",
+      "word": "lantern",
+      "options": [
+        "apple",
+        "cube",
+        "observation-forest-lantern"
+      ],
+      "answer": 2
+    },
+    {
+      "id": "q11",
+      "kind": "vocab",
+      "prompt": "Which picture is “tent”?",
+      "word": "tent",
+      "options": [
+        "cube",
+        "observation-forest-tent",
+        "apple"
+      ],
+      "answer": 1
+    },
+    {
+      "id": "sp1",
+      "kind": "spell",
+      "sentence": "s18",
+      "word": "night"
+    },
+    {
+      "id": "sp2",
+      "kind": "spell",
+      "sentence": "s3",
+      "word": "sleep"
+    },
+    {
+      "id": "sp3",
+      "kind": "spell",
+      "sentence": "s4",
+      "word": "awake"
+    },
+    {
+      "id": "sp4",
+      "kind": "spell",
+      "sentence": "s12",
+      "word": "moon"
+    },
+    {
+      "id": "sp5",
+      "kind": "spell",
+      "sentence": "s16",
+      "word": "light"
+    }
+  ],
+  "pictures": {
+    "owl": "observation-forest-owl",
+    "star": "star",
+    "lantern": "observation-forest-lantern",
+    "tent": "observation-forest-tent"
+  },
+  "noRecording": [
+    "Dara"
+  ],
+  "learningTakeaway": "Some animals are awake at night. They sleep when the sun is up.",
+  "provenance": "Original story written for Koda, 2026. Draft: not yet read aloud or reviewed by a person."
+}

@@ -1,4 +1,5 @@
 import type { ObservationObject } from "./types";
+import { to } from "./i18n";
 
 const PACKS = {
   beach: ["shell", "sunglasses", "crab", "bucket", "sunscreen", "sun hat", "beach ball", "sandal", "camera", "kite"],
@@ -61,16 +62,14 @@ const MIRROR_SAFE = new Set([
   "banner", "dragon", "chess knight", "comet", "telescope", "wrench", "kelp frond", "sea fan",
 ]);
 
-/** Child-facing wording for a category round's prompt. */
-export const CATEGORY_LABELS: Record<string, string> = {
-  food: "things you can eat",
-  animal: "animals",
-  tool: "tools",
-  clothing: "things you can wear",
-  toy: "toys",
-  container: "things that hold something",
-  nature: "things that grow or wash up",
-};
+/**
+ * Child-facing wording for a category round's prompt, read from the catalog each
+ * time it is looked up so it follows the language on screen.
+ */
+export const CATEGORY_LABELS: Record<string, string> = {};
+for (const category of Object.keys(CATEGORY_MEMBERS)) {
+  Object.defineProperty(CATEGORY_LABELS, category, { enumerable: true, get: () => to(`categories.${category}`) });
+}
 
 const slug = (value: string) => value.replace(/\s+/g, "-");
 const DECOY_GROUPS: Record<string, string> = {

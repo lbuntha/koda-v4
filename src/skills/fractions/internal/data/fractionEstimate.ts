@@ -24,6 +24,7 @@ import {
   type Fraction,
   type Whole,
 } from "./fractionNumbers";
+import { tf } from "../i18n";
 
 export type EstimateMode =
   /** Nearest to nothing, a half, or one whole. */
@@ -47,9 +48,9 @@ export const nameOf = (f: Fraction): string => `${f.taken}/${f.parts}`;
 export type Benchmark = "nothing" | "half" | "one";
 
 export const BENCHMARK_WORDS: Record<Benchmark, string> = {
-  nothing: "Nearly nothing",
-  half: "About a half",
-  one: "Nearly a whole one",
+  get nothing() { return tf("est.bNothing"); },
+  get half() { return tf("est.bHalf"); },
+  get one() { return tf("est.bOne"); },
 };
 
 /**
@@ -97,15 +98,15 @@ export interface EstimateQuestion {
 }
 
 const PROMPTS: Record<EstimateMode, (q: Omit<EstimateQuestion, "prompt">) => string> = {
-  benchmark: (q) => `${nameOf(q.fraction)} — nearest to what?`,
+  benchmark: (q) => tf("est.promptBench", { fraction: nameOf(q.fraction) }),
   reasonable: (q) =>
-    `Somebody says ${nameOf(q.left as Fraction)} + ${nameOf(q.right as Fraction)} = ${nameOf(q.claim as Fraction)}. Could that be right?`,
+    tf("est.promptClaim", { left: nameOf(q.left as Fraction), right: nameOf(q.right as Fraction), claim: nameOf(q.claim as Fraction) }),
 };
 
 const VERDICT_WORDS: Record<NonNullable<EstimateQuestion["verdict"]>, string> = {
-  right: "Yes, that looks about right",
-  "too-small": "No — that is smaller than one of the pieces",
-  "too-big": "No — that is more than the two together",
+  get right() { return tf("est.vRight"); },
+  get "too-small"() { return tf("est.vSmall"); },
+  get "too-big"() { return tf("est.vBig"); },
 };
 
 export function buildEstimateQuestion(
@@ -198,23 +199,23 @@ export function isEstimateCorrect(q: EstimateQuestion, given: string): boolean {
 export function explainEstimate(q: EstimateQuestion, correct: boolean): string {
   if (!correct) {
     return q.mode === "benchmark"
-      ? "Put it on the strip and look at where it lands: near the start, near the middle, or near the end."
-      : "Lay both fractions along the strip and see roughly how far they reach together.";
+      ? tf("est.missBench")
+      : tf("est.missClaim");
   }
 
   if (q.mode === "benchmark") {
     const answer = benchmarkOf(q.fraction);
     const piece = partWord(q.fraction.parts, true);
     return answer === "half"
-      ? `${q.fraction.taken} of the ${q.fraction.parts} ${piece} is about halfway along the strip.`
+      ? tf("est.rightHalf", { taken: q.fraction.taken, parts: q.fraction.parts, words: piece })
       : answer === "one"
-        ? `${q.fraction.taken} of the ${q.fraction.parts} ${piece} very nearly fills the strip.`
-        : `${q.fraction.taken} of the ${q.fraction.parts} ${piece} is only a little way along the strip.`;
+        ? tf("est.rightOne", { taken: q.fraction.taken, parts: q.fraction.parts, words: piece })
+        : tf("est.rightNothing", { taken: q.fraction.taken, parts: q.fraction.parts, words: piece });
   }
 
   return q.verdict === "right"
-    ? `Both pieces laid end to end reach about that far, so the answer is believable.`
-    : `Adding the bottom numbers made the pieces smaller, so the answer came out below what they started with.`;
+    ? tf("est.rightSound")
+    : tf("est.rightUnsound");
 }
 
 export { partWord, simplify, valueOf };

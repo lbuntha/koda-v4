@@ -1,4 +1,5 @@
 import { placeValueSplit } from "./multiplicationNumbers";
+import { joinAnd, tm } from "../i18n";
 
 /**
  * The routes to a product, and which of them actually fit a given pair.
@@ -43,20 +44,22 @@ const has = (a: number, b: number, n: number): boolean => a === n || b === n;
 export const STRATEGIES: readonly Strategy[] = Object.freeze([
   {
     id: "place_value_split",
-    label: "Split one number by place value",
+    get label() { return tm("strategy.place_value_split.label"); },
     // Always available above ten: every two-digit number splits into tens and ones.
     fits: (a, b) => placeValueSplit(a).length > 1 || placeValueSplit(b).length > 1,
     route: (a, b) => {
       const target = placeValueSplit(a).length > 1 ? a : b;
       const partner = other(a, b, target);
       const parts = placeValueSplit(target);
-      return `${parts.map((p) => `${p} × ${partner}`).join(" and ")}, added together`;
+      return tm("strategy.place_value_split.route", {
+        parts: joinAnd(parts.map((p) => `${p} × ${partner}`)),
+      });
     },
-    why: () => "Both numbers are single digits, so there is nothing to split.",
+    why: () => tm("strategy.place_value_split.why"),
   },
   {
     id: "halve_and_double",
-    label: "Halve one and double the other",
+    get label() { return tm("strategy.halve_and_double.label"); },
     /* Worth doing only when halving an even factor lands the other on a ten —
        otherwise the rewrite makes the sum harder, not easier. */
     fits: (a, b) => (a % 2 === 0 && (b * 2) % 10 === 0) || (b % 2 === 0 && (a * 2) % 10 === 0),
@@ -67,61 +70,61 @@ export const STRATEGIES: readonly Strategy[] = Object.freeze([
     },
     why: (a, b) =>
       a % 2 !== 0 && b % 2 !== 0
-        ? "Neither number can be halved into whole groups."
-        : "Doubling the other one does not land on a ten, so this makes it harder.",
+        ? tm("strategy.halve_and_double.whyOdd")
+        : tm("strategy.halve_and_double.whyHarder"),
   },
   {
     id: "double_double",
-    label: "Double, then double again",
+    get label() { return tm("strategy.double_double.label"); },
     fits: (a, b) => has(a, b, 4),
     route: (a, b) => {
       const partner = other(a, b, 4);
-      return `2 × ${partner} = ${2 * partner}, doubled to ${4 * partner}`;
+      return tm("strategy.double_double.route", { partner, double: 2 * partner, quad: 4 * partner });
     },
-    why: () => "Neither number is four, so there is nothing to reach by doubling twice.",
+    why: () => tm("strategy.double_double.why"),
   },
   {
     id: "add_a_group",
-    label: "Start one group below, then add a group",
+    get label() { return tm("strategy.add_a_group.label"); },
     fits: (a, b) => has(a, b, 3) || has(a, b, 6),
     route: (a, b) => {
       const driver = a === 3 || a === 6 ? a : b;
       const partner = other(a, b, driver);
       const helper = driver === 3 ? 2 : 5;
-      return `${helper} × ${partner} = ${helper * partner}, plus one more ${partner}`;
+      return tm("strategy.add_a_group.route", { helper, partner, product: helper * partner });
     },
-    why: () => "Neither number sits one group above a fact worth starting from.",
+    why: () => tm("strategy.add_a_group.why"),
   },
   {
     id: "subtract_a_group",
-    label: "Start one group above, then take a group away",
+    get label() { return tm("strategy.subtract_a_group.label"); },
     fits: (a, b) => has(a, b, 9),
     route: (a, b) => {
       const partner = other(a, b, 9);
-      return `10 × ${partner} = ${10 * partner}, take one ${partner} away`;
+      return tm("strategy.subtract_a_group.route", { partner, ten: 10 * partner });
     },
-    why: () => "Neither number is nine, so there is no ten to come down from.",
+    why: () => tm("strategy.subtract_a_group.why"),
   },
   {
     id: "near_square",
-    label: "Use the square next to it",
+    get label() { return tm("strategy.near_square.label"); },
     fits: (a, b) => Math.abs(a - b) === 1,
     route: (a, b) => {
       const small = Math.min(a, b);
-      return `${small} × ${small} = ${small * small}, plus one more ${small}`;
+      return tm("strategy.near_square.route", { small, square: small * small });
     },
-    why: () => "The two numbers are not next to each other, so no square is one step away.",
+    why: () => tm("strategy.near_square.why"),
   },
   {
     id: "count_the_tens",
-    label: "Count it in tens",
+    get label() { return tm("strategy.count_the_tens.label"); },
     fits: (a, b) => has(a, b, 10) || a % 10 === 0 || b % 10 === 0,
     route: (a, b) => {
       const tens = a % 10 === 0 ? a : b;
       const partner = other(a, b, tens);
-      return `${tens / 10} × ${partner} tens`;
+      return tm("strategy.count_the_tens.route", { tens: tens / 10, partner });
     },
-    why: () => "Neither number is a whole number of tens.",
+    why: () => tm("strategy.count_the_tens.why"),
   },
 ]);
 

@@ -27,6 +27,7 @@ import {
   type Fraction,
   type FractionSpec,
 } from "./fractionNumbers";
+import { tf } from "../i18n";
 
 export type MillMode =
   /** Cut every part into k smaller ones and read the new name. */
@@ -96,11 +97,11 @@ export interface MillQuestion {
 }
 
 const PROMPTS: Record<MillMode, (q: Omit<MillQuestion, "prompt">) => string> = {
-  split: (q) => `Cut every part into ${q.factor}. What is it called now?`,
-  two_names: () => "Which pair of names does this amount have?",
-  scale_up: (q) => `Write ${nameOf(q.from)} in ${partWord(q.to.parts, true)}.`,
-  scale_down: (q) => `Both numbers divide by ${q.factor}. What does ${nameOf(q.from)} become?`,
-  simplest: (q) => `Write ${nameOf(q.from)} as simply as it will go.`,
+  split: (q) => tf("mill.promptSplit", { factor: q.factor }),
+  two_names: () => tf("mill.promptTwo"),
+  scale_up: (q) => tf("mill.promptUp", { fraction: nameOf(q.from), words: partWord(q.to.parts, true) }),
+  scale_down: (q) => tf("mill.promptDown", { factor: q.factor, fraction: nameOf(q.from) }),
+  simplest: (q) => tf("mill.promptSimplest", { fraction: nameOf(q.from) }),
 };
 
 export function buildMillQuestion(
@@ -168,14 +169,14 @@ export function buildMillQuestion(
   };
 
   if (mode === "two_names") {
-    const truth = `${nameOf(from)} and ${nameOf(to)}`;
+    const truth = tf("mill.pairAnd", { a: nameOf(from), b: nameOf(to) });
     const [near] = fractionDistractors(to, 1);
     const wrong = [
       // Added, not multiplied — the commonest wrong way to make an equivalent.
-      `${nameOf(from)} and ${from.taken + factor}/${from.parts + factor}`,
+      tf("mill.pairAnd", { a: nameOf(from), b: `${from.taken + factor}/${from.parts + factor}` }),
       // Only the bottom multiplied.
-      `${nameOf(from)} and ${from.taken}/${to.parts}`,
-      `${nameOf(from)} and ${nameOf(near.value)}`,
+      tf("mill.pairAnd", { a: nameOf(from), b: `${from.taken}/${to.parts}` }),
+      tf("mill.pairAnd", { a: nameOf(from), b: nameOf(near.value) }),
     ];
     return {
       ...base,
@@ -219,9 +220,9 @@ export function millBlockedBecause(question: MillQuestion, current: Fraction): M
 }
 
 export const MILL_REFUSALS: Record<Exclude<MillBlock, null>, string> = {
-  "not-there-yet": "Not there yet — keep going.",
-  "went-past": "That has gone past it. Come back one step.",
-  "not-simplest": "That is an equal fraction, but it can still be made simpler.",
+  get "not-there-yet"() { return tf("mill.notThere"); },
+  get "went-past"() { return tf("mill.wentPast"); },
+  get "not-simplest"() { return tf("mill.notSimplest"); },
 };
 
 /** The splits and joins the mill offers, given where the child is now. */
@@ -260,25 +261,25 @@ export function explainMill(q: MillQuestion, correct: boolean): string {
   if (!correct) {
     switch (q.mode) {
       case "two_names":
-        return "One half of that pair is not what the bars show. Read both halves before choosing.";
+        return tf("mill.missTwo");
       case "scale_up":
-        return `Cut every part into ${to.parts / from.parts} — the shaded ones get cut as well.`;
+        return tf("mill.missUp", { factor: to.parts / from.parts });
       case "simplest":
-        return "Keep joining parts up while both numbers still share a factor.";
+        return tf("mill.missSimplest");
       default:
-        return "The shaded amount never moves. Only the number of parts changes.";
+        return tf("mill.missDefault");
     }
   }
   switch (q.mode) {
     case "split":
-      return `${factor} times as many parts, and ${factor} times as many shaded — ${nameOf(from)} and ${nameOf(to)} are the same amount.`;
+      return tf("mill.rightSplit", { factor, from: nameOf(from), to: nameOf(to) });
     case "two_names":
-      return `Same amount, two names: ${nameOf(from)} and ${nameOf(to)}.`;
+      return tf("mill.rightTwo", { from: nameOf(from), to: nameOf(to) });
     case "scale_up":
-      return `Every part cut into ${to.parts / from.parts}, so ${nameOf(from)} is written ${nameOf(to)} without changing.`;
+      return tf("mill.rightUp", { n: to.parts / from.parts, from: nameOf(from), to: nameOf(to) });
     case "scale_down":
-      return `Joining every ${factor} parts turns ${nameOf(from)} into ${nameOf(to)} — the same amount, fewer pieces.`;
+      return tf("mill.rightDown", { factor, from: nameOf(from), to: nameOf(to) });
     default:
-      return `${nameOf(to)} is as far as it goes: nothing but one divides both numbers now.`;
+      return tf("mill.rightSimplest", { to: nameOf(to) });
   }
 }

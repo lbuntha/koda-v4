@@ -30,6 +30,7 @@ import {
   type Fraction,
   type Whole,
 } from "./fractionNumbers";
+import { tf } from "../i18n";
 
 export type AddMode =
   /** Same denominator, adding. */
@@ -148,7 +149,7 @@ const PROMPTS: Record<AddMode, (q: Omit<AddQuestion, "prompt">) => string> = {
   add_like: (q) => `${nameOf(q.left)} + ${nameOf(q.right)}`,
   subtract_like: (q) => `${nameOf(q.left)} − ${nameOf(q.right)}`,
   refute: (q) =>
-    `Somebody says ${nameOf(q.left)} + ${nameOf(q.right)} = ${nameOf(q.claim as Fraction)}. Show that it is wrong.`,
+    tf("add.promptRefute", { left: nameOf(q.left), right: nameOf(q.right), claim: nameOf(q.claim as Fraction) }),
   add_nested: (q) => `${nameOf(q.left)} + ${nameOf(q.right)}`,
   add_unlike: (q) => `${nameOf(q.left)} + ${nameOf(q.right)}`,
   subtract_unlike: (q) => `${nameOf(q.left)} − ${nameOf(q.right)}`,
@@ -427,7 +428,7 @@ export function isAddCorrect(q: AddQuestion, given: string): boolean {
 }
 
 export const ADD_REFUSALS: Record<Exclude<AddBlock, null>, string> = {
-  "pieces-differ": "These pieces are different sizes. Cut them to match before you count.",
+  get "pieces-differ"() { return tf("add.piecesDiffer"); },
 };
 
 export { gcd, lcm, partWord, simplify, valueOf };
@@ -439,33 +440,32 @@ export { gcd, lcm, partWord, simplify, valueOf };
 export function explainAdd(q: AddQuestion, correct: boolean): string {
   const m = matchedPair(q);
   const piece = partWord(q.common, true);
-  const sign = q.operation === "add" ? "and" : "take away";
 
   if (!correct) {
     switch (q.mode) {
       case "refute":
-        return "Line the two up on the strip. Together they reach further than the answer being claimed.";
+        return tf("add.missRefute");
       case "subtract_mixed":
-        return "There are not enough loose parts to take that many away. Break a whole one up first.";
+        return tf("add.missSubMixed");
       case "add_like":
       case "subtract_like":
-        return `Both are ${partWord(q.left.parts, true)} already, so just ${q.operation === "add" ? "count them together" : "count what is left"}.`;
+        return tf(q.operation === "add" ? "add.missLikeAdd" : "add.missLikeSub", { words: partWord(q.left.parts, true) });
       default:
-        return `Cut both to ${piece} first — then they are the same size and can be counted.`;
+        return tf("add.missDefault", { words: piece });
     }
   }
 
   switch (q.mode) {
     case "add_like":
-      return `${q.left.taken} ${sign} ${q.right.taken} ${partWord(q.left.parts, true)} is ${q.left.taken + q.right.taken} of them — ${q.expected}.`;
+      return tf("add.rightLikeAdd", { a: q.left.taken, b: q.right.taken, words: partWord(q.left.parts, true), sum: q.left.taken + q.right.taken, expected: q.expected });
     case "subtract_like":
-      return `${q.left.taken} ${partWord(q.left.parts, true)} take away ${q.right.taken} leaves ${q.left.taken - q.right.taken} — ${q.expected}.`;
+      return tf("add.rightLikeSub", { a: q.left.taken, words: partWord(q.left.parts, true), b: q.right.taken, rest: q.left.taken - q.right.taken, expected: q.expected });
     case "refute":
-      return `Cut both to ${piece}: that is ${m.left.taken} and ${m.right.taken}, which makes ${q.expected}. Adding the bottom numbers gives a smaller answer than either piece deserves.`;
+      return tf("add.rightRefute", { words: piece, a: m.left.taken, b: m.right.taken, expected: q.expected });
     case "subtract_mixed":
-      return `A whole one broken up gives ${q.common} more ${piece}, and there is enough to take ${m.right.taken} away — ${q.expected}.`;
+      return tf("add.rightSubMixed", { common: q.common, words: piece, b: m.right.taken, expected: q.expected });
     default:
-      return `In ${piece} they are ${m.left.taken} and ${m.right.taken}, so the answer is ${q.expected}.`;
+      return tf("add.rightDefault", { words: piece, a: m.left.taken, b: m.right.taken, expected: q.expected });
   }
 }
 

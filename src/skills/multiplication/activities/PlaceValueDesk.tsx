@@ -16,6 +16,7 @@ import { themeSystem } from "../../../lib/themeSystem";
 import {
   PLACE_ABBREV,
   PLACE_NAMES,
+  PLACE_UNITS,
   drawScaledProduct,
   productDistractors,
   shuffle,
@@ -27,6 +28,8 @@ import { speechRate, tagLabelsFrom } from "../internal/data/multiplicationChrome
 import { ADJUSTMENT, EACH, GROUPS, NEUTRAL, PRODUCT } from "../internal/data/multiplicationPalette";
 import { DIGIT_CELL, SCROLL_BOX, TOUCH_TARGET } from "../internal/data/multiplicationLayout";
 import { useNudge } from "../internal/ui/useNudge";
+import { tm } from "../internal/i18n";
+import { useT } from "../../../lib/i18n";
 
 /**
  * The place-value desk — where the zero comes from.
@@ -113,14 +116,14 @@ export function buildQuestion(params: DeskParams, index: number, seen?: Set<stri
       return {
         ...base,
         taskKind: "multiply_a_multiple_of_ten",
-        prompt: `${a} × ${b}. How many tens is that, and where do they go?`,
+        prompt: tm("desk.promptTens", { a, b }),
         expected: String(product),
       };
     case "tens_times_tens":
       return {
         ...base,
         taskKind: "tens_times_tens",
-        prompt: `${a} × ${b}. How many, and of what?`,
+        prompt: tm("desk.promptTensTens", { a, b }),
         expected: String(product),
       };
     case "times_ten_hundred":
@@ -128,7 +131,7 @@ export function buildQuestion(params: DeskParams, index: number, seen?: Set<stri
       return {
         ...base,
         taskKind: "scale_by_ten_or_hundred",
-        prompt: `${a} × ${b}. Move the digits to the left.`,
+        prompt: tm("desk.promptMove", { a, b }),
         expected: String(product),
       };
   }
@@ -142,23 +145,23 @@ export const promptFor = (question: DeskQuestion): string => question.prompt ?? 
 
 export function printedFor(question: DeskQuestion): PrintedQuestion | null {
   const { a, b, product, count, place } = question;
-  const name = PLACE_NAMES[place];
+  const name = PLACE_UNITS[place];
   switch (question.mode) {
     case "multiples_of_ten":
       return {
-        text: `${a} × ${b}. Write it as a number of tens, then as a number. ${a} × ${b} = ____`,
-        answer: `${count} tens = ${product}`,
+        text: tm("desk.printedTens", { a, b }),
+        answer: tm("desk.printedTensAnswer", { count, product }),
       };
     case "tens_times_tens":
       return {
-        text: `${a} × ${b}. How many hundreds is that? ${a} × ${b} = ____`,
-        answer: `${count} hundreds = ${product}`,
+        text: tm("desk.printedTensTens", { a, b }),
+        answer: tm("desk.printedTensTensAnswer", { count, product }),
       };
     case "times_ten_hundred":
     default:
       return {
-        text: `${a} × ${b}. Move each digit ${question.places === 1 ? "one place" : "two places"} to the left. ${a} × ${b} = ____`,
-        answer: `${product} — ${count} ${name}`,
+        text: tm("desk.printedMove", { a, b, places: question.places === 1 ? tm("desk.onePlace") : tm("desk.twoPlaces") }),
+        answer: tm("desk.printedMoveAnswer", { product, count, name }),
       };
   }
 }
@@ -168,23 +171,23 @@ export function methodFor(question: DeskQuestion): string[] | null {
   switch (question.mode) {
     case "multiples_of_ten":
       return [
-        `${b} is ${b / 10} tens.`,
-        `So ${a} × ${b} is ${a} × ${b / 10} tens, which is ${count} tens.`,
-        `${count} tens is ${question.product}.`,
+        tm("desk.methodTens1", { b, tens: b / 10 }),
+        tm("desk.methodTens2", { a, b, tens: b / 10, count }),
+        tm("desk.methodTens3", { count, product: question.product }),
       ];
     case "tens_times_tens":
       return [
-        `${a} is ${a / 10} tens and ${b} is ${b / 10} tens.`,
-        `A ten of a ten is a hundred, so this is ${count} hundreds.`,
-        `${count} hundreds is ${question.product}.`,
+        tm("desk.methodTT1", { a, b, ta: a / 10, tb: b / 10 }),
+        tm("desk.methodTT2", { count }),
+        tm("desk.methodTT3", { count, product: question.product }),
       ];
     case "times_ten_hundred":
     default:
       return [
-        `Multiplying by ${b} makes every digit worth ${b} times as much.`,
-        `Each one moves ${question.places === 1 ? "one column" : "two columns"} to the left.`,
+        tm("desk.methodMove1", { b }),
+        tm("desk.methodMove2", { columns: question.places === 1 ? tm("desk.oneColumn") : tm("desk.twoColumns") }),
         // Never "add a zero" (§12 trap 5).
-        `The ${PLACE_NAMES[1]} column is left with nothing in it, so a zero is written there.`,
+        tm("desk.methodMove3", { place: PLACE_NAMES[1] }),
       ];
   }
 }
@@ -192,13 +195,13 @@ export function methodFor(question: DeskQuestion): string[] | null {
 /** The columns, drawn empty, for a child to fill in with a pencil. */
 export function figureFor(_question: DeskQuestion): React.ReactNode | null {
   const cell = 34;
-  const labels = ["Th", "H", "T", "O"];
+  const labels = [1000, 100, 10, 1].map((place) => PLACE_ABBREV[place]);
   return (
     <svg
       viewBox={`0 0 ${cell * 4 + 4} 56`}
       width="100%"
       role="img"
-      aria-label="A place value chart with thousands, hundreds, tens and ones"
+      aria-label={tm("desk.figureLabel")}
     >
       {labels.map((label, i) => (
         <g key={label}>
@@ -239,24 +242,24 @@ export function deskHints(
     case "multiples_of_ten":
       return composeHints(
         kidTip,
-        `${b} is ${b / 10} tens, so this is ${a} lots of ${b / 10} tens.`,
-        `Work out ${a} × ${b / 10}, then put that many in the tens column.`,
+        tm("desk.hintTens1", { a, b, tens: b / 10 }),
+        tm("desk.hintTens2", { a, tens: b / 10 }),
       );
     case "tens_times_tens":
       return composeHints(
         kidTip,
-        `${a} is ${a / 10} tens and ${b} is ${b / 10} tens.`,
+        tm("desk.hintTT1", { a, b, ta: a / 10, tb: b / 10 }),
         // The place is the question, so this names the rule and not the column.
-        `A ten multiplied by a ten is a hundred, so the answer counts hundreds.`,
+        tm("desk.hintTT2"),
       );
     case "times_ten_hundred":
     default:
       return composeHints(
         kidTip,
         state.moved === 0
-          ? `Every digit becomes worth ${b} times as much. Move them left.`
-          : `You have moved them ${state.moved} place${state.moved === 1 ? "" : "s"}.`,
-        `Multiplying by ${b} moves each digit ${question.places === 1 ? "one column" : "two columns"}. Watch what is left in the ones.`,
+          ? tm("desk.hintMoveStart", { b })
+          : tm("desk.hintMoved", { count: state.moved }),
+        tm("desk.hintMove2", { b, columns: question.places === 1 ? tm("desk.oneColumn") : tm("desk.twoColumns") }),
       );
   }
 }
@@ -266,6 +269,7 @@ export function deskHints(
 /* -------------------------------------------------------------------------- */
 
 export const PlaceValueDesk: React.FC<ActivityProps<DeskParams>> = ({ params, koda, onComplete, lesson }) => {
+  useT();
   const setup: DeskSetup = useMemo(() => ({ ...params, ...params.question }), [params]);
   const copy = playCopy(params);
   const practising = isPractice(setup);
@@ -366,12 +370,12 @@ export const PlaceValueDesk: React.FC<ActivityProps<DeskParams>> = ({ params, ko
     if (round.feedback) return;
     const next = moved + by;
     if (next < 0) {
-      refuse("The digits are back where they started.", "They are back at the start.");
+      refuse(tm("desk.backStart"), tm("desk.backStartSay"));
       return;
     }
     // Four columns, and the leading digit has to stay on the desk.
     if (String(a * 10 ** next).length > COLUMNS.length) {
-      refuse("There is no room to move them any further left.", "There is no more room.");
+      refuse(tm("desk.noRoom"), tm("desk.noRoomSay"));
       return;
     }
     setMoved(next);
@@ -383,26 +387,26 @@ export const PlaceValueDesk: React.FC<ActivityProps<DeskParams>> = ({ params, ko
   const checkDesk = () => {
     if (round.feedback) return;
     if (moving && moved === 0) {
-      refuse("Move the digits first.", "Move the digits first.");
+      refuse(tm("desk.moveFirst"), tm("desk.moveFirst"));
       return;
     }
     if (!moving && (count === undefined || place === undefined)) {
       refuse(
-        count === undefined ? "Choose how many first." : "Now choose which column they go in.",
-        count === undefined ? "Choose how many first." : "Choose a column.",
+        count === undefined ? tm("desk.howManyFirst") : tm("desk.chooseColumn"),
+        count === undefined ? tm("desk.howManyFirst") : tm("desk.chooseColumnSay"),
       );
       return;
     }
     const correct = shown === question.product;
-    const name = PLACE_NAMES[question.place];
+    const name = PLACE_UNITS[question.place];
     judge(
       correct,
       String(shown),
-      correct ? "That is it" : "Not quite",
+      correct ? tm("desk.rightTitle") : tm("desk.wrongTitle"),
       moving
         // The zero is named as a consequence, never as a keystroke.
-        ? `${a} × ${b} is ${question.count} ${name}. Every digit moved ${question.places === 1 ? "one place" : "two places"} left, and the ones column was left empty — that is where the zero comes from.`
-        : `${a} × ${b} is ${question.count} ${name}, which is ${question.product}.`,
+        ? tm("desk.moveMessage", { a, b, count: question.count, name, places: question.places === 1 ? tm("desk.onePlace") : tm("desk.twoPlaces") })
+        : tm("desk.countMessage", { a, b, count: question.count, name, product: question.product }),
     );
   };
 
@@ -439,7 +443,7 @@ export const PlaceValueDesk: React.FC<ActivityProps<DeskParams>> = ({ params, ko
     <div className={SCROLL_BOX}>
       <div
         role="img"
-        aria-label={shown === 0 ? "The desk is empty" : `The desk reads ${shown}`}
+        aria-label={shown === 0 ? tm("desk.empty") : tm("desk.reads", { shown })}
         className="mx-auto flex w-fit gap-1"
       >
         {COLUMNS.map((column, i) => {
@@ -483,7 +487,7 @@ export const PlaceValueDesk: React.FC<ActivityProps<DeskParams>> = ({ params, ko
       <div className="flex items-center gap-2">
         <button
           type="button"
-          aria-label="Move the digits one place left"
+          aria-label={tm("desk.moveLeft")}
           onClick={() => move(1)}
           disabled={!!round.feedback}
           className={themeSystem.button("secondary", "choice")}
@@ -491,11 +495,11 @@ export const PlaceValueDesk: React.FC<ActivityProps<DeskParams>> = ({ params, ko
           ←
         </button>
         <span className={`min-w-32 text-center text-sm font-bold ${GROUPS.text}`}>
-          moved {moved} place{moved === 1 ? "" : "s"}
+          {tm("desk.moved", { count: moved })}
         </span>
         <button
           type="button"
-          aria-label="Move the digits back to the right"
+          aria-label={tm("desk.moveBack")}
           onClick={() => move(-1)}
           disabled={!!round.feedback}
           className={themeSystem.button("secondary", "choice")}
@@ -504,7 +508,7 @@ export const PlaceValueDesk: React.FC<ActivityProps<DeskParams>> = ({ params, ko
         </button>
       </div>
       <button type="button" onClick={checkDesk} disabled={!!round.feedback} className={themeSystem.button("primary", "md")}>
-        Check
+        {tm("desk.check")}
       </button>
     </div>
   ) : (
@@ -515,7 +519,7 @@ export const PlaceValueDesk: React.FC<ActivityProps<DeskParams>> = ({ params, ko
             key={n}
             type="button"
             aria-pressed={count === n}
-            aria-label={`${n} of them${guide.target === n ? ", choose this one next" : ""}`}
+            aria-label={tm("desk.ofThem", { n, next: guide.target === n ? tm("desk.chooseNext") : "" })}
             onClick={() => {
               if (round.feedback) return;
               setCount(n);
@@ -537,7 +541,7 @@ export const PlaceValueDesk: React.FC<ActivityProps<DeskParams>> = ({ params, ko
             key={p}
             type="button"
             aria-pressed={place === p}
-            aria-label={PLACE_NAMES[p]}
+            aria-label={PLACE_UNITS[p]}
             onClick={() => {
               if (round.feedback) return;
               setPlace(p);
@@ -549,12 +553,12 @@ export const PlaceValueDesk: React.FC<ActivityProps<DeskParams>> = ({ params, ko
               place === p ? `${PRODUCT.border} ${PRODUCT.soft}` : `${EACH.border} bg-surface`
             }`}
           >
-            {PLACE_NAMES[p]}
+            {PLACE_UNITS[p]}
           </button>
         ))}
       </div>
       <button type="button" onClick={checkDesk} disabled={!!round.feedback} className={themeSystem.button("primary", "md")}>
-        Check
+        {tm("desk.check")}
       </button>
     </div>
   );
@@ -564,7 +568,7 @@ export const PlaceValueDesk: React.FC<ActivityProps<DeskParams>> = ({ params, ko
     <SkillRound
       koda={koda}
       lesson={lesson}
-      fallbackTitle="Place Value Desk"
+      fallbackTitle={tm("desk.title")}
       round={round}
       totalQuestions={total}
       prompt={promptFor(question)}
@@ -592,10 +596,10 @@ export const PlaceValueDesk: React.FC<ActivityProps<DeskParams>> = ({ params, ko
             {moving
               ? `${a} × ${b}`
               : count === undefined
-                ? "How many?"
+                ? tm("desk.howMany")
                 : place === undefined
-                  ? `${count} of what?`
-                  : `${count} ${PLACE_NAMES[place]} = ${shown}`}
+                  ? tm("desk.ofWhat", { count })
+                  : tm("desk.equals", { count, name: PLACE_UNITS[place], shown })}
           </p>
         )}
 

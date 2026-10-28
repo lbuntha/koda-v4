@@ -35,6 +35,8 @@ import {
 } from "../internal/data/multiplicationLayout";
 import { useNudge } from "../internal/ui/useNudge";
 import { NumberPad } from "../internal/ui/NumberPad";
+import { tm } from "../internal/i18n";
+import { useT } from "../../../lib/i18n";
 
 /**
  * The array — equal groups, stood in rows and columns.
@@ -125,10 +127,10 @@ const NEEDS_DIFFERENT_SIDES: ArrayMode[] = ["commute", "array_to_equation"];
  */
 const reasonsFor = (rows: number, cols: number): Choice[] =>
   shuffle([
-    { text: "No — the same squares, just turned round.", correct: true },
-    { text: `Yes — ${rows} rows of ${cols} holds more than ${cols} rows of ${rows}.`, correct: false },
-    { text: "Yes — the rows changed, so the total changed.", correct: false },
-    { text: "No — turning always makes an array smaller.", correct: false },
+    { text: tm("array.reasonSame"), correct: true },
+    { text: tm("array.reasonMore", { rows, cols }), correct: false },
+    { text: tm("array.reasonChanged"), correct: false },
+    { text: tm("array.reasonSmaller"), correct: false },
   ]);
 
 /**
@@ -201,21 +203,21 @@ export function buildQuestion(params: ArrayParams, index: number): ArrayQuestion
       return {
         ...base,
         taskKind: "read_an_array",
-        prompt: `${rows} rows of ${cols}. How many squares altogether?`,
+        prompt: tm("array.promptRead", { rows, cols }),
         expected: String(total),
       };
     case "commute":
       return {
         ...base,
         taskKind: "turn_the_array",
-        prompt: `Turn the array, then say whether the total changed — and why.`,
+        prompt: tm("array.promptCommute"),
         expected: "No — the same squares, just turned round.",
       };
     case "array_to_equation":
       return {
         ...base,
         taskKind: "write_both_equations",
-        prompt: `Choose both sentences that describe this array.`,
+        prompt: tm("array.promptEquation"),
         expected: `${rows} × ${cols} = ${total} and ${cols} × ${rows} = ${total}`,
       };
     case "missing_dimension":
@@ -223,15 +225,15 @@ export function buildQuestion(params: ArrayParams, index: number): ArrayQuestion
         ...base,
         taskKind: "find_the_missing_side",
         prompt: unknown === "rows"
-          ? `${total} squares in rows of ${cols}. How many rows?`
-          : `${total} squares in ${rows} rows. How many in each row?`,
+          ? tm("array.promptMissingRows", { total, cols })
+          : tm("array.promptMissingCols", { total, rows }),
         expected: String(answer),
       };
     case "split_array":
       return {
         ...base,
         taskKind: "split_the_array",
-        prompt: `Cut the array into two easier pieces, then add them.`,
+        prompt: tm("array.promptSplit"),
         expected: String(total),
       };
     case "build_array":
@@ -239,7 +241,7 @@ export function buildQuestion(params: ArrayParams, index: number): ArrayQuestion
       return {
         ...base,
         taskKind: "build_an_array",
-        prompt: `Make an array with ${rows} rows of ${cols}, then say how many squares.`,
+        prompt: tm("array.promptBuild", { rows, cols }),
         expected: String(total),
       };
   }
@@ -258,22 +260,22 @@ export function printedFor(question: ArrayQuestion): PrintedQuestion | null {
       // Turning is the interaction, so paper asks for the pair of sentences the
       // turn produces rather than pretending a page can be rotated.
       return {
-        text: `An array has ${rows} rows of ${cols}. Write the two multiplication sentences it shows.`,
-        answer: `${rows} × ${cols} = ${total} and ${cols} × ${rows} = ${total}`,
+        text: tm("array.printedCommute", { rows, cols }),
+        answer: tm("array.bothEquations", { rows, cols, total }),
       };
     case "array_to_equation":
       return {
-        text: `Write both multiplication sentences for an array of ${rows} rows of ${cols}.`,
-        answer: `${rows} × ${cols} = ${total} and ${cols} × ${rows} = ${total}`,
+        text: tm("array.printedBoth", { rows, cols }),
+        answer: tm("array.bothEquations", { rows, cols, total }),
       };
     case "missing_dimension":
       return question.unknown === "rows"
-        ? { text: `${total} squares are arranged in rows of ${cols}. How many rows? ____`, answer: String(rows) }
-        : { text: `${total} squares are arranged in ${rows} equal rows. How many in each row? ____`, answer: String(cols) };
+        ? { text: tm("array.printedMissingRows", { total, cols }), answer: String(rows) }
+        : { text: tm("array.printedMissingCols", { total, rows }), answer: String(cols) };
     case "split_array": {
       const cut = question.cuts[0] || 2;
       return {
-        text: `Split ${rows} × ${cols} into ${cut} × ${cols} and ${rows - cut} × ${cols}, then add the two products. ${rows} × ${cols} = ____`,
+        text: tm("array.printedSplit", { rows, cols, cut, rest: rows - cut }),
         answer: `${cut * cols} + ${(rows - cut) * cols} = ${total}`,
       };
     }
@@ -281,7 +283,7 @@ export function printedFor(question: ArrayQuestion): PrintedQuestion | null {
     case "build_array":
     default:
       return {
-        text: `Draw an array with ${rows} rows of ${cols}. ${rows} × ${cols} = ____`,
+        text: tm("array.printedDraw", { rows, cols }),
         answer: String(total),
       };
   }
@@ -292,20 +294,20 @@ export function methodFor(question: ArrayQuestion): string[] | null {
     case "commute":
     case "array_to_equation":
       return [
-        "Count the rows, then count how many are in one row.",
-        "Rows times row-length gives the total.",
-        "The same array read the other way gives the same total.",
+        tm("array.methodCount1"),
+        tm("array.methodCount2"),
+        tm("array.methodCount3"),
       ];
     case "missing_dimension":
-      return ["The total is the rows times the row length.", "Divide the total by the side you know."];
+      return [tm("array.methodMissing1"), tm("array.methodMissing2")];
     case "split_array":
       return [
-        "Cut the rows into two easier groups.",
-        "Multiply each group by the row length.",
-        "Add the two products.",
+        tm("array.methodSplit1"),
+        tm("array.methodSplit2"),
+        tm("array.methodSplit3"),
       ];
     default:
-      return ["Count the rows.", "Count how many are in one row.", "Multiply the two."];
+      return [tm("array.methodPlain1"), tm("array.methodPlain2"), tm("array.methodPlain3")];
   }
 }
 
@@ -318,7 +320,7 @@ export function figureFor(question: ArrayQuestion): React.ReactNode | null {
       viewBox={`0 0 ${cols * cell + pad * 2} ${rows * cell + pad * 2}`}
       width="100%"
       role="img"
-      aria-label={`An array of ${rows} rows of ${cols}`}
+      aria-label={tm("array.figureLabel", { rows, cols })}
     >
       {Array.from({ length: rows }, (_, r) =>
         Array.from({ length: cols }, (_, c) => (
@@ -360,20 +362,20 @@ export function arrayHints(question: ArrayQuestion, kidTip: string | undefined, 
       return composeHints(
         kidTip,
         state.rows === rows && state.cols === cols
-          ? `Your array is right. Count the rows: ${rows} rows of ${cols}.`
-          : `You have ${state.rows} rows of ${state.cols}. You need ${rows} rows of ${cols}.`,
-        `${rows} rows of ${cols} is ${rows} lots of ${cols}.`,
+          ? tm("array.hintBuildRight", { rows, cols })
+          : tm("array.hintBuildNeed", { haveRows: state.rows, haveCols: state.cols, rows, cols }),
+        tm("array.hintBuildLots", { rows, cols }),
       );
     case "read_array":
       return composeHints(
         kidTip,
-        `Count down the side: ${rows} rows. Count along the top: ${cols}.`,
-        `So it is ${rows} lots of ${cols}.`,
+        tm("array.hintReadCount", { rows, cols }),
+        tm("array.hintReadLots", { rows, cols }),
       );
     case "commute":
       return composeHints(
         kidTip,
-        state.turned ? "Look at the squares. Were any added or taken away?" : "Turn the array first, then compare.",
+        state.turned ? tm("array.hintCommuteTurned") : tm("array.hintCommuteTurn"),
         /*
          * The commutative fact on these numbers, not the idea again.
          *
@@ -382,34 +384,34 @@ export function arrayHints(question: ArrayQuestion, kidTip: string | undefined, 
          * long: a child who climbed to the top was handed the sentence they
          * had already read. Only a sweep over every lesson catches that.
          */
-        `${rows} rows of ${cols} and ${cols} rows of ${rows} both hold ${total}.`,
+        tm("array.hintCommuteBoth", { rows, cols, total }),
       );
     case "array_to_equation":
       return composeHints(
         kidTip,
         state.picked.length === 0
-          ? "Count the rows, then count along one row."
-          : `You have chosen ${state.picked.length}. This array needs two.`,
-        `Both ${rows} × ${cols} and ${cols} × ${rows} describe it.`,
+          ? tm("array.hintEqCount")
+          : tm("array.hintEqChosen", { count: state.picked.length }),
+        tm("array.hintEqBoth", { rows, cols }),
       );
     case "missing_dimension":
       return composeHints(
         kidTip,
         question.unknown === "rows"
-          ? `Each row holds ${cols}. How many rows of ${cols} make ${total}?`
-          : `There are ${rows} rows. How many in each row makes ${total}?`,
-        `Count up in ${question.shown}s until you reach ${total}.`,
+          ? tm("array.hintMissingRows", { cols, total })
+          : tm("array.hintMissingCols", { rows, total }),
+        tm("array.hintMissingUp", { shown: question.shown, total }),
       );
     case "split_array":
     default:
       return composeHints(
         kidTip,
         state.cutAt
-          ? `You cut it into ${state.cutAt} rows and ${rows - state.cutAt} rows. Work out each piece.`
-          : "Cut the rows into two groups you already know.",
+          ? tm("array.hintSplitCut", { cut: state.cutAt, rest: rows - state.cutAt })
+          : tm("array.hintSplitStart"),
         state.cutAt
-          ? `${state.cutAt} × ${cols} and ${rows - state.cutAt} × ${cols}, added together.`
-          : `${rows} rows is harder than two smaller pieces of it.`,
+          ? tm("array.hintSplitSum", { cut: state.cutAt, rest: rows - state.cutAt, cols })
+          : tm("array.hintSplitHarder", { rows }),
       );
   }
 }
@@ -419,6 +421,7 @@ export function arrayHints(question: ArrayQuestion, kidTip: string | undefined, 
 /* -------------------------------------------------------------------------- */
 
 export const ArrayGrid: React.FC<ActivityProps<ArrayParams>> = ({ params, koda, onComplete, lesson }) => {
+  useT();
   const setup: ArraySetup = useMemo(() => ({ ...params, ...params.question }), [params]);
   const copy = playCopy(params);
   const practising = isPractice(setup);
@@ -560,11 +563,11 @@ export const ArrayGrid: React.FC<ActivityProps<ArrayParams>> = ({ params, koda, 
     const current = side === "rows" ? rows : cols;
     const next = current + by;
     if (next < 1) {
-      refuse("An array needs at least one row and one column.", "It cannot get smaller.");
+      refuse(tm("array.atLeastOne"), tm("array.smallerSay"));
       return;
     }
     if (next > MAX_ARRAY_SIDE) {
-      refuse(`An array here goes up to ${MAX_ARRAY_SIDE} a side.`, "That is as big as it goes.");
+      refuse(tm("array.upTo", { max: MAX_ARRAY_SIDE }), tm("array.biggestSay"));
       return;
     }
     if (side === "rows") setRows(next);
@@ -607,8 +610,8 @@ export const ArrayGrid: React.FC<ActivityProps<ArrayParams>> = ({ params, koda, 
   const checkEquations = () => {
     if (picked.length !== 2) {
       refuse(
-        `An array shows two sentences. You have chosen ${picked.length}.`,
-        "Choose two.",
+        tm("array.twoSentences", { count: picked.length }),
+        tm("array.chooseTwo"),
       );
       return;
     }
@@ -618,10 +621,10 @@ export const ArrayGrid: React.FC<ActivityProps<ArrayParams>> = ({ params, koda, 
     judge(
       correct,
       [...picked].sort().join(" and "),
-      correct ? "Both of them" : "Not both",
+      correct ? tm("array.bothTitle") : tm("array.notBothTitle"),
       correct
-        ? `${question.rows} × ${question.cols} and ${question.cols} × ${question.rows} are the same array.`
-        : "One sentence for the rows, one for the columns.",
+        ? tm("array.sameArray", { rows: question.rows, cols: question.cols })
+        : tm("array.oneEach"),
     );
   };
 
@@ -630,29 +633,29 @@ export const ArrayGrid: React.FC<ActivityProps<ArrayParams>> = ({ params, koda, 
     if (round.feedback) return;
     if (builds && (rows !== question.rows || cols !== question.cols)) {
       refuse(
-        `Your array is ${rows} rows of ${cols}. You need ${question.rows} rows of ${question.cols}.`,
-        "Build the array first.",
+        tm("array.buildFirst", { haveRows: rows, haveCols: cols, rows: question.rows, cols: question.cols }),
+        tm("array.buildFirstSay"),
       );
       return;
     }
     if (mode === "split_array" && cutAt === undefined) {
-      refuse("Cut the array into two pieces first.", "Cut it first.");
+      refuse(tm("array.cutFirst"), tm("array.cutFirstSay"));
       return;
     }
     const correct = value === question.total;
     judge(
       correct,
       String(value),
-      correct ? "Yes!" : "Not quite",
+      correct ? tm("array.yes") : tm("array.notQuite"),
       correct
-        ? `${question.rows} rows of ${question.cols} is ${question.total}.`
-        : `Count the rows, then count along one row.`,
+        ? tm("array.isTotal", { rows: question.rows, cols: question.cols, total: question.total })
+        : tm("array.countAgain"),
     );
   };
 
   const submitTyped = () => {
     if (typed === "") {
-      refuse("Type a number first.", "Type a number first.");
+      refuse(tm("array.typeFirst"), tm("array.typeFirst"));
       return;
     }
     answerTotal(Number(typed));
@@ -666,32 +669,32 @@ export const ArrayGrid: React.FC<ActivityProps<ArrayParams>> = ({ params, koda, 
     judge(
       correct,
       String(given),
-      correct ? "That is the side" : "Not that many",
+      correct ? tm("array.sideTitle") : tm("array.notThatMany"),
       correct
-        ? `${question.rows} rows of ${question.cols} is ${question.total}.`
-        : `Count up in ${question.shown}s until you reach ${question.total}.`,
+        ? tm("array.isTotal", { rows: question.rows, cols: question.cols, total: question.total })
+        : tm("array.countUp", { shown: question.shown, total: question.total }),
     );
   };
 
   const answerReason = (reason: Choice) => {
     if (round.feedback) return;
     if (!turned) {
-      refuse("Turn the array before you answer.", "Turn it first.");
+      refuse(tm("array.turnFirst"), tm("array.turnFirstSay"));
       return;
     }
     judge(
       reason.correct,
       reason.text,
-      reason.correct ? "Exactly" : "Look again",
+      reason.correct ? tm("array.exactly") : tm("array.lookAgain"),
       reason.correct
-        ? `${question.rows} × ${question.cols} and ${question.cols} × ${question.rows} both make ${question.total}.`
-        : "Nothing was added or taken away — only turned.",
+        ? tm("array.bothMake", { rows: question.rows, cols: question.cols, total: question.total })
+        : tm("array.onlyTurned"),
     );
   };
 
   /* ---- the grid ---- */
   const cutRow = cutAt !== undefined && !turned ? cutAt : undefined;
-  const gridLabel = `${shownRows} rows of ${shownCols}`;
+  const gridLabel = tm("array.gridLabel", { rows: shownRows, cols: shownCols });
 
   const board = (
     <div className={SCROLL_BOX}>
@@ -734,11 +737,11 @@ export const ArrayGrid: React.FC<ActivityProps<ArrayParams>> = ({ params, koda, 
     </div>
   );
 
-  const sideControls = (side: "rows" | "cols", label: string) => (
+  const sideControls = (side: "rows" | "cols") => (
     <div className="flex items-center gap-2">
       <button
         type="button"
-        aria-label={`Remove a ${label}`}
+        aria-label={tm(side === "rows" ? "array.removeRow" : "array.removeCol")}
         onClick={() => resize(side, -1)}
         disabled={!!round.feedback}
         className={themeSystem.button("secondary", "choice")}
@@ -746,11 +749,11 @@ export const ArrayGrid: React.FC<ActivityProps<ArrayParams>> = ({ params, koda, 
         −
       </button>
       <span className={`min-w-16 text-center text-sm font-bold ${side === "rows" ? GROUPS.text : EACH.text}`}>
-        {side === "rows" ? rows : cols} {label}{(side === "rows" ? rows : cols) === 1 ? "" : "s"}
+        {tm(side === "rows" ? "array.rowCount" : "array.colCount", { count: side === "rows" ? rows : cols })}
       </span>
       <button
         type="button"
-        aria-label={`Add a ${label}`}
+        aria-label={tm(side === "rows" ? "array.addRow" : "array.addCol")}
         onClick={() => resize(side, 1)}
         disabled={!!round.feedback}
         className={themeSystem.button("secondary", "choice")}
@@ -763,7 +766,7 @@ export const ArrayGrid: React.FC<ActivityProps<ArrayParams>> = ({ params, koda, 
   const numericAnswer = usePad ? (
     <div className="flex flex-col items-center gap-3">
       <output
-        aria-label="Your answer"
+        aria-label={tm("array.yourAnswer")}
         className={`min-h-11 min-w-24 rounded-xl border-2 px-4 py-2 text-center text-2xl font-black tabular-nums ${PRODUCT.border} ${PRODUCT.text}`}
       >
         {typed || "—"}
@@ -774,7 +777,7 @@ export const ArrayGrid: React.FC<ActivityProps<ArrayParams>> = ({ params, koda, 
         disabled={!!round.feedback}
       />
       <button type="button" onClick={submitTyped} disabled={!!round.feedback} className={themeSystem.button("primary", "md")}>
-        Check
+        {tm("array.check")}
       </button>
     </div>
   ) : (
@@ -783,7 +786,7 @@ export const ArrayGrid: React.FC<ActivityProps<ArrayParams>> = ({ params, koda, 
         <button
           key={value}
           type="button"
-          aria-label={`${value} squares`}
+          aria-label={tm("array.squares", { value })}
           onClick={() => answerTotal(value)}
           disabled={!!round.feedback}
           className={themeSystem.button("secondary", "choice")}
@@ -801,13 +804,13 @@ export const ArrayGrid: React.FC<ActivityProps<ArrayParams>> = ({ params, koda, 
           <div className="mx-auto flex w-full max-w-md flex-col items-stretch gap-2">
             <button
               type="button"
-              aria-label="Turn the array"
+              aria-label={tm("array.turnArray")}
               aria-pressed={turned}
               onClick={turn}
               disabled={!!round.feedback}
               className={themeSystem.button("primary", "md")}
             >
-              {turned ? "Turn it back" : "Turn the array"}
+              {turned ? tm("array.turnBack") : tm("array.turnArray")}
             </button>
             {question.reasons.map((reason) => (
               <button
@@ -840,16 +843,16 @@ export const ArrayGrid: React.FC<ActivityProps<ArrayParams>> = ({ params, koda, 
               </button>
             ))}
             <button type="button" onClick={checkEquations} disabled={!!round.feedback} className={themeSystem.button("primary", "md")}>
-              Check
+              {tm("array.check")}
             </button>
           </div>
         );
       case "missing_dimension":
         return (
           <div className="flex flex-col items-center gap-3">
-            {sideControls(question.unknown, question.unknown === "rows" ? "row" : "column")}
+            {sideControls(question.unknown)}
             <button type="button" onClick={checkSide} disabled={!!round.feedback} className={themeSystem.button("primary", "md")}>
-              Check
+              {tm("array.check")}
             </button>
           </div>
         );
@@ -861,13 +864,13 @@ export const ArrayGrid: React.FC<ActivityProps<ArrayParams>> = ({ params, koda, 
                 <button
                   key={at}
                   type="button"
-                  aria-label={`Cut after row ${at}`}
+                  aria-label={tm("array.cutAfter", { at })}
                   aria-pressed={cutAt === at}
                   onClick={() => cut(at)}
                   disabled={!!round.feedback}
                   className={`${WORD_CHOICE} ${cutAt === at ? `${PRODUCT.border} ${PRODUCT.soft}` : `${EACH.border} bg-surface`}`}
                 >
-                  Cut after row {at}
+                  {tm("array.cutAfter", { at })}
                 </button>
               ))}
             </div>
@@ -883,8 +886,8 @@ export const ArrayGrid: React.FC<ActivityProps<ArrayParams>> = ({ params, koda, 
         return (
           <div className="flex flex-col items-center gap-3">
             <div className="flex flex-wrap items-center justify-center gap-4">
-              {sideControls("rows", "row")}
-              {sideControls("cols", "column")}
+              {sideControls("rows")}
+              {sideControls("cols")}
             </div>
             {numericAnswer}
           </div>
@@ -952,7 +955,7 @@ export const ArrayGrid: React.FC<ActivityProps<ArrayParams>> = ({ params, koda, 
     <SkillRound
       koda={koda}
       lesson={lesson}
-      fallbackTitle="Rows and Columns"
+      fallbackTitle={tm("array.title")}
       round={round}
       totalQuestions={total}
       prompt={promptFor(question)}
@@ -977,13 +980,13 @@ export const ArrayGrid: React.FC<ActivityProps<ArrayParams>> = ({ params, koda, 
 
         {scaffold && builds && (
           <p className={`text-center text-sm font-bold ${GROUPS.text}`} aria-live="polite">
-            You need {question.rows} rows of {question.cols}
+            {tm("array.youNeed", { rows: question.rows, cols: question.cols })}
           </p>
         )}
 
         {runningTotal && (builds || findsSide) && (
           <p className={`text-sm font-black tabular-nums ${PRODUCT.text}`} aria-live="polite">
-            So far: {liveTotal} squares
+            {tm("array.soFar", { total: liveTotal })}
           </p>
         )}
 

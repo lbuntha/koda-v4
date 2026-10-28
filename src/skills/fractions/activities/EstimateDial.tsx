@@ -14,6 +14,8 @@ import {
   type EstimateQuestion,
   type EstimateSetup,
 } from "../internal/data/fractionEstimate";
+import { tf } from "../internal/i18n";
+import { useT } from "../../../lib/i18n";
 
 /**
  * Judging, before any calculating.
@@ -44,26 +46,27 @@ export const promptFor = (question: EstimateQuestion): string => question.prompt
 export function estimateHints(question: EstimateQuestion): string[] {
   if (question.mode === "benchmark") {
     return composeHints(
-      "Do not work anything out. Just look at where it lands on the strip.",
-      "Halfway along is a half. The far end is one whole.",
-      "Ask which of the three marks it is closest to.",
+      tf("est.hintB1"),
+      tf("est.hintB2"),
+      tf("est.hintB3"),
     );
   }
   return composeHints(
-    "You do not have to add them. You only have to judge the answer.",
-    `Lay ${nameOf(question.left!)} and ${nameOf(question.right!)} along the strip, one after the other.`,
-    "An answer smaller than one of the pieces you started with cannot be their total.",
+    tf("est.hintC1"),
+    tf("est.hintC2", { left: nameOf(question.left!), right: nameOf(question.right!) }),
+    tf("est.hintC3"),
   );
 }
 
 /** The three marks a fraction is judged against. */
 const MARKS = [
-  { at: 0, label: "nothing" },
-  { at: 0.5, label: "a half" },
-  { at: 1, label: "one whole" },
+  { at: 0, get label() { return tf("est.markNothing"); } },
+  { at: 0.5, get label() { return tf("est.markHalf"); } },
+  { at: 1, get label() { return tf("est.markOne"); } },
 ];
 
 export const EstimateDial: React.FC<ActivityProps<DialParams>> = ({ params, koda, onComplete, lesson }) => {
+  useT();
   const setup: EstimateSetup = useMemo(() => ({ ...params, ...params.question }), [params]);
   const practising = isPractice(setup);
   const total = setup.questionsPerRound ?? 5;
@@ -107,7 +110,7 @@ export const EstimateDial: React.FC<ActivityProps<DialParams>> = ({ params, koda
       correct,
       given: text,
       expected: question.expected,
-      title: correct ? "Yes!" : "Not yet",
+      title: correct ? tf("est.yes") : tf("est.notYet"),
       message: explainEstimate(question, correct),
     });
   };
@@ -137,7 +140,7 @@ export const EstimateDial: React.FC<ActivityProps<DialParams>> = ({ params, koda
     <SkillRound
       koda={koda}
       lesson={lesson}
-      fallbackTitle="Roughly How Much?"
+      fallbackTitle={tf("est.title")}
       round={round}
       totalQuestions={total}
       prompt={promptFor(question)}
@@ -221,12 +224,12 @@ export const EstimateDial: React.FC<ActivityProps<DialParams>> = ({ params, koda
 export function printedFor(question: EstimateQuestion): { text: string; answer: string } | null {
   if (question.mode === "benchmark") {
     return {
-      text: `Is ${nameOf(question.fraction)} nearly nothing, about a half, or nearly a whole one?`,
+      text: tf("est.printBench", { fraction: nameOf(question.fraction) }),
       answer: question.expected,
     };
   }
   return {
-    text: `Somebody says ${nameOf(question.left!)} + ${nameOf(question.right!)} = ${nameOf(question.claim!)}. Could that be right? Say why.`,
+    text: tf("est.printClaim", { left: nameOf(question.left!), right: nameOf(question.right!), claim: nameOf(question.claim!) }),
     answer: question.expected,
   };
 }
@@ -237,12 +240,12 @@ export const figureFor = (question: EstimateQuestion): React.ReactNode | null =>
 export function methodFor(question: EstimateQuestion): string[] | null {
   if (question.mode === "benchmark") {
     return [
-      "Do not work it out. Compare the top number with half of the bottom one.",
-      "Close to nothing, close to half, or close to all of it?",
+      tf("est.methodB1"),
+      tf("est.methodB2"),
     ];
   }
   return [
-    "You are judging the answer, not calculating it.",
-    "An answer smaller than one of the pieces you started with cannot be their total.",
+    tf("est.methodC1"),
+    tf("est.methodC2"),
   ];
 }

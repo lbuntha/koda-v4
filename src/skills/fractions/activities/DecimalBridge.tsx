@@ -15,6 +15,8 @@ import {
   type DecimalQuestion,
   type DecimalSetup,
 } from "../internal/data/fractionDecimal";
+import { tf } from "../internal/i18n";
+import { useT } from "../../../lib/i18n";
 
 /**
  * One number, three names.
@@ -44,44 +46,45 @@ export function decimalHints(question: DecimalQuestion): string[] {
   switch (question.mode) {
     case "tenths":
       return composeHints(
-        "The first place after the point counts tenths.",
-        "So the top number goes straight into that first place.",
-        "Nothing else moves. There is only one place to fill.",
+        tf("dec.hintT1"),
+        tf("dec.hintT2"),
+        tf("dec.hintT3"),
       );
     case "hundredths":
       return composeHints(
-        "Two places after the point means hundredths.",
-        "The first place is tenths and the second is hundredths, so both digits are used.",
-        "Fifty-eight hundredths fills both places, in that order.",
+        tf("dec.hintH1"),
+        tf("dec.hintH2"),
+        tf("dec.hintH3"),
       );
     case "by_dividing":
       return composeHints(
-        "A fraction is a division waiting to happen: the top shared between the bottom.",
-        "Divide the top number by the bottom one, carrying on past the point.",
-        "It stops rather than running on forever, because of which bottom number this is.",
+        tf("dec.hintD1"),
+        tf("dec.hintD2"),
+        tf("dec.hintD3"),
       );
     case "from_decimal":
       return composeHints(
-        "Count the places after the point. One place is tenths, two places is hundredths.",
-        "Write the digits over that bottom number.",
-        "Then cut it down as far as it goes.",
+        tf("dec.hintF1"),
+        tf("dec.hintF2"),
+        tf("dec.hintF3"),
       );
     case "percent":
       return composeHints(
-        "Percent means out of a hundred, and nothing else.",
-        "So write the fraction with a hundred underneath it first.",
-        "The top number of that is the percentage.",
+        tf("dec.hintP1"),
+        tf("dec.hintP2"),
+        tf("dec.hintP3"),
       );
     default:
       return composeHints(
-        "All three names have to be worth the same amount.",
-        "Check the decimal first: how many hundredths is it?",
-        "The percent should be that same number of hundredths.",
+        tf("dec.hintR1"),
+        tf("dec.hintR2"),
+        tf("dec.hintR3"),
       );
   }
 }
 
 export const DecimalBridge: React.FC<ActivityProps<BridgeParams>> = ({ params, koda, onComplete, lesson }) => {
+  useT();
   const setup: DecimalSetup = useMemo(() => ({ ...params, ...params.question }), [params]);
   const practising = isPractice(setup);
   const total = setup.questionsPerRound ?? 5;
@@ -125,7 +128,7 @@ export const DecimalBridge: React.FC<ActivityProps<BridgeParams>> = ({ params, k
       correct,
       given: text,
       expected: question.expected,
-      title: correct ? "Yes!" : "Not yet",
+      title: correct ? tf("dec.yes") : tf("dec.notYet"),
       message: explainDecimal(question, correct),
     });
   };
@@ -149,7 +152,7 @@ export const DecimalBridge: React.FC<ActivityProps<BridgeParams>> = ({ params, k
           <FractionBar
             parts={question.fraction.parts}
             shaded={Array.from({ length: question.fraction.taken }, (_, i) => i)}
-            label={`a strip in ${question.fraction.parts}, ${question.fraction.taken} shaded`}
+            label={tf("dec.stripIn", { parts: question.fraction.parts, taken: question.fraction.taken })}
           />
         </div>
       );
@@ -160,7 +163,7 @@ export const DecimalBridge: React.FC<ActivityProps<BridgeParams>> = ({ params, k
           <FractionBar
             parts={10}
             shaded={Array.from({ length: shadedCount }, (_, i) => i)}
-            label={`a strip in ten, ${shadedCount} shaded`}
+            label={tf("dec.stripTen", { count: shadedCount })}
           />
         </div>
       );
@@ -169,7 +172,7 @@ export const DecimalBridge: React.FC<ActivityProps<BridgeParams>> = ({ params, k
     return (
       <svg
         role="img"
-        aria-label={`A hundred squares, ${shadedCount} shaded`}
+        aria-label={tf("print.hundred", { shaded: shadedCount })}
         viewBox={`0 0 ${cell * 10} ${cell * 10}`}
         width={cell * 10 * 1.6}
         height={cell * 10 * 1.6}
@@ -198,7 +201,7 @@ export const DecimalBridge: React.FC<ActivityProps<BridgeParams>> = ({ params, k
     <SkillRound
       koda={koda}
       lesson={lesson}
-      fallbackTitle="One Number, Three Names"
+      fallbackTitle={tf("dec.title")}
       round={round}
       totalQuestions={total}
       prompt={promptFor(question)}
@@ -265,19 +268,19 @@ export function printedFor(question: DecimalQuestion): { text: string; answer: s
   switch (question.mode) {
     case "tenths":
     case "hundredths":
-      return { text: `${nameOf(f)} = ______ as a decimal`, answer: question.expected };
+      return { text: tf("dec.printTenths", { fraction: nameOf(f) }), answer: question.expected };
     case "by_dividing":
-      return { text: `${f.taken} ÷ ${f.parts} = ______ (write ${nameOf(f)} as a decimal)`, answer: question.expected };
+      return { text: tf("dec.printDividing", { taken: f.taken, parts: f.parts, fraction: nameOf(f) }), answer: question.expected };
     case "from_decimal":
       return {
-        text: `${decimalText(f.taken, f.parts)} = ______ as a fraction in its simplest form`,
+        text: tf("dec.printFromDec", { decimal: decimalText(f.taken, f.parts) }),
         answer: question.expected,
       };
     case "percent":
-      return { text: `${nameOf(f)} = ______ %`, answer: question.expected };
+      return { text: tf("dec.printPercent", { fraction: nameOf(f) }), answer: question.expected };
     default:
       return {
-        text: `Write ${nameOf(f)} as a decimal and as a percentage.`,
+        text: tf("dec.printRow", { fraction: nameOf(f) }),
         answer: question.expected,
       };
   }
@@ -293,28 +296,28 @@ export const figureFor = (question: DecimalQuestion): React.ReactNode | null => 
 export function methodFor(question: DecimalQuestion): string[] | null {
   switch (question.mode) {
     case "tenths":
-      return ["The first place after the point counts tenths."];
+      return [tf("dec.methodT")];
     case "hundredths":
       return [
-        "The first place after the point is tenths and the second is hundredths.",
-        "Fifty-eight hundredths uses both places.",
+        tf("dec.methodH1"),
+        tf("dec.methodH2"),
       ];
     case "by_dividing":
       return [
-        "The line in a fraction is a division sign.",
-        "Divide the top by the bottom, carrying on past the point.",
+        tf("dec.methodD1"),
+        tf("dec.methodD2"),
       ];
     case "from_decimal":
       return [
-        "Count the places after the point: one is tenths, two is hundredths.",
-        "Write the digits over that number, then cut it down.",
+        tf("dec.methodF1"),
+        tf("dec.methodF2"),
       ];
     case "percent":
       return [
-        "Percent means out of a hundred.",
-        "Write the fraction with a hundred underneath; the top number is the percentage.",
+        tf("dec.methodP1"),
+        tf("dec.methodP2"),
       ];
     default:
-      return ["A fraction, a decimal and a percentage can all be the same number."];
+      return [tf("dec.methodR")];
   }
 }

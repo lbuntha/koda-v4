@@ -3,7 +3,9 @@ import type { ActivityProps } from "../../types";
 import { SkillRound, composeHints, isPractice, playCopy, useMotionOK, useSkillRound, type RoundQuestion } from "../../kit";
 import { isCorked, isDeadlock, isSolvedRack, legalPours, pour, pourSteps, refuseReason } from "../internal/pour";
 import { rackFor } from "../internal/racks";
-import { GLYPH, cssColour, nameOf, shapeOf } from "../internal/paint";
+import { GLYPH, colourName, cssColour, shapeOf } from "../internal/paint";
+import { tb } from "../internal/i18n";
+import { useT } from "../../../lib/i18n";
 import { specFor } from "../internal/specs";
 import { UNIFORM, bottleDone, goalFor, labelFor, numbered, type Goal } from "../internal/goal";
 import { minimumPours } from "../internal/solve";
@@ -108,10 +110,10 @@ export function buildQuestion(params: BottleSortParams, index: number): BottleSo
     taskKind: `sort_${spec.id}`,
     // The goal is the lesson from 25 on, so the prompt has to say it.
     prompt: goal.kind === "order"
-      ? `Put every bottle in order: ${goal.order.map((c) => labelFor(goal, spec, c)).join(", ")}.`
+      ? tb("prompt.order", { order: goal.order.map((c) => labelFor(goal, spec, c)).join(", ") })
       : goal.kind === "group"
-        ? "Sort the odd numbers and the even numbers into different bottles."
-        : spec.colours === 2 ? "Sort both bottles." : `Sort all ${spec.colours} colours.`,
+        ? tb("prompt.group")
+        : spec.colours === 2 ? tb("prompt.both") : tb("prompt.all", { count: String(spec.colours) }),
     // The answer is the property, not a signature of the dealt rack: a hint can
     // add a bottle mid-round and the goal has to survive that.
     expected: goal.kind === "uniform" ? "every bottle one colour" : "every bottle finished",
@@ -149,29 +151,30 @@ export function bottleHints(
   // Rung 2: what to do *here*, read off this rack. The rule that is actually
   // biting comes first, and it names the bottles rather than describing them.
   const here = corked >= 0
-    ? `Bottle ${corked + 1} is corked. Finish bottle ${(rack[corked].lockedBy ?? 0) + 1} to open it.`
+    ? tb("hint.corked", { n: String(corked + 1), by: String((rack[corked].lockedBy ?? 0) + 1) })
     : oneWay >= 0
-      ? `Bottle ${oneWay + 1} only receives. Pour into it once you are sure of the colour.`
+      ? tb("hint.oneWay", { n: String(oneWay + 1) })
       : left !== undefined && left <= 2
-        ? `${left === 1 ? "One pour" : `${left} pours`} left. Work the rest out before you move.`
+        ? tb("hint.left", { count: left })
         : empty < 0
-          ? "Nothing is empty. Find the bottle you can clear first."
-          : `Bottle ${empty + 1} is free. Use it for the colour that is in the way.`;
+          ? tb("hint.noneEmpty")
+          : tb("hint.free", { n: String(empty + 1) });
 
   // Rung 3: the worked step. Sorting is done rather than chosen, so this names
   // a real pour instead of stopping short of one.
   const move = suggestedPour(rack, goal);
 
   return composeHints(
-    state.kidTip ?? "Look for a bottle you could empty completely.",
+    state.kidTip ?? tb("hint.kidTip"),
     here,
-    move ? `Try pouring bottle ${move.from + 1} onto bottle ${move.to + 1}.` : undefined,
+    move ? tb("hint.try", { from: String(move.from + 1), to: String(move.to + 1) }) : undefined,
   );
 }
 
-export const promptFor = (q: BottleSortQuestion): string => q.prompt ?? "Sort every bottle.";
+export const promptFor = (q: BottleSortQuestion): string => q.prompt ?? tb("prompt.fallback");
 
 export const BottleSort: React.FC<ActivityProps<BottleSortParams>> = ({ params, koda, onComplete, lesson }) => {
+  useT();
   const setup = useMemo(() => ({ ...params, ...params.question }), [params]);
   const copy = playCopy(params);
   const practising = isPractice(setup);
@@ -312,7 +315,7 @@ export const BottleSort: React.FC<ActivityProps<BottleSortParams>> = ({ params, 
     if (picked === null) {
       const why = refuseReason(rack, index, index === 0 ? 1 : 0, question.goal);
       // Only the reasons that are about the source itself stop a pick-up.
-      if (why === "That bottle is corked." || why === "That bottle is empty." || why === "That bottle only receives.") {
+      if (why === tb("refuse.corked") || why === tb("refuse.empty") || why === tb("refuse.oneWay")) {
         refuse(why);
         return;
       }
@@ -448,14 +451,14 @@ export const BottleSort: React.FC<ActivityProps<BottleSortParams>> = ({ params, 
       chime("success");
       buzz("success");
       koda.speech.stop();
-      round.submit({ correct: true, given: "every bottle one colour", expected: question.expected, title: "Sorted!", message: "Every bottle holds one colour." });
+      round.submit({ correct: true, given: "every bottle one colour", expected: question.expected, title: tb("sorter.sortedTitle"), message: tb("sorter.sortedMessage") });
       return;
     }
     chime("clink");
     buzz("tap");
     if (isDeadlock(next, question.goal)) {
       koda.speech.stop();
-      round.submit({ correct: false, given: "no pours left", expected: question.expected, errorKind: "miscounted_items", title: "No pours left", message: "That path ran out. The rack is back as it was dealt." });
+      round.submit({ correct: false, given: "no pours left", expected: question.expected, errorKind: "miscounted_items", title: tb("sorter.noPoursTitle"), message: tb("sorter.noPoursMessage") });
       setRack(dealt);
       setHistory([]);
       setPoured(0);
@@ -467,7 +470,7 @@ export const BottleSort: React.FC<ActivityProps<BottleSortParams>> = ({ params, 
     // budget still counts as sorted.
     if (spent !== undefined && question.budget !== undefined && spent >= question.budget) {
       koda.speech.stop();
-      round.submit({ correct: false, given: `${spent} pours`, expected: question.expected, errorKind: "miscounted_items", title: "Out of pours", message: "You are out of pours. The rack is back as it was dealt." });
+      round.submit({ correct: false, given: `${spent} pours`, expected: question.expected, errorKind: "miscounted_items", title: tb("sorter.outOfTitle"), message: tb("sorter.outOfMessage") });
       setRack(dealt);
       setHistory([]);
       setPoured(0);
@@ -508,7 +511,7 @@ export const BottleSort: React.FC<ActivityProps<BottleSortParams>> = ({ params, 
   });
 
   return (
-    <SkillRound koda={koda} lesson={lesson} fallbackTitle="Bottle Sort" round={round} totalQuestions={total}
+    <SkillRound koda={koda} lesson={lesson} fallbackTitle={tb("sorter.title")} round={round} totalQuestions={total}
       prompt={promptFor(question)} onExit={() => koda.ui.exit()} hints={hints}
       guide={practising ? undefined : guide} guideMethod={bottleGuideMethod(params)} nudge={nudge}
       iconName="FlaskConical" iconTone="cyan"
@@ -516,9 +519,9 @@ export const BottleSort: React.FC<ActivityProps<BottleSortParams>> = ({ params, 
         round.useSupport("audio_replay");
         void koda.speech.say(promptFor(question), { rate: speechRate });
       }}>
-      <section aria-label="Bottle rack" className="mx-auto flex w-full max-w-[640px] flex-col gap-4">
+      <section aria-label={tb("sorter.rack")} className="mx-auto flex w-full max-w-[640px] flex-col gap-4">
         <p className="sr-only" aria-live="polite">
-          {rack.filter((b) => bottleDone(question.goal, b)).length} of {rack.length} bottles sorted.
+          {tb("sorter.sortedCount", { done: String(rack.filter((b) => bottleDone(question.goal, b)).length), total: String(rack.length) })}
         </p>
 
         {/* Six per row is the phone ceiling; a seventh drops a bottle under 44px. */}
@@ -618,13 +621,17 @@ export const BottleSort: React.FC<ActivityProps<BottleSortParams>> = ({ params, 
                 // Announces "pressed" when a bottle is picked up, so the
                 // selection is audible and not only a raised bottle.
                 aria-pressed={picked === i}
-                aria-label={`Bottle ${i + 1}, holds ${b.cap}. ${b.seg.length ? b.seg.map((c, k) => (k < buried ? "hidden" : numbered(spec) ? labelFor(question.goal, spec, c) : nameOf(c))).join(", ") : "Empty"}.`
-                  + (showRunCount && picked === i ? ` ${topRun(b).n} will pour.` : "")
+                aria-label={tb("sorter.bottle", {
+                  n: String(i + 1),
+                  cap: String(b.cap),
+                  contents: b.seg.length ? b.seg.map((c, k) => (k < buried ? tb("sorter.hidden") : numbered(spec) ? labelFor(question.goal, spec, c) : colourName(c))).join(", ") : tb("sorter.emptyBottle"),
+                })
+                  + (showRunCount && picked === i ? ` ${tb("sorter.willPour", { n: String(topRun(b).n) })}` : "")
                   // A child using the label instead of the picture has to be
                   // told the same rules the badges show.
-                  + (b.lockedBy !== undefined && isCorked(rack, i) ? ` Corked until bottle ${b.lockedBy + 1} is finished.` : "")
-                  + (b.oneWay ? " Receives only." : "")
-                  + (guide.target === i ? " Smart guide focus." : "")}
+                  + (b.lockedBy !== undefined && isCorked(rack, i) ? ` ${tb("sorter.corkedUntil", { n: String(b.lockedBy + 1) })}` : "")
+                  + (b.oneWay ? ` ${tb("sorter.receivesOnly")}` : "")
+                  + (guide.target === i ? ` ${tb("sorter.guideFocus")}` : "")}
                 data-pouring={pouring?.from === i || undefined}
                 style={pouring?.from === i
                   ? { transform: `translate(${pouring.dx}px, ${pouring.dy}px) rotate(${pouring.angle}deg)`, transformOrigin: `50% ${PIVOT_Y * 100}%`, zIndex: 6 }
@@ -805,20 +812,20 @@ export const BottleSort: React.FC<ActivityProps<BottleSortParams>> = ({ params, 
               poured >= question.budget ? "text-rose-600 dark:text-rose-400"
                 : poured >= question.budget - 2 ? "text-indigo-600 dark:text-indigo-300"
                 : "text-slate-600 dark:text-slate-300"}`}>
-            {`Pours: ${poured} of ${question.budget}`}
+            {tb("sorter.pours", { poured: String(poured), budget: String(question.budget) })}
           </p>
         )}
 
         <div className="flex justify-center gap-2">
           <button type="button" data-action="undo" disabled={!history.length || !!round.feedback}
-            onClick={() => stepBack("Stepped back.", () => { setRack(history[history.length - 1]); setHistory((h) => h.slice(0, -1)); setPoured((n) => Math.max(0, n - 1)); })}
+            onClick={() => stepBack(tb("sorter.stepped"), () => { setRack(history[history.length - 1]); setHistory((h) => h.slice(0, -1)); setPoured((n) => Math.max(0, n - 1)); })}
             className="min-h-11 rounded-xl border border-slate-300 px-4 text-sm font-semibold text-slate-700 disabled:opacity-40 dark:border-slate-600 dark:text-slate-200">
-            Undo
+            {tb("sorter.undo")}
           </button>
           <button type="button" data-action="reset" disabled={!!round.feedback}
-            onClick={() => stepBack("Back to the dealt rack.", () => { setRack(dealt); setHistory([]); setPoured(0); })}
+            onClick={() => stepBack(tb("sorter.dealt"), () => { setRack(dealt); setHistory([]); setPoured(0); })}
             className="min-h-11 rounded-xl border border-slate-300 px-4 text-sm font-semibold text-slate-700 disabled:opacity-40 dark:border-slate-600 dark:text-slate-200">
-            Start over
+            {tb("sorter.startOver")}
           </button>
         </div>
       </section>

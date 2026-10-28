@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { isPhoto, knownPhotoUrl, photoUrl } from "./photos";
 import { SvgAsset, SvgMarkup } from "../assets/svg";
+import { aspectOfViewBox, svgMarkupFor } from "../assets/svg/SvgAsset";
 
 /**
  * A story picture, by key.
@@ -118,6 +119,22 @@ export const PICTURE_KEYS: readonly string[] = [...Object.keys(LOCAL).filter((k)
  * changed; the drawing is scaled to its width and centred, so the middle of a
  * drawing is what stays in view.
  */
+/**
+ * A drawing's width ÷ height, if it can be told without drawing it.
+ *
+ * The drawing reports its own shape (`onRatio`), but only after it has been
+ * painted, so a page that waited for that showed its frame at the wrong height
+ * for a frame and then jumped, taking the words with it. A drawing in the
+ * stores or the house set can be read now, from its viewBox, so the page reserves
+ * the right shape on its first paint. A photo cannot: it is cropped to the
+ * reserved shape when it is made, and corrects itself if it was not.
+ */
+export function drawingRatio(name: string): number | undefined {
+  if (isPhoto(name)) return undefined;
+  const markup = svgMarkupFor(name) ?? LOCAL[name];
+  return (markup ? aspectOfViewBox(markup) : null) ?? undefined;
+}
+
 export function Picture({ name, label, className = "", cover = false, whole = false, fill = false, onRatio }: { name: string; label?: string; className?: string; cover?: boolean | number; whole?: boolean; fill?: boolean; onRatio?(ratio: number): void }) {
   if (isPhoto(name)) return <Photo name={name} label={label} className={className} whole={whole} fill={fill} onRatio={onRatio} />;
   const fallback = <SvgMarkup markup={LOCAL[name] ?? LOCAL.book} raw size="100%" cover={cover} onRatio={onRatio} />;

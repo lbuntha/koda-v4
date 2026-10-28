@@ -3,7 +3,9 @@ import type { ActivityProps } from "../../types";
 import { SkillRound, composeHints, isPractice, playCopy, useSkillRound, type RoundQuestion } from "../../kit";
 import { buildPrediction } from "../internal/predict";
 import { specFor } from "../internal/specs";
-import { GLYPH, cssColour, nameOf, shapeOf } from "../internal/paint";
+import { GLYPH, colourName, cssColour, nameOf, shapeOf } from "../internal/paint";
+import { tb } from "../internal/i18n";
+import { useT } from "../../../lib/i18n";
 import { topRun, type Pour, type Rack } from "../internal/types";
 import { bottleGuideMethod, useBottleGuide } from "../internal/useBottleGuide";
 
@@ -45,7 +47,9 @@ export interface PredictQuestion extends RoundQuestion {
 }
 
 const say = (moves: Pour[]): string =>
-  moves.map((m) => `bottle ${m.from + 1} into bottle ${m.to + 1}`).join(", then ");
+  moves
+    .map((m) => tb("predict.move", { from: String(m.from + 1), to: String(m.to + 1) }))
+    .reduce((a, b) => tb("predict.then", { a, b }));
 
 export function buildQuestion(params: PredictParams, index: number): PredictQuestion {
   const setup = { ...params, ...params.question };
@@ -56,7 +60,7 @@ export function buildQuestion(params: PredictParams, index: number): PredictQues
   return {
     id: `predict-${spec.id}-${index}`,
     taskKind: `predict_${spec.id}`,
-    prompt: `Pour ${say(p.moves)}. Which rack comes next?`,
+    prompt: tb("predict.prompt", { moves: say(p.moves) }),
     // The answer key is the rack, described: a choice index would say nothing
     // in the log once the shuffle changed.
     expected: describe(p.choices[p.answer]),
@@ -69,7 +73,17 @@ export function buildQuestion(params: PredictParams, index: number): PredictQues
   };
 }
 
-/** A rack in words, for the answer key and the accessible name. */
+/** A rack in words, for the accessible name. */
+function describeSpoken(rack: Rack): string {
+  return rack
+    .map((b, i) => tb("predict.bottleLine", {
+      n: String(i + 1),
+      contents: b.seg.length ? b.seg.map(colourName).join(", ") : tb("predict.empty"),
+    }))
+    .join("; ");
+}
+
+/** A rack in words, for the answer key. English always, so the log does not change with the language. */
 function describe(rack: Rack): string {
   return rack
     .map((b, i) => `bottle ${i + 1}: ${b.seg.length ? b.seg.map(nameOf).join(", ") : "empty"}`)
@@ -80,17 +94,15 @@ export function predictHints(question: PredictQuestion, kidTip?: string): string
   const first = question.moves[0];
   const run = topRun(question.start[first.from]);
   return composeHints(
-    kidTip ?? (question.moves.length === 1
-      ? "A pour moves the whole top run, not one layer."
-      : "Picture the first pour completely; the second pour starts from that new rack."),
-    `Bottle ${first.from + 1} has ${run.n} ${nameOf(run.colour)} on top.`,
+    kidTip ?? (question.moves.length === 1 ? tb("predict.tipOne") : tb("predict.tipTwo")),
+    tb("predict.onTop", { n: String(first.from + 1), count: String(run.n), name: colourName(run.colour) }),
     question.moves.length === 1
-      ? `Count the room in bottle ${first.to + 1}, then move as many as fit.`
-      : `Build the first result, then follow the second instruction from that rack.`,
+      ? tb("predict.roomOne", { n: String(first.to + 1) })
+      : tb("predict.roomTwo"),
   );
 }
 
-export const promptFor = (q: PredictQuestion): string => q.prompt ?? "Which rack comes next?";
+export const promptFor = (q: PredictQuestion): string => q.prompt ?? tb("predict.title");
 
 /**
  * Geometry for a small, still bottle. The sorter's is animated and stateful,
@@ -152,6 +164,7 @@ const MiniRack: React.FC<{ rack: Rack; hues: number[] }> = ({ rack, hues }) => {
 };
 
 export const PredictThePour: React.FC<ActivityProps<PredictParams>> = ({ params, koda, onComplete, lesson }) => {
+  useT();
   const setup = useMemo(() => ({ ...params, ...params.question }), [params]);
   const copy = playCopy(params);
   const practising = isPractice(setup);
@@ -196,26 +209,24 @@ export const PredictThePour: React.FC<ActivityProps<PredictParams>> = ({ params,
       given: describe(question.choices[index]),
       expected: question.expected,
       errorKind: correct ? undefined : "miscounted_items",
-      title: correct ? "That is the one" : "Not that one",
-      message: correct
-        ? "A pour moves the whole run of one colour."
-        : "Look again at how many move, and how much room there is.",
+      title: correct ? tb("predict.rightTitle") : tb("predict.wrongTitle"),
+      message: correct ? tb("predict.rightMessage") : tb("predict.wrongMessage"),
     });
   };
 
   return (
     <SkillRound
-      koda={koda} lesson={lesson} fallbackTitle="Which rack comes next?"
+      koda={koda} lesson={lesson} fallbackTitle={tb("predict.title")}
       round={round} totalQuestions={total}
       prompt={promptFor(question)} onExit={() => koda.ui.exit()}
       hints={hints}
       guide={practising ? undefined : guide}
       guideMethod={bottleGuideMethod(params)}
       iconName="FlaskConical" iconTone="cyan">
-      <section aria-label="Predict the pour" className="mx-auto flex w-full max-w-[640px] flex-col gap-5">
+      <section aria-label={tb("predict.section")} className="mx-auto flex w-full max-w-[640px] flex-col gap-5">
         <div className="rounded-2xl bg-slate-100 px-3 py-4 dark:bg-slate-900/50">
           <p className="mb-2 text-center text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">
-            Now
+            {tb("predict.now")}
           </p>
           <MiniRack rack={question.start} hues={question.hues} />
         </div>
@@ -224,7 +235,7 @@ export const PredictThePour: React.FC<ActivityProps<PredictParams>> = ({ params,
           {question.choices.map((choice, i) => (
             <button key={i} type="button" data-choice={i} disabled={!!round.feedback}
               onClick={() => choose(i)}
-              aria-label={`Choice ${i + 1}. ${describe(choice)}`}
+              aria-label={tb("predict.choice", { n: String(i + 1), rack: describeSpoken(choice) })}
               className="min-h-11 rounded-2xl border-2 border-slate-300 bg-white px-2 py-3 transition-colors hover:border-indigo-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 disabled:opacity-60 dark:border-slate-600 dark:bg-slate-800">
               <MiniRack rack={choice} hues={question.hues} />
             </button>

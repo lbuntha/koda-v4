@@ -29,6 +29,7 @@ import {
   type Fraction,
   type Whole,
 } from "./fractionNumbers";
+import { tf } from "../i18n";
 
 export type DecimalMode =
   /** `n/10` and `0.n` are the same number. */
@@ -142,12 +143,12 @@ export interface DecimalQuestion {
 }
 
 const PROMPTS: Record<DecimalMode, (q: Omit<DecimalQuestion, "prompt">) => string> = {
-  tenths: (q) => `${nameOf(q.fraction)} — write it as a decimal`,
-  hundredths: (q) => `${nameOf(q.fraction)} — write it as a decimal`,
-  by_dividing: (q) => `${nameOf(q.fraction)} as a decimal`,
-  from_decimal: (q) => `${decimalText(q.fraction.taken, q.fraction.parts)} as a fraction`,
-  percent: (q) => `${nameOf(q.fraction)} as a percentage`,
-  three_names: (q) => `${nameOf(q.fraction)} — which row is the same number?`,
+  tenths: (q) => tf("dec.promptWrite", { fraction: nameOf(q.fraction) }),
+  hundredths: (q) => tf("dec.promptWrite", { fraction: nameOf(q.fraction) }),
+  by_dividing: (q) => tf("dec.promptDividing", { fraction: nameOf(q.fraction) }),
+  from_decimal: (q) => tf("dec.promptFromDec", { decimal: decimalText(q.fraction.taken, q.fraction.parts) }),
+  percent: (q) => tf("dec.promptPercent", { fraction: nameOf(q.fraction) }),
+  three_names: (q) => tf("dec.promptRow", { fraction: nameOf(q.fraction) }),
 };
 
 /** A row of the three names, as level 48 shows them. */
@@ -379,33 +380,33 @@ export function explainDecimal(q: DecimalQuestion, correct: boolean): string {
   if (!correct) {
     switch (q.mode) {
       case "tenths":
-        return "The first place after the point counts tenths, so the top number goes straight into it.";
+        return tf("dec.missTenths");
       case "hundredths":
-        return "Two places after the point means hundredths, and both digits belong in them.";
+        return tf("dec.missHundredths");
       case "by_dividing":
-        return "Divide the top number by the bottom one. The digits of the fraction are not the answer.";
+        return tf("dec.missDividing");
       case "from_decimal":
-        return "Count the places after the point: one is tenths, two is hundredths. Then cut it down.";
+        return tf("dec.missFromDec");
       case "percent":
-        return "Percent means out of a hundred, so write the fraction with a hundred underneath first.";
+        return tf("dec.missPercent");
       default:
-        return "All three names have to be the same amount. Check the decimal against the percent.";
+        return tf("dec.missRow");
     }
   }
 
   switch (q.mode) {
     case "tenths":
-      return `${f.taken} ${partWord(10, true)} is ${f.taken} in the first place after the point — ${q.expected}.`;
+      return tf("dec.rightTenths", { taken: f.taken, words: partWord(10, true), expected: q.expected });
     case "hundredths":
-      return `${f.taken} ${partWord(100, true)} fills two places after the point, which is ${q.expected}.`;
+      return tf("dec.rightHundredths", { taken: f.taken, words: partWord(100, true), expected: q.expected });
     case "by_dividing":
-      return `${f.taken} divided by ${f.parts} is ${q.expected}, and it stops rather than running on forever.`;
+      return tf("dec.rightDividing", { taken: f.taken, parts: f.parts, expected: q.expected });
     case "from_decimal":
-      return `That many ${partWord(f.parts, true)} is ${nameOf(f)}, which cuts down to ${q.expected}.`;
+      return tf("dec.rightFromDec", { words: partWord(f.parts, true), fraction: nameOf(f), expected: q.expected });
     case "percent":
-      return `${nameOf(f)} written with a hundred underneath is ${percentOf(f.taken, f.parts)} hundredths — ${q.expected}.`;
+      return tf("dec.rightPercent", { fraction: nameOf(f), value: percentOf(f.taken, f.parts), expected: q.expected });
     default:
-      return `${nameOf(f)}, ${decimalText(f.taken, f.parts)} and ${percentOf(f.taken, f.parts)}% are one number written three ways.`;
+      return tf("dec.rightRow", { fraction: nameOf(f), decimal: decimalText(f.taken, f.parts), value: percentOf(f.taken, f.parts) });
   }
 }
 

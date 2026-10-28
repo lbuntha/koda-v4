@@ -32,6 +32,8 @@
  * The primitives are duplicated from division's module rather than imported: a
  * skill may reference another skill's *activity*, never its internals.
  */
+import { BASE_LANGUAGE, currentLanguage } from "../../../../lib/i18n";
+import { tf } from "../i18n";
 
 /* -------------------------------------------------------------------------- */
 /* Primitives                                                                  */
@@ -178,8 +180,10 @@ const PART_WORDS: Record<number, [string, string]> = {
  * fortieths, and there is no honest ceiling to list up to.
  */
 export const partWord = (parts: number, plural = false): string => {
-  const pair = PART_WORDS[parts];
-  if (pair) return plural ? pair[1] : pair[0];
+  const form = plural ? "many" : "one";
+  if (PART_WORDS[parts]) return tf(`parts.${parts}.${form}`);
+  // English composes a name ("twenty-eighth"); other languages say "part 28".
+  if (currentLanguage() !== BASE_LANGUAGE) return tf(`parts.generic.${form}`, { n: parts });
   const word = ordinalWord(parts);
   return plural ? `${word}s` : word;
 };
@@ -221,8 +225,12 @@ export function ordinalWord(n: number): string {
  */
 export const withArticle = (parts: number): string => {
   const word = partWord(parts);
+  if (currentLanguage() !== BASE_LANGUAGE) return word;
   return `${/^[aeiou]/i.test(word) ? "an" : "a"} ${word}`;
 };
+
+/** What a whole is called on screen. Its `name` stays English: it is also its identity. */
+export const wholeName = (whole: Whole): string => tf(`wholes.${whole.name.replace(/[^a-z0-9]+/gi, "-").toLowerCase()}`);
 
 /* -------------------------------------------------------------------------- */
 /* A fraction                                                                  */

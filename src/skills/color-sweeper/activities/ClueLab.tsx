@@ -3,12 +3,14 @@ import type { ActivityProps, PrintedQuestion } from "../../types";
 import { SkillRound, composeHints, isPractice, modeAt, playCopy, useSkillRound, type RoundQuestion } from "../../kit";
 import { quietWhenPractising } from "../../kit/practice";
 import type { Color } from "../internal/board";
-import { BoardGrid, tileLabel } from "../internal/BoardGrid";
+import { BoardGrid } from "../internal/BoardGrid";
 import type { BoardMode } from "../internal/puzzles";
 import { clueName, forces, generateLab, LAB_MODES, type Lab, type LabMode } from "../internal/reasons";
 import { chime, speechRate, tagLabelsFrom } from "../internal/sweeperChrome";
 import { useNudge } from "../internal/useNudge";
 import { sweeperGuideMethod, useSweeperGuide } from "../internal/useSweeperGuide";
+import { tw, whereLower } from "../internal/i18n";
+import { useT } from "../../../lib/i18n";
 
 /**
  * Judging a deduction instead of making one.
@@ -49,11 +51,11 @@ const DEFAULTS = { questionsPerRound: 5 };
 const promptText = (lab: Lab): string => {
   switch (lab.mode) {
     case "compare_clues":
-      return `Which clues are enough, on their own, to decide the outlined tile?`;
+      return tw("lab.comparePrompt");
     case "choose_reason":
-      return `The outlined tile has been worked out. Which of these says why?`;
+      return tw("lab.choosePrompt");
     case "find_error":
-      return `Somebody coloured this board and one tile is wrong. Tap a clue that is not true.`;
+      return tw("lab.findPrompt");
   }
 };
 
@@ -82,30 +84,30 @@ export const promptFor = (question: LabQuestion): string => question.prompt ?? p
 
 export const figureFor = (question: LabQuestion): React.ReactNode => (
   <BoardGrid board={question.board} assignment={question.assignment} target={question.target}
-    availableWidth={260} label="Board" />
+    availableWidth={260} label={tw("grid.board")} />
 );
 
 export function printedFor(question: LabQuestion): PrintedQuestion | null {
-  const spot = question.target === undefined ? "" : ` (${tileLabel(question.board, question.target).replace(", the outlined tile", "")})`;
+  const spot = question.target === undefined ? "" : tw("lab.spot", { where: whereLower(question.board, question.target) });
   if (question.mode === "find_error") {
     return {
-      text: "One tile in this board is the wrong colour. Write down a clue that is not true, and why. ____",
-      answer: `Any of: ${question.expected}`,
+      text: tw("lab.printFind"),
+      answer: tw("lab.printAny", { list: question.expected }),
     };
   }
   return {
     text: question.mode === "compare_clues"
-      ? `Which clues are enough on their own to decide the outlined tile${spot}? ____`
-      : `Write down why the outlined tile${spot} must be the colour it is. ____`,
+      ? tw("lab.printCompare", { spot })
+      : tw("lab.printWhy", { spot }),
     answer: question.expected,
   };
 }
 
 export function methodFor(): string[] | null {
   return [
-    "A set of clues is enough when it decides the tile without any other help.",
-    "A reason names the clue, the colour it counts, and what that leaves.",
-    "To check a board, count each clue's colour around it and compare with its number.",
+    tw("lab.method1"),
+    tw("lab.method2"),
+    tw("lab.method3"),
   ];
 }
 
@@ -117,17 +119,17 @@ export function labHints(question: LabQuestion, kidTip: string | undefined): str
   switch (question.mode) {
     case "compare_clues":
       return composeHints(kidTip,
-        "Take one option at a time and ask: with only these clues, could I still work the tile out?",
+        tw("lab.hintCompare1"),
         // Never names the sufficient set — choosing it is the question.
-        "A clue that is true but says nothing about this tile is not evidence for it.");
+        tw("lab.hintCompare2"));
     case "choose_reason":
       return composeHints(kidTip,
-        "A reason has to name a clue, and say what that clue leaves for this tile.",
-        "More than one reason may work. Reject any that misread what a clue counts.");
+        tw("lab.hintChoose1"),
+        tw("lab.hintChoose2"));
     case "find_error":
       return composeHints(kidTip,
-        "Take one clue and count its colour around it. Compare that with its number.",
-        "Work through the clues in turn. The wrong tile may break more than one.");
+        tw("lab.hintFind1"),
+        tw("lab.hintFind2"));
   }
 }
 
@@ -136,6 +138,7 @@ export function labHints(question: LabQuestion, kidTip: string | undefined): str
 /* -------------------------------------------------------------------------- */
 
 export const ClueLab: React.FC<ActivityProps<LabParams>> = ({ params, koda, onComplete, lesson }) => {
+  useT();
   const setup: LabSetup = useMemo(() => ({ ...params, ...params.question }), [params]);
   const copy = playCopy(params);
   const practising = isPractice(setup);
@@ -198,21 +201,21 @@ export const ClueLab: React.FC<ActivityProps<LabParams>> = ({ params, koda, onCo
       : option.correct;
     finish(correct, option.text,
       correct
-        ? question.mode === "compare_clues" ? "Enough on their own" : "That is a fair reason"
-        : question.mode === "compare_clues" ? "Not enough yet" : "Not why it works",
+        ? question.mode === "compare_clues" ? tw("lab.enoughTitle") : tw("lab.fairTitle")
+        : question.mode === "compare_clues" ? tw("lab.notEnoughTitle") : tw("lab.notWhyTitle"),
       correct
         ? question.mode === "compare_clues"
-          ? "With only those clues the tile still comes out."
-          : "It names a clue and says what that clue leaves."
+          ? tw("lab.enoughMsg")
+          : tw("lab.fairMsg")
         : option.trap === "not-enough"
-          ? "That clue is true, but on its own it leaves the tile open."
+          ? tw("lab.trapNotEnough")
           : option.trap === "unrelated"
-            ? "That clue says nothing about this tile."
+            ? tw("lab.trapUnrelated")
             : option.trap === "counts-itself"
-              ? "A clue never counts its own tile."
+              ? tw("lab.trapSelf")
               : option.trap === "skips-diagonals"
-                ? "The corner-touching tiles count too."
-                : "Check which colour the clue counts, and where.");
+                ? tw("lab.trapDiag")
+                : tw("lab.trapColor"));
   };
 
   const answerClue = (cell: number) => {
@@ -220,19 +223,19 @@ export const ClueLab: React.FC<ActivityProps<LabParams>> = ({ params, koda, onCo
     const clue = question.board.clues.find((c) => c.cell === cell);
     if (!clue) {
       /* Not a wrong answer: the child pointed at a tile, not at a clue. */
-      nudge.refuse("That tile has no clue on it. Tap one with a number.");
+      nudge.refuse(tw("lab.noClueNudge"));
       guide.stumbled();
-      speak("Tap a clue.");
+      speak(tw("lab.noClueSay"));
       return;
     }
     /* Every clue the painted board actually breaks is a right answer, not just
        the one nearest the mistake. */
     const correct = question.violated!.includes(clue.id);
     finish(correct, clueName(question.board, clue),
-      correct ? "That one is not true" : "That clue holds",
+      correct ? tw("lab.brokenTitle") : tw("lab.holdsTitle"),
       correct
-        ? `Count its colour around it and compare with its number — they do not match.`
-        : `Count around it: it says ${clue.count}, and that is what is there. Try another.`);
+        ? tw("lab.brokenMsg")
+        : tw("lab.holdsMsg", { count: String(clue.count) }));
   };
 
   const optionButton =
@@ -242,7 +245,7 @@ export const ClueLab: React.FC<ActivityProps<LabParams>> = ({ params, koda, onCo
     <SkillRound
       koda={koda}
       lesson={lesson}
-      fallbackTitle="Give a Reason"
+      fallbackTitle={tw("lab.title")}
       round={round}
       totalQuestions={total}
       prompt={promptFor(question)}
@@ -266,7 +269,7 @@ export const ClueLab: React.FC<ActivityProps<LabParams>> = ({ params, koda, onCo
           target={question.target}
           onTap={question.mode === "find_error" ? answerClue : undefined}
           locked={Boolean(round.feedback)}
-          label={question.mode === "find_error" ? "Board somebody has coloured" : "Board"}
+          label={question.mode === "find_error" ? tw("grid.coloured") : tw("grid.board")}
         />
 
         {question.options && (

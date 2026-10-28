@@ -1,5 +1,6 @@
 import type { Bottle, RackSpec } from "./types";
 import { shapeOf } from "./paint";
+import { tb } from "./i18n";
 
 /**
  * What a finished bottle looks like, and what may sit on what.
@@ -54,13 +55,13 @@ export function accepts(goal: Goal, dest: Bottle, colour: number): number {
 
 /** Why this bottle will not take that colour, in a child's words. */
 export function refusalFor(goal: Goal, dest: Bottle, _colour: number): string {
-  if (dest.seg.length >= dest.cap) return "That bottle is full.";
+  if (dest.seg.length >= dest.cap) return tb("refuse.full");
   if (goal.kind === "order") {
-    if (dest.seg.some((c, i) => c !== goal.order[i])) return "That bottle is not in order yet.";
-    return `That is not what comes next. ${goal.label}`;
+    if (dest.seg.some((c, i) => c !== goal.order[i])) return tb("refuse.notInOrder");
+    return tb("refuse.notNext", { label: goal.label });
   }
   if (goal.kind === "group") return goal.label;
-  return "Those colours do not match.";
+  return tb("refuse.colours");
 }
 
 /** Empty, or finished. */
@@ -91,27 +92,27 @@ export function goalFor(spec: RackSpec): Goal {
   const up = Array.from({ length: spec.colours }, (_, i) => i);
   switch (spec.goal) {
     case "ascending":
-      return { kind: "order", order: up, label: "They go smallest to biggest." };
+      return { kind: "order", order: up, get label() { return tb("goal.ascending"); } };
     case "descending":
-      return { kind: "order", order: [...up].reverse(), label: "They go biggest to smallest." };
+      return { kind: "order", order: [...up].reverse(), get label() { return tb("goal.descending"); } };
     case "by-size":
       return {
         kind: "order",
         order: [...up].sort((a, b) => FRACTION_VALUE[a] - FRACTION_VALUE[b]),
-        label: "They go from the smallest piece to the biggest.",
+        get label() { return tb("goal.bySize"); },
       };
     case "count-by-twos":
-      return { kind: "order", order: up, label: "They count up in twos." };
+      return { kind: "order", order: up, get label() { return tb("goal.twos"); } };
     case "pattern":
       // The same ordering rule, but the segments keep their shapes: a rainbow
       // is an order of colours, and numbering them would rename the thing the
       // child is being asked to reproduce.
-      return { kind: "order", order: up, label: "Every bottle ends up the same." };
+      return { kind: "order", order: up, get label() { return tb("goal.pattern"); } };
     case "parity":
       return {
         kind: "group",
         groups: [up.filter((n) => n % 2 === 0), up.filter((n) => n % 2 === 1)],
-        label: "Odd numbers and even numbers go in different bottles.",
+        get label() { return tb("goal.parity"); },
       };
     default:
       return UNIFORM;

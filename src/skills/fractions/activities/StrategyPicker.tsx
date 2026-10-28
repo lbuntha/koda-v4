@@ -4,6 +4,8 @@ import type { ActivityProps } from "../../types";
 import { SkillRound, composeHints, isPractice, useSkillRound } from "../../kit";
 import { fractionGuideMethod, useFractionGuide } from "../internal/useFractionGuide";
 import { gcd, partWord, randInt, shuffle, simplify, type Fraction, type Whole } from "../internal/data/fractionNumbers";
+import { tf } from "../internal/i18n";
+import { useT } from "../../../lib/i18n";
 
 /**
  * Which way, and why.
@@ -45,50 +47,50 @@ interface Route {
 export const ROUTES: readonly Route[] = [
   {
     id: "already-match",
-    label: "Just count them — the pieces already match",
+    get label() { return tf("route.matchLabel"); },
     fits: (a, b) => a.parts === b.parts,
-    why: (a) => `Both are ${partWord(a.parts, true)} already, so nothing needs cutting up.`,
+    why: (a) => tf("route.matchWhy", { words: partWord(a.parts, true) }),
   },
   {
     id: "one-divides",
-    label: "Cut only one of them",
+    get label() { return tf("route.oneLabel"); },
     fits: (a, b) => a.parts !== b.parts && (a.parts % b.parts === 0 || b.parts % a.parts === 0),
     why: (a, b) => {
       const [small, big] = a.parts < b.parts ? [a.parts, b.parts] : [b.parts, a.parts];
-      return `${small} goes into ${big} exactly, so only the ${partWord(small, true)} need cutting up.`;
+      return tf("route.oneWhy", { small, big, words: partWord(small, true) });
     },
   },
   {
     id: "multiply-bottoms",
-    label: "Multiply the bottom numbers together",
+    get label() { return tf("route.multLabel"); },
     fits: (a, b) => a.parts !== b.parts && gcd(a.parts, b.parts) === 1,
-    why: (a, b) => `${a.parts} and ${b.parts} share no factor, so ${a.parts * b.parts} is the size to use.`,
+    why: (a, b) => tf("route.multWhy", { a: a.parts, b: b.parts, product: a.parts * b.parts }),
   },
   {
     id: "smallest-common",
-    label: "Find the smallest size they both fit",
+    get label() { return tf("route.smallLabel"); },
     fits: (a, b) => a.parts !== b.parts && gcd(a.parts, b.parts) > 1,
     why: (a, b) => {
       const shared = gcd(a.parts, b.parts);
-      return `They share a factor of ${shared}, so the pieces can be smaller than ${a.parts * b.parts}.`;
+      return tf("route.smallWhy", { shared, product: a.parts * b.parts });
     },
   },
   {
     id: "simplify-first",
-    label: "Cut them down before doing anything",
+    get label() { return tf("route.simpLabel"); },
     fits: (a, b) => gcd(a.taken, a.parts) > 1 || gcd(b.taken, b.parts) > 1,
     why: (a, b) => {
       const messy = gcd(a.taken, a.parts) > 1 ? a : b;
-      return `${nameOf(messy)} is ${nameOf(simplify(messy))} in simpler terms, which makes everything after it easier.`;
+      return tf("route.simpWhy", { messy: nameOf(messy), simple: nameOf(simplify(messy)) });
     },
   },
   {
     id: "benchmark",
-    label: "Judge it against a half first",
+    get label() { return tf("route.benchLabel"); },
     fits: (a, b) => Math.abs(a.taken / a.parts - 0.5) < 0.13 || Math.abs(b.taken / b.parts - 0.5) < 0.13,
     why: (a, b) => {
       const near = Math.abs(a.taken / a.parts - 0.5) < 0.13 ? a : b;
-      return `${nameOf(near)} is about a half, so you know roughly what the answer should be before you start.`;
+      return tf("route.benchWhy", { near: nameOf(near) });
     },
   },
 ] as const;
@@ -140,7 +142,7 @@ export function buildQuestion(_params: StrategyParams, index: number): StrategyQ
   return {
     id: `fractions-strategy-${index}-${nameOf(left)}-${nameOf(right)}`,
     taskKind: "fractions_compare_paths",
-    prompt: `${nameOf(left)} + ${nameOf(right)}. Which way would you do it?`,
+    prompt: tf("route.prompt", { a: nameOf(left), b: nameOf(right) }),
     expected: fitting.map((r) => r.id).join(" | "),
     itemCount: offered.length,
     left,
@@ -154,9 +156,9 @@ export const promptFor = (question: StrategyQuestion): string => question.prompt
 
 export function strategyHints(_question: StrategyQuestion): string[] {
   return composeHints(
-    "Look at the two bottom numbers before you look at anything else.",
-    "Are they the same? Does one go into the other? Do they share a factor?",
-    "More than one way can be right here. Pick one that suits these particular numbers.",
+    tf("route.hint1"),
+    tf("route.hint2"),
+    tf("route.hint3"),
   );
 }
 
@@ -170,13 +172,14 @@ export function strategyHints(_question: StrategyQuestion): string[] {
  */
 export function explainStrategy(question: StrategyQuestion, correct: boolean): string {
   if (!correct) {
-    return "That one does not suit these particular numbers. Look at the two bottom numbers again.";
+    return tf("route.missWrong");
   }
   const route = ROUTES.find((r) => r.id === question.fitting[0]);
-  return route ? route.why(question.left, question.right) : "That route suits these two numbers.";
+  return route ? route.why(question.left, question.right) : tf("route.missDefault");
 }
 
 export const StrategyPicker: React.FC<ActivityProps<StrategyParams>> = ({ params, koda, onComplete, lesson }) => {
+  useT();
   const setup = useMemo(() => ({ ...params, ...params.question }), [params]);
   const practising = isPractice(setup);
   const total = setup.questionsPerRound ?? 5;
@@ -214,7 +217,7 @@ export const StrategyPicker: React.FC<ActivityProps<StrategyParams>> = ({ params
       correct,
       given: id,
       expected: question.expected,
-      title: correct ? "That works" : "Not that one",
+      title: correct ? tf("route.works") : tf("route.notThat"),
       message:
         correct && route
           ? route.why(question.left, question.right)
@@ -226,7 +229,7 @@ export const StrategyPicker: React.FC<ActivityProps<StrategyParams>> = ({ params
     <SkillRound
       koda={koda}
       lesson={lesson}
-      fallbackTitle="Which Way?"
+      fallbackTitle={tf("route.title")}
       round={round}
       totalQuestions={total}
       prompt={promptFor(question)}
@@ -268,7 +271,7 @@ export const StrategyPicker: React.FC<ActivityProps<StrategyParams>> = ({ params
         </div>
 
         {!practising ? (
-          <p className="text-xs text-muted">more than one of these can be right</p>
+          <p className="text-xs text-muted">{tf("route.moreThanOne")}</p>
         ) : null}
       </div>
     </SkillRound>
@@ -288,7 +291,7 @@ export const StrategyPicker: React.FC<ActivityProps<StrategyParams>> = ({ params
  */
 export function printedFor(question: StrategyQuestion): { text: string; answer: string } | null {
   return {
-    text: `${nameOf(question.left)} + ${nameOf(question.right)}. Which way would you do this one, and why?`,
+    text: tf("route.print", { a: nameOf(question.left), b: nameOf(question.right) }),
     answer: question.fitting
       .map((id) => ROUTES.find((r) => r.id === id)?.why(question.left, question.right))
       .filter(Boolean)
@@ -298,8 +301,8 @@ export function printedFor(question: StrategyQuestion): { text: string; answer: 
 
 export function methodFor(): string[] | null {
   return [
-    "Look at the two bottom numbers first.",
-    "The same? Nothing to cut. One goes into the other? Cut only one of them.",
-    "Sharing a factor? The pieces can be smaller than multiplying the bottoms would give.",
+    tf("route.method1"),
+    tf("route.method2"),
+    tf("route.method3"),
   ];
 }

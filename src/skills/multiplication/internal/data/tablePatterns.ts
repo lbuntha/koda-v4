@@ -1,4 +1,5 @@
 import { randInt } from "./multiplicationNumbers";
+import { tm } from "../i18n";
 
 /**
  * The patterns a times table holds, as data.
@@ -27,10 +28,10 @@ export interface PatternRule {
 }
 
 export const PATTERN_RULES: readonly PatternRule[] = Object.freeze([
-  { id: "ends_in_zero", asks: "ends in 0", holds: (n) => n % 10 === 0 },
-  { id: "ends_in_five", asks: "ends in 5", holds: (n) => n % 10 === 5 },
-  { id: "is_even", asks: "is an even number", holds: (n) => n % 2 === 0 },
-  { id: "is_odd", asks: "is an odd number", holds: (n) => n % 2 === 1 },
+  { id: "ends_in_zero", get asks() { return tm("patterns.ends_in_zero"); }, holds: (n) => n % 10 === 0 },
+  { id: "ends_in_five", get asks() { return tm("patterns.ends_in_five"); }, holds: (n) => n % 10 === 5 },
+  { id: "is_even", get asks() { return tm("patterns.is_even"); }, holds: (n) => n % 2 === 0 },
+  { id: "is_odd", get asks() { return tm("patterns.is_odd"); }, holds: (n) => n % 2 === 1 },
 ]);
 
 export const ruleById = (id: PatternRuleId): PatternRule =>
@@ -90,11 +91,11 @@ export function drawPatternHunt(ceiling: number, drivers?: number[]): PatternHun
  * pattern, and a round that only ever says "correct" has taught tapping.
  */
 export function noteFor(driver: number): string | undefined {
-  if (driver === 5) return "Every answer in the fives ends in 0 or 5.";
-  if (driver === 9) return "In the nines the digits add up to 9 — 27, 36, 45 — right up to 90.";
-  if (driver === 10) return "The tens are the other number with its digits moved up one place.";
-  if (driver === 11) return "The elevens repeat the digit, as far as 9 × 11.";
-  if (driver % 2 === 0) return `Every answer in the ${driver}s is even, because ${driver} is.`;
+  if (driver === 5) return tm("patterns.note5");
+  if (driver === 9) return tm("patterns.note9");
+  if (driver === 10) return tm("patterns.note10");
+  if (driver === 11) return tm("patterns.note11");
+  if (driver % 2 === 0) return tm("patterns.noteEven", { driver });
   return undefined;
 }
 

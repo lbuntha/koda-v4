@@ -590,6 +590,7 @@
       }
     },
     "wordsYouWillMeet": "Words you will meet",
+    "coverLearn": "What you will learn",
     "voice": {
       "saving": "Saving the voice for offline — {ready} of {total}. You can start reading.",
       "saved": "Read in a recorded voice · saved for offline",

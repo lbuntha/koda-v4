@@ -18,6 +18,8 @@ import {
   type DivideQuestion,
   type DivideSetup,
 } from "../internal/data/fractionDivide";
+import { tf } from "../internal/i18n";
+import { useT } from "../../../lib/i18n";
 
 /**
  * Dividing — which is mostly measuring, and mostly makes numbers bigger.
@@ -53,38 +55,39 @@ export function divideHints(question: DivideQuestion): string[] {
   switch (question.mode) {
     case "measure":
       return composeHints(
-        "Mark one whole strip into those pieces first, and count them.",
-        "Every whole strip holds the same number of them.",
-        "So count that many for each whole one you have.",
+        tf("div.hintMeasure1"),
+        tf("div.hintMeasure2"),
+        tf("div.hintMeasure3"),
       );
     case "whole_by":
       return composeHints(
-        "Cut every whole one into the pieces named at the bottom of the fraction.",
-        `Now group them: the top number says how many pieces make one group.`,
-        "Count the groups. That is what dividing by a fraction asks.",
+        tf("div.hintWhole1"),
+        tf("div.hintWhole2"),
+        tf("div.hintWhole3"),
       );
     case "by_whole":
       return composeHints(
-        "This one is sharing, not measuring: one amount split between several people.",
-        `Cut each ${partWord(dividend!.parts)} into ${question.shares} and give everybody one piece from each.`,
-        "The pieces got smaller, so the bottom number gets bigger.",
+        tf("div.hintShare1"),
+        tf("div.hintShare2", { word: partWord(dividend!.parts), shares: question.shares ?? 0 }),
+        tf("div.hintShare3"),
       );
     case "explain_flip":
       return composeHints(
-        "Dividing asks how many of the second one fit inside the first.",
-        `The smaller ${nameOf(divisor!)} is, the more of them fit — so the answer grows as the divisor shrinks.`,
-        "Turning the second fraction upside down and multiplying does exactly that.",
+        tf("div.hintFlip1"),
+        tf("div.hintFlip2", { divisor: nameOf(divisor!) }),
+        tf("div.hintFlip3"),
       );
     default:
       return composeHints(
-        `Ask how many ${nameOf(divisor!)} fit inside ${nameOf(dividend!)}.`,
-        "Cut both into the same-sized pieces so they can be compared.",
-        "Then it is just counting how many of the second one fit.",
+        tf("div.hintDef1", { divisor: nameOf(divisor!), dividend: nameOf(dividend!) }),
+        tf("div.hintDef2"),
+        tf("div.hintDef3"),
       );
   }
 }
 
 export const ShareOut: React.FC<ActivityProps<ShareParams>> = ({ params, koda, onComplete, lesson }) => {
+  useT();
   const setup: DivideSetup = useMemo(() => ({ ...params, ...params.question }), [params]);
   const practising = isPractice(setup);
   const total = setup.questionsPerRound ?? 5;
@@ -156,7 +159,7 @@ export const ShareOut: React.FC<ActivityProps<ShareParams>> = ({ params, koda, o
       correct,
       given: text,
       expected: question.expected,
-      title: correct ? "Yes!" : "Not yet",
+      title: correct ? tf("div.yes") : tf("div.notYet"),
       message: explainDivide(question, correct),
     });
   };
@@ -170,10 +173,10 @@ export const ShareOut: React.FC<ActivityProps<ShareParams>> = ({ params, koda, o
           <FractionBar
             parts={f.parts}
             shaded={Array.from({ length: f.taken }, (_, i) => i)}
-            label={`${nameOf(f)} of a strip, to share between ${question.shares}`}
+            label={tf("div.sharingLabel", { fraction: nameOf(f), shares: question.shares ?? 0 })}
           />
           <span className="text-sm font-bold text-ink">
-            {nameOf(f)} between {question.shares}
+            {tf("div.between", { fraction: nameOf(f), shares: question.shares ?? 0 })}
           </span>
         </div>
       );
@@ -192,8 +195,8 @@ export const ShareOut: React.FC<ActivityProps<ShareParams>> = ({ params, koda, o
               scale={0.8}
               label={
                 marked
-                  ? `whole ${i + 1}, marked into ${parts} ${partWord(parts, true)}`
-                  : `whole ${i + 1}, not marked yet`
+                  ? tf("div.wholeMarked", { i: i + 1, parts, words: partWord(parts, true) })
+                  : tf("div.wholeUnmarked", { i: i + 1 })
               }
             />
           ))
@@ -202,13 +205,13 @@ export const ShareOut: React.FC<ActivityProps<ShareParams>> = ({ params, koda, o
             <FractionBar
               parts={question.dividend!.parts}
               shaded={Array.from({ length: question.dividend!.taken }, (_, k) => k)}
-              label={`${nameOf(question.dividend!)}, the amount being divided`}
+              label={tf("div.amountLabel", { fraction: nameOf(question.dividend!) })}
             />
             <FractionBar
               parts={question.divisor!.parts}
               shaded={Array.from({ length: question.divisor!.taken }, (_, k) => k)}
               scale={0.8}
-              label={`${nameOf(question.divisor!)}, what it is divided by`}
+              label={tf("div.byLabel", { fraction: nameOf(question.divisor!) })}
             />
           </>
         )}
@@ -220,7 +223,7 @@ export const ShareOut: React.FC<ActivityProps<ShareParams>> = ({ params, koda, o
     <SkillRound
       koda={koda}
       lesson={lesson}
-      fallbackTitle="How Many Fit?"
+      fallbackTitle={tf("div.title")}
       round={round}
       totalQuestions={total}
       prompt={promptFor(question)}
@@ -310,19 +313,19 @@ export function printedFor(question: DivideQuestion): { text: string; answer: st
   switch (question.mode) {
     case "measure":
       return {
-        text: `Mark each strip into ${partWord(question.divisor!.parts, true)}. How many are there altogether?`,
+        text: tf("div.printMeasure", { words: partWord(question.divisor!.parts, true) }),
         answer: question.expected,
       };
     case "whole_by":
       return { text: `${question.whole} ÷ ${nameOf(question.divisor!)} =`, answer: question.expected };
     case "by_whole":
       return {
-        text: `${nameOf(question.dividend!)} shared equally between ${question.shares}. How much each?`,
+        text: tf("div.printShared", { fraction: nameOf(question.dividend!), shares: question.shares ?? 0 }),
         answer: question.expected,
       };
     case "explain_flip":
       return {
-        text: `Write the multiplication that asks the same thing as ${nameOf(question.dividend!)} ÷ ${nameOf(question.divisor!)}.`,
+        text: tf("div.printFlip", { a: nameOf(question.dividend!), b: nameOf(question.divisor!) }),
         answer: question.expected,
       };
     default:
@@ -351,31 +354,31 @@ export function methodFor(question: DivideQuestion): string[] | null {
   switch (question.mode) {
     case "measure":
       return [
-        "Every whole one holds the same number of those pieces.",
-        "Count them in one whole, then count that many for each whole you have.",
+        tf("div.methodMeasure1"),
+        tf("div.methodMeasure2"),
       ];
     case "whole_by":
       return [
-        "Cut every whole one into the pieces named at the bottom of the fraction.",
-        "Group them: the top number says how many pieces make one group.",
-        "Count how many groups you made — that is the answer.",
+        tf("div.methodWhole1"),
+        tf("div.methodWhole2"),
+        tf("div.methodWhole3"),
       ];
     case "by_whole":
       return [
-        "This one is sharing, not measuring.",
-        "Cut each piece into as many bits as there are people; everybody takes one bit from each.",
-        "The pieces get smaller, so the bottom number gets bigger.",
+        tf("div.methodShare1"),
+        tf("div.methodShare2"),
+        tf("div.methodShare3"),
       ];
     case "explain_flip":
       return [
-        "Dividing asks how many of the second fraction fit inside the first.",
-        "The smaller the second one is, the more of them fit.",
-        "Turning it upside down and multiplying does exactly that.",
+        tf("div.methodFlip1"),
+        tf("div.methodFlip2"),
+        tf("div.methodFlip3"),
       ];
     default:
       return [
-        "Ask how many of the second one fit inside the first.",
-        "Cut both into the same-sized pieces, then count.",
+        tf("div.methodDef1"),
+        tf("div.methodDef2"),
       ];
   }
 }

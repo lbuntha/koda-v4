@@ -1,4 +1,5 @@
 import { POOL } from "./racks";
+import { tb } from "./i18n";
 
 /**
  * What a colour looks like, in one place.
@@ -23,7 +24,10 @@ export const GLYPH: Record<string, string> = {
 };
 
 export const shapeOf = (colour: number) => SHAPES[colour % SHAPES.length];
+/** English, for answer keys and logs: they must not change with the language. */
 export const nameOf = (colour: number) => `${shapeOf(colour)} ${colour + 1}`;
+/** What the child hears and reads: "circle 1", in the language on screen. */
+export const colourName = (colour: number) => tb("colour.name", { shape: tb(`shapes.${shapeOf(colour)}`), n: String(colour + 1) });
 
 export const cssColour = (hues: number[], colour: number) => {
   const [r, g, b] = POOL[hues[colour] ?? 0];

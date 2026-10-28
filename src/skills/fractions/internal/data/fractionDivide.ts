@@ -33,6 +33,7 @@ import {
   type Fraction,
   type Whole,
 } from "./fractionNumbers";
+import { tf } from "../i18n";
 
 export type DivideMode =
   /** How many of this unit fraction fit inside a whole number. */
@@ -112,12 +113,12 @@ export function quotientOf(a: Fraction, b: Fraction): { ones: number; fraction: 
 }
 
 const PROMPTS: Record<DivideMode, (q: Omit<DivideQuestion, "prompt">) => string> = {
-  measure: (q) => `How many ${partWord((q.divisor as Fraction).parts, true)} fit in ${q.whole}?`,
+  measure: (q) => tf("div.promptMeasure", { words: partWord((q.divisor as Fraction).parts, true), whole: q.whole ?? 0 }),
   whole_by: (q) => `${q.whole} ÷ ${nameOf(q.divisor as Fraction)}`,
-  by_whole: (q) => `${nameOf(q.dividend as Fraction)} shared between ${q.shares}`,
+  by_whole: (q) => tf("div.promptShared", { fraction: nameOf(q.dividend as Fraction), shares: q.shares ?? 0 }),
   by_fraction: (q) => `${nameOf(q.dividend as Fraction)} ÷ ${nameOf(q.divisor as Fraction)}`,
   explain_flip: (q) =>
-    `${nameOf(q.dividend as Fraction)} ÷ ${nameOf(q.divisor as Fraction)} — which multiplication asks the same thing?`,
+    tf("div.promptFlip", { a: nameOf(q.dividend as Fraction), b: nameOf(q.divisor as Fraction) }),
 };
 
 export function buildDivideQuestion(
@@ -373,7 +374,7 @@ export function divideBlockedBecause(q: DivideQuestion, marked: boolean): Divide
 }
 
 export const DIVIDE_REFUSALS: Record<Exclude<DivideBlock, null>, string> = {
-  "mark-the-strip": "Mark the strip into those pieces first, then count how many there are.",
+  get "mark-the-strip"() { return tf("div.markStrip"); },
 };
 
 /* -------------------------------------------------------------------------- */
@@ -387,35 +388,35 @@ export function explainDivide(q: DivideQuestion, correct: boolean): string {
   if (!correct) {
     switch (q.mode) {
       case "measure":
-        return `Each whole one holds ${divisor.parts} of them, so count those pieces across every whole one.`;
+        return tf("div.missMeasure", { parts: divisor.parts });
       case "whole_by":
-        return "Cut every whole one into those pieces, then see how many groups of that size you can make.";
+        return tf("div.missWholeBy");
       case "by_whole":
-        return "Sharing cuts each piece up again, so the pieces get smaller and there are more of them.";
+        return tf("div.missByWhole");
       case "explain_flip":
-        return "Dividing by a fraction asks how many fit inside, and that is multiplying by it upside down.";
+        return tf("div.missFlip");
       default:
-        return "Ask how many of the second one fit inside the first. That is what the sign means.";
+        return tf("div.missDefault");
     }
   }
 
   switch (q.mode) {
     case "measure":
-      return `Each whole one holds ${divisor.parts} ${partWord(divisor.parts, true)}, and there are ${q.whole} whole ones — ${q.expected} altogether.`;
+      return tf("div.rightMeasure", { parts: divisor.parts, words: partWord(divisor.parts, true), whole: q.whole ?? 0, expected: q.expected });
     case "whole_by":
-      return `Cut the ${q.whole} into ${partWord(divisor.parts, true)} and group them ${divisor.taken} at a time: that makes ${q.expected} groups.`;
+      return tf("div.rightWholeBy", { whole: q.whole ?? 0, words: partWord(divisor.parts, true), taken: divisor.taken, expected: q.expected });
     case "by_whole":
-      return `Each ${partWord(dividend.parts)} cut into ${q.shares} makes ${partWord(dividend.parts * (q.shares as number))}, so each share is ${q.expected}.`;
+      return tf("div.rightByWhole", { word: partWord(dividend.parts), shares: q.shares ?? 0, words: partWord(dividend.parts * (q.shares as number)), expected: q.expected });
     case "explain_flip":
-      return `Asking how many ${nameOf(divisor)} fit inside is the same as multiplying by it upside down — ${q.expected}.`;
+      return tf("div.rightFlip", { divisor: nameOf(divisor), expected: q.expected });
     default: {
       // Under one is the case that needs saying out loud: a divisor bigger than
       // the amount does not fit even once, and "0.89 times" is a sentence a
       // child will read as a mistake unless somebody names it.
       const under = valueOf(dividend) < valueOf(divisor);
       return under
-        ? `${nameOf(divisor)} is the bigger of the two, so it does not fit even once — only ${q.expected} of the way.`
-        : `Cut both into the same-sized pieces and ${nameOf(divisor)} fits inside ${nameOf(dividend)} ${q.expected} times.`;
+        ? tf("div.rightUnder", { divisor: nameOf(divisor), expected: q.expected })
+        : tf("div.rightDefault", { divisor: nameOf(divisor), dividend: nameOf(dividend), expected: q.expected });
     }
   }
 }

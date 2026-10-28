@@ -1,4 +1,5 @@
 import { skillArtId } from "../../../../assets/svg/skillArt";
+import { tm } from "../i18n";
 
 const art = (name: string) => skillArtId("multiplication", name);
 
@@ -18,26 +19,31 @@ export interface Countable {
  * to the skill that registered them, and a family who turned counting off would
  * otherwise take multiplication's objects away with it.
  */
+const countable = (key: string, shape: Countable["shape"]): Countable => ({
+  id: art(key),
+  get name() { return tm(`countables.${key}.many`); },
+  get one() { return tm(`countables.${key}.one`); },
+  shape,
+});
+
 export const COUNTABLES: Countable[] = [
-  { id: art("apple"), name: "apples", one: "apple", shape: "round" },
-  { id: art("egg"), name: "eggs", one: "egg", shape: "oval" },
-  { id: art("pencil"), name: "pencils", one: "pencil", shape: "tall" },
-  { id: art("sticker"), name: "stickers", one: "sticker", shape: "star" },
-  { id: art("coin"), name: "coins", one: "coin", shape: "disc" },
-  { id: art("leaf"), name: "leaves", one: "leaf", shape: "leafy" },
+  countable("apple", "round"),
+  countable("egg", "oval"),
+  countable("pencil", "tall"),
+  countable("sticker", "star"),
+  countable("coin", "disc"),
+  countable("leaf", "leafy"),
 ];
 
-/** What the bins are called, so a prompt can say "four baskets of three". */
 export interface Container {
   /** Plural. */
   name: string;
   one: string;
 }
 
-export const CONTAINERS: Container[] = [
-  { name: "baskets", one: "basket" },
-  { name: "boxes", one: "box" },
-  { name: "plates", one: "plate" },
-  { name: "bags", one: "bag" },
-  { name: "trays", one: "tray" },
-];
+const bin = (key: string): Container => ({
+  get name() { return tm(`bins.${key}.many`); },
+  get one() { return tm(`bins.${key}.one`); },
+});
+
+export const CONTAINERS: Container[] = ["basket", "box", "plate", "bag", "tray"].map(bin);
