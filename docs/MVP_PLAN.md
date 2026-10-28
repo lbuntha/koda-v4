@@ -64,7 +64,7 @@ reaches into ages 13–14 and its later lessons stay gated.
 | Feature | Where | Verdict | Why |
 |---|---|---|---|
 | Live voice coach + Ask Koda tutor | `LiveVoiceCoachModal` (970), `KodaAskModal` (410), `/api/live` socket in `server.ts`, `tutorApi` | **Keep, switch off** (decided 2026-10-28) | Already switchable in System settings → Ask Koda (`ai.enabled` master, `ai.chat`, `ai.liveVoice`). For the MVP deployment set `ai.enabled` off; no code is deleted. New `ui.kodaMascot` switch keeps the character on screen (tap says hello) when AI is off, or hides it entirely. |
-| Billing, plans, upgrade requests | `routers/billing.py` (475), `services/entitlements.py`, `BillingPage`, `PlanCard`, `UpgradePrompt`, `featureGate`, `premiumLessons` | **Hide**, then cut | There is no payment processor. A free MVP needs none of it. Keep `FREE_PLAN` so `entitlements()` still answers "yes". |
+| Billing, plans, upgrade requests | `routers/billing.py` (475), `services/entitlements.py`, `BillingPage`, `PlanCard`, `UpgradePrompt`, `featureGate`, `premiumLessons` | **Keep** (decided 2026-10-28) | Users are on a free plan, and the plan checks gate Ask Koda and premium lessons. Nothing is removed. |
 | Leaderboard + buddies | `routers/leaderboard.py` (448), `LeaderboardPage` (725), `docs/LEADERBOARD_PRIVACY.md` | **Hide** | A privacy surface for children that the MVP does not need. Parents hearing progress is the point, not ranking. |
 | Rebus group rooms | `routers/rebus_rooms.py`, `rebus/group` | **Decide** | Just built; useful in a classroom. If the first users are families, hide it. |
 | Skill Manager, Skill registrations | `SkillManagerPage` (1,575), `LearningLogPanel`, `PracticeLogPanel`, `routers/skill_registrations.py` | **Hide** | The largest component in the app, for one admin. With 3 skills there is nothing to manage. |
@@ -81,8 +81,8 @@ Keep untouched: sync/offline layer, auth, family/learners/devices, roles, transl
 ### 2c. How to cut safely
 
 One removal per commit, in this order, with `npm run lint` and the scoped tests green
-after each: (1) the four skills, (2) billing, (4) leaderboard,
-(5) admin pages, (6) docs and scripts, (7) dependencies. Then a final full run:
+after each: (1) operator pages, (2) docs, mocks and scripts, (3) unused dependencies.
+No skills, billing, leaderboard, group rooms or Ask Koda are cut. Then a final full run:
 `npm run lint`, full vitest, server pytest (≈16 min), and a look at the app at 390 px.
 
 ## 3. Clean-up (Phase 2)
@@ -170,9 +170,9 @@ data by design, so test with a real family. Also confirm Cloud Scheduler is actu
 1. **Color Sweeper, Bottle Sort, Observation** — keep all three. No skill is cut.
 2. **Rebus group rooms and leaderboard** — keep both.
 3. **Drawing** — tracing and free painting.
-4. **Removal** — delete from `main` after tagging `pre-mvp-cut`; no build flag.
+4. **Billing** — keep; users are on the free plan.
+5. **Removal** — delete from `main` after tagging `pre-mvp-cut`; no build flag.
 
-Effect: Phase 1 shrinks to the feature cuts only — Live voice coach and Ask Koda tutor,
-billing/plans, the operator pages (Skill Manager, push admin, cleanup, API keys, personas),
+Effect: Phase 1 shrinks to the operator pages (Skill Manager, push admin, cleanup, API keys, personas),
 docs/mocks/scripts, and unused dependencies. "Hide" rows in 2b for the leaderboard and
 group rooms no longer apply.
