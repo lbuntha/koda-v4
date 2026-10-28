@@ -141,12 +141,20 @@ painting** (`paint.py`, `paintings.py`, `PaintPicture`). Confirm which the MVP m
 way, the English set needs publishing and the Khmer set needs drafting; there are no tests or
 grades on the English set yet (noted in memory 2026-10-23).
 
-### 4.5 Parent progress — the stated core purpose
-Weekly summary, daily reminder and absence check exist in `tasks.py` (1,308 lines).
-Verify end to end on a real device before launch: a child plays → event syncs →
-summary email and push arrive in the parent's language. The admin account never syncs learning
-data by design, so test with a real family. Also confirm Cloud Scheduler is actually calling
-`/tasks/*` in production (`gcloud` logs; do not assume).
+### 4.5 Parent progress — checked 2026-10-28
+- **Logic:** 154 server tests pass (tasks, reminders, progress/parent notifications, email, language).
+- **Scheduler (production, `learn-with-koda`):** `weekly-summary`, `daily-reminders`, `skill-announcements`
+  run hourly and `token-sweep` daily, all enabled; the last runs returned 200. The absence check and daily
+  digest run inside `daily-reminders`, so they need no job of their own.
+- **Email does not leave production.** `koda-backend` has `MAIL_DRIVER=console`, so every email (weekly
+  summary, password reset, verification) is only written to the log. `SMTP_*` is configured but unused,
+  and `MAIL_FROM` is `no-reply@koda.local`, which a real mail server would reject or spam-file.
+  `REQUIRE_EMAIL_VERIFICATION` is false, consistent with that. Fix before launch: switch the driver to
+  `smtp`, use a sender on a domain you control, and send a real test summary.
+- **Push:** `PUSH_DRIVER=fcm` with `FIREBASE_PROJECT_ID` set. Not yet tested on a real device from this
+  deployment (the dev container uses the console driver).
+- Still to do: one real family end to end — a child plays, the event syncs, the parent receives the
+  summary email and the push, in the parent's language.
 
 ### 4.6 Smaller things to fix
 - `server.ts` still holds ~10 Gemini routes; after the cut, keep only Studio generation
