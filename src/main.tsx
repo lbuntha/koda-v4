@@ -4,6 +4,7 @@ import {MotionConfig} from 'motion/react';
 import App from './App.tsx';
 import { ThemeProvider } from './context/ThemeContext';
 import { PwaStatus } from './components/PwaStatus';
+import { AppErrorBoundary, installChunkRecovery } from './components/AppErrorBoundary';
 import { blockPinchZoom } from './pwa/blockPinchZoom';
 // The app's own recordings — numbers, and praise that names no subject. A skill
 // registers its own on import; this belongs to no skill, so it is registered here.
@@ -16,6 +17,7 @@ import { applyCachedOverrides, refreshOverrides } from './lib/i18n/overrides';
 /* Before the first render: a child can pinch the splash screen too. Never torn
    down — it lives as long as the document does. */
 blockPinchZoom();
+installChunkRecovery();
 
 /* `<html lang dir>` follows the chosen language from the first paint, so the
    right font and the right screen-reader voice are picked before React runs. */
@@ -59,7 +61,9 @@ createRoot(document.getElementById('root')!).render(
       */}
     <MotionConfig reducedMotion="user">
       <ThemeProvider>
-        <LanguageRoot />
+        <AppErrorBoundary>
+          <LanguageRoot />
+        </AppErrorBoundary>
       </ThemeProvider>
     </MotionConfig>
   </StrictMode>,

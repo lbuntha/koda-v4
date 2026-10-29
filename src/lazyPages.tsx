@@ -1,5 +1,6 @@
 import React, { Suspense, lazy } from "react";
 
+import { AppErrorBoundary } from "./components/AppErrorBoundary";
 import { UIPageLoader } from "./components/ui";
 
 /*
@@ -77,5 +78,7 @@ export const LeaderboardPage = lazy(() =>
  * take its neighbours down with it.
  */
 export const Deferred: React.FC<{ label: string; children: React.ReactNode }> = ({ label, children }) => (
-  <Suspense fallback={<UIPageLoader label={label} />}>{children}</Suspense>
+  <AppErrorBoundary>
+    <Suspense fallback={<UIPageLoader label={label} />}>{children}</Suspense>
+  </AppErrorBoundary>
 );
