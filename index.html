@@ -107,11 +107,32 @@
       }
       #koda-boot img { width: 64px; height: 64px; border-radius: 16px; }
       @keyframes koda-boot-in { to { opacity: 1; } }
+      #koda-boot { align-content: center; justify-items: center; gap: 12px; text-align: center; font: 15px system-ui, sans-serif; color: #475569; }
+      html.dark #koda-boot { color: #cbd5e1; }
+      #koda-boot button { font: inherit; font-weight: 700; padding: 10px 20px; border: 0; border-radius: 12px; background: #6B46C1; color: #fff; }
       @media (prefers-reduced-motion: reduce) {
         #koda-boot { animation-duration: 1ms; }
       }
     </style>
     <div id="root"><div id="koda-boot" aria-hidden="true"><img src="/favicon.svg" alt="" /></div></div>
+    <!-- If the bundle has not replaced the boot mark after 15s the connection is
+         the problem, and a logo that never goes away looks like a frozen app.
+         Say so and offer a retry. Inline, because it has to run when the
+         bundle does not. -->
+    <script>
+      setTimeout(function () {
+        var boot = document.getElementById("koda-boot");
+        if (!boot) return;
+        var km = /^km/i.test(navigator.language || "");
+        var note = document.createElement("div");
+        note.textContent = km ? "កំពុងផ្ទុកយូរជាងធម្មតា" : "Loading is taking longer than usual";
+        var retry = document.createElement("button");
+        retry.textContent = km ? "ព្យាយាមម្តងទៀត" : "Try again";
+        retry.onclick = function () { location.reload(); };
+        boot.appendChild(note);
+        boot.appendChild(retry);
+      }, 15000);
+    </script>
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>
