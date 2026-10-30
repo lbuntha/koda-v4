@@ -12,6 +12,7 @@
  */
 
 import { isAgeRange } from "../lib/ages";
+import { bulkGet, bulkRemove, bulkSet } from "../lib/bulkStore";
 import { accessToken, request } from "../lib/sync";
 import { isCategoryId, parseCategories, setCategories, type Category } from "./categories";
 import { prefetchPuzzlePhotos } from "./photos";
@@ -51,9 +52,8 @@ export const parsePuzzles = (raw: unknown): Puzzle[] => {
   });
 };
 
-const load = (): BankSnapshot | null => {
+const parse = (raw: string | null): BankSnapshot | null => {
   try {
-    const raw = localStorage.getItem(KEY);
     if (!raw) return null;
     const parsed = JSON.parse(raw) as { version?: unknown; puzzles?: unknown; categories?: unknown };
     const puzzles = parsePuzzles(parsed.puzzles);
@@ -64,10 +64,35 @@ const load = (): BankSnapshot | null => {
   }
 };
 
-let snapshot: BankSnapshot | null = load();
+/* A copy a device saved before the bulk store existed is still in localStorage:
+   read it now, so the first screen has puzzles, and let the next save move it. */
+const legacy = (): string | null => {
+  try {
+    return localStorage.getItem(KEY);
+  } catch {
+    return null;
+  }
+};
+
+let snapshot: BankSnapshot | null = parse(legacy());
 if (snapshot?.categories) setCategories(snapshot.categories);
 let lastAsked = 0;
 const listeners = new Set<() => void>();
+
+// A legacy copy moves across now rather than waiting for the next change.
+const carried = legacy();
+if (snapshot && carried) void bulkSet(KEY, carried);
+
+/* The stored copy arrives a moment after start. It only fills a gap: anything
+   the server or the legacy copy has already given is at least as new. */
+void bulkGet(KEY).then((raw) => {
+  if (snapshot) return;
+  const stored = parse(raw);
+  if (!stored) return;
+  snapshot = stored;
+  if (stored.categories) setCategories(stored.categories);
+  listeners.forEach((fn) => fn());
+});
 
 export const bankSnapshot = (): BankSnapshot | null => snapshot;
 
@@ -79,11 +104,8 @@ export const subscribeBank = (listener: () => void): (() => void) => {
 const adopt = (next: BankSnapshot): void => {
   snapshot = next;
   if (next.categories) setCategories(next.categories);
-  try {
-    localStorage.setItem(KEY, JSON.stringify(next));
-  } catch {
-    /* Not kept this time (storage full or off): the list is still used until the app closes. */
-  }
+  // Not kept this time (storage full or off): the list is still used until the app closes.
+  void bulkSet(KEY, JSON.stringify(next));
   listeners.forEach((fn) => fn());
   // The photos in the list come along with it, so offline play never shows an empty frame.
   void prefetchPuzzlePhotos(next.puzzles);
@@ -115,10 +137,6 @@ export const resetBank = (): void => {
   snapshot = null;
   lastAsked = 0;
   setCategories([]);
-  try {
-    localStorage.removeItem(KEY);
-  } catch {
-    /* nothing to remove */
-  }
+  void bulkRemove(KEY);
   listeners.forEach((fn) => fn());
 };

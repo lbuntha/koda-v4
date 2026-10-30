@@ -67,7 +67,7 @@ registerRoute(
   ({ request }) => request.destination === "image" || request.destination === "font",
   new StaleWhileRevalidate({
     cacheName: "koda-assets",
-    plugins: [new ExpirationPlugin({ maxEntries: 60, maxAgeSeconds: 60 * 60 * 24 * 30 })],
+    plugins: [new ExpirationPlugin({ maxEntries: 200, maxAgeSeconds: 60 * 60 * 24 * 30 })],
   }),
 );
 

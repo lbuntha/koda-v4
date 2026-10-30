@@ -12,6 +12,7 @@ import { useEffect, useSyncExternalStore } from "react";
 import type { CollectionBundle, CollectionSummary, ReportIn } from "./api";
 import { fetchBundle, fetchShelf, sendReport } from "./api";
 import { isPhoto, photoUrl } from "../../library/photos";
+import { bulkGet, bulkSet } from "../../lib/bulkStore";
 
 interface Stored {
   collections: CollectionSummary[];
@@ -24,23 +25,49 @@ const listeners = new Set<() => void>();
 let version = 0;
 let refreshing: Promise<void> | null = null;
 
-function read(): Stored {
+const EMPTY: Stored = { collections: [], bundles: {}, checkedAt: 0 };
+
+function parseStored(raw: string | null): Stored | null {
   try {
-    const raw = localStorage.getItem(KEY);
     const parsed = raw ? JSON.parse(raw) : null;
     if (parsed && Array.isArray(parsed.collections)) return parsed as Stored;
   } catch {
     /* fall through */
   }
-  return { collections: [], bundles: {}, checkedAt: 0 };
+  return null;
+}
+
+function legacy(): string | null {
+  try {
+    return localStorage.getItem(KEY);
+  } catch {
+    return null;
+  }
+}
+
+/* Parsed once and kept. `useTraceShelf` asks on every render, and the stored
+   shelf holds every collection's strokes: parsing megabytes of JSON each time a
+   screen re-rendered is how a phone ends up stuck on the Trace page. */
+let current: Stored = parseStored(legacy()) ?? EMPTY;
+if (current !== EMPTY) void bulkSet(KEY, JSON.stringify(current)); // a copy from before the bulk store moves across
+
+void bulkGet(KEY).then((raw) => {
+  if (current !== EMPTY) return;
+  const stored = parseStored(raw);
+  if (!stored) return;
+  current = stored;
+  version++;
+  listeners.forEach((l) => l());
+});
+
+function read(): Stored {
+  return current;
 }
 
 function write(s: Stored) {
-  try {
-    localStorage.setItem(KEY, JSON.stringify(s));
-  } catch {
-    /* full: the shelf still shows what is in memory this session */
-  }
+  current = s;
+  // Not kept when storage is full or off: the shelf still shows what is in memory this session.
+  void bulkSet(KEY, JSON.stringify(s));
   version++;
   listeners.forEach((l) => l());
 }
