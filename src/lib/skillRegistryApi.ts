@@ -1,5 +1,6 @@
 import { useSyncExternalStore } from "react";
 import type { ReleaseStatus, SkillInfo } from "../skills/types";
+import { bulkGet, bulkSet } from "./bulkStore";
 import { request } from "./sync/api";
 import { SessionAPI, accessToken } from "./sync/session";
 
@@ -64,6 +65,29 @@ let version = 0;
 let flushing: Promise<void> | null = null;
 const listeners = new Set<() => void>();
 
+/* The snapshot is the biggest thing here (every skill's lessons), so it lives in
+   the bulk store rather than the shared localStorage budget. A copy from before
+   that is read above and moves across now; the stored copy fills a gap only. */
+let carried: string | null = null;
+try {
+  carried = localStorage.getItem(CACHE_KEY);
+} catch {
+  /* storage blocked: nothing to carry */
+}
+if (records.length && carried) void bulkSet(CACHE_KEY, carried);
+void bulkGet(CACHE_KEY).then((raw) => {
+  if (records.length || !raw) return;
+  try {
+    const parsed = JSON.parse(raw);
+    if (!Array.isArray(parsed) || !parsed.length) return;
+    records = parsed;
+    version += 1;
+    listeners.forEach((listener) => listener());
+  } catch {
+    /* an unreadable copy is the same as none */
+  }
+});
+
 function readJson<T>(key: string, fallback: T): T {
   try {
     const raw = localStorage.getItem(key);
@@ -123,13 +147,10 @@ function applyConfigurationSnapshot(next: RegisteredSkill[]): void {
 function replace(next: RegisteredSkill[]): void {
   records = next;
   version += 1;
-  try {
-    // This is an offline snapshot, never the source of truth. It is replaced
-    // only after a complete server response succeeds.
-    localStorage.setItem(CACHE_KEY, JSON.stringify(next));
-  } catch {
-    // Memory still serves this tab; the bundled manifest is the final fallback.
-  }
+  // This is an offline snapshot, never the source of truth. It is replaced
+  // only after a complete server response succeeds. If it cannot be kept,
+  // memory still serves this tab and the bundled manifest is the final fallback.
+  void bulkSet(CACHE_KEY, JSON.stringify(next));
   listeners.forEach((listener) => listener());
 }
 

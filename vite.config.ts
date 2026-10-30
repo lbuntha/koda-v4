@@ -31,6 +31,13 @@ export default defineConfig(() => {
        * teaches everybody to re-run rather than to read the failure.
        */
       testTimeout: 20_000,
+      /*
+       * Leave headroom on an 8-core laptop that is also running the dev server,
+       * Docker and a browser. With every core taken, workers sometimes failed to
+       * start in time and round tests passed the budget above; two fewer workers
+       * cost little and made those failures go away.
+       */
+      maxWorkers: 6,
     },
     build: {
       rollupOptions: {
