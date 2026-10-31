@@ -1,0 +1,361 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Koda Launch Guide</title>
+<style>
+  :root {
+    --bg: #f8fafc; --card: #ffffff; --ink: #0f172a; --muted: #475569; --line: #e2e8f0;
+    --brand: #6b46c1; --brand-soft: #f1ecfb; --ok: #047857; --ok-soft: #e6f6ef;
+    --warn: #be123c; --warn-soft: #fdecef; --code: #f1f5f9;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #0d061a; --card: #17102a; --ink: #f1f5f9; --muted: #b6bfd0; --line: #2d2547;
+      --brand: #a78bfa; --brand-soft: #251a45; --ok: #34d399; --ok-soft: #0f2a22;
+      --warn: #fb7185; --warn-soft: #3a1520; --code: #0a0616;
+    }
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--ink); font: 16px/1.6 system-ui, -apple-system, "Segoe UI", sans-serif; }
+  .wrap { max-width: 880px; margin: 0 auto; padding: 24px 16px 80px; }
+  h1 { font-size: 2rem; line-height: 1.2; margin: 8px 0 4px; }
+  h2 { font-size: 1.4rem; margin: 40px 0 8px; padding-top: 8px; border-top: 1px solid var(--line); }
+  h3 { font-size: 1.1rem; margin: 24px 0 6px; }
+  p, li { color: var(--ink); }
+  .lead { color: var(--muted); margin: 0 0 16px; }
+  nav { background: var(--card); border: 1px solid var(--line); border-radius: 12px; padding: 12px 16px; margin: 20px 0; }
+  nav a { display: inline-block; margin: 2px 12px 2px 0; color: var(--brand); text-decoration: none; font-weight: 600; }
+  a { color: var(--brand); }
+  table { width: 100%; border-collapse: collapse; margin: 12px 0; font-size: 0.95rem; display: block; overflow-x: auto; }
+  th, td { text-align: left; padding: 8px 10px; border-bottom: 1px solid var(--line); vertical-align: top; }
+  th { background: var(--brand-soft); white-space: nowrap; }
+  pre { background: var(--code); border: 1px solid var(--line); border-radius: 10px; padding: 12px 14px; overflow-x: auto; font-size: 0.85rem; line-height: 1.5; }
+  code { background: var(--code); border-radius: 5px; padding: 1px 5px; font-size: 0.9em; }
+  pre code { background: none; padding: 0; }
+  .note, .warn, .ok { border-radius: 10px; padding: 10px 14px; margin: 14px 0; border: 1px solid var(--line); }
+  .note { background: var(--brand-soft); }
+  .warn { background: var(--warn-soft); border-color: var(--warn); }
+  .ok { background: var(--ok-soft); border-color: var(--ok); }
+  .tag { display: inline-block; font-size: 0.75rem; font-weight: 700; padding: 1px 8px; border-radius: 999px; margin-right: 6px; vertical-align: middle; }
+  .tag.you { background: var(--brand-soft); color: var(--brand); }
+  .tag.me { background: var(--ok-soft); color: var(--ok); }
+  .tag.open { background: var(--warn-soft); color: var(--warn); }
+  ul.check { list-style: none; padding-left: 0; }
+  ul.check li { padding: 6px 0 6px 30px; position: relative; border-bottom: 1px solid var(--line); }
+  ul.check li::before { content: ""; position: absolute; left: 4px; top: 11px; width: 16px; height: 16px; border: 2px solid var(--brand); border-radius: 4px; }
+  .grid { display: grid; gap: 12px; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); }
+  .card { background: var(--card); border: 1px solid var(--line); border-radius: 12px; padding: 12px 16px; }
+  .card h3 { margin-top: 4px; }
+  .flow { list-style: none; margin: 16px 0 8px; padding: 0; display: grid; gap: 0; counter-reset: step; }
+  .flow li { position: relative; margin: 0; padding: 0 0 18px 52px; counter-increment: step; }
+  .flow li::before { content: counter(step); position: absolute; left: 0; top: 0; width: 36px; height: 36px; border-radius: 50%; background: var(--brand); color: #fff; font-weight: 800; display: grid; place-items: center; }
+  .flow li::after { content: ""; position: absolute; left: 17px; top: 38px; bottom: 2px; width: 2px; background: var(--line); }
+  .flow li:last-child::after { display: none; }
+  .flow a { font-weight: 700; text-decoration: none; }
+  .flow small { display: block; color: var(--muted); }
+  .flow .gate { display: inline-block; font-size: 0.8rem; font-weight: 700; color: var(--ok); background: var(--ok-soft); border-radius: 999px; padding: 0 8px; margin-top: 2px; }
+  .loop { background: var(--brand-soft); border: 1px dashed var(--brand); border-radius: 12px; padding: 10px 14px; margin: 0 0 8px 52px; }
+  @media (min-width: 760px) {
+    .flow { grid-template-columns: repeat(3, 1fr); gap: 12px; }
+    .flow li { padding: 52px 12px 12px; background: var(--card); border: 1px solid var(--line); border-radius: 12px; }
+    .flow li::before { left: 12px; top: 10px; }
+    .flow li::after { display: none; }
+    .loop { margin-left: 0; }
+  }
+  footer { margin-top: 48px; color: var(--muted); font-size: 0.9rem; }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<h1>Koda launch guide</h1>
+<p class="lead">How to open Koda to its first families, how to keep adding content from Grade 1 upward, and how to find and win the first clients. Written 2026-10-31 from the code and the live deployment.</p>
+
+<nav aria-label="Sections">
+  <a href="#flow">The path</a>
+  <a href="#state">1. Where it stands</a>
+  <a href="#before">2. Before the first user</a>
+  <a href="#content">3. Growing the content</a>
+  <a href="#release">4. Releasing and rolling back</a>
+  <a href="#operate">5. Running it</a>
+  <a href="#clients">6. Finding clients</a>
+  <a href="#pilot">7. The first pilot</a>
+  <a href="#open">8. Open items</a>
+</nav>
+
+<h2 id="flow" style="border-top:0;margin-top:8px">The whole path in six steps</h2>
+<ol class="flow">
+  <li><a href="#before">Set up</a><small>Admin account, email, Ask Koda on or off, menu labels.</small><span class="gate">Done when: a real test email arrives</span></li>
+  <li><a href="#content">Put content in</a><small>Publish Rebus; import Library books and Trace sets.</small><span class="gate">Done when: a child account sees them</span></li>
+  <li><a href="#before">Test on a real phone</a><small>Install, go offline, check push, run one family end to end.</small><span class="gate">Done when: nothing sticks</span></li>
+  <li><a href="#clients">Choose who to invite</a><small>Start with parents of Grade 1&ndash;3 children you can talk to.</small><span class="gate">Done when: 20&ndash;30 families said yes</span></li>
+  <li><a href="#pilot">Run a 4-week pilot</a><small>Help in week 1, add one piece of content a week, then call each family.</small><span class="gate">Done when: you have the five numbers</span></li>
+  <li><a href="#pilot">Decide: go, fix, or rethink</a><small>Then open to the next group.</small><span class="gate">Done when: you chose</span></li>
+</ol>
+<div class="loop"><strong>Then repeat every week:</strong> finish one book or trace set &rarr; publish &rarr; import (<a href="#content">section 3</a>) &rarr; look at it as a child &rarr; read the parent reports &rarr; pick next week's content.</div>
+
+<div class="note"><strong>Who does what.</strong>
+  <span class="tag you">You</span> own all content (books, pictures, trace sets, Rebus approval, accounts, email) and the business side.
+  <span class="tag me">Claude</span> owns code and features. Where a step says <em>You</em>, it needs your judgement or your credentials.
+  The client section (6 and 7) is a set of proposals to test, not facts about the market.</div>
+
+<!-- ============================================================ -->
+<h2 id="state">1. Where it stands</h2>
+
+<p>The platform is live. The last deploy (2026-10-31) finished with every job green and Cloud Run serving the new revisions.</p>
+
+<table>
+  <tr><th>Part</th><th>Address / name</th><th>Status</th></tr>
+  <tr><td>Web app</td><td><code>https://learn-with-koda.web.app</code> (Cloud Run <code>koda-app</code>, project <code>learn-with-koda</code>, <code>us-central1</code>)</td><td>Live</td></tr>
+  <tr><td>API</td><td>Cloud Run <code>koda-backend</code>, database <code>koda_v4</code>, API under <code>/v1</code></td><td>Live</td></tr>
+  <tr><td>Library audio</td><td>Storage bucket <code>learn-with-koda-library-audio</code></td><td>Configured</td></tr>
+  <tr><td>Scheduled jobs</td><td>weekly-summary, daily-reminders, skill-announcements (hourly), token-sweep (daily)</td><td>Enabled, last runs 200</td></tr>
+  <tr><td>Push</td><td><code>PUSH_DRIVER=fcm</code></td><td>Configured, not tested on a real phone</td></tr>
+  <tr><td>Email</td><td><code>MAIL_DRIVER=console</code></td><td><span class="tag open">Not sending</span> emails are only written to the log</td></tr>
+</table>
+
+<h3>What a child gets, Grades 1–3 (ages 6–8; the app shows lessons up to a year above the child's age)</h3>
+<div class="grid">
+  <div class="card"><h3>Math</h3><p>Counting, addition, subtraction, multiplication, division, fractions (introduction). 107 course units. Lessons are age-banded, so the course opens up as the child grows.</p></div>
+  <div class="card"><h3>Reading</h3><p>Koda Library books and Khmer/English letters. Today: 1 of 12 planned Grade 1 books published.</p></div>
+  <div class="card"><h3>Rebus</h3><p>2,324 puzzles ship with the server, including math and quiz puzzles. They arrive as <em>drafts</em> and a child sees none until you approve and publish them.</p></div>
+  <div class="card"><h3>Drawing</h3><p>Tracing (Trace) and free painting. English A–Z, a–z and 0–9 are drafted, not yet published.</p></div>
+  <div class="card"><h3>Logic games</h3><p>Color Sweeper, Bottle Sort, Observation.</p></div>
+  <div class="card"><h3>For parents</h3><p>Weekly summary, daily reminder, a report per child, push notifications. A free plan; billing stays in place.</p></div>
+</div>
+
+<h3>What was checked, and what was not</h3>
+<ul>
+  <li><strong>Checked:</strong> lint and typecheck; 5,363 frontend tests; 1,033 server tests; a content-pack round trip into a scratch database; the phone-layout screens at 390&nbsp;px; production health after deploy.</li>
+  <li><strong>Not checked:</strong> a real phone on a weak connection; push on a real device; a real email; the first import of a content pack into production.</li>
+</ul>
+
+<!-- ============================================================ -->
+<h2 id="before">2. Before the first user</h2>
+<p>Do these in order. Nothing here needs new code.</p>
+
+<ul class="check">
+  <li><span class="tag you">You</span><strong>Make sure an admin account exists on production.</strong> Sign in at the web address above with it. If you do not have one, create it against the production database (needs <code>MONGODB_URI</code>, kept in the repository secrets):
+<pre><code>cd server
+MONGODB_URI='&lt;production uri&gt;' MONGODB_DB=koda_v4 \
+  python -m app.cli create-admin --email you@example.com --password '&lt;strong password&gt;'</code></pre></li>
+
+  <li><span class="tag you">You</span><strong>Configure email.</strong> In GitHub: repository variables <code>MAIL_DRIVER=smtp</code>, <code>SMTP_HOST</code>, <code>SMTP_PORT</code>, <code>SMTP_STARTTLS</code>, <code>MAIL_FROM</code> (an address on a domain you control, not <code>koda.local</code>), and secrets <code>SMTP_USER</code>, <code>SMTP_PASSWORD</code>. Push to <code>main</code> to deploy. Until this is done the weekly summary and password reset reach nobody. Turn on <code>REQUIRE_EMAIL_VERIFICATION=true</code> only after a real test email arrives.</li>
+
+  <li><span class="tag you">You</span><strong>Decide Ask Koda for launch.</strong> In the app: Ask Koda page (the same place holds the mascot switch). Switch the master <code>ai.enabled</code> off to launch without the live voice coach and the tutor; the Koda character stays on screen as a friendly face, or hide it with the mascot switch. The Gemini and Anthropic keys are billed; leave them off until you want that cost.</li>
+
+  <li><span class="tag you">You</span><strong>Publish Rebus.</strong> Rebus Studio → approve all → publish a release. Until you do, Rebus Rush is empty for every child. Check the grade of each batch before approving (see section 3).</li>
+
+  <li><span class="tag you">You</span><strong>Put Library and Trace content on production</strong> (section 3). Without it the Library shows only the starter books bundled in the app and Trace has no sets.</li>
+
+  <li><span class="tag you">You</span><strong>Fix the menu labels</strong> that were typed wrongly in your local data (<code>LEADERBOAR</code>, <code>SKILLS STU</code>, <code>LIBRARY STU</code>). On production, open the Menu page and check each label. The defaults in the code are correct.</li>
+
+  <li><span class="tag you">You</span><strong>Test on a real phone</strong> with a poor connection: install the app to the home screen, open a lesson, switch on airplane mode, open it again. Then check a push: turn notifications on for a parent account and trigger one.</li>
+
+  <li><span class="tag you">You</span><strong>Run one family end to end.</strong> A child plays a lesson; the parent receives the weekly summary by email and a push, in the parent's language.</li>
+
+  <li><span class="tag you">You</span><strong>Privacy and consent.</strong> The users are children. Have a privacy policy and a clear parent-consent step ready, and check what the rules in Cambodia (and in any other country you open in) require. The repository has <code>docs/SECURITY.md</code> and <code>docs/LEADERBOARD_PRIVACY.md</code> to start from; they are engineering notes, not legal advice.</li>
+</ul>
+
+<!-- ============================================================ -->
+<h2 id="content">3. Growing the content from Grade 1</h2>
+
+<p>The platform is finished enough that growth is content work. Everything below follows one rule: <strong>author it in a Studio, publish it, and children get it</strong>. Grades are ages minus five: Grade 1 is age 6, Grade 2 is 7, Grade 3 is 8. Studios speak grades; the data stores ages.</p>
+
+<h3>Two ways to get content onto production</h3>
+<table>
+  <tr><th></th><th>A. Author on production directly</th><th>B. Author locally, then move with a content pack</th></tr>
+  <tr><td>How</td><td>Sign in to the live app as admin and use Library Studio, Trace Studio and Rebus Studio there.</td><td>Work on <code>localhost:3001</code>, then export and import.</td></tr>
+  <tr><td>Good for</td><td>Small edits, fixing a typo, quick additions.</td><td>Big batches you want to review first; keeps a copy on your machine.</td></tr>
+  <tr><td>Watch out</td><td>Every save is live to children once published.</td><td>The import never overwrites a correction made on the server unless you pass <code>--update</code>.</td></tr>
+</table>
+
+<h3>The content pack (way B)</h3>
+<pre><code># 1. publish in the Studio first: only published content is exported
+# 2. export from the local stack
+docker compose exec api python -m app.cli content-export /tmp/pack
+docker compose cp api:/tmp/pack ./content-pack        # the folder is ignored by git
+
+# 3. try it on production without writing anything
+cd server
+MONGODB_URI='&lt;production uri&gt;' MONGODB_DB=koda_v4 \
+LIBRARY_AUDIO_BUCKET=learn-with-koda-library-audio \
+  python -m app.cli content-import ../content-pack --dry-run
+
+# 4. do it for real (re-running is safe: it adds only what is missing)
+  python -m app.cli content-import ../content-pack
+# later, to take newer revisions of books you already imported:
+  python -m app.cli content-import ../content-pack --update</code></pre>
+<div class="warn"><strong>Not yet tried against production.</strong> The round trip is tested against a scratch database, but writing audio to the Cloud Storage bucket from your machine needs Google credentials (<code>gcloud auth application-default login</code>). Do the <code>--dry-run</code> first and check the counts before the real import.</div>
+
+<h3>Per pillar</h3>
+
+<h3>Reading — Library</h3>
+<ul>
+  <li>The plan is 12 Grade 1 books, one at a time: <code>docs/library-grade1-books-plan.md</code>. Each follows the same loop: brief, story, title check, questions, JSON, check, register, pictures, read it at 390&nbsp;px. A book is done when step 8 passes.</li>
+  <li>Book 1 (<em>Bot and the Seed</em>) is published. Book 2 (<em>Sleepy Night Animals</em>) waits for pictures.</li>
+  <li>Grades 2 and 3 have no book plan yet. Copy the Grade 1 plan, raise the sentence length and the vocabulary, and set <code>ages</code> to <code>[7,9]</code>.</li>
+  <li>Pictures and recordings travel with the book in a content pack, keyed by their hash, so a book never arrives without its art.</li>
+</ul>
+
+<h3>Drawing — Trace</h3>
+<ul>
+  <li>English A–Z, a–z and 0–9 are drafted: <code>docs/ENGLISH_TRACE_PLAN.md</code>. Finish the tests and grades on each set, then publish.</li>
+  <li>Khmer consonants and vowels follow the same Studio route. Children's tracing progress stays on the child's device and syncs to the parent report; it is never part of a content pack.</li>
+</ul>
+
+<h3>Rebus</h3>
+<ul>
+  <li>The server seeds 2,324 puzzles as drafts on every boot (create-if-absent, so your edits are never undone). Approve and publish in batches by grade rather than all at once if you want to control what a Grade 1 child meets first.</li>
+  <li>Puzzles carry an age range. Of the 2,324, 1,878 start at age 9 or younger. Spot-check the reading level of the math and quiz puzzles at Grade 1 versus Grade 3.</li>
+</ul>
+
+<h3>Math and the other skills</h3>
+<ul>
+  <li>The lessons exist and are age-gated. Walk the course once as an age 6, 7 and 8 child to confirm there is a path with no dead end.</li>
+  <li>New lessons or a whole new skill: <code>docs/SKILL_DEVELOPMENT.md</code> and <code>docs/NEW_SKILL_PROMPT.md</code>. After a new skill is added, the API needs a restart to register it. Grade 4 to 6 content slots into the same age bands, so nothing already shipped changes.</li>
+</ul>
+
+<h3>A steady rhythm</h3>
+<table>
+  <tr><th>Cadence</th><th>Work</th></tr>
+  <tr><td>Each week</td><td>One new book or one new trace set, finished and read in the app at 390&nbsp;px; one Rebus batch approved.</td></tr>
+  <tr><td>Each content drop</td><td>Export, dry-run, import; open the live app as a child account; look for the new item.</td></tr>
+  <tr><td>Each month</td><td>Read the parent reports from your pilot families; let what children finish and what they abandon decide the next content.</td></tr>
+</table>
+
+<!-- ============================================================ -->
+<h2 id="release">4. Releasing and rolling back</h2>
+
+<h3>Shipping a code change</h3>
+<ol>
+  <li>Make the change on <code>main</code> locally and commit.</li>
+  <li><code>npm run lint</code> and the scoped tests for what changed; the full <code>npm test</code> when the machine is quiet.</li>
+  <li><strong>Pushing to <code>main</code> deploys.</strong> The pipeline runs CI (about 37 minutes), then deploys the API, the web service and the Firebase routing (about 5 minutes more).</li>
+  <li>Watch it: <code>gh run list --limit 3</code>, then <code>gh run view &lt;id&gt;</code>.</li>
+  <li>Confirm the new revisions are ready:
+<pre><code>gcloud run services describe koda-app --region us-central1 --project learn-with-koda \
+  --format='value(status.latestReadyRevisionName)'</code></pre></li>
+</ol>
+<div class="note">A phone that already has the app keeps the old version until the update prompt is accepted. Children never lose a round to an update: the new version waits until they choose it.</div>
+
+<h3>Rolling back</h3>
+<p>If a deploy goes wrong, send traffic back to the last good revision (no code change needed):</p>
+<pre><code>gcloud run revisions list --service koda-backend --region us-central1 --project learn-with-koda
+gcloud run services update-traffic koda-backend --region us-central1 --project learn-with-koda \
+  --to-revisions=&lt;previous-revision&gt;=100</code></pre>
+<p>Same for <code>koda-app</code>. Revisions before this release were <code>koda-app-00192-dqp</code> and <code>koda-backend-00243-7fz</code>. A code tag, <code>pre-mvp-cut</code>, marks the repository before the clean-up if you need to look back.</p>
+
+<!-- ============================================================ -->
+<h2 id="operate">5. Running it</h2>
+
+<table>
+  <tr><th>I want to…</th><th>Do this</th></tr>
+  <tr><td>See if the services are healthy</td><td><code>gcloud run services list --project learn-with-koda</code>; the API's health is at <code>/v1/health</code>.</td></tr>
+  <tr><td>Read recent errors</td><td><code>gcloud logging read 'resource.type=cloud_run_revision AND severity&gt;=ERROR' --project learn-with-koda --limit 20 --freshness=1h</code></td></tr>
+  <tr><td>Check the scheduled jobs</td><td><code>gcloud scheduler jobs list --location us-central1 --project learn-with-koda</code></td></tr>
+  <tr><td>Turn a feature on or off</td><td>System settings in the app (Ask Koda, mascot, backdrop, and so on). No deploy needed.</td></tr>
+  <tr><td>Reset the sidebar to defaults</td><td><code>python -m app.cli reset-menu</code> (against the production database)</td></tr>
+  <tr><td>Reset someone's password</td><td><code>python -m app.cli set-password</code></td></tr>
+  <tr><td>Change the sender or the SMTP details</td><td>GitHub repository variables and secrets, then a deploy.</td></tr>
+</table>
+
+<div class="note"><strong>Offline is a promise, not a bonus.</strong> Many homes have an unstable connection. Books, pictures, recordings, Rebus puzzles and trace sets are saved on the device when first fetched, and every network call has a deadline. If a screen ever gets stuck, it now offers a retry; tell me what you were doing and what the screen showed.</div>
+
+<!-- ============================================================ -->
+<h2 id="clients">6. Finding clients</h2>
+
+<div class="warn"><strong>These are proposals, not facts.</strong> I have no market research, pricing data or user numbers for Cambodia. Treat every statement below as a hypothesis to test with a small pilot (section 7), and replace it with what you learn.</div>
+
+<h3>Who it is for</h3>
+<table>
+  <tr><th>Segment</th><th>Why they might want Koda</th><th>What to prove</th></tr>
+  <tr><td><strong>Parents of children in Grades 1–3</strong> (start here)</td><td>They want to know how their child is doing without sitting next to them. Koda's weekly summary and daily reminder do exactly that. Khmer and English, works offline, a free plan.</td><td>The child practises on their own at least 3 days a week; the parent opens the summary.</td></tr>
+  <tr><td><strong>Teachers and small classes</strong></td><td>Rebus group rooms and a progress view suit a classroom; the content follows the national-style grade bands.</td><td>A teacher can run a 20-minute session with a shared phone or tablet.</td></tr>
+  <tr><td><strong>Tutoring and learning centres</strong></td><td>They need structured practice they can hand a child. Many children, few staff.</td><td>The centre keeps using it without you in the room.</td></tr>
+  <tr><td><strong>Khmer families abroad</strong> (later)</td><td>Children who need reading and numbers in Khmer. Offline use and the Khmer letters matter.</td><td>Only after the Cambodian pilot works.</td></tr>
+</table>
+
+<h3>What to say</h3>
+<ul>
+  <li><strong>For the parent:</strong> "Your child practises maths and reading for a few minutes a day, and you get a short message about how it went." Lead with the summary, not the features.</li>
+  <li><strong>For the teacher:</strong> "Twenty minutes of practice that follows your grade, in Khmer, with nothing to set up."</li>
+  <li><strong>Always true and checkable:</strong> works without internet after the first visit; free plan; no ads; progress visible to parents.</li>
+</ul>
+
+<h3>Where to reach them (to verify)</h3>
+<ul>
+  <li><strong>Where parents already talk:</strong> parent groups and school groups on the messaging and social apps your friends and relatives actually use. I believe Facebook and Telegram groups are common for this in Cambodia; <em>check this with the parents you know before spending any time.</em></li>
+  <li><strong>Through schools:</strong> ask one teacher you know to try it with one class for four weeks. A teacher who sees children asking to continue is the best introduction to the next school.</li>
+  <li><strong>Through your own network first:</strong> 20 to 30 families you can talk to. They will tell you what is confusing in the first minute.</li>
+  <li><strong>A short demo:</strong> a one-minute screen recording of a child finishing a lesson and the parent's summary arriving. This is the clearest sales material you can make.</li>
+</ul>
+
+<h3>Free plan and paying</h3>
+<ul>
+  <li>The app has plans and billing in place, and users start on the free plan. Decide <em>before</em> the pilot what stays free forever (I suggest: the core Grade 1–3 practice) and what a paid plan adds (for example more children, richer reports, Ask Koda).</li>
+  <li>Do not charge in the pilot. Ask instead: "Would you pay for this, and how much?" Their answers set the price, not a guess.</li>
+</ul>
+
+<h3>Privacy as a selling point</h3>
+<p>Parents and schools care what happens to a child's data. Say plainly what you collect, that there are no ads, and who can see a child's progress. The leaderboard design already limits what is shown (<code>docs/LEADERBOARD_PRIVACY.md</code>).</p>
+
+<!-- ============================================================ -->
+<h2 id="pilot">7. The first pilot</h2>
+
+<table>
+  <tr><th>Item</th><th>Plan</th></tr>
+  <tr><td>Size</td><td>20 to 30 families, or 2 to 3 classes. Small enough to talk to everyone.</td></tr>
+  <tr><td>Length</td><td>4 weeks.</td></tr>
+  <tr><td>Before it starts</td><td>All of section 2 done, especially email, a real phone test, and enough content: Rebus published, at least 2 to 3 Library books, one Trace set.</td></tr>
+  <tr><td>Week 1</td><td>Help each family install it to the home screen and sign in. Watch for where they stop.</td></tr>
+  <tr><td>Weeks 2–3</td><td>Do not change much. Fix only what blocks children. Add one new piece of content each week and see if it gets used.</td></tr>
+  <tr><td>Week 4</td><td>A short call with each family: what did the child ask to do again? What did the parent ignore? Would they pay, and how much?</td></tr>
+</table>
+
+<h3>What to measure</h3>
+<table>
+  <tr><th>Measure</th><th>Why</th></tr>
+  <tr><td>Children who practised in each of the 4 weeks</td><td>Retention, the number that matters most.</td></tr>
+  <tr><td>Days practised per child per week</td><td>Whether it became a habit.</td></tr>
+  <tr><td>Lessons finished versus started</td><td>Where lessons are too hard or dull.</td></tr>
+  <tr><td>Parents who opened the weekly summary</td><td>Whether the core promise lands.</td></tr>
+  <tr><td>Where the app got stuck or failed</td><td>Real phones on real networks.</td></tr>
+</table>
+<p>I have not checked whether the admin pages give you a view across all users. The per-child learning log and the parent report exist. If you need an overview across the whole pilot, tell me which numbers above you want on one screen and I will build it.</p>
+
+<h3>Decide at the end</h3>
+<ul>
+  <li><strong>Go:</strong> most children still practise in week 4, and parents say they read the summary.</li>
+  <li><strong>Fix first:</strong> children start but stop. Look at where and fix that, then repeat with new families.</li>
+  <li><strong>Rethink:</strong> children do not start. The problem is in the first minute or in how you reached them, not in the content.</li>
+</ul>
+
+<!-- ============================================================ -->
+<h2 id="open">8. Open items</h2>
+
+<table>
+  <tr><th>Item</th><th>Owner</th><th>Note</th></tr>
+  <tr><td>Configure email and send a real test summary</td><td><span class="tag you">You</span></td><td>Production still logs emails only.</td></tr>
+  <tr><td>Approve and publish Rebus</td><td><span class="tag you">You</span></td><td>Empty for children until done.</td></tr>
+  <tr><td>First content import into production</td><td><span class="tag you">You</span></td><td>Dry-run first; needs credentials for the audio bucket.</td></tr>
+  <tr><td>Book 2 pictures, Books 3–12, a Grade 2–3 shelf</td><td><span class="tag you">You</span></td><td>Plan in <code>docs/library-grade1-books-plan.md</code>.</td></tr>
+  <tr><td>Publish English Trace sets; draft Khmer sets</td><td><span class="tag you">You</span></td><td>Plan in <code>docs/ENGLISH_TRACE_PLAN.md</code>.</td></tr>
+  <tr><td>Fix the three menu label typos</td><td><span class="tag you">You</span></td><td>Menu page.</td></tr>
+  <tr><td>Test push and weak-network use on a real phone</td><td><span class="tag you">You</span></td><td>Tell me what you see.</td></tr>
+  <tr><td>Privacy policy and parent consent</td><td><span class="tag you">You</span></td><td>Check local requirements.</td></tr>
+  <tr><td>Cross-user pilot overview (optional)</td><td><span class="tag me">Claude</span></td><td>Only if you want it; say which numbers.</td></tr>
+  <tr><td>Skill registry and remaining large caches check on a low-end phone</td><td><span class="tag me">Claude</span></td><td>After the real phone test shows what is slow.</td></tr>
+  <tr><td>Further <code>App.tsx</code> split, smaller default menu</td><td><span class="tag me">Claude</span></td><td>Low value; left alone on purpose.</td></tr>
+</table>
+
+<footer>
+  Sources: <code>docs/MVP_PLAN.md</code>, <code>server/README.md</code>, <code>.github/workflows/deploy.yml</code>, the live Cloud Run configuration, and this session's checks.
+  Update this page when a step changes.
+</footer>
+
+</div>
+</body>
+</html>
