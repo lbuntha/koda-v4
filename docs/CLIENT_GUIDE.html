@@ -1,0 +1,166 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Koda Client Guide</title>
+<style>
+  :root {
+    --bg: #f8fafc; --card: #ffffff; --ink: #0f172a; --muted: #475569; --line: #e2e8f0;
+    --brand: #6b46c1; --brand-soft: #f1ecfb; --ok: #047857; --ok-soft: #e6f6ef;
+    --warn: #be123c; --warn-soft: #fdecef; --code: #f1f5f9;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #0d061a; --card: #17102a; --ink: #f1f5f9; --muted: #b6bfd0; --line: #2d2547;
+      --brand: #a78bfa; --brand-soft: #251a45; --ok: #34d399; --ok-soft: #0f2a22;
+      --warn: #fb7185; --warn-soft: #3a1520; --code: #0a0616;
+    }
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--ink); font: 16px/1.6 system-ui, -apple-system, "Segoe UI", sans-serif; }
+  .wrap { max-width: 880px; margin: 0 auto; padding: 24px 16px 80px; }
+  h1 { font-size: 2rem; line-height: 1.2; margin: 8px 0 4px; }
+  h2 { font-size: 1.4rem; margin: 40px 0 8px; padding-top: 8px; border-top: 1px solid var(--line); }
+  h3 { font-size: 1.1rem; margin: 24px 0 6px; }
+  p, li { color: var(--ink); }
+  .lead { color: var(--muted); margin: 0 0 16px; }
+  nav { background: var(--card); border: 1px solid var(--line); border-radius: 12px; padding: 12px 16px; margin: 20px 0; }
+  nav a { display: inline-block; margin: 2px 12px 2px 0; color: var(--brand); text-decoration: none; font-weight: 600; }
+  a { color: var(--brand); }
+  table { width: 100%; border-collapse: collapse; margin: 12px 0; font-size: 0.95rem; display: block; overflow-x: auto; }
+  th, td { text-align: left; padding: 8px 10px; border-bottom: 1px solid var(--line); vertical-align: top; }
+  th { background: var(--brand-soft); white-space: nowrap; }
+  pre { background: var(--code); border: 1px solid var(--line); border-radius: 10px; padding: 12px 14px; overflow-x: auto; font-size: 0.85rem; line-height: 1.5; }
+  code { background: var(--code); border-radius: 5px; padding: 1px 5px; font-size: 0.9em; }
+  pre code { background: none; padding: 0; }
+  .note, .warn, .ok { border-radius: 10px; padding: 10px 14px; margin: 14px 0; border: 1px solid var(--line); }
+  .note { background: var(--brand-soft); }
+  .warn { background: var(--warn-soft); border-color: var(--warn); }
+  .ok { background: var(--ok-soft); border-color: var(--ok); }
+  .tag { display: inline-block; font-size: 0.75rem; font-weight: 700; padding: 1px 8px; border-radius: 999px; margin-right: 6px; vertical-align: middle; }
+  .tag.you { background: var(--brand-soft); color: var(--brand); }
+  .tag.me { background: var(--ok-soft); color: var(--ok); }
+  .tag.open { background: var(--warn-soft); color: var(--warn); }
+  ul.check { list-style: none; padding-left: 0; }
+  ul.check li { padding: 6px 0 6px 30px; position: relative; border-bottom: 1px solid var(--line); }
+  ul.check li::before { content: ""; position: absolute; left: 4px; top: 11px; width: 16px; height: 16px; border: 2px solid var(--brand); border-radius: 4px; }
+  .grid { display: grid; gap: 12px; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); }
+  .card { background: var(--card); border: 1px solid var(--line); border-radius: 12px; padding: 12px 16px; }
+  .card h3 { margin-top: 4px; }
+  .flow { list-style: none; margin: 16px 0 8px; padding: 0; display: grid; gap: 0; counter-reset: step; }
+  .flow li { position: relative; margin: 0; padding: 0 0 18px 52px; counter-increment: step; }
+  .flow li::before { content: counter(step); position: absolute; left: 0; top: 0; width: 36px; height: 36px; border-radius: 50%; background: var(--brand); color: #fff; font-weight: 800; display: grid; place-items: center; }
+  .flow li::after { content: ""; position: absolute; left: 17px; top: 38px; bottom: 2px; width: 2px; background: var(--line); }
+  .flow li:last-child::after { display: none; }
+  .flow a { font-weight: 700; text-decoration: none; }
+  .flow small { display: block; color: var(--muted); }
+  .flow .gate { display: inline-block; font-size: 0.8rem; font-weight: 700; color: var(--ok); background: var(--ok-soft); border-radius: 999px; padding: 0 8px; margin-top: 2px; }
+  .loop { background: var(--brand-soft); border: 1px dashed var(--brand); border-radius: 12px; padding: 10px 14px; margin: 0 0 8px 52px; }
+  @media (min-width: 760px) {
+    .flow { grid-template-columns: repeat(3, 1fr); gap: 12px; }
+    .flow li { padding: 52px 12px 12px; background: var(--card); border: 1px solid var(--line); border-radius: 12px; }
+    .flow li::before { left: 12px; top: 10px; }
+    .flow li::after { display: none; }
+    .loop { margin-left: 0; }
+  }
+  footer { margin-top: 48px; color: var(--muted); font-size: 0.9rem; }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<h1>Koda client guide</h1>
+<p class="lead">Who to invite first, what to tell them, and how to run a four-week pilot that tells you whether to go on. The technical set-up and content steps are in the <a href="LAUNCH_GUIDE.html">launch guide</a>. Written 2026-10-31.</p>
+
+<nav aria-label="Sections">
+  <a href="#path">The path</a>
+  <a href="#clients">1. Finding clients</a>
+  <a href="#pilot">2. The first pilot</a>
+  <a href="LAUNCH_GUIDE.html">Launch guide &rarr;</a>
+</nav>
+
+<h2 id="path" style="border-top:0;margin-top:8px">The path in four steps</h2>
+<ol class="flow">
+  <li><a href="#clients">Pick the first group</a><small>Parents of Grade 1&ndash;3 children you can talk to.</small><span class="gate">Done when: 20&ndash;30 families said yes</span></li>
+  <li><a href="LAUNCH_GUIDE.html#before">Be ready</a><small>Email works, content is in, a real phone passed. (Launch guide.)</small><span class="gate">Done when: the launch checklist is ticked</span></li>
+  <li><a href="#pilot">Run 4 weeks</a><small>Help in week 1, add one piece of content a week, call each family at the end.</small><span class="gate">Done when: you have the five numbers</span></li>
+  <li><a href="#pilot">Decide</a><small>Go, fix first, or rethink. Then open to the next group.</small><span class="gate">Done when: you chose</span></li>
+</ol>
+
+<!-- ============================================================ -->
+<h2 id="clients">1. Finding clients</h2>
+
+<div class="warn"><strong>These are proposals, not facts.</strong> I have no market research, pricing data or user numbers for Cambodia. Treat every statement below as a hypothesis to test with a small pilot (section 2), and replace it with what you learn.</div>
+
+<h3>Who it is for</h3>
+<table>
+  <tr><th>Segment</th><th>Why they might want Koda</th><th>What to prove</th></tr>
+  <tr><td><strong>Parents of children in Grades 1–3</strong> (start here)</td><td>They want to know how their child is doing without sitting next to them. Koda's weekly summary and daily reminder do exactly that. Khmer and English, works offline, a free plan.</td><td>The child practises on their own at least 3 days a week; the parent opens the summary.</td></tr>
+  <tr><td><strong>Teachers and small classes</strong></td><td>Rebus group rooms and a progress view suit a classroom; the content follows the national-style grade bands.</td><td>A teacher can run a 20-minute session with a shared phone or tablet.</td></tr>
+  <tr><td><strong>Tutoring and learning centres</strong></td><td>They need structured practice they can hand a child. Many children, few staff.</td><td>The centre keeps using it without you in the room.</td></tr>
+  <tr><td><strong>Khmer families abroad</strong> (later)</td><td>Children who need reading and numbers in Khmer. Offline use and the Khmer letters matter.</td><td>Only after the Cambodian pilot works.</td></tr>
+</table>
+
+<h3>What to say</h3>
+<ul>
+  <li><strong>For the parent:</strong> "Your child practises maths and reading for a few minutes a day, and you get a short message about how it went." Lead with the summary, not the features.</li>
+  <li><strong>For the teacher:</strong> "Twenty minutes of practice that follows your grade, in Khmer, with nothing to set up."</li>
+  <li><strong>Always true and checkable:</strong> works without internet after the first visit; free plan; no ads; progress visible to parents.</li>
+</ul>
+
+<h3>Where to reach them (to verify)</h3>
+<ul>
+  <li><strong>Where parents already talk:</strong> parent groups and school groups on the messaging and social apps your friends and relatives actually use. I believe Facebook and Telegram groups are common for this in Cambodia; <em>check this with the parents you know before spending any time.</em></li>
+  <li><strong>Through schools:</strong> ask one teacher you know to try it with one class for four weeks. A teacher who sees children asking to continue is the best introduction to the next school.</li>
+  <li><strong>Through your own network first:</strong> 20 to 30 families you can talk to. They will tell you what is confusing in the first minute.</li>
+  <li><strong>A short demo:</strong> a one-minute screen recording of a child finishing a lesson and the parent's summary arriving. This is the clearest sales material you can make.</li>
+</ul>
+
+<h3>Free plan and paying</h3>
+<ul>
+  <li>The app has plans and billing in place, and users start on the free plan. Decide <em>before</em> the pilot what stays free forever (I suggest: the core Grade 1–3 practice) and what a paid plan adds (for example more children, richer reports, Ask Koda).</li>
+  <li>Do not charge in the pilot. Ask instead: "Would you pay for this, and how much?" Their answers set the price, not a guess.</li>
+</ul>
+
+<h3>Privacy as a selling point</h3>
+<p>Parents and schools care what happens to a child's data. Say plainly what you collect, that there are no ads, and who can see a child's progress. The leaderboard design already limits what is shown (<code>docs/LEADERBOARD_PRIVACY.md</code>).</p>
+
+<!-- ============================================================ -->
+<h2 id="pilot">2. The first pilot</h2>
+
+<table>
+  <tr><th>Item</th><th>Plan</th></tr>
+  <tr><td>Size</td><td>20 to 30 families, or 2 to 3 classes. Small enough to talk to everyone.</td></tr>
+  <tr><td>Length</td><td>4 weeks.</td></tr>
+  <tr><td>Before it starts</td><td>The whole <a href="LAUNCH_GUIDE.html#before">launch checklist</a> done, especially email, a real phone test, and enough content: Rebus published, at least 2 to 3 Library books, one Trace set.</td></tr>
+  <tr><td>Week 1</td><td>Help each family install it to the home screen and sign in. Watch for where they stop.</td></tr>
+  <tr><td>Weeks 2–3</td><td>Do not change much. Fix only what blocks children. Add one new piece of content each week and see if it gets used.</td></tr>
+  <tr><td>Week 4</td><td>A short call with each family: what did the child ask to do again? What did the parent ignore? Would they pay, and how much?</td></tr>
+</table>
+
+<h3>What to measure</h3>
+<table>
+  <tr><th>Measure</th><th>Why</th></tr>
+  <tr><td>Children who practised in each of the 4 weeks</td><td>Retention, the number that matters most.</td></tr>
+  <tr><td>Days practised per child per week</td><td>Whether it became a habit.</td></tr>
+  <tr><td>Lessons finished versus started</td><td>Where lessons are too hard or dull.</td></tr>
+  <tr><td>Parents who opened the weekly summary</td><td>Whether the core promise lands.</td></tr>
+  <tr><td>Where the app got stuck or failed</td><td>Real phones on real networks.</td></tr>
+</table>
+<p>I have not checked whether the admin pages give you a view across all users. The per-child learning log and the parent report exist. If you need an overview across the whole pilot, tell me which numbers above you want on one screen and I will build it.</p>
+
+<h3>Decide at the end</h3>
+<ul>
+  <li><strong>Go:</strong> most children still practise in week 4, and parents say they read the summary.</li>
+  <li><strong>Fix first:</strong> children start but stop. Look at where and fix that, then repeat with new families.</li>
+  <li><strong>Rethink:</strong> children do not start. The problem is in the first minute or in how you reached them, not in the content.</li>
+</ul>
+
+
+<footer>
+  Sources: this session's checks and the launch guide. Nothing here is market research; replace each hypothesis with what the pilot shows.
+</footer>
+</div>
+</body>
+</html>

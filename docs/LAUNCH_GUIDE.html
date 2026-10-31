@@ -71,7 +71,7 @@
 <div class="wrap">
 
 <h1>Koda launch guide</h1>
-<p class="lead">How to open Koda to its first families, how to keep adding content from Grade 1 upward, and how to find and win the first clients. Written 2026-10-31 from the code and the live deployment.</p>
+<p class="lead">How to open Koda to its first families and how to keep adding content from Grade 1 upward. Finding clients and running the pilot are in the separate <a href="CLIENT_GUIDE.html">client guide</a>. Written 2026-10-31 from the code and the live deployment.</p>
 
 <nav aria-label="Sections">
   <a href="#flow">The path</a>
@@ -80,26 +80,23 @@
   <a href="#content">3. Growing the content</a>
   <a href="#release">4. Releasing and rolling back</a>
   <a href="#operate">5. Running it</a>
-  <a href="#clients">6. Finding clients</a>
-  <a href="#pilot">7. The first pilot</a>
-  <a href="#open">8. Open items</a>
+  <a href="#open">6. Open items</a>
+  <a href="CLIENT_GUIDE.html">Client guide &rarr;</a>
 </nav>
 
-<h2 id="flow" style="border-top:0;margin-top:8px">The whole path in six steps</h2>
+<h2 id="flow" style="border-top:0;margin-top:8px">The path in four steps</h2>
 <ol class="flow">
   <li><a href="#before">Set up</a><small>Admin account, email, Ask Koda on or off, menu labels.</small><span class="gate">Done when: a real test email arrives</span></li>
   <li><a href="#content">Put content in</a><small>Publish Rebus; import Library books and Trace sets.</small><span class="gate">Done when: a child account sees them</span></li>
   <li><a href="#before">Test on a real phone</a><small>Install, go offline, check push, run one family end to end.</small><span class="gate">Done when: nothing sticks</span></li>
-  <li><a href="#clients">Choose who to invite</a><small>Start with parents of Grade 1&ndash;3 children you can talk to.</small><span class="gate">Done when: 20&ndash;30 families said yes</span></li>
-  <li><a href="#pilot">Run a 4-week pilot</a><small>Help in week 1, add one piece of content a week, then call each family.</small><span class="gate">Done when: you have the five numbers</span></li>
-  <li><a href="#pilot">Decide: go, fix, or rethink</a><small>Then open to the next group.</small><span class="gate">Done when: you chose</span></li>
+  <li><a href="CLIENT_GUIDE.html">Invite the first families</a><small>Who, what to say and the 4-week pilot are in the client guide.</small><span class="gate">Done when: the pilot has started</span></li>
 </ol>
 <div class="loop"><strong>Then repeat every week:</strong> finish one book or trace set &rarr; publish &rarr; import (<a href="#content">section 3</a>) &rarr; look at it as a child &rarr; read the parent reports &rarr; pick next week's content.</div>
 
 <div class="note"><strong>Who does what.</strong>
   <span class="tag you">You</span> own all content (books, pictures, trace sets, Rebus approval, accounts, email) and the business side.
   <span class="tag me">Claude</span> owns code and features. Where a step says <em>You</em>, it needs your judgement or your credentials.
-  The client section (6 and 7) is a set of proposals to test, not facts about the market.</div>
+  The <a href="CLIENT_GUIDE.html">client guide</a> is a set of proposals to test, not facts about the market.</div>
 
 <!-- ============================================================ -->
 <h2 id="state">1. Where it stands</h2>
@@ -265,76 +262,7 @@ gcloud run services update-traffic koda-backend --region us-central1 --project l
 <div class="note"><strong>Offline is a promise, not a bonus.</strong> Many homes have an unstable connection. Books, pictures, recordings, Rebus puzzles and trace sets are saved on the device when first fetched, and every network call has a deadline. If a screen ever gets stuck, it now offers a retry; tell me what you were doing and what the screen showed.</div>
 
 <!-- ============================================================ -->
-<h2 id="clients">6. Finding clients</h2>
-
-<div class="warn"><strong>These are proposals, not facts.</strong> I have no market research, pricing data or user numbers for Cambodia. Treat every statement below as a hypothesis to test with a small pilot (section 7), and replace it with what you learn.</div>
-
-<h3>Who it is for</h3>
-<table>
-  <tr><th>Segment</th><th>Why they might want Koda</th><th>What to prove</th></tr>
-  <tr><td><strong>Parents of children in Grades 1–3</strong> (start here)</td><td>They want to know how their child is doing without sitting next to them. Koda's weekly summary and daily reminder do exactly that. Khmer and English, works offline, a free plan.</td><td>The child practises on their own at least 3 days a week; the parent opens the summary.</td></tr>
-  <tr><td><strong>Teachers and small classes</strong></td><td>Rebus group rooms and a progress view suit a classroom; the content follows the national-style grade bands.</td><td>A teacher can run a 20-minute session with a shared phone or tablet.</td></tr>
-  <tr><td><strong>Tutoring and learning centres</strong></td><td>They need structured practice they can hand a child. Many children, few staff.</td><td>The centre keeps using it without you in the room.</td></tr>
-  <tr><td><strong>Khmer families abroad</strong> (later)</td><td>Children who need reading and numbers in Khmer. Offline use and the Khmer letters matter.</td><td>Only after the Cambodian pilot works.</td></tr>
-</table>
-
-<h3>What to say</h3>
-<ul>
-  <li><strong>For the parent:</strong> "Your child practises maths and reading for a few minutes a day, and you get a short message about how it went." Lead with the summary, not the features.</li>
-  <li><strong>For the teacher:</strong> "Twenty minutes of practice that follows your grade, in Khmer, with nothing to set up."</li>
-  <li><strong>Always true and checkable:</strong> works without internet after the first visit; free plan; no ads; progress visible to parents.</li>
-</ul>
-
-<h3>Where to reach them (to verify)</h3>
-<ul>
-  <li><strong>Where parents already talk:</strong> parent groups and school groups on the messaging and social apps your friends and relatives actually use. I believe Facebook and Telegram groups are common for this in Cambodia; <em>check this with the parents you know before spending any time.</em></li>
-  <li><strong>Through schools:</strong> ask one teacher you know to try it with one class for four weeks. A teacher who sees children asking to continue is the best introduction to the next school.</li>
-  <li><strong>Through your own network first:</strong> 20 to 30 families you can talk to. They will tell you what is confusing in the first minute.</li>
-  <li><strong>A short demo:</strong> a one-minute screen recording of a child finishing a lesson and the parent's summary arriving. This is the clearest sales material you can make.</li>
-</ul>
-
-<h3>Free plan and paying</h3>
-<ul>
-  <li>The app has plans and billing in place, and users start on the free plan. Decide <em>before</em> the pilot what stays free forever (I suggest: the core Grade 1–3 practice) and what a paid plan adds (for example more children, richer reports, Ask Koda).</li>
-  <li>Do not charge in the pilot. Ask instead: "Would you pay for this, and how much?" Their answers set the price, not a guess.</li>
-</ul>
-
-<h3>Privacy as a selling point</h3>
-<p>Parents and schools care what happens to a child's data. Say plainly what you collect, that there are no ads, and who can see a child's progress. The leaderboard design already limits what is shown (<code>docs/LEADERBOARD_PRIVACY.md</code>).</p>
-
-<!-- ============================================================ -->
-<h2 id="pilot">7. The first pilot</h2>
-
-<table>
-  <tr><th>Item</th><th>Plan</th></tr>
-  <tr><td>Size</td><td>20 to 30 families, or 2 to 3 classes. Small enough to talk to everyone.</td></tr>
-  <tr><td>Length</td><td>4 weeks.</td></tr>
-  <tr><td>Before it starts</td><td>All of section 2 done, especially email, a real phone test, and enough content: Rebus published, at least 2 to 3 Library books, one Trace set.</td></tr>
-  <tr><td>Week 1</td><td>Help each family install it to the home screen and sign in. Watch for where they stop.</td></tr>
-  <tr><td>Weeks 2–3</td><td>Do not change much. Fix only what blocks children. Add one new piece of content each week and see if it gets used.</td></tr>
-  <tr><td>Week 4</td><td>A short call with each family: what did the child ask to do again? What did the parent ignore? Would they pay, and how much?</td></tr>
-</table>
-
-<h3>What to measure</h3>
-<table>
-  <tr><th>Measure</th><th>Why</th></tr>
-  <tr><td>Children who practised in each of the 4 weeks</td><td>Retention, the number that matters most.</td></tr>
-  <tr><td>Days practised per child per week</td><td>Whether it became a habit.</td></tr>
-  <tr><td>Lessons finished versus started</td><td>Where lessons are too hard or dull.</td></tr>
-  <tr><td>Parents who opened the weekly summary</td><td>Whether the core promise lands.</td></tr>
-  <tr><td>Where the app got stuck or failed</td><td>Real phones on real networks.</td></tr>
-</table>
-<p>I have not checked whether the admin pages give you a view across all users. The per-child learning log and the parent report exist. If you need an overview across the whole pilot, tell me which numbers above you want on one screen and I will build it.</p>
-
-<h3>Decide at the end</h3>
-<ul>
-  <li><strong>Go:</strong> most children still practise in week 4, and parents say they read the summary.</li>
-  <li><strong>Fix first:</strong> children start but stop. Look at where and fix that, then repeat with new families.</li>
-  <li><strong>Rethink:</strong> children do not start. The problem is in the first minute or in how you reached them, not in the content.</li>
-</ul>
-
-<!-- ============================================================ -->
-<h2 id="open">8. Open items</h2>
+<h2 id="open">6. Open items</h2>
 
 <table>
   <tr><th>Item</th><th>Owner</th><th>Note</th></tr>
@@ -346,7 +274,7 @@ gcloud run services update-traffic koda-backend --region us-central1 --project l
   <tr><td>Fix the three menu label typos</td><td><span class="tag you">You</span></td><td>Menu page.</td></tr>
   <tr><td>Test push and weak-network use on a real phone</td><td><span class="tag you">You</span></td><td>Tell me what you see.</td></tr>
   <tr><td>Privacy policy and parent consent</td><td><span class="tag you">You</span></td><td>Check local requirements.</td></tr>
-  <tr><td>Cross-user pilot overview (optional)</td><td><span class="tag me">Claude</span></td><td>Only if you want it; say which numbers.</td></tr>
+  <tr><td>Cross-user pilot overview (optional)</td><td><span class="tag me">Claude</span></td><td>Only if you want it; see the <a href="CLIENT_GUIDE.html#pilot">client guide</a> for the numbers.</td></tr>
   <tr><td>Skill registry and remaining large caches check on a low-end phone</td><td><span class="tag me">Claude</span></td><td>After the real phone test shows what is slow.</td></tr>
   <tr><td>Further <code>App.tsx</code> split, smaller default menu</td><td><span class="tag me">Claude</span></td><td>Low value; left alone on purpose.</td></tr>
 </table>
