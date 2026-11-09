@@ -1,0 +1,9 @@
+# HTTPS for the domain in .env, renewed by Caddy on its own.
+#
+# The app already sends its built files compressed (scripts/precompress.mjs);
+# `encode` leaves those alone and compresses the API's JSON on the way out.
+# WebSockets — the voice coach, Rebus group play — pass through as they are.
+{$DOMAIN} {
+	encode zstd gzip
+	reverse_proxy app:3001
+}

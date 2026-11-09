@@ -1,0 +1,159 @@
+# Koda on one server: the whole production stack on a single VPS.
+#
+# A second home beside Cloud Run, not a replacement for it: nothing here reads
+# or changes the Google deployment, so both can run while this one is checked.
+# The steps are in README.md beside this file; `deploy.sh` runs them.
+#
+#   caddy   HTTPS for $DOMAIN, certificates from Let's Encrypt, forwards to app
+#   app     the built web app and the Node server (the `prod` Dockerfile stage)
+#   api     the FastAPI service
+#   mongo   the database, on a volume, never published outside this network
+#   tasks   the scheduled jobs Cloud Scheduler used to call
+#   backup  a nightly mongodump into ./backups
+#
+# Every value comes from `.env` here (copy env.example). Compose refuses to start
+# with a required one missing — the `:?` below — rather than starting broken.
+
+name: koda
+
+x-restart: &restart
+  restart: unless-stopped
+  logging:
+    driver: json-file
+    options: { max-size: '10m', max-file: '5' }
+
+services:
+  caddy:
+    <<: *restart
+    image: caddy:2.8
+    ports:
+      - '80:80'
+      - '443:443'
+      - '443:443/udp'
+    environment:
+      DOMAIN: ${DOMAIN:?set DOMAIN in .env}
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy-data:/data
+      - caddy-config:/config
+    depends_on:
+      - app
+
+  app:
+    <<: *restart
+    build:
+      context: ../..
+      target: prod
+      # Read by Vite at build time, so they are build arguments: the browser
+      # bundle is written before any runtime variable could reach it.
+      args:
+        VITE_GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID:-}
+        VITE_FIREBASE_API_KEY: ${VITE_FIREBASE_API_KEY:-}
+        VITE_FIREBASE_PROJECT_ID: ${VITE_FIREBASE_PROJECT_ID:-}
+        VITE_FIREBASE_APP_ID: ${VITE_FIREBASE_APP_ID:-}
+        VITE_FIREBASE_MESSAGING_SENDER_ID: ${VITE_FIREBASE_MESSAGING_SENDER_ID:-}
+        VITE_FIREBASE_VAPID_KEY: ${VITE_FIREBASE_VAPID_KEY:-}
+    environment:
+      NODE_ENV: production
+      PORT: '3001'
+      API_URL: http://api:8000
+      TUTOR_SERVICE_TOKEN: ${TUTOR_SERVICE_TOKEN:?set TUTOR_SERVICE_TOKEN in .env}
+      # Empty: Caddy passes the voice socket through, so it opens on the page's
+      # own origin. Cloud Run needed a second origin only because Firebase
+      # Hosting would not upgrade the connection.
+      LIVE_WS_ORIGIN: ''
+    depends_on:
+      api:
+        condition: service_healthy
+
+  api:
+    <<: *restart
+    build:
+      context: ../../server
+    environment:
+      ENVIRONMENT: production
+      MONGODB_URI: mongodb://${MONGO_USER:?set MONGO_USER in .env}:${MONGO_PASSWORD:?set MONGO_PASSWORD in .env}@mongo:27017/?authSource=admin
+      MONGODB_DB: koda_v4
+      JWT_SECRET: ${JWT_SECRET:?set JWT_SECRET in .env}
+      TUTOR_SERVICE_TOKEN: ${TUTOR_SERVICE_TOKEN}
+      GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID:-}
+      APP_BASE_URL: https://${DOMAIN}
+      CORS_ORIGINS: '["https://${DOMAIN}"]'
+      # Recordings and paintings on the `api-data` volume rather than a bucket:
+      # one server is one disk, so every request sees the same files.
+      DATA_DIRS_PERSIST: 'true'
+      TASK_TOKEN: ${TASK_TOKEN:?set TASK_TOKEN in .env}
+      REQUIRE_EMAIL_VERIFICATION: ${REQUIRE_EMAIL_VERIFICATION:-false}
+      MAIL_DRIVER: ${MAIL_DRIVER:-console}
+      SMTP_HOST: ${SMTP_HOST:-}
+      SMTP_PORT: ${SMTP_PORT:-587}
+      SMTP_STARTTLS: ${SMTP_STARTTLS:-true}
+      SMTP_USER: ${SMTP_USER:-}
+      SMTP_PASSWORD: ${SMTP_PASSWORD:-}
+      MAIL_FROM: ${MAIL_FROM:-Koda <no-reply@koda.local>}
+      # Push still goes through Firebase Cloud Messaging. On Cloud Run the
+      # service account was the credential; here it is a key file in ./secrets.
+      PUSH_DRIVER: ${PUSH_DRIVER:-console}
+      FIREBASE_PROJECT_ID: ${FIREBASE_PROJECT_ID:-}
+      GOOGLE_APPLICATION_CREDENTIALS: /secrets/firebase-service-account.json
+    volumes:
+      - api-data:/srv/data
+      - ./secrets:/secrets:ro
+    healthcheck:
+      test: ['CMD', 'python', '-c', "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/v1/health', timeout=4)"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 30s
+    depends_on:
+      mongo:
+        condition: service_healthy
+
+  mongo:
+    <<: *restart
+    image: mongo:7
+    # No `ports:` on purpose. Only the containers on this network reach it.
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: ${MONGO_USER}
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_PASSWORD}
+    volumes:
+      - mongo-data:/data/db
+    healthcheck:
+      test: ['CMD', 'mongosh', '--quiet', '--eval', "db.adminCommand('ping').ok"]
+      interval: 5s
+      timeout: 5s
+      retries: 12
+      start_period: 10s
+
+  tasks:
+    <<: *restart
+    image: alpine:3.20
+    environment:
+      TASK_TOKEN: ${TASK_TOKEN}
+    volumes:
+      - ./tasks.sh:/tasks.sh:ro
+    entrypoint: ['sh', '/tasks.sh']
+    depends_on:
+      api:
+        condition: service_healthy
+
+  backup:
+    <<: *restart
+    image: mongo:7
+    environment:
+      MONGODB_URI: mongodb://${MONGO_USER}:${MONGO_PASSWORD}@mongo:27017/?authSource=admin
+      BACKUP_KEEP_DAYS: ${BACKUP_KEEP_DAYS:-14}
+    volumes:
+      - ./backup.sh:/backup.sh:ro
+      - ./backups:/backups
+      - api-data:/srv/data:ro
+    entrypoint: ['bash', '/backup.sh']
+    depends_on:
+      mongo:
+        condition: service_healthy
+
+volumes:
+  mongo-data:
+  api-data:
+  caddy-data:
+  caddy-config:

@@ -18,6 +18,10 @@ Three things are checked, and each closes a different hole:
    scheduler's service account. Audience alone would let anything that can
    reach Cloud Run and mint a token for it in.
 
+A server with no Google in front of it (`deploy/vps`) has no OIDC token to
+send, so `TASK_TOKEN` is a second key to the same door: a shared secret its own
+cron presents. It is checked first and only when set.
+
 **Fail closed.** With no service account configured, this refuses every request
 outside development rather than falling back to "allow" — the shape
 `main.py` already uses when it declines to start on the development JWT secret.
@@ -26,6 +30,7 @@ refusing costs it nothing and protects it from the version of this file that
 guessed.
 """
 
+import hmac
 import logging
 
 from fastapi import Request
@@ -53,6 +58,16 @@ async def scheduler_only(request: Request) -> str:
     cfg = settings()
     expected_caller = cfg.push_task_service_account
     audience = cfg.push_task_audience
+
+    # A server's own cron, where there is no Google to mint a token. Compared in
+    # constant time; anything else falls through to the OIDC check below.
+    if cfg.task_token:
+        header = request.headers.get("Authorization") or ""
+        scheme, _, presented = header.partition(" ")
+        if scheme.lower() == "bearer" and hmac.compare_digest(
+            presented.strip().encode(), cfg.task_token.encode()
+        ):
+            return "cron"
 
     if not expected_caller or not audience:
         if cfg.is_dev:

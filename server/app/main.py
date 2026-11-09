@@ -91,11 +91,12 @@ def refuse_unsafe_deployment(cfg: Settings) -> None:
         return
     if cfg.jwt_secret.startswith("dev-only-change-me"):
         raise RuntimeError("JWT_SECRET is still the development default — refusing to start.")
-    if not cfg.library_audio_bucket:
+    if not cfg.library_audio_bucket and not cfg.data_dirs_persist:
         raise RuntimeError(
             "LIBRARY_AUDIO_BUCKET is not set — refusing to start. "
             "Book recordings would be written to this instance's own disk, "
-            "lost on the next deploy and invisible to every other instance."
+            "lost on the next deploy and invisible to every other instance. "
+            "On a single server whose data folder is a volume, set DATA_DIRS_PERSIST=true."
         )
 
 

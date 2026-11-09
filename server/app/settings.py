@@ -23,6 +23,10 @@ class Settings(BaseSettings):
     #: Children's finished Trace paintings: this folder in development; in
     #: production the bucket above, under a `trace-paintings/` prefix.
     trace_paintings_dir: str = "data/trace-paintings"
+    #: The two folders above are a volume that outlives the container. True on
+    #: a single server (`deploy/vps`), where one disk is every instance's disk
+    #: and the bucket has no job left to do. Cloud Run never sets it.
+    data_dirs_persist: bool = False
 
     # Dev default so `make dev-local` works out of the box. Production supplies
     # a real one; `main.py` refuses to start with this value outside dev.
@@ -113,6 +117,10 @@ class Settings(BaseSettings):
     #: no scheduler has no jobs to lose.
     push_task_audience: str | None = None
     push_task_service_account: str | None = None
+    #: The same door for a deployment with no Google scheduler: a cron beside
+    #: the service sends `Bearer <task_token>`. A long random string, held by
+    #: the API and its cron and nothing else. Unset, only OIDC is accepted.
+    task_token: str | None = None
 
     cors_origins: list[str] = ["http://localhost:3001", "http://localhost:3002"]
     environment: str = "development"

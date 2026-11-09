@@ -165,6 +165,31 @@ async def test_an_unconfigured_production_deployment_refuses_every_job(client, m
     assert response.json()["error"]["code"] == "task_auth_unconfigured"
 
 
+async def test_the_servers_own_cron_is_let_through_with_the_task_token(client, monkeypatch):
+    """deploy/vps: no Google scheduler, so a shared secret opens the same door."""
+    monkeypatch.setattr(settings(), "environment", "production")
+    monkeypatch.setattr(settings(), "push_task_service_account", None)
+    monkeypatch.setattr(settings(), "task_token", "a-long-random-cron-secret")
+
+    response = await client.post(
+        "/tasks/token-sweep", headers={"Authorization": "Bearer a-long-random-cron-secret"}
+    )
+
+    assert response.status_code == 200
+    assert response.json()["job"] == "token-sweep"
+
+
+async def test_a_wrong_task_token_is_refused(client, monkeypatch):
+    monkeypatch.setattr(settings(), "environment", "production")
+    monkeypatch.setattr(settings(), "push_task_service_account", None)
+    monkeypatch.setattr(settings(), "task_token", "a-long-random-cron-secret")
+
+    for header in ("Bearer guessed", "Bearer a-long-random-cron-secret-plus", "a-long-random-cron-secret"):
+        response = await client.post("/tasks/token-sweep", headers={"Authorization": header})
+        assert response.status_code == 403
+        assert response.json()["error"]["code"] == "task_auth_unconfigured"
+
+
 # --- the weekly summary ---------------------------------------------------
 
 

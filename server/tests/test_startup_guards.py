@@ -24,6 +24,11 @@ def test_production_with_a_bucket_starts():
     refuse_unsafe_deployment(Settings(**PROD, library_audio_bucket="koda-library-audio"))
 
 
+def test_a_single_server_with_a_persistent_disk_starts_without_a_bucket():
+    # deploy/vps: one machine, its data folder a docker volume.
+    refuse_unsafe_deployment(Settings(**PROD, library_audio_bucket=None, data_dirs_persist=True))
+
+
 def test_production_still_refuses_the_development_secret():
     # Spelled out rather than left to the environment: a .env beside the tests
     # would otherwise supply a real secret and the guard would look broken.
