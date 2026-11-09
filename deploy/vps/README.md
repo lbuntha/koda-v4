@@ -112,6 +112,24 @@ aloud, the voice coach, a Rebus group game, a push notification. Then:
 - Keep the Atlas cluster until a few weekly backups exist here.
 - **Keep the Firebase project** — push notifications depend on it.
 
+## Deploy from GitHub on every push
+
+The `deploy-vps` job in `.github/workflows/deploy.yml` runs `deploy.sh` after
+the tests pass. It is skipped until configured. Once the first manual deploy
+(step 3) works:
+
+```sh
+ssh-keygen -t ed25519 -N '' -C github-deploy -f /tmp/koda-deploy
+ssh-copy-id -i /tmp/koda-deploy.pub root@<ip>
+gh secret set VPS_SSH_KEY < /tmp/koda-deploy
+ssh-keyscan <ip> | gh secret set VPS_KNOWN_HOSTS
+gh variable set VPS_HOST --body <ip>
+rm /tmp/koda-deploy /tmp/koda-deploy.pub
+```
+
+The next push to main deploys to the VPS. To stop, delete the `VPS_HOST`
+variable.
+
 ## Every day
 
 ```sh

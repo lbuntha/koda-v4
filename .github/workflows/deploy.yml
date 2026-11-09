@@ -248,6 +248,42 @@ jobs:
           app_url="$(gcloud run services describe "$APP_SERVICE" --project "$GCP_PROJECT_ID" --region "$GCP_REGION" --format='value(status.url)')"
           curl --fail --show-error --silent --retry 6 --retry-all-errors --retry-delay 5 "$app_url/" > /dev/null
 
+  # The VPS (deploy/vps), beside Cloud Run until it replaces it. Needs only the
+  # tests, not the Google jobs, so it keeps working once those are removed.
+  #
+  # Off until the repository variable VPS_HOST is set — the job is skipped,
+  # not failed. Then it also needs the secrets VPS_SSH_KEY (a private key
+  # whose public half is in the server's authorized_keys) and VPS_KNOWN_HOSTS
+  # (`ssh-keyscan <ip>`, taken once from a machine you trust, so a server
+  # answering in its place is refused rather than deployed to).
+  deploy-vps:
+    name: Deploy to the VPS
+    runs-on: ubuntu-latest
+    needs: ci-verification
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push' && vars.VPS_HOST != ''
+    concurrency:
+      group: koda-vps
+      cancel-in-progress: false
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install the SSH key
+        env:
+          VPS_SSH_KEY: ${{ secrets.VPS_SSH_KEY }}
+          VPS_KNOWN_HOSTS: ${{ secrets.VPS_KNOWN_HOSTS }}
+        run: |
+          test -n "$VPS_SSH_KEY"
+          test -n "$VPS_KNOWN_HOSTS"
+          install -m 700 -d ~/.ssh
+          printf '%s\n' "$VPS_SSH_KEY" > ~/.ssh/id_ed25519
+          chmod 600 ~/.ssh/id_ed25519
+          printf '%s\n' "$VPS_KNOWN_HOSTS" > ~/.ssh/known_hosts
+
+      - name: Copy, build and start
+        env:
+          VPS: ${{ vars.VPS_USER || 'root' }}@${{ vars.VPS_HOST }}
+        run: deploy/vps/deploy.sh
+
   deploy-hosting:
     name: Route Firebase Hosting to Koda
     runs-on: ubuntu-latest
