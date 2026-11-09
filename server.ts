@@ -1,4 +1,5 @@
 import express from "express";
+import fs from "fs";
 import http from "http";
 import path from "path";
 import { createServer as createViteServer } from "vite";
@@ -751,6 +752,51 @@ Reply with JSON only:
 });
 
 /** A photo the browser sent, as `data:image/…;base64,…`: its type and data, or null if it is not one or is too big. */
+/**
+ * Sends the brotli or gzip copy of a built file when the browser takes one.
+ *
+ * `scripts/precompress.mjs` writes them at build time; nothing in front of the
+ * server on Cloud Run compresses, so this is the only place it happens. The
+ * copies are listed once at startup — dist/ never changes while the server
+ * runs — so a request costs a set lookup, not a disk check.
+ */
+function serveCompressed(root: string): express.RequestHandler {
+  const built = new Set<string>();
+  const walk = (dir: string) => {
+    for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
+      const full = path.join(dir, entry.name);
+      if (entry.isDirectory()) walk(full);
+      else built.add(full);
+    }
+  };
+  if (fs.existsSync(root)) walk(root);
+
+  return (req, res, next) => {
+    if (req.method !== "GET" && req.method !== "HEAD") return next();
+    let file: string;
+    try {
+      file = path.join(root, decodeURIComponent(req.path));
+    } catch {
+      return next();
+    }
+    if (!built.has(`${file}.br`) && !built.has(`${file}.gz`)) return next();
+    // The answer depends on the header, so any cache on the way must key on it.
+    res.setHeader("Vary", "Accept-Encoding");
+    const accepted = String(req.headers["accept-encoding"] ?? "");
+    for (const [encoding, suffix] of [["br", ".br"], ["gzip", ".gz"]] as const) {
+      if (!built.has(file + suffix) || !new RegExp(`\\b${encoding}\\b`).test(accepted)) continue;
+      res.setHeader("Content-Encoding", encoding);
+      // Set before express.static runs: it keeps a type already on the response,
+      // where it would otherwise name the `.br` file's type.
+      res.type(path.extname(file));
+      const query = req.url.indexOf("?");
+      req.url = query < 0 ? req.url + suffix : req.url.slice(0, query) + suffix + req.url.slice(query);
+      break;
+    }
+    next();
+  };
+}
+
 function readPhoto(image: unknown): { mimeType: string; data: string } | null {
   if (typeof image !== "string" || image.length > 3_000_000) return null;
   const m = /^data:(image\/(?:jpeg|png|webp));base64,(.+)$/.exec(image);
@@ -2584,10 +2630,12 @@ async function startServer() {
   } else {
     const distPath = path.join(process.cwd(), "dist");
 
+    app.use(serveCompressed(distPath));
     app.use(
       express.static(distPath, {
         setHeaders(res, filePath) {
-          const name = path.basename(filePath);
+          // `index-x.js.br` is cached as `index-x.js` is: the copy is the same file.
+          const name = path.basename(filePath).replace(/\.(?:br|gz)$/, "");
           // The service worker and the manifest must never be served stale: a
           // cached sw.js is the classic way a PWA pins itself to an old build
           // and stops taking updates. Everything else in dist is content-hashed

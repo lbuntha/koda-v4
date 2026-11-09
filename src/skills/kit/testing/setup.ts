@@ -36,3 +36,12 @@ if (typeof window !== "undefined" && !window.matchMedia) {
     dispatchEvent: () => false,
   })) as typeof window.matchMedia;
 }
+
+/**
+ * jsdom has no media playback, and its `pause()` logs "Not implemented" into
+ * the run's output. Stopping a clip that never played is a no-op in a browser
+ * too, so a silent one is the faithful stand-in.
+ */
+if (typeof HTMLMediaElement !== "undefined") {
+  HTMLMediaElement.prototype.pause = () => {};
+}
