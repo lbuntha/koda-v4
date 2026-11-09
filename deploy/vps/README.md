@@ -15,35 +15,33 @@ What changes from Cloud Run:
 | MongoDB Atlas                     | `mongo` container, `mongo-data` volume            |
 | Recordings in a GCS bucket        | `api-data` volume (`DATA_DIRS_PERSIST=true`)      |
 | Cloud Scheduler + OIDC token      | `tasks` container + `TASK_TOKEN`                  |
-| Firebase Hosting in front         | Caddy, HTTPS from Let's Encrypt                   |
+| Firebase Hosting in front         | the server's nginx + certbot (or Caddy)           |
+| Cloud Build images                | GitHub Actions → ghcr.io, the server pulls        |
 | Service account sends push        | a key file in `secrets/`                          |
 | Atlas backups                     | `backup` container, daily into `backups/`         |
 
 ## 1. Prepare the server (once)
 
-Ubuntu 22.04/24.04, at least 2 vCPU / 4 GB RAM (the web build is the hungry
-part; `setup-server.sh` adds swap). Copy your SSH key in hPanel → VPS →
-Settings → SSH keys, then from your machine:
+Ubuntu 22.04/24.04 with Docker. Add your SSH key in hPanel → VPS → Settings →
+SSH keys.
 
-```sh
-scp deploy/vps/setup-server.sh root@<ip>:/root/
-ssh root@<ip> bash /root/setup-server.sh
-```
+- **A server already running other sites behind nginx** (Koda's does: n8n,
+  DockPanel): nothing to install. Koda listens on `127.0.0.1:3101` and
+  `deploy.sh` adds one nginx site for its domain. Leave the firewall alone.
+- **An empty server:** `setup-server.sh` installs Docker, a firewall and swap;
+  then start with `docker compose --profile caddy up -d` and Caddy does HTTPS.
 
 ## 2. Point a domain at it
 
-Create an `A` record for the domain (e.g. `app.example.com`) → the VPS IP.
-Caddy needs it resolving before the first start to get a certificate.
+Create an `A` record for the domain (e.g. `koda.example.com`) → the VPS IP.
 
 ## 3. First deploy
 
+On the server, create the settings file:
+
 ```sh
-VPS=root@<ip> deploy/vps/deploy.sh      # copies the code; stops: .env missing
-ssh root@<ip>
-cd /opt/koda/deploy/vps
-cp env.example .env && nano .env        # see the notes inside
-exit
-VPS=root@<ip> deploy/vps/deploy.sh      # builds and starts; ends with a health check
+mkdir -p /opt/koda/deploy/vps && cd /opt/koda/deploy/vps
+nano .env        # from env.example; secrets: openssl rand -hex 32
 ```
 
 Reuse `JWT_SECRET` and `TUTOR_SERVICE_TOKEN` from Cloud Run so families stay
@@ -52,6 +50,19 @@ signed in and saved API keys still open:
 ```sh
 gcloud run services describe koda-backend --region us-central1 \
   --format='value(spec.template.spec.containers[0].env)' | tr ';' '\n' | grep -E 'JWT_SECRET|TUTOR_SERVICE_TOKEN'
+```
+
+Then deploy — from GitHub (Actions → CI & Deployment → *Run workflow*, once
+step "Deploy from GitHub" below is set up), or from your machine:
+
+```sh
+VPS=root@<ip> deploy/vps/deploy.sh --build    # builds on the server: slow, memory-hungry
+```
+
+The first deploy installs `/etc/nginx/sites-available/koda`. Add HTTPS:
+
+```sh
+certbot --nginx -d <domain>
 ```
 
 ## 4. Google sign-in
@@ -114,9 +125,12 @@ aloud, the voice coach, a Rebus group game, a push notification. Then:
 
 ## Deploy from GitHub on every push
 
-The `deploy-vps` job in `.github/workflows/deploy.yml` runs `deploy.sh` after
-the tests pass. It is skipped until configured. Once the first manual deploy
-(step 3) works:
+The `deploy-vps` job in `.github/workflows/deploy.yml` runs after the tests:
+it builds both images, pushes them to ghcr.io (tagged with the commit), and
+runs `deploy.sh` over SSH, which pulls them and restarts. The server never
+builds. It also runs from Actions → *Run workflow*, without touching Cloud Run.
+
+It is skipped until configured:
 
 ```sh
 ssh-keygen -t ed25519 -N '' -C github-deploy -f /tmp/koda-deploy
@@ -127,13 +141,13 @@ gh variable set VPS_HOST --body <ip>
 rm /tmp/koda-deploy /tmp/koda-deploy.pub
 ```
 
-The next push to main deploys to the VPS. To stop, delete the `VPS_HOST`
-variable.
+To stop deploying there, delete the `VPS_HOST` variable. To go back to an
+earlier commit, on the server: `KODA_TAG=<sha> docker compose up -d app api`.
 
 ## Every day
 
 ```sh
-VPS=root@<ip> deploy/vps/deploy.sh      # deploy what is on your machine
+git push                                 # GitHub tests, builds and deploys
 ssh root@<ip> 'cd /opt/koda/deploy/vps && docker compose logs -f --tail=100 api'
 ssh root@<ip> 'cd /opt/koda/deploy/vps && docker compose logs tasks backup'
 ```

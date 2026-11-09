@@ -5,6 +5,9 @@ on:
     branches: [main]
   pull_request:
     branches: [main]
+  # "Run workflow" in the Actions tab: tests, then the VPS only. The Cloud Run
+  # jobs run on a push and are skipped here.
+  workflow_dispatch:
 
 permissions:
   contents: read
@@ -251,6 +254,10 @@ jobs:
   # The VPS (deploy/vps), beside Cloud Run until it replaces it. Needs only the
   # tests, not the Google jobs, so it keeps working once those are removed.
   #
+  # The images are built here and pushed to ghcr.io; the server only pulls
+  # them, because it is shared with other services and the web build needs
+  # more memory than it can spare.
+  #
   # Off until the repository variable VPS_HOST is set — the job is skipped,
   # not failed. Then it also needs the secrets VPS_SSH_KEY (a private key
   # whose public half is in the server's authorized_keys) and VPS_KNOWN_HOSTS
@@ -260,12 +267,40 @@ jobs:
     name: Deploy to the VPS
     runs-on: ubuntu-latest
     needs: ci-verification
-    if: github.ref == 'refs/heads/main' && github.event_name == 'push' && vars.VPS_HOST != ''
+    if: github.ref == 'refs/heads/main' && (github.event_name == 'push' || github.event_name == 'workflow_dispatch') && vars.VPS_HOST != ''
+    permissions:
+      contents: read
+      packages: write
     concurrency:
       group: koda-vps
       cancel-in-progress: false
+    env:
+      GOOGLE_CLIENT_ID: ${{ vars.GOOGLE_CLIENT_ID }}
+      VITE_FIREBASE_API_KEY: ${{ vars.VITE_FIREBASE_API_KEY }}
+      VITE_FIREBASE_PROJECT_ID: ${{ vars.VITE_FIREBASE_PROJECT_ID }}
+      VITE_FIREBASE_APP_ID: ${{ vars.VITE_FIREBASE_APP_ID }}
+      VITE_FIREBASE_MESSAGING_SENDER_ID: ${{ vars.VITE_FIREBASE_MESSAGING_SENDER_ID }}
+      VITE_FIREBASE_VAPID_KEY: ${{ vars.VITE_FIREBASE_VAPID_KEY }}
     steps:
       - uses: actions/checkout@v4
+
+      - name: Log in to GitHub's container registry
+        run: echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u "${{ github.actor }}" --password-stdin
+
+      - name: Build and push the images
+        run: |
+          app=ghcr.io/lbuntha/koda-app
+          api=ghcr.io/lbuntha/koda-api
+          docker build --target prod \
+            --build-arg VITE_GOOGLE_CLIENT_ID="$GOOGLE_CLIENT_ID" \
+            --build-arg VITE_FIREBASE_API_KEY="$VITE_FIREBASE_API_KEY" \
+            --build-arg VITE_FIREBASE_PROJECT_ID="$VITE_FIREBASE_PROJECT_ID" \
+            --build-arg VITE_FIREBASE_APP_ID="$VITE_FIREBASE_APP_ID" \
+            --build-arg VITE_FIREBASE_MESSAGING_SENDER_ID="$VITE_FIREBASE_MESSAGING_SENDER_ID" \
+            --build-arg VITE_FIREBASE_VAPID_KEY="$VITE_FIREBASE_VAPID_KEY" \
+            -t "$app:${{ github.sha }}" -t "$app:latest" .
+          docker build -t "$api:${{ github.sha }}" -t "$api:latest" server
+          for image in "$app" "$api"; do docker push --all-tags "$image"; done
 
       - name: Install the SSH key
         env:
@@ -279,9 +314,13 @@ jobs:
           chmod 600 ~/.ssh/id_ed25519
           printf '%s\n' "$VPS_KNOWN_HOSTS" > ~/.ssh/known_hosts
 
-      - name: Copy, build and start
+      - name: Pull and start on the server
         env:
           VPS: ${{ vars.VPS_USER || 'root' }}@${{ vars.VPS_HOST }}
+          KODA_TAG: ${{ github.sha }}
+          # Lives for this job only; the server logs out again after the pull.
+          GHCR_USER: ${{ github.actor }}
+          GHCR_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: deploy/vps/deploy.sh
 
   deploy-hosting:

@@ -4,9 +4,15 @@
 # or changes the Google deployment, so both can run while this one is checked.
 # The steps are in README.md beside this file; `deploy.sh` runs them.
 #
-#   caddy   HTTPS for $DOMAIN, certificates from Let's Encrypt, forwards to app
+#   caddy   HTTPS for $DOMAIN — only with `--profile caddy`, on a server with
+#           nothing else on ports 80/443. Otherwise the server's own nginx
+#           forwards to the app (nginx-site.conf).
 #   app     the built web app and the Node server (the `prod` Dockerfile stage)
 #   api     the FastAPI service
+#
+# app and api are built by GitHub Actions and pulled from ghcr.io, so a small
+# server shared with other services never runs the memory-hungry web build.
+# `build:` stays for a server that should build for itself (`deploy.sh --build`).
 #   mongo   the database, on a volume, never published outside this network
 #   tasks   the scheduled jobs Cloud Scheduler used to call
 #   backup  a nightly mongodump into ./backups
@@ -26,6 +32,7 @@ services:
   caddy:
     <<: *restart
     image: caddy:2.8
+    profiles: ['caddy']
     ports:
       - '80:80'
       - '443:443'
@@ -41,6 +48,10 @@ services:
 
   app:
     <<: *restart
+    image: ghcr.io/lbuntha/koda-app:${KODA_TAG:-latest}
+    # Loopback only: the server's nginx (or Caddy) is the public door.
+    ports:
+      - '127.0.0.1:${APP_PORT:-3101}:3001'
     build:
       context: ../..
       target: prod
@@ -68,6 +79,7 @@ services:
 
   api:
     <<: *restart
+    image: ghcr.io/lbuntha/koda-api:${KODA_TAG:-latest}
     build:
       context: ../../server
     environment:
@@ -113,6 +125,9 @@ services:
     <<: *restart
     image: mongo:7
     # No `ports:` on purpose. Only the containers on this network reach it.
+    # The cache is capped: left alone MongoDB takes half the machine's memory,
+    # which a server shared with other services does not have to give.
+    command: ['--wiredTigerCacheSizeGB', '${MONGO_CACHE_GB:-0.5}']
     environment:
       MONGO_INITDB_ROOT_USERNAME: ${MONGO_USER}
       MONGO_INITDB_ROOT_PASSWORD: ${MONGO_PASSWORD}
