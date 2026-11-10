@@ -326,7 +326,7 @@ export function draftLocally(base: Omit<Passage, "rev">, keys: readonly string[]
 export function mergeWords(s: Sentence, index: number, lang: Language): Sentence {
   if (index < 0 || index >= s.words.length - 1) return s;
   const words = [...s.words];
-  words.splice(index, 2, words[index] + (lang === "km" ? "" : " ") + words[index + 1]);
+  words.splice(index, 2, words[index].trimEnd() + (lang === "km" ? "" : " ") + words[index + 1]);
   // A changed split invalidates the old per-word timing offsets. Keep the
   // recording, but make the server regenerate/omit highlighting until new
   // cues are attached to this exact word list.

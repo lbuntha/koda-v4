@@ -37,6 +37,14 @@ export const icuKhmerSplitter: WordSplitter = (chunk) => {
 /** How a language writes a sentence back out of its words. */
 export const joiner = (lang: Language): string => (lang === "km" ? "" : " ");
 
+/**
+ * Khmer is written without spaces, but a word list or a title may want one. An
+ * author marks it on the word: a single space at its end. `core` ignores it, so
+ * spelling, pictures and notes see the same word; the text still rejoins.
+ */
+export const hasSpaceAfter = (word: string): boolean => /\s$/.test(word);
+export const withSpaceAfter = (word: string, on: boolean): string => word.trimEnd() + (on ? " " : "");
+
 export const sentenceText = (words: readonly string[], lang: Language): string => words.join(joiner(lang));
 
 /**

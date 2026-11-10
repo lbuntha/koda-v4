@@ -1,0 +1,112 @@
+{
+  "id": "stacked-syllables-lesson-100",
+  "rev": 0,
+  "language": "km",
+  "band": "A",
+  "ages": [
+    6,
+    7
+  ],
+  "topics": [],
+  "questionCounts": {
+    "understand": 0,
+    "words": 0,
+    "spell": 3
+  },
+  "title": "ព្យាង្គតម្រួត ម្ប ម្ត ម្ភ ម្ម ម្រ ម្ល",
+  "category": "Khmer",
+  "picture": "khmer-school",
+  "sentences": [
+    {
+      "id": "s1",
+      "text": "សម្បុក សម្បុរ សម្បូរ សម្បុក សម្បត្តិ ជម្ពូ សម្ពាយ ",
+      "words": [
+        "សម្បុក ",
+        "សម្បុរ ",
+        "សម្បូរ ",
+        "សម្បុក ",
+        "សម្បត្តិ ",
+        "ជម្ពូ ",
+        "សម្ពាយ "
+      ]
+    },
+    {
+      "id": "s2",
+      "text": "កម្ពស់ កុម្ភៈ សម្ភារៈ កម្ពុជា ចម្រៀង កម្រិត កម្រើក ",
+      "words": [
+        "កម្ពស់ ",
+        "កុម្ភៈ ",
+        "សម្ភារៈ ",
+        "កម្ពុជា ",
+        "ចម្រៀង ",
+        "កម្រិត ",
+        "កម្រើក "
+      ]
+    },
+    {
+      "id": "s3",
+      "text": "ចម្លង ចម្លើយ កម្លាំង សម្ល សម្លាប់ សម្លាញ់ កម្មករ ",
+      "words": [
+        "ចម្លង ",
+        "ចម្លើយ ",
+        "កម្លាំង ",
+        "សម្ល ",
+        "សម្លាប់ ",
+        "សម្លាញ់ ",
+        "កម្មករ "
+      ]
+    },
+    {
+      "id": "s4",
+      "text": "សម្លៀកបំពាក់",
+      "words": [
+        "សម្លៀកបំពាក់"
+      ]
+    },
+    {
+      "id": "s5",
+      "text": "ខែកុម្ភៈខ្ញុំទៅប្រឡងចម្រៀង។",
+      "words": [
+        "ខែ",
+        "កុម្ភៈ",
+        "ខ្ញុំ",
+        "ទៅ",
+        "ប្រឡង",
+        "ចម្រៀង។"
+      ]
+    },
+    {
+      "id": "s6",
+      "text": "សម្លៀកបំពាក់ខ្ញុំស្អាតណាស់។",
+      "words": [
+        "សម្លៀកបំពាក់",
+        "ខ្ញុំ",
+        "ស្អាត",
+        "ណាស់។"
+      ]
+    }
+  ],
+  "questions": [
+    {
+      "id": "sp1",
+      "kind": "spell",
+      "sentence": "s5",
+      "word": "កុម្ភៈ"
+    },
+    {
+      "id": "sp2",
+      "kind": "spell",
+      "sentence": "s6",
+      "word": "ស្អាត"
+    },
+    {
+      "id": "sp3",
+      "kind": "spell",
+      "sentence": "s3",
+      "word": "កម្លាំង"
+    }
+  ],
+  "pictures": {},
+  "noRecording": [],
+  "provenance": "Typed from a Grade 1 Khmer textbook page (lesson 100, page ១២៨, 4 teaching periods). Not yet reviewed by a native speaker. The rose-apple (ផ្លែជម្ពូ) and school-uniform photos are not in the art library; the owner supplies them."
+}

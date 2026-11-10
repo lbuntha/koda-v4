@@ -1,8 +1,8 @@
 import { useEffect, useMemo, useState, type ReactNode } from "react";
-import { ArrowLeft, BookOpen, Check, ChevronDown, ChevronRight, ChevronUp, CornerLeftUp, Download, Merge, Scissors, Mic, Play, Pencil, RefreshCw, Sparkles, Square, Trash2, Upload } from "lucide-react";
+import { ArrowLeft, Space, BookOpen, Check, ChevronDown, ChevronRight, ChevronUp, CornerLeftUp, Download, Merge, Scissors, Mic, Play, Pencil, RefreshCw, Sparkles, Square, Trash2, Upload } from "lucide-react";
 import { BANDS, bookAges, CHOICES, MATCH_MAX_QUESTIONS, meetsTarget, minimumQuestions, TARGET_MAX, type Band, type Language, type Question, type QuestionCounts, type WordCue } from "../data/passage";
 import { readingLexiconFor, readingWordsFor } from "../data/readingLexicon";
-import { core } from "../data/text";
+import { core, hasSpaceAfter, withSpaceAfter } from "../data/text";
 import { RULES, verifyPassage, type Verdict } from "../data/verifyPassage";
 import { deleteBook, fetchDraft, fetchReports, fetchStudioMeta, publishBook, requestAiCorrection, requestAiDraft, requestAiMatch, requestAiStory, resolveReport, saveDraft, unpublishBook, type BookReport, type BookRow, type BookSummary, type Provider, type StudioMeta } from "../api";
 import { baseOf, draftLocally, fromModel, withStoryPictures, joinSentences, mergeWords, pictureFor, sentenceIdFor, withVocabWord, type StoryInput, type VocabEdit } from "../draft";
@@ -737,7 +737,9 @@ function ReviewStep({ draft, verdict, confirmed, onConfirmed, onEdit, target, so
       ...draft,
       sentences: draft.sentences.map((sentence) => {
         if (sentence.id !== sid) return sentence;
-        const words = [...sentence.words.slice(0, index), ...pieces, ...sentence.words.slice(index + 1)];
+        // A word an author spaced stays spaced when it is fixed or split.
+        const kept = pieces.length && hasSpaceAfter(sentence.words[index]) ? [...pieces.slice(0, -1), withSpaceAfter(pieces[pieces.length - 1], true)] : pieces;
+        const words = [...sentence.words.slice(0, index), ...kept, ...sentence.words.slice(index + 1)];
         return {
           ...sentence,
           words,
@@ -801,9 +803,22 @@ function ReviewStep({ draft, verdict, confirmed, onConfirmed, onEdit, target, so
                   }} className={`rounded-xl border border-indigo-200 bg-indigo-50 px-2.5 py-1 text-indigo-900 dark:border-indigo-800 dark:bg-indigo-950 dark:text-indigo-100 ${km ? `${KHMER} text-lg` : ""}`}>
                     {w}
                   </button>
-                  <button type="button" aria-label={t("studio.review.editWord", { line: s.id, n: i + 1 })} title={t("studio.review.fixWordTitle")} onClick={() => { setSplitTarget({ sid: s.id, index: i }); setSplitText(w); }} className="grid h-7 w-7 shrink-0 place-items-center rounded-lg text-muted hover:bg-indigo-50 hover:text-indigo-700 dark:hover:bg-indigo-950 dark:hover:text-indigo-300">
+                  <button type="button" aria-label={t("studio.review.editWord", { line: s.id, n: i + 1 })} title={t("studio.review.fixWordTitle")} onClick={() => { setSplitTarget({ sid: s.id, index: i }); setSplitText(w.trimEnd()); }} className="grid h-7 w-7 shrink-0 place-items-center rounded-lg text-muted hover:bg-indigo-50 hover:text-indigo-700 dark:hover:bg-indigo-950 dark:hover:text-indigo-300">
                     <Pencil className="h-3.5 w-3.5" aria-hidden="true" />
                   </button>
+                  {km && (
+                    <button type="button" aria-pressed={hasSpaceAfter(w)} aria-label={t("studio.review.spaceAfter", { line: s.id, n: i + 1 })} title={t("studio.review.spaceAfterTitle")}
+                      onClick={() => {
+                        onEdit({ ...draft, sentences: draft.sentences.map((x) => {
+                          if (x.id !== s.id) return x;
+                          const words = x.words.map((word, wi) => (wi === i ? withSpaceAfter(word, !hasSpaceAfter(word)) : word));
+                          return { ...x, words, text: words.join(""), audioCues: undefined };
+                        }) });
+                      }}
+                      className={`grid h-7 w-7 shrink-0 place-items-center rounded-lg ${hasSpaceAfter(w) ? "bg-indigo-600 text-white" : "text-muted hover:bg-indigo-50 hover:text-indigo-700 dark:hover:bg-indigo-950 dark:hover:text-indigo-300"}`}>
+                      <Space className="h-3.5 w-3.5" aria-hidden="true" />
+                    </button>
+                  )}
                 </div>
               ))}
             </div>
@@ -816,7 +831,7 @@ function ReviewStep({ draft, verdict, confirmed, onConfirmed, onEdit, target, so
             )}
             {splitTarget?.sid === s.id && (() => {
               const pieces = splitText.trim().split(/[\s\u200B]+/u).filter(Boolean);
-              const unchanged = pieces.length === 1 && pieces[0] === s.words[splitTarget.index];
+              const unchanged = pieces.length === 1 && pieces[0] === s.words[splitTarget.index].trimEnd();
               return (
                 <div className="mt-2 basis-full rounded-xl border border-indigo-200 bg-indigo-50 p-2 dark:border-indigo-800 dark:bg-indigo-950/50">
                   <label className="block text-sm font-semibold text-ink">

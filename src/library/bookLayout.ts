@@ -21,6 +21,8 @@ export interface SetToken {
   /** The word without its punctuation — what a tap looks up. */
   word: string;
   emphasis: Emphasis;
+  /** An author put a space after this word (Khmer is otherwise set unspaced). */
+  spaced?: boolean;
 }
 
 export interface SetSentence {
@@ -115,7 +117,7 @@ export function setSentence(s: Sentence, book: Pick<Passage, "language" | "noRec
     // word after . ! ? : ; (or after a quote) is not taken for a name. "I" is
     // not a name. Names the book lists (they have no recording) count anywhere.
     else if (names.has(word) || (lang === "en" && !startsSentence(body, i) && /^[A-Z][a-z]/.test(word))) emphasis = "name";
-    return { text, word, emphasis };
+    return { text: text.trimEnd(), word, emphasis, spaced: /\s$/.test(text) || undefined };
   });
   return { sentence: s, heading, tokens };
 }

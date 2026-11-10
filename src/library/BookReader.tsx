@@ -1049,11 +1049,11 @@ const StoryPage = memo(function StoryPage({ book, sentences, picture, at = "top"
                           speaking={playingWord?.sentence === s.sentence.id && playingWord.index === s.sentence.words.length - s.tokens.length + k}
                           onWord={onWord}
                         />
-                        {k === s.tokens.length - 1 ? "" : km ? KHMER_WORD_BREAK : " "}
+                        {k === s.tokens.length - 1 ? "" : t.spaced ? " " : km ? KHMER_WORD_BREAK : " "}
                       </span>
                     ))}
                   </span>
-                  {j === b.sentences.length - 1 ? "" : km ? KHMER_WORD_BREAK : " "}
+                  {j === b.sentences.length - 1 ? "" : s.tokens[s.tokens.length - 1]?.spaced ? " " : km ? KHMER_WORD_BREAK : " "}
                 </span>
               ))}
             </p>

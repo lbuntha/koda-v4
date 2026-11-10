@@ -886,6 +886,8 @@
       "splitsHelp": "Tap a word to join it to the next one. Use the pencil to fix, split or delete a word. Use ⌐ to join a line to the one above.",
       "joinLines": "Join {line} to {above}",
       "lastWord": "Last word",
+      "spaceAfter": "Space after word {n} of line {line}",
+      "spaceAfterTitle": "Show a space after this word",
       "joinNext": "Join with the next word",
       "editWord": "Edit {line} word {n}",
       "fixWordTitle": "Fix, split or delete this word",
