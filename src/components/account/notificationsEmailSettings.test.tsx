@@ -24,6 +24,7 @@ vi.mock("../../lib/themeSystem", () => ({
 }));
 
 vi.mock("../ui", () => ({
+  UIArtIcon: () => <span />,
   UIToggle: ({ checked, onChange, label }: { checked: boolean; onChange: () => void; label: string }) => (
     <button role="switch" aria-checked={checked} aria-label={label} onClick={onChange} />
   ),

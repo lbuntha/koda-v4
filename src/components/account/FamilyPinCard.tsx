@@ -1,11 +1,11 @@
 import React, { useEffect, useState } from "react";
-import { Lock, ShieldCheck } from "lucide-react";
+import { Lock } from "lucide-react";
 
 import { ApiError, usePermissions } from "../../lib/sync";
 import { FamilyPin, PIN_LENGTH, isWellFormed } from "../../lib/familyPin";
 import { themeSystem } from "../../lib/themeSystem";
 import { playSound } from "../../utils/audio";
-import { UIBadge, UIButton, UIDialog, UISectionHeader } from "../ui";
+import { UIBadge, UIButton, UIDialog, UISectionHeader, UIArtIcon } from "../ui";
 import { useT } from "../../lib/i18n";
 
 /**
@@ -86,7 +86,7 @@ export const FamilyPinCard: React.FC = () => {
       <UISectionHeader
         title={t("pin.title")}
         subtitle={t("pin.subtitle")}
-        icon={<ShieldCheck className="h-5 w-5 text-indigo-600 dark:text-indigo-400" />}
+        icon={<UIArtIcon id="kit-shield" className="h-6 w-6" />}
         action={
           isSet === null ? undefined : isSet ? (
             <UIBadge variant="success">{t("pin.on")}</UIBadge>

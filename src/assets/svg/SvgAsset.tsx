@@ -18,6 +18,8 @@ interface SvgMarkupProps {
   className?: string;
   /** Names the image for a screen reader. Omit for decoration, which is then hidden. */
   title?: string;
+  /** Drop the artwork's built-in <title> (icons named by the page, not the file). */
+  untitled?: boolean;
   /** Drawn instead when nothing survives sanitising. */
   fallback?: React.ReactNode;
   /**
@@ -86,6 +88,7 @@ export const SvgMarkup: React.FC<SvgMarkupProps> = ({
   size = 48,
   className = "",
   title,
+  untitled = false,
   fallback = null,
   raw = false,
   cover = false,
@@ -98,12 +101,15 @@ export const SvgMarkup: React.FC<SvgMarkupProps> = ({
   const safeMarkup = useMemo(() => {
     if (!markup) return "";
     const normalised = raw ? preprocessSvgMarkup(markup) : markup;
-    const safe = scopeSvgIds(sanitizeSvgMarkup(normalised), scope);
+    const scoped = scopeSvgIds(sanitizeSvgMarkup(normalised), scope);
+    // An icon's own <title> is English authoring text: it would show as a hover
+    // tooltip and read as page text in every language.
+    const safe = untitled ? scoped.replace(/<title\b[^>]*>[\s\S]*?<\/title>/gi, "") : scoped;
     if (!cover) return safe;
     if (cover === true) return withCoverFit(safe);
     const aspect = aspectOfViewBox(safe);
     return aspect !== null && aspect >= cover ? withCoverFit(safe) : safe;
-  }, [markup, raw, scope, cover]);
+  }, [markup, raw, scope, cover, untitled]);
 
   const ratio = useMemo(() => (safeMarkup ? aspectOfViewBox(safeMarkup) : null), [safeMarkup]);
   useEffect(() => {

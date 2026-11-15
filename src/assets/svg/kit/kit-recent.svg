@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+  <title>Recent</title>
+  <path fill="none" stroke="#8B5CF6" stroke-width="10" stroke-linecap="round" d="M20 50 A32 32 0 1 0 30 27" />
+  <path fill="#8B5CF6" d="M14 14 L36 22 L22 40 Z" />
+  <path fill="none" stroke="#C4B5FD" stroke-width="10" stroke-linecap="round" d="M30 27 A32 32 0 0 1 52 18" />
+  <path fill="none" stroke="#4C1D95" stroke-width="6" stroke-linecap="round" stroke-linejoin="round" d="M52 36 V52 L64 60" />
+</svg>

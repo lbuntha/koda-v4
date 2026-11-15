@@ -98,6 +98,18 @@ export interface Rhythm {
   /** Rounds finished, ever. Deliberately not "this week" — see below. */
   roundsEver: number;
   questionsEver: number;
+  /**
+   * The practised days inside the last `WEEK_DAYS`, as `YYYY-MM-DD`.
+   *
+   * Kept separately from `activity`, which is capped at `RECENT_DAYS` and so
+   * cannot draw a full week of dots for a child who plays every day.
+   */
+  weekDays?: string[];
+  /**
+   * Days practised in each of the last `TREND_WEEKS` seven-day spans, oldest
+   * first, the last one ending today. Drawn as the practice trend.
+   */
+  weeks?: number[];
 }
 
 /**
@@ -204,6 +216,24 @@ const normalise = (row: Partial<ConceptTotals>): ConceptTotals => ({
   lastSeenTs: row.lastSeenTs ?? "",
 });
 
+/** How many weeks the practice trend looks back. */
+export const TREND_WEEKS = 8;
+
+/** Practised days counted into seven-day spans ending today, oldest first. */
+export const weeklyDays = (days: string[], now: Date = new Date()): number[] => {
+  const counts = new Array<number>(TREND_WEEKS).fill(0);
+  const today = new Date(`${localDayOf(now)}T00:00:00`);
+  for (const day of days) {
+    const date = new Date(`${day}T00:00:00`);
+    if (Number.isNaN(date.getTime())) continue;
+    const back = Math.round((today.getTime() - date.getTime()) / 86_400_000);
+    if (back < 0) continue;
+    const week = Math.floor(back / WEEK_DAYS);
+    if (week < TREND_WEEKS) counts[TREND_WEEKS - 1 - week] += 1;
+  }
+  return counts;
+};
+
 /**
  * Turn a child's rollup into the reading a screen shows.
  *
@@ -271,6 +301,8 @@ export function buildReport(
     rhythm: {
       lastSeenTs: totals.map((t) => t.lastSeenTs).filter(Boolean).sort().pop() || undefined,
       daysThisWeek: [...days.keys()].filter((day) => day >= firstDay).length,
+      weekDays: [...days.keys()].filter((day) => day >= firstDay).sort(),
+      weeks: weeklyDays([...days.keys()], now),
       daysEver: days.size,
       roundsEver: totals.reduce((sum, t) => sum + t.lessonsCompleted, 0),
       questionsEver: totals.reduce((sum, t) => sum + t.questionsAnswered, 0),
@@ -505,3 +537,58 @@ export const whatNext = (
     why: translate("report.move.done.why", { name: childName }),
   };
 };
+
+/**
+ * The whole report as one verdict, for the parent with ten seconds.
+ *
+ * The order is what to act on first: a child who has stopped playing needs
+ * that said before anything about how the playing went; something going wrong
+ * beats something too new to judge; and a week that went well but too rarely
+ * is told apart from one that simply went well.
+ */
+export type GlanceTone = "quiet" | "help" | "early" | "light" | "good";
+
+export interface Glance {
+  tone: GlanceTone;
+  /** Lessons in each band, for the stacked bar. */
+  counts: Record<"mastered" | "practising" | "learning" | "struggling", number>;
+  /**
+   * Right first time across the lessons with enough answers to judge, 0..1 —
+   * or null when none has, so no figure is printed from noise.
+   */
+  firstTry: number | null;
+  /** How many answers that figure stands on. */
+  judgedAnswers: number;
+}
+
+export const glance = (report: ChildReport): Glance => {
+  const counts = { mastered: 0, practising: 0, learning: 0, struggling: 0 };
+  let right = 0;
+  let judged = 0;
+  for (const concept of report.concepts) {
+    if (concept.status in counts) counts[concept.status as keyof typeof counts] += 1;
+    if (concept.questionsAnswered > 0 && evidenceGap(concept) === 0) {
+      right += rightFirstTime(concept);
+      judged += concept.questionsAnswered;
+    }
+  }
+  const tone: GlanceTone =
+    report.rhythm.daysThisWeek === 0
+      ? "quiet"
+      : counts.struggling > 0
+        ? "help"
+        : tooEarlyToRead(report)
+          ? "early"
+          : report.rhythm.daysThisWeek < GOOD_WEEK_DAYS
+            ? "light"
+            : "good";
+  return { tone, counts, firstTry: judged > 0 ? right / judged : null, judgedAnswers: judged };
+};
+
+/** The last `WEEK_DAYS` local dates, oldest first, ending today. */
+export const lastWeek = (now: Date = new Date()): string[] =>
+  Array.from({ length: WEEK_DAYS }, (_, i) => {
+    const date = new Date(now);
+    date.setDate(date.getDate() - (WEEK_DAYS - 1 - i));
+    return localDayOf(date);
+  });

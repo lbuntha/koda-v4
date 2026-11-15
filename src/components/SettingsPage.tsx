@@ -1,9 +1,8 @@
 import React, { useEffect, useRef } from "react";
-import { Languages, Moon, Sun, Volume2, VolumeX } from "lucide-react";
 import { KodaFace } from "./KodaFace";
 import { useTheme } from "../context/ThemeContext";
 import { playSound } from "../utils/audio";
-import { UIPageHeader, UISettingGroup, UISettingRow, UIToggle } from "./ui";
+import { UIPageHeader, UISettingGroup, UISettingRow, UIToggle, UIArtIcon } from "./ui";
 import { YourLearning } from "./account/YourLearning";
 import { PlanCard } from "./account/PlanCard";
 import { DevicesPage } from "./account/DevicesPage";
@@ -151,7 +150,7 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({
           switch anywhere lower down it. */}
       <UISettingGroup label={t("settings.language.group")}>
         <UISettingRow
-          icon={<Languages className="text-ink" />}
+          icon={<UIArtIcon id="kit-languages" className="h-6 w-6" />}
           title={t("settings.language.title")}
           note={t("settings.language.note")}
           control={<LanguagePicker />}
@@ -165,7 +164,7 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({
              only a title and a switch. Ink flips with the theme, so it stays
              black on white and white on the dark canvas — a literal black
              would disappear the moment the switch it sits beside is on. */
-          icon={isDark ? <Moon className="text-ink" /> : <Sun className="text-ink" />}
+          icon={<UIArtIcon id="kit-theme" className="h-6 w-6" />}
           title={t("settings.appearance.darkMode")}
           control={
             <UIToggle
@@ -183,11 +182,7 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({
       <UISettingGroup label={t("settings.sound.group")}>
         <UISettingRow
           icon={
-            soundEnabled ? (
-              <Volume2 className="text-emerald-600 dark:text-emerald-400" />
-            ) : (
-              <VolumeX />
-            )
+            <UIArtIcon id="kit-sound" className={`h-6 w-6 transition ${soundEnabled ? "" : "opacity-40 grayscale"}`} />
           }
           title={t("settings.sound.effects")}
           /* Names its scope. This is the master switch — each skill also has its

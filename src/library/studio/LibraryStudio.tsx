@@ -1,11 +1,11 @@
 import { useEffect, useMemo, useState, type ReactNode } from "react";
-import { ArrowLeft, Space, BookOpen, Check, ChevronDown, ChevronRight, ChevronUp, CornerLeftUp, Download, Merge, Scissors, Mic, Play, Pencil, RefreshCw, Sparkles, Square, Trash2, Upload } from "lucide-react";
+import { ArrowLeft, Space, BookOpen, Check, ChevronDown, ChevronRight, ChevronUp, CornerDownLeft, CornerLeftUp, Download, Merge, Scissors, Mic, Play, Pencil, RefreshCw, Sparkles, Square, Trash2, Upload } from "lucide-react";
 import { BANDS, bookAges, CHOICES, MATCH_MAX_QUESTIONS, meetsTarget, minimumQuestions, TARGET_MAX, type Band, type Language, type Question, type QuestionCounts, type WordCue } from "../data/passage";
 import { readingLexiconFor, readingWordsFor } from "../data/readingLexicon";
 import { core, hasSpaceAfter, withSpaceAfter } from "../data/text";
 import { RULES, verifyPassage, type Verdict } from "../data/verifyPassage";
 import { deleteBook, fetchDraft, fetchReports, fetchStudioMeta, publishBook, requestAiCorrection, requestAiDraft, requestAiMatch, requestAiStory, resolveReport, saveDraft, unpublishBook, type BookReport, type BookRow, type BookSummary, type Provider, type StudioMeta } from "../api";
-import { baseOf, draftLocally, fromModel, withStoryPictures, joinSentences, mergeWords, pictureFor, sentenceIdFor, withVocabWord, type StoryInput, type VocabEdit } from "../draft";
+import { baseOf, draftLocally, fromModel, withStoryPictures, joinSentences, splitSentence, mergeWords, pictureFor, sentenceIdFor, withVocabWord, type StoryInput, type VocabEdit } from "../draft";
 import { BookPreview } from "../LibraryPage";
 import { bookTopics } from "../tags";
 import { PagesStep } from "./PagesStep";
@@ -140,6 +140,10 @@ export function LibraryStudio() {
   );
 }
 
+/** What a server draft says, to tell whether unsaved work still starts from it. */
+const draftFingerprint = (d: Pick<Draft, "title" | "sentences"> | null | undefined) =>
+  d ? JSON.stringify({ title: d.title, lines: d.sentences.map((s) => s.words) }) : "";
+
 function Editor({ row, categories, reports = [], onResolved, onClose }: { row: BookRow | null; categories: readonly string[]; reports?: BookReport[]; onResolved?(id: string): void; onClose(): void }) {
   const { t } = useT();
   const start = row?.draft;
@@ -164,11 +168,18 @@ function Editor({ row, categories, reports = [], onResolved, onClose }: { row: B
   const id = row?.id ?? (input.id || draft?.id || slug(input.title));
   const km = (draft?.language ?? input.language) === "km";
   const recoveryKey = `koda-studio-recovery-${row?.id ?? "new"}`;
+  // The server draft the unsaved work started from. If the draft changed on the
+  // server since (someone else saved it, or it was re-seeded), the old work is
+  // stale and must not cover the newer draft.
+  const [base, setBase] = useState(() => draftFingerprint(start));
   const [recovered, setRecovered] = useState(false);
   useEffect(() => {
     try {
       const saved = JSON.parse(localStorage.getItem(recoveryKey) ?? "null");
-      if (saved?.input && saved?.dirty) {
+      if (saved?.dirty && typeof saved.base === "string" && saved.base !== base) {
+        localStorage.removeItem(recoveryKey);
+        setNote({ kind: "info", text: t("studio.summary.recoveryStale") });
+      } else if (saved?.input && saved?.dirty) {
         // Work recovered from before ages were required starts from its band's, like a saved book.
         const band = (saved.input.band in BANDS ? saved.input.band : "A") as Band;
         setInput({ ...saved.input, ages: isAgeRange(saved.input.ages) ? saved.input.ages : BANDS[band].ages });
@@ -183,10 +194,10 @@ function Editor({ row, categories, reports = [], onResolved, onClose }: { row: B
   useEffect(() => {
     if (!recovered) return;
     try {
-      if (dirty) localStorage.setItem(recoveryKey, JSON.stringify({ input, draft, confirmed, dirty }));
+      if (dirty) localStorage.setItem(recoveryKey, JSON.stringify({ input, draft, confirmed, dirty, base }));
       else localStorage.removeItem(recoveryKey);
     } catch { /* Server draft saving remains available. */ }
-  }, [input, draft, confirmed, dirty, recovered, recoveryKey]);
+  }, [input, draft, confirmed, dirty, recovered, recoveryKey, base]);
 
   const verdict = useMemo<Verdict | null>(() => (draft ? verifyPassage({ ...draft, rev: 1 }, { confirmedSplit: confirmed, lexicon: readingLexiconFor(draft.band, draft.language) }) : null), [draft, confirmed]);
   const edit = (next: Draft) => {
@@ -204,6 +215,7 @@ function Editor({ row, categories, reports = [], onResolved, onClose }: { row: B
       const saved = await saveDraft(id, passage, confirmed, source === "offline" ? "offline" : source);
       setInput((current) => ({ ...current, id }));
       setStatus({ rev: saved.rev, published: saved.status === "published" });
+      setBase(draftFingerprint(passage));
       setDirty(false);
       setNote({ kind: "ok", text: t("studio.saved") });
       return true;
@@ -806,6 +818,16 @@ function ReviewStep({ draft, verdict, confirmed, onConfirmed, onEdit, target, so
                   <button type="button" aria-label={t("studio.review.editWord", { line: s.id, n: i + 1 })} title={t("studio.review.fixWordTitle")} onClick={() => { setSplitTarget({ sid: s.id, index: i }); setSplitText(w.trimEnd()); }} className="grid h-7 w-7 shrink-0 place-items-center rounded-lg text-muted hover:bg-indigo-50 hover:text-indigo-700 dark:hover:bg-indigo-950 dark:hover:text-indigo-300">
                     <Pencil className="h-3.5 w-3.5" aria-hidden="true" />
                   </button>
+                  {i < s.words.length - 1 && (
+                    <button type="button" aria-label={t("studio.review.newLineAfter", { line: s.id, n: i + 1 })} title={t("studio.review.newLineTitle")}
+                      onClick={() => {
+                        onEdit(splitSentence(draft, s.id, i));
+                        if (km) onConfirmed(false);
+                      }}
+                      className="grid h-7 w-7 shrink-0 place-items-center rounded-lg text-muted hover:bg-indigo-50 hover:text-indigo-700 dark:hover:bg-indigo-950 dark:hover:text-indigo-300">
+                      <CornerDownLeft className="h-3.5 w-3.5" aria-hidden="true" />
+                    </button>
+                  )}
                   {km && (
                     <button type="button" aria-pressed={hasSpaceAfter(w)} aria-label={t("studio.review.spaceAfter", { line: s.id, n: i + 1 })} title={t("studio.review.spaceAfterTitle")}
                       onClick={() => {

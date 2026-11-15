@@ -721,7 +721,7 @@ export const TouchOrbit: React.FC<ActivityProps<TouchOrbitParams>> = ({
       totalQuestions={total}
       prompt={prompt}
       iconName={question.mode === "compare" ? "scale" : "star"}
-      iconTone="amber"
+      iconTone="cyan"
       hints={hints}
       guide={practising ? undefined : guide}
       guideMethod={copy.stepByStep}

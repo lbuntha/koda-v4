@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+  <title>Plan</title>
+  <rect x="8" y="22" width="84" height="58" rx="10" fill="#8B5CF6" />
+  <path fill="#A78BFA" d="M18 22 H70 L8 70 V32 a10 10 0 0 1 10 -10 Z" />
+  <rect x="8" y="34" width="84" height="10" fill="#4C1D95" />
+  <rect x="18" y="56" width="26" height="8" rx="4" fill="#FFFFFF" />
+  <circle cx="70" cy="62" r="8" fill="#EC4899" />
+  <circle cx="80" cy="62" r="8" fill="#F472B6" />
+</svg>

@@ -25,6 +25,7 @@ export type SurfaceVariant = "default" | "glass" | "bordered" | "interactive";
  */
 export type PathNodeState = "completed" | "current" | "available" | "locked" | "premium";
 export type KidMessageTone = "correct" | "tryAgain" | "hint" | "celebrate" | "nudge";
+export type AnswerFlashTone = "correct" | "tryAgain";
 export type FieldSize = "sm" | "md" | "lg";
 
 /**
@@ -149,9 +150,9 @@ export const themeSystem = {
         "bg-emerald-600 hover:bg-emerald-500 text-white border-emerald-700 focus-visible:ring-emerald-500",
       danger:
         "bg-rose-600 hover:bg-rose-500 text-white border-rose-700 focus-visible:ring-rose-500",
-      /* Brand amber is a light yellow, so it carries dark ink — white would fail contrast. */
+      /* Rose, not amber: Koda uses no yellow — it is hard to read. */
       warning:
-        "bg-amber-400 hover:bg-amber-300 text-slate-900 border-amber-600 focus-visible:ring-amber-500",
+        "bg-rose-500 hover:bg-rose-400 text-white border-rose-700 focus-visible:ring-rose-500",
       ghost:
         "bg-transparent hover:bg-slate-100 text-slate-500 dark:hover:bg-slate-800/60 dark:text-slate-400 border-transparent focus-visible:ring-slate-400",
       outline:
@@ -195,7 +196,7 @@ export const themeSystem = {
     const variants = {
       primary: "bg-indigo-50 dark:bg-indigo-950/60 text-indigo-700 dark:text-indigo-300 border border-indigo-200 dark:border-indigo-800/60",
       success: "bg-emerald-50 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800/60",
-      warning: "bg-amber-50 dark:bg-amber-950/60 text-amber-700 dark:text-amber-300 border border-amber-200 dark:border-amber-800/60",
+      warning: "bg-rose-50 dark:bg-rose-950/60 text-rose-700 dark:text-rose-300 border border-rose-200 dark:border-rose-800/60",
       danger: "bg-rose-50 dark:bg-rose-950/60 text-rose-700 dark:text-rose-300 border border-rose-200 dark:border-rose-800/60",
       info: "bg-sky-50 dark:bg-sky-950/60 text-sky-700 dark:text-sky-300 border border-sky-200 dark:border-sky-800/60",
       neutral: "bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700",
@@ -209,7 +210,7 @@ export const themeSystem = {
     const types = {
       info: "bg-sky-50 dark:bg-sky-950/40 border-sky-200 dark:border-sky-900/60 text-sky-900 dark:text-sky-200",
       success: "bg-emerald-50 dark:bg-emerald-950/40 border-emerald-200 dark:border-emerald-900/60 text-emerald-900 dark:text-emerald-200",
-      warning: "bg-amber-50 dark:bg-amber-950/40 border-amber-200 dark:border-amber-900/60 text-amber-900 dark:text-amber-200",
+      warning: "bg-rose-50 dark:bg-rose-950/40 border-rose-200 dark:border-rose-900/60 text-rose-900 dark:text-rose-200",
       error: "bg-rose-50 dark:bg-rose-950/40 border-rose-200 dark:border-rose-900/60 text-rose-900 dark:text-rose-200",
     };
     return `${base} ${types[type]} ${className}`;
@@ -326,7 +327,7 @@ export const themeSystem = {
     tone: (tone: StatTone = "primary") =>
       ({
         primary: "text-indigo-600 dark:text-indigo-400",
-        streak: "text-amber-500 dark:text-amber-400",
+        streak: "text-rose-500 dark:text-rose-400",
         success: "text-emerald-600 dark:text-emerald-400",
         danger: "text-rose-600 dark:text-rose-400",
       })[tone],
@@ -403,7 +404,7 @@ export const themeSystem = {
      because nothing was got wrong — the child has not answered yet — and it is
      not `hint`, because they did not ask for help. It reads as Koda speaking
      rather than as a verdict, which is why it carries the app's own violet
-     rather than the amber that means "that was not right".
+     rather than the sky blue that means "that was not right".
 
      The shadow is on the base, so every tone sits as a raised surface rather
      than a flat box. It matters most on the sticky strip along the bottom,
@@ -416,7 +417,7 @@ export const themeSystem = {
       return `${base} ${{
         correct: "bg-emerald-50 dark:bg-emerald-950/40 border-emerald-300 dark:border-emerald-800",
         celebrate: "bg-indigo-50 dark:bg-indigo-950/40 border-indigo-300 dark:border-indigo-800",
-        tryAgain: "bg-amber-50 dark:bg-amber-950/40 border-amber-300 dark:border-amber-800",
+        tryAgain: "bg-sky-50 dark:bg-sky-950/40 border-sky-300 dark:border-sky-800",
         hint: "bg-slate-50 dark:bg-slate-800/60 border-slate-300 dark:border-slate-700",
         nudge: "bg-violet-50 dark:bg-violet-950/40 border-violet-300 dark:border-violet-800",
       }[tone]}`;
@@ -428,7 +429,7 @@ export const themeSystem = {
       return `${base} ${{
         correct: "bg-emerald-600 text-white",
         celebrate: "bg-indigo-600 text-white",
-        tryAgain: "bg-amber-400 text-slate-900",
+        tryAgain: "bg-sky-600 text-white",
         hint: "bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-200",
         nudge: "bg-violet-600 text-white",
       }[tone]}`;
@@ -444,11 +445,45 @@ export const themeSystem = {
       return `${base} ${{
         correct: "bg-emerald-600 hover:bg-emerald-500 border-emerald-800",
         celebrate: "bg-indigo-600 hover:bg-indigo-500 border-indigo-800",
-        tryAgain: "bg-amber-500 hover:bg-amber-400 border-amber-700 !text-slate-900",
+        tryAgain: "bg-sky-600 hover:bg-sky-500 border-sky-800",
         hint: "bg-slate-600 hover:bg-slate-500 border-slate-800",
         nudge: "bg-violet-600 hover:bg-violet-500 border-violet-800",
       }[tone]}`;
     },
+  },
+
+  /*
+   * The answer flash: the verdict on an answer, popped into the middle of the
+   * screen so it is seen, not hunted for. Two tones only — right, and try
+   * again — and each is a white card with one coloured medallion, so the
+   * colour marks the verdict and nothing else on the card competes with it.
+   */
+  answerFlash: {
+    layer:
+      "fixed inset-0 z-40 flex items-center justify-center p-4 " +
+      "pb-[calc(1rem+env(safe-area-inset-bottom))] pointer-events-none",
+    scrim: "ui-scrim-in absolute inset-0 bg-slate-900/25 dark:bg-black/50",
+    card: (tone: AnswerFlashTone) =>
+      "ui-flash-in pointer-events-auto relative w-full max-w-sm rounded-[28px] border-2 bg-white dark:bg-slate-900 " +
+      "px-6 pt-8 pb-6 text-center shadow-2xl shadow-slate-900/20 dark:shadow-black/50 " +
+      { correct: "border-emerald-200 dark:border-emerald-800", tryAgain: "border-sky-200 dark:border-sky-800" }[tone],
+    medallion: (tone: AnswerFlashTone) =>
+      "mx-auto flex h-20 w-20 items-center justify-center rounded-full text-white [&>svg]:h-10 [&>svg]:w-10 " +
+      {
+        correct: "ui-pop-in bg-emerald-500 ring-8 ring-emerald-100 dark:ring-emerald-900/60",
+        tryAgain: "ui-shake bg-sky-500 ring-8 ring-sky-100 dark:ring-sky-900/60",
+      }[tone],
+    title: "mt-5 text-2xl sm:text-3xl font-black text-ink",
+    message: "mt-1.5 text-base font-semibold text-body",
+    xp: "ui-float-up mt-3 inline-block rounded-xl bg-emerald-600 px-3 py-1 font-mono text-sm font-black text-white",
+    action: (tone: AnswerFlashTone) =>
+      "mt-6 w-full min-h-[52px] rounded-2xl border-2 border-b-4 px-5 py-3 font-black text-base text-white " +
+      "active:border-b-2 active:translate-y-0.5 transition-all duration-100 cursor-pointer " +
+      "focus:outline-none focus-visible:ring-4 focus-visible:ring-offset-2 " +
+      {
+        correct: "bg-emerald-600 hover:bg-emerald-500 border-emerald-800 focus-visible:ring-emerald-300",
+        tryAgain: "bg-sky-600 hover:bg-sky-500 border-sky-800 focus-visible:ring-sky-300",
+      }[tone],
   },
 
   /*

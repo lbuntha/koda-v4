@@ -19,7 +19,7 @@ export const SKILL_CATEGORY_ART: Record<
 > = {
   "number-sense": { art: "from-indigo-500 to-violet-500", solid: "bg-violet-600", label: "Number Sense" },
   operations: { art: "from-emerald-500 to-teal-500", solid: "bg-emerald-600", label: "Operations" },
-  "place-value": { art: "from-amber-500 to-orange-500", solid: "bg-amber-600", label: "Place Value" },
+  "place-value": { art: "from-blue-500 to-indigo-500", solid: "bg-blue-600", label: "Place Value" },
   patterns: { art: "from-sky-500 to-cyan-500", solid: "bg-sky-600", label: "Patterns" },
   fractions: { art: "from-rose-500 to-pink-500", solid: "bg-rose-600", label: "Fractions" },
   measurement: { art: "from-lime-500 to-emerald-500", solid: "bg-lime-600", label: "Measurement" },

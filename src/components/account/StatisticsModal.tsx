@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from "react";
-import { Flame, Star, Target, Trophy, Zap } from "lucide-react";
+import { Target } from "lucide-react";
 import { useT } from "../../lib/i18n";
 
-import { UIModal, UIButton, UIStatTile } from "../ui";
+import { UIModal, UIButton, UIStatTile, UIArtIcon } from "../ui";
 import {
   EMPTY_STATS,
   fetchProfileStats,
@@ -151,24 +151,24 @@ export const StatisticsModal: React.FC<StatisticsModalProps> = ({
         {/* Key figures grid */}
         <div className="grid grid-cols-2 gap-3">
           <UIStatTile
-            icon={<Flame className="fill-current" />}
+            icon={<UIArtIcon id="streak" className="h-6 w-6" />}
             value={`${streak}`}
             label={t("stats.dayStreak")}
             tone="streak"
           />
           <UIStatTile
-            icon={<Zap className="fill-current" />}
+            icon={<UIArtIcon id="points" className="h-6 w-6" />}
             value={t("progress.xp", { xp })}
             label={t("stats.totalXp")}
           />
           <UIStatTile
-            icon={<Trophy />}
+            icon={<UIArtIcon id="trophy" className="h-6 w-6" />}
             value={t("stats.level", { level })}
             label={t("stats.currentLevel")}
             tone="success"
           />
           <UIStatTile
-            icon={<Star className="fill-current" />}
+            icon={<UIArtIcon id="kit-star" className="h-6 w-6" />}
             value={`${starsEarned}`}
             label={t("stats.starsEarned")}
             tone="streak"

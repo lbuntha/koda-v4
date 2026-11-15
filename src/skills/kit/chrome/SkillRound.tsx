@@ -2,7 +2,7 @@ import React, { useEffect, useRef } from "react";
 import { motion } from "motion/react";
 import { SPRING } from "../motion";
 import type { ActivityLesson, KodaSDK } from "../../types";
-import { UIKidMessage } from "../../../components/ui";
+import { UIAnswerFlash, UIKidMessage } from "../../../components/ui";
 import { PracticeStepHeader, type StepTagLabels } from "./PracticeStepHeader";
 import { SkillHint } from "./SkillHint";
 import { SkillGuide } from "./SkillGuide";
@@ -379,25 +379,19 @@ export const SkillRound: React.FC<SkillRoundProps> = ({
         </motion.div>
       )}
 
+      {/* The verdict flashes into the middle of the screen, where the child
+          is already looking. A right answer still moves on by itself and
+          still offers the button: a child who wants to go *now* has
+          something to tap, and one who waits is not stalled. */}
       {round.feedback && (
-        <div className="sticky bottom-0 left-0 right-0 z-30 p-3 sm:p-4 pb-[calc(0.75rem+env(safe-area-inset-bottom))] sm:pb-[calc(1rem+env(safe-area-inset-bottom))] bg-surface">
-          <UIKidMessage
-            tone={round.feedback.status === "correct" ? "correct" : "tryAgain"}
-            title={round.feedback.title}
-            message={round.feedback.message}
-            /*
-             * A right answer moves on by itself — and still offers the button.
-             *
-             * Auto-advance keeps the rhythm of a round: a child who has just
-             * been told they were right should not have to hunt for "Next".
-             * Removing the button entirely was worse, though, because it leaves
-             * a child who wants to go *now* with nothing to tap and no way to
-             * skip the praise. Both, so neither impatience nor inaction stalls.
-             */
-            actionLabel={round.feedback.status === "correct" ? t("studio.next") : t("studio.tryAgain")}
-            onAction={round.advance}
-          />
-        </div>
+        <UIAnswerFlash
+          key={`${round.feedback.status}-${round.feedback.title}`}
+          tone={round.feedback.status === "correct" ? "correct" : "tryAgain"}
+          title={round.feedback.title}
+          message={round.feedback.message}
+          actionLabel={round.feedback.status === "correct" ? t("studio.next") : t("studio.tryAgain")}
+          onAction={round.advance}
+        />
       )}
 
       {round.score && (

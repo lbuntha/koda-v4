@@ -3,9 +3,9 @@
   <defs>
     <!-- Base Gradient (Gold) -->
     <linearGradient id="baseGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" stop-color="#D97706" />
-      <stop offset="50%" stop-color="#F59E0B" />
-      <stop offset="100%" stop-color="#FCD34D" />
+      <stop offset="0%" stop-color="#6D28D9" />
+      <stop offset="50%" stop-color="#8B5CF6" />
+      <stop offset="100%" stop-color="#C4B5FD" />
     </linearGradient>
 
     <!-- Top Highlight Gradient (3D Light Effect) -->
@@ -17,7 +17,7 @@
     <!-- Shadow Gradient (3D Depth Effect) -->
     <linearGradient id="shadowGradient" x1="0%" y1="0%" x2="100%" y2="100%">
       <stop offset="0%" stop-color="#000000" stop-opacity="0.0" />
-      <stop offset="100%" stop-color="#451A03" stop-opacity="0.5" />
+      <stop offset="100%" stop-color="#2E1065" stop-opacity="0.5" />
     </linearGradient>
 
     <!-- Drop Shadow Filter -->

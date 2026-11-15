@@ -207,14 +207,14 @@ export const SkillRoundTopBar: React.FC<SkillRoundTopBarProps> = ({
    * with a thumb; 40px once there is a pointer.
    */
   const iconButton =
-    "grid place-items-center shrink-0 rounded-full min-w-11 min-h-11 sm:min-w-10 sm:min-h-10 text-muted hover:text-ink hover:bg-surface-muted transition active:scale-90 cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500";
+    "grid place-items-center shrink-0 rounded-full h-11 w-11 sm:h-10 sm:w-10 text-muted hover:text-ink hover:bg-surface-muted transition active:scale-90 cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500";
 
+  /*
+   * Progress: the bar, then the count beside it in plain figures. A filled
+   * pill on the left sat taller than the bar and read as a second button.
+   */
   const progress = (
-    <div className="flex items-center gap-2.5 min-w-0">
-      <span className="shrink-0 rounded-full bg-indigo-500 px-2.5 py-1 text-xs font-black tabular-nums text-white">
-        {questionIndex}
-        <span className="opacity-70">/{totalQuestions}</span>
-      </span>
+    <div className="flex h-10 items-center gap-3 min-w-0">
       <UIProgressBar
         size="lg"
         className="flex-1"
@@ -222,6 +222,10 @@ export const SkillRoundTopBar: React.FC<SkillRoundTopBarProps> = ({
         max={100}
         label={t("lessonCard.questionOf", { answered: questionIndex, total: totalQuestions })}
       />
+      <span className="shrink-0 text-sm font-black tabular-nums text-ink" aria-hidden="true">
+        {questionIndex}
+        <span className="text-muted">/{totalQuestions}</span>
+      </span>
     </div>
   );
 
@@ -247,24 +251,26 @@ export const SkillRoundTopBar: React.FC<SkillRoundTopBarProps> = ({
             {/* Which lesson. Takes what is left, and truncates before anything else gives. */}
             <div className="flex-1 min-w-0 sm:flex-initial sm:max-w-[34%]">
               {identity ?? (
-                <div className="flex items-center gap-2 min-w-0">
-                  <UILessonIcon name={iconName} tone={iconTone} variant="bare" size="sm" />
-                  {/*
-                   * The child's title, and the adult's underneath — the concept
-                   * line, written for a grown-up, only where there is room.
-                   */}
-                  <div className="min-w-0">
-                    <span className="flex items-baseline gap-1.5 min-w-0">
-                      {levelNumber ? (
-                        <span className="shrink-0 text-[10px] font-black text-muted tabular-nums">
-                          {levelNumber}
-                        </span>
-                      ) : null}
-                      <span className="block truncate text-sm font-extrabold text-ink">{title}</span>
-                    </span>
-                    {subtitle && (
-                      <span className="hidden md:block truncate text-[11px] font-medium text-muted">
-                        {subtitle}
+                /*
+                 * The lesson's icon in a 40px tile — the same height as every
+                 * button on the right, so the whole bar shares one centre line.
+                 * Title on top; "Lesson 8 · what it teaches" underneath, the
+                 * concept part only where there is room.
+                 */
+                <div className="flex h-10 items-center gap-2.5 min-w-0">
+                  <UILessonIcon name={iconName} tone={iconTone} size="md" />
+                  <div className="min-w-0 leading-tight">
+                    <span className="block truncate text-sm sm:text-[15px] font-extrabold text-ink">{title}</span>
+                    {(levelNumber || subtitle) && (
+                      <span className="block truncate text-xs font-medium text-muted">
+                        {levelNumber ? t("round.lessonN", { n: levelNumber }) : null}
+                        {subtitle && (
+                          <span
+                            className={`hidden md:inline ${levelNumber ? "before:mx-1 before:content-['·']" : ""}`}
+                          >
+                            {subtitle}
+                          </span>
+                        )}
                       </span>
                     )}
                   </div>
@@ -281,20 +287,20 @@ export const SkillRoundTopBar: React.FC<SkillRoundTopBarProps> = ({
                 * chips beside a labelled Koda pill made the right of the bar
                 * louder than the question.
                 */}
-              <div className="hidden lg:flex items-center gap-2 mr-1 rounded-full bg-surface-muted px-3 py-1.5">
+              <div className="hidden lg:flex h-10 items-center gap-2.5 mr-1.5 rounded-full border border-line bg-surface px-3.5">
                 <span
-                  className="flex items-center gap-1 text-orange-700 dark:text-orange-300"
+                  className="flex items-center gap-1.5 text-ink"
                   aria-label={t("streak.daysChip", { count: standing?.streakDays ?? 0 })}
                 >
-                  <SvgAsset id="streak" size={18} fallback={<Flame className="w-4 h-4 fill-orange-400" />} />
+                  <SvgAsset id="streak" size={20} fallback={<Flame className="w-4 h-4 fill-orange-400" />} />
                   <span className="text-sm font-black tabular-nums">{standing?.streakDays ?? 0}</span>
                 </span>
                 <span className="h-4 w-px bg-line" aria-hidden="true" />
                 <span
-                  className="flex items-center gap-1 text-indigo-700 dark:text-indigo-300"
+                  className="flex items-center gap-1.5 text-ink"
                   aria-label={t("round.xpPoints", { count: standing?.xp ?? 0 })}
                 >
-                  <SvgAsset id="points" size={18} fallback={<Zap className="w-4 h-4" />} />
+                  <SvgAsset id="points" size={20} fallback={<Zap className="w-4 h-4" />} />
                   <span className="text-sm font-black tabular-nums">{formatXp(standing?.xp ?? 0)}</span>
                 </span>
               </div>
@@ -313,7 +319,7 @@ export const SkillRoundTopBar: React.FC<SkillRoundTopBarProps> = ({
                   title={t("round.askKoda")}
                   aria-label={t("round.askKoda")}
                 >
-                  <KodaFace size={30} />
+                  <KodaFace size={28} />
                 </button>
               )}
 
@@ -359,11 +365,14 @@ export const SkillRoundTopBar: React.FC<SkillRoundTopBarProps> = ({
                 </UIMenu>
               </div>
 
-              {/* Leaving: the same shape as the rest, told apart by colour alone. */}
+              {/* Leaving: set apart by a hairline, not by an alarm colour —
+                  a red X beside the question read as "wrong". It turns rose
+                  only under the pointer. */}
+              <span className="mx-1 h-6 w-px bg-line" aria-hidden="true" />
               <button
                 type="button"
                 onClick={onExit}
-                className={`${iconButton} !text-rose-600 dark:!text-rose-400 hover:!bg-rose-500/10`}
+                className={`${iconButton} border border-line hover:!text-rose-600 dark:hover:!text-rose-400 hover:!bg-rose-500/10 hover:!border-rose-200`}
                 title={t("round.leave")}
                 aria-label={t("round.leave")}
               >
@@ -373,7 +382,7 @@ export const SkillRoundTopBar: React.FC<SkillRoundTopBarProps> = ({
           </div>
 
           {/* Phone: progress gets its own full-width row. */}
-          <div className="sm:hidden mt-1.5">{progress}</div>
+          <div className="sm:hidden mt-1">{progress}</div>
         </div>
       </header>
 

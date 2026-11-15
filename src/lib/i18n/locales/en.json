@@ -56,7 +56,7 @@
     "lessons": "Think",
     "books": "Read",
     "trace": "Write",
-    "loading": "Getting it ready"
+    "loading": "Getting ready…"
   },
   "ages": {
     "label": "Who it's for",
@@ -143,13 +143,13 @@
     "sound": {
       "group": "Sound",
       "effects": "Sound effects",
-      "effectsNote": "Each skill can also be silenced on its own",
+      "effectsNote": "You can also mute each skill",
       "voice": "Koda’s voice"
     }
   },
   "signIn": {
     "headline": "Learning that grows with your child",
-    "tagline": "Maths, reading and writing practice, with progress you can see.",
+    "tagline": "Math, reading and writing practice, with progress you can see.",
     "offline": "Works offline after sign-in"
   },
   "account": {
@@ -160,7 +160,7 @@
     "working": "Working…",
     "sending": "Sending…",
     "continueWithGoogle": "Continue with Google",
-    "googleUnavailable": "Google sign-in could not load. Check your connection or use email below.",
+    "googleUnavailable": "Google sign-in didn't load. Check your connection, or use email below.",
     "orEmail": "or use email",
     "whoFor": "Who is this account for",
     "forChildren": "For my children",
@@ -168,13 +168,13 @@
     "forChildrenNote": "You add each child, and set their goals and limits.",
     "forMyselfNote": "Your own space. You set your own goal and limits.",
     "childCode": "Child code",
-    "childCodeNote": "Ask a parent for their 8-character code. It works once, within 15 minutes.",
+    "childCodeNote": "Ask your parent for the 8-letter code. It works once, for 15 minutes.",
     "email": "Email",
     "password": "Password",
     "forgot": "Forgot password?",
     "showPassword": "Show password",
     "hidePassword": "Hide password",
-    "resetSent": "If {email} has an account, a reset link is on its way. It works once and expires in 30 minutes.",
+    "resetSent": "If {email} has an account, we sent a reset link. It works once, for 30 minutes.",
     "familyName": "Family or group name",
     "familyNamePlaceholder": "My family, Class 2B, Grandma's house",
     "defaultFamilyName": "My family",
@@ -191,18 +191,18 @@
     },
     "verify": {
       "title": "Check your email",
-      "openLink": "Open the verification link sent to {email}. It works once and expires after 24 hours.",
-      "sendLink": "Send a verification link to {email}. It works once and expires after 24 hours.",
-      "onItsWay": "A verification link is on its way. Check spam if it does not appear soon.",
+      "openLink": "Open the link we sent to {email}. It works once, for 24 hours.",
+      "sendLink": "We'll send a link to {email}. It works once, for 24 hours.",
+      "onItsWay": "Link sent. Check your spam folder if you don't see it.",
       "resend": "Send a new link"
     },
     "error": {
       "emailFirst": "Type your email first, then ask for a link.",
-      "offlineRetry": "No connection to the data service. Try again in a moment.",
-      "offlineShort": "No connection. Try again in a moment.",
-      "offlineSaved": "No connection to the data service. Your work is saved on this device either way.",
-      "googleOffline": "Google sign-in needs a connection. Your saved work is still on this device.",
-      "firstMessage": "We could not send the first message. Check the address, then send a new link."
+      "offlineRetry": "Can't connect right now. Try again in a moment.",
+      "offlineShort": "Can't connect. Try again in a moment.",
+      "offlineSaved": "Can't connect right now. Your work is saved on this device.",
+      "googleOffline": "Google sign-in needs the internet. Your work is still saved on this device.",
+      "firstMessage": "We couldn't send the email. Check the address and try again."
     }
   },
   "menu": {
@@ -228,19 +228,19 @@
       "one": "Show {count} subject",
       "other": "Show all {count} subjects"
     },
-    "carryOn": "Carry on",
-    "allFinished": "Everything open right now is finished. Pick a subject below to play it again, or add another skill.",
-    "noSkills": "No skills available",
-    "noSkillsNote": "No published, enabled skills currently match this learner.",
-    "buildList": "Build your learning list",
-    "buildListNote": "Browse the skill catalog and add the skills you want to learn. What to do next appears here.",
-    "browseSkills": "Browse skills",
+    "carryOn": "Keep going",
+    "allFinished": "You finished everything for now! Play a subject again, or add a new one.",
+    "noSkills": "No lessons yet",
+    "noSkillsNote": "Ask a grown-up to add lessons for you.",
+    "buildList": "Pick what to learn",
+    "buildListNote": "Choose a few skills to start. Your next lesson will show up here.",
+    "browseSkills": "Choose skills",
     "yourProgress": "Your progress",
     "learningStreak": "Learning streak",
     "totalPoints": "Total points",
     "xpLevel": "XP Level {level}",
     "xpToLevel": "{xp} XP to level {level}",
-    "xpRule": "{xp} XP earns a level. Every finished round pays XP.",
+    "xpRule": "Finish rounds to earn XP. Every {xp} XP is a new level.",
     "lessonsMastered": "Lessons mastered",
     "dailyGoal": "Daily goal",
     "goalMet": "Goal met today",
@@ -256,23 +256,27 @@
         "one": "{count} star to go",
         "other": "{count} stars to go"
       }
-    }
+    },
+    "startTitle": "Let's get started!",
+    "startBody": "Finish your first lesson to start your streak and earn XP.",
+    "todayGoal": "Today's goal",
+    "goalCount": "{done} of {goal} done"
   },
   "today": {
     "review": "Let's warm up with something you already know!",
     "practise": "One more round to make it stick!",
-    "advance": "Ready for something new?",
+    "advance": "Let's learn something new!",
     "read": {
       "continue": "Pick up your book where you left off.",
-      "linked": "Goes with {link}, from something you did lately.",
+      "linked": "Goes with {link}, which you learned lately.",
       "new": "A new story for you."
     },
     "write": {
       "checkUp": "Time for a quick check-up!",
       "continue": "Keep writing where you stopped.",
-      "linked": "Goes with {link}, from something you did lately.",
-      "new": "Something new to write.",
-      "again": "Write it again to keep it fresh."
+      "linked": "Goes with {link}, which you learned lately.",
+      "new": "Let's write something new!",
+      "again": "Write it again so you don't forget."
     }
   },
   "lessonCard": {
@@ -280,7 +284,7 @@
       "review": "Warm up",
       "practise": "Keep going",
       "advance": "New",
-      "resume": "Finish"
+      "resume": "Continue"
     },
     "questionOf": "Question {answered} of {total}"
   },
@@ -294,11 +298,11 @@
     "adding": "Adding…",
     "review": "Review",
     "continue": "Continue",
-    "open": "Open",
+    "open": "Play",
     "done": "Done",
     "draft": "Draft",
     "ready": "{count} ready",
-    "readyToBegin": "Ready to begin",
+    "readyToBegin": "Ready to start",
     "lessonsComplete": "{done} of {total} lessons complete",
     "xOfY": "{done} of {total}",
     "lessons": {
@@ -319,18 +323,18 @@
     },
     "upNext": "Up next: {lesson}",
     "lockedUntil": "Locked until {lesson} is done.",
-    "lockedUntilOther": "Locked until {lesson} is done — it is in another skill.",
-    "completePracticeOpen": "Every lesson complete — practice is open below whenever you want it.",
-    "completePlayAgain": "Every lesson complete — play any of them again.",
-    "register": "Register skill",
-    "registerFailed": "Could not register this skill.",
+    "lockedUntilOther": "Locked until {lesson} is done (in another skill).",
+    "completePracticeOpen": "All lessons done! Practice is open below anytime.",
+    "completePlayAgain": "All lessons done! Play any of them again.",
+    "register": "Add skill",
+    "registerFailed": "Couldn't add this skill. Try again.",
     "reviewLesson": "Review a lesson",
     "first": "First: {lesson}",
     "start": "Start",
     "startPractice": "Start practice",
     "startLearning": "Start learning",
     "path": "Learning path",
-    "pathBlurb": "Complete lessons to unlock more challenges.",
+    "pathBlurb": "Finish lessons to unlock new ones.",
     "free": "{count} Free",
     "premium": "{count} Premium",
     "plan": "{plan} plan",
@@ -338,7 +342,7 @@
     "premiumUpgrade": "Premium lessons need an upgrade",
     "allAvailable": "All lessons available",
     "practice": "Practice",
-    "practiceBlurb": "No hints this time — play any round, in any order.",
+    "practiceBlurb": "No hints. Play any round, in any order.",
     "allTechniques": "All techniques",
     "unit": "Unit {number}",
     "unlocksAfter": "Unlocks after {lesson}",
@@ -360,9 +364,9 @@
   },
   "offline": {
     "preparing": "Saving for offline… {done} of {total}",
-    "incomplete": "Saved {done} of {total}. The rest needs a connection — it will finish next time you open this skill.",
+    "incomplete": "Saved {done} of {total}. The rest will save next time you're online.",
     "ready": "Ready to play offline.",
-    "readyDeviceVoice": "Ready to play offline. Spoken lines use your device's voice until this skill is recorded."
+    "readyDeviceVoice": "Ready to play offline. Your device's voice reads the words for now."
   },
   "goalBanner": {
     "title": "Goal met — {done} of {goal} today",
@@ -372,8 +376,8 @@
     "weeksInRow": "That's {count} weeks in a row."
   },
   "welcomeBack": {
-    "away": "It's been {count} days. Pick anything below to start again.",
-    "yesterday": "You practised yesterday — one round keeps it going.",
+    "away": "It's been {count} days. Pick anything to start again.",
+    "yesterday": "You practised yesterday. One round keeps your streak going.",
     "streakWaiting": "Your {count}-day streak is waiting.",
     "dismiss": "Dismiss welcome back message"
   },
@@ -386,28 +390,28 @@
     "edit": "Edit profile",
     "joinedOn": "Joined {date}",
     "error": {
-      "offline": "No connection — your profile was not changed.",
-      "copy": "The code could not be copied. Please select it manually."
+      "offline": "Can't connect — your profile wasn't changed.",
+      "copy": "Couldn't copy the code. Please select it and copy it."
     },
     "children": {
       "title": "Children",
       "subtitle": "The profiles under this family",
       "manage": "Manage",
       "hidden": "Not visible to this account",
-      "hiddenDetail": "Viewing children needs the learner:read permission.",
+      "hiddenDetail": "Your account can't view children.",
       "loading": "Loading children…",
       "none": "No child profiles yet",
       "noneDetail": "Add a child to give them their own learning space and profile.",
-      "seePractice": "See what they have practised",
+      "seePractice": "See what they practised",
       "added": "Added {date}",
       "born": "born {year}",
       "code": "Code"
     },
     "access": {
       "title": "Access",
-      "subtitle": "What this account is allowed to do on this deployment",
+      "subtitle": "What this account can do",
       "none": "No permissions loaded",
-      "noneDetail": "The effective set arrives with the account; reconnect to see it."
+      "noneDetail": "Reconnect to load what this account can do."
     },
     "account": {
       "subtitle": "How this profile is identified",
@@ -422,11 +426,11 @@
       "subtitle": "Generate a one-time code for a child's device.",
       "button": "Device code",
       "modalTitle": "Device code for {name}",
-      "howTo": "On the child's device, choose {childCode} on the sign-in screen and enter this code.",
-      "expires": "Expires {time} · single use",
+      "howTo": "On your child's device, tap {childCode} on the sign-in screen and type this code.",
+      "expires": "Expires {time} · works once",
       "copy": "Copy code",
       "copied": "Copied",
-      "private": "Keep this code private. It cannot be used again after the child joins."
+      "private": "Keep this code private. It stops working after your child signs in."
     },
     "editModal": {
       "displayName": "Display name",
@@ -436,21 +440,21 @@
     }
   },
   "password": {
-    "subtitle": "Changing it signs your other sessions out",
+    "subtitle": "Changing it signs you out on other devices",
     "current": "Current password",
     "new": "New password",
     "change": "Change password",
     "changed": "Password changed.",
     "changedSignedOut": {
-      "one": "Password changed. {count} other sign-in was ended — signing in again on that device will need the new password.",
-      "other": "Password changed. {count} other sign-ins were ended — signing in again on those devices will need the new password."
+      "one": "Password changed. You were signed out on {count} other device.",
+      "other": "Password changed. You were signed out on {count} other devices."
     },
-    "offline": "No connection to the data service, so this cannot be changed right now."
+    "offline": "Can't connect, so the password can't be changed right now."
   },
   "avatar": {
     "title": "Choose your avatar",
     "use": "Use this avatar",
-    "note": "Pick from Koda Art or the classic collection. Your choice follows your account on every device.",
+    "note": "Your choice shows on every device.",
     "choose": "Choose {name}",
     "current": "Current avatar",
     "classicN": "Classic {number}",
@@ -460,7 +464,7 @@
   },
   "stats": {
     "viewInProfile": "View in profile",
-    "todayNote": "The daily goal, and how far through the course this learner is",
+    "todayNote": "Today's goal and course progress",
     "courseProgress": "Course progress",
     "dayStreak": "Day streak",
     "totalXp": "Total XP",
@@ -468,7 +472,7 @@
     "currentLevel": "Current level",
     "starsEarned": "Stars earned",
     "badges": "Badges",
-    "badgesNote": "Won, and the next one to go for",
+    "badgesNote": "Badges won, and the next one to get",
     "amount": {
       "xp": "{count} XP",
       "streak": {
@@ -495,7 +499,7 @@
     "lightMode": "Use light mode",
     "darkMode": "Use dark mode",
     "readAgain": "Read again",
-    "checkLearning": "Check My Learning",
+    "checkLearning": "Check my learning",
     "finishBook": "I finished!",
     "pages": "Pages",
     "previousPage": "Previous page",
@@ -507,8 +511,8 @@
     "pictureWordHint": "Picture word · tap the speaker to hear it",
     "tapSpeaker": "Tap the speaker to hear it",
     "autoTurn": "Turn pages by themselves",
-    "autoTurnOn": "Auto turn is on: after a page is read, the next page turns and is read",
-    "autoTurnOff": "Auto turn is off: tap to turn pages by themselves after reading",
+    "autoTurnOn": "Auto turn is on: pages turn by themselves after reading",
+    "autoTurnOff": "Auto turn is off: tap to turn it on",
     "voice": {
       "record": "Record my reading for my grown-ups",
       "region": "Voice message",
@@ -524,8 +528,8 @@
       "again": "Record again",
       "discard": "Throw this recording away",
       "sent": "Sent! Your grown-ups can listen now.",
-      "failed": "It did not send",
-      "blocked": "The microphone is off. Ask a grown-up to allow it for Koda in the browser settings.",
+      "failed": "It didn't send",
+      "blocked": "The microphone is off. Ask a grown-up to turn it on in the browser settings.",
       "unsentTitle": "You haven't sent your reading yet.",
       "sendAndLeave": "Send, then leave",
       "stay": "Stay here",
@@ -675,7 +679,7 @@
       "km": "Khmer"
     },
     "summary": {
-      "read": "Read “{title}” ({language}). Understood {understood}, matched {matched}, spelled {spelled} on the first try.",
+      "read": "Read “{title}” ({language}). Right on the first try: {understood} understood, {matched} matched, {spelled} spelled.",
       "needs": "Needs practice: {words}.",
       "nothing": "Nothing needs practice."
     },
@@ -901,7 +905,9 @@
       "matchFull": "A book can have at most {max} matching sets.",
       "optional": "optional",
       "pagesHelp": "Pages break by themselves. Use the scissors to start a new page at a line, or Join to put a page back on the one before.",
-      "newPageAt": "Start a new page at {line}"
+      "newPageAt": "Start a new page at {line}",
+      "newLineAfter": "Start a new line after word {n} of {line}",
+      "newLineTitle": "Move the words after this one to a new line on the same page"
     },
     "q": {
       "collapse": "Collapse question",
@@ -1190,6 +1196,7 @@
     },
     "summary": {
       "recovered": "Your unsaved edits have been recovered.",
+      "recoveryStale": "This draft changed since your unsaved edits, so you are seeing the newer saved version.",
       "takeaway": "Learning takeaway",
       "suggest": "Suggest with AI",
       "takeawayHint": "What should students learn from this story?",
@@ -1383,11 +1390,11 @@
   "rest": {
     "asleep": {
       "title": "Koda is asleep",
-      "body": "Koda wakes up at {time}. Your grown-up picked that, so come back and find him then."
+      "body": "Koda wakes up at {time}. Your grown-up set this time. See you then!"
     },
     "dayDone": {
       "title": "That’s it for today",
-      "body": "You have had your {minutes} minutes of Koda today. Your grown-up picked that, and it starts again tomorrow."
+      "body": "You've played your {minutes} minutes today. Your grown-up set this. See you tomorrow!"
     },
     "saved": "Everything you earned is saved.",
     "savedToday": "Everything you earned today is saved.",
@@ -1395,24 +1402,25 @@
   },
   "catalog": {
     "error": {
-      "add": "Could not add this skill.",
-      "refresh": "The skill library could not be refreshed."
+      "add": "Couldn't add this skill. Try again.",
+      "refresh": "Couldn't load skills. Try again."
     },
     "empty": {
       "title": "No skills available yet",
       "admin": "Publish a skill with at least one lesson from Skills Manager to make it appear here.",
-      "age": "No published skills currently match age {age}. New age-matched skills will appear here automatically.",
-      "askAdult": "Ask an adult to check the learner age and published skills."
+      "age": "No skills for age {age} yet. New ones will show up here.",
+      "askAdult": "Ask a grown-up for help."
     },
     "refresh": "Refresh skill library",
     "eyebrow": "Skill library",
     "subtitleAdmin": "{count} skills · admin catalog includes every age and release state.",
-    "subtitle": "Skills selected for age {age}. Choose one to open its learning path.",
+    "subtitle": "Skills for age {age}. Tap one to start.",
     "adminBadge": "Admin · all skills",
     "searchPlaceholder": "Search skills or subjects",
     "search": "Search skills",
-    "subjects": "Skill subjects",
+    "subjects": "Subjects",
     "forYou": "For you",
+    "unfiled": "More",
     "thisSkill": "This skill",
     "continueLearning": "Continue learning",
     "openSkill": "Open skill",
@@ -1423,7 +1431,7 @@
       "other": "{count} skills"
     },
     "allComplete": "All complete",
-    "everySkill": "That is every skill available to this learner.",
+    "everySkill": "That's every skill for you right now.",
     "noMatch": "No matching skills",
     "noMatchHint": "Try another search or subject.",
     "showMore": "Show more skills"
@@ -1445,10 +1453,10 @@
     "readAloud": "Read question aloud",
     "hideHint": "Hide hint",
     "step": {
-      "warmup": "Warm-up Exercise 🌱",
-      "activity": "Interactive Activity 🚀",
-      "guided": "Guided Challenge 🌟",
-      "milestone": "Final Milestone 🏆"
+      "warmup": "Warm-up 🌱",
+      "activity": "Let's play 🚀",
+      "guided": "Try it 🌟",
+      "milestone": "Final challenge 🏆"
     },
     "backToLessons": "Back to lessons",
     "tryPractice": "Try a practice round",
@@ -1461,30 +1469,30 @@
     "levelProgress": "Level {level} progress",
     "oneMore": "One more round",
     "playAgain": "Play this lesson again",
-    "practiceAgain": "Practice Again",
+    "practiceAgain": "Practice again",
     "crash": {
       "title": "That didn't work",
-      "body": "Something went wrong with this lesson. Your progress is safe."
+      "body": "Something went wrong. Your progress is saved."
     },
     "gettingReady": "Getting the game ready…",
-    "couldNotLoad": "This game has not downloaded yet. Connect to the internet once, then try again.",
+    "couldNotLoad": "This game isn't downloaded yet. Connect to the internet once, then try again.",
     "tryAgain": "Try again"
   },
   "praise": {
     "practiceComplete": {
       "tag": "Practice complete",
       "headline": "Every practice round done!",
-      "note": "All of it again, with no help at all. That is what knowing something looks like."
+      "note": "You did it all again with no help. That means you really know it!"
     },
     "skillComplete": {
       "tag": "Skill complete",
       "headline": "You finished every lesson!",
-      "note": "That is the whole path, first lesson to last. Nothing here is beyond you."
+      "note": "From the first lesson to the last. Amazing!"
     },
     "levelUp": {
       "tag": "New level",
       "headline": "Level {level}!",
-      "note": "Every round you have ever played added up to this."
+      "note": "All your rounds added up to this!"
     },
     "streak": {
       "tag": "Streak",
@@ -1496,19 +1504,19 @@
         "one": "{count} week in a row!",
         "other": "{count} weeks in a row!"
       },
-      "note": "You keep coming back. That is the hard part, and you are doing it."
+      "note": "You keep coming back. Great job!"
     },
     "perfect": {
       "tag": "Perfect round",
       "headline": "Every single one!",
-      "note": "Right first time, all the way through. No hints needed."
+      "note": "All right on the first try. No hints!"
     },
     "goal": {
       "tag": "Goal met",
-      "headline": "That is today's goal!",
+      "headline": "You reached today's goal!",
       "note": {
-        "one": "{count} round done. Anything more today is extra.",
-        "other": "{count} rounds done. Anything more today is extra."
+        "one": "{count} round done. Anything more is a bonus!",
+        "other": "{count} rounds done. Anything more is a bonus!"
       }
     },
     "stars3": {
@@ -1517,11 +1525,11 @@
     },
     "stars2": {
       "headline": "Nicely done!",
-      "note": "You worked some of those out the hard way, and you got there."
+      "note": "Some were tricky, but you got there."
     },
     "stars1": {
       "headline": "You finished it!",
-      "note": "Some of those were tricky. Finishing anyway is what counts."
+      "note": "Some were hard. You kept going — well done!"
     },
     "roundComplete": "Round complete"
   },
@@ -1538,8 +1546,8 @@
     "raise": "Raise {label}"
   },
   "children": {
-    "subtitle": "Each child learns on their own device.",
-    "noAccess": "Only family members with child access can view children.",
+    "subtitle": "Add each child and see how they're doing.",
+    "noAccess": "Your account can't view children's profiles.",
     "add": "Add child",
     "atLimit": {
       "one": "The {plan} plan covers {count} child. Upgrade to add another.",
@@ -1557,21 +1565,21 @@
     "report": "Report",
     "switch": "Switch",
     "createAndCode": "Create and get code",
-    "createNote": "The child does not need an email or password. You will receive a one-time code after creating this profile.",
+    "createNote": "Your child doesn't need an email or password. You'll get a one-time code to sign them in.",
     "name": "Child's name",
     "namePlaceholder": "Mia",
     "birthYear": "Birth year",
     "edit": "Edit child",
     "save": "Save changes",
-    "goalHint": "Rounds {name} aims to finish each day",
+    "goalHint": "Rounds {name} should finish each day",
     "thisChild": "this child",
     "thisChildCap": "This child",
     "kodaSettings": "Koda settings",
     "everyDevice": "Applies on every device.",
     "removeTitle": "Remove child?",
-    "removeBody": "{name} will be removed and their devices signed out. Their learning history goes with the profile.",
+    "removeBody": "{name} will be removed and signed out on their devices. Their learning history will be deleted too.",
     "notice": {
-      "created": "Child profile created. Share this code with the child.",
+      "created": "Child added. Use this code to sign them in.",
       "updated": "Child profile updated.",
       "removed": "{name} was removed."
     }
@@ -1649,8 +1657,8 @@
     },
     "photoPages": {
       "title": "Pictures from photos",
-      "hint": "Let them turn their own photos into colouring pictures. The photo is sent to Google's AI to be redrawn and is not kept; only the drawing is saved.",
-      "notInPlan": "Part of the AI plan. Turning photos into colouring pictures uses Koda's AI."
+      "hint": "Turn their own photos into colouring pictures. The photo is sent to Google's AI to redraw and isn't kept — only the drawing is saved.",
+      "notInPlan": "Part of the AI plan."
     },
     "cadence": {
       "hint": "Count streaks by days or weeks.",
@@ -1668,7 +1676,7 @@
   },
   "pin": {
     "title": "Family PIN",
-    "subtitle": "Protects parent account switching.",
+    "subtitle": "Stops kids switching to your account.",
     "on": "On",
     "notSet": "Not set",
     "new": "New PIN",
@@ -1677,14 +1685,14 @@
     "change": "Change PIN",
     "set": "Set a PIN",
     "remove": "Remove",
-    "note": "Four digits to stop accidental account switches.",
+    "note": "4 digits. Stops kids switching to your account by accident.",
     "mismatch": "Those two do not match.",
     "saved": "Family PIN saved.",
-    "removed": "Family PIN removed. Switching accounts no longer asks for one.",
+    "removed": "PIN removed. Switching accounts won't ask for it anymore.",
     "removeTitle": "Remove the family PIN?",
-    "removeBody": "Switching from a child's session back to a grown-up's account will stop asking for it.",
+    "removeBody": "Kids will be able to switch back to your account without a PIN.",
     "removeConfirm": "Remove PIN",
-    "offline": "No connection, so this cannot be checked right now.",
+    "offline": "Can't connect, so the PIN can't be checked right now.",
     "askGrownUp": "Ask a grown‑up",
     "unlock": "Unlock",
     "opening": "Opening {name} needs the family PIN.",
@@ -1695,7 +1703,7 @@
     "updated": "Updated {when}",
     "openReport": "Open report",
     "addFirst": "Add your first child",
-    "addFirstNote": "Koda is for them. Create a profile and they get their own learning space — you keep the settings, the goal and the progress.",
+    "addFirstNote": "Create a profile for your child. They get their own space to learn, and you see their progress and set the rules.",
     "practisedToday": "Practised today",
     "minToday": "{count} min today",
     "notStarted": "Hasn't started yet",
@@ -1723,8 +1731,8 @@
   },
   "yourLearning": {
     "title": "Your learning",
-    "note": "Yours to set. Nobody else manages this account, so the limits below are the ones you choose for yourself.",
-    "saveFailed": "That could not be saved. Try again in a moment.",
+    "note": "You set your own goal and limits.",
+    "saveFailed": "Couldn't save. Try again.",
     "goalHint": "Rounds you aim to finish each day"
   },
   "report": {
@@ -1741,12 +1749,12 @@
     },
     "hideDetail": "Hide detail",
     "spread": {
-      "all": "All of it on {lesson}.",
+      "all": "All on {lesson}.",
       "half": {
-        "questions": "Over half of the questions on {lesson}.",
-        "finishes": "Over half of the finishes on {lesson}."
+        "questions": "More than half on {lesson}.",
+        "finishes": "More than half on {lesson}."
       },
-      "across": "Spread across {count} lessons, most on {lesson}."
+      "across": "Across {count} lessons, mostly {lesson}."
     },
     "evidence": {
       "notPlayed": "not played yet",
@@ -1756,113 +1764,113 @@
       },
       "rightOf": "{right} of {total} right first time"
     },
-    "offline": "No connection to the data service, so this is not available right now.",
+    "offline": "You're offline. Connect to the internet to see this report.",
     "progressOf": "{name}'s progress",
     "noAccess": "Only family members with access to a child's record can see what they have practised.",
-    "subtitle": "What {name} has practised, and what it shows.",
+    "subtitle": "{name}'s learning report",
     "tooEarly": "Still getting to know {name}. There is enough here to see the shape of what they are meeting, but not yet enough to say how securely — a few more rounds will settle it.",
-    "loading": "Reading {name}'s record…",
-    "emptyNote": "Once {name} has played a few rounds, this page fills in with what they know, what they are working on, and where they are going wrong.",
+    "loading": "Loading {name}'s report…",
+    "emptyNote": "After {name} plays a few rounds, this page shows what they know, what they're practising, and where they need help.",
     "doNext": "Do this next",
     "howOften": "How often",
-    "howOftenNote": "How much {name} is practising. Little and often is what makes it stay.",
+    "howOftenNote": "Short, regular practice helps {name} remember.",
     "lastPlayed": "Last played",
     "daysThisWeek": "Days this week",
     "lessonsFinished": "Lessons finished",
     "questionsAnswered": "Questions answered",
     "tapNumber": "Tap a number to see which lessons it came from.",
     "questionsFrom": "Where the {count} questions came from",
-    "questionsHint": "The second line is the one to read: lots of questions but few right first time means that lesson needs help.",
+    "questionsHint": "Many questions but few right first time? That lesson needs help.",
     "nothingAnswered": "Nothing answered yet.",
     "rightFirstTime": "{count} right first time",
     "finishedRounds": {
       "one": "The {count} finished round",
       "other": "The {count} finished rounds"
     },
-    "finishedHint": "A round played all the way to the end — stopping half way still counts as practice, but not as finished.",
-    "nothingFinished": "Nothing finished yet — every round so far was left part-done. Worth sitting with {name} for one short lesson from start to end.",
+    "finishedHint": "A finished round means played to the end.",
+    "nothingFinished": "No round finished yet. Sit with {name} for one short lesson, start to end.",
     "nFinished": "{count} finished",
     "last": "last {when}",
     "recent": "Recent activity",
-    "recentOne": "The one day {name} has played, and what they worked on",
-    "recentMany": "The last {count} days {name} played, and what they worked on",
+    "recentOne": "The day {name} played, and what they practised",
+    "recentMany": "The last {count} days {name} played, and what they practised",
     "everyLesson": "Every lesson so far",
-    "everyLessonNote": "How {name} is doing on each one, and what it needs next",
+    "everyLessonNote": "How {name} is doing in each lesson, and what to do next",
     "mistakes": "Mistakes to watch",
-    "mistakesNote": "The same slip, more than once — and what helps with it",
+    "mistakesNote": "Mistakes made more than once, and how to help",
     "times": {
       "one": "{count} time",
       "other": "{count} times"
     },
     "try": "Try: {fix}",
     "stillHints": "Still using hints",
-    "stillHintsNote": "{name} gets these right, but asks for a hint most times. One round with the hints closed is the next step.",
-    "hintsIn": "{hints} hints in {total}",
+    "stillHintsNote": "{name} gets these right but often uses hints. Next: one round without hints.",
+    "hintsIn": "{hints} hints in {total} questions",
     "rhythm": {
-      "none": "{name} has not played this week. Ten minutes today is worth more than an hour on Sunday.",
-      "most": "Practising most days. This is the thing that makes it stick — keep it.",
-      "good": "{count} days this week. Three or more is the bar, and {name} is over it.",
+      "none": "{name} has not played this week. 10 minutes today is a good start.",
+      "most": "Practising most days. Great — keep it up.",
+      "good": "{count} days this week. That meets the goal of 3.",
       "low": {
-        "one": "{count} day this week. Aim for {target} short sessions rather than one long one — spacing is what makes it stay.",
-        "other": "{count} days this week. Aim for {target} short sessions rather than one long one — spacing is what makes it stay."
+        "one": "{count} day this week. Aim for {target} short sessions a week.",
+        "other": "{count} days this week. Aim for {target} short sessions a week."
       }
     },
     "next": {
       "notPlayed": "Not played yet.",
       "tooSoon": {
-        "one": "Too soon to tell — about {count} more question and we will know.",
-        "other": "Too soon to tell — about {count} more questions and we will know."
+        "one": "Too early to tell. About {count} more question needed.",
+        "other": "Too early to tell. About {count} more questions needed."
       },
-      "struggling": "Sit with them for one round. More is going wrong than right.",
-      "hints": "Right most times, but using hints. Try one round without them.",
-      "anotherDay": "Doing well. One more round on another day and it is learned.",
-      "fewerSlips": "Nearly there. A round with fewer slips finishes it.",
-      "finishRound": "Just needs one round played all the way to the end.",
-      "mastered": "Learned. Come back in a week or two so it stays that way.",
+      "struggling": "Sit with them for one round. More wrong than right.",
+      "hints": "Mostly right, but uses hints. Try one round without them.",
+      "anotherDay": "Doing well. Play once more on another day to finish it.",
+      "fewerSlips": "Almost learned. One more careful round.",
+      "finishRound": "Needs one round played to the end.",
+      "mastered": "Learned. Review it in 1–2 weeks.",
       "nothing": "Nothing to do here yet."
     },
     "move": {
       "stuck": {
         "action": "Sit with {name} for one round of {lesson}.",
-        "why": "More is going wrong than right on this one, so it is where help counts most."
+        "why": "More wrong answers than right, so your help matters most here."
       },
       "hints": {
-        "action": "One round of {lesson}, with the hints left closed.",
-        "why": "{name} gets these right, but reaches for a hint most times."
+        "action": "Play {lesson} once without hints.",
+        "why": "{name} gets these right but often uses hints."
       },
       "day": {
-        "action": "One more round of {lesson}, on a different day.",
-        "why": "It has only been practised on one day. A second day is what makes it stay."
+        "action": "Play {lesson} again on another day.",
+        "why": "Practised on one day only. A second day helps it stick."
       },
       "slips": {
-        "action": "Another round of {lesson}.",
-        "why": "Nearly learned — a round with fewer slips finishes it."
+        "action": "Play {lesson} once more.",
+        "why": "Almost learned. One more careful round should finish it."
       },
       "finish": {
-        "action": "One round of {lesson}, played all the way to the end.",
-        "why": "Every round so far was left part-way. A finished round is what counts."
+        "action": "Play {lesson} once, all the way to the end.",
+        "why": "Earlier rounds were stopped early. Only finished rounds count."
       },
       "early": {
-        "action": "A couple more rounds of {lesson}.",
-        "why": "It is too new to tell how it is going. More rounds is the only thing that helps."
+        "action": "Play {lesson} a couple more times.",
+        "why": "Too new to judge. A few more rounds will show how it's going."
       },
       "done": {
-        "action": "Nothing needs fixing — time for something new.",
-        "why": "{name} has learned everything they have met so far."
+        "action": "Everything is learned — try a new lesson.",
+        "why": "{name} knows everything practised so far."
       }
     },
     "status": {
       "mastered": {
         "label": "Knows it",
-        "detail": "Learned. One quick round in a week or two keeps it."
+        "detail": "Learned. Review in 1–2 weeks."
       },
       "practising": {
         "label": "Almost there",
-        "detail": "Nearly learned. The best place to spend the next session."
+        "detail": "Nearly learned. Practise these next."
       },
       "learning": {
         "label": "Just started",
-        "detail": "Too soon to tell how it is going. A few more rounds will show."
+        "detail": "Too early to tell. A few more rounds will show."
       },
       "struggling": {
         "label": "Needs help",
@@ -2000,18 +2008,79 @@
       "deleteOne": "Delete the recording of {book}",
       "playFailed": "That recording could not be played. Try again.",
       "deleteFailed": "That recording could not be deleted. Try again."
+    },
+    "glance": {
+      "atGlance": "At a glance",
+      "tone": {
+        "quiet": {
+          "title": "Hasn't played lately",
+          "why": "Last played {when}. A short round today gets the habit going again."
+        },
+        "help": {
+          "title": "Needs a hand",
+          "why": {
+            "one": "{count} lesson has more wrong answers than right. Sit with {name} for one round.",
+            "other": "{count} lessons have more wrong answers than right. Sit with {name} for one round."
+          }
+        },
+        "early": {
+          "title": "Still getting to know {name}",
+          "why": "Too early to judge. After a few more rounds, this page will show how it's going."
+        },
+        "light": {
+          "title": "Going well — practise more often",
+          "why": "Nothing is stuck. Aim for {target} days a week."
+        },
+        "good": {
+          "title": "On track",
+          "why": "Practising often, nothing stuck. Keep going."
+        }
+      },
+      "week": "This week",
+      "weekDays": "{count}/7",
+      "secure": "Knows it",
+      "needHelp": "Needs help",
+      "firstTry": "Right first try",
+      "firstTryNone": "Not enough answers yet",
+      "lessonsBar": "{name}'s lessons",
+      "toDo": "What to do this week",
+      "mistakeTip": "Common mistake: {label}. {fix}",
+      "trendTitle": "Practice, last 8 weeks",
+      "trendNote": "Days practised each week. Goal: {target} days.",
+      "trendGoal": "Goal",
+      "thisWeek": "This week",
+      "weeksAgo": {
+        "one": "{count} week ago",
+        "other": "{count} weeks ago"
+      },
+      "daysIn": {
+        "one": "{count} day",
+        "other": "{count} days"
+      },
+      "lessonsTitle": "How each lesson is going",
+      "lessonsNote": "% right on the first try. The line ({mark}%) is the bar for “learned”.",
+      "learnedLine": "Learned",
+      "tooFewNote": {
+        "one": "{count} more lesson needs more answers before it appears.",
+        "other": "{count} more lessons need more answers before they appear."
+      },
+      "showAllLessons": {
+        "one": "Show {count} lesson",
+        "other": "Show all {count} lessons"
+      },
+      "weekInitials": "S,M,T,W,T,F,S"
     }
   },
   "leaderboard": {
-    "thisLearnerIsNowIncludedOn": "This learner is now included on the public leaderboard.",
+    "thisLearnerIsNowIncludedOn": "Your child now shows on the public leaderboard.",
     "leaderboardSharingIsOnForApproved": "Leaderboard sharing is on for approved buddies only.",
-    "sharingStoppedThisLearnerDisappearedFrom": "Sharing stopped. This learner disappeared from all leaderboards.",
-    "buddyAddedSharingRemainsASeparate": "Buddy added. Sharing remains a separate choice for each learner.",
+    "sharingStoppedThisLearnerDisappearedFrom": "Sharing stopped. Your child no longer shows on any leaderboard.",
+    "buddyAddedSharingRemainsASeparate": "Buddy added. You still choose sharing for each child.",
     "buddyBlockedAndRemoved": "Buddy blocked and removed.",
     "buddyRemoved": "Buddy removed.",
     "loadingBuddyLeaderboard": "Loading buddy leaderboard",
-    "noLearnerProfile": "No learner profile",
-    "addOrSelectALearnerProfile": "Add or select a learner profile before opening the buddy leaderboard.",
+    "noLearnerProfile": "No child profile",
+    "addOrSelectALearnerProfile": "Add or choose a child first to see the buddy leaderboard.",
     "friendsProgress": "Friends & progress",
     "leaderboards": "Leaderboards",
     "chooseAPublicChallengeOrA": "Choose a public challenge or a private board with approved buddies.",
@@ -2079,22 +2148,22 @@
     "useAOneTimeCodeTo": "Use a one-time code to connect safely.",
     "addingABuddyNeverTurnsOn": "Adding a buddy never turns on leaderboard sharing.",
     "chooseLeaderboardSharing": "Choose leaderboard sharing",
-    "whoCanSeeThisLearner": "Who can see this learner",
+    "whoCanSeeThisLearner": "Who can see your child",
     "onlyDirectAcceptedBuddies": "Only direct, accepted buddies.",
-    "anySignedInKodaLearner": "Any signed-in Koda learner.",
-    "anySignedInKodaLearnerCan": "Any signed-in Koda learner can see",
+    "anySignedInKodaLearner": "Anyone signed in to Koda.",
+    "anySignedInKodaLearnerCan": "Anyone signed in to Koda can see",
     "approvedBuddiesCanSee": "Approved buddies can see",
-    "valueOnlyThisNicknameAvatarWeekly": "{value} only this nickname, avatar, weekly XP, and rank. A real name, email, age, family, and lesson details stay private.",
+    "valueOnlyThisNicknameAvatarWeekly": "{value} only the nickname, avatar, weekly XP and rank. Real name, email, age, family and lessons stay private.",
     "leaderboardNickname": "Leaderboard nickname",
     "exampleStarfox": "Example: StarFox",
-    "iUnderstandThisProfileWillBe": "I understand this profile will be visible to any signed-in Koda learner.",
-    "iConfirmThisLearnerMayAppear": "I confirm this learner may appear to direct, approved buddies.",
+    "iUnderstandThisProfileWillBe": "I understand anyone signed in to Koda can see this profile.",
+    "iConfirmThisLearnerMayAppear": "I agree my child can be seen by approved buddies.",
     "notNow": "Not now",
     "confirmPublicSharing": "Confirm public sharing",
     "confirmBuddiesOnly": "Confirm buddies only",
     "shareThisCodeDirectlyWithThe": "Share this code directly with the buddy you want to add.",
     "removeThisBuddy": "Remove this buddy?",
-    "theyWillDisappearFromBothBuddy": "They will disappear from both buddy lists and leaderboards. A new code is required to reconnect.",
+    "theyWillDisappearFromBothBuddy": "You'll both disappear from each other's buddy lists and leaderboards. You'll need a new code to reconnect.",
     "removeBuddy": "Remove buddy",
     "blockThisBuddy": "Block this buddy?",
     "theyWillBeRemovedImmediatelyAnd": "They will be removed immediately and cannot reconnect until unblocked.",
@@ -3518,8 +3587,8 @@
     "dailyStudyGoal": {
       "changeDailyGoal": "Change daily goal",
       "goal": "Goal",
-      "setDailyTarget": "Set Daily Target",
-      "targetDailyProblemsForSteadyMastery": "Target daily problems for steady mastery."
+      "setDailyTarget": "Set daily goal",
+      "targetDailyProblemsForSteadyMastery": "Rounds to do each day."
     },
     "kodaAskModal": {
       "askName": "Ask {name}",
@@ -3528,62 +3597,62 @@
       "talkToNameOutLoudInstead": "Talk to {name} out loud instead of typing",
       "close": "Close",
       "iMNameAskMeAnything": "I'm {name}. Ask me anything about what you're working on.",
-      "kodaCouldNotBeReachedThis": "Koda could not be reached — this is a general nudge, not an answer.",
+      "kodaCouldNotBeReachedThis": "Koda can't connect right now. Here's a tip instead.",
       "nameIsThinking": "{name} is thinking",
       "typeYourQuestion": "Type your question…",
       "yourQuestionForKoda": "Your question for Koda",
       "send": "Send",
-      "nameListensAndAnswersOutLoud": "{name} listens and answers out loud here. Written help is switched off.",
+      "nameListensAndAnswersOutLoud": "{name} listens and answers out loud. Typing is turned off.",
       "talkToName": "Talk to {name}"
     },
     "kodaAvatar": {
       "koda": "Koda",
-      "aiMathCoach": "AI Math Coach",
-      "explainingConcept": "Explaining concept...",
-      "thinkingOfAGuidingHint": "Thinking of a guiding hint...",
-      "listeningToYou": "Listening to you...",
-      "greatIntuitionKeepGoing": "Great intuition! Keep going!",
-      "readyToExploreWithYou": "Ready to explore with you"
+      "aiMathCoach": "Study helper",
+      "explainingConcept": "Explaining…",
+      "thinkingOfAGuidingHint": "Thinking of a hint…",
+      "listeningToYou": "Listening…",
+      "greatIntuitionKeepGoing": "Good thinking! Keep going!",
+      "readyToExploreWithYou": "Ready when you are"
     },
     "liveVoiceCoachModal": {
       "live": "Live",
-      "selectKodaVoice": "Select Koda Voice",
+      "selectKodaVoice": "Choose Koda's voice",
       "aoedeWarm": "Aoede (Warm)",
       "puckFun": "Puck (Fun)",
       "koreCalm": "Kore (Calm)",
       "fenrirDeep": "Fenrir (Deep)",
       "zephyrTutor": "Zephyr (Tutor)",
       "typeToKodaInstead": "Type to Koda instead",
-      "floatingPopUpMode": "Floating Pop-up Mode",
-      "closeVoiceCoach": "Close Voice Coach",
+      "floatingPopUpMode": "Floating window",
+      "closeVoiceCoach": "Close voice helper",
       "questionValue": "Question {value}",
-      "askHint": "Ask Hint",
+      "askHint": "Ask for a hint",
       "moveToTheNextQuestion": "Move to the next question",
-      "nextQuestion": "Next Question",
-      "endTheVoiceSession": "End the voice session",
-      "startTheVoiceSession": "Start the voice session",
-      "connectionError": "Connection Error",
+      "nextQuestion": "Next question",
+      "endTheVoiceSession": "Stop talking to Koda",
+      "startTheVoiceSession": "Start talking to Koda",
+      "connectionError": "Can't connect",
       "tapNameToStart": "Tap {name} to start",
       "microphoneOff": "Microphone off",
-      "endVoice": "End Voice",
-      "startLiveVoice": "Start Live Voice",
-      "unmuteMicrophone": "Unmute Microphone",
-      "muteMicrophone": "Mute Microphone",
-      "hintQ": "Hint Q",
-      "visualTools": "Visual Tools",
-      "concept": "Concept",
-      "liveVoiceTranscripts": "Live Voice Transcripts",
+      "endVoice": "Stop voice",
+      "startLiveVoice": "Start voice",
+      "unmuteMicrophone": "Turn microphone on",
+      "muteMicrophone": "Turn microphone off",
+      "hintQ": "Hint",
+      "visualTools": "Picture tools",
+      "concept": "Idea",
+      "liveVoiceTranscripts": "What we said",
       "koda": "Koda",
-      "typeOrSpeakAQuestionTo": "Type or speak a question to Koda...",
+      "typeOrSpeakAQuestionTo": "Type or say a question to Koda…",
       "send": "Send",
-      "clickAndDragToMoveKoda": "Click and drag to move Koda anywhere!",
-      "voiceIsActiveClickToPause": "Voice is ACTIVE! Click to pause/disconnect.",
-      "voiceIsOfflineClickToConnect": "Voice is offline. Click to connect!",
-      "disconnectSession": "Disconnect Session",
-      "connectSession": "Connect Session",
-      "unmuteMic": "Unmute Mic",
-      "muteMic": "Mute Mic",
-      "closeKodaCoach": "Close Koda Coach"
+      "clickAndDragToMoveKoda": "Drag Koda anywhere!",
+      "voiceIsActiveClickToPause": "Voice is on. Tap to pause.",
+      "voiceIsOfflineClickToConnect": "Voice is off. Tap to connect.",
+      "disconnectSession": "Disconnect",
+      "connectSession": "Connect",
+      "unmuteMic": "Mic on",
+      "muteMic": "Mic off",
+      "closeKodaCoach": "Close Koda"
     },
     "progressShortcuts": {
       "today": "Today",
@@ -3600,11 +3669,11 @@
       "readyToPlayWithoutInternet": "Ready to play without internet."
     },
     "quickMathPanel": {
-      "rapidReinforcementMode": "RAPID REINFORCEMENT MODE",
+      "rapidReinforcementMode": "Quick practice",
       "quick": "Quick",
       "drills": "Drills",
       "math": "Math",
-      "streakHotStreak": "{streak} Hot Streak",
+      "streakHotStreak": "{streak} in a row",
       "allMixed": "⚡ All Mixed",
       "algebra": "⚖️ Algebra",
       "fractions": "🥧 Fractions",
@@ -3614,22 +3683,22 @@
       "logic": "💻 Logic",
       "question": "Question",
       "of": "of",
-      "visualClueModel": "Visual Clue Model:",
-      "typeYourMentalMathAnswer": "Type your mental math answer...",
-      "submitAnswer": "Submit Answer",
-      "nextProblem": "Next Problem",
-      "requestKodaHint": "Request Koda Hint",
-      "kodaSSocraticMentalHint": "💡 Koda's Socratic Mental Hint:",
+      "visualClueModel": "Picture clue:",
+      "typeYourMentalMathAnswer": "Type your answer…",
+      "submitAnswer": "Check",
+      "nextProblem": "Next question",
+      "requestKodaHint": "Ask Koda for a hint",
+      "kodaSSocraticMentalHint": "💡 Koda's hint:",
       "correct30Xp": "Correct! +30 XP",
-      "keepReasoning": "Keep Reasoning!",
-      "socraticSpeedEngineActive": "Socratic Speed Engine Active",
-      "solveRapidProblemsToDoubleDaily": "Solve rapid problems to double daily XP momentum"
+      "keepReasoning": "Keep thinking!",
+      "socraticSpeedEngineActive": "Quick practice is on",
+      "solveRapidProblemsToDoubleDaily": "Answer quick questions to earn extra XP"
     },
     "socraticChatPanel": {
-      "socraticAiCoach": "Socratic AI Coach",
-      "toggleVoiceSpeech": "Toggle Voice Speech",
-      "voiceOn": "Voice ON",
-      "voiceOff": "Voice OFF",
+      "socraticAiCoach": "Koda study helper",
+      "toggleVoiceSpeech": "Turn voice on or off",
+      "voiceOn": "Voice on",
+      "voiceOff": "Voice off",
       "kodaAi": "Koda AI",
       "you": "You",
       "xpearnedXp": "+{xpEarned} XP",
@@ -3637,9 +3706,9 @@
       "hint": "Hint",
       "whyDoesThisWork": "💡 Why does this work?",
       "visualClue": "🔍 Visual clue",
-      "microphoneSpeechToText": "Microphone Speech-to-Text",
-      "listeningSpeakClearly": "Listening... speak clearly...",
-      "askAQuestionOrExplainYour": "Ask a question or explain your reasoning..."
+      "microphoneSpeechToText": "Speak instead of typing",
+      "listeningSpeakClearly": "Listening… speak clearly",
+      "askAQuestionOrExplainYour": "Ask a question, or say how you worked it out…"
     },
     "upgradePrompt": {
       "askKoda": "Ask Koda",
@@ -3648,8 +3717,8 @@
       "youVeFinishedTheFreeLessons": "You've finished the free lessons in this skill. The rest come with a paid plan.",
       "switchedOff": "Switched off",
       "okay": "Okay",
-      "kodaRsquoSHelpIsSwitched": "Koda’s help is switched off for you right now. Your grown-up chose that, and they can turn it back on.",
-      "everythingElseStillWorksEveryLesson": "Everything else still works — every lesson, every star, your streak and your badges.",
+      "kodaRsquoSHelpIsSwitched": "Koda's help is off right now. Your grown-up turned it off and can turn it back on.",
+      "everythingElseStillWorksEveryLesson": "Everything else still works — lessons, stars, streak and badges.",
       "onAPaidPlan": "On a paid plan",
       "thisPartOfKodaComesWith": "This part of Koda comes with a paid plan.",
       "notNow": "Not now",
@@ -3664,7 +3733,7 @@
       "close": "Close",
       "newQuestions": "New questions",
       "print": "Print",
-      "noneOfThisSkillRsquoS": "None of this skill’s lessons can be printed yet. Its questions are things to touch, drag and count on screen — on paper they would be a caption and an empty box.",
+      "noneOfThisSkillRsquoS": "This skill can't be printed yet. Its questions are for touching and dragging on screen.",
       "lesson": "Lesson",
       "questions": "Questions",
       "answerKey": "Answer key",
@@ -4674,7 +4743,7 @@
     "clear": "Start over",
     "imDone": "I'm done",
     "doneOf": "{done} of {total} done",
-    "anyOrder": "Colour any part you like. The glowing part is the suggested next step; tap a step to choose another.",
+    "anyOrder": "Colour any part you like. The glowing part is a good next step — or tap another one.",
     "helper": "Stay inside the lines",
     "helperNote": "Each stroke stays inside the part where it starts.",
     "nextPicture": "Next picture",
@@ -4778,12 +4847,12 @@
     "nowColour": "Now colour it"
   },
   "rebus": {
-      "needsDownloadTitle": "Getting the puzzles ready",
-      "needsDownloadText": "Rebus Rush needs to download its puzzles once. Connect to the internet, then try again. After that it works without a connection.",
-      "nothingYetTitle": "No puzzles yet",
-      "nothingYetText": "There are no puzzles to play right now. Please check back soon.",
-      "retry": "Try again",
-      "gettingPuzzles": "Getting the puzzles…",
+    "needsDownloadTitle": "Getting the puzzles ready",
+    "needsDownloadText": "Rebus Rush needs to download its puzzles once. Connect to the internet, then try again. After that it works without a connection.",
+    "nothingYetTitle": "No puzzles yet",
+    "nothingYetText": "There are no puzzles to play right now. Please check back soon.",
+    "retry": "Try again",
+    "gettingPuzzles": "Getting the puzzles…",
     "title": "Rebus Rush",
     "tagline": "Read the pictures, say the phrase, beat the Machine.",
     "entryTitle": "Rebus Rush",
@@ -4794,7 +4863,9 @@
     "puzzlesCount": "{count} puzzles",
     "playedOf": "{done} of {total} played",
     "mixed": "Mixed",
-    "choice": {"answers": "The answers"},
+    "choice": {
+      "answers": "The answers"
+    },
     "chooseAnswer": "Choose your answer",
     "answerPlaceholderMath": "Type the number",
     "xpAmount": "+{xp} XP",
@@ -4802,8 +4873,35 @@
     "hintN": "Hint {n}",
     "hintsUsedOf": "{used} of {total} hints used",
     "pointsChip": "+{points} points",
-    "hint": {"category": "Category: {name}", "letters": "Letters: {mask}", "pieces": "The pieces: {names}", "count": "({n} letters)", "digits": "The answer has {n} digits", "eliminate": "One wrong answer is taken away", "eliminateNone": "Only two answers are left. Look at the question again", "range": "The answer is between {low} and {high}"},
-    "turns": {"openCard": "Take turns on this device", "title": "Take turns", "subtitle": "Pass the device back and forth. No internet needed.", "players": "Players", "add": "Add a player", "change": "Change {name}", "remove": "Remove {name}", "each": "Puzzles each", "total": "{total} puzzles in all.", "start": "Start", "offline": "Works with no internet. Nothing is saved to anyone's account.", "passTo": "Pass to {name}", "passHint": "Hand over the device. The timer starts when they press the button.", "ready": "I'm ready", "turnOf": "{name}'s turn", "solved": "{name} got it!", "leave": "Done"},
+    "hint": {
+      "category": "Category: {name}",
+      "letters": "Letters: {mask}",
+      "pieces": "The pieces: {names}",
+      "count": "({n} letters)",
+      "digits": "The answer has {n} digits",
+      "eliminate": "One wrong answer is taken away",
+      "eliminateNone": "Only two answers are left. Look at the question again",
+      "range": "The answer is between {low} and {high}"
+    },
+    "turns": {
+      "openCard": "Take turns on this device",
+      "title": "Take turns",
+      "subtitle": "Pass the device back and forth. No internet needed.",
+      "players": "Players",
+      "add": "Add a player",
+      "change": "Change {name}",
+      "remove": "Remove {name}",
+      "each": "Puzzles each",
+      "total": "{total} puzzles in all.",
+      "start": "Start",
+      "offline": "Works with no internet. Nothing is saved to anyone's account.",
+      "passTo": "Pass to {name}",
+      "passHint": "Hand over the device. The timer starts when they press the button.",
+      "ready": "I'm ready",
+      "turnOf": "{name}'s turn",
+      "solved": "{name} got it!",
+      "leave": "Done"
+    },
     "categories": {
       "countries": "Countries",
       "food": "Food",
@@ -4903,8 +5001,17 @@
       "door": "Waiting for the host to let you in…",
       "doorHint": "Stay on this page. The host sees your nickname and picks Accept.",
       "declined": "The host did not let you in.",
-      "podium": {"label": "The podium", "place": "Place {n}"},
-      "ask": {"title": "Want to keep playing?", "body": "Ask a grown-up to sign up for Koda. You don't have to type anything.", "button": "Ask a grown-up", "copy": "Copy the note", "note": "Hi! I played Rebus Rush on Koda and loved it. Can you sign up for me so I can keep playing? {link}"},
+      "podium": {
+        "label": "The podium",
+        "place": "Place {n}"
+      },
+      "ask": {
+        "title": "Want to keep playing?",
+        "body": "Ask a grown-up to sign up for Koda. You don't have to type anything.",
+        "button": "Ask a grown-up",
+        "copy": "Copy the note",
+        "note": "Hi! I played Rebus Rush on Koda and loved it. Can you sign up for me so I can keep playing? {link}"
+      },
       "earnedXp": "+{xp} XP for this game",
       "noXp": "You played these before, so no new XP this time.",
       "requests": "Waiting to join",
@@ -4989,7 +5096,12 @@
     "puzzle": "Puzzle",
     "thinking": "Machine is thinking…",
     "machineLocked": "Machine guessed wrong. Your chance!",
-    "mood": {"oops": "Oops!", "cheer": "Got it!", "groan": "Aw, you were quicker!", "shrug": "Hmm, nobody got it."},
+    "mood": {
+      "oops": "Oops!",
+      "cheer": "Got it!",
+      "groan": "Aw, you were quicker!",
+      "shrug": "Hmm, nobody got it."
+    },
     "answerLabel": "Your answer",
     "answerPlaceholder": "Type what the pictures say",
     "check": "Check",
@@ -5030,11 +5142,17 @@
       "releaseBadge": "Release {n}",
       "addedBy": "Added by {name}",
       "releaseBy": "Published by {name}",
-      "usedIn": {"one": "Used in {count} puzzle", "other": "Used in {count} puzzles"},
+      "usedIn": {
+        "one": "Used in {count} puzzle",
+        "other": "Used in {count} puzzles"
+      },
       "notUsed": "Not used yet",
       "usedInAria": "See the puzzles that use {name}",
       "usedInTitle": "Puzzles using {name}",
-      "usedInCount": {"one": "{count} puzzle uses this drawing. A change to it changes that puzzle.", "other": "{count} puzzles use this drawing. A change to it changes all of them."},
+      "usedInCount": {
+        "one": "{count} puzzle uses this drawing. A change to it changes that puzzle.",
+        "other": "{count} puzzles use this drawing. A change to it changes all of them."
+      },
       "usedInNone": "No puzzle uses this drawing yet.",
       "backToDrawings": "All drawings",
       "tabDrawings": "Drawings",
@@ -5196,14 +5314,77 @@
       "kind_choice": "Multiple choice",
       "kind_quiz": "Worked question",
       "addDrawing": "Add a drawing",
-      "wizard": {"title": "Make a question", "steps": "Steps", "stepKind": "Kind", "stepBuild": "Build", "stepCheck": "Check and save", "kindTitle": "What kind of question?", "pickKind": "Pick a kind of question.", "checkTitle": "Check it and save", "next": "Next", "toContinue": "To continue: {what}", "kind_picture": "Picture puzzle", "kind_picture_text": "Pictures, photos and words add up to a typed answer, like a hot dog.", "kind_photo": "Name a picture", "kind_photo_text": "One picture or a photo you upload, and the word for it.", "kind_math": "Math", "kind_math_text": "Pick the numbers. The question and its answer are worked out for you.", "kind_choice": "Multiple choice", "kind_choice_text": "A question with two to four answers to tap."},
+      "wizard": {
+        "title": "Make a question",
+        "steps": "Steps",
+        "stepKind": "Kind",
+        "stepBuild": "Build",
+        "stepCheck": "Check and save",
+        "kindTitle": "What kind of question?",
+        "pickKind": "Pick a kind of question.",
+        "checkTitle": "Check it and save",
+        "next": "Next",
+        "toContinue": "To continue: {what}",
+        "kind_picture": "Picture puzzle",
+        "kind_picture_text": "Pictures, photos and words add up to a typed answer, like a hot dog.",
+        "kind_photo": "Name a picture",
+        "kind_photo_text": "One picture or a photo you upload, and the word for it.",
+        "kind_math": "Math",
+        "kind_math_text": "Pick the numbers. The question and its answer are worked out for you.",
+        "kind_choice": "Multiple choice",
+        "kind_choice_text": "A question with two to four answers to tap."
+      },
       "pictures": "Pictures",
       "noPictures": "No picture yet. A picture is optional.",
       "preview": "As children will see it",
-      "choice": {"title": "A multiple-choice question", "card": "Write a multiple-choice question", "cardText": "A question with two to four answers to tap. Works for any subject.", "question": "The question", "questionHint": "What is the capital of France?", "answers": "The answers", "markRight": "Answer {n} is the right one", "answerN": "Answer {n}", "removeAnswer": "Remove answer {n}", "addAnswer": "Add an answer", "rightHint": "Tap the circle beside the right answer. The answers are shuffled for each child."},
-      "math": {"title": "A math question", "card": "Write a math question", "cardText": "Pick the numbers. The question and its answer are worked out for you.", "first": "First number", "operation": "Sum", "second": "Second number", "missing": "Which part does the child work out?", "missing_result": "The answer", "missing_a": "The first number", "missing_b": "The second number", "preview": "The question", "answerIs": "Answer: {n}"},
+      "choice": {
+        "title": "A multiple-choice question",
+        "card": "Write a multiple-choice question",
+        "cardText": "A question with two to four answers to tap. Works for any subject.",
+        "question": "The question",
+        "questionHint": "What is the capital of France?",
+        "answers": "The answers",
+        "markRight": "Answer {n} is the right one",
+        "answerN": "Answer {n}",
+        "removeAnswer": "Remove answer {n}",
+        "addAnswer": "Add an answer",
+        "rightHint": "Tap the circle beside the right answer. The answers are shuffled for each child."
+      },
+      "math": {
+        "title": "A math question",
+        "card": "Write a math question",
+        "cardText": "Pick the numbers. The question and its answer are worked out for you.",
+        "first": "First number",
+        "operation": "Sum",
+        "second": "Second number",
+        "missing": "Which part does the child work out?",
+        "missing_result": "The answer",
+        "missing_a": "The first number",
+        "missing_b": "The second number",
+        "preview": "The question",
+        "answerIs": "Answer: {n}"
+      },
       "tabCategories": "Categories",
-      "cat": {"intro": "The topics children pick from. Add one, rename it in each language, choose its colour, put them in order, or switch one off without losing its puzzles.", "new": "New category", "add": "Add category", "nameEn": "Name in English", "nameKm": "Name in Khmer (optional)", "id": "Id", "idHint": "Its address. Lowercase letters, numbers and dashes. It cannot be changed later.", "topic": "Koda topic", "colour": "Colour", "off": "Off", "enabled": "Show to children", "enabledHint": "Off hides the category and its puzzles from children. Nothing is deleted.", "up": "Move {name} up", "down": "Move {name} down", "edit": "Edit {name}", "delete": "Delete category", "builtInNote": "Built-in categories cannot be deleted. Switch it off instead.", "inUseNote": "{count} puzzles use this category, so it cannot be deleted. Switch it off instead."},
+      "cat": {
+        "intro": "The topics children pick from. Add one, rename it in each language, choose its colour, put them in order, or switch one off without losing its puzzles.",
+        "new": "New category",
+        "add": "Add category",
+        "nameEn": "Name in English",
+        "nameKm": "Name in Khmer (optional)",
+        "id": "Id",
+        "idHint": "Its address. Lowercase letters, numbers and dashes. It cannot be changed later.",
+        "topic": "Koda topic",
+        "colour": "Colour",
+        "off": "Off",
+        "enabled": "Show to children",
+        "enabledHint": "Off hides the category and its puzzles from children. Nothing is deleted.",
+        "up": "Move {name} up",
+        "down": "Move {name} down",
+        "edit": "Edit {name}",
+        "delete": "Delete category",
+        "builtInNote": "Built-in categories cannot be deleted. Switch it off instead.",
+        "inUseNote": "{count} puzzles use this category, so it cannot be deleted. Switch it off instead."
+      },
       "addPhoto": "Add a photo",
       "photoHint": "From your computer. It is made smaller for you.",
       "photoFile": "Choose a photo file",
@@ -5314,8 +5495,24 @@
       "maxPlayersHint": "Used by group play.",
       "guestsAllowed": "Let players without an account join",
       "guestsAllowedHint": "Off: only players signed in to Koda can join a room. Rooms can still only be opened by a signed-in player.",
-      "report": {"title": "Group play", "hint": "Counted as games happen. Only totals per day are kept: no names, codes or answers.", "show": "Show the numbers",
-        "range": "Period", "lastDays": "Last {n} days", "failed": "Could not load the numbers. Check the connection and try again.", "rooms": "Rooms opened", "started": "Games started", "finished": "Games finished", "players": "Players seated ({guests} guests)", "rematches": "Play-agains", "asked": "Guests who asked a grown-up", "none": "No group games in this period yet.", "day": "Day", "guestSeats": "Guests", "askedShort": "Asked"},
+      "report": {
+        "title": "Group play",
+        "hint": "Counted as games happen. Only totals per day are kept: no names, codes or answers.",
+        "show": "Show the numbers",
+        "range": "Period",
+        "lastDays": "Last {n} days",
+        "failed": "Could not load the numbers. Check the connection and try again.",
+        "rooms": "Rooms opened",
+        "started": "Games started",
+        "finished": "Games finished",
+        "players": "Players seated ({guests} guests)",
+        "rematches": "Play-agains",
+        "asked": "Guests who asked a grown-up",
+        "none": "No group games in this period yet.",
+        "day": "Day",
+        "guestSeats": "Guests",
+        "askedShort": "Asked"
+      },
       "machineLevel": "The Machine's level",
       "machineLevelHint": "Let each child choose, or fix it for everyone.",
       "childPicks": "Child picks",
@@ -5326,6 +5523,142 @@
       "save": "Save changes",
       "reset": "Back to the defaults",
       "tab": "Rebus Rush"
+    }
+  },
+  "starter": {
+    "title": "Start here",
+    "subtitle": "Picked for your age. Tap Start to play.",
+    "best": "Best first pick",
+    "start": "Start",
+    "starting": "Starting…",
+    "startSkill": "Start {title}",
+    "welcome": "Hi {name}! Welcome to Koda",
+    "welcomeNoName": "Welcome to Koda!",
+    "welcomeBody": "Let's find your first lesson.",
+    "orReadWrite": "Or try reading and writing",
+    "seeAll": "See all skills"
+  },
+  "setup": {
+    "title": "Set up Koda",
+    "back": "Back",
+    "later": "Finish later",
+    "continue": "Continue",
+    "notNow": "Not now",
+    "offline": "You're offline. Connect to the internet to add a child, then try again.",
+    "somethingWrong": "Something went wrong. Please try again.",
+    "child": {
+      "title": "Add your child",
+      "body": "It takes a minute. You can add more children later.",
+      "name": "Child's name",
+      "namePlaceholder": "e.g. Dara",
+      "grade": "What grade are they in?",
+      "gradeFor": "What grade is {name} in?",
+      "gradeWhy": "So we can pick lessons at the right level."
+    },
+    "where": {
+      "title": "Where will {name} learn?",
+      "body": "You can change this any time.",
+      "here": "On this phone or tablet",
+      "hereBody": "{name} learns here. A parent PIN keeps your settings safe.",
+      "own": "On their own device",
+      "ownBody": "Scan a code on {name}'s phone or tablet. No email or password needed."
+    },
+    "pin": {
+      "title": "Set a parent PIN",
+      "body": "You'll type this PIN to get back to your parent settings from {name}'s screen.",
+      "new": "New PIN",
+      "again": "Type it again",
+      "save": "Save PIN"
+    },
+    "code": {
+      "title": "Connect {name}'s device",
+      "body": "On {name}'s device, scan this with the camera. Or open Koda, tap \"Use a child code\" and type the code.",
+      "qrLabel": "Sign-in code for {name}",
+      "orType": "Or type this code",
+      "share": "Share",
+      "message": "Open Koda on {name}'s device: {link} (or enter the code {code})"
+    },
+    "alerts": {
+      "title": "Hear how {name} is doing",
+      "body": "Get a note when {name} finishes lessons and earns badges.",
+      "push": "Alerts on this phone",
+      "pushBody": "A notification when there's news.",
+      "pushDenied": "Notifications are blocked. You can allow them in your browser settings.",
+      "pushUnavailable": "This device can't show alerts right now. You can still get emails.",
+      "turnOn": "Turn on",
+      "on": "On",
+      "email": "Progress emails",
+      "emailVerify": "Confirm {email} to start getting them."
+    },
+    "done": {
+      "title": "All set!",
+      "bodyHere": "{name} is ready to learn on this device.",
+      "bodyOwn": "{name}'s device is ready once the code is scanned. You'll find the code again on the Children page.",
+      "start": "Start {name}'s learning",
+      "another": "Add another child",
+      "dashboard": "Go to my dashboard"
+    }
+  },
+  "landing": {
+    "start": "Start free",
+    "hero": {
+      "eyebrow": "A new way to learn, made for the AI era",
+      "title": "Help your child read and write Khmer",
+      "body": "Fun Khmer lessons for kids who grow up with English — in Cambodia or anywhere in the world. Math and English reading too.",
+      "free": "Free for 3 months"
+    },
+    "path": {
+      "title": "Khmer, step by step",
+      "letters": "Letters",
+      "lettersBody": "Learn each letter by sound and shape.",
+      "words": "Words",
+      "wordsBody": "Join letters into first words.",
+      "read": "Read",
+      "readBody": "Read short picture books aloud.",
+      "write": "Write",
+      "writeBody": "Trace and write with a finger."
+    },
+    "worries": {
+      "title": "Made for Khmer families everywhere",
+      "khmer": {
+        "q": "My child speaks English, not Khmer.",
+        "a": "Step-by-step Khmer reading and writing, made for kids who grew up with English."
+      },
+      "fees": {
+        "q": "Tutors and extra classes cost too much.",
+        "a": "Daily practice at home, free for the first 3 months."
+      },
+      "records": {
+        "q": "I don't know what my child studied.",
+        "a": "A simple report shows what they practised, what they know, and where to help."
+      },
+      "motivate": {
+        "q": "My child won't sit down to study.",
+        "a": "Lessons feel like games — stars, books and tracing — so kids want to come back."
+      }
+    },
+    "safe": {
+      "title": "A smart helper, healthy screen time",
+      "body": "A friendly AI helper guides every lesson. You decide how long and when your child plays, and Koda stops when time is up.",
+      "limit": "Daily time limit",
+      "hours": "Play hours you choose",
+      "offline": "Works offline",
+      "curriculum": "International curriculum — coming soon"
+    },
+    "cta": {
+      "title": "Ready to start?",
+      "body": "Create a parent account, add your child, and play the first lesson in minutes."
+    },
+    "footer": {
+      "about": "Fun Khmer, math and English lessons for kids, with a simple report for parents.",
+      "learn": "Learn",
+      "khmer": "Khmer reading & writing",
+      "math": "Math",
+      "english": "English reading",
+      "parents": "For parents",
+      "report": "Daily progress report",
+      "screenTime": "Screen-time controls",
+      "made": "Made in Cambodia, for Khmer families everywhere"
     }
   }
 }

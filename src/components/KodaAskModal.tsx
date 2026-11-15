@@ -285,7 +285,7 @@ export const KodaAskModal: React.FC<{
                         turn.sender === "student"
                           ? "bg-indigo-600 text-white"
                           : turn.standIn
-                            ? "border border-dashed border-amber-400 bg-amber-50 text-ink dark:bg-amber-950/30"
+                            ? "border border-dashed border-rose-300 bg-rose-50 text-ink dark:bg-rose-950/30"
                             : "border border-line bg-surface text-ink",
                       ].join(" ")}
                     >
@@ -296,7 +296,7 @@ export const KodaAskModal: React.FC<{
                         without it, a deployment answering with canned nudges
                         looks like a coach that has simply gone vague. */}
                     {turn.standIn && (
-                      <p className="flex items-center gap-1 text-[11px] text-amber-700 dark:text-amber-400">
+                      <p className="flex items-center gap-1 text-[11px] text-rose-700 dark:text-rose-400">
                         <AlertTriangle className="h-3 w-3 shrink-0" />
                         {translate("app.kodaAskModal.kodaCouldNotBeReachedThis")}
                       </p>

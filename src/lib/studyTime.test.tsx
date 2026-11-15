@@ -270,7 +270,7 @@ describe("a parent's twenty minutes, from the setting to the child's screen", ()
     expect(screen.getByText(/That.s it for today/i)).toBeTruthy();
 
     // 4. The child is told the rule, in the number their grown-up picked.
-    expect(screen.getByText(/20 minutes of Koda today/i)).toBeTruthy();
+    expect(screen.getByText(/played your 20 minutes today/i)).toBeTruthy();
   });
 });
 
@@ -279,8 +279,8 @@ describe("the screen a child is shown when their time is up", () => {
     const { DayDoneScreen } = await import("../components/DayDoneScreen");
     render(<DayDoneScreen cap={45} />);
 
-    expect(screen.getByText(/45 minutes of Koda today/i)).toBeTruthy();
-    expect(screen.getByText(/grown-up picked that/i)).toBeTruthy();
+    expect(screen.getByText(/played your 45 minutes today/i)).toBeTruthy();
+    expect(screen.getByText(/grown-up set this/i)).toBeTruthy();
   });
 
   it("keeps what the child earned, and offers no way back into a lesson", async () => {

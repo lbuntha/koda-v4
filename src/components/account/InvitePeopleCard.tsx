@@ -1,10 +1,10 @@
 import React, { useCallback, useEffect, useState } from "react";
-import { Check, Copy, Mail, Trash2, UserPlus } from "lucide-react";
+import { Check, Copy, Trash2, UserPlus } from "lucide-react";
 
 import { ApiError, accessToken, request, usePermissions } from "../../lib/sync";
 import { themeSystem } from "../../lib/themeSystem";
 import { playSound } from "../../utils/audio";
-import { UIBadge, UIButton, UIModal, UISectionHeader } from "../ui";
+import { UIBadge, UIButton, UIModal, UISectionHeader, UIArtIcon } from "../ui";
 
 import { translate } from "../../lib/i18n";
 interface Invite {
@@ -102,7 +102,7 @@ export const InvitePeopleCard: React.FC = () => {
       <UISectionHeader
         title={translate("admin.invitePeopleCard.inviteSomeone")}
         subtitle={translate("admin.invitePeopleCard.aSecondParentOrAGrandparent")}
-        icon={<Mail className="h-5 w-5 text-indigo-600 dark:text-indigo-400" />}
+        icon={<UIArtIcon id="kit-mail" className="h-6 w-6" />}
       />
 
       {error && <p className={themeSystem.flash("error")}>{error}</p>}

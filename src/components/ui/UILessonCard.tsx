@@ -14,7 +14,7 @@ export type UILessonCardTone = "review" | "practise" | "advance" | "resume";
  * collapses to a row — see the component note below for why only some of them
  * do that.
  */
-export type UILessonCardVariant = "card" | "compact";
+export type UILessonCardVariant = "card" | "compact" | "row";
 
 export interface UILessonCardProps {
   title: string;
@@ -39,6 +39,11 @@ export interface UILessonCardProps {
   tone?: UILessonCardTone;
   actionLabel?: string;
   variant?: UILessonCardVariant;
+  /**
+   * The one thing to do first, drawn bigger: a larger title, the message in
+   * full and a full-size Play button — so "start here" is one obvious tap.
+   */
+  featured?: boolean;
   onClick(): void;
   className?: string;
 }
@@ -110,44 +115,51 @@ export const UILessonCard: React.FC<UILessonCardProps> = ({
   tone = "advance",
   actionLabel,
   variant = "card",
+  featured = false,
   onClick,
   className = "",
 }) => {
   const { t } = useT();
   const look = { ...TONES[tone], label: t(`lessonCard.tone.${tone}`) };
-  const compact = variant === "compact";
+  /* `row` is the phone row at every width — a quick second choice beside a
+     featured card. `compact` is that row on a phone only and a card from 640px
+     up, so its `sm:` classes put the card back; a `row` never takes them. */
+  const compact = variant === "compact" || variant === "row";
+  const up = (classes: string) => (variant === "compact" ? classes : "");
 
   return (
     <button
       type="button"
       onClick={onClick}
       className={`${themeSystem.card("interactive")} ${
-        compact ? "p-3 sm:p-5" : themeSystem.spacing.card
+        compact ? `p-3 ${up("sm:p-5")}` : themeSystem.spacing.card
       } flex w-full text-left ${
-        compact ? "items-center gap-3 sm:flex-col sm:items-start" : "flex-col items-start gap-3"
+        compact
+          ? `items-center gap-3 ${up("sm:flex-col sm:items-start")}`
+          : `flex-col items-start ${featured ? "gap-4" : "gap-3"}`
       } ${className}`}
     >
-      <div className={`flex items-center gap-3 shrink-0 ${compact ? "sm:w-full" : "w-full"}`}>
+      <div className={`flex items-center gap-3 shrink-0 ${compact ? up("sm:w-full") : "w-full"}`}>
         {icon ?? <UILessonIcon name={iconName} tone={iconTone} />}
         {/* On a phone the row has no room for a chip, and no need of one: the
             same word rides on the subject line below the title. */}
         <span
           className={`ml-auto shrink-0 rounded-full px-2.5 py-1 font-mono text-[10px] font-black uppercase tracking-wider ${
             look.chip
-          } ${compact ? "hidden sm:inline-block" : ""}`}
+          } ${compact ? `hidden ${up("sm:inline-block")}` : ""}`}
         >
           {look.label}
         </span>
       </div>
 
       <div
-        className={`min-w-0 flex flex-col ${compact ? "flex-1 sm:w-full sm:flex-none" : "w-full"}`}
+        className={`min-w-0 flex flex-col ${compact ? `flex-1 ${up("sm:w-full sm:flex-none")}` : "w-full"}`}
       >
         {/* Title first on a phone row, eyebrow first everywhere else — one
             pair of lines, ordered for the shape they are in. */}
         <h3
-          className={`text-base font-black leading-tight text-ink mt-1 break-words ${
-            compact ? "order-1 sm:order-none" : ""
+          className={`${featured ? "text-xl sm:text-2xl" : "text-base"} font-black leading-tight text-ink mt-1 break-words ${
+            compact ? `order-1 ${up("sm:order-none")}` : ""
           }`}
         >
           {title}
@@ -155,7 +167,7 @@ export const UILessonCard: React.FC<UILessonCardProps> = ({
         <p
           className={`truncate text-muted ${
             compact
-              ? "order-2 text-[11px] sm:order-first sm:font-mono sm:text-[10px] sm:font-black sm:uppercase sm:tracking-widest"
+              ? `order-2 text-xs ${up("sm:order-first sm:font-mono sm:text-[10px] sm:font-black sm:uppercase sm:tracking-widest")}`
               : "order-first font-mono text-[10px] font-black uppercase tracking-widest"
           }`}
         >
@@ -163,10 +175,10 @@ export const UILessonCard: React.FC<UILessonCardProps> = ({
             <>
               {/* The reason, on the line a phone actually reads. Above 640px the
                   chip in the corner carries it and this drops back to the skill. */}
-              <span className="sm:hidden">
+              <span className={up("sm:hidden")}>
                 {subject} · <span className={`font-bold ${look.accent}`}>{look.label}</span>
               </span>
-              <span className="hidden sm:inline">{subject}</span>
+              <span className={`hidden ${up("sm:inline")}`}>{subject}</span>
             </>
           ) : (
             subject
@@ -196,7 +208,7 @@ export const UILessonCard: React.FC<UILessonCardProps> = ({
         ) : (
           message && (
             <p
-              className={`mt-1.5 text-xs text-muted line-clamp-2 ${compact ? "hidden sm:block" : ""}`}
+              className={`mt-1.5 ${featured ? "text-sm" : "text-xs"} text-muted line-clamp-2 ${compact ? `hidden ${up("sm:block")}` : ""}`}
             >
               {message}
             </p>
@@ -208,14 +220,14 @@ export const UILessonCard: React.FC<UILessonCardProps> = ({
           a mark rather than a second button — the full-width one below it is
           what a card at 640px and up gets. */}
       {compact && (
-        <span className="sm:hidden shrink-0 grid h-10 w-10 place-items-center rounded-2xl bg-indigo-500/10 text-indigo-600 dark:text-indigo-300">
+        <span className={`${up("sm:hidden")} shrink-0 grid h-10 w-10 place-items-center rounded-2xl bg-indigo-500/10 text-indigo-600 dark:text-indigo-300`}>
           <Play className="h-4 w-4 fill-current" />
         </span>
       )}
 
       {/* A span, not a nested button — the whole card is already the control. */}
-      <span className={`mt-auto w-full ${compact ? "hidden sm:block" : "block"}`}>
-        <span className={`${themeSystem.button("primary", "sm")} w-full pointer-events-none`}>
+      <span className={`mt-auto w-full ${compact ? `hidden ${up("sm:block")}` : "block"}`}>
+        <span className={`${themeSystem.button("primary", featured ? "md" : "sm")} w-full pointer-events-none`}>
           <Play className="fill-current" />
           {actionLabel ?? t("common.play")}
         </span>

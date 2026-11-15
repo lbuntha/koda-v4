@@ -42,7 +42,7 @@ export const DayDoneScreen: React.FC<DayDoneScreenProps> = ({ cap, onGoHome }) =
       </p>
 
       <div className="mt-5 flex items-center justify-center gap-2 rounded-2xl bg-surface-muted p-3">
-        <Sparkles className="h-4 w-4 shrink-0 text-amber-500" />
+        <Sparkles className="h-4 w-4 shrink-0 text-violet-500" />
         <p className="text-sm font-bold text-ink">{t("rest.savedToday")}</p>
       </div>
 

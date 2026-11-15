@@ -179,7 +179,7 @@ describe("the last lesson of a path", () => {
  * The way out, mid-course.
  *
  * The exit used to be drawn only at the end of a path, where practice was on
- * offer. Everywhere else the screen read "Next lesson" and "Practice Again" —
+ * offer. Everywhere else the screen read "Next lesson" and "Practice again" —
  * both of which keep the child in the round — over a modal that covers the
  * sidebar. A child who had finished for the day had to play another round or
  * close the tab.
@@ -192,7 +192,7 @@ describe("leaving at the end of a round", () => {
 
     // The two that carry on are still the loud ones.
     expect(screen.getByText("NEXT LESSON (8)")).toBeTruthy();
-    expect(screen.getByText("Practice Again")).toBeTruthy();
+    expect(screen.getByText("Practice again")).toBeTruthy();
 
     screen.getByText("Back to lessons").click();
     expect(exit).toHaveBeenCalled();

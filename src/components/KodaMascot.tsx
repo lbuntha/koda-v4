@@ -60,7 +60,7 @@ export interface MascotPalette {
 export const MASCOT_PALETTES: MascotPalette[] = [
   { head: "#4f46e5", accent: "#818cf8" }, // indigo
   { head: "#059669", accent: "#34d399" }, // emerald
-  { head: "#d97706", accent: "#fbbf24" }, // amber
+  { head: "#0d9488", accent: "#2dd4bf" }, // teal
   { head: "#0284c7", accent: "#38bdf8" }, // sky
   { head: "#e11d48", accent: "#fb7185" }, // rose
   { head: "#7c3aed", accent: "#a78bfa" }, // violet

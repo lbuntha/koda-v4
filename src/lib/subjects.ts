@@ -6,7 +6,17 @@ export interface Subject { id: string; name: string }
 export interface SubjectCatalog { subjects: Subject[]; assignments: Record<string, string> }
 export const DEFAULT_SUBJECTS: SubjectCatalog = {
   subjects: [{ id: "math", name: "Math" }, { id: "thinking", name: "Thinking" }],
-  assignments: { counting: "math", addition: "math", subtraction: "math", observation: "thinking" },
+  assignments: {
+    counting: "math",
+    addition: "math",
+    subtraction: "math",
+    multiplication: "math",
+    division: "math",
+    fractions: "math",
+    observation: "thinking",
+    "bottle-sort": "thinking",
+    "color-sweeper": "thinking",
+  },
 };
 
 export function validateSubjects(catalog: SubjectCatalog): string | null {

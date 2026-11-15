@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+  <title>Celebrate</title>
+  <path fill="#8B5CF6" d="M10 92 L32 30 L72 70 Z" />
+  <path fill="#A78BFA" d="M10 92 L32 30 L46 44 Z" />
+  <path fill="none" stroke="#FFFFFF" stroke-width="5" d="M22 60 L42 80 M28 44 L56 72" />
+  <circle cx="62" cy="18" r="6" fill="#EC4899" />
+  <circle cx="86" cy="40" r="6" fill="#10B981" />
+  <circle cx="80" cy="12" r="4" fill="#0EA5E9" />
+  <path fill="none" stroke="#F43F5E" stroke-width="5" stroke-linecap="round" d="M46 26 C50 18 44 12 50 6" />
+  <path fill="none" stroke="#0EA5E9" stroke-width="5" stroke-linecap="round" d="M74 54 C82 50 88 56 94 52" />
+</svg>

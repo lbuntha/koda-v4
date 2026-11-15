@@ -21,7 +21,7 @@ import { studyGateNow, useSessionClock, useStudyGate } from "./lib/sessionTime";
 import { levelFromXp } from "./lib/level";
 import { publishLearnerFigures } from "./lib/profileStats";
 import { Billing } from "./lib/billing";
-import { ApiError } from "./lib/sync";
+import { ApiError, accessToken, request } from "./lib/sync";
 import { refreshDeploymentRules } from "./lib/deploymentRules";
 import { BadgeAPI, earnedBadges } from "./lib/badges";
 import { LearnPage } from "./components/LearnPage";
@@ -43,6 +43,21 @@ import {
 } from "./curriculum";
 import { useAudienceViewer } from "./skills/viewer";
 import { SignInScreen } from "./components/account/SignInScreen";
+import { LandingPage } from "./components/landing/LandingPage";
+
+/** Set once a device has signed in, so a returning family skips the landing page. */
+const SIGNED_IN_BEFORE = "koda.signedInBefore";
+
+/** Where a signed-out visitor starts: the landing page, unless they have been here before or came by a join link. */
+const firstEntry = (): "landing" | "signIn" => {
+  try {
+    if (new URLSearchParams(window.location.search).has("join")) return "signIn";
+    if (localStorage.getItem(SIGNED_IN_BEFORE)) return "signIn";
+  } catch {
+    /* Storage blocked: show the landing page. */
+  }
+  return "landing";
+};
 import { ResetPasswordScreen, resetTokenFromUrl } from "./components/account/ResetPasswordScreen";
 import { VerifyEmailScreen, verificationTokenFromUrl } from "./components/account/VerifyEmailScreen";
 import { clearRoomFromUrl, roomCodeFromUrl } from "./rebus/group/roomLink";
@@ -68,6 +83,8 @@ import {
 import { refreshNotificationToken } from "./lib/push";
 import { onNotificationClick } from "./lib/push/landing";
 import { DayDoneScreen } from "./components/DayDoneScreen";
+import { ParentSetup, setupSeenKey } from "./components/onboarding/ParentSetup";
+import { AvatarPickerModal } from "./components/account/AvatarPickerModal";
 import { KodaAsleepScreen } from "./components/KodaAsleepScreen";
 import { LiveVoiceCoachModal } from "./components/LiveVoiceCoachModal";
 import { PreferencesAPI } from "./lib/preferences";
@@ -112,16 +129,82 @@ export default function App() {
   // An invitation link to a Rebus Rush room: a guest sees the join screen before sign-in, a signed-in player is taken to it.
   const [roomCode, setRoomCode] = useState<string | null>(roomCodeFromUrl);
   const [guestSignIn, setGuestSignIn] = useState(false);
+  const [entry, setEntry] = useState<"landing" | "signIn" | "signUp">(firstEntry);
   /** A Trace item is open (writing or colouring): like a book, it takes the phone's whole screen. */
   const [tracePlaying, setTracePlaying] = useState(false);
   /* A book or collection to open once Learn shows it — a Today pick on Home. */
   const [learnTarget, setLearnTarget] = useState<{ bookId?: string; collectionId?: string } | null>(null);
   const [switchingCategory, startCategorySwitch] = useTransition();
   const session = useSession();
+  useEffect(() => {
+    if (!session) return;
+    try {
+      localStorage.setItem(SIGNED_IN_BEFORE, "1");
+    } catch {
+      /* Storage blocked: the landing page shows again next time, which is harmless. */
+    }
+  }, [session]);
   const { can, known: permissionsKnown } = usePermissions();
   const canManageMenu = Boolean(session && can("menu:manage"));
   const canManageRoles = Boolean(session && can("role:manage"));
   const canManageChildren = Boolean(session && can("learner:create"));
+  /*
+   * Parent setup — the guided "add your child" flow.
+   *
+   * Opens by itself once for a parent whose family has no children yet (a new
+   * sign-up), and from every "Add a child" button after that. A parent is an
+   * adult in a family who can create learners; staff belong to no family and
+   * a learner is never one.
+   */
+  const [setupOpen, setSetupOpen] = useState(false);
+  const isFamilyParent = Boolean(session && session.familyId && !session.learnerId && canManageChildren);
+  const setupUserId = session?.userId ?? null;
+  useEffect(() => {
+    if (!isFamilyParent || !setupUserId || !permissionsKnown) return;
+    try {
+      if (localStorage.getItem(setupSeenKey(setupUserId))) return;
+    } catch {
+      /* no storage: ask the server, as a first visit would */
+    }
+    let live = true;
+    void (async () => {
+      try {
+        const result = await request<{ learners: unknown[] }>("/learners", { token: await accessToken() });
+        if (live && result.learners.length === 0) setSetupOpen(true);
+      } catch {
+        /* offline: the Home card offers "Add a child" instead */
+      }
+    })();
+    return () => {
+      live = false;
+    };
+  }, [isFamilyParent, setupUserId, permissionsKnown]);
+
+  /*
+   * A child's first moment: choosing what they look like.
+   *
+   * Offered once per learner on this device, before their first lesson, so
+   * the first thing a child does in Koda is theirs to decide. Closing it
+   * keeps the avatar the family gave them.
+   */
+  const avatarKey = session?.learnerId ? `koda.avatarPicked.${session.learnerId}` : null;
+  const [avatarOpen, setAvatarOpen] = useState(false);
+  useEffect(() => {
+    if (!avatarKey) return;
+    try {
+      if (!localStorage.getItem(avatarKey)) setAvatarOpen(true);
+    } catch {
+      /* no storage: skip it rather than ask every launch */
+    }
+  }, [avatarKey]);
+  const closeAvatar = () => {
+    setAvatarOpen(false);
+    try {
+      if (avatarKey) localStorage.setItem(avatarKey, "1");
+    } catch {
+      /* asked again next launch at worst */
+    }
+  };
   const canManageSkills = Boolean(session && can("content:write"));
   // The shared art library is the deployment's, not a family's — see
   // `content:write` in the policy table. Hiding the nav entry is not enough on
@@ -702,7 +785,16 @@ export default function App() {
   }
 
   if (!session) {
-    return <SignInScreen />;
+    if (entry === "landing") {
+      return <LandingPage onStart={() => setEntry("signUp")} onSignIn={() => setEntry("signIn")} />;
+    }
+    return (
+      <SignInScreen
+        key={entry}
+        initialMode={entry === "signUp" ? "signUp" : "signIn"}
+        onBack={() => setEntry("landing")}
+      />
+    );
   }
 
   /*
@@ -844,6 +936,7 @@ export default function App() {
                   activeLevelNumber={activeLevelNumber}
                   completedLevels={completedGameLevels}
                   onSelectSkill={setSelectedLearnSkillId}
+                  onStartLesson={startLesson}
                   onOpenRebus={() => setRebusOpen(true)}
                 />
               )}
@@ -873,10 +966,7 @@ export default function App() {
                 setActiveTab("children");
                 setChildReport(learnerId);
               }}
-              onAddChild={() => {
-                setChildReport(null);
-                setActiveTab("children");
-              }}
+              onAddChild={() => setSetupOpen(true)}
               onOpenBook={(bookId) => {
                 setInRound(false);
                 setLearnCategory("books");
@@ -1079,8 +1169,22 @@ export default function App() {
       <UpgradePrompt onOpenPlan={() => setActiveTab("settings")} />
 
       {/* Asks an adult without notifications to set them up; Set up opens the switch. */}
+      {setupOpen && <ParentSetup onClose={() => setSetupOpen(false)} />}
+
+      {avatarOpen && !setupOpen && (
+        <AvatarPickerModal
+          isOpen
+          currentSeed={session?.avatarSeed}
+          onClose={closeAvatar}
+          onSave={async (seed) => {
+            await SessionAPI.updateAvatar(seed);
+            closeAvatar();
+          }}
+        />
+      )}
+
       <NotificationSetupPrompt
-        suppressed={inLesson}
+        suppressed={inLesson || setupOpen}
         onSetUp={() => {
           setActiveTab("settings");
           setSettingsFocus("notifications");

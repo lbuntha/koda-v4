@@ -567,7 +567,7 @@ export const UsersPage: React.FC = () => {
 
   const stats = result?.stats ?? { total: 0, active: 0, suspended: 0, staff: 0, pendingOnboarding: 0, completedOnboarding: 0, blockedOnboarding: 0 };
   const statCards = view === "onboarding" ? [
-    { label: translate("admin.usersPage.awaitingSignIn"), value: stats.pendingOnboarding, icon: Clock3, tone: "text-amber-600", ground: "bg-amber-50" },
+    { label: translate("admin.usersPage.awaitingSignIn"), value: stats.pendingOnboarding, icon: Clock3, tone: "text-sky-600", ground: "bg-sky-50" },
     { label: translate("admin.usersPage.onboarded"), value: stats.completedOnboarding, icon: ClipboardCheck, tone: "text-emerald-600", ground: "bg-emerald-50" },
     { label: translate("admin.usersPage.blocked"), value: stats.blockedOnboarding, icon: Ban, tone: "text-rose-600", ground: "bg-rose-50" },
     { label: translate("admin.usersPage.allAccounts"), value: stats.total, icon: Users, tone: "text-indigo-600", ground: "bg-indigo-50" },
@@ -575,7 +575,7 @@ export const UsersPage: React.FC = () => {
     { label: translate("admin.usersPage.totalUsers"), value: stats.total, icon: Users, tone: "text-indigo-600", ground: "bg-indigo-50" },
     { label: translate("admin.usersPage.active"), value: stats.active, icon: UserCheck, tone: "text-emerald-600", ground: "bg-emerald-50" },
     { label: translate("admin.usersPage.suspended"), value: stats.suspended, icon: Ban, tone: "text-rose-600", ground: "bg-rose-50" },
-    { label: translate("admin.usersPage.staff"), value: stats.staff, icon: ShieldCheck, tone: "text-amber-600", ground: "bg-amber-50" },
+    { label: translate("admin.usersPage.staff"), value: stats.staff, icon: ShieldCheck, tone: "text-violet-600", ground: "bg-violet-50" },
   ];
 
   return (

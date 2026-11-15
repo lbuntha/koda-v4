@@ -1053,7 +1053,7 @@ const StoryPage = memo(function StoryPage({ book, sentences, picture, at = "top"
                       </span>
                     ))}
                   </span>
-                  {j === b.sentences.length - 1 ? "" : s.tokens[s.tokens.length - 1]?.spaced ? " " : km ? KHMER_WORD_BREAK : " "}
+                  {j === b.sentences.length - 1 ? "" : km && !/[។៕?!.»”"]$/u.test(s.sentence.text.trimEnd()) ? <br /> : s.tokens[s.tokens.length - 1]?.spaced ? " " : km ? KHMER_WORD_BREAK : " "}
                 </span>
               ))}
             </p>

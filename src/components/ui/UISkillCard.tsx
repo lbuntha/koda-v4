@@ -1,9 +1,9 @@
 import React from "react";
-import { ArrowRight, Check, ChevronRight, Play } from "lucide-react";
+import { Check, Play } from "lucide-react";
 import { themeSystem } from "../../lib/themeSystem";
 import { UIBadge, UIButton } from "./ThemeUI";
 import { UIProgressBar } from "./UIProgressBar";
-import { UISkillThumbnail, skillArtFor, useHasSkillArtwork } from "./UISkillThumbnail";
+import { UISkillThumbnail, useHasSkillArtwork } from "./UISkillThumbnail";
 import { useT } from "../../lib/i18n";
 
 /**
@@ -94,7 +94,6 @@ export const UISkillCard: React.FC<UISkillCardProps> = ({
   const percent =
     progressPercent ?? (lessonCount ? Math.round((completedLessons / lessonCount) * 100) : 0);
   const complete = percent === 100;
-  const categoryLabel = subjectName ?? skillArtFor(category).label;
   const label =
     actionLabel ??
     t(!registered ? "skillCard.add" : complete ? "skillCard.review" : completedLessons > 0 ? "skillCard.continue" : "skillCard.open");
@@ -115,12 +114,18 @@ export const UISkillCard: React.FC<UISkillCardProps> = ({
         aria-label={`${label} ${title}`}
         className={`${themeSystem.card("interactive")} flex w-full items-center gap-3 p-3 text-left ${className}`}
       >
-        <UISkillThumbnail
-          thumbnail={thumbnail}
-          fallbackIconName={fallbackIconName}
-          category={category}
-          size="sm"
-        />
+        {/* One frame for every row: square art and 16:9 art used to come out at
+            different widths, so the titles beside them did not line up. */}
+        <span className="relative block h-14 w-20 shrink-0 overflow-hidden rounded-xl">
+          <UISkillThumbnail
+            thumbnail={thumbnail}
+            fallbackIconName={fallbackIconName}
+            category={category}
+            size="sm"
+            fill
+            cover
+          />
+        </span>
 
         <div className="min-w-0 flex-1">
           <div className="flex items-center gap-2">
@@ -141,16 +146,25 @@ export const UISkillCard: React.FC<UISkillCardProps> = ({
             <p className="mt-0.5 truncate text-[13px] leading-snug text-muted">{tagline}</p>
           )}
 
-          <div className="mt-1.5 flex items-center gap-2">
-            <UIProgressBar value={percent} max={100} size="sm" className="flex-1" />
-            <span className="shrink-0 text-[11px] font-bold text-muted tabular-nums">
-              {completedLessons}/{lessonCount}
-            </span>
-          </div>
+          {/* The bar once there is progress, as the poster does — an empty bar
+              and "0/15" on a skill nobody has started reads as a score. */}
+          {completedLessons > 0 ? (
+            <div className="mt-1.5 flex items-center gap-2">
+              <UIProgressBar value={percent} max={100} size="sm" className="flex-1" />
+              <span className="shrink-0 text-[11px] font-bold text-muted tabular-nums">
+                {completedLessons}/{lessonCount}
+              </span>
+            </div>
+          ) : (
+            <p className="mt-1 text-[11px] font-bold text-muted">{t("skillCard.lessons", { count: lessonCount })}</p>
+          )}
         </div>
 
         {registered ? (
-          <ChevronRight className="w-4 h-4 shrink-0 text-muted" />
+          /* A play mark, as the Today rows have: the row is the control. */
+          <span className="grid h-10 w-10 shrink-0 place-items-center rounded-2xl bg-indigo-500/10 text-indigo-600 dark:text-indigo-300">
+            <Play className="h-4 w-4 fill-current" aria-hidden="true" />
+          </span>
         ) : (
           <span className="shrink-0 rounded-full bg-indigo-600 px-3 py-1.5 text-xs font-black text-white">
             {registering ? t("skillCard.adding") : label}
@@ -260,9 +274,15 @@ export const UISkillCard: React.FC<UISkillCardProps> = ({
           className="transition-transform duration-200 group-hover:scale-[1.03]"
         />
         {/* Bottom, not top: a skill's drawn artwork carries its own name in the top corner. */}
-        <span className="absolute bottom-3 left-3 max-w-[70%] truncate rounded-full bg-white/95 px-3 py-1 text-[11px] font-black text-slate-900">
-          {categoryLabel}
-        </span>
+        {/* The subject only — the same word as the chip that filters to it. An
+            unfiled skill has none, and the art's own label ("Operations",
+            "Skill") matched no chip, so it shows nothing rather than a third
+            vocabulary. */}
+        {subjectName && (
+          <span className="absolute bottom-3 left-3 max-w-[70%] truncate rounded-full bg-white/95 px-3 py-1 text-[11px] font-black text-slate-900">
+            {subjectName}
+          </span>
+        )}
         {status === "draft" ? (
           <UIBadge variant="warning" className="absolute right-3 top-3">
             {t("skillCard.draft")}
@@ -305,15 +325,19 @@ export const UISkillCard: React.FC<UISkillCardProps> = ({
               : `${t("skillCard.lessons", { count: lessonCount })}${ages ? ` · ${t("skillCard.ages", { from: ages[0], to: ages[1] })}` : ""}`}
           </span>
           {registered ? (
+            /* Words, not an arrow: "Play" or "Continue" says what the tap does,
+               and the button is big enough to hit first time. */
             <UIButton
               type="button"
-              variant="light"
-              size="icon"
-              className="shrink-0"
-              icon={<ArrowRight aria-hidden="true" />}
+              variant={completedLessons > 0 && !complete ? "primary" : "light"}
+              size="sm"
+              className="h-[42px] shrink-0 pointer-coarse:h-11"
+              icon={<Play className="fill-current" aria-hidden="true" />}
               onClick={act}
               aria-label={`${label} ${title}`}
-            />
+            >
+              {label}
+            </UIButton>
           ) : (
             <UIButton
               type="button"

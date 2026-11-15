@@ -68,7 +68,7 @@ interface PracticeRoundCompleteModalProps {
 
 /** The one filled button. Shared so the three things it can say cannot drift. */
 const PRIMARY =
-  "w-full py-3 px-6 rounded-full bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-400 hover:to-orange-400 text-slate-950 font-mono font-black text-sm tracking-wide shadow-lg hover:shadow-orange-500/20 active:scale-[0.98] transition-all transform flex items-center justify-center gap-2 cursor-pointer";
+  "w-full py-3 px-6 rounded-full bg-gradient-to-r from-violet-500 to-rose-500 hover:from-violet-400 hover:to-rose-400 text-white font-mono font-black text-sm tracking-wide shadow-lg hover:shadow-orange-500/20 active:scale-[0.98] transition-all transform flex items-center justify-center gap-2 cursor-pointer";
 
 /** The two doors out. Quiet on purpose — see where they are drawn. */
 const QUIET =
@@ -188,25 +188,25 @@ export const PracticeRoundCompleteModal: React.FC<PracticeRoundCompleteModalProp
          * a ceiling and somewhere for the overflow to go, not a shorter
          * screen: every line here is something a child earned.
          */
-        className="relative bg-slate-900 border-2 border-amber-500/30 rounded-[32px] max-w-md w-full p-5 sm:p-6 text-center shadow-2xl space-y-3.5 max-h-[92dvh] overflow-y-auto md:max-w-lg"
+        className="relative bg-slate-900 border-2 border-violet-500/30 rounded-[32px] max-w-md w-full p-5 sm:p-6 text-center shadow-2xl space-y-3.5 max-h-[92dvh] overflow-y-auto md:max-w-lg"
       >
         {/* Soft background ambient glows */}
-        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-48 h-48 bg-amber-500/10 rounded-full filter blur-3xl pointer-events-none -z-10" />
+        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-48 h-48 bg-violet-500/10 rounded-full filter blur-3xl pointer-events-none -z-10" />
 
         {/* 1. Golden Trophy Badge with Soft Glow */}
         <div className="relative mx-auto flex items-center justify-center w-16 h-16">
           {/* Pulsing Outer Glow Ring */}
-          <div className="absolute inset-0 rounded-full bg-amber-500/20 animate-pulse scale-110 filter blur-md" />
+          <div className="absolute inset-0 rounded-full bg-violet-500/20 animate-pulse scale-110 filter blur-md" />
           
           {/* Main Gold Trophy Circle Backdrop */}
-          <div className="relative w-14 h-14 rounded-full bg-gradient-to-b from-amber-400 to-orange-500 flex items-center justify-center shadow-[0_8px_30px_rgba(245,158,11,0.5)] border-2 border-amber-300">
+          <div className="relative w-14 h-14 rounded-full bg-gradient-to-b from-violet-400 to-rose-500 flex items-center justify-center shadow-[0_8px_30px_rgba(139,92,246,0.5)] border-2 border-violet-300">
             <Trophy className="w-7 h-7 text-slate-950 stroke-[2.5]" />
           </div>
         </div>
 
         {/* 2. Headline Information */}
         <div className="space-y-1">
-          <span className="text-[11px] font-mono font-black text-amber-400 uppercase tracking-widest block">
+          <span className="text-[11px] font-mono font-black text-violet-400 uppercase tracking-widest block">
             {praise.tag}
           </span>
           <h2 className="text-xl sm:text-2xl font-black text-white tracking-tight">
@@ -245,10 +245,10 @@ export const PracticeRoundCompleteModal: React.FC<PracticeRoundCompleteModalProp
                 className={[
                   big ? "w-9 h-9" : "w-7 h-7",
                   earned
-                    ? `text-amber-400 fill-amber-400 filter ${
+                    ? `text-violet-400 fill-violet-400 filter ${
                         big
-                          ? "drop-shadow-[0_0_12px_rgba(245,158,11,0.8)]"
-                          : "drop-shadow-[0_0_8px_rgba(245,158,11,0.6)]"
+                          ? "drop-shadow-[0_0_12px_rgba(139,92,246,0.8)]"
+                          : "drop-shadow-[0_0_8px_rgba(139,92,246,0.6)]"
                       } animate-bounce`
                     : "text-slate-700 fill-slate-800/60",
                   earned && n === 1 ? "delay-75" : "",
@@ -357,7 +357,7 @@ export const PracticeRoundCompleteModal: React.FC<PracticeRoundCompleteModalProp
         */}
         {recommendation && advance.primary && (
           <div className="flex items-start gap-2.5 text-left bg-slate-950/60 border border-slate-800 rounded-2xl px-4 py-3 max-w-xs mx-auto">
-            <Sparkles className="w-4 h-4 text-amber-400 shrink-0 mt-0.5" />
+            <Sparkles className="w-4 h-4 text-violet-400 shrink-0 mt-0.5" />
             <p className="text-xs text-slate-200 font-medium leading-snug">
               {t(`today.${recommendation.kind}`)}
             </p>

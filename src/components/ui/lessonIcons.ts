@@ -64,7 +64,8 @@ export const resolveLessonIcon = (name?: string): LucideIcon =>
  * distinguish them.
  */
 export const lessonIconTones = {
-  amber: "text-slate-800 dark:text-amber-400",
+  /* Kept as a name so saved lessons still resolve; drawn sky, since Koda uses no yellow. */
+  amber: "text-sky-700 dark:text-sky-400",
   cyan: "text-cyan-700 dark:text-cyan-400",
   indigo: "text-indigo-600 dark:text-indigo-400",
   purple: "text-purple-600 dark:text-purple-400",
