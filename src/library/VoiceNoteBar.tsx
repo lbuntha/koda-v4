@@ -55,7 +55,7 @@ export function VoiceNoteBar({ voice, leaving }: { voice: VoiceNoteRecorder; lea
       {leaving && (stage === "review" || stage === "sending" || stage === "failed") && (
         <div role="alertdialog" aria-label={t("reader.voice.unsentTitle")} className="grid gap-2">
           <p className="flex items-start gap-2 text-sm font-bold text-ink">
-            <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0 text-amber-600" aria-hidden="true" /> {t("reader.voice.unsentTitle")}
+            <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0 text-rose-600" aria-hidden="true" /> {t("reader.voice.unsentTitle")}
           </p>
           {stage === "failed" && <p className="text-sm font-semibold text-rose-700 dark:text-rose-300">{t("reader.voice.failed")}{voice.error ? ` — ${voice.error}` : ""}</p>}
           <div className="flex flex-wrap items-center gap-2">

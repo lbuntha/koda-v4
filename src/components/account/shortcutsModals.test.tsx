@@ -77,7 +77,7 @@ describe("AchievementsModal", () => {
     );
 
     expect(screen.getAllByText("Achievements").length).toBeGreaterThan(0);
-    expect(screen.getByText("Won, and the next one to go for")).toBeTruthy();
+    expect(screen.getByText("Badges won, and the next one to get")).toBeTruthy();
     // At 80 XP, "First Steps" (50 XP threshold) is earned
     expect(screen.getByText("First Steps")).toBeTruthy();
   });
@@ -103,8 +103,8 @@ describe("NavShortcuts with Statistics and Achievements", () => {
   it("opens Achievements modal when Achievements tile is clicked", () => {
     render(<NavShortcuts activeTab="settings" onSelectTab={vi.fn()} />);
 
-    expect(screen.queryByText("Won, and the next one to go for")).toBeNull();
+    expect(screen.queryByText("Badges won, and the next one to get")).toBeNull();
     fireEvent.click(screen.getByRole("button", { name: "Achievements" }));
-    expect(screen.getByText("Won, and the next one to go for")).toBeTruthy();
+    expect(screen.getByText("Badges won, and the next one to get")).toBeTruthy();
   });
 });

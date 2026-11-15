@@ -53,7 +53,7 @@ const draw = async (progress: import("../types").UserProgress) => {
 describe("the band a returning learner reads", () => {
   it("counts the days and points at what is underneath", async () => {
     await draw(learner({ lastPracticeDay: daysAgo(3), streakDays: 6, lastStreakDay: daysAgo(3) }));
-    expect(screen.getByText("It's been 3 days. Pick anything below to start again.")).toBeTruthy();
+    expect(screen.getByText("It's been 3 days. Pick anything to start again.")).toBeTruthy();
   });
 
   it("never tells a child what their lapsed streak used to be", async () => {
@@ -69,7 +69,7 @@ describe("the band a returning learner reads", () => {
 
   it("does not say '1-day streak' to somebody one day in", async () => {
     await draw(learner({ lastPracticeDay: daysAgo(1), streakDays: 1, lastStreakDay: daysAgo(1) }));
-    expect(screen.getByText("You practised yesterday — one round keeps it going.")).toBeTruthy();
+    expect(screen.getByText("You practised yesterday. One round keeps your streak going.")).toBeTruthy();
   });
 
   it("draws nothing at all for a child who practised today", async () => {

@@ -1,5 +1,10 @@
 import React, { useEffect, useRef, useState } from "react";
 import { Eye, EyeOff, KeyRound, LogIn, MailCheck, RefreshCw, UserPlus } from "lucide-react";
+import { SvgMarkup, getSvgAsset } from "../../assets/svg";
+
+/* From the shared art library, so the same pictures can be reused elsewhere. */
+const familyIcon = getSvgAsset("kit-family") ?? "";
+const myselfIcon = getSvgAsset("kit-myself") ?? "";
 
 import { ApiError, SessionAPI, request } from "../../lib/sync";
 import { themeSystem } from "../../lib/themeSystem";
@@ -64,6 +69,8 @@ export interface AccountFormProps {
   /** Called after the session exists, so a screen can leave itself. */
   onSignedIn?: () => void;
   autoFocus?: boolean;
+  /** Which tab opens first — "Start free" on the landing page opens Create account. */
+  initialMode?: AccountMode;
 }
 
 /**
@@ -290,10 +297,23 @@ const GoogleSignInButton: React.FC<{
   );
 };
 
-export const AccountForm: React.FC<AccountFormProps> = ({ onSignedIn, autoFocus = false }) => {
+/**
+ * A child code carried on the link a parent's QR code opens: `/?join=ABCD2345`.
+ * Read once; the shape is checked so a stray parameter is not sent as a code.
+ */
+const joinFromUrl = (): string | null => {
+  try {
+    const value = new URLSearchParams(window.location.search).get("join")?.toUpperCase() ?? "";
+    return /^[A-Z2-9]{8}$/.test(value) ? value : null;
+  } catch {
+    return null;
+  }
+};
+
+export const AccountForm: React.FC<AccountFormProps> = ({ onSignedIn, autoFocus = false, initialMode = "signIn" }) => {
   const googleConfigured = Boolean(import.meta.env.VITE_GOOGLE_CLIENT_ID?.trim());
   const { t, tNodes, language } = useT();
-  const [mode, setMode] = useState<AccountMode>("signIn");
+  const [mode, setMode] = useState<AccountMode>(initialMode);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [familyName, setFamilyName] = useState("");
@@ -308,8 +328,9 @@ export const AccountForm: React.FC<AccountFormProps> = ({ onSignedIn, autoFocus 
    * a teenager. Settings → Your learning lets them skip ahead on day one.
    */
   const [signupType, setSignupType] = useState<SignupType>("parent");
-  const [loginMethod, setLoginMethod] = useState<LoginMethod>("email");
-  const [joinCode, setJoinCode] = useState("");
+  const [urlJoin] = useState(joinFromUrl);
+  const [loginMethod, setLoginMethod] = useState<LoginMethod>(urlJoin ? "childCode" : "email");
+  const [joinCode, setJoinCode] = useState(urlJoin ?? "");
   const [showPassword, setShowPassword] = useState(false);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -317,6 +338,35 @@ export const AccountForm: React.FC<AccountFormProps> = ({ onSignedIn, autoFocus 
   const [googleUnavailable, setGoogleUnavailable] = useState(false);
   const [verificationEmail, setVerificationEmail] = useState<string | null>(null);
   const [verificationSent, setVerificationSent] = useState(false);
+
+  /*
+   * A scanned QR signs the child straight in.
+   *
+   * The code arrives on the link, so typing it again would be a step for
+   * nothing. The parameter comes off the address first, so a reload or a
+   * shared screenshot does not spend it twice; the ref keeps StrictMode's
+   * second effect run from sending it again.
+   */
+  const joinSent = useRef(false);
+  useEffect(() => {
+    if (!urlJoin || joinSent.current) return;
+    joinSent.current = true;
+    try {
+      const url = new URL(window.location.href);
+      url.searchParams.delete("join");
+      window.history.replaceState(null, "", url.pathname + url.search + url.hash);
+    } catch {
+      /* the address keeps the code; nothing else depends on it */
+    }
+    setBusy(true);
+    SessionAPI.join(urlJoin)
+      .then(() => {
+        playSound("pop");
+        onSignedIn?.();
+      })
+      .catch((err: unknown) => setError((err as ApiError).message))
+      .finally(() => setBusy(false));
+  }, [urlJoin, onSignedIn]);
 
   /**
    * Ask for a reset link.
@@ -555,25 +605,47 @@ export const AccountForm: React.FC<AccountFormProps> = ({ onSignedIn, autoFocus 
 
       <form onSubmit={submit} className="space-y-4">
         {mode === "signUp" && (
-          <div className="space-y-1.5">
-            <Segmented
-              label={t("account.whoFor")}
-              size="sm"
-              value={signupType}
-              options={[
-                ["parent", t("account.forChildren")],
-                ["student", t("account.forMyself")],
-              ]}
-              onChange={(value) => setSignupType(value as SignupType)}
-            />
-            <p className="text-xs leading-relaxed text-muted">
-              {signupType === "parent"
-                ? t("account.forChildrenNote")
-                : t("account.forMyselfNote")}
-            </p>
+          /*
+           * "Who will learn?" as two picture cards rather than a toggle: the
+           * choice decides everything after it, so it gets the size of a
+           * decision, and a parent reads it before any field.
+           */
+          <div role="radiogroup" aria-label={t("account.whoFor")} className="grid grid-cols-2 gap-2.5">
+            {(
+              [
+                ["parent", familyIcon, t("account.forChildren"), t("account.forChildrenNote")],
+                ["student", myselfIcon, t("account.forMyself"), t("account.forMyselfNote")],
+              ] as const
+            ).map(([value, icon, label, note]) => {
+              const selected = signupType === value;
+              return (
+                <button
+                  key={value}
+                  type="button"
+                  role="radio"
+                  aria-checked={selected}
+                  disabled={busy}
+                  onClick={() => {
+                    setSignupType(value as SignupType);
+                    playSound("pop");
+                  }}
+                  className={`flex flex-col items-start gap-2 rounded-2xl border-2 p-3 text-left transition ${
+                    selected
+                      ? "border-violet-500 bg-violet-50 dark:border-violet-400 dark:bg-violet-950/40"
+                      : "border-line bg-surface hover:border-violet-300"
+                  }`}
+                >
+                  {/* Drawn in the sidebar's icon style; dimmed until chosen. */}
+                  <span aria-hidden className={`block h-12 w-12 transition ${selected ? "" : "opacity-60 grayscale-[40%]"}`}>
+                    <SvgMarkup markup={icon} size="100%" />
+                  </span>
+                  <span className="text-sm font-black leading-tight text-ink">{label}</span>
+                  <span className="text-[11px] leading-snug text-muted">{note}</span>
+                </button>
+              );
+            })}
           </div>
         )}
-
         {mode === "signIn" && loginMethod === "childCode" ? (
           <div>
             <label className={labelClass} htmlFor="account-join-code">

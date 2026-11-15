@@ -4,10 +4,14 @@ import {
   buildReport,
   contributionsTo,
   evidenceGap,
+  glance,
+  lastWeek,
   RECENT_DAYS,
+  TREND_WEEKS,
   rightFirstTime,
   tooEarlyToRead,
   WEEK_DAYS,
+  weeklyDays,
   whatNext,
 } from "./childReport";
 import { MASTERY_DAYS, MIN_EVIDENCE, masteryFrom } from "./learning/mastery";
@@ -291,7 +295,7 @@ describe("the one thing to do next", () => {
     // left is a second day, so that is what it asks for.
     const next = move([totals({ practisedOn: ["2026-08-21"] })]);
 
-    expect(next?.action).toMatch(/different day/);
+    expect(next?.action).toMatch(/another day/);
     expect(next?.why).toMatch(/one day/);
   });
 
@@ -300,7 +304,7 @@ describe("the one thing to do next", () => {
     // hint rate is the loudest thing wrong with it.
     const next = move([totals({ questionsAnswered: 20, correctFirstTry: 16, supportsUsed: 15 })]);
 
-    expect(next?.action).toMatch(/hints left closed/);
+    expect(next?.action).toMatch(/without hints/);
   });
 
   it("asks for a finished round when every round was left part-way", () => {
@@ -313,17 +317,70 @@ describe("the one thing to do next", () => {
     const next = move([totals({ questionsAnswered: 3, correctFirstTry: 2 })]);
 
     expect(next?.conceptKey).toBe("make-ten");
-    expect(next?.action).toMatch(/couple more rounds/);
+    expect(next?.action).toMatch(/couple more times/);
   });
 
   it("says to move on when everything met is learned", () => {
     const next = move([totals()]);
 
     expect(next?.conceptKey).toBeNull();
-    expect(next?.action).toMatch(/something new/);
+    expect(next?.action).toMatch(/new lesson/);
   });
 
   it("has no advice for a child who has never played", () => {
     expect(move([])).toBeNull();
+  });
+});
+
+describe("the report at a glance", () => {
+  const AUG_21 = new Date("2026-08-21T12:00:00.000Z");
+
+  it("says a child who has not played this week has gone quiet, before anything else", () => {
+    const report = buildReport("l_1", [totals({ correctFirstTry: 2 })], 0, AUG_24 /* three days on, still in-week */);
+    const later = buildReport("l_1", [totals({ correctFirstTry: 2 })], 0, new Date("2026-09-10T12:00:00.000Z"));
+    expect(glance(report).tone).toBe("help");
+    expect(glance(later).tone).toBe("quiet");
+  });
+
+  it("asks for a hand when anything has more wrong than right", () => {
+    const summary = glance(buildReport("l_1", [totals({ correctFirstTry: 2 }), totals({ conceptKey: "b" })], 0, AUG_21));
+    expect(summary.tone).toBe("help");
+    expect(summary.counts).toEqual({ mastered: 1, practising: 0, learning: 0, struggling: 1 });
+  });
+
+  it("is getting started while nothing has enough answers to judge", () => {
+    const summary = glance(buildReport("l_1", [totals({ questionsAnswered: 3, correctFirstTry: 3 })], 0, AUG_21));
+    expect(summary.tone).toBe("early");
+    expect(summary.firstTry, "no figure from noise").toBeNull();
+  });
+
+  it("tells a good week that was too short from one on track", () => {
+    expect(glance(buildReport("l_1", [totals()], 0, AUG_21)).tone).toBe("light");
+    const often = totals({ practisedOn: ["2026-08-19", "2026-08-20", "2026-08-21"] });
+    expect(glance(buildReport("l_1", [often], 0, AUG_21)).tone).toBe("good");
+  });
+
+  it("pools right-first-try over the judged lessons only", () => {
+    const summary = glance(
+      buildReport("l_1", [totals(), totals({ conceptKey: "new", questionsAnswered: 2, correctFirstTry: 0 })], 0, AUG_21),
+    );
+    expect(summary.firstTry).toBeCloseTo(0.9);
+    expect(summary.judgedAnswers).toBe(10);
+  });
+});
+
+describe("practice over the weeks", () => {
+  it("buckets days into seven-day spans ending today, oldest first", () => {
+    const weeks = weeklyDays(["2026-08-24", "2026-08-18", "2026-08-17", "2026-08-10", "2026-01-01"], AUG_24);
+    expect(weeks).toHaveLength(TREND_WEEKS);
+    expect(weeks.slice(-3)).toEqual([1, 1, 2]);
+    expect(weeks.reduce((a, b) => a + b, 0), "too old to draw").toBe(4);
+  });
+
+  it("names the seven days the week dots stand for, ending today", () => {
+    const week = lastWeek(AUG_24);
+    expect(week).toHaveLength(WEEK_DAYS);
+    expect(week[0]).toBe("2026-08-18");
+    expect(week[6]).toBe("2026-08-24");
   });
 });

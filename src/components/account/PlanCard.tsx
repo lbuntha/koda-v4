@@ -1,12 +1,12 @@
 import React, { useCallback, useEffect, useState } from "react";
-import { ArrowUpRight, Check, CreditCard, Sparkles } from "lucide-react";
+import { ArrowUpRight, Check, Sparkles } from "lucide-react";
 
 import { AI_FEATURE, Billing, formatPrice, type Plan, type UpgradeRequest } from "../../lib/billing";
 import { useBilling } from "../../lib/useBilling";
 import { ApiError, usePermissions } from "../../lib/sync";
 import { themeSystem } from "../../lib/themeSystem";
 import { playSound } from "../../utils/audio";
-import { UIBadge, UIButton, UIModal, UISectionHeader } from "../ui";
+import { UIBadge, UIButton, UIModal, UISectionHeader, UIArtIcon } from "../ui";
 
 import { translate } from "../../lib/i18n";
 const when = (iso: string | null): string | null =>
@@ -99,7 +99,7 @@ export const PlanCard: React.FC = () => {
       <UISectionHeader
         title={translate("admin.planCard.yourPlan")}
         subtitle={translate("admin.planCard.whatThisFamilySAccountIncludes")}
-        icon={<CreditCard className="h-5 w-5 text-indigo-600 dark:text-indigo-400" />}
+        icon={<UIArtIcon id="kit-card" className="h-6 w-6" />}
         action={
           mayBuy && !asked ? (
             <UIButton variant="primary" size="sm" icon={<ArrowUpRight />} onClick={() => void open()}>

@@ -24,6 +24,7 @@ vi.mock("../../lib/themeSystem", () => ({
 }));
 
 vi.mock("../ui", () => ({
+  UIArtIcon: () => <span />,
   UIAvatar: () => <span />,
   UIButton: ({ children, onClick }: { children: ReactNode; onClick?: () => void }) => (
     <button onClick={onClick}>{children}</button>

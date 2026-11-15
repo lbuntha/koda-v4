@@ -12,7 +12,7 @@ import { FamilyPinCard } from "./FamilyPinCard";
 import { ageFromBirthYear } from "../../skills/viewer";
 import { themeSystem } from "../../lib/themeSystem";
 import { playSound } from "../../utils/audio";
-import { UIAvatar, UIBadge, UIButton, UIDialog, UIMenu, UIMenuItem, UIMenuSeparator, UIModal } from "../ui";
+import { UIAvatar, UIBadge, UIButton, UIDialog, UIMenu, UIMenuItem, UIMenuSeparator, UIModal, UIArtIcon } from "../ui";
 import { ChildReportPage } from "./ChildReportPage";
 import { NoAccess } from "./NoAccess";
 import { useIsCompact } from "../../lib/useBreakpoint";
@@ -303,7 +303,7 @@ export const LearnersPage: React.FC<LearnersPageProps> = ({ reportFor = null, on
         {error && <p className={themeSystem.flash("error")}>{error}</p>}
         {notice && <p className={themeSystem.flash("success")}>{notice}</p>}
 
-        {loading ? <div className="rounded-2xl border border-line bg-white p-6 text-center text-sm text-muted dark:bg-surface">{t("profile.children.loading")}</div> : learners.length === 0 ? <section className={themeSystem.card("default", "p-6 text-center")}><UserRound className="mx-auto h-10 w-10 text-indigo-300" /><h2 className="mt-3 text-lg font-semibold text-ink">{t("profile.children.none")}</h2><p className="mx-auto mt-1 max-w-md text-sm text-muted">{t("children.noneNote")}</p>{canCreate && <UIButton className="mt-4" icon={<Plus />} disabled={atLimit} onClick={() => setCreateOpen(true)}>{t("children.add")}</UIButton>}</section> : <div className="grid gap-3 sm:grid-cols-2">{learners.map((learner) => (
+        {loading ? <div className="rounded-2xl border border-line bg-white p-6 text-center text-sm text-muted dark:bg-surface">{t("profile.children.loading")}</div> : learners.length === 0 ? <section className={themeSystem.card("default", "p-6 text-center")}><UIArtIcon id="menu-children" className="mx-auto block h-14 w-14" /><h2 className="mt-3 text-lg font-semibold text-ink">{t("profile.children.none")}</h2><p className="mx-auto mt-1 max-w-md text-sm text-muted">{t("children.noneNote")}</p>{canCreate && <UIButton className="mt-4" icon={<Plus />} disabled={atLimit} onClick={() => setCreateOpen(true)}>{t("children.add")}</UIButton>}</section> : <div className="grid gap-3 sm:grid-cols-2">{learners.map((learner) => (
           <article key={learner.id} className={themeSystem.card("default", "p-4")}>
             <div className="flex items-start justify-between gap-3">
               <div className="flex min-w-0 items-center gap-3">

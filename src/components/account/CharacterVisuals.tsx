@@ -31,7 +31,7 @@ import { KodaMascot } from "../KodaMascot";
 const TINTS = [
   { bg: "bg-indigo-50 dark:bg-indigo-500/15", ring: "ring-indigo-200 dark:ring-indigo-500/40", text: "text-indigo-700 dark:text-indigo-300" },
   { bg: "bg-emerald-50 dark:bg-emerald-500/15", ring: "ring-emerald-200 dark:ring-emerald-500/40", text: "text-emerald-700 dark:text-emerald-300" },
-  { bg: "bg-amber-50 dark:bg-amber-500/15", ring: "ring-amber-200 dark:ring-amber-500/40", text: "text-amber-700 dark:text-amber-300" },
+  { bg: "bg-teal-50 dark:bg-teal-500/15", ring: "ring-teal-200 dark:ring-teal-500/40", text: "text-teal-700 dark:text-teal-300" },
   { bg: "bg-sky-50 dark:bg-sky-500/15", ring: "ring-sky-200 dark:ring-sky-500/40", text: "text-sky-700 dark:text-sky-300" },
   { bg: "bg-rose-50 dark:bg-rose-500/15", ring: "ring-rose-200 dark:ring-rose-500/40", text: "text-rose-700 dark:text-rose-300" },
   { bg: "bg-violet-50 dark:bg-violet-500/15", ring: "ring-violet-200 dark:ring-violet-500/40", text: "text-violet-700 dark:text-violet-300" },

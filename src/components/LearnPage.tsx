@@ -1,14 +1,5 @@
 import React, { useMemo, useState } from "react";
-import {
-  ArrowLeft,
-  BookOpen,
-  CheckCircle2,
-  Circle,
-  CircleDot,
-  Printer,
-  Repeat,
-  Sparkles,
-} from "lucide-react";
+import { ArrowLeft, BookOpen, CheckCircle2, Circle, CircleDot, Printer, Repeat } from "lucide-react";
 import { outcomeSummary } from "../lib/learnOutcomes";
 import {
   type CourseUnit,
@@ -42,6 +33,7 @@ import {
   UIUnitSection,
   skillArtFor,
   type UISkillPathItem,
+  UIArtIcon,
 } from "./ui";
 import { useT } from "../lib/i18n";
 
@@ -517,7 +509,7 @@ export const LearnPage: React.FC<LearnPageProps> = ({
       <div className="grid lg:grid-cols-[minmax(0,1fr)_280px] gap-5 items-start">
         <section className={`${themeSystem.card("default")} p-5 sm:p-6`}>
           <SectionIntro
-            icon={<Sparkles className="w-5 h-5" />}
+            icon={<UIArtIcon id="kit-flag" className="h-6 w-6" />}
             tint="bg-indigo-50 dark:bg-indigo-950/50 text-indigo-600"
             title={t("learn.path")}
             blurb={t("learn.pathBlurb")}
@@ -547,7 +539,7 @@ export const LearnPage: React.FC<LearnPageProps> = ({
                stops the path reading as if it simply carries on. */
             <div className="mt-8 pt-6 border-t border-line">
               <SectionIntro
-                icon={<Repeat className="w-5 h-5" />}
+                icon={<UIArtIcon id="kit-repeat" className="h-6 w-6" />}
                 tint="bg-violet-50 dark:bg-violet-950/50 text-violet-600"
                 title={t("learn.practice")}
                 blurb={t("learn.practiceBlurb")}

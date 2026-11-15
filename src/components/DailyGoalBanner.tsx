@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { PartyPopper } from "lucide-react";
+import { UIArtIcon } from "./ui";
 import { translate, useT } from "../lib/i18n";
 
 import { useStreak } from "../lib/streak";
@@ -73,7 +73,7 @@ export const DailyGoalBanner: React.FC<{ userProgress: UserProgress }> = ({ user
       // The card arrives with a small overshoot and the popper pops a beat
       // later. Both are finite, and both stop for a reduced-motion setting.
       className="koda-celebrate"
-      icon={<PartyPopper className="koda-celebrate-icon" />}
+      icon={<UIArtIcon id="kit-party" className="koda-celebrate-icon h-6 w-6" />}
       title={t("goalBanner.title", { done: streak.solvedToday, goal })}
       dismissLabel={t("goalBanner.dismiss")}
       onDismiss={() => {

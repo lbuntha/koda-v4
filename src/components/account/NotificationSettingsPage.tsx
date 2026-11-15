@@ -1,7 +1,6 @@
 import React, { useState } from "react";
-import { Bell } from "lucide-react";
 
-import { UISectionHeader, UITabs } from "../ui";
+import { UISectionHeader, UITabs, UIArtIcon } from "../ui";
 import { NotificationsSettings } from "./NotificationsSettings";
 import { NotificationsAdmin } from "./NotificationsAdmin";
 import { NotifyEventsPanel } from "./NotifyEventsPanel";
@@ -26,7 +25,7 @@ const NotificationSettingsTabs: React.FC = () => {
       <UISectionHeader
         title={translate("admin.notificationSettingsPage.notificationSettings")}
         subtitle={translate("admin.notificationSettingsPage.chooseWhatKodaCanSendTo")}
-        icon={<Bell className="w-5 h-5 text-indigo-600 dark:text-indigo-400" />}
+        icon={<UIArtIcon id="menu-notifications" className="h-6 w-6" />}
       />
       <UITabs
         items={[

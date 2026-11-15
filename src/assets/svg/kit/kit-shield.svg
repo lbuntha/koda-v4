@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+  <title>Protected</title>
+  <path fill="#6366F1" d="M50 6 L86 20 V46 C86 70 70 86 50 94 C30 86 14 70 14 46 V20 Z" />
+  <path fill="#818CF8" d="M50 6 L86 20 V30 L22 78 C17 69 14 58 14 46 V20 Z" />
+  <rect x="34" y="46" width="32" height="26" rx="6" fill="#FFFFFF" />
+  <path fill="none" stroke="#FFFFFF" stroke-width="6" d="M40 47 V40 a10 10 0 0 1 20 0 V47" />
+  <circle cx="50" cy="58" r="4.5" fill="#4338CA" />
+  <rect x="48" y="58" width="4" height="8" rx="2" fill="#4338CA" />
+</svg>

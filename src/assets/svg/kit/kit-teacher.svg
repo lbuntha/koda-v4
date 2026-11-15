@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+  <title>Teacher</title>
+  <rect x="8" y="14" width="84" height="56" rx="10" fill="#047857" />
+  <rect x="14" y="20" width="72" height="44" rx="6" fill="#10B981" />
+  <path fill="#34D399" d="M20 20 H66 L14 58 V26 a6 6 0 0 1 6 -6 Z" />
+  <path fill="none" stroke="#FFFFFF" stroke-width="5" stroke-linecap="round" d="M24 34 H50 M24 46 H42" />
+  <circle cx="66" cy="44" r="8" fill="none" stroke="#FFFFFF" stroke-width="5" />
+  <rect x="20" y="70" width="8" height="22" rx="4" fill="#334155" />
+  <rect x="72" y="70" width="8" height="22" rx="4" fill="#334155" />
+</svg>

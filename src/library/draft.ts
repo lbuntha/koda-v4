@@ -383,6 +383,34 @@ export function joinSentences<T extends Pick<Passage, "sentences" | "questions" 
 }
 
 /**
+ * One sentence made two: the words after `index` move to a new line placed
+ * straight after it, on the same page. The way back from `joinSentences`, and
+ * the way to give a list its own line without re-typing it.
+ *
+ * The first half keeps the id, picture and layout choices. A recording covers
+ * the whole sentence, so neither half keeps it; the author records again.
+ * A spelling question follows the half that holds its word.
+ */
+export function splitSentence<T extends Pick<Passage, "sentences" | "questions" | "language">>(book: T, id: string, index: number): T {
+  const i = book.sentences.findIndex((s) => s.id === id);
+  const sentence = book.sentences[i];
+  if (!sentence || index < 0 || index >= sentence.words.length - 1) return book;
+  const used = new Set(book.sentences.map((s) => s.id));
+  let n = book.sentences.length + 1;
+  while (used.has(`s${n}`)) n++;
+  const headWords = sentence.words.slice(0, index + 1);
+  const tailWords = sentence.words.slice(index + 1);
+  const head: Sentence = { ...sentence, words: headWords, text: sentenceText(headWords, book.language), audio: undefined, audioCues: undefined };
+  const tail: Sentence = { id: `s${n}`, text: sentenceText(tailWords, book.language), words: tailWords, pageBreak: false };
+  const inTail = (word: string) => tailWords.some((w) => w.trim() === word) && !headWords.some((w) => w.trim() === word);
+  return {
+    ...book,
+    sentences: book.sentences.flatMap((s) => (s.id === id ? [head, tail] : [s])),
+    questions: book.questions.map((q) => (q.kind === "spell" && q.sentence === id && inTail(q.word) ? { ...q, sentence: tail.id } : q)),
+  };
+}
+
+/**
  * The sentence an AI reply points at. Asked for an id, a model sometimes
  * copies the sentence itself — or the part of it that proves the answer —
  * so a reply is matched by id first, then by its text. Null when neither

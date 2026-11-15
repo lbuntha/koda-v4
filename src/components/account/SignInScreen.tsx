@@ -1,8 +1,8 @@
 import React from "react";
-import { WifiOff } from "lucide-react";
+import { ArrowLeft, WifiOff } from "lucide-react";
 
 import { themeSystem } from "../../lib/themeSystem";
-import { AccountForm } from "./AccountForm";
+import { AccountForm, type AccountMode } from "./AccountForm";
 import { LanguagePicker } from "../LanguagePicker";
 import { availableLanguages, useT } from "../../lib/i18n";
 import { PreferencesAPI } from "../../lib/preferences";
@@ -17,7 +17,7 @@ import { playSound } from "../../utils/audio";
  * two or three buttons show every option in its own script at once. Past
  * that, the shared select takes over so the row never wraps.
  */
-const LanguageSwitch: React.FC = () => {
+export const LanguageSwitch: React.FC = () => {
   const { t, language } = useT();
   const languages = availableLanguages();
   if (languages.length > 3) return <LanguagePicker compact />;
@@ -66,7 +66,11 @@ const LanguageSwitch: React.FC = () => {
  * signed in the session is local and lessons keep working with no connection;
  * this screen is the one thing that needs a network.
  */
-export const SignInScreen: React.FC = () => {
+export const SignInScreen: React.FC<{
+  initialMode?: AccountMode;
+  /** Back to the landing page, when the visitor came from it. */
+  onBack?: () => void;
+}> = ({ initialMode, onBack }) => {
   const { t } = useT();
   return (
     <div className="min-h-dvh w-full bg-canvas flex flex-col">
@@ -74,11 +78,22 @@ export const SignInScreen: React.FC = () => {
         {/* The product's own mark (public/favicon.svg), the same tile as the
             installed app's icon. Here only on a computer, where the intro
             column is laid out without it. */}
-        <span className="hidden items-center gap-2 lg:inline-flex">
+        <span className={`hidden items-center gap-2 ${onBack ? "" : "lg:inline-flex"}`}>
           <img src="/favicon.svg" alt="" width={32} height={32} className="h-8 w-8 rounded-lg" />
           <span className="text-lg font-extrabold tracking-tight text-ink">Koda</span>
         </span>
-        <span className="lg:hidden" />
+        {onBack ? (
+          <button
+            type="button"
+            onClick={onBack}
+            className="inline-flex min-h-9 cursor-pointer items-center gap-1.5 rounded-xl px-2 text-sm font-bold text-muted transition hover:text-ink"
+          >
+            <ArrowLeft className="h-4 w-4" aria-hidden />
+            {t("reader.back")}
+          </button>
+        ) : (
+          <span className="lg:hidden" />
+        )}
         <LanguageSwitch />
       </header>
 
@@ -108,7 +123,7 @@ export const SignInScreen: React.FC = () => {
 
         <section className="mx-auto w-full max-w-[420px] lg:mr-0">
           <div className={themeSystem.card("default", "p-5 sm:p-6")}>
-            <AccountForm autoFocus />
+            <AccountForm autoFocus initialMode={initialMode} />
           </div>
           <p className="mt-4 text-center text-xs leading-relaxed text-muted lg:hidden">
             {t("signIn.offline")}

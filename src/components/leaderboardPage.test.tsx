@@ -166,7 +166,7 @@ describe("Buddy Leaderboard page", () => {
     expect(await screen.findByText("PublicPanda")).toBeTruthy();
     expect(screen.getByText("Viewing only")).toBeTruthy();
     fireEvent.click(screen.getByRole("button", { name: "Join public leaderboard" }));
-    expect(screen.getByText("Any signed-in Koda learner.")).toBeTruthy();
+    expect(screen.getByText("Anyone signed in to Koda.")).toBeTruthy();
     expect(screen.getByRole("button", { name: "Confirm public sharing" })).toBeTruthy();
   });
 

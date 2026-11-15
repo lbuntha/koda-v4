@@ -1,5 +1,5 @@
 import React, { useState, useSyncExternalStore } from "react";
-import { Award, Pencil, Plus, RotateCcw, Trash2 } from "lucide-react";
+import { Pencil, Plus, RotateCcw, Trash2 } from "lucide-react";
 
 import {
   BADGE_METRICS,
@@ -12,7 +12,7 @@ import {
 import { usePermissions } from "../../lib/sync";
 import { themeSystem } from "../../lib/themeSystem";
 import { playSound } from "../../utils/audio";
-import { UIButton, UIModal, UISectionHeader } from "../ui";
+import { UIButton, UIModal, UISectionHeader, UIArtIcon } from "../ui";
 import {
   ART_PREFIX,
   BADGE_ART_CATEGORY,
@@ -131,7 +131,7 @@ export const BadgesPage: React.FC<{ embedded?: boolean }> = ({ embedded = false 
         <UISectionHeader
           title={translate("admin.badgesPage.achievements")}
           subtitle={translate("admin.badgesPage.earnedOnLifetimeXpLongestStreak")}
-          icon={<Award className="h-5 w-5 text-amber-500" />}
+          icon={<UIArtIcon id="kit-badge" className="h-6 w-6" />}
           action={
             BadgeAPI.isEdited() ? (
               <button
@@ -151,7 +151,7 @@ export const BadgesPage: React.FC<{ embedded?: boolean }> = ({ embedded = false 
 
         {rules.length === 0 ? (
           <div className="rounded-2xl border-2 border-dashed border-line bg-surface-muted p-6 text-center">
-            <Award className="mx-auto h-8 w-8 text-amber-400" />
+            <UIArtIcon id="kit-badge" className="mx-auto block h-12 w-12" />
             <h4 className="mt-2 text-sm font-bold text-ink">{translate("admin.badgesPage.noBadgesYet")}</h4>
             <p className="mx-auto mt-1 max-w-sm text-xs text-muted">
               {translate("admin.badgesPage.addOneAndEveryLearnerWho")}
@@ -170,7 +170,7 @@ export const BadgesPage: React.FC<{ embedded?: boolean }> = ({ embedded = false 
                       that already has an edge reads as two frames. 44px so the
                       art is the size it was drawn to be rather than a 20px
                       thumbnail of itself. */}
-                  <span className="flex h-11 w-11 shrink-0 items-center justify-center text-amber-500 [&>svg]:h-9 [&>svg]:w-9">
+                  <span className="flex h-11 w-11 shrink-0 items-center justify-center text-violet-500 [&>svg]:h-9 [&>svg]:w-9">
                     <BadgeIcon icon={rule.icon} size={44} />
                   </span>
                   <div className="min-w-0">

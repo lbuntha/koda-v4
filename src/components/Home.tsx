@@ -1,5 +1,5 @@
 import React from "react";
-import { ArrowRight, BookOpen, Flame, Star, Target, X, Zap } from "lucide-react";
+import { ArrowRight, BookOpen, Check, Flame, Sparkles, X, Zap } from "lucide-react";
 import {
   getCourseLessons,
   isUnlocked,
@@ -24,13 +24,14 @@ import { levelFromXp, XP_PER_LEVEL, xpToNextLevel } from "../lib/level";
 import { BadgeIcon } from "./account/BadgeVisuals";
 import type { UserProgress } from "../types";
 import { playSound } from "../utils/audio";
-import { UIButton, UILessonCard, UIRewardProgress, UISkillCard, UISubjectLessonCard } from "./ui";
+import { UIButton, UILessonCard, UIRewardProgress, UISkillCard, UISubjectLessonCard, UIArtIcon } from "./ui";
 import { WelcomeBack } from "./WelcomeBack";
 import { DailyGoalBanner } from "./DailyGoalBanner";
 import { ChildrenOverview } from "./account/ChildrenOverview";
 import { SvgAsset } from "../assets/svg";
 import { useT } from "../lib/i18n";
 import { useTodayPicks } from "./learn/useToday";
+import { StarterPicks } from "./learn/StarterPicks";
 import { SidebarIcon } from "./ui";
 import type { PickWhy } from "../lib/today";
 
@@ -185,6 +186,40 @@ const NextBadge: React.FC<{
   );
 };
 
+/**
+ * Today's goal as one circle per lesson, ticked as they are done.
+ *
+ * A child counts circles faster than they read "1 / 4", and an empty circle is
+ * an invitation where "0 / 4" is a score. A goal past ten would wrap into a
+ * wall of dots, so that falls back to the bar.
+ */
+const GoalDots: React.FC<{ done: number; goal: number; label: string }> = ({ done, goal, label }) =>
+  goal > 10 ? (
+    <UIRewardProgress value={done} max={goal} label={label} reward={null} tone="emerald" />
+  ) : (
+    <div
+      role="progressbar"
+      aria-label={label}
+      aria-valuenow={Math.min(done, goal)}
+      aria-valuemin={0}
+      aria-valuemax={goal}
+      className="flex flex-wrap gap-2"
+    >
+      {Array.from({ length: goal }, (_, i) => (
+        <span
+          key={i}
+          className={`grid h-9 w-9 place-items-center rounded-full border-2 transition-colors duration-300 ${
+            i < done
+              ? "border-emerald-500 bg-emerald-500 text-white"
+              : "border-dashed border-slate-300 text-slate-300 dark:border-slate-600 dark:text-slate-600"
+          }`}
+        >
+          {i < done ? <Check className="h-5 w-5" strokeWidth={3} /> : <span className="text-xs font-black">{i + 1}</span>}
+        </span>
+      ))}
+    </div>
+  );
+
 const HomeRail: React.FC<{
   userProgress: UserProgress;
   totalMastered: number;
@@ -198,7 +233,34 @@ const HomeRail: React.FC<{
   const streak = useStreak(userProgress);
   const { t } = useT();
   const goal = Math.max(1, userProgress.dailyGoal);
-  const percent = Math.min(100, Math.round((streak.solvedToday / goal) * 100));
+  const done = Math.min(streak.solvedToday, goal);
+  const goalMet = streak.solvedToday >= goal;
+  /*
+   * A learner who has not finished anything yet.
+   *
+   * Their rail used to be six zeros — 0 days, 0 XP, 0 / 100, 0 / 284, 0 / 4,
+   * 0 / 50 — which reads as a report card before the first lesson. One welcome
+   * says what the first lesson will start instead, and the figures arrive the
+   * moment there is something in them.
+   */
+  const fresh =
+    userProgress.xp === 0 && streak.days === 0 && streak.solvedToday === 0 && totalMastered === 0;
+
+  const goalBlock = (
+    <div>
+      <div className="flex items-baseline justify-between gap-2">
+        <h3 className="text-sm font-black text-ink">
+          {goalMet ? t("home.goalMet") : t("home.todayGoal")}
+        </h3>
+        <span className="text-xs font-bold text-muted tabular-nums">
+          {t("home.goalCount", { done, goal })}
+        </span>
+      </div>
+      <div className="mt-2.5">
+        <GoalDots done={done} goal={goal} label={t("home.dailyGoal")} />
+      </div>
+    </div>
+  );
 
   return (
     /*
@@ -215,119 +277,94 @@ const HomeRail: React.FC<{
      *
      * Hidden as a whole rather than card by card: an empty `aside` is still a
      * grid child, and it would leave the grid's gap behind on every phone.
+     *
+     * `pb-24` keeps the last card clear of the floating Ask Koda button, which
+     * sits over the bottom-right corner of exactly this column.
      */
-    <aside className="hidden lg:flex flex-col gap-4 lg:sticky lg:top-6">
-      <section
-        className={`${themeSystem.card("default")} ${themeSystem.spacing.card}`}
-      >
-        <h2 className="font-mono font-black text-xs uppercase tracking-widest text-muted">
-          {t("home.yourProgress")}
-        </h2>
-        <div className="mt-3 space-y-3">
-          {/* Hidden outright when a parent has switched streaks off — a flame
-              frozen at zero is a broken feature, not a disabled one. */}
-          {streak.config.enabled && (
+    <aside className="hidden lg:flex flex-col gap-4 lg:sticky lg:top-6 lg:pb-24">
+      {fresh ? (
+        <section
+          className={`${themeSystem.card("default")} ${themeSystem.spacing.card} bg-gradient-to-br from-violet-50 to-sky-50 dark:from-violet-950/40 dark:to-sky-950/30`}
+        >
+          <span className="grid h-12 w-12 place-items-center rounded-2xl bg-white text-violet-600 shadow-sm dark:bg-slate-900 dark:text-violet-300">
+            <Sparkles className="h-6 w-6" />
+          </span>
+          <h2 className="mt-3 text-lg font-black leading-tight text-ink">{t("home.startTitle")}</h2>
+          <p className="mt-1 text-sm text-muted">{t("home.startBody")}</p>
+          <div className="mt-4 border-t border-line pt-4">{goalBlock}</div>
+        </section>
+      ) : (
+        <section className={`${themeSystem.card("default")} ${themeSystem.spacing.card}`}>
+          <h2 className="font-mono font-black text-xs uppercase tracking-widest text-muted">
+            {t("home.yourProgress")}
+          </h2>
+          <div className="mt-3 space-y-3">
+            {/* Hidden outright when a parent has switched streaks off — a flame
+                frozen at zero is a broken feature, not a disabled one. */}
+            {streak.config.enabled && (
+              <RailStat
+                icon={
+                  <SvgAsset
+                    id="streak"
+                    size={50}
+                    title={t("home.learningStreak")}
+                    fallback={<Flame className="fill-current text-rose-500" />}
+                  />
+                }
+                label={t("home.learningStreak")}
+                /* The unit follows the cadence the view was produced with — a run
+                   of three weeks printed as "3 days" is the whole reason the view
+                   carries it. */
+                value={t(streak.cadence === "weekly" ? "streak.weeks" : "streak.days", { count: streak.days })}
+              />
+            )}
             <RailStat
               icon={
                 <SvgAsset
-                  id="streak"
+                  id="points"
                   size={50}
-                  title={t("home.learningStreak")}
-                  fallback={<Flame className="fill-current" />}
+                  title={t("home.totalPoints")}
+                  fallback={<Zap className="fill-current text-violet-500" />}
                 />
               }
-              label={t("home.learningStreak")}
-              /* The unit follows the cadence the view was produced with — a run
-                 of three weeks printed as "3 days" is the whole reason the view
-                 carries it. */
-              value={t(streak.cadence === "weekly" ? "streak.weeks" : "streak.days", { count: streak.days })}
+              label={t("home.totalPoints")}
+              value={t("progress.xp", { xp: userProgress.xp })}
             />
-          )}
-          <RailStat
-            icon={
-              <SvgAsset
-                id="points"
-                size={50}
-                title={t("home.totalPoints")}
-                fallback={<Zap className="fill-current" />}
+            {/*
+              * What the XP is for: every hundred is another level, so the bar
+              * refills and the number climbs for as long as a learner keeps
+              * playing. The rule itself rides on the title rather than as a
+              * paragraph — a child learns it from the first level-up, and a
+              * grown-up who wonders can hover.
+              */}
+            <div className="pl-[3.75rem] -mt-1" title={t("home.xpRule", { xp: XP_PER_LEVEL })}>
+              <div className="flex items-baseline justify-between gap-2">
+                <span className="text-xs font-bold text-muted">
+                  {t("home.xpLevel", { level: levelFromXp(userProgress.xp) })}
+                </span>
+                <span className="font-mono text-[0.6875rem] tabular-nums text-muted">
+                  {t("home.xpToLevel", { xp: xpToNextLevel(userProgress.xp), level: levelFromXp(userProgress.xp) + 1 })}
+                </span>
+              </div>
+              <UIRewardProgress
+                className="mt-1.5"
+                value={XP_PER_LEVEL - xpToNextLevel(userProgress.xp)}
+                max={XP_PER_LEVEL}
+                label={t("home.xpLevel", { level: levelFromXp(userProgress.xp) })}
               />
-            }
-            label={t("home.totalPoints")}
-            value={t("progress.xp", { xp: userProgress.xp })}
-          />
-          {/*
-            * What the XP is for.
-            *
-            * Every hundred is another level, so the bar refills and the number
-            * climbs for as long as a learner keeps playing — no last rung to
-            * reach and no admin having to add one. It sits directly under the
-            * XP it reads, because the two are one fact shown twice.
-            */}
-          <div className="pl-[3.75rem] -mt-1">
-            <div className="flex items-baseline justify-between gap-2">
-              <span className="text-xs font-bold text-muted">
-                {t("home.xpLevel", { level: levelFromXp(userProgress.xp) })}
-              </span>
-              <span className="font-mono text-[0.6875rem] tabular-nums text-muted">
-                {t("home.xpToLevel", { xp: xpToNextLevel(userProgress.xp), level: levelFromXp(userProgress.xp) + 1 })}
-              </span>
             </div>
-            <UIRewardProgress
-              className="mt-1.5"
-              value={XP_PER_LEVEL - xpToNextLevel(userProgress.xp)}
-              max={XP_PER_LEVEL}
-              label={t("home.xpLevel", { level: levelFromXp(userProgress.xp) })}
+            <RailStat
+              icon={<UIArtIcon id="kit-star" className="h-6 w-6" />}
+              label={t("home.lessonsMastered")}
+              value={`${totalMastered} / ${totalLessons}`}
             />
-            {/* The rule itself, said once. "XP Level 4" and "Lesson 4" are two
-                different numbers on two different screens, and this is the
-                sentence that keeps them apart: levels come from points, and
-                points come from rounds — nothing else moves either. */}
-            <p className="mt-1 text-[0.6875rem] text-muted">
-              {t("home.xpRule", { xp: XP_PER_LEVEL })}
-            </p>
           </div>
-          <RailStat
-            icon={
-              <SvgAsset
-                id="star"
-                size={50}
-                title={t("home.lessonsMastered")}
-                fallback={<Star className="fill-current" />}
-              />
-            }
-            label={t("home.lessonsMastered")}
-            value={`${totalMastered} / ${totalLessons}`}
-          />
-        </div>
-      </section>
-
-      <section
-        className={`${themeSystem.card("default")} ${themeSystem.spacing.card}`}
-      >
-        <h2 className="font-mono font-black text-xs uppercase tracking-widest text-muted">
-          {t("home.dailyGoal")}
-        </h2>
-        <div className="mt-3 flex items-center gap-3">
-          <span className="w-11 h-11 text-indigo-600 dark:text-indigo-400 flex items-center justify-center shrink-0">
-            <SvgAsset
-              id="daily-goal"
-              size={50}
-              title={t("home.dailyGoal")}
-              fallback={<Target className="w-8 h-8" />}
-            />
-          </span>
-          <p className="text-sm font-bold text-muted flex-1 min-w-0">
-            {percent >= 100 ? t("home.goalMet") : t("home.lessonsToday")}
-          </p>
-        </div>
-        {/* The count lives inside the bar now, so it is not said twice. */}
-        <UIRewardProgress
-          className="mt-3"
-          value={streak.solvedToday}
-          max={goal}
-          label={t("home.dailyGoal")}
-        />
-      </section>
+          {/* The daily goal joins this card rather than standing in its own:
+              it is one more line of the same story, and one card fewer keeps
+              the rail inside a laptop's height. */}
+          <div className="mt-4 border-t border-line pt-4">{goalBlock}</div>
+        </section>
+      )}
 
       <NextBadge userProgress={userProgress} starsEarned={starsEarned} />
     </aside>
@@ -353,6 +390,8 @@ export const Home: React.FC<HomeProps> = ({
    * this column cannot disagree about who is looking at it.
    */
   const isParent = Boolean(session && !session.learnerId && can("learner:create"));
+  /** For the first-day greeting; a learner without a name is greeted without one. */
+  const learnerName = session?.learnerName ?? session?.displayName ?? null;
   const { skills, viewer } = useSkillCatalog(completedLevels);
   const { registrations } = useSkillRegistrations();
   /* Subscribed so Today re-reads the plan: a family that upgrades should see
@@ -512,7 +551,7 @@ export const Home: React.FC<HomeProps> = ({
 
   /* Wide enough to fill the top row where three cards would otherwise leave an
      orphan, and back to one column where all three fit in a row. */
-  const leadSpan = "sm:col-span-2 xl:col-span-1";
+  const leadSpan = "sm:col-span-2 xl:row-span-2";
 
   /*
    * What leads the band.
@@ -537,6 +576,7 @@ export const Home: React.FC<HomeProps> = ({
       iconName={interrupted.lesson.iconName}
       iconTone={interrupted.lesson.iconTone}
       tone="resume"
+      featured
       actionLabel={t("home.carryOn")}
       onClick={() => {
         playSound("pop");
@@ -553,6 +593,7 @@ export const Home: React.FC<HomeProps> = ({
       iconName={leadLesson?.iconName}
       iconTone={leadLesson?.iconTone}
       tone={leadPick.kind}
+      featured
       onClick={() => start(leadPick.lesson.ref)}
     />
   ) : null;
@@ -570,7 +611,7 @@ export const Home: React.FC<HomeProps> = ({
         todayPicks.read && (
           <UILessonCard
             key={`read-${todayPicks.read.book.id}`}
-            variant="compact"
+            variant="row"
             icon={<SidebarIcon name="art:menu-library" size={40} className="h-10 w-10 shrink-0" />}
             title={todayPicks.read.book.title}
             subject={t("learnHub.books")}
@@ -585,7 +626,7 @@ export const Home: React.FC<HomeProps> = ({
         todayPicks.write && (
           <UILessonCard
             key={`write-${todayPicks.write.collection.id}`}
-            variant="compact"
+            variant="row"
             icon={<SidebarIcon name="art:menu-trace" size={40} className="h-10 w-10 shrink-0" />}
             title={todayPicks.write.collection.title}
             subject={t("learnHub.trace")}
@@ -634,24 +675,6 @@ export const Home: React.FC<HomeProps> = ({
                 only exists on a day with practice in it. */}
             <DailyGoalBanner userProgress={userProgress} />
             <WelcomeBack userProgress={userProgress} />
-            {/*
-              * The badge, on a phone only.
-              *
-              * It belongs to the rail, and the rail stacks *below* this column
-              * on a phone — which put the one card that is a reason to start a
-              * round underneath everything it was meant to pull a child into.
-              * Ordering cannot fix that: the welcome band has to stay above it
-              * and the two are in different parents, so there is no common flex
-              * context to reorder. Rendering it here instead, and hiding the
-              * rail's copy, costs one cheap extra read of the badge rules and
-              * leaves the desktop layout untouched.
-              */}
-            <div className="lg:hidden">
-              <NextBadge
-                userProgress={userProgress}
-                starsEarned={Object.values(completedLevels).reduce((t, stars) => t + stars, 0)}
-              />
-            </div>
             <section>
               <h1 className="font-mono font-black uppercase tracking-widest text-xs text-indigo-600">
                 {t("home.today")}
@@ -688,6 +711,22 @@ export const Home: React.FC<HomeProps> = ({
                 </p>
               )}
             </section>
+
+            {/*
+              * The badge, on a phone only — under Today, not above it.
+              *
+              * The rail's copy is hidden below `lg`, so a phone draws its own
+              * here. It used to lead the page, which pushed the Play button a
+              * full card down: a child opening the app should reach their
+              * lesson in one tap without scrolling, and the badge still sits
+              * right where they look next.
+              */}
+            <div className="lg:hidden">
+              <NextBadge
+                userProgress={userProgress}
+                starsEarned={Object.values(completedLevels).reduce((t, stars) => t + stars, 0)}
+              />
+            </div>
 
             <section>
               <h2 className="font-mono font-black uppercase tracking-widest text-xs text-muted">
@@ -779,22 +818,50 @@ export const Home: React.FC<HomeProps> = ({
            * one screen where the answer is "add a child". `ChildrenOverview`
            * above says that instead, and says it whether or not this branch runs.
            */
+          /*
+           * The first day: nothing added yet.
+           *
+           * Not an empty page and not a catalogue — a greeting, three skills
+           * picked for this learner's age that each start a lesson in one tap,
+           * and today's book and writing, which need nothing added at all. The
+           * whole shelf is one quiet button away for anybody who wants it.
+           */
           <>
-          {/* No skills chosen yet, but books and writing need none: today's Read and Write still lead. */}
-          {categoryCards.length > 0 && (
-            <section>
-              <h1 className="font-mono font-black uppercase tracking-widest text-xs text-indigo-600">{t("home.today")}</h1>
-              <div className="mt-3 grid gap-4 sm:grid-cols-2">{categoryCards}</div>
+            <section
+              className={`${themeSystem.card("default")} p-5 sm:p-6 bg-gradient-to-br from-violet-50 to-sky-50 dark:from-violet-950/40 dark:to-sky-950/30`}
+            >
+              <div className="flex items-start gap-4">
+                <span className="grid h-12 w-12 shrink-0 place-items-center rounded-2xl bg-white text-violet-600 shadow-sm dark:bg-slate-900 dark:text-violet-300 sm:h-14 sm:w-14">
+                  <Sparkles className="h-6 w-6 sm:h-7 sm:w-7" aria-hidden="true" />
+                </span>
+                <div className="min-w-0">
+                  <h1 className="text-xl font-black leading-tight text-ink sm:text-2xl">
+                    {learnerName ? t("starter.welcome", { name: learnerName }) : t("starter.welcomeNoName")}
+                  </h1>
+                  <p className="mt-1 text-sm text-muted sm:text-base">{t("starter.welcomeBody")}</p>
+                </div>
+              </div>
             </section>
-          )}
-          <div className={`${themeSystem.card("default")} p-6 sm:p-8 text-center`}>
-            <BookOpen className="w-11 h-11 mx-auto text-indigo-500" />
-            <h1 className="mt-3 font-mono font-black text-lg text-ink">{t("home.buildList")}</h1>
-            <p className="mt-1 text-sm text-muted max-w-md mx-auto">{t("home.buildListNote")}</p>
-            <UIButton className="mt-4" iconRight={<ArrowRight />} onClick={onBrowseSkills}>
-              {t("home.browseSkills")}
-            </UIButton>
-          </div>
+
+            <StarterPicks
+              skills={skills}
+              viewer={viewer}
+              completedLevels={completedLevels}
+              onStartLesson={onStartLesson}
+            />
+
+            {categoryCards.length > 0 && (
+              <section>
+                <h2 className="text-lg font-black text-ink sm:text-xl">{t("starter.orReadWrite")}</h2>
+                <div className="mt-3 grid gap-3 sm:grid-cols-2 sm:gap-4">{categoryCards}</div>
+              </section>
+            )}
+
+            <div className="flex justify-center">
+              <UIButton variant="secondary" iconRight={<ArrowRight />} onClick={onBrowseSkills}>
+                {t("starter.seeAll")}
+              </UIButton>
+            </div>
           </>
         )}
       </div>

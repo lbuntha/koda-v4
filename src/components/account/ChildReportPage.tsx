@@ -1,31 +1,20 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { LIBRARY_CONCEPT_NAMES } from "../../library/session";
 import { TRACE_CONCEPT_NAMES } from "../../trace/learning";
-import {
-  ArrowLeft,
-  BookOpen,
-  CalendarDays,
-  ChevronDown,
-  CircleHelp,
-  Clock,
-  HandHelping,
-  History,
-  Lightbulb,
-  Target,
-  X,
-} from "lucide-react";
+import { ArrowLeft, ChevronDown, X } from "lucide-react";
 
 import {
   ERROR_COPY,
+  GOOD_WEEK_DAYS,
   LEANING_ON_HELP,
   STATUS_COPY,
   contributionsTo,
   evidenceGap,
   fetchChildReport,
+  glance,
   nextStep,
   rhythmVerdict,
   rightFirstTime,
-  tooEarlyToRead,
   whatNext,
   type ChildReport,
   type Contribution,
@@ -36,9 +25,11 @@ import type { ConceptMastery, MasteryStatus } from "../../lib/learning/mastery";
 import type { ErrorKind } from "../../lib/learning/events";
 import { SKILLS } from "../../skills/registry";
 import { themeSystem } from "../../lib/themeSystem";
-import { UIAvatar, UIBadge, UIButton, UISectionHeader, UIStatGrid, UIStatTile } from "../ui";
+import { UIAvatar, UIBadge, UIButton, UISectionHeader, UIStatGrid, UIStatTile, UIArtIcon } from "../ui";
 import { NoAccess } from "./NoAccess";
 import { VoiceNotesCard } from "./VoiceNotesCard";
+import { ReportGlance, type GlanceAction } from "./ReportGlance";
+import { LessonBars, PracticeTrend } from "./ReportCharts";
 import { TraceReport } from "../../trace/report/TraceReport";
 import { PaintingsReport } from "../../trace/report/PaintingsReport";
 import { formatDate, translate, useT } from "../../lib/i18n";
@@ -326,8 +317,9 @@ const StatusGroup: React.FC<{
   showSkill: boolean;
 }> = ({ status, concepts, names, showSkill }) => (
   <details
+    id={`report-group-${status}`}
     open={OPEN_BY_DEFAULT.includes(status)}
-    className="group rounded-2xl border border-line bg-white dark:bg-surface"
+    className="group scroll-mt-4 rounded-2xl border border-line bg-white dark:bg-surface"
   >
     <summary className="flex cursor-pointer list-none flex-wrap items-center gap-x-2 gap-y-1 rounded-2xl p-3 transition hover:bg-surface-muted [&::-webkit-details-marker]:hidden">
       <UIBadge variant={STATUS_TONE[status]}>{STATUS_COPY[status].label}</UIBadge>
@@ -459,6 +451,40 @@ export const ChildReportPage: React.FC<ChildReportPageProps> = ({
     [report],
   );
 
+  const summary = useMemo(() => (report ? glance(report) : null), [report]);
+
+  /*
+   * At most three things to do, the most useful first: the one move, then a
+   * nudge on how often (unless the verdict already said it), then the mistake
+   * seen most. Each is a sentence a parent can act on tonight.
+   */
+  const actions = useMemo(() => {
+    const list: GlanceAction[] = [];
+    if (!report || !summary) return list;
+    if (move) list.push({ text: move.action, why: move.why });
+    if (
+      report.rhythm.daysThisWeek < GOOD_WEEK_DAYS &&
+      summary.tone !== "quiet" &&
+      summary.tone !== "light"
+    ) {
+      list.push({ text: rhythmVerdict(report.rhythm, learnerName) });
+    }
+    const top = troubles[0];
+    if (top) {
+      list.push({ text: translate("report.glance.mistakeTip", { label: ERROR_COPY[top.kind].label, fix: ERROR_COPY[top.kind].fix }) });
+    }
+    return list.slice(0, 3);
+    // `language`: every line is worded in the language on screen.
+  }, [report, summary, move, troubles, learnerName, language]);
+
+  /* A legend chip in the bar opens its group below and brings it into view. */
+  const jumpTo = (status: MasteryStatus) => {
+    const group = document.getElementById(`report-group-${status}`);
+    if (!(group instanceof HTMLDetailsElement)) return;
+    group.open = true;
+    group.scrollIntoView({ behavior: "smooth", block: "start" });
+  };
+
   if (!canRead) {
     return (
       <NoAccess
@@ -512,56 +538,33 @@ export const ChildReportPage: React.FC<ChildReportPageProps> = ({
         {/* What the child read aloud and sent. Absent until there is one. */}
         <VoiceNotesCard learnerId={learnerId} learnerName={learnerName} />
 
-        {/*
-          * A record that exists but is too young to read is its own answer, and
-          * a different one from "has never played". Said once at the top, so the
-          * sections below are read as early rather than as disappointing.
-          */}
-        {report && tooEarlyToRead(report) && (
-          <p className={themeSystem.flash("info")}>
-            {t("report.tooEarly", { name: learnerName })}
-          </p>
-        )}
-
         {loading ? (
           <div className="rounded-2xl border border-line bg-white p-8 text-center text-sm text-muted dark:bg-surface">
             {t("report.loading", { name: learnerName })}
           </div>
         ) : !played ? (
           <section className={themeSystem.card("default", "p-8 text-center")}>
-            <BookOpen className="mx-auto h-10 w-10 text-indigo-300" />
+            <UIArtIcon id="kit-report" className="mx-auto block h-14 w-14" />
             <h2 className="mt-3 text-lg font-semibold text-ink">{t("common.nothingYet")}</h2>
             <p className="mx-auto mt-1 max-w-md text-sm text-muted">{t("report.emptyNote", { name: learnerName })}</p>
           </section>
         ) : (
           <>
             {/*
-              * DO THIS NEXT — the whole page in one sentence.
-              *
-              * Everything below is evidence, and a parent standing in a kitchen
-              * does not want evidence, they want an instruction. The bands, the
-              * counts and the mistakes are all still there for the reader who
-              * wants to check the working; this is for the one who has a minute
-              * and a child to sit with.
-              *
-              * Never a second opinion: it is picked from the same concepts and
-              * the same thresholds the rows below use, so it always names a
-              * lesson the reader can then find further down.
+              * AT A GLANCE — the whole page in one card: a coloured verdict,
+              * four numbers, where the lessons are, and up to three things to
+              * do. Everything below it is the evidence, for the reader who
+              * wants to check the working.
               */}
-            {move && (
-              <section
-                className={themeSystem.card(
-                  "default",
-                  `${themeSystem.spacing.card} space-y-2 border-indigo-200 dark:border-indigo-500/40`,
-                )}
-              >
-                <p className="flex items-center gap-2 text-xs font-black uppercase tracking-[0.18em] text-indigo-600 dark:text-indigo-400">
-                  <Lightbulb className="h-4 w-4" aria-hidden="true" />
-                  {t("report.doNext")}
-                </p>
-                <p className="text-lg font-bold leading-snug text-ink sm:text-xl">{move.action}</p>
-                <p className="text-sm leading-snug text-muted">{move.why}</p>
-              </section>
+            {report && summary && (
+              <ReportGlance
+                report={report}
+                summary={summary}
+                learnerName={learnerName}
+                lastPlayed={sinceWords(report.rhythm.lastSeenTs)}
+                actions={actions}
+                onJump={jumpTo}
+              />
             )}
 
             {/*
@@ -578,11 +581,14 @@ export const ChildReportPage: React.FC<ChildReportPageProps> = ({
               <UISectionHeader
                 title={t("report.howOften")}
                 subtitle={t("report.howOftenNote", { name: learnerName })}
-                icon={<CalendarDays className="h-5 w-5 text-indigo-600 dark:text-indigo-400" />}
+                icon={<UIArtIcon id="kit-calendar" className="h-6 w-6" />}
               />
+              {/* Is the habit growing? Weeks, not days: one bad Tuesday is
+                  noise, a falling month is a conversation. */}
+              {report?.rhythm.weeks && <PracticeTrend weeks={report.rhythm.weeks} />}
               <UIStatGrid>
                 <UIStatTile
-                  icon={<Clock />}
+                  icon={<UIArtIcon id="kit-clock" className="h-6 w-6" />}
                   value={sinceWords(report?.rhythm.lastSeenTs)}
                   label={t("report.lastPlayed")}
                 />
@@ -591,7 +597,7 @@ export const ChildReportPage: React.FC<ChildReportPageProps> = ({
                     24px next to three indigo tiles is the one thing on the
                     page the eye keeps snagging on. */}
                 <UIStatTile
-                  icon={<CalendarDays />}
+                  icon={<UIArtIcon id="kit-calendar" className="h-6 w-6" />}
                   tone="success"
                   value={t("skillCard.xOfY", { done: report?.rhythm.daysThisWeek ?? 0, total: 7 })}
                   label={t("report.daysThisWeek")}
@@ -600,13 +606,13 @@ export const ChildReportPage: React.FC<ChildReportPageProps> = ({
                     behind it are the first thing a parent can act on, and
                     `interactive` is what says the tile is worth a tap. */}
                 <UIStatTile
-                  icon={<Target />}
+                  icon={<UIArtIcon id="kit-target" className="h-6 w-6" />}
                   value={report?.rhythm.roundsEver ?? 0}
                   label={t("report.lessonsFinished")}
                   onClick={() => setDetail((open) => (open === "lessons" ? null : "lessons"))}
                 />
                 <UIStatTile
-                  icon={<BookOpen />}
+                  icon={<UIArtIcon id="menu-library" className="h-6 w-6" />}
                   value={report?.rhythm.questionsEver ?? 0}
                   label={t("report.questionsAnswered")}
                   onClick={() => setDetail((open) => (open === "questions" ? null : "questions"))}
@@ -711,7 +717,7 @@ export const ChildReportPage: React.FC<ChildReportPageProps> = ({
                       ? t("report.recentOne", { name: learnerName })
                       : t("report.recentMany", { count: report?.activity.length ?? 0, name: learnerName })
                   }
-                  icon={<History className="h-5 w-5 text-indigo-600 dark:text-indigo-400" />}
+                  icon={<UIArtIcon id="kit-recent" className="h-6 w-6" />}
                 />
                 <ol className="space-y-2">
                   {(report?.activity ?? []).map(({ day, conceptKeys }) => (
@@ -749,7 +755,12 @@ export const ChildReportPage: React.FC<ChildReportPageProps> = ({
               <UISectionHeader
                 title={t("report.everyLesson")}
                 subtitle={t("report.everyLessonNote", { name: learnerName })}
-                icon={<Target className="h-5 w-5 text-indigo-600 dark:text-indigo-400" />}
+                icon={<UIArtIcon id="kit-target" className="h-6 w-6" />}
+              />
+              {/* Which lesson needs me? Weakest first, against the learned line. */}
+              <LessonBars
+                concepts={report?.concepts ?? []}
+                lessonOf={(key) => names.get(key)?.lesson ?? key}
               />
               <div className="space-y-2">
                 {grouped.map(({ status, concepts }) => (
@@ -777,7 +788,7 @@ export const ChildReportPage: React.FC<ChildReportPageProps> = ({
               <UISectionHeader
                 title={t("report.mistakes")}
                 subtitle={t("report.mistakesNote")}
-                icon={<CircleHelp className="h-5 w-5 text-indigo-600 dark:text-indigo-400" />}
+                icon={<UIArtIcon id="kit-question" className="h-6 w-6" />}
               />
               <ul className="space-y-2">
                 {troubles.map(({ kind, count }) => (
@@ -810,7 +821,7 @@ export const ChildReportPage: React.FC<ChildReportPageProps> = ({
                 <UISectionHeader
                   title={t("report.stillHints")}
                   subtitle={t("report.stillHintsNote", { name: learnerName })}
-                  icon={<HandHelping className="h-5 w-5 text-indigo-600 dark:text-indigo-400" />}
+                  icon={<UIArtIcon id="kit-hand" className="h-6 w-6" />}
                 />
                 <ul className="grid gap-2 sm:grid-cols-2">
                   {leaning.map((concept) => (

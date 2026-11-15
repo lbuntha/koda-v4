@@ -84,7 +84,7 @@ export const AchievementsModal: React.FC<AchievementsModalProps> = ({
     >
       <div className="space-y-4">
         <div className="flex items-center gap-2">
-          <Award className="h-5 w-5 text-amber-500" />
+          <Award className="h-5 w-5 text-violet-500" />
           <div>
             <h4 className="font-mono text-base font-bold text-ink">{t("stats.badges")}</h4>
             <p className="text-xs text-muted">{t("stats.badgesNote")}</p>
@@ -99,14 +99,14 @@ export const AchievementsModal: React.FC<AchievementsModalProps> = ({
                 key={rule.id}
                 className={`flex items-center gap-3 rounded-2xl border p-4 transition-all ${
                   earned
-                    ? "border-amber-300 bg-amber-50 dark:border-amber-700/60 dark:bg-amber-950/20"
+                    ? "border-violet-300 bg-violet-50 dark:border-violet-700/60 dark:bg-violet-950/20"
                     : "border-line bg-surface-muted"
                 }`}
               >
                 <span
                   className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-xl border ${
                     earned
-                      ? "border-amber-300 bg-surface text-amber-500 dark:border-amber-700/60"
+                      ? "border-violet-300 bg-surface text-violet-500 dark:border-violet-700/60"
                       : "border-line bg-surface text-muted opacity-60"
                   }`}
                 >

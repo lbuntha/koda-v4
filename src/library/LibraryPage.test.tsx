@@ -128,7 +128,7 @@ describe("a whole book, as a child plays it", () => {
     fireEvent.click(screen.getByRole("button", { name: "mango" })); // bold: the quiz asks about it
     expect(screen.getByText("Picture word · tap the speaker to hear it")).toBeTruthy();
     fireEvent.click(screen.getByRole("button", { name: "Next page" }));
-    fireEvent.click(screen.getByRole("button", { name: "Check My Learning" }));
+    fireEvent.click(screen.getByRole("button", { name: "Check my learning" }));
 
     // Understand 1: one wrong answer first. It stays, locked and marked — and
     // each answer has its own sound, not the page-turn one BookReader just used.
@@ -172,7 +172,7 @@ describe("a whole book, as a child plays it", () => {
 
     // Results
     expect(screen.getByRole("heading", { name: /You finished “At the Market”/ })).toBeTruthy();
-    expect(screen.getByText(/Read “At the Market” \(English\)\. Understood 0\/2, matched 2\/2/)).toBeTruthy();
+    expect(screen.getByText(/Read “At the Market” \(English\)\. Right on the first try: 0\/2 understood, 2\/2 matched/)).toBeTruthy();
     expect(onAwardXp).toHaveBeenCalledTimes(1);
     expect(LibraryProgress.get(MARKET.id, MARKET.rev)?.stage).toBe("done");
 
@@ -236,7 +236,7 @@ describe("a book with no questions", () => {
       fireEvent.click(screen.getByRole("button", { name: "Read" }));
       fireEvent.click(screen.getByRole("button", { name: "Next page" }));
       fireEvent.click(screen.getByRole("button", { name: "Next page" }));
-      expect(screen.queryByRole("button", { name: "Check My Learning" })).toBeNull();
+      expect(screen.queryByRole("button", { name: "Check my learning" })).toBeNull();
       fireEvent.click(screen.getByRole("button", { name: "I finished!" }));
 
       expect(screen.queryByLabelText("Progress")).toBeNull();
@@ -260,14 +260,14 @@ describe("the reader is a book", () => {
     openBook();
     expect(screen.getByRole("heading", { name: "At the Market" })).toBeTruthy();
     expect((screen.getByRole("button", { name: "Previous page" }) as HTMLButtonElement).disabled).toBe(true);
-    expect(screen.queryByRole("button", { name: "Check My Learning" })).toBeNull();
+    expect(screen.queryByRole("button", { name: "Check my learning" })).toBeNull();
     fireEvent.click(screen.getByRole("button", { name: "Next page" }));
     expect(screen.getByText("Page 1 of 2")).toBeTruthy();
     expect(screen.queryByText(/The mango is sweet/)).toBeNull(); // on the next page, not this one
     fireEvent.click(screen.getByRole("button", { name: "Next page" }));
     expect(screen.getByText("The end")).toBeTruthy();
     expect(screen.queryByRole("button", { name: "Next page" })).toBeNull();
-    expect(screen.getByRole("button", { name: "Check My Learning" })).toBeTruthy();
+    expect(screen.getByRole("button", { name: "Check my learning" })).toBeTruthy();
   });
 
   it("turns with the arrow keys and with a swipe, but not with a small wobble", () => {
@@ -346,7 +346,7 @@ describe("a matching set in the quiz", () => {
       fireEvent.click(screen.getByRole("button", { name: "Read" }));
       fireEvent.click(screen.getByRole("button", { name: "Next page" }));
       fireEvent.click(screen.getByRole("button", { name: "Next page" }));
-      fireEvent.click(screen.getByRole("button", { name: "Check My Learning" }));
+      fireEvent.click(screen.getByRole("button", { name: "Check my learning" }));
       fireEvent.click(screen.getByRole("button", { name: "Home" }));
       await advance();
       fireEvent.click(screen.getByRole("button", { name: "The mango" }));

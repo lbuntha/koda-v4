@@ -183,7 +183,9 @@ export const LearnHub: React.FC<LearnHubProps> = ({ value, onChange, immersed, p
   return (
     <div className={immersed ? undefined : "flex flex-col gap-5"}>
       {/* On a phone the app bar already says "Learn", so this collapses away. */}
-      {!immersed && <UIPageHeader title={t("nav.game")} subtitle={t("learnHub.subtitle")} />}
+      {/* Title only: the switcher right under it already says "think, read and
+          write", and the line that repeated it pushed the shelf down a row. */}
+      {!immersed && <UIPageHeader title={t("nav.game")} />}
       {!immersed && <LearnSwitcher value={value} onChange={onChange} />}
       <div role="tabpanel" aria-busy={pending} className={pending ? "opacity-60 transition-opacity" : undefined}>
         <Suspense fallback={<UIPageLoader label={t("learnHub.loading")} />}>{children}</Suspense>

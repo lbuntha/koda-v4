@@ -1,16 +1,5 @@
 import React, { useCallback, useEffect, useState, useSyncExternalStore } from "react";
-import {
-  Baby,
-  Check,
-  Copy,
-  Flame,
-  KeyRound,
-  Pencil,
-  ShieldCheck,
-  Star,
-  Zap,
-  UserRound,
-} from "lucide-react";
+import { Check, Copy, Flame, KeyRound, Pencil, Star, Zap } from "lucide-react";
 
 import { SvgAsset } from "../../assets/svg";
 import { DailyGoalAPI } from "../../lib/dailyGoal";
@@ -34,7 +23,7 @@ import {
 } from "../../lib/sync";
 import { themeSystem } from "../../lib/themeSystem";
 import { playSound } from "../../utils/audio";
-import { UIAvatar, UIBadge, UIButton, UIRewardProgress, UISectionHeader, UIModal } from "../ui";
+import { UIAvatar, UIBadge, UIButton, UIRewardProgress, UISectionHeader, UIModal, UIArtIcon } from "../ui";
 import { ProfileEditModal } from "./ProfileEditModal";
 import { ChangePasswordCard } from "./ChangePasswordCard";
 
@@ -330,7 +319,7 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({ onNavigate }) => {
           <UISectionHeader
             title={t("profile.children.title")}
             subtitle={t("profile.children.subtitle")}
-            icon={<Baby className="h-5 w-5 text-indigo-600 dark:text-indigo-400" />}
+            icon={<UIArtIcon id="menu-children" className="h-6 w-6" />}
             action={
               onNavigate && can("learner:create") ? (
                 <UIButton variant="secondary" size="sm" onClick={() => onNavigate("children")}>
@@ -341,7 +330,7 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({ onNavigate }) => {
           />
           {!canReadLearners ? (
             <EmptyNote
-              icon={<Baby />}
+              icon={<UIArtIcon id="menu-children" className="h-10 w-10" />}
               title={t("profile.children.hidden")}
               detail={t("profile.children.hiddenDetail")}
             />
@@ -349,7 +338,7 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({ onNavigate }) => {
             <p className="text-sm text-muted">{t("profile.children.loading")}</p>
           ) : children.length === 0 ? (
             <EmptyNote
-              icon={<Baby />}
+              icon={<UIArtIcon id="menu-children" className="h-10 w-10" />}
               title={t("profile.children.none")}
               detail={t("profile.children.noneDetail")}
             />
@@ -409,11 +398,11 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({ onNavigate }) => {
           <UISectionHeader
             title={t("profile.access.title")}
             subtitle={t("profile.access.subtitle")}
-            icon={<ShieldCheck className="h-5 w-5 text-indigo-600 dark:text-indigo-400" />}
+            icon={<UIArtIcon id="kit-shield" className="h-6 w-6" />}
           />
           {permissions.length === 0 ? (
             <EmptyNote
-              icon={<ShieldCheck />}
+              icon={<UIArtIcon id="kit-shield" className="h-10 w-10" />}
               title={t("profile.access.none")}
               detail={t("profile.access.noneDetail")}
             />
@@ -436,7 +425,7 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({ onNavigate }) => {
         <UISectionHeader
           title={t("account.label")}
           subtitle={t("profile.account.subtitle")}
-          icon={<UserRound className="h-5 w-5 text-indigo-600 dark:text-indigo-400" />}
+          icon={<UIArtIcon id="menu-profile" className="h-6 w-6" />}
         />
         <dl className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
           {[

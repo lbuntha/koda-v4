@@ -105,7 +105,7 @@ describe("tally and words to practise", () => {
 
   it("tells a parent the same numbers the child saw", () => {
     expect(parentSummary(MARKET, outcomes, quiz)).toBe(
-      "Read “At the Market” (English). Understood 1/2, matched 1/2, spelled 2/3 on the first try. Needs practice: market, mango.",
+      "Read “At the Market” (English). Right on the first try: 1/2 understood, 1/2 matched, 2/3 spelled. Needs practice: market, mango.",
     );
   });
 

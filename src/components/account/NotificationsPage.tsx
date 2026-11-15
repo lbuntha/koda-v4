@@ -1,7 +1,6 @@
 import React, { useCallback, useEffect, useMemo, useState } from "react";
-import { Bell, GraduationCap, Inbox, Megaphone, ShieldCheck, Sparkles } from "lucide-react";
 import { themeSystem } from "../../lib/themeSystem";
-import { UIPageHeader } from "../ui";
+import { UIPageHeader, UIArtIcon } from "../ui";
 import {
   markNotificationsRead,
   notificationHistory,
@@ -10,6 +9,7 @@ import {
 import { openNotification } from "../../lib/push/landing";
 
 import { translate } from "../../lib/i18n";
+import { notifyKindArt } from "./notifyKindArt";
 /**
  * Everything Koda has told this account, with room to read it.
  *
@@ -47,22 +47,10 @@ type Category = "all" | "learning" | "account";
 const categoryOf = (kind: string): Exclude<Category, "all"> =>
   kind.startsWith("learn.") ? "learning" : "account";
 
-const ICONS: Record<string, React.ReactNode> = {
-  "learn.goal_met": <Sparkles className="h-4 w-4 text-violet-500" />,
-  "learn.weekly_summary": <GraduationCap className="h-4 w-4 text-sky-500" />,
-  "learn.practice_reminder": <Bell className="h-4 w-4 text-emerald-500" />,
-  "learn.streak_ending": <Bell className="h-4 w-4 text-rose-500" />,
-  "system.announcement": <Megaphone className="h-4 w-4 text-indigo-500" />,
-};
-
-/** A kind without artwork of its own still gets its category's mark. */
-const iconFor = (kind: string): React.ReactNode =>
-  ICONS[kind] ??
-  (categoryOf(kind) === "learning" ? (
-    <GraduationCap className="h-4 w-4 text-sky-500" />
-  ) : (
-    <ShieldCheck className="h-4 w-4 text-indigo-500" />
-  ));
+/** Same art as the Settings switches, from the one shared map. */
+const iconFor = (kind: string): React.ReactNode => (
+  <UIArtIcon id={notifyKindArt(kind)} className="h-6 w-6" />
+);
 
 /** The day a notification belongs to, as a person would say it. */
 function dayOf(iso: string): string {
@@ -169,7 +157,7 @@ export const NotificationsPage: React.FC = () => {
 
       {groups.length === 0 ? (
         <div className={themeSystem.card("default", `${themeSystem.spacing.card} text-center`)}>
-          <Inbox className="mx-auto h-8 w-8 text-muted" />
+          <UIArtIcon id="menu-notifications" className="mx-auto block h-12 w-12" />
           <p className="mt-3 text-sm text-ink">
             {!loaded
               ? translate("admin.notificationsPage.reading")

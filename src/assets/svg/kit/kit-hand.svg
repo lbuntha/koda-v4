@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+  <title>Hint</title>
+  <circle cx="50" cy="30" r="20" fill="#8B5CF6" />
+  <path fill="#A78BFA" d="M50 10 A20 20 0 0 0 34 42 L42 36 A10 10 0 0 1 50 20 Z" />
+  <rect x="42" y="48" width="16" height="8" rx="3" fill="#6D28D9" />
+  <path fill="#FFFFFF" d="M50 18 C51 25 52 26 59 28 C52 30 51 31 50 38 C49 31 48 30 41 28 C48 26 49 25 50 18 Z" />
+  <path fill="#FBCFB0" d="M10 74 C18 66 30 62 42 64 L60 66 a6 6 0 0 1 0 12 H48 L66 80 L84 70 a7 7 0 0 1 8 11 L70 94 H30 L10 88 Z" />
+  <path fill="#F9B892" d="M10 74 C18 66 30 62 42 64 L48 65 C36 66 24 72 18 80 L10 82 Z" />
+</svg>

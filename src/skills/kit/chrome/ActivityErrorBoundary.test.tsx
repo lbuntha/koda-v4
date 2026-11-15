@@ -43,7 +43,7 @@ describe("ActivityErrorBoundary", () => {
     expect(screen.getByText("That didn't work")).toBeTruthy();
     // The reassurance matters as much as the catch: a child who thinks their
     // work is gone will not want to start again.
-    expect(screen.getByText(/progress is safe/i)).toBeTruthy();
+    expect(screen.getByText(/progress is saved/i)).toBeTruthy();
   });
 
   it("offers a way out, so the message is not a dead end", () => {

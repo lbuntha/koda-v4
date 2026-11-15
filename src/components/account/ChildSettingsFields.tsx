@@ -1,5 +1,4 @@
 import React from "react";
-import { Camera, Clock, Flag, Flame, GraduationCap, Moon, Sparkles } from "lucide-react";
 
 import type {
   AllowedHours,
@@ -13,7 +12,7 @@ import { themeSystem } from "../../lib/themeSystem";
 import { playSound } from "../../utils/audio";
 import { usePersonaRoster } from "../../lib/usePersona";
 import { PersonaPicker } from "./PersonaPicker";
-import { UIToggle } from "../ui";
+import { UIToggle, UIArtIcon } from "../ui";
 import { translate, useT } from "../../lib/i18n";
 
 /**
@@ -248,7 +247,7 @@ export const ChildSettingsFields: React.FC<ChildSettingsFieldsProps> = ({
     <div className="space-y-3">
       <Row
         stacked
-        icon={<Clock className="h-5 w-5" />}
+        icon={<UIArtIcon id="kit-timer" className="h-6 w-6" />}
         tint="text-indigo-500"
         title={t("childSettings.playTime.title")}
         hint={t("childSettings.playTime.hint")}
@@ -284,7 +283,7 @@ export const ChildSettingsFields: React.FC<ChildSettingsFieldsProps> = ({
         */}
       <Row
         stacked
-        icon={<Moon className="h-5 w-5" />}
+        icon={<UIArtIcon id="kit-hours" className="h-6 w-6" />}
         tint="text-purple-500"
         title={t("childSettings.hours.title")}
         hint={t("childSettings.hours.hint")}
@@ -356,7 +355,7 @@ export const ChildSettingsFields: React.FC<ChildSettingsFieldsProps> = ({
 
       <Row
         stacked
-        icon={<Flag className="h-5 w-5" />}
+        icon={<UIArtIcon id="kit-flag" className="h-6 w-6" />}
         tint="text-emerald-500"
         title={t("childSettings.start.title")}
         hint={t(`childSettings.start.hint.${v}`)}
@@ -405,7 +404,7 @@ export const ChildSettingsFields: React.FC<ChildSettingsFieldsProps> = ({
       {roster.length > 1 && (
         <Row
           stacked
-          icon={<GraduationCap className="h-5 w-5" />}
+          icon={<UIArtIcon id="kit-teacher" className="h-6 w-6" />}
           tint="text-indigo-500"
           title={t("childSettings.teacher.title")}
           hint={t(`childSettings.teacher.hint.${v}`)}
@@ -419,8 +418,8 @@ export const ChildSettingsFields: React.FC<ChildSettingsFieldsProps> = ({
       )}
 
       <Row
-        icon={<Sparkles className="h-5 w-5" />}
-        tint="text-amber-500"
+        icon={<UIArtIcon id="menu-koda" className="h-6 w-6" />}
+        tint="text-violet-500"
         title={t("childSettings.help.title")}
         hint={planHasAi ? t("childSettings.help.hint") : t("childSettings.help.notInPlan")}
       >
@@ -437,7 +436,7 @@ export const ChildSettingsFields: React.FC<ChildSettingsFieldsProps> = ({
       </Row>
 
       <Row
-        icon={<Camera className="h-5 w-5" />}
+        icon={<UIArtIcon id="kit-camera" className="h-6 w-6" />}
         tint="text-indigo-500"
         title={t("childSettings.photoPages.title")}
         hint={planHasAi ? t("childSettings.photoPages.hint") : t("childSettings.photoPages.notInPlan")}
@@ -454,7 +453,7 @@ export const ChildSettingsFields: React.FC<ChildSettingsFieldsProps> = ({
 
       <Row
         stacked
-        icon={<Flame className="h-5 w-5" />}
+        icon={<UIArtIcon id="streak" className="h-6 w-6" />}
         tint="text-orange-500"
         title={t("praise.streak.tag")}
         hint={t("childSettings.cadence.hint")}

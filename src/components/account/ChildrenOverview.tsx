@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
-import { CheckCircle2, Flame, Hand, Plus, UserRound } from "lucide-react";
+import { CheckCircle2, Flame, Plus } from "lucide-react";
 import { themeSystem } from "../../lib/themeSystem";
-import { UIAvatar, UIBanner, UIButton } from "../ui";
+import { UIAvatar, UIBanner, UIButton, UIArtIcon } from "../ui";
 import { usePermissions, useSession } from "../../lib/sync";
 import {
   cachedChildrenOverview,
@@ -123,7 +123,7 @@ export const ChildrenOverview: React.FC<{
   if (data.overview.children.length === 0) {
     return (
       <section aria-labelledby="your-children" className={themeSystem.card("default", "p-6 text-center")}>
-        <UserRound className="mx-auto h-10 w-10 text-indigo-500" />
+        <UIArtIcon id="menu-children" className="mx-auto block h-14 w-14" />
         <h2 id="your-children" className="mt-3 text-lg font-semibold text-ink">
           {t("overview.addFirst")}
         </h2>
@@ -156,7 +156,7 @@ export const ChildrenOverview: React.FC<{
       {attention && (
         <UIBanner
           tone="primary"
-          icon={<Hand />}
+          icon={<UIArtIcon id="kit-hand" className="h-6 w-6" />}
           title={attention.title}
           action={
             onOpenChild ? { label: t("overview.openReport"), onClick: () => onOpenChild(attention.learnerId) } : undefined

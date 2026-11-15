@@ -61,7 +61,7 @@ describe("creating an account", () => {
   it("creates a learner's own account, with no family to name", async () => {
     render(<AccountForm />);
     fireEvent.click(screen.getByRole("tab", { name: "Create account" }));
-    fireEvent.click(screen.getByRole("tab", { name: "For myself" }));
+    fireEvent.click(screen.getByRole("radio", { name: /For myself/ }));
 
     expect(screen.queryByLabelText(/Family or group name/)).toBeNull();
     fill("Email", "sam@example.com");

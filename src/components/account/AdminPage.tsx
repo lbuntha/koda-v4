@@ -252,7 +252,7 @@ const SystemPanel: React.FC<{
               }
               icon={
                 show === "secrets" ? (
-                  <KeyRound className="w-5 h-5 text-amber-500" />
+                  <KeyRound className="w-5 h-5 text-violet-500" />
                 ) : group === "Artwork" ? (
                   <Sliders className="w-5 h-5 text-indigo-600 dark:text-indigo-400" />
                 ) : (
@@ -289,7 +289,7 @@ const SystemPanel: React.FC<{
                     className="bg-surface-muted border border-line rounded-2xl p-4 space-y-3"
                   >
                     <div className="flex items-center gap-2 flex-wrap">
-                      <KeyRound className="w-4 h-4 text-amber-500 shrink-0" />
+                      <KeyRound className="w-4 h-4 text-violet-500 shrink-0" />
                       <h4 className="text-sm font-bold text-ink font-mono">{setting.label}</h4>
                       {setting.isSet ? (
                         <UIBadge variant="success">{translate("admin.adminPage.setHint", { hint: setting.hint ?? "" })}</UIBadge>

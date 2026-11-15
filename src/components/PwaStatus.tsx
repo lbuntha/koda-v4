@@ -102,7 +102,7 @@ export const PwaStatus: React.FC = () => {
     >
       {!online && (
         <div
-          className={`flex items-center gap-2.5 rounded-2xl border-2 border-amber-800/30 dark:border-amber-500/40 bg-amber-50 dark:bg-amber-950/90 shadow-sm transition-all ${
+          className={`flex items-center gap-2.5 rounded-2xl border-2 border-sky-800/30 dark:border-sky-500/40 bg-sky-50 dark:bg-sky-950/90 shadow-sm transition-all ${
             offlineCollapsed ? "p-2.5" : "px-4 py-2.5"
           }`}
           // The full sentence stays available to a screen reader and on hover
@@ -110,9 +110,9 @@ export const PwaStatus: React.FC = () => {
           title={translate("app.pwaStatus.noInternetYouCanStillPlay")}
           aria-label={translate("app.pwaStatus.noInternetYouCanStillPlay")}
         >
-          <CloudOff className="w-4 h-4 text-amber-800 dark:text-amber-400 shrink-0" />
+          <CloudOff className="w-4 h-4 text-sky-800 dark:text-sky-400 shrink-0" />
           {!offlineCollapsed && (
-            <p className="text-xs font-bold text-slate-800 dark:text-amber-100 whitespace-nowrap">
+            <p className="text-xs font-bold text-slate-800 dark:text-sky-100 whitespace-nowrap">
               {translate("app.pwaStatus.noInternetYouCanStillPlay")}
             </p>
           )}

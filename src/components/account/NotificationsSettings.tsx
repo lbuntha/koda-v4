@@ -1,7 +1,8 @@
 import React, { useCallback, useEffect, useState } from "react";
 import { Bell, BellOff, Mail, Smartphone } from "lucide-react";
 import { themeSystem } from "../../lib/themeSystem";
-import { UIToggle } from "../ui";
+import { UIArtIcon, UIToggle } from "../ui";
+import { notifyKindArt } from "./notifyKindArt";
 import {
   chooseNotification,
   disableNotifications,
@@ -294,7 +295,9 @@ export const NotificationsSettings: React.FC = () => {
           (kinds ?? []).map((kind) => (
             <div key={kind.id} className={l.row}>
               <div className="flex items-center gap-3 min-w-0">
-                <span className={l.rowIcon} aria-hidden />
+                <span className={l.rowIcon} aria-hidden>
+                <UIArtIcon id={notifyKindArt(kind.id)} className="h-6 w-6" />
+              </span>
                 <h4 className={l.rowTitle}>{kind.label}</h4>
               </div>
               <UIToggle
@@ -448,7 +451,9 @@ export const NotificationsSettings: React.FC = () => {
                 email.kinds.map((kind) => (
                   <div key={kind.id} className={l.row}>
                     <div className="flex items-center gap-3 min-w-0">
-                      <span className={l.rowIcon} aria-hidden />
+                      <span className={l.rowIcon} aria-hidden>
+                <UIArtIcon id={notifyKindArt(kind.id)} className="h-6 w-6" />
+              </span>
                       <h4 className={l.rowTitle}>{kind.label}</h4>
                     </div>
                     <UIToggle

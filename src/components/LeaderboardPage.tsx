@@ -1,18 +1,5 @@
 import React, { useCallback, useEffect, useMemo, useState } from "react";
-import {
-  Check,
-  ChevronLeft,
-  Copy,
-  Globe2,
-  Link2,
-  LockKeyhole,
-  Plus,
-  RefreshCw,
-  Search,
-  ShieldCheck,
-  UserRoundPlus,
-  Users,
-} from "lucide-react";
+import { Check, ChevronLeft, Copy, Globe2, Link2, LockKeyhole, Plus, RefreshCw, Search, ShieldCheck, UserRoundPlus, Users } from "lucide-react";
 
 import { SvgAsset } from "../assets/svg";
 import { artAvatarId, artAvatarSeed } from "../lib/avatar";
@@ -40,6 +27,7 @@ import {
   UISpinner,
   UISearchInput,
   UIProgressBar,
+  UIArtIcon,
 } from "./ui";
 
 import { currentLanguage, translate } from "../lib/i18n";
@@ -75,7 +63,7 @@ const friendlyWeek = (start: string, end: string): string => {
 };
 
 const rankTone = (rank: number): string => {
-  if (rank === 1) return "bg-amber-100 text-amber-800 border-amber-300";
+  if (rank === 1) return "bg-violet-100 text-violet-800 border-violet-300 dark:bg-violet-950/50 dark:text-violet-200 dark:border-violet-800";
   if (rank === 2) return "bg-slate-100 text-slate-700 border-slate-300";
   if (rank === 3) return "bg-orange-100 text-orange-800 border-orange-300";
   return "bg-indigo-50 text-indigo-700 border-indigo-200";
@@ -428,7 +416,7 @@ export const LeaderboardPage: React.FC = () => {
                     <UIButton className="w-full rail:w-auto" variant="outline" size="md" icon={<Globe2 />} onClick={() => { setConsentVisibility("public"); setConsentOpen(true); }}>{translate("leaderboard.joinPublic")}</UIButton>
                   </div>
                 ) : (
-                  <p className="mt-6 rounded-2xl bg-amber-50 p-4 text-sm font-bold text-amber-900 dark:bg-amber-950/40 dark:text-amber-200">
+                  <p className="mt-6 rounded-2xl bg-violet-50 p-4 text-sm font-bold text-violet-900 dark:bg-violet-950/40 dark:text-violet-200">
                     {translate("leaderboard.askAParentOrAccountOwner")}
                   </p>
                 )}
@@ -443,7 +431,7 @@ export const LeaderboardPage: React.FC = () => {
                         ? participating ? translate("leaderboard.includedPublicly") : translate("leaderboard.viewingOnly")
                         : translate("leaderboard.sharingWithSharedcountValue", { sharedCount: sharedCount, value: sharedCount === 1 ? translate("leaderboard.buddy") : translate("leaderboard.buddies2") })}
                     </UIBadge>
-                    {boardScope === "public" ? <Globe2 className="h-8 w-8 text-violet-500" aria-hidden="true" /> : <SvgAsset id="trophy" size={36} />}
+                    {boardScope === "public" ? <UIArtIcon id="kit-globe" className="h-9 w-9" /> : <SvgAsset id="trophy" size={36} />}
                   </div>
                   <div className="mt-4 flex items-end justify-between gap-3">
                     <div>
@@ -540,11 +528,11 @@ export const LeaderboardPage: React.FC = () => {
                 </div>
               </div>
             )}
-            <UICard className="border-orange-200 p-4 dark:border-orange-900/70 rail:p-5">
+            <UICard className="p-4 rail:p-5">
               <UISectionHeader
                 title={<span id={isCompact ? undefined : "manage-buddies-title"}>{isCompact ? translate("leaderboard.buddyCode") : translate("leaderboard.manageBuddies")}</span>}
                 subtitle={isCompact ? undefined : selectedLearner ? translate("leaderboard.connectionsForDisplayname", { displayName: selectedLearner.displayName }) : translate("leaderboard.privateConnections")}
-                icon={<UserRoundPlus className="h-5 w-5 text-orange-500" />}
+                icon={<UIArtIcon id="kit-mail" className="h-6 w-6" />}
               />
               {canManage ? (
                 <div className="mt-4 space-y-4">
@@ -583,7 +571,7 @@ export const LeaderboardPage: React.FC = () => {
             </UICard>
 
             <UICard className="p-5">
-              <UISectionHeader title={translate("leaderboard.yourBuddies")} subtitle={translate("leaderboard.lengthConnected", { length: buddies.length })} icon={<Users className="h-5 w-5 text-cyan-600" />} />
+              <UISectionHeader title={translate("leaderboard.yourBuddies")} subtitle={translate("leaderboard.lengthConnected", { length: buddies.length })} icon={<UIArtIcon id="menu-users" className="h-6 w-6" />} />
               {buddies.length > 5 && (
                 <UISearchInput
                   label={translate("leaderboard.searchBuddies")}
@@ -647,7 +635,7 @@ export const LeaderboardPage: React.FC = () => {
               onClick={() => { setConsentVisibility("buddies"); setConfirmed(false); }}
               className={`rounded-2xl border-2 p-4 text-left ${consentVisibility === "buddies" ? "border-indigo-500 bg-indigo-50 dark:bg-indigo-950/40" : "border-slate-200 dark:border-slate-700"}`}
             >
-              <Users className="h-5 w-5 text-cyan-600" />
+              <UIArtIcon id="menu-users" className="h-6 w-6" />
               <span className="mt-2 block font-black text-slate-900 dark:text-white">{translate("leaderboard.buddiesOnly")}</span>
               <span className="mt-1 block text-xs leading-5 text-slate-500">{translate("leaderboard.onlyDirectAcceptedBuddies")}</span>
             </button>
@@ -658,7 +646,7 @@ export const LeaderboardPage: React.FC = () => {
               onClick={() => { setConsentVisibility("public"); setConfirmed(false); }}
               className={`rounded-2xl border-2 p-4 text-left ${consentVisibility === "public" ? "border-violet-500 bg-violet-50 dark:bg-violet-950/40" : "border-slate-200 dark:border-slate-700"}`}
             >
-              <Globe2 className="h-5 w-5 text-violet-600" />
+              <UIArtIcon id="kit-globe" className="h-6 w-6" />
               <span className="mt-2 block font-black text-slate-900 dark:text-white">{translate("leaderboard.public")}</span>
               <span className="mt-1 block text-xs leading-5 text-slate-500">{translate("leaderboard.anySignedInKodaLearner")}</span>
             </button>

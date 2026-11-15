@@ -422,7 +422,7 @@ export const RolesPage: React.FC = () => {
                                   {describe(permission).label}
                                 </span>
                                 {held !== fromRole && (
-                                  <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-amber-700 dark:text-amber-400">
+                                  <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-violet-700 dark:text-violet-400">
                                     {held ? translate("admin.rolesPage.added") : translate("admin.rolesPage.removed")}
                                   </span>
                                 )}

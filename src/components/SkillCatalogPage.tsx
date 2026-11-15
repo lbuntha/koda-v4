@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useState } from "react";
-import { BookOpen, CheckCircle2, RefreshCw } from "lucide-react";
+import { BookOpen, CheckCircle2, RefreshCw, Search } from "lucide-react";
 import { filterSkillCatalog, learnOrder } from "../lib/skillCatalog";
 import { useSkillCatalog } from "../lib/useSkillCatalog";
 import { useSkillRegistrations } from "../lib/skillRegistrationApi";
@@ -14,11 +14,14 @@ import { refreshSystem } from "../lib/sync/system";
 import { useT } from "../lib/i18n";
 import { RebusEntry } from "../rebus/ui/RebusEntry";
 import { useSystem } from "../lib/sync/useSystem";
+import { StarterPicks } from "./learn/StarterPicks";
 
 export interface SkillCatalogPageProps {
   activeLevelNumber: number;
   completedLevels: Record<number, number>;
   onSelectSkill(skillId: string): void;
+  /** Starts a lesson directly — what a first-day "Start" pick does. */
+  onStartLesson?(levelNumber: number): void;
   /** Opens Rebus Rush, the picture-puzzle game that sits on this shelf. */
   onOpenRebus?(): void;
   /** Shown inside Learn, which carries the page's title: keep only the admin badge. */
@@ -33,7 +36,19 @@ const PAGE_SIZE = 12;
  * Wider columns than a square-ish card would need: the artwork is 16:9, and at
  * five columns a landscape picture is too small to read the title inside it.
  */
-const CARD_GRID = "grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4";
+/* Three across up to a wide monitor: at four, a laptop showed the pictures and
+   the titles but cut every card's button off below the fold. */
+const CARD_GRID = "grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4 gap-4";
+/**
+ * Below this many skills the search box stays an icon.
+ *
+ * A full-width box above seven cards costs a row of the first screen and
+ * finds nothing a glance would not — and a six-year-old does not type. It
+ * opens on a tap, and it is always open on a library big enough to need it.
+ */
+const SEARCH_FROM = 12;
+/** The chip for skills nobody has filed under a subject yet. */
+const UNFILED = "__unfiled";
 /** A phone gets rows; a poster grid needs width to be a grid at all. */
 const ROW_LIST = "space-y-2.5";
 
@@ -41,6 +56,7 @@ export const SkillCatalogPage: React.FC<SkillCatalogPageProps> = ({
   activeLevelNumber,
   completedLevels,
   onSelectSkill,
+  onStartLesson,
   onOpenRebus,
   embedded = false,
 }) => {
@@ -51,6 +67,7 @@ export const SkillCatalogPage: React.FC<SkillCatalogPageProps> = ({
   const { registeredIds, register } = useSkillRegistrations();
   const [query, setQuery] = useState("");
   const [category, setCategory] = useState("all");
+  const [searchOpen, setSearchOpen] = useState(false);
   const [visibleLimit, setVisibleLimit] = useState(PAGE_SIZE);
   const [registeringId, setRegisteringId] = useState<string | null>(null);
   const [registrationError, setRegistrationError] = useState<string | null>(null);
@@ -64,13 +81,20 @@ export const SkillCatalogPage: React.FC<SkillCatalogPageProps> = ({
     [subjects, skills, viewer.showAllSkills],
   );
   useEffect(() => {
-    if (category !== "all" && !categories.some((subject) => subject.id === category)) {
+    if (category !== "all" && category !== UNFILED && !categories.some((subject) => subject.id === category)) {
       setCategory("all");
       setVisibleLimit(PAGE_SIZE);
     }
   }, [categories, category]);
   const visible = useMemo(
-    () => filterSkillCatalog(skills, query, "all").filter((skill) => category === "all" || subjectForSkill(subjects, skill.id)?.id === category),
+    () =>
+      filterSkillCatalog(skills, query, "all").filter((skill) =>
+        category === "all"
+          ? true
+          : category === UNFILED
+            ? !subjectForSkill(subjects, skill.id)
+            : subjectForSkill(subjects, skill.id)?.id === category,
+      ),
     [category, query, skills, subjects],
   );
   const resume =
@@ -81,7 +105,12 @@ export const SkillCatalogPage: React.FC<SkillCatalogPageProps> = ({
         skill.lessons.some((lesson) => lesson.levelNumber === activeLevelNumber),
     ) ?? skills.find((skill) => skill.completedLessons > 0 && skill.progressPercent < 100);
   const compact = useIsCompact();
+  /* Skills with no subject still need a chip, or the chips' counts stop
+     adding up to "For you" and those skills can only be found unfiltered. */
+  const unfiledCount = skills.filter((skill) => !subjectForSkill(subjects, skill.id)).length;
+  const showSearch = searchOpen || Boolean(query) || skills.length > SEARCH_FROM;
   const unfiltered = !query && category === "all";
+  const firstDay = unfiltered && !viewer.showAllSkills && registeredIds.size === 0;
   const showResume = unfiltered && Boolean(resume);
 
   /*
@@ -183,7 +212,8 @@ export const SkillCatalogPage: React.FC<SkillCatalogPageProps> = ({
   }
 
   return (
-    <div className={themeSystem.spacing.section}>
+    /* `pb-24`: the last row of cards scrolls clear of the floating Ask Koda button. */
+    <div className={`${themeSystem.spacing.section} pb-24`}>
       {/* The title goes on a phone — the toolbar says "Learn" already. The badge
           stays: it is the only thing here explaining why unreleased skills are
           on screen. */}
@@ -206,20 +236,38 @@ export const SkillCatalogPage: React.FC<SkillCatalogPageProps> = ({
       />
       )}
 
+      {/* The first day, before anything is added: three skills that start in
+          one tap lead the page, ahead of a shelf of "Add" buttons. */}
+      {firstDay && onStartLesson && (
+        <StarterPicks
+          skills={skills}
+          viewer={viewer}
+          completedLevels={completedLevels}
+          onStartLesson={onStartLesson}
+        />
+      )}
+
       {onOpenRebus && system.allows("rebus.enabled") && <RebusEntry onOpen={onOpenRebus} />}
 
-      <UISearchInput
-        label={t("catalog.search")}
-        placeholder={t("catalog.searchPlaceholder")}
-        value={query}
-        onChange={(event) => {
-          setQuery(event.target.value);
-          setVisibleLimit(PAGE_SIZE);
-        }}
-      />
+      {showSearch && (
+        <UISearchInput
+          label={t("catalog.search")}
+          placeholder={t("catalog.searchPlaceholder")}
+          value={query}
+          autoFocus={searchOpen && !query}
+          onChange={(event) => {
+            setQuery(event.target.value);
+            setVisibleLimit(PAGE_SIZE);
+          }}
+        />
+      )}
 
-      <div className="flex gap-2 overflow-x-auto pb-1" aria-label={t("catalog.subjects")}>
-        {[{ id: "all", name: t("catalog.forYou") }, ...categories].map(({ id: value, name }) => (
+      <div className="flex items-center gap-2 overflow-x-auto pb-1" aria-label={t("catalog.subjects")}>
+        {[
+          { id: "all", name: t("catalog.forYou") },
+          ...categories,
+          ...(unfiledCount ? [{ id: UNFILED, name: t("catalog.unfiled") }] : []),
+        ].map(({ id: value, name }) => (
           <button
             key={value}
             type="button"
@@ -228,15 +276,33 @@ export const SkillCatalogPage: React.FC<SkillCatalogPageProps> = ({
               setVisibleLimit(PAGE_SIZE);
             }}
             aria-pressed={category === value}
-            className={`shrink-0 rounded-full px-3 py-1.5 text-[11px] font-mono font-black border-2 transition ${
+            className={`shrink-0 rounded-full px-4 py-2 text-sm font-bold border-2 transition ${
               category === value
                 ? "bg-indigo-600 border-indigo-700 text-white"
                 : "bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 text-muted hover:border-indigo-300"
             }`}
           >
-            {name} <span className="ml-1 opacity-70">{value === "all" ? skills.length : skills.filter((skill) => skill.subjectId === value).length}</span>
+            {name}{" "}
+            <span className="ml-1 opacity-70">
+              {value === "all"
+                ? skills.length
+                : value === UNFILED
+                  ? unfiledCount
+                  : skills.filter((skill) => skill.subjectId === value).length}
+            </span>
           </button>
         ))}
+        {!showSearch && (
+          <button
+            type="button"
+            onClick={() => setSearchOpen(true)}
+            aria-label={t("catalog.search")}
+            title={t("catalog.search")}
+            className="ml-auto grid h-10 w-10 shrink-0 place-items-center rounded-full border-2 border-slate-200 bg-white text-muted transition hover:border-indigo-300 hover:text-indigo-600 dark:border-slate-800 dark:bg-slate-900"
+          >
+            <Search className="h-4 w-4" aria-hidden="true" />
+          </button>
+        )}
       </div>
 
       {registrationError && <p className={themeSystem.flash("error")}>{registrationError}</p>}
@@ -278,11 +344,16 @@ export const SkillCatalogPage: React.FC<SkillCatalogPageProps> = ({
         <div className="mb-3 flex items-end justify-between gap-3">
           <div>
             <h2 className="font-black text-lg text-ink">
-              {!unfiltered ? t("catalog.searchResults") : shownAbove.size ? t("catalog.moreSkills") : t("learn.allSkills")}
+              {query
+                ? t("catalog.searchResults")
+                : category !== "all"
+                  ? [...categories, { id: UNFILED, name: t("catalog.unfiled") }].find((c) => c.id === category)?.name
+                  : shownAbove.size || firstDay
+                    ? t("catalog.moreSkills")
+                    : t("catalog.forYou")}
             </h2>
-            <p className="text-xs text-muted">
-              {t("catalog.skills", { count: browse.length })}
-            </p>
+            {/* The count only where no chip already says it: a search. */}
+            {query && <p className="text-xs text-muted">{t("catalog.skills", { count: browse.length })}</p>}
           </div>
           {skills.every((skill) => skill.progressPercent === 100) && (
             <span className="inline-flex items-center gap-1.5 text-xs font-bold text-emerald-600">

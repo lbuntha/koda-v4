@@ -37,7 +37,7 @@ export const DailyGoalField: React.FC<{
   return (
     <div className="flex items-center justify-between gap-4 rounded-2xl border border-line bg-surface-muted p-4">
       <div className="flex min-w-0 items-center gap-3">
-        <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-line bg-surface text-amber-500">
+        <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-line bg-surface text-violet-500">
           <Target className="h-5 w-5" />
         </span>
         <div className="min-w-0">
