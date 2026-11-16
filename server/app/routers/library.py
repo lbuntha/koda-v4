@@ -15,7 +15,7 @@ from __future__ import annotations
 import base64
 import binascii
 import re
-from typing import Annotated, Any
+from typing import Annotated, Any, Literal
 
 from fastapi import APIRouter, Depends, Query, Response
 from pydantic import Field
@@ -491,11 +491,38 @@ async def get_audio(clip_id: str, db: Db, _: CanRead) -> Response:
 class ImageWrite(Model):
     mime: str
     data: str  # base64
+    # Set by the studio when the picture was made with AI, so it can be found and
+    # used again in any book — not only the one it was first made for.
+    source: Literal["ai"] | None = None
+    prompt: str | None = Field(default=None, max_length=2000)
+
+
+class ImageListed(Model):
+    id: str
+    prompt: str = ""
+    bytes: int = 0
+
+
+class ImageList(Model):
+    images: list[ImageListed]
 
 
 @router.post("/images")
 async def upload_image(body: ImageWrite, db: Db, p: CanWrite) -> AudioSaved:
     return await store_image(body, db, p.subject_id)
+
+
+@router.get("/images")
+async def list_images(
+    db: Db,
+    _: CanWrite,
+    source: Literal["ai", "all"] = "ai",
+    q: Annotated[str, Query(max_length=200)] = "",
+    limit: Annotated[int, Query(ge=1, le=200)] = 60,
+) -> ImageList:
+    """Pictures made with AI in any book (or every stored photo), newest first, for the studio to offer again."""
+    rows = await library_repo.list_images(db, source=source, query=q.strip(), limit=limit)
+    return ImageList(images=[ImageListed(id=r["id"], prompt=r.get("prompt") or "", bytes=r.get("bytes") or 0) for r in rows])
 
 
 async def store_image(body: ImageWrite, db: Any, owner: str) -> AudioSaved:
@@ -513,7 +540,7 @@ async def store_image(body: ImageWrite, db: Any, owner: str) -> AudioSaved:
         raise AppError(413, "image_too_large", "A photo may be at most 3 MB.")
     if not IMAGE_MAGIC[mime](data):
         raise AppError(415, "unsupported_image", "That file is not the kind of photo it says it is.")
-    image_id = await library_repo.put_image(db, data, mime, owner)
+    image_id = await library_repo.put_image(db, data, mime, owner, source=body.source, prompt=(body.prompt or "").strip() or None)
     return AudioSaved(id=image_id, bytes=len(data))
 
 

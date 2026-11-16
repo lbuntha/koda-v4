@@ -292,14 +292,36 @@ async def resolve_report(db: AsyncIOMotorDatabase, report_id: str, by: str | Non
 # cannot change under it.
 
 
-async def put_image(db: AsyncIOMotorDatabase, data: bytes, mime: str, by: str | None) -> str:
+async def put_image(
+    db: AsyncIOMotorDatabase, data: bytes, mime: str, by: str | None, *, source: str | None = None, prompt: str | None = None
+) -> str:
+    """Keep a photo. A made-with-AI one also keeps what it was asked for, so it can be found again.
+
+    The label is `$set`, not `$setOnInsert`: the same bytes uploaded first as a
+    plain photo and later marked as made by AI still show up among AI pictures.
+    """
     image_id = hashlib.sha256(data).hexdigest()
-    await db.library_images.update_one(
-        {"id": image_id},
-        {"$setOnInsert": {"id": image_id, "mime": mime, "data": Binary(data), "bytes": len(data), "createdAt": now(), "createdBy": by}},
-        upsert=True,
-    )
+    update: dict[str, Any] = {
+        "$setOnInsert": {"id": image_id, "mime": mime, "data": Binary(data), "bytes": len(data), "createdAt": now(), "createdBy": by}
+    }
+    if source:
+        update["$set"] = {"source": source, "prompt": prompt or "", "madeAt": now()}
+    await db.library_images.update_one({"id": image_id}, update, upsert=True)
     return image_id
+
+
+async def list_images(db: AsyncIOMotorDatabase, *, source: str, query: str = "", limit: int = 60) -> list[dict[str, Any]]:
+    """Photos newest first, without their bytes. `query` matches the description.
+
+    `source="ai"` is the pictures made with AI; `"all"` is every stored photo,
+    which is how a picture made before pictures were labelled is found again.
+    """
+    match: dict[str, Any] = {} if source == "all" else {"source": source}
+    if query:
+        match["prompt"] = {"$regex": re.escape(query), "$options": "i"}
+    order = "createdAt" if source == "all" else "madeAt"
+    cursor = db.library_images.find(match, {"_id": 0, "id": 1, "prompt": 1, "bytes": 1}).sort(order, -1).limit(limit)
+    return await cursor.to_list(length=limit)
 
 
 async def get_image(db: AsyncIOMotorDatabase, image_id: str) -> dict[str, Any] | None:

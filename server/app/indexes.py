@@ -205,6 +205,7 @@ INDEXES: dict[str, list[IndexModel]] = {
     ],
     "library_images": [
         IndexModel([("id", ASCENDING)], unique=True, name="library_image_id_unique"),
+        IndexModel([("source", ASCENDING), ("madeAt", DESCENDING)], name="library_images_by_source", sparse=True),
     ],
     "library_reports": [
         IndexModel([("resolvedAt", ASCENDING), ("bookId", ASCENDING)], name="library_report_open_by_book"),

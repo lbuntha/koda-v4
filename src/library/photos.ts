@@ -253,7 +253,13 @@ async function smallestOf(canvas: HTMLCanvasElement): Promise<Blob> {
  * picture key. `route` is who is asking: Trace creators upload through
  * `/trace/studio/images`, into the same store.
  */
-export async function uploadPhoto(file: Blob, route = "library/images", longSide = LONG_SIDE): Promise<string> {
+/** What a made-with-AI picture is labelled with, so the studio can offer it again in any book. */
+export interface AiLabel {
+  source: "ai";
+  prompt: string;
+}
+
+export async function uploadPhoto(file: Blob, route = "library/images", longSide = LONG_SIDE, label?: AiLabel): Promise<string> {
   let blob: Blob;
   try {
     blob = await shrinkPhoto(file, longSide);
@@ -267,11 +273,52 @@ export async function uploadPhoto(file: Blob, route = "library/images", longSide
   const res = await fetch(`${API_BASE}/${route}`, {
     method: "POST",
     headers: { "Content-Type": "application/json", ...(token ? { Authorization: `Bearer ${token}` } : {}) },
-    body: JSON.stringify({ mime: blob.type || "image/jpeg", data: btoa(bin) }),
+    body: JSON.stringify({ mime: blob.type || "image/jpeg", data: btoa(bin), ...(label ? { source: label.source, prompt: label.prompt.slice(0, 2000) } : {}) }),
   });
   const body = (await res.json().catch(() => null)) as { id?: string; error?: { message?: string } } | null;
   if (!res.ok || !body?.id) throw new Error(body?.error?.message ?? translate("studio.picture.uploadFailed"));
   urls.set(body.id, URL.createObjectURL(blob));
   await toCache(body.id, blob);
   return PHOTO_PREFIX + body.id;
+}
+
+/** A picture made with AI, kept on the server: its book key and what it was asked for. */
+export interface AiPicture {
+  key: string;
+  prompt: string;
+}
+
+/** Keep a picture made with AI, labelled with its description, and return its book key. */
+export const uploadAiPicture = (picture: Blob, prompt: string): Promise<string> =>
+  uploadPhoto(picture, "library/images", LONG_SIDE, { source: "ai", prompt });
+
+const LIST_TIMEOUT_MS = 8_000;
+
+/**
+ * Pictures made with AI in any book, newest first, matched against their
+ * description. `every` widens it to every stored photo — the only way to find a
+ * picture made before pictures were labelled. Null when the server cannot be reached in time — the studio says
+ * so rather than showing an empty shelf as if nothing had ever been made.
+ */
+export async function listAiPictures(query = "", limit = 60, every = false): Promise<AiPicture[] | null> {
+  if (offline()) return null;
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), LIST_TIMEOUT_MS);
+  try {
+    const token = await accessToken();
+    const params = new URLSearchParams({ source: every ? "all" : "ai", limit: String(limit) });
+    if (query.trim()) params.set("q", query.trim());
+    const res = await fetch(`${API_BASE}/library/images?${params}`, {
+      headers: token ? { Authorization: `Bearer ${token}` } : {},
+      signal: controller.signal,
+    });
+    if (!res.ok) return null;
+    const body = (await res.json().catch(() => null)) as { images?: { id: string; prompt?: string }[] } | null;
+    if (!body?.images) return null;
+    return body.images.map((i) => ({ key: PHOTO_PREFIX + i.id, prompt: i.prompt ?? "" }));
+  } catch {
+    return null;
+  } finally {
+    clearTimeout(timer);
+  }
 }

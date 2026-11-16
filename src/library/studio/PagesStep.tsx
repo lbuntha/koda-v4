@@ -2,7 +2,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { AlertCircle, Check, ChevronDown, ImageOff, Loader2, Merge, RotateCcw, Scissors, Settings2, Sparkles, Square } from "lucide-react";
 import { hasOwnPages, joinPageToPrevious, layoutBook, pagePicture, pageText, withAutomaticPages, withPageBreak, withPageChoice, withPagePicture } from "../bookLayout";
 import { type PageTextAlign, type Passage } from "../data/passage";
-import { isPhoto, photosOf, uploadPhoto } from "../photos";
+import { isPhoto, photosOf, uploadAiPicture } from "../photos";
 import { core } from "../data/text";
 import { pictureFor } from "../draft";
 import { Picture, PICTURE_KEYS } from "../Picture";
@@ -330,7 +330,7 @@ function useBatch(draft: Draft, onEdit: (d: Draft) => void) {
         if (o.improve) prompt = await improvePicturePrompt(prompt, { provider: o.provider, mode: "image", kind, subjectOnly: false, cambodia: o.cambodia });
         else if (o.cambodia) prompt += " Show it as it looks in Cambodia.";
         const picture = await cropToShape(await generateBookImage(prompt, kind, o.provider, o.style), kind);
-        const key = await uploadPhoto(picture);
+        const key = await uploadAiPicture(picture, prompt);
         if (!live.current) return;
         place(slot, key);
         mark(slot, "done");
