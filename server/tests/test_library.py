@@ -308,7 +308,8 @@ async def test_ai_pictures_are_listed_newest_first_and_found_by_description(clie
     first = PNG + b"\x01"
     second = PNG + b"\x02"
     for data, prompt in ((first, "A mango tree"), (second, "A school in Cambodia")):
-        up = await client.post("/library/images", json={"mime": "image/png", "data": base64.b64encode(data).decode(), "source": "ai", "prompt": prompt}, headers=dev)
+        body = {"mime": "image/png", "data": base64.b64encode(data).decode(), "source": "ai", "prompt": prompt}
+        up = await client.post("/library/images", json=body, headers=dev)
         assert up.status_code == 200, up.text
 
     listed = (await client.get("/library/images", headers=dev)).json()["images"]
@@ -318,11 +319,13 @@ async def test_ai_pictures_are_listed_newest_first_and_found_by_description(clie
     assert [i["prompt"] for i in found] == ["A mango tree"]
 
     # A plain photo later made again by AI is labelled too.
-    await client.post("/library/images", json={"mime": "image/png", "data": base64.b64encode(PNG).decode(), "source": "ai", "prompt": "Blank"}, headers=dev)
+    blank = {"mime": "image/png", "data": base64.b64encode(PNG).decode()}
+    await client.post("/library/images", json={**blank, "source": "ai", "prompt": "Blank"}, headers=dev)
     assert len((await client.get("/library/images", headers=dev)).json()["images"]) == 3
     every = (await client.get("/library/images", params={"source": "all"}, headers=dev)).json()["images"]
     assert len(every) == 3
-    assert (await client.post("/library/images", json={"mime": "image/png", "data": base64.b64encode(PNG).decode(), "source": "other"}, headers=dev)).status_code in (400, 422)
+    refused = await client.post("/library/images", json={**blank, "source": "other"}, headers=dev)
+    assert refused.status_code in (400, 422)
 
 
 async def test_only_real_photos_are_accepted(client, db):
