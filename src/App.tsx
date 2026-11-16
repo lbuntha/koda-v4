@@ -92,6 +92,7 @@ import { themeSystem } from "./lib/themeSystem";
 import { listSvgAssets } from "./lib/svgAssetsApi";
 import { refreshSkillRegistry, useSkillRegistryVersion } from "./lib/skillRegistryApi";
 import { refreshMaintenanceVersions } from "./lib/maintenanceReset";
+import { legalKindOf } from "./components/legal/legalText";
 
 import {
   AdminPage,
@@ -99,6 +100,7 @@ import {
   Deferred,
   GuestRoomScreen,
   KodaPage,
+  LegalPage,
   LeaderboardPage,
   LibraryStudio,
   MenuPage,
@@ -762,6 +764,18 @@ export default function App() {
    * key taped to the other side. Read once at mount: the token is on the URL,
    * and the screen clears it as soon as it has been spent.
    */
+  /* The Privacy Policy and Terms: public pages, signed in or not, because
+     Google's sign-in screen links to them and a parent reads them before
+     making an account. Read from the path on every render; there is no router. */
+  const legalKind = legalKindOf(window.location.pathname);
+  if (legalKind) {
+    return (
+      <Deferred label="Koda">
+        <LegalPage kind={legalKind} />
+      </Deferred>
+    );
+  }
+
   if (verificationToken) {
     return (
       <VerifyEmailScreen

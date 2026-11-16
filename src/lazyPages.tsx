@@ -37,6 +37,7 @@ export const NotificationsPage = lazy(() =>
 export const SkillManagerPage = lazy(() =>
   import("./components/skills/SkillManagerPage").then((m) => ({ default: m.SkillManagerPage })),
 );
+export const LegalPage = lazy(() => import("./components/legal/LegalPage").then((m) => ({ default: m.LegalPage })));
 export const GuestRoomScreen = lazy(() => import("./rebus/group/GuestRoomScreen").then((m) => ({ default: m.GuestRoomScreen })));
 export const RebusPage = lazy(() => import("./rebus/RebusPage").then((m) => ({ default: m.RebusPage })));
 export const RebusStudio = lazy(() => import("./rebus/studio/RebusStudio").then((m) => ({ default: m.RebusStudio })));

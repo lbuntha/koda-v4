@@ -264,7 +264,11 @@ export const LandingPage: React.FC<{ onStart: () => void; onSignIn: () => void }
         </div>
         <div className="border-t border-line">
           <p className="mx-auto flex w-full max-w-5xl flex-wrap items-center justify-between gap-2 px-4 py-4 text-xs text-muted sm:px-6">
-            <span>© {new Date().getFullYear()} Koda</span>
+            <span className="flex flex-wrap items-center gap-x-4 gap-y-1">
+              <span>© {new Date().getFullYear()} Koda</span>
+              <a href="/privacy" className="font-semibold hover:text-ink hover:underline">{t("legal.privacy")}</a>
+              <a href="/terms" className="font-semibold hover:text-ink hover:underline">{t("legal.terms")}</a>
+            </span>
             <span>{t("landing.footer.made")}</span>
           </p>
         </div>

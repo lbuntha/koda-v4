@@ -5675,5 +5675,13 @@
       "screenTime": "Screen-time controls",
       "made": "Made in Cambodia, for Khmer families everywhere"
     }
+  },
+  "legal": {
+    "back": "Back to Koda",
+    "updated": "Last updated {date}",
+    "contact": "Questions or requests",
+    "contactNote": "To ask a question, get a copy of your family's information, or delete your account, email us at",
+    "privacy": "Privacy Policy",
+    "terms": "Terms of Use"
   }
 }
