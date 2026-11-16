@@ -1,0 +1,97 @@
+{
+  "id": "km-g1-098",
+  "rev": 0,
+  "language": "km",
+  "band": "A",
+  "ages": [
+    6,
+    7
+  ],
+  "topics": [],
+  "questionCounts": {
+    "understand": 0,
+    "words": 0,
+    "spell": 4
+  },
+  "title": "មេរៀនទី ៩៨ · ព្យញ្ជនៈ ត្រួត ម្ប ម្ព",
+  "category": "Khmer",
+  "picture": "khmer-school",
+  "sentences": [
+    {
+      "id": "s1",
+      "text": "សម្បុក កម្ពុជា សម្ល ឆ្លើយ",
+      "words": [
+        "សម្បុក ",
+        "កម្ពុជា ",
+        "សម្ល ",
+        "ឆ្លើយ"
+      ]
+    },
+    {
+      "id": "s2",
+      "text": "ខ្ញុំស្រឡាញ់កម្ពុជា។",
+      "words": [
+        "ខ្ញុំ",
+        "ស្រឡាញ់",
+        "កម្ពុជា។"
+      ]
+    },
+    {
+      "id": "s3",
+      "text": "ចាបនៅក្នុងសម្បុក។",
+      "words": [
+        "ចាប",
+        "នៅ",
+        "ក្នុង",
+        "សម្បុក។"
+      ]
+    },
+    {
+      "id": "s4",
+      "text": "ម៉ែស្លសម្ល។",
+      "words": [
+        "ម៉ែ",
+        "ស្ល",
+        "សម្ល។"
+      ]
+    },
+    {
+      "id": "s5",
+      "text": "ខ្ញុំឆ្លើយគ្រូ។",
+      "words": [
+        "ខ្ញុំ",
+        "ឆ្លើយ",
+        "គ្រូ។"
+      ]
+    }
+  ],
+  "questions": [
+    {
+      "id": "sp1",
+      "kind": "spell",
+      "sentence": "s2",
+      "word": "កម្ពុជា"
+    },
+    {
+      "id": "sp2",
+      "kind": "spell",
+      "sentence": "s3",
+      "word": "សម្បុក"
+    },
+    {
+      "id": "sp3",
+      "kind": "spell",
+      "sentence": "s4",
+      "word": "សម្ល"
+    },
+    {
+      "id": "sp4",
+      "kind": "spell",
+      "sentence": "s5",
+      "word": "ឆ្លើយ"
+    }
+  ],
+  "pictures": {},
+  "noRecording": [],
+  "provenance": "Original lesson written for Koda, 2026. It follows the order in which Grade 1 Khmer teaches letters; the words and sentences are new. Draft: not yet reviewed by a native speaker."
+}

@@ -1,0 +1,109 @@
+{
+  "id": "km-g1-086",
+  "rev": 0,
+  "language": "km",
+  "band": "A",
+  "ages": [
+    6,
+    7
+  ],
+  "topics": [],
+  "questionCounts": {
+    "understand": 0,
+    "words": 0,
+    "spell": 4
+  },
+  "title": "មេរៀនទី ៨៦ · ជើង ភ្ជ ភ្ញ ភ្ន ភ្ល",
+  "category": "Khmer",
+  "picture": "khmer-school",
+  "sentences": [
+    {
+      "id": "s1",
+      "text": "ភ្ជា ភ្ញា ភ្នា ភ្លា",
+      "words": [
+        "ភ្ជា ",
+        "ភ្ញា ",
+        "ភ្នា ",
+        "ភ្លា"
+      ]
+    },
+    {
+      "id": "s2",
+      "text": "ភ្ជួរ ភ្ញៀវ ភ្នំ ភ្លៀង ភ្លើង ភ្លេច",
+      "words": [
+        "ភ្ជួរ ",
+        "ភ្ញៀវ ",
+        "ភ្នំ ",
+        "ភ្លៀង ",
+        "ភ្លើង ",
+        "ភ្លេច"
+      ]
+    },
+    {
+      "id": "s3",
+      "text": "ពូភ្ជួរដី។",
+      "words": [
+        "ពូ",
+        "ភ្ជួរ",
+        "ដី។"
+      ]
+    },
+    {
+      "id": "s4",
+      "text": "ភ្ញៀវមកផ្ទះខ្ញុំ។",
+      "words": [
+        "ភ្ញៀវ",
+        "មក",
+        "ផ្ទះ",
+        "ខ្ញុំ។"
+      ]
+    },
+    {
+      "id": "s5",
+      "text": "ថ្ងៃនេះភ្លៀង។",
+      "words": [
+        "ថ្ងៃ",
+        "នេះ",
+        "ភ្លៀង។"
+      ]
+    },
+    {
+      "id": "s6",
+      "text": "កុំភ្លេចសៀវភៅ។",
+      "words": [
+        "កុំ",
+        "ភ្លេច",
+        "សៀវភៅ។"
+      ]
+    }
+  ],
+  "questions": [
+    {
+      "id": "sp1",
+      "kind": "spell",
+      "sentence": "s3",
+      "word": "ភ្ជួរ"
+    },
+    {
+      "id": "sp2",
+      "kind": "spell",
+      "sentence": "s4",
+      "word": "ភ្ញៀវ"
+    },
+    {
+      "id": "sp3",
+      "kind": "spell",
+      "sentence": "s5",
+      "word": "ភ្លៀង"
+    },
+    {
+      "id": "sp4",
+      "kind": "spell",
+      "sentence": "s6",
+      "word": "ភ្លេច"
+    }
+  ],
+  "pictures": {},
+  "noRecording": [],
+  "provenance": "Original lesson written for Koda, 2026. It follows the order in which Grade 1 Khmer teaches letters; the words and sentences are new. Draft: not yet reviewed by a native speaker."
+}

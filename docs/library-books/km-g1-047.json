@@ -1,0 +1,161 @@
+{
+  "id": "km-g1-047",
+  "rev": 0,
+  "language": "km",
+  "band": "A",
+  "ages": [
+    6,
+    7
+  ],
+  "topics": [],
+  "questionCounts": {
+    "understand": 0,
+    "words": 0,
+    "spell": 4
+  },
+  "title": "មេរៀនទី ៤៧ · ក្រោយ ◌ញ ◌ញ់ (ព្យញ្ជនៈ ញ ទី ២)",
+  "category": "Khmer",
+  "picture": "khmer-school",
+  "sentences": [
+    {
+      "id": "s1",
+      "text": "គញ ងញ ជញ ទញ នញ ពញ មញ យញ រញ លញ",
+      "words": [
+        "គញ ",
+        "ងញ ",
+        "ជញ ",
+        "ទញ ",
+        "នញ ",
+        "ពញ ",
+        "មញ ",
+        "យញ ",
+        "រញ ",
+        "លញ"
+      ]
+    },
+    {
+      "id": "s2",
+      "text": "គញ់ ងញ់ ជញ់ ទញ់ នញ់ ពញ់ មញ់ យញ់ រញ់ លញ់",
+      "words": [
+        "គញ់ ",
+        "ងញ់ ",
+        "ជញ់ ",
+        "ទញ់ ",
+        "នញ់ ",
+        "ពញ់ ",
+        "មញ់ ",
+        "យញ់ ",
+        "រញ់ ",
+        "លញ់"
+      ]
+    },
+    {
+      "id": "s3",
+      "text": "គាញ ងាញ ជាញ ទាញ នាញ ពាញ មាញ យាញ រាញ លាញ",
+      "words": [
+        "គាញ ",
+        "ងាញ ",
+        "ជាញ ",
+        "ទាញ ",
+        "នាញ ",
+        "ពាញ ",
+        "មាញ ",
+        "យាញ ",
+        "រាញ ",
+        "លាញ"
+      ]
+    },
+    {
+      "id": "s4",
+      "text": "គាញ់ ងាញ់ ជាញ់ ទាញ់ នាញ់ ពាញ់ មាញ់ យាញ់ រាញ់ លាញ់",
+      "words": [
+        "គាញ់ ",
+        "ងាញ់ ",
+        "ជាញ់ ",
+        "ទាញ់ ",
+        "នាញ់ ",
+        "ពាញ់ ",
+        "មាញ់ ",
+        "យាញ់ ",
+        "រាញ់ ",
+        "លាញ់"
+      ]
+    },
+    {
+      "id": "s5",
+      "text": "ទិញ ពេញ ឃើញ វិញ រួញ",
+      "words": [
+        "ទិញ ",
+        "ពេញ ",
+        "ឃើញ ",
+        "វិញ ",
+        "រួញ"
+      ]
+    },
+    {
+      "id": "s6",
+      "text": "ម៉ែទិញនំ។",
+      "words": [
+        "ម៉ែ",
+        "ទិញ",
+        "នំ។"
+      ]
+    },
+    {
+      "id": "s7",
+      "text": "ចៅឃើញម៉ែ។",
+      "words": [
+        "ចៅ",
+        "ឃើញ",
+        "ម៉ែ។"
+      ]
+    },
+    {
+      "id": "s8",
+      "text": "ពាងពេញទឹក។",
+      "words": [
+        "ពាង",
+        "ពេញ",
+        "ទឹក។"
+      ]
+    },
+    {
+      "id": "s9",
+      "text": "ប៉ាទៅវិញ។",
+      "words": [
+        "ប៉ា",
+        "ទៅ",
+        "វិញ។"
+      ]
+    }
+  ],
+  "questions": [
+    {
+      "id": "sp1",
+      "kind": "spell",
+      "sentence": "s6",
+      "word": "ទិញ"
+    },
+    {
+      "id": "sp2",
+      "kind": "spell",
+      "sentence": "s7",
+      "word": "ឃើញ"
+    },
+    {
+      "id": "sp3",
+      "kind": "spell",
+      "sentence": "s8",
+      "word": "ពេញ"
+    },
+    {
+      "id": "sp4",
+      "kind": "spell",
+      "sentence": "s9",
+      "word": "វិញ"
+    }
+  ],
+  "pictures": {},
+  "noRecording": [],
+  "provenance": "Original lesson written for Koda, 2026. It follows the order in which Grade 1 Khmer teaches letters; the words and sentences are new. Draft: not yet reviewed by a native speaker."
+}

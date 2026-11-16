@@ -48,7 +48,7 @@ function traceWord(letters: string[]) {
   for (const p of pts.slice(1)) fireEvent.pointerMove(svg, { ...p, pointerId: 1, pointerType: "touch" });
   fireEvent.pointerUp(svg, { ...pts[pts.length - 1], pointerId: 1, pointerType: "touch" });
 }
-const advance = async (ms = 1100) => { await act(async () => { vi.advanceTimersByTime(ms); }); };
+const advance = async (ms = 1700) => { await act(async () => { vi.advanceTimersByTime(ms); }); };
 
 describe("the catalog", () => {
   it("shows the English books by default, grouped on shelves", () => {
@@ -128,14 +128,14 @@ describe("a whole book, as a child plays it", () => {
     fireEvent.click(screen.getByRole("button", { name: "mango" })); // bold: the quiz asks about it
     expect(screen.getByText("Picture word · tap the speaker to hear it")).toBeTruthy();
     fireEvent.click(screen.getByRole("button", { name: "Next page" }));
-    fireEvent.click(screen.getByRole("button", { name: "Check my learning" }));
+    fireEvent.click(screen.getByRole("button", { name: "Quiz time!" }));
 
     // Understand 1: one wrong answer first. It stays, locked and marked — and
     // each answer has its own sound, not the page-turn one BookReader just used.
     expect(screen.getByText("Where did they walk after the market?")).toBeTruthy();
     fireEvent.click(screen.getByRole("button", { name: "To the market" }));
     expect(playSound).toHaveBeenLastCalledWith("error");
-    const wrong = screen.getByRole("button", { name: "✕ To the market" }) as HTMLButtonElement;
+    const wrong = screen.getByRole("button", { name: "To the market, not this one" }) as HTMLButtonElement;
     expect(wrong.disabled).toBe(true);
     fireEvent.click(screen.getByRole("button", { name: "Home" }));
     expect(playSound).toHaveBeenLastCalledWith("success");
@@ -236,7 +236,7 @@ describe("a book with no questions", () => {
       fireEvent.click(screen.getByRole("button", { name: "Read" }));
       fireEvent.click(screen.getByRole("button", { name: "Next page" }));
       fireEvent.click(screen.getByRole("button", { name: "Next page" }));
-      expect(screen.queryByRole("button", { name: "Check my learning" })).toBeNull();
+      expect(screen.queryByRole("button", { name: "Quiz time!" })).toBeNull();
       fireEvent.click(screen.getByRole("button", { name: "I finished!" }));
 
       expect(screen.queryByLabelText("Progress")).toBeNull();
@@ -260,14 +260,14 @@ describe("the reader is a book", () => {
     openBook();
     expect(screen.getByRole("heading", { name: "At the Market" })).toBeTruthy();
     expect((screen.getByRole("button", { name: "Previous page" }) as HTMLButtonElement).disabled).toBe(true);
-    expect(screen.queryByRole("button", { name: "Check my learning" })).toBeNull();
+    expect(screen.queryByRole("button", { name: "Quiz time!" })).toBeNull();
     fireEvent.click(screen.getByRole("button", { name: "Next page" }));
     expect(screen.getByText("Page 1 of 2")).toBeTruthy();
     expect(screen.queryByText(/The mango is sweet/)).toBeNull(); // on the next page, not this one
     fireEvent.click(screen.getByRole("button", { name: "Next page" }));
     expect(screen.getByText("The end")).toBeTruthy();
     expect(screen.queryByRole("button", { name: "Next page" })).toBeNull();
-    expect(screen.getByRole("button", { name: "Check my learning" })).toBeTruthy();
+    expect(screen.getByRole("button", { name: "Quiz time!" })).toBeTruthy();
   });
 
   it("turns with the arrow keys and with a swipe, but not with a small wobble", () => {
@@ -346,7 +346,7 @@ describe("a matching set in the quiz", () => {
       fireEvent.click(screen.getByRole("button", { name: "Read" }));
       fireEvent.click(screen.getByRole("button", { name: "Next page" }));
       fireEvent.click(screen.getByRole("button", { name: "Next page" }));
-      fireEvent.click(screen.getByRole("button", { name: "Check my learning" }));
+      fireEvent.click(screen.getByRole("button", { name: "Quiz time!" }));
       fireEvent.click(screen.getByRole("button", { name: "Home" }));
       await advance();
       fireEvent.click(screen.getByRole("button", { name: "The mango" }));

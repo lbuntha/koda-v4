@@ -1,0 +1,120 @@
+{
+  "id": "km-g1-006r",
+  "rev": 0,
+  "language": "km",
+  "band": "A",
+  "ages": [
+    6,
+    7
+  ],
+  "topics": [],
+  "questionCounts": {
+    "understand": 0,
+    "words": 0,
+    "spell": 3
+  },
+  "title": "រៀនសាឡើងវិញ · ក ខ ច ឆ",
+  "category": "Khmer",
+  "picture": "khmer-school",
+  "sentences": [
+    {
+      "id": "s1",
+      "text": "កា ខា ចា ឆា",
+      "words": [
+        "កា ",
+        "ខា ",
+        "ចា ",
+        "ឆា"
+      ]
+    },
+    {
+      "id": "s2",
+      "text": "កី ខី ចី ឆី",
+      "words": [
+        "កី ",
+        "ខី ",
+        "ចី ",
+        "ឆី"
+      ]
+    },
+    {
+      "id": "s3",
+      "text": "កេ ខេ ចេ ឆេ",
+      "words": [
+        "កេ ",
+        "ខេ ",
+        "ចេ ",
+        "ឆេ"
+      ]
+    },
+    {
+      "id": "s4",
+      "text": "កោ ខោ ចោ ឆោ",
+      "words": [
+        "កោ ",
+        "ខោ ",
+        "ចោ ",
+        "ឆោ"
+      ]
+    },
+    {
+      "id": "s5",
+      "text": "ចៅខំឆា។",
+      "words": [
+        "ចៅ",
+        "ខំ",
+        "ឆា។"
+      ]
+    },
+    {
+      "id": "s6",
+      "text": "កុំឆាឆៅ។",
+      "words": [
+        "កុំ",
+        "ឆា",
+        "ឆៅ។"
+      ]
+    },
+    {
+      "id": "s7",
+      "text": "ចៃខាំចៅ។",
+      "words": [
+        "ចៃ",
+        "ខាំ",
+        "ចៅ។"
+      ]
+    },
+    {
+      "id": "s8",
+      "text": "ចៅចុះកោះ។",
+      "words": [
+        "ចៅ",
+        "ចុះ",
+        "កោះ។"
+      ]
+    }
+  ],
+  "questions": [
+    {
+      "id": "sp1",
+      "kind": "spell",
+      "sentence": "s5",
+      "word": "ឆា"
+    },
+    {
+      "id": "sp2",
+      "kind": "spell",
+      "sentence": "s7",
+      "word": "ចៃ"
+    },
+    {
+      "id": "sp3",
+      "kind": "spell",
+      "sentence": "s8",
+      "word": "កោះ"
+    }
+  ],
+  "pictures": {},
+  "noRecording": [],
+  "provenance": "Original lesson written for Koda, 2026. It follows the order in which Grade 1 Khmer teaches letters; the words and sentences are new. Draft: not yet reviewed by a native speaker."
+}

@@ -1,0 +1,105 @@
+{
+  "id": "km-g1-027",
+  "rev": 0,
+  "language": "km",
+  "band": "A",
+  "ages": [
+    6,
+    7
+  ],
+  "topics": [],
+  "questionCounts": {
+    "understand": 0,
+    "words": 0,
+    "spell": 5
+  },
+  "title": "មេរៀនទី ២៧ · កំណាព្យ ថ្ងៃ នៅ ចម្ការ",
+  "category": "Khmer",
+  "picture": "khmer-school",
+  "sentences": [
+    {
+      "id": "s1",
+      "text": "ពូទៅលីឈើ។",
+      "words": [
+        "ពូ",
+        "ទៅ",
+        "លី",
+        "ឈើ។"
+      ]
+    },
+    {
+      "id": "s2",
+      "text": "ចៅទៅបេះតែ។",
+      "words": [
+        "ចៅ",
+        "ទៅ",
+        "បេះ",
+        "តែ។"
+      ]
+    },
+    {
+      "id": "s3",
+      "text": "មេទៅឆាមី។",
+      "words": [
+        "មេ",
+        "ទៅ",
+        "ឆា",
+        "មី។"
+      ]
+    },
+    {
+      "id": "s4",
+      "text": "ទារាំលើដី។",
+      "words": [
+        "ទា",
+        "រាំ",
+        "លើ",
+        "ដី។"
+      ]
+    },
+    {
+      "id": "s5",
+      "text": "តាថាពិរោះ។",
+      "words": [
+        "តា",
+        "ថា",
+        "ពិរោះ។"
+      ]
+    }
+  ],
+  "questions": [
+    {
+      "id": "sp1",
+      "kind": "spell",
+      "sentence": "s1",
+      "word": "លី"
+    },
+    {
+      "id": "sp2",
+      "kind": "spell",
+      "sentence": "s2",
+      "word": "បេះ"
+    },
+    {
+      "id": "sp3",
+      "kind": "spell",
+      "sentence": "s3",
+      "word": "ឆា"
+    },
+    {
+      "id": "sp4",
+      "kind": "spell",
+      "sentence": "s4",
+      "word": "រាំ"
+    },
+    {
+      "id": "sp5",
+      "kind": "spell",
+      "sentence": "s5",
+      "word": "ពិរោះ"
+    }
+  ],
+  "pictures": {},
+  "noRecording": [],
+  "provenance": "Original lesson written for Koda, 2026. It follows the order in which Grade 1 Khmer teaches letters; the words and sentences are new. Draft: not yet reviewed by a native speaker."
+}

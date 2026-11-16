@@ -1,0 +1,117 @@
+{
+  "id": "km-g1-021",
+  "rev": 0,
+  "language": "km",
+  "band": "A",
+  "ages": [
+    6,
+    7
+  ],
+  "topics": [],
+  "questionCounts": {
+    "understand": 0,
+    "words": 0,
+    "spell": 3
+  },
+  "title": "មេរៀនទី ២១ · អក្សរ ឍ",
+  "category": "Khmer",
+  "picture": "khmer-school",
+  "sentences": [
+    {
+      "id": "s1",
+      "text": "ឍ ឍា ឍិ ឍី ឍឹ ឍឺ ឍុ ឍូ ឍួ ឍើ ឍឿ ឍៀ ឍេ",
+      "words": [
+        "ឍ ",
+        "ឍា ",
+        "ឍិ ",
+        "ឍី ",
+        "ឍឹ ",
+        "ឍឺ ",
+        "ឍុ ",
+        "ឍូ ",
+        "ឍួ ",
+        "ឍើ ",
+        "ឍឿ ",
+        "ឍៀ ",
+        "ឍេ"
+      ]
+    },
+    {
+      "id": "s2",
+      "text": "ឍែ ឍៃ ឍោ ឍៅ ឍុំ ឍំ ឍាំ ឍះ ឍុះ ឍេះ ឍោះ",
+      "words": [
+        "ឍែ ",
+        "ឍៃ ",
+        "ឍោ ",
+        "ឍៅ ",
+        "ឍុំ ",
+        "ឍំ ",
+        "ឍាំ ",
+        "ឍះ ",
+        "ឍុះ ",
+        "ឍេះ ",
+        "ឍោះ"
+      ]
+    },
+    {
+      "id": "s3",
+      "text": "ឈើ តុ កៅអី ផើ",
+      "words": [
+        "ឈើ ",
+        "តុ ",
+        "កៅអី ",
+        "ផើ"
+      ]
+    },
+    {
+      "id": "s4",
+      "text": "ផើជាដី។",
+      "words": [
+        "ផើ",
+        "ជា",
+        "ដី។"
+      ]
+    },
+    {
+      "id": "s5",
+      "text": "តាដាំឈើ។",
+      "words": [
+        "តា",
+        "ដាំ",
+        "ឈើ។"
+      ]
+    },
+    {
+      "id": "s6",
+      "text": "ចៅគូតុ។",
+      "words": [
+        "ចៅ",
+        "គូ",
+        "តុ។"
+      ]
+    }
+  ],
+  "questions": [
+    {
+      "id": "sp1",
+      "kind": "spell",
+      "sentence": "s4",
+      "word": "ផើ"
+    },
+    {
+      "id": "sp2",
+      "kind": "spell",
+      "sentence": "s5",
+      "word": "ឈើ"
+    },
+    {
+      "id": "sp3",
+      "kind": "spell",
+      "sentence": "s6",
+      "word": "តុ"
+    }
+  ],
+  "pictures": {},
+  "noRecording": [],
+  "provenance": "Original lesson written for Koda, 2026. It follows the order in which Grade 1 Khmer teaches letters; the words and sentences are new. Draft: not yet reviewed by a native speaker."
+}

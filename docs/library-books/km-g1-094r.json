@@ -1,0 +1,86 @@
+{
+  "id": "km-g1-094r",
+  "rev": 0,
+  "language": "km",
+  "band": "A",
+  "ages": [
+    6,
+    7
+  ],
+  "topics": [],
+  "questionCounts": {
+    "understand": 0,
+    "words": 0,
+    "spell": 3
+  },
+  "title": "រៀនសាឡើងវិញ · ព្យញ្ជនៈ ត្រួត ង",
+  "category": "Khmer",
+  "picture": "khmer-school",
+  "sentences": [
+    {
+      "id": "s1",
+      "text": "ង្ក ង្គ ង្ហ ង្ឃ ង្រ",
+      "words": [
+        "ង្ក ",
+        "ង្គ ",
+        "ង្ហ ",
+        "ង្ឃ ",
+        "ង្រ"
+      ]
+    },
+    {
+      "id": "s2",
+      "text": "បង្គានិងបង្កងរស់ក្នុងទឹក។",
+      "words": [
+        "បង្គា",
+        "និង",
+        "បង្កង",
+        "រស់",
+        "ក្នុង",
+        "ទឹក។"
+      ]
+    },
+    {
+      "id": "s3",
+      "text": "កង្ហារនៅក្បែរគ្រែ។",
+      "words": [
+        "កង្ហារ",
+        "នៅ",
+        "ក្បែរ",
+        "គ្រែ។"
+      ]
+    },
+    {
+      "id": "s4",
+      "text": "ចង្កៀងនេះថ្មី។",
+      "words": [
+        "ចង្កៀង",
+        "នេះ",
+        "ថ្មី។"
+      ]
+    }
+  ],
+  "questions": [
+    {
+      "id": "sp1",
+      "kind": "spell",
+      "sentence": "s2",
+      "word": "បង្កង"
+    },
+    {
+      "id": "sp2",
+      "kind": "spell",
+      "sentence": "s3",
+      "word": "ក្បែរ"
+    },
+    {
+      "id": "sp3",
+      "kind": "spell",
+      "sentence": "s4",
+      "word": "ថ្មី"
+    }
+  ],
+  "pictures": {},
+  "noRecording": [],
+  "provenance": "Original lesson written for Koda, 2026. It follows the order in which Grade 1 Khmer teaches letters; the words and sentences are new. Draft: not yet reviewed by a native speaker."
+}

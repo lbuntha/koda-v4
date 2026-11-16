@@ -1,0 +1,119 @@
+{
+  "id": "km-g1-035",
+  "rev": 0,
+  "language": "km",
+  "band": "A",
+  "ages": [
+    6,
+    7
+  ],
+  "topics": [],
+  "questionCounts": {
+    "understand": 0,
+    "words": 0,
+    "spell": 3
+  },
+  "title": "មេរៀនទី ៣៥ · ប៊",
+  "category": "Khmer",
+  "picture": "khmer-school",
+  "sentences": [
+    {
+      "id": "s1",
+      "text": "ប៊ ប៊ា ប៊ិ ប៊ី ប៊ឹ ប៊ឺ ប៊ុ ប៊ូ ប៊ួ ប៊ើ ប៊ឿ ប៊ៀ ប៊េ",
+      "words": [
+        "ប៊ ",
+        "ប៊ា ",
+        "ប៊ិ ",
+        "ប៊ី ",
+        "ប៊ឹ ",
+        "ប៊ឺ ",
+        "ប៊ុ ",
+        "ប៊ូ ",
+        "ប៊ួ ",
+        "ប៊ើ ",
+        "ប៊ឿ ",
+        "ប៊ៀ ",
+        "ប៊េ"
+      ]
+    },
+    {
+      "id": "s2",
+      "text": "ប៊ែ ប៊ៃ ប៊ោ ប៊ៅ ប៊ុំ ប៊ំ ប៊ាំ ប៊ះ ប៊ុះ ប៊េះ ប៊ោះ",
+      "words": [
+        "ប៊ែ ",
+        "ប៊ៃ ",
+        "ប៊ោ ",
+        "ប៊ៅ ",
+        "ប៊ុំ ",
+        "ប៊ំ ",
+        "ប៊ាំ ",
+        "ប៊ះ ",
+        "ប៊ុះ ",
+        "ប៊េះ ",
+        "ប៊ោះ"
+      ]
+    },
+    {
+      "id": "s3",
+      "text": "ម៉ែ ប៉ា ចៅ តា",
+      "words": [
+        "ម៉ែ ",
+        "ប៉ា ",
+        "ចៅ ",
+        "តា"
+      ]
+    },
+    {
+      "id": "s4",
+      "text": "ម៉ែប៉ាថែតា។",
+      "words": [
+        "ម៉ែ",
+        "ប៉ា",
+        "ថែ",
+        "តា។"
+      ]
+    },
+    {
+      "id": "s5",
+      "text": "ចៅចាំប៉ា។",
+      "words": [
+        "ចៅ",
+        "ចាំ",
+        "ប៉ា។"
+      ]
+    },
+    {
+      "id": "s6",
+      "text": "តាខំពុះឈើ។",
+      "words": [
+        "តា",
+        "ខំ",
+        "ពុះ",
+        "ឈើ។"
+      ]
+    }
+  ],
+  "questions": [
+    {
+      "id": "sp1",
+      "kind": "spell",
+      "sentence": "s4",
+      "word": "ថែ"
+    },
+    {
+      "id": "sp2",
+      "kind": "spell",
+      "sentence": "s5",
+      "word": "ចាំ"
+    },
+    {
+      "id": "sp3",
+      "kind": "spell",
+      "sentence": "s6",
+      "word": "ពុះ"
+    }
+  ],
+  "pictures": {},
+  "noRecording": [],
+  "provenance": "Original lesson written for Koda, 2026. It follows the order in which Grade 1 Khmer teaches letters; the words and sentences are new. Draft: not yet reviewed by a native speaker."
+}

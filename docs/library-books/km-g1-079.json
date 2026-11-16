@@ -1,0 +1,110 @@
+{
+  "id": "km-g1-079",
+  "rev": 0,
+  "language": "km",
+  "band": "A",
+  "ages": [
+    6,
+    7
+  ],
+  "topics": [],
+  "questionCounts": {
+    "understand": 0,
+    "words": 0,
+    "spell": 4
+  },
+  "title": "មេរៀនទី ៧៩ · ជើង ថ្ង ថ្ន ថ្ម ថ្ល ថ្វ",
+  "category": "Khmer",
+  "picture": "khmer-school",
+  "sentences": [
+    {
+      "id": "s1",
+      "text": "ថ្ងា ថ្នា ថ្មា ថ្លា ថ្វា",
+      "words": [
+        "ថ្ងា ",
+        "ថ្នា ",
+        "ថ្មា ",
+        "ថ្លា ",
+        "ថ្វា"
+      ]
+    },
+    {
+      "id": "s2",
+      "text": "ថ្ងៃ ថ្នាំ ថ្ម ថ្មី ថ្លៃ ថ្វាយ",
+      "words": [
+        "ថ្ងៃ ",
+        "ថ្នាំ ",
+        "ថ្ម ",
+        "ថ្មី ",
+        "ថ្លៃ ",
+        "ថ្វាយ"
+      ]
+    },
+    {
+      "id": "s3",
+      "text": "ថ្ងៃនេះក្តៅ។",
+      "words": [
+        "ថ្ងៃ",
+        "នេះ",
+        "ក្តៅ។"
+      ]
+    },
+    {
+      "id": "s4",
+      "text": "ខ្ញុំមានអាវថ្មី។",
+      "words": [
+        "ខ្ញុំ",
+        "មាន",
+        "អាវ",
+        "ថ្មី។"
+      ]
+    },
+    {
+      "id": "s5",
+      "text": "ម៉ែទិញថ្នាំ។",
+      "words": [
+        "ម៉ែ",
+        "ទិញ",
+        "ថ្នាំ។"
+      ]
+    },
+    {
+      "id": "s6",
+      "text": "អាវនេះថ្លៃ។",
+      "words": [
+        "អាវ",
+        "នេះ",
+        "ថ្លៃ។"
+      ]
+    }
+  ],
+  "questions": [
+    {
+      "id": "sp1",
+      "kind": "spell",
+      "sentence": "s3",
+      "word": "ថ្ងៃ"
+    },
+    {
+      "id": "sp2",
+      "kind": "spell",
+      "sentence": "s4",
+      "word": "ថ្មី"
+    },
+    {
+      "id": "sp3",
+      "kind": "spell",
+      "sentence": "s5",
+      "word": "ថ្នាំ"
+    },
+    {
+      "id": "sp4",
+      "kind": "spell",
+      "sentence": "s6",
+      "word": "ថ្លៃ"
+    }
+  ],
+  "pictures": {},
+  "noRecording": [],
+  "provenance": "Original lesson written for Koda, 2026. It follows the order in which Grade 1 Khmer teaches letters; the words and sentences are new. Draft: not yet reviewed by a native speaker."
+}

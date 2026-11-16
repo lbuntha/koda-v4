@@ -1,0 +1,134 @@
+{
+  "id": "km-g1-045r",
+  "rev": 0,
+  "language": "km",
+  "band": "A",
+  "ages": [
+    6,
+    7
+  ],
+  "topics": [],
+  "questionCounts": {
+    "understand": 0,
+    "words": 0,
+    "spell": 5
+  },
+  "title": "រៀនសាឡើងវិញ · ◌ក ◌ង ◌ច",
+  "category": "Khmer",
+  "picture": "khmer-school",
+  "sentences": [
+    {
+      "id": "s1",
+      "text": "កក ចក ទឹក មក ដេក",
+      "words": [
+        "កក ",
+        "ចក ",
+        "ទឹក ",
+        "មក ",
+        "ដេក"
+      ]
+    },
+    {
+      "id": "s2",
+      "text": "ចង បង ហាង លេង ម៉ោង",
+      "words": [
+        "ចង ",
+        "បង ",
+        "ហាង ",
+        "លេង ",
+        "ម៉ោង"
+      ]
+    },
+    {
+      "id": "s3",
+      "text": "តូច ដូច ខូច រួច លួច",
+      "words": [
+        "តូច ",
+        "ដូច ",
+        "ខូច ",
+        "រួច ",
+        "លួច"
+      ]
+    },
+    {
+      "id": "s4",
+      "text": "ចៅដេកលក់។",
+      "words": [
+        "ចៅ",
+        "ដេក",
+        "លក់។"
+      ]
+    },
+    {
+      "id": "s5",
+      "text": "បងទៅហាង។",
+      "words": [
+        "បង",
+        "ទៅ",
+        "ហាង។"
+      ]
+    },
+    {
+      "id": "s6",
+      "text": "ចៅតូចលេងទឹក។",
+      "words": [
+        "ចៅ",
+        "តូច",
+        "លេង",
+        "ទឹក។"
+      ]
+    },
+    {
+      "id": "s7",
+      "text": "ទូខូច។",
+      "words": [
+        "ទូ",
+        "ខូច។"
+      ]
+    },
+    {
+      "id": "s8",
+      "text": "បងចងគោ។",
+      "words": [
+        "បង",
+        "ចង",
+        "គោ។"
+      ]
+    }
+  ],
+  "questions": [
+    {
+      "id": "sp1",
+      "kind": "spell",
+      "sentence": "s4",
+      "word": "ដេក"
+    },
+    {
+      "id": "sp2",
+      "kind": "spell",
+      "sentence": "s5",
+      "word": "ហាង"
+    },
+    {
+      "id": "sp3",
+      "kind": "spell",
+      "sentence": "s6",
+      "word": "លេង"
+    },
+    {
+      "id": "sp4",
+      "kind": "spell",
+      "sentence": "s7",
+      "word": "ខូច"
+    },
+    {
+      "id": "sp5",
+      "kind": "spell",
+      "sentence": "s8",
+      "word": "ចង"
+    }
+  ],
+  "pictures": {},
+  "noRecording": [],
+  "provenance": "Original lesson written for Koda, 2026. It follows the order in which Grade 1 Khmer teaches letters; the words and sentences are new. Draft: not yet reviewed by a native speaker."
+}

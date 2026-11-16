@@ -1,0 +1,120 @@
+{
+  "id": "km-g1-033",
+  "rev": 0,
+  "language": "km",
+  "band": "A",
+  "ages": [
+    6,
+    7
+  ],
+  "topics": [],
+  "questionCounts": {
+    "understand": 0,
+    "words": 0,
+    "spell": 3
+  },
+  "title": "មេរៀនទី ៣៣ · រ៉",
+  "category": "Khmer",
+  "picture": "khmer-school",
+  "sentences": [
+    {
+      "id": "s1",
+      "text": "រ៉ រ៉ា រ៉ិ រ៉ី រ៉ឹ រ៉ឺ រ៉ុ រ៉ូ រ៉ួ រ៉ើ រ៉ឿ រ៉ៀ រ៉េ",
+      "words": [
+        "រ៉ ",
+        "រ៉ា ",
+        "រ៉ិ ",
+        "រ៉ី ",
+        "រ៉ឹ ",
+        "រ៉ឺ ",
+        "រ៉ុ ",
+        "រ៉ូ ",
+        "រ៉ួ ",
+        "រ៉ើ ",
+        "រ៉ឿ ",
+        "រ៉ៀ ",
+        "រ៉េ"
+      ]
+    },
+    {
+      "id": "s2",
+      "text": "រ៉ែ រ៉ៃ រ៉ោ រ៉ៅ រ៉ុំ រ៉ំ រ៉ាំ រ៉ះ រ៉ុះ រ៉េះ រ៉ោះ",
+      "words": [
+        "រ៉ែ ",
+        "រ៉ៃ ",
+        "រ៉ោ ",
+        "រ៉ៅ ",
+        "រ៉ុំ ",
+        "រ៉ំ ",
+        "រ៉ាំ ",
+        "រ៉ះ ",
+        "រ៉ុះ ",
+        "រ៉េះ ",
+        "រ៉ោះ"
+      ]
+    },
+    {
+      "id": "s3",
+      "text": "ម៉ែ ប៉ា ពូ តា",
+      "words": [
+        "ម៉ែ ",
+        "ប៉ា ",
+        "ពូ ",
+        "តា"
+      ]
+    },
+    {
+      "id": "s4",
+      "text": "តាថាចៅពូកែ។",
+      "words": [
+        "តា",
+        "ថា",
+        "ចៅ",
+        "ពូកែ។"
+      ]
+    },
+    {
+      "id": "s5",
+      "text": "ម៉ែហៅចៅញ៉ាំនំ។",
+      "words": [
+        "ម៉ែ",
+        "ហៅ",
+        "ចៅ",
+        "ញ៉ាំ",
+        "នំ។"
+      ]
+    },
+    {
+      "id": "s6",
+      "text": "ប៉ាឆាមី។",
+      "words": [
+        "ប៉ា",
+        "ឆា",
+        "មី។"
+      ]
+    }
+  ],
+  "questions": [
+    {
+      "id": "sp1",
+      "kind": "spell",
+      "sentence": "s4",
+      "word": "ពូកែ"
+    },
+    {
+      "id": "sp2",
+      "kind": "spell",
+      "sentence": "s5",
+      "word": "ញ៉ាំ"
+    },
+    {
+      "id": "sp3",
+      "kind": "spell",
+      "sentence": "s6",
+      "word": "ឆា"
+    }
+  ],
+  "pictures": {},
+  "noRecording": [],
+  "provenance": "Original lesson written for Koda, 2026. It follows the order in which Grade 1 Khmer teaches letters; the words and sentences are new. Draft: not yet reviewed by a native speaker."
+}

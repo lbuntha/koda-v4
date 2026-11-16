@@ -1,0 +1,118 @@
+{
+  "id": "km-g1-032",
+  "rev": 0,
+  "language": "km",
+  "band": "A",
+  "ages": [
+    6,
+    7
+  ],
+  "topics": [],
+  "questionCounts": {
+    "understand": 0,
+    "words": 0,
+    "spell": 3
+  },
+  "title": "មេរៀនទី ៣២ · យ៉",
+  "category": "Khmer",
+  "picture": "khmer-school",
+  "sentences": [
+    {
+      "id": "s1",
+      "text": "យ៉ យ៉ា យ៉ិ យ៉ី យ៉ឹ យ៉ឺ យ៉ុ យ៉ូ យ៉ួ យ៉ើ យ៉ឿ យ៉ៀ យ៉េ",
+      "words": [
+        "យ៉ ",
+        "យ៉ា ",
+        "យ៉ិ ",
+        "យ៉ី ",
+        "យ៉ឹ ",
+        "យ៉ឺ ",
+        "យ៉ុ ",
+        "យ៉ូ ",
+        "យ៉ួ ",
+        "យ៉ើ ",
+        "យ៉ឿ ",
+        "យ៉ៀ ",
+        "យ៉េ"
+      ]
+    },
+    {
+      "id": "s2",
+      "text": "យ៉ែ យ៉ៃ យ៉ោ យ៉ៅ យ៉ុំ យ៉ំ យ៉ាំ យ៉ះ យ៉ុះ យ៉េះ យ៉ោះ",
+      "words": [
+        "យ៉ែ ",
+        "យ៉ៃ ",
+        "យ៉ោ ",
+        "យ៉ៅ ",
+        "យ៉ុំ ",
+        "យ៉ំ ",
+        "យ៉ាំ ",
+        "យ៉ះ ",
+        "យ៉ុះ ",
+        "យ៉េះ ",
+        "យ៉ោះ"
+      ]
+    },
+    {
+      "id": "s3",
+      "text": "ម៉ែ ប៉ា ចៅ ពូ",
+      "words": [
+        "ម៉ែ ",
+        "ប៉ា ",
+        "ចៅ ",
+        "ពូ"
+      ]
+    },
+    {
+      "id": "s4",
+      "text": "ប៉ាពុះឈើ។",
+      "words": [
+        "ប៉ា",
+        "ពុះ",
+        "ឈើ។"
+      ]
+    },
+    {
+      "id": "s5",
+      "text": "ម៉ែថែចៅ។",
+      "words": [
+        "ម៉ែ",
+        "ថែ",
+        "ចៅ។"
+      ]
+    },
+    {
+      "id": "s6",
+      "text": "ពូប៉ះដៃចៅ។",
+      "words": [
+        "ពូ",
+        "ប៉ះ",
+        "ដៃ",
+        "ចៅ។"
+      ]
+    }
+  ],
+  "questions": [
+    {
+      "id": "sp1",
+      "kind": "spell",
+      "sentence": "s4",
+      "word": "ពុះ"
+    },
+    {
+      "id": "sp2",
+      "kind": "spell",
+      "sentence": "s5",
+      "word": "ថែ"
+    },
+    {
+      "id": "sp3",
+      "kind": "spell",
+      "sentence": "s6",
+      "word": "ប៉ះ"
+    }
+  ],
+  "pictures": {},
+  "noRecording": [],
+  "provenance": "Original lesson written for Koda, 2026. It follows the order in which Grade 1 Khmer teaches letters; the words and sentences are new. Draft: not yet reviewed by a native speaker."
+}

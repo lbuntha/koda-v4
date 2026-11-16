@@ -1,0 +1,102 @@
+{
+  "id": "km-g1-082",
+  "rev": 0,
+  "language": "km",
+  "band": "A",
+  "ages": [
+    6,
+    7
+  ],
+  "topics": [],
+  "questionCounts": {
+    "understand": 0,
+    "words": 0,
+    "spell": 4
+  },
+  "title": "មេរៀនទី ៨២ · ជើង ប្ត ប្រ ប្ល ប្អ",
+  "category": "Khmer",
+  "picture": "khmer-school",
+  "sentences": [
+    {
+      "id": "s1",
+      "text": "ប្តា ប្រា ប្លា ប្អា",
+      "words": [
+        "ប្តា ",
+        "ប្រា ",
+        "ប្លា ",
+        "ប្អា"
+      ]
+    },
+    {
+      "id": "s2",
+      "text": "ប្តី ប្រាំ ប្រើ ប្រាប់ ប្លែក ប្អូន",
+      "words": [
+        "ប្តី ",
+        "ប្រាំ ",
+        "ប្រើ ",
+        "ប្រាប់ ",
+        "ប្លែក ",
+        "ប្អូន"
+      ]
+    },
+    {
+      "id": "s3",
+      "text": "ប្អូនខ្ញុំអាយុប្រាំឆ្នាំ។",
+      "words": [
+        "ប្អូន",
+        "ខ្ញុំ",
+        "អាយុ",
+        "ប្រាំ",
+        "ឆ្នាំ។"
+      ]
+    },
+    {
+      "id": "s4",
+      "text": "ពូជាប្តីមីង។",
+      "words": [
+        "ពូ",
+        "ជា",
+        "ប្តី",
+        "មីង។"
+      ]
+    },
+    {
+      "id": "s5",
+      "text": "គ្រូប្រាប់ខ្ញុំ។",
+      "words": [
+        "គ្រូ",
+        "ប្រាប់",
+        "ខ្ញុំ។"
+      ]
+    }
+  ],
+  "questions": [
+    {
+      "id": "sp1",
+      "kind": "spell",
+      "sentence": "s3",
+      "word": "ប្អូន"
+    },
+    {
+      "id": "sp2",
+      "kind": "spell",
+      "sentence": "s4",
+      "word": "ប្តី"
+    },
+    {
+      "id": "sp3",
+      "kind": "spell",
+      "sentence": "s5",
+      "word": "ប្រាប់"
+    },
+    {
+      "id": "sp4",
+      "kind": "spell",
+      "sentence": "s2",
+      "word": "ប្រាំ"
+    }
+  ],
+  "pictures": {},
+  "noRecording": [],
+  "provenance": "Original lesson written for Koda, 2026. It follows the order in which Grade 1 Khmer teaches letters; the words and sentences are new. Draft: not yet reviewed by a native speaker."
+}

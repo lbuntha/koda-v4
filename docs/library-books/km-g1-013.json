@@ -1,0 +1,162 @@
+{
+  "id": "km-g1-013",
+  "rev": 0,
+  "language": "km",
+  "band": "A",
+  "ages": [
+    6,
+    7
+  ],
+  "topics": [],
+  "questionCounts": {
+    "understand": 0,
+    "words": 0,
+    "spell": 3
+  },
+  "title": "មេរៀនទី ១៣ · អក្សរ ឡ អ",
+  "category": "Khmer",
+  "picture": "khmer-school",
+  "sentences": [
+    {
+      "id": "s1",
+      "text": "ឡ ឡា ឡិ ឡី ឡឹ ឡឺ ឡុ ឡូ ឡួ ឡើ ឡឿ ឡៀ ឡេ",
+      "words": [
+        "ឡ ",
+        "ឡា ",
+        "ឡិ ",
+        "ឡី ",
+        "ឡឹ ",
+        "ឡឺ ",
+        "ឡុ ",
+        "ឡូ ",
+        "ឡួ ",
+        "ឡើ ",
+        "ឡឿ ",
+        "ឡៀ ",
+        "ឡេ"
+      ]
+    },
+    {
+      "id": "s2",
+      "text": "ឡែ ឡៃ ឡោ ឡៅ ឡុំ ឡំ ឡាំ ឡះ ឡុះ ឡេះ ឡោះ",
+      "words": [
+        "ឡែ ",
+        "ឡៃ ",
+        "ឡោ ",
+        "ឡៅ ",
+        "ឡុំ ",
+        "ឡំ ",
+        "ឡាំ ",
+        "ឡះ ",
+        "ឡុះ ",
+        "ឡេះ ",
+        "ឡោះ"
+      ]
+    },
+    {
+      "id": "s3",
+      "text": "អ អា អិ អី អឹ អឺ អុ អូ អួ អើ អឿ អៀ អេ",
+      "words": [
+        "អ ",
+        "អា ",
+        "អិ ",
+        "អី ",
+        "អឹ ",
+        "អឺ ",
+        "អុ ",
+        "អូ ",
+        "អួ ",
+        "អើ ",
+        "អឿ ",
+        "អៀ ",
+        "អេ"
+      ]
+    },
+    {
+      "id": "s4",
+      "text": "អែ អៃ អោ អៅ អុំ អំ អាំ អះ អុះ អេះ អោះ",
+      "words": [
+        "អែ ",
+        "អៃ ",
+        "អោ ",
+        "អៅ ",
+        "អុំ ",
+        "អំ ",
+        "អាំ ",
+        "អះ ",
+        "អុះ ",
+        "អេះ ",
+        "អោះ"
+      ]
+    },
+    {
+      "id": "s5",
+      "text": "កៅអី អី អើ",
+      "words": [
+        "កៅអី ",
+        "អី ",
+        "អើ"
+      ]
+    },
+    {
+      "id": "s6",
+      "text": "ចៅបីកៅអី។",
+      "words": [
+        "ចៅ",
+        "បី",
+        "កៅអី។"
+      ]
+    },
+    {
+      "id": "s7",
+      "text": "តាចេះកែកៅអី។",
+      "words": [
+        "តា",
+        "ចេះ",
+        "កែ",
+        "កៅអី។"
+      ]
+    },
+    {
+      "id": "s8",
+      "text": "តាហៅអី។",
+      "words": [
+        "តា",
+        "ហៅ",
+        "អី។"
+      ]
+    },
+    {
+      "id": "s9",
+      "text": "ចៅថាអើ។",
+      "words": [
+        "ចៅ",
+        "ថា",
+        "អើ។"
+      ]
+    }
+  ],
+  "questions": [
+    {
+      "id": "sp1",
+      "kind": "spell",
+      "sentence": "s6",
+      "word": "កៅអី"
+    },
+    {
+      "id": "sp2",
+      "kind": "spell",
+      "sentence": "s8",
+      "word": "អី"
+    },
+    {
+      "id": "sp3",
+      "kind": "spell",
+      "sentence": "s9",
+      "word": "អើ"
+    }
+  ],
+  "pictures": {},
+  "noRecording": [],
+  "provenance": "Original lesson written for Koda, 2026. It follows the order in which Grade 1 Khmer teaches letters; the words and sentences are new. Draft: not yet reviewed by a native speaker."
+}

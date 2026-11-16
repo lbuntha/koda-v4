@@ -1,0 +1,160 @@
+{
+  "id": "km-g1-045",
+  "rev": 0,
+  "language": "km",
+  "band": "A",
+  "ages": [
+    6,
+    7
+  ],
+  "topics": [],
+  "questionCounts": {
+    "understand": 0,
+    "words": 0,
+    "spell": 4
+  },
+  "title": "មេរៀនទី ៤៥ · ក្រោយ ◌ច ◌ច់ (ព្យញ្ជនៈ ច ទី ២)",
+  "category": "Khmer",
+  "picture": "khmer-school",
+  "sentences": [
+    {
+      "id": "s1",
+      "text": "គច ងច ជច ទច នច ពច មច យច រច លច",
+      "words": [
+        "គច ",
+        "ងច ",
+        "ជច ",
+        "ទច ",
+        "នច ",
+        "ពច ",
+        "មច ",
+        "យច ",
+        "រច ",
+        "លច"
+      ]
+    },
+    {
+      "id": "s2",
+      "text": "គច់ ងច់ ជច់ ទច់ នច់ ពច់ មច់ យច់ រច់ លច់",
+      "words": [
+        "គច់ ",
+        "ងច់ ",
+        "ជច់ ",
+        "ទច់ ",
+        "នច់ ",
+        "ពច់ ",
+        "មច់ ",
+        "យច់ ",
+        "រច់ ",
+        "លច់"
+      ]
+    },
+    {
+      "id": "s3",
+      "text": "គាច ងាច ជាច ទាច នាច ពាច មាច យាច រាច លាច",
+      "words": [
+        "គាច ",
+        "ងាច ",
+        "ជាច ",
+        "ទាច ",
+        "នាច ",
+        "ពាច ",
+        "មាច ",
+        "យាច ",
+        "រាច ",
+        "លាច"
+      ]
+    },
+    {
+      "id": "s4",
+      "text": "គាច់ ងាច់ ជាច់ ទាច់ នាច់ ពាច់ មាច់ យាច់ រាច់ លាច់",
+      "words": [
+        "គាច់ ",
+        "ងាច់ ",
+        "ជាច់ ",
+        "ទាច់ ",
+        "នាច់ ",
+        "ពាច់ ",
+        "មាច់ ",
+        "យាច់ ",
+        "រាច់ ",
+        "លាច់"
+      ]
+    },
+    {
+      "id": "s5",
+      "text": "រួច លួច លិច វេច",
+      "words": [
+        "រួច ",
+        "លួច ",
+        "លិច ",
+        "វេច"
+      ]
+    },
+    {
+      "id": "s6",
+      "text": "ម៉ែលាងខោរួច។",
+      "words": [
+        "ម៉ែ",
+        "លាង",
+        "ខោ",
+        "រួច។"
+      ]
+    },
+    {
+      "id": "s7",
+      "text": "កុំលួចនំ។",
+      "words": [
+        "កុំ",
+        "លួច",
+        "នំ។"
+      ]
+    },
+    {
+      "id": "s8",
+      "text": "ទូកលិច។",
+      "words": [
+        "ទូក",
+        "លិច។"
+      ]
+    },
+    {
+      "id": "s9",
+      "text": "ម៉ែវេចនំ។",
+      "words": [
+        "ម៉ែ",
+        "វេច",
+        "នំ។"
+      ]
+    }
+  ],
+  "questions": [
+    {
+      "id": "sp1",
+      "kind": "spell",
+      "sentence": "s6",
+      "word": "រួច"
+    },
+    {
+      "id": "sp2",
+      "kind": "spell",
+      "sentence": "s7",
+      "word": "លួច"
+    },
+    {
+      "id": "sp3",
+      "kind": "spell",
+      "sentence": "s8",
+      "word": "លិច"
+    },
+    {
+      "id": "sp4",
+      "kind": "spell",
+      "sentence": "s9",
+      "word": "វេច"
+    }
+  ],
+  "pictures": {},
+  "noRecording": [],
+  "provenance": "Original lesson written for Koda, 2026. It follows the order in which Grade 1 Khmer teaches letters; the words and sentences are new. Draft: not yet reviewed by a native speaker."
+}

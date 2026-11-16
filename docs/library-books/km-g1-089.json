@@ -1,0 +1,107 @@
+{
+  "id": "km-g1-089",
+  "rev": 0,
+  "language": "km",
+  "band": "A",
+  "ages": [
+    6,
+    7
+  ],
+  "topics": [],
+  "questionCounts": {
+    "understand": 0,
+    "words": 0,
+    "spell": 4
+  },
+  "title": "មេរៀនទី ៨៩ · ជើង ម្ភ ម្រ ម្ល",
+  "category": "Khmer",
+  "picture": "khmer-school",
+  "sentences": [
+    {
+      "id": "s1",
+      "text": "ម្ភា ម្រា ម្លា",
+      "words": [
+        "ម្ភា ",
+        "ម្រា ",
+        "ម្លា"
+      ]
+    },
+    {
+      "id": "s2",
+      "text": "ម្នាស់ ម្ភៃ ម្រះ ម្លប់",
+      "words": [
+        "ម្នាស់ ",
+        "ម្ភៃ ",
+        "ម្រះ ",
+        "ម្លប់"
+      ]
+    },
+    {
+      "id": "s3",
+      "text": "ម្នាស់ផ្អែម។",
+      "words": [
+        "ម្នាស់",
+        "ផ្អែម។"
+      ]
+    },
+    {
+      "id": "s4",
+      "text": "ខ្ញុំមានម្ភៃរៀល។",
+      "words": [
+        "ខ្ញុំ",
+        "មាន",
+        "ម្ភៃ",
+        "រៀល។"
+      ]
+    },
+    {
+      "id": "s5",
+      "text": "ម៉ែចៀនម្រះ។",
+      "words": [
+        "ម៉ែ",
+        "ចៀន",
+        "ម្រះ។"
+      ]
+    },
+    {
+      "id": "s6",
+      "text": "ចៅដេកក្រោមម្លប់ឈើ។",
+      "words": [
+        "ចៅ",
+        "ដេក",
+        "ក្រោម",
+        "ម្លប់",
+        "ឈើ។"
+      ]
+    }
+  ],
+  "questions": [
+    {
+      "id": "sp1",
+      "kind": "spell",
+      "sentence": "s3",
+      "word": "ម្នាស់"
+    },
+    {
+      "id": "sp2",
+      "kind": "spell",
+      "sentence": "s4",
+      "word": "ម្ភៃ"
+    },
+    {
+      "id": "sp3",
+      "kind": "spell",
+      "sentence": "s5",
+      "word": "ម្រះ"
+    },
+    {
+      "id": "sp4",
+      "kind": "spell",
+      "sentence": "s6",
+      "word": "ម្លប់"
+    }
+  ],
+  "pictures": {},
+  "noRecording": [],
+  "provenance": "Original lesson written for Koda, 2026. It follows the order in which Grade 1 Khmer teaches letters; the words and sentences are new. Draft: not yet reviewed by a native speaker."
+}

@@ -3,7 +3,7 @@ import { memo, useCallback, useDeferredValue, useEffect, useMemo, useRef, useSta
 import { createPortal } from "react-dom";
 import { LANG_KEY, readLang } from "./lang";
 import { readPickFrom, useTodayContext } from "../components/learn/useToday";
-import { ArrowLeft, BookOpen, Check, ChevronDown, Globe, Lightbulb, RotateCcw, Search, Star, Volume2, Zap } from "lucide-react";
+import { ArrowLeft, BookOpen, Check, ChevronDown, Globe, RotateCcw, Search, Star, Volume2, X, Zap } from "lucide-react";
 import { LetterWheel } from "../components/wheel/LetterWheel";
 import { ScoringAPI } from "../lib/scoring";
 import { noteFor, type Language, type Passage } from "./data/passage";
@@ -25,8 +25,9 @@ import { prefetchPhotos } from "./photos";
 import { reportBook, type ReportReason } from "./api";
 import { BookReader, type ReaderPage } from "./BookReader";
 import { playSound } from "../utils/audio";
-import { UIButton, UICard, UICarousel, UIMenu, UIMenuItem, UIGuideBubble, UIBookCard, UILinkButton, UIQuizToolbar, UIModal, UIMatchPairs, UIProgressBar, UISearchInput } from "../components/ui";
+import { UIAnswerFlash, UIArtIcon, UIButton, UICard, UICarousel, UIMenu, UIMenuItem, UIGuideBubble, UIBookCard, UILinkButton, UIQuizToolbar, UIModal, UIMatchPairs, UISearchInput } from "../components/ui";
 import { themeSystem } from "../lib/themeSystem";
+import type { SvgAssetId } from "../assets/svg";
 import "./khmerFont";
 import { useT } from "../lib/i18n";
 
@@ -53,8 +54,6 @@ const COVER: Record<string, string> = {
   "Weather & play": "from-sky-500 to-indigo-700",
   Everyday: "from-indigo-400 to-purple-700",
 };
-const btn = "inline-flex min-h-11 items-center justify-center gap-2 rounded-full px-4 font-bold transition-colors disabled:cursor-not-allowed disabled:opacity-45";
-const quiet = `${btn} border border-line bg-surface text-ink hover:border-indigo-400`;
 /** Catalog layout knobs, named once so the page has no loose numbers. */
 const TILE_MIN = "16rem";
 /** A book card's width in a sideways row, and the grid a row opens into. */
@@ -667,7 +666,15 @@ const Reader = BookReader;
 /* Quiz                                                                        */
 /* -------------------------------------------------------------------------- */
 
-/* Worded under `library.part.<part>`. */
+/* Worded under `library.part.<part>`; drawn with the shared art kit. */
+const PART_ART: Record<QuizItem["part"], SvgAssetId> = {
+  understand: "kit-question",
+  words: "kit-words",
+  spell: "kit-letters",
+  match: "kit-target",
+  opposite: "kit-repeat",
+  reading: "kit-sound",
+};
 
 function Quiz({ book, onLeave, onFinish, preview = false }: { book: Passage; onLeave(): void; onFinish(o: Outcome[]): void; preview?: boolean }) {
   const { t: tr } = useT();
@@ -677,6 +684,10 @@ function Quiz({ book, onLeave, onFinish, preview = false }: { book: Passage; onL
   const [outcomes, setOutcomes] = useState<Outcome[]>([]);
   const [sheet, setSheet] = useState<{ evidence: string | null } | null>(null);
   const [hintHost, setHintHost] = useState<HTMLDivElement | null>(null);
+  // The verdict on an answer: the same pop-up card the lessons use, so a child
+  // meets one way of being told "right" or "not yet" everywhere in Koda.
+  const [flash, setFlash] = useState<"right" | "wrong" | null>(null);
+  const advance = useRef<number | undefined>(undefined);
   const cur = useRef<Outcome | null>(null);
   const finished = useRef(false);
   const item = quiz[i];
@@ -711,6 +722,15 @@ function Quiz({ book, onLeave, onFinish, preview = false }: { book: Passage; onL
     }
   };
 
+  // A right answer moves on by itself, and still offers "Next" for a child who wants to go now.
+  const right = () => {
+    setFlash("right");
+    window.clearTimeout(advance.current);
+    advance.current = window.setTimeout(() => { setFlash(null); correct(); }, 1600);
+  };
+  const next = () => { window.clearTimeout(advance.current); setFlash(null); correct(); };
+  useEffect(() => () => window.clearTimeout(advance.current), []);
+
   const doneIn = (part: QuizItem["part"]) => outcomes.filter((o) => o.part === part).length;
   const parts = PARTS.map((p) => ({ p, n: quiz.filter((q) => q.part === p).length })).filter(({ p, n }) => n > 0 || !OPTIONAL_PARTS.has(p));
 
@@ -719,25 +739,43 @@ function Quiz({ book, onLeave, onFinish, preview = false }: { book: Passage; onL
       <div className="mb-4">
         <UIQuizToolbar onBack={onLeave} onReadAgain={() => readAgain()} hintHostRef={setHintHost} />
       </div>
-      <div className={`mb-4 grid gap-2 ${parts.length > 3 ? "grid-cols-4" : "grid-cols-3"}`} aria-label={tr("library.progress")}>
-        {parts.map(({ p, n }) => (
-          <div key={p}>
-            <div className={`mb-1 flex justify-between gap-1.5 text-[11px] font-extrabold uppercase tracking-wide ${item?.part === p ? "text-ink" : "text-muted"}`}>
-              <span className="min-w-0 truncate">{tr(`library.part.${p}`)}</span>
-              <span className="shrink-0 tabular-nums">{doneIn(p)}/{n}</span>
-            </div>
-            <UIProgressBar value={doneIn(p)} max={n} label={tr(`library.part.${p}`)} />
-          </div>
-        ))}
-      </div>
+      {/* The parts as steps: where the child is, what is done, what is next. */}
+      <ol className={`mb-4 grid gap-2 ${parts.length > 3 ? "grid-cols-2 sm:grid-cols-4" : "grid-cols-3"}`} aria-label={tr("library.progress")}>
+        {parts.map(({ p, n }) => {
+          const state = item?.part === p ? "now" : doneIn(p) >= n ? "done" : "next";
+          return (
+            <li key={p} className={themeSystem.quiz.step(state)} aria-current={state === "now" ? "step" : undefined}>
+              <span className="relative shrink-0">
+                <UIArtIcon id={PART_ART[p]} className="h-6 w-6 sm:h-7 sm:w-7" />
+                {state === "done" && (
+                  <span className="absolute -bottom-1 -right-1 grid h-4 w-4 place-items-center rounded-full bg-emerald-500 text-white ring-2 ring-surface" aria-hidden="true">
+                    <Check className="h-3 w-3" strokeWidth={3} />
+                  </span>
+                )}
+              </span>
+              <span className="w-full min-w-0 sm:w-auto">
+                <span className={themeSystem.quiz.stepLabel}>{tr(`library.part.${p}`)}</span>
+                <span className={themeSystem.quiz.stepCount}>{doneIn(p)}/{n}</span>
+              </span>
+            </li>
+          );
+        })}
+      </ol>
 
+      {item && (
+        <section className={themeSystem.quiz.card}>
+          <p className={themeSystem.quiz.eyebrow}>
+            {tr("library.questionOf", { n: doneIn(item.part) + 1, total: quiz.filter((q) => q.part === item.part).length })}
+          </p>
       {item && (item.part === "match" || item.part === "opposite" || item.part === "reading") && (
         <MatchQuestionView
           key={i}
           book={book}
           item={item}
+          // A missed pair is one step of the question, not an answer: the board
+          // shows it, and the pop-up waits for the question to be finished.
           onWrong={(given) => { cur.current!.wrong++; recorder.answered(item, false, given); }}
-          onRight={(given) => { recorder.answered(item, true, given); setTimeout(correct, 900); }}
+          onRight={(given) => { recorder.answered(item, true, given); right(); }}
           onHint={(level) => {
             cur.current!.hints = Math.max(cur.current!.hints, level);
             recorder.support("hint", level);
@@ -751,8 +789,8 @@ function Quiz({ book, onLeave, onFinish, preview = false }: { book: Passage; onL
           key={i}
           book={book}
           item={item}
-          onWrong={(given) => { cur.current!.wrong++; recorder.answered(item, false, given); }}
-          onRight={(given) => { recorder.answered(item, true, given); setTimeout(correct, 900); }}
+          onWrong={(given) => { cur.current!.wrong++; recorder.answered(item, false, given); setFlash("wrong"); }}
+          onRight={(given) => { recorder.answered(item, true, given); right(); }}
           onHint={(level) => {
             cur.current!.hints = Math.max(cur.current!.hints, level);
             recorder.support("hint", level);
@@ -767,10 +805,23 @@ function Quiz({ book, onLeave, onFinish, preview = false }: { book: Passage; onL
           key={i}
           book={book}
           item={item}
-          onWrong={(given) => { cur.current!.wrong++; recorder.answered(item, false, given); }}
-          onRight={(given) => { recorder.answered(item, true, given); setTimeout(correct, 1000); }}
+          onWrong={(given) => { cur.current!.wrong++; recorder.answered(item, false, given); setFlash("wrong"); }}
+          onRight={(given) => { recorder.answered(item, true, given); right(); }}
           onHint={(level) => { cur.current!.hints = Math.max(cur.current!.hints, level); recorder.support("hint", level); }}
           hintHost={hintHost}
+        />
+      )}
+        </section>
+      )}
+
+      {flash && (
+        <UIAnswerFlash
+          key={`${flash}-${i}-${outcomes.length}`}
+          tone={flash === "right" ? "correct" : "tryAgain"}
+          title={tr(flash === "right" ? "library.feedback.right" : "library.feedback.notQuite")}
+          message={flash === "wrong" ? tr(item?.part === "spell" ? "library.feedback.spellAgain" : "library.feedback.tryAnother") : undefined}
+          actionLabel={tr(flash === "right" ? "studio.next" : "studio.tryAgain")}
+          onAction={flash === "right" ? next : () => setFlash(null)}
         />
       )}
 
@@ -804,8 +855,9 @@ function HintBar({ text, level, onHint, host }: { text: string; level: number; o
   const { t: tr } = useT();
   const label = level >= 3 ? tr("library.hint.none") : tr("library.hint.button", { n: level + 1, total: 3 });
   const action = (
-    <button type="button" onClick={onHint} disabled={level >= 3} className={`${quiet} !w-11 !px-0`} aria-label={label} title={label}>
-      <Lightbulb className="h-4 w-4" aria-hidden="true" />
+    <button type="button" onClick={onHint} disabled={level >= 3} className={themeSystem.quiz.tool} aria-label={label} title={label}>
+      <UIArtIcon id="kit-hint" className="h-7 w-7" />
+      {tr("library.hint.title")}
     </button>
   );
   return (
@@ -855,18 +907,15 @@ function ChoiceQuestion({ book, item, onWrong, onRight, onHint, hintHost }: {
   const [right, setRight] = useState(false);
   const [hint, setHint] = useState(0);
   const [hintText, setHintText] = useState("");
-  const [fb, setFb] = useState("");
 
   const pick = (i: number) => {
     if (right || wrong.includes(i) || out.includes(i)) return;
     if (i === q.answer) {
       setRight(true);
-      setFb(tr("library.feedback.right"));
       playSound("success");
       onRight(q.options[i]);
     } else {
       setWrong((w) => [...w, i]);
-      setFb(tr("library.feedback.wrong"));
       playSound("error");
       onWrong(q.options[i]);
     }
@@ -884,44 +933,48 @@ function ChoiceQuestion({ book, item, onWrong, onRight, onHint, hintHost }: {
     }
   };
 
+  const long = !pics && q.options.some((o) => o.length > 22);
   return (
     <div>
-      <p className={`text-2xl font-extrabold leading-snug text-ink ${kh(book)}`}>
+      <p className={`${themeSystem.quiz.question} ${kh(book)}`}>
         {q.prompt}
         {pics && canSpeak(book.language) && (
-          <button type="button" onClick={() => void say(q.kind === "vocab" ? q.word : "", book.language)} aria-label={tr("library.hearWord")} className="ml-2 inline-grid h-11 w-11 place-items-center rounded-full border border-line bg-surface-muted align-middle">
+          <button type="button" onClick={() => void say(q.kind === "vocab" ? q.word : "", book.language)} aria-label={tr("library.hearWord")} className="ml-2 inline-grid h-11 w-11 place-items-center rounded-full border border-line bg-surface-muted align-middle text-ink hover:bg-indigo-50 dark:hover:bg-indigo-950">
             <Volume2 className="h-4 w-4" aria-hidden="true" />
           </button>
         )}
       </p>
-      <div className={`mt-4 grid gap-3 ${pics ? "grid-cols-3" : "sm:grid-cols-3"}`}>
+      <div className={`mt-4 grid gap-2.5 sm:gap-3 ${pics ? "grid-cols-3" : long ? "" : "sm:grid-cols-3"}`}>
         {q.options.map((o, i) => {
           const isWrong = wrong.includes(i) || out.includes(i);
           const isRight = right && i === q.answer;
+          const state = isRight ? "right" : isWrong ? "wrong" : right ? "rest" : "idle";
+          const badge = <span className={themeSystem.quiz.badge(state)} aria-hidden="true">{isRight ? <Check strokeWidth={3} /> : isWrong ? <X strokeWidth={3} /> : String.fromCharCode(65 + i)}</span>;
           return (
             <button
               key={i}
               type="button"
               onClick={() => pick(i)}
               disabled={isWrong || right}
-              aria-label={pics ? `${o}${isWrong ? `, ${tr("library.notThisOne")}` : isRight ? `, ${tr("library.right")}` : ""}` : undefined}
-              className={`flex min-h-16 flex-col items-center justify-center gap-2 rounded-2xl border-2 p-3 text-lg font-extrabold transition-colors ${
-                isRight ? "border-emerald-600 bg-emerald-50 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-200"
-                : isWrong ? "border-rose-400 bg-rose-50 text-rose-800 line-through opacity-60 dark:bg-rose-950 dark:text-rose-200"
-                : "border-line bg-surface text-ink hover:border-indigo-400"
-              } ${kh(book)}`}
+              aria-label={`${o}${isWrong ? `, ${tr("library.notThisOne")}` : isRight ? `, ${tr("library.right")}` : ""}`}
+              className={`${themeSystem.quiz.choice(state, pics)} ${kh(book)}`}
             >
-              {pics ? <span className="h-20 w-full max-w-[140px]"><Picture name={o} /></span> : null}
-              <span>
-                {isRight ? "✓ " : isWrong ? "✕ " : ""}
-                {pics ? "" : o}
-              </span>
+              {pics ? (
+                <>
+                  <span className="absolute left-2 top-2 z-10 rounded-xl bg-surface shadow-sm">{badge}</span>
+                  <span className={themeSystem.quiz.picture}><Picture name={o} /></span>
+                </>
+              ) : (
+                <>
+                  {badge}
+                  <span className="min-w-0 flex-1">{o}</span>
+                </>
+              )}
             </button>
           );
         })}
       </div>
-      <p aria-live="polite" className={`mt-3 min-h-6 text-sm font-bold ${right ? "text-emerald-700 dark:text-emerald-400" : "text-rose-700 dark:text-rose-400"}`}>{fb}</p>
-      {right && q.kind === "vocab" && <WordNotes book={book} word={q.word} />}
+      {right && q.kind === "vocab" && <WordNotes book={book} word={q.word} className="mt-4" />}
       <HintBar text={hintText} level={hint} onHint={nextHint} host={hintHost} />
     </div>
   );
@@ -959,21 +1012,17 @@ function MatchQuestionView({ book, item, onWrong, onRight, onHint, hintHost }: {
   const [joined, setJoined] = useState<Record<number, number>>({});
   const [hint, setHint] = useState(0);
   const [hintText, setHintText] = useState("");
-  const [fb, setFb] = useState("");
   const done = Object.keys(joined).length === q.pairs.length;
 
   const join = (l: number) => {
     const next = { ...joined, [l]: Object.keys(joined).length };
     setJoined(next);
-    setFb("");
     if (Object.keys(next).length === q.pairs.length) {
-      setFb(tr("library.feedback.right"));
       playSound("success");
       onRight(q.pairs.map((pr) => `${pr.left} → ${pr.right}`).join("; "));
     } else playSound("pop");
   };
   const miss = (l: number, r: number) => {
-    setFb(tr("library.feedback.wrong"));
     playSound("error");
     onWrong(`${q.pairs[l].left} → ${q.pairs[r].right}`);
   };
@@ -992,7 +1041,7 @@ function MatchQuestionView({ book, item, onWrong, onRight, onHint, hintHost }: {
 
   return (
     <div>
-      <p className={`text-2xl font-extrabold leading-snug text-ink ${kh(book)}`}>{q.prompt}</p>
+      <p className={`${themeSystem.quiz.question} ${kh(book)}`}>{q.prompt}</p>
       <p className="mt-1 text-sm text-muted">{tr(item.part === "match" ? "library.matchHow" : "library.notesQuiz.how")}</p>
       <div className="mt-4">
         <UIMatchPairs
@@ -1007,7 +1056,6 @@ function MatchQuestionView({ book, item, onWrong, onRight, onHint, hintHost }: {
           disabled={done}
         />
       </div>
-      <p aria-live="polite" className={`mt-3 min-h-6 text-sm font-bold ${done ? "text-emerald-700 dark:text-emerald-400" : "text-rose-700 dark:text-rose-400"}`}>{fb}</p>
       <HintBar text={hintText} level={hint} onHint={nextHint} host={hintHost} />
     </div>
   );
@@ -1070,8 +1118,8 @@ function SpellQuestion({ book, item, onWrong, onRight, onHint, hintHost }: {
   return (
     <div className="grid gap-4 md:grid-cols-[minmax(0,1fr)_minmax(0,1fr)] md:items-start">
       <div>
-        <h2 className="text-xs font-extrabold uppercase tracking-wider text-muted">{tr("library.finishSentence")}</h2>
-        <p className={`mt-2 text-2xl leading-loose text-ink ${kh(book)}`}>
+        <h2 className={`${themeSystem.quiz.question} !mt-1 !text-lg sm:!text-xl`}>{tr("library.finishSentence")}</h2>
+        <p className={`mt-3 rounded-2xl bg-surface-muted px-4 py-3 text-xl sm:text-2xl leading-loose text-ink ${kh(book)}`}>
           {voice && (
             <button type="button" onClick={() => void say(full, book.language, sentence?.audio)} aria-label={tr("library.readSentenceToMe")} title={tr("library.readSentenceToMe")} className="mr-2 inline-grid h-11 w-11 place-items-center rounded-full border border-line bg-surface-muted align-middle">
               <Volume2 className="h-5 w-5" aria-hidden="true" />

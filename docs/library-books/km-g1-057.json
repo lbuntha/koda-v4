@@ -1,0 +1,170 @@
+{
+  "id": "km-g1-057",
+  "rev": 0,
+  "language": "km",
+  "band": "A",
+  "ages": [
+    6,
+    7
+  ],
+  "topics": [],
+  "questionCounts": {
+    "understand": 0,
+    "words": 0,
+    "spell": 5
+  },
+  "title": "មេរៀនទី ៥៧ · ក្រោយ ◌យ (ព្យញ្ជនៈ យ ទី ២)",
+  "category": "Khmer",
+  "picture": "khmer-school",
+  "sentences": [
+    {
+      "id": "s1",
+      "text": "គយ ងយ ជយ ទយ នយ ពយ មយ យយ រយ លយ",
+      "words": [
+        "គយ ",
+        "ងយ ",
+        "ជយ ",
+        "ទយ ",
+        "នយ ",
+        "ពយ ",
+        "មយ ",
+        "យយ ",
+        "រយ ",
+        "លយ"
+      ]
+    },
+    {
+      "id": "s2",
+      "text": "គាយ ងាយ ជាយ ទាយ នាយ ពាយ មាយ យាយ រាយ លាយ",
+      "words": [
+        "គាយ ",
+        "ងាយ ",
+        "ជាយ ",
+        "ទាយ ",
+        "នាយ ",
+        "ពាយ ",
+        "មាយ ",
+        "យាយ ",
+        "រាយ ",
+        "លាយ"
+      ]
+    },
+    {
+      "id": "s3",
+      "text": "ទាយ ងាយ វាយ លាយ ជាយ យាយ នាយ មុយ រុយ លុយ មួយ ជួយ",
+      "words": [
+        "ទាយ ",
+        "ងាយ ",
+        "វាយ ",
+        "លាយ ",
+        "ជាយ ",
+        "យាយ ",
+        "នាយ ",
+        "មុយ ",
+        "រុយ ",
+        "លុយ ",
+        "មួយ ",
+        "ជួយ"
+      ]
+    },
+    {
+      "id": "s4",
+      "text": "យាយជួយម៉ែ។",
+      "words": [
+        "យាយ",
+        "ជួយ",
+        "ម៉ែ។"
+      ]
+    },
+    {
+      "id": "s5",
+      "text": "ម៉ែមានលុយ។",
+      "words": [
+        "ម៉ែ",
+        "មាន",
+        "លុយ។"
+      ]
+    },
+    {
+      "id": "s6",
+      "text": "មុយមកហើយ។",
+      "words": [
+        "មុយ",
+        "មក",
+        "ហើយ។"
+      ]
+    },
+    {
+      "id": "s7",
+      "text": "ចៅជួយយាយ។",
+      "words": [
+        "ចៅ",
+        "ជួយ",
+        "យាយ។"
+      ]
+    },
+    {
+      "id": "s8",
+      "text": "ម៉ែលាយបាយ។",
+      "words": [
+        "ម៉ែ",
+        "លាយ",
+        "បាយ។"
+      ]
+    },
+    {
+      "id": "s9",
+      "text": "ចៅមានដបមួយ។",
+      "words": [
+        "ចៅ",
+        "មាន",
+        "ដប",
+        "មួយ។"
+      ]
+    },
+    {
+      "id": "s10",
+      "text": "ពូវាយគង។",
+      "words": [
+        "ពូ",
+        "វាយ",
+        "គង។"
+      ]
+    }
+  ],
+  "questions": [
+    {
+      "id": "sp1",
+      "kind": "spell",
+      "sentence": "s4",
+      "word": "ជួយ"
+    },
+    {
+      "id": "sp2",
+      "kind": "spell",
+      "sentence": "s5",
+      "word": "លុយ"
+    },
+    {
+      "id": "sp3",
+      "kind": "spell",
+      "sentence": "s6",
+      "word": "មុយ"
+    },
+    {
+      "id": "sp4",
+      "kind": "spell",
+      "sentence": "s9",
+      "word": "មួយ"
+    },
+    {
+      "id": "sp5",
+      "kind": "spell",
+      "sentence": "s8",
+      "word": "លាយ"
+    }
+  ],
+  "pictures": {},
+  "noRecording": [],
+  "provenance": "Original lesson written for Koda, 2026. It follows the order in which Grade 1 Khmer teaches letters; the words and sentences are new. Draft: not yet reviewed by a native speaker."
+}

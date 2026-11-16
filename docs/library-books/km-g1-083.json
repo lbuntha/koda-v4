@@ -1,0 +1,91 @@
+{
+  "id": "km-g1-083",
+  "rev": 0,
+  "language": "km",
+  "band": "A",
+  "ages": [
+    6,
+    7
+  ],
+  "topics": [],
+  "questionCounts": {
+    "understand": 0,
+    "words": 0,
+    "spell": 3
+  },
+  "title": "មេរៀនទី ៨៣ · ជើង ផ្ក ផ្គ ផ្ច",
+  "category": "Khmer",
+  "picture": "khmer-school",
+  "sentences": [
+    {
+      "id": "s1",
+      "text": "ផ្កា ផ្គា ផ្ចា",
+      "words": [
+        "ផ្កា ",
+        "ផ្គា ",
+        "ផ្ចា"
+      ]
+    },
+    {
+      "id": "s2",
+      "text": "ផ្កា ផ្កាយ ផ្គរ ផ្ចិត",
+      "words": [
+        "ផ្កា ",
+        "ផ្កាយ ",
+        "ផ្គរ ",
+        "ផ្ចិត"
+      ]
+    },
+    {
+      "id": "s3",
+      "text": "ផ្កានេះក្រហម។",
+      "words": [
+        "ផ្កា",
+        "នេះ",
+        "ក្រហម។"
+      ]
+    },
+    {
+      "id": "s4",
+      "text": "យប់មានផ្កាយច្រើន។",
+      "words": [
+        "យប់",
+        "មាន",
+        "ផ្កាយ",
+        "ច្រើន។"
+      ]
+    },
+    {
+      "id": "s5",
+      "text": "ផ្គរលាន់ខ្លាំង។",
+      "words": [
+        "ផ្គរ",
+        "លាន់",
+        "ខ្លាំង។"
+      ]
+    }
+  ],
+  "questions": [
+    {
+      "id": "sp1",
+      "kind": "spell",
+      "sentence": "s3",
+      "word": "ផ្កា"
+    },
+    {
+      "id": "sp2",
+      "kind": "spell",
+      "sentence": "s4",
+      "word": "ផ្កាយ"
+    },
+    {
+      "id": "sp3",
+      "kind": "spell",
+      "sentence": "s5",
+      "word": "ផ្គរ"
+    }
+  ],
+  "pictures": {},
+  "noRecording": [],
+  "provenance": "Original lesson written for Koda, 2026. It follows the order in which Grade 1 Khmer teaches letters; the words and sentences are new. Draft: not yet reviewed by a native speaker."
+}

@@ -1,0 +1,118 @@
+{
+  "id": "km-g1-020",
+  "rev": 0,
+  "language": "km",
+  "band": "A",
+  "ages": [
+    6,
+    7
+  ],
+  "topics": [],
+  "questionCounts": {
+    "understand": 0,
+    "words": 0,
+    "spell": 3
+  },
+  "title": "មេរៀនទី ២០ · អក្សរ ឌ",
+  "category": "Khmer",
+  "picture": "khmer-school",
+  "sentences": [
+    {
+      "id": "s1",
+      "text": "ឌ ឌា ឌិ ឌី ឌឹ ឌឺ ឌុ ឌូ ឌួ ឌើ ឌឿ ឌៀ ឌេ",
+      "words": [
+        "ឌ ",
+        "ឌា ",
+        "ឌិ ",
+        "ឌី ",
+        "ឌឹ ",
+        "ឌឺ ",
+        "ឌុ ",
+        "ឌូ ",
+        "ឌួ ",
+        "ឌើ ",
+        "ឌឿ ",
+        "ឌៀ ",
+        "ឌេ"
+      ]
+    },
+    {
+      "id": "s2",
+      "text": "ឌែ ឌៃ ឌោ ឌៅ ឌុំ ឌំ ឌាំ ឌះ ឌុះ ឌេះ ឌោះ",
+      "words": [
+        "ឌែ ",
+        "ឌៃ ",
+        "ឌោ ",
+        "ឌៅ ",
+        "ឌុំ ",
+        "ឌំ ",
+        "ឌាំ ",
+        "ឌះ ",
+        "ឌុះ ",
+        "ឌេះ ",
+        "ឌោះ"
+      ]
+    },
+    {
+      "id": "s3",
+      "text": "ជា ជី ជុំ គោ",
+      "words": [
+        "ជា ",
+        "ជី ",
+        "ជុំ ",
+        "គោ"
+      ]
+    },
+    {
+      "id": "s4",
+      "text": "ឈើជាផេះ។",
+      "words": [
+        "ឈើ",
+        "ជា",
+        "ផេះ។"
+      ]
+    },
+    {
+      "id": "s5",
+      "text": "គេជាចៅតា។",
+      "words": [
+        "គេ",
+        "ជា",
+        "ចៅ",
+        "តា។"
+      ]
+    },
+    {
+      "id": "s6",
+      "text": "កុំហៅគោ។",
+      "words": [
+        "កុំ",
+        "ហៅ",
+        "គោ។"
+      ]
+    }
+  ],
+  "questions": [
+    {
+      "id": "sp1",
+      "kind": "spell",
+      "sentence": "s4",
+      "word": "ផេះ"
+    },
+    {
+      "id": "sp2",
+      "kind": "spell",
+      "sentence": "s5",
+      "word": "ជា"
+    },
+    {
+      "id": "sp3",
+      "kind": "spell",
+      "sentence": "s6",
+      "word": "គោ"
+    }
+  ],
+  "pictures": {},
+  "noRecording": [],
+  "provenance": "Original lesson written for Koda, 2026. It follows the order in which Grade 1 Khmer teaches letters; the words and sentences are new. Draft: not yet reviewed by a native speaker."
+}

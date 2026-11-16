@@ -1,0 +1,118 @@
+{
+  "id": "km-g1-016",
+  "rev": 0,
+  "language": "km",
+  "band": "A",
+  "ages": [
+    6,
+    7
+  ],
+  "topics": [],
+  "questionCounts": {
+    "understand": 0,
+    "words": 0,
+    "spell": 3
+  },
+  "title": "មេរៀនទី ១៦ · អក្សរ ង",
+  "category": "Khmer",
+  "picture": "khmer-school",
+  "sentences": [
+    {
+      "id": "s1",
+      "text": "ង ងា ងិ ងី ងឹ ងឺ ងុ ងូ ងួ ងើ ងឿ ងៀ ងេ",
+      "words": [
+        "ង ",
+        "ងា ",
+        "ងិ ",
+        "ងី ",
+        "ងឹ ",
+        "ងឺ ",
+        "ងុ ",
+        "ងូ ",
+        "ងួ ",
+        "ងើ ",
+        "ងឿ ",
+        "ងៀ ",
+        "ងេ"
+      ]
+    },
+    {
+      "id": "s2",
+      "text": "ងែ ងៃ ងោ ងៅ ងុំ ងំ ងាំ ងះ ងុះ ងេះ ងោះ",
+      "words": [
+        "ងែ ",
+        "ងៃ ",
+        "ងោ ",
+        "ងៅ ",
+        "ងុំ ",
+        "ងំ ",
+        "ងាំ ",
+        "ងះ ",
+        "ងុះ ",
+        "ងេះ ",
+        "ងោះ"
+      ]
+    },
+    {
+      "id": "s3",
+      "text": "គោ គេ គូ ដី ដៃ",
+      "words": [
+        "គោ ",
+        "គេ ",
+        "គូ ",
+        "ដី ",
+        "ដៃ"
+      ]
+    },
+    {
+      "id": "s4",
+      "text": "តាគូគោ។",
+      "words": [
+        "តា",
+        "គូ",
+        "គោ។"
+      ]
+    },
+    {
+      "id": "s5",
+      "text": "ចៅចាំគេ។",
+      "words": [
+        "ចៅ",
+        "ចាំ",
+        "គេ។"
+      ]
+    },
+    {
+      "id": "s6",
+      "text": "គោចុះដី។",
+      "words": [
+        "គោ",
+        "ចុះ",
+        "ដី។"
+      ]
+    }
+  ],
+  "questions": [
+    {
+      "id": "sp1",
+      "kind": "spell",
+      "sentence": "s4",
+      "word": "គូ"
+    },
+    {
+      "id": "sp2",
+      "kind": "spell",
+      "sentence": "s5",
+      "word": "គេ"
+    },
+    {
+      "id": "sp3",
+      "kind": "spell",
+      "sentence": "s6",
+      "word": "គោ"
+    }
+  ],
+  "pictures": {},
+  "noRecording": [],
+  "provenance": "Original lesson written for Koda, 2026. It follows the order in which Grade 1 Khmer teaches letters; the words and sentences are new. Draft: not yet reviewed by a native speaker."
+}

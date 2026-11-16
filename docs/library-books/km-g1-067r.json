@@ -1,0 +1,89 @@
+{
+  "id": "km-g1-067r",
+  "rev": 0,
+  "language": "km",
+  "band": "A",
+  "ages": [
+    6,
+    7
+  ],
+  "topics": [],
+  "questionCounts": {
+    "understand": 0,
+    "words": 0,
+    "spell": 3
+  },
+  "title": "រៀនសាឡើងវិញ · ជើង ក",
+  "category": "Khmer",
+  "picture": "khmer-school",
+  "sentences": [
+    {
+      "id": "s1",
+      "text": "ក្ត ក្ប ក្ស ក្អ ក្ង ក្ន ក្ម ក្រ ក្ល",
+      "words": [
+        "ក្ត ",
+        "ក្ប ",
+        "ក្ស ",
+        "ក្អ ",
+        "ក្ង ",
+        "ក្ន ",
+        "ក្ម ",
+        "ក្រ ",
+        "ក្ល"
+      ]
+    },
+    {
+      "id": "s2",
+      "text": "ក្តាមនៅក្នុងក្អម។",
+      "words": [
+        "ក្តាម",
+        "នៅ",
+        "ក្នុង",
+        "ក្អម។"
+      ]
+    },
+    {
+      "id": "s3",
+      "text": "ក្មេងក្អកពេលយប់។",
+      "words": [
+        "ក្មេង",
+        "ក្អក",
+        "ពេល",
+        "យប់។"
+      ]
+    },
+    {
+      "id": "s4",
+      "text": "ក្អែកហើរទៅក្រុង។",
+      "words": [
+        "ក្អែក",
+        "ហើរ",
+        "ទៅ",
+        "ក្រុង។"
+      ]
+    }
+  ],
+  "questions": [
+    {
+      "id": "sp1",
+      "kind": "spell",
+      "sentence": "s2",
+      "word": "ក្អម"
+    },
+    {
+      "id": "sp2",
+      "kind": "spell",
+      "sentence": "s3",
+      "word": "ពេល"
+    },
+    {
+      "id": "sp3",
+      "kind": "spell",
+      "sentence": "s4",
+      "word": "ក្រុង"
+    }
+  ],
+  "pictures": {},
+  "noRecording": [],
+  "provenance": "Original lesson written for Koda, 2026. It follows the order in which Grade 1 Khmer teaches letters; the words and sentences are new. Draft: not yet reviewed by a native speaker."
+}

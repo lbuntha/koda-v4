@@ -1,0 +1,96 @@
+{
+  "id": "km-g1-094",
+  "rev": 0,
+  "language": "km",
+  "band": "A",
+  "ages": [
+    6,
+    7
+  ],
+  "topics": [],
+  "questionCounts": {
+    "understand": 0,
+    "words": 0,
+    "spell": 4
+  },
+  "title": "មេរៀនទី ៩៤ · ព្យញ្ជនៈ ត្រួត ង្ឃ ង្រ",
+  "category": "Khmer",
+  "picture": "khmer-school",
+  "sentences": [
+    {
+      "id": "s1",
+      "text": "មង្ឃុត សង្ឃឹម បង្រៀន បង្គា គីង្គក់",
+      "words": [
+        "មង្ឃុត ",
+        "សង្ឃឹម ",
+        "បង្រៀន ",
+        "បង្គា ",
+        "គីង្គក់"
+      ]
+    },
+    {
+      "id": "s2",
+      "text": "មង្ឃុតផ្អែម។",
+      "words": [
+        "មង្ឃុត",
+        "ផ្អែម។"
+      ]
+    },
+    {
+      "id": "s3",
+      "text": "ប៉ាទិញបង្គា។",
+      "words": [
+        "ប៉ា",
+        "ទិញ",
+        "បង្គា។"
+      ]
+    },
+    {
+      "id": "s4",
+      "text": "គីង្គក់លោត។",
+      "words": [
+        "គីង្គក់",
+        "លោត។"
+      ]
+    },
+    {
+      "id": "s5",
+      "text": "ខ្ញុំសង្ឃឹមថាភ្លៀង។",
+      "words": [
+        "ខ្ញុំ",
+        "សង្ឃឹម",
+        "ថា",
+        "ភ្លៀង។"
+      ]
+    }
+  ],
+  "questions": [
+    {
+      "id": "sp1",
+      "kind": "spell",
+      "sentence": "s2",
+      "word": "មង្ឃុត"
+    },
+    {
+      "id": "sp2",
+      "kind": "spell",
+      "sentence": "s3",
+      "word": "បង្គា"
+    },
+    {
+      "id": "sp3",
+      "kind": "spell",
+      "sentence": "s4",
+      "word": "គីង្គក់"
+    },
+    {
+      "id": "sp4",
+      "kind": "spell",
+      "sentence": "s5",
+      "word": "សង្ឃឹម"
+    }
+  ],
+  "pictures": {},
+  "noRecording": [],
+  "provenance": "Original lesson written for Koda, 2026. It follows the order in which Grade 1 Khmer teaches letters; the words and sentences are new. Draft: not yet reviewed by a native speaker."
+}

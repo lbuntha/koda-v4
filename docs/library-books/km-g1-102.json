@@ -1,0 +1,108 @@
+{
+  "id": "km-g1-102",
+  "rev": 0,
+  "language": "km",
+  "band": "A",
+  "ages": [
+    6,
+    7
+  ],
+  "topics": [],
+  "questionCounts": {
+    "understand": 0,
+    "words": 0,
+    "spell": 4
+  },
+  "title": "មេរៀនទី ១០២ · សាលា ខ្ញុំ",
+  "category": "Khmer",
+  "picture": "khmer-school",
+  "sentences": [
+    {
+      "id": "s1",
+      "text": "សាលាខ្ញុំនៅជិតទន្លេ។",
+      "words": [
+        "សាលា",
+        "ខ្ញុំ",
+        "នៅ",
+        "ជិត",
+        "ទន្លេ។"
+      ]
+    },
+    {
+      "id": "s2",
+      "text": "សាលាមានថ្នាក់រៀនប្រាំ។",
+      "words": [
+        "សាលា",
+        "មាន",
+        "ថ្នាក់",
+        "រៀន",
+        "ប្រាំ។"
+      ]
+    },
+    {
+      "id": "s3",
+      "text": "នៅក្បែរសាលាមានសួនផ្កា។",
+      "words": [
+        "នៅ",
+        "ក្បែរ",
+        "សាលា",
+        "មាន",
+        "សួន",
+        "ផ្កា។"
+      ]
+    },
+    {
+      "id": "s4",
+      "text": "ពេលចេញលេងយើងលេងល្បែងជាមួយគ្នា។",
+      "words": [
+        "ពេល",
+        "ចេញ",
+        "លេង",
+        "យើង",
+        "លេង",
+        "ល្បែង",
+        "ជាមួយ",
+        "គ្នា។"
+      ]
+    },
+    {
+      "id": "s5",
+      "text": "ខ្ញុំស្រឡាញ់សាលាខ្ញុំ។",
+      "words": [
+        "ខ្ញុំ",
+        "ស្រឡាញ់",
+        "សាលា",
+        "ខ្ញុំ។"
+      ]
+    }
+  ],
+  "questions": [
+    {
+      "id": "sp1",
+      "kind": "spell",
+      "sentence": "s1",
+      "word": "ទន្លេ"
+    },
+    {
+      "id": "sp2",
+      "kind": "spell",
+      "sentence": "s2",
+      "word": "ថ្នាក់"
+    },
+    {
+      "id": "sp3",
+      "kind": "spell",
+      "sentence": "s3",
+      "word": "សួន"
+    },
+    {
+      "id": "sp4",
+      "kind": "spell",
+      "sentence": "s4",
+      "word": "ល្បែង"
+    }
+  ],
+  "pictures": {},
+  "noRecording": [],
+  "provenance": "Original lesson written for Koda, 2026. It follows the order in which Grade 1 Khmer teaches letters; the words and sentences are new. Draft: not yet reviewed by a native speaker."
+}

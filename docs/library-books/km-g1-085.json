@@ -1,0 +1,111 @@
+{
+  "id": "km-g1-085",
+  "rev": 0,
+  "language": "km",
+  "band": "A",
+  "ages": [
+    6,
+    7
+  ],
+  "topics": [],
+  "questionCounts": {
+    "understand": 0,
+    "words": 0,
+    "spell": 4
+  },
+  "title": "មេរៀនទី ៨៥ · ជើង ព្យ ព្រ ព្ល",
+  "category": "Khmer",
+  "picture": "khmer-school",
+  "sentences": [
+    {
+      "id": "s1",
+      "text": "ព្យា ព្រា ព្លា ព្រី ព្រៃ",
+      "words": [
+        "ព្យា ",
+        "ព្រា ",
+        "ព្លា ",
+        "ព្រី ",
+        "ព្រៃ"
+      ]
+    },
+    {
+      "id": "s2",
+      "text": "ព្យុះ ព្រឹក ព្រាប ព្រៃ ព្រលឹម",
+      "words": [
+        "ព្យុះ ",
+        "ព្រឹក ",
+        "ព្រាប ",
+        "ព្រៃ ",
+        "ព្រលឹម"
+      ]
+    },
+    {
+      "id": "s3",
+      "text": "ព្រឹកនេះខ្ញុំក្រោកយឺត។",
+      "words": [
+        "ព្រឹក",
+        "នេះ",
+        "ខ្ញុំ",
+        "ក្រោក",
+        "យឺត។"
+      ]
+    },
+    {
+      "id": "s4",
+      "text": "ព្រាបហើរលើផ្ទះ។",
+      "words": [
+        "ព្រាប",
+        "ហើរ",
+        "លើ",
+        "ផ្ទះ។"
+      ]
+    },
+    {
+      "id": "s5",
+      "text": "ព្យុះខ្លាំង។",
+      "words": [
+        "ព្យុះ",
+        "ខ្លាំង។"
+      ]
+    },
+    {
+      "id": "s6",
+      "text": "ក្នុងព្រៃមានខ្លា។",
+      "words": [
+        "ក្នុង",
+        "ព្រៃ",
+        "មាន",
+        "ខ្លា។"
+      ]
+    }
+  ],
+  "questions": [
+    {
+      "id": "sp1",
+      "kind": "spell",
+      "sentence": "s3",
+      "word": "ព្រឹក"
+    },
+    {
+      "id": "sp2",
+      "kind": "spell",
+      "sentence": "s4",
+      "word": "ព្រាប"
+    },
+    {
+      "id": "sp3",
+      "kind": "spell",
+      "sentence": "s5",
+      "word": "ព្យុះ"
+    },
+    {
+      "id": "sp4",
+      "kind": "spell",
+      "sentence": "s6",
+      "word": "ព្រៃ"
+    }
+  ],
+  "pictures": {},
+  "noRecording": [],
+  "provenance": "Original lesson written for Koda, 2026. It follows the order in which Grade 1 Khmer teaches letters; the words and sentences are new. Draft: not yet reviewed by a native speaker."
+}

@@ -1,0 +1,117 @@
+{
+  "id": "km-g1-009",
+  "rev": 0,
+  "language": "km",
+  "band": "A",
+  "ages": [
+    6,
+    7
+  ],
+  "topics": [],
+  "questionCounts": {
+    "understand": 0,
+    "words": 0,
+    "spell": 3
+  },
+  "title": "មេរៀនទី ៩ · អក្សរ ណ",
+  "category": "Khmer",
+  "picture": "khmer-school",
+  "sentences": [
+    {
+      "id": "s1",
+      "text": "ណ ណា ណិ ណី ណឹ ណឺ ណុ ណូ ណួ ណើ ណឿ ណៀ ណេ",
+      "words": [
+        "ណ ",
+        "ណា ",
+        "ណិ ",
+        "ណី ",
+        "ណឹ ",
+        "ណឺ ",
+        "ណុ ",
+        "ណូ ",
+        "ណួ ",
+        "ណើ ",
+        "ណឿ ",
+        "ណៀ ",
+        "ណេ"
+      ]
+    },
+    {
+      "id": "s2",
+      "text": "ណែ ណៃ ណោ ណៅ ណុំ ណំ ណាំ ណះ ណុះ ណេះ ណោះ",
+      "words": [
+        "ណែ ",
+        "ណៃ ",
+        "ណោ ",
+        "ណៅ ",
+        "ណុំ ",
+        "ណំ ",
+        "ណាំ ",
+        "ណះ ",
+        "ណុះ ",
+        "ណេះ ",
+        "ណោះ"
+      ]
+    },
+    {
+      "id": "s3",
+      "text": "ណា ដៃ ណា ខែ ណា ខោ ណា",
+      "words": [
+        "ណា ",
+        "ដៃ ",
+        "ណា ",
+        "ខែ ",
+        "ណា ",
+        "ខោ ",
+        "ណា"
+      ]
+    },
+    {
+      "id": "s4",
+      "text": "ដីណា?",
+      "words": [
+        "ដី",
+        "ណា?"
+      ]
+    },
+    {
+      "id": "s5",
+      "text": "ខែណា?",
+      "words": [
+        "ខែ",
+        "ណា?"
+      ]
+    },
+    {
+      "id": "s6",
+      "text": "ដៃណា?",
+      "words": [
+        "ដៃ",
+        "ណា?"
+      ]
+    }
+  ],
+  "questions": [
+    {
+      "id": "sp1",
+      "kind": "spell",
+      "sentence": "s5",
+      "word": "ណា"
+    },
+    {
+      "id": "sp2",
+      "kind": "spell",
+      "sentence": "s4",
+      "word": "ដី"
+    },
+    {
+      "id": "sp3",
+      "kind": "spell",
+      "sentence": "s6",
+      "word": "ដៃ"
+    }
+  ],
+  "pictures": {},
+  "noRecording": [],
+  "provenance": "Original lesson written for Koda, 2026. It follows the order in which Grade 1 Khmer teaches letters; the words and sentences are new. Draft: not yet reviewed by a native speaker."
+}

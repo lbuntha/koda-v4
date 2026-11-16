@@ -1,0 +1,107 @@
+{
+  "id": "km-g1-075r",
+  "rev": 0,
+  "language": "km",
+  "band": "A",
+  "ages": [
+    6,
+    7
+  ],
+  "topics": [],
+  "questionCounts": {
+    "understand": 0,
+    "words": 0,
+    "spell": 4
+  },
+  "title": "រៀនសាឡើងវិញ · ជើង ច ឆ",
+  "category": "Khmer",
+  "picture": "khmer-school",
+  "sentences": [
+    {
+      "id": "s1",
+      "text": "ច្ប ច្ន ច្រ ឆ្ក ឆ្ង ឆ្ន ឆ្ម ឆ្ល ឆ្វ ឆ្អ",
+      "words": [
+        "ច្ប ",
+        "ច្ន ",
+        "ច្រ ",
+        "ឆ្ក ",
+        "ឆ្ង ",
+        "ឆ្ន ",
+        "ឆ្ម ",
+        "ឆ្ល ",
+        "ឆ្វ ",
+        "ឆ្អ"
+      ]
+    },
+    {
+      "id": "s2",
+      "text": "ឆ្មានិងឆ្កែលេងជាមួយគ្នា។",
+      "words": [
+        "ឆ្មា",
+        "និង",
+        "ឆ្កែ",
+        "លេង",
+        "ជាមួយ",
+        "គ្នា។"
+      ]
+    },
+    {
+      "id": "s3",
+      "text": "ខ្ញុំឆ្លងទឹក។",
+      "words": [
+        "ខ្ញុំ",
+        "ឆ្លង",
+        "ទឹក។"
+      ]
+    },
+    {
+      "id": "s4",
+      "text": "ម៉ែច្រៀងពិរោះ។",
+      "words": [
+        "ម៉ែ",
+        "ច្រៀង",
+        "ពិរោះ។"
+      ]
+    },
+    {
+      "id": "s5",
+      "text": "ឆ្នាំនេះខ្ញុំរៀនច្រើន។",
+      "words": [
+        "ឆ្នាំ",
+        "នេះ",
+        "ខ្ញុំ",
+        "រៀន",
+        "ច្រើន។"
+      ]
+    }
+  ],
+  "questions": [
+    {
+      "id": "sp1",
+      "kind": "spell",
+      "sentence": "s2",
+      "word": "ឆ្មា"
+    },
+    {
+      "id": "sp2",
+      "kind": "spell",
+      "sentence": "s3",
+      "word": "ឆ្លង"
+    },
+    {
+      "id": "sp3",
+      "kind": "spell",
+      "sentence": "s4",
+      "word": "ច្រៀង"
+    },
+    {
+      "id": "sp4",
+      "kind": "spell",
+      "sentence": "s5",
+      "word": "ឆ្នាំ"
+    }
+  ],
+  "pictures": {},
+  "noRecording": [],
+  "provenance": "Original lesson written for Koda, 2026. It follows the order in which Grade 1 Khmer teaches letters; the words and sentences are new. Draft: not yet reviewed by a native speaker."
+}

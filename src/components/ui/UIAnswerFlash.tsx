@@ -26,6 +26,17 @@ export interface UIAnswerFlashProps {
  * focus, so Enter or a tap moves on. A right answer also throws one burst of
  * confetti. Never colour alone — each tone has its own icon and words — and
  * every movement stops for a player who asked for less motion.
+ *
+ * Use it wisely — it is Koda's one way of giving a verdict, so it should mean
+ * something every time it appears:
+ *  - Once per answer the child has finished: right, or not yet. Not for a step
+ *    inside an answer (a pair joined in a match, a letter traced): the board
+ *    already shows that, and a pop-up on every step nags.
+ *  - Never for hints, tips or "hold on" nudges — those are `UIKidMessage` or
+ *    `UIGuideBubble`, said beside the work without stopping it.
+ *  - Short words: a 2–4 word title and at most one short sentence. One button.
+ *  - Right moves on by itself (keep "Next" for a child who wants to go now);
+ *    "Try again" only closes the card, so the child is back on the question.
  */
 export const UIAnswerFlash: React.FC<UIAnswerFlashProps> = ({
   tone,

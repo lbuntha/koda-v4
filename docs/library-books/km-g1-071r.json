@@ -1,0 +1,86 @@
+{
+  "id": "km-g1-071r",
+  "rev": 0,
+  "language": "km",
+  "band": "A",
+  "ages": [
+    6,
+    7
+  ],
+  "topics": [],
+  "questionCounts": {
+    "understand": 0,
+    "words": 0,
+    "spell": 3
+  },
+  "title": "រៀនសាឡើងវិញ · ជើង គ ឃ",
+  "category": "Khmer",
+  "picture": "khmer-school",
+  "sentences": [
+    {
+      "id": "s1",
+      "text": "គ្ន គ្ម គ្រ ឃ្ន ឃ្ម ឃ្ល ឃ្វ",
+      "words": [
+        "គ្ន ",
+        "គ្ម ",
+        "គ្រ ",
+        "ឃ្ន ",
+        "ឃ្ម ",
+        "ឃ្ល ",
+        "ឃ្វ"
+      ]
+    },
+    {
+      "id": "s2",
+      "text": "គ្រប់គ្នាឃ្លានបាយ។",
+      "words": [
+        "គ្រប់",
+        "គ្នា",
+        "ឃ្លាន",
+        "បាយ។"
+      ]
+    },
+    {
+      "id": "s3",
+      "text": "ឃ្មុំហើរលើគ្រែ។",
+      "words": [
+        "ឃ្មុំ",
+        "ហើរ",
+        "លើ",
+        "គ្រែ។"
+      ]
+    },
+    {
+      "id": "s4",
+      "text": "ក្មេងឃ្វាលទា។",
+      "words": [
+        "ក្មេង",
+        "ឃ្វាល",
+        "ទា។"
+      ]
+    }
+  ],
+  "questions": [
+    {
+      "id": "sp1",
+      "kind": "spell",
+      "sentence": "s2",
+      "word": "គ្រប់"
+    },
+    {
+      "id": "sp2",
+      "kind": "spell",
+      "sentence": "s3",
+      "word": "ឃ្មុំ"
+    },
+    {
+      "id": "sp3",
+      "kind": "spell",
+      "sentence": "s4",
+      "word": "ឃ្វាល"
+    }
+  ],
+  "pictures": {},
+  "noRecording": [],
+  "provenance": "Original lesson written for Koda, 2026. It follows the order in which Grade 1 Khmer teaches letters; the words and sentences are new. Draft: not yet reviewed by a native speaker."
+}

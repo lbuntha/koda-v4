@@ -1,0 +1,133 @@
+{
+  "id": "km-g1-014",
+  "rev": 0,
+  "language": "km",
+  "band": "A",
+  "ages": [
+    6,
+    7
+  ],
+  "topics": [],
+  "questionCounts": {
+    "understand": 0,
+    "words": 0,
+    "spell": 4
+  },
+  "title": "មេរៀនទី ១៤ · អក្សរ គ",
+  "category": "Khmer",
+  "picture": "khmer-school",
+  "sentences": [
+    {
+      "id": "s1",
+      "text": "គ គា គិ គី គឹ គឺ គុ គូ គួ គើ គឿ គៀ គេ",
+      "words": [
+        "គ ",
+        "គា ",
+        "គិ ",
+        "គី ",
+        "គឹ ",
+        "គឺ ",
+        "គុ ",
+        "គូ ",
+        "គួ ",
+        "គើ ",
+        "គឿ ",
+        "គៀ ",
+        "គេ"
+      ]
+    },
+    {
+      "id": "s2",
+      "text": "គែ គៃ គោ គៅ គុំ គំ គាំ គះ គុះ គេះ គោះ",
+      "words": [
+        "គែ ",
+        "គៃ ",
+        "គោ ",
+        "គៅ ",
+        "គុំ ",
+        "គំ ",
+        "គាំ ",
+        "គះ ",
+        "គុះ ",
+        "គេះ ",
+        "គោះ"
+      ]
+    },
+    {
+      "id": "s3",
+      "text": "គោ គេ គូ គោះ គឺ",
+      "words": [
+        "គោ ",
+        "គេ ",
+        "គូ ",
+        "គោះ ",
+        "គឺ"
+      ]
+    },
+    {
+      "id": "s4",
+      "text": "គេដាំតែ។",
+      "words": [
+        "គេ",
+        "ដាំ",
+        "តែ។"
+      ]
+    },
+    {
+      "id": "s5",
+      "text": "កុំគោះផើ។",
+      "words": [
+        "កុំ",
+        "គោះ",
+        "ផើ។"
+      ]
+    },
+    {
+      "id": "s6",
+      "text": "តាហៅគោ។",
+      "words": [
+        "តា",
+        "ហៅ",
+        "គោ។"
+      ]
+    },
+    {
+      "id": "s7",
+      "text": "ចៅខំគូ។",
+      "words": [
+        "ចៅ",
+        "ខំ",
+        "គូ។"
+      ]
+    }
+  ],
+  "questions": [
+    {
+      "id": "sp1",
+      "kind": "spell",
+      "sentence": "s4",
+      "word": "គេ"
+    },
+    {
+      "id": "sp2",
+      "kind": "spell",
+      "sentence": "s5",
+      "word": "គោះ"
+    },
+    {
+      "id": "sp3",
+      "kind": "spell",
+      "sentence": "s6",
+      "word": "គោ"
+    },
+    {
+      "id": "sp4",
+      "kind": "spell",
+      "sentence": "s7",
+      "word": "គូ"
+    }
+  ],
+  "pictures": {},
+  "noRecording": [],
+  "provenance": "Original lesson written for Koda, 2026. It follows the order in which Grade 1 Khmer teaches letters; the words and sentences are new. Draft: not yet reviewed by a native speaker."
+}

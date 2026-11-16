@@ -1,0 +1,176 @@
+{
+  "id": "km-g1-011",
+  "rev": 0,
+  "language": "km",
+  "band": "A",
+  "ages": [
+    6,
+    7
+  ],
+  "topics": [],
+  "questionCounts": {
+    "understand": 0,
+    "words": 0,
+    "spell": 5
+  },
+  "title": "មេរៀនទី ១១ · អក្សរ ប ផ",
+  "category": "Khmer",
+  "picture": "khmer-school",
+  "sentences": [
+    {
+      "id": "s1",
+      "text": "ប បា បិ បី បឹ បឺ បុ បូ បួ បើ បឿ បៀ បេ",
+      "words": [
+        "ប ",
+        "បា ",
+        "បិ ",
+        "បី ",
+        "បឹ ",
+        "បឺ ",
+        "បុ ",
+        "បូ ",
+        "បួ ",
+        "បើ ",
+        "បឿ ",
+        "បៀ ",
+        "បេ"
+      ]
+    },
+    {
+      "id": "s2",
+      "text": "បែ បៃ បោ បៅ បុំ បំ បាំ បះ បុះ បេះ បោះ",
+      "words": [
+        "បែ ",
+        "បៃ ",
+        "បោ ",
+        "បៅ ",
+        "បុំ ",
+        "បំ ",
+        "បាំ ",
+        "បះ ",
+        "បុះ ",
+        "បេះ ",
+        "បោះ"
+      ]
+    },
+    {
+      "id": "s3",
+      "text": "ផ ផា ផិ ផី ផឹ ផឺ ផុ ផូ ផួ ផើ ផឿ ផៀ ផេ",
+      "words": [
+        "ផ ",
+        "ផា ",
+        "ផិ ",
+        "ផី ",
+        "ផឹ ",
+        "ផឺ ",
+        "ផុ ",
+        "ផូ ",
+        "ផួ ",
+        "ផើ ",
+        "ផឿ ",
+        "ផៀ ",
+        "ផេ"
+      ]
+    },
+    {
+      "id": "s4",
+      "text": "ផែ ផៃ ផោ ផៅ ផុំ ផំ ផាំ ផះ ផុះ ផេះ ផោះ",
+      "words": [
+        "ផែ ",
+        "ផៃ ",
+        "ផោ ",
+        "ផៅ ",
+        "ផុំ ",
+        "ផំ ",
+        "ផាំ ",
+        "ផះ ",
+        "ផុះ ",
+        "ផេះ ",
+        "ផោះ"
+      ]
+    },
+    {
+      "id": "s5",
+      "text": "បី បេះ បោះ ផែ ផេះ ផើ",
+      "words": [
+        "បី ",
+        "បេះ ",
+        "បោះ ",
+        "ផែ ",
+        "ផេះ ",
+        "ផើ"
+      ]
+    },
+    {
+      "id": "s6",
+      "text": "តាដាំផើ។",
+      "words": [
+        "តា",
+        "ដាំ",
+        "ផើ។"
+      ]
+    },
+    {
+      "id": "s7",
+      "text": "កុំបោះតុ។",
+      "words": [
+        "កុំ",
+        "បោះ",
+        "តុ។"
+      ]
+    },
+    {
+      "id": "s8",
+      "text": "ថៅកែបេះតែ។",
+      "words": [
+        "ថៅកែ",
+        "បេះ",
+        "តែ។"
+      ]
+    },
+    {
+      "id": "s9",
+      "text": "ចៅឆាបី។",
+      "words": [
+        "ចៅ",
+        "ឆា",
+        "បី។"
+      ]
+    }
+  ],
+  "questions": [
+    {
+      "id": "sp1",
+      "kind": "spell",
+      "sentence": "s9",
+      "word": "បី"
+    },
+    {
+      "id": "sp2",
+      "kind": "spell",
+      "sentence": "s8",
+      "word": "បេះ"
+    },
+    {
+      "id": "sp3",
+      "kind": "spell",
+      "sentence": "s7",
+      "word": "បោះ"
+    },
+    {
+      "id": "sp4",
+      "kind": "spell",
+      "sentence": "s4",
+      "word": "ផេះ"
+    },
+    {
+      "id": "sp5",
+      "kind": "spell",
+      "sentence": "s6",
+      "word": "ផើ"
+    }
+  ],
+  "pictures": {},
+  "noRecording": [],
+  "provenance": "Original lesson written for Koda, 2026. It follows the order in which Grade 1 Khmer teaches letters; the words and sentences are new. Draft: not yet reviewed by a native speaker."
+}

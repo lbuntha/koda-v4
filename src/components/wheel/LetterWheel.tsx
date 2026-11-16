@@ -64,6 +64,7 @@ const COLOR = {
   good: "var(--color-emerald-600, #2E9D73)",
   bad: "var(--color-rose-600, #FF2D78)",
   muted: "var(--koda-surface-muted, #F0F4FF)",
+  surface: "var(--koda-surface, #FFFFFF)",
   line: "var(--koda-line, #E2E8F0)",
   ink: "var(--koda-ink, #0F172A)",
   // The tile edge: `line` matches the dark-theme tile fill exactly, so it vanished.
@@ -384,8 +385,9 @@ export function LetterWheel({
         onPointerUp={endGesture}
         onPointerCancel={endGesture}
       >
-        <circle cx={VIEW.cx} cy={VIEW.cy} r={RING.outer} fill="none" stroke={COLOR.line} strokeWidth={3} />
-        <circle cx={VIEW.cx} cy={VIEW.cy} r={RING.dashed} fill="none" stroke={COLOR.line} strokeWidth={2} strokeDasharray="7 9" />
+        {/* A soft wash of Koda's violet: the wheel reads as a toy, not a form, in light and dark alike. */}
+        <circle cx={VIEW.cx} cy={VIEW.cy} r={RING.outer} fill={COLOR.picked} fillOpacity={0.06} stroke={COLOR.picked} strokeOpacity={0.25} strokeWidth={3} />
+        <circle cx={VIEW.cx} cy={VIEW.cy} r={RING.dashed} fill="none" stroke={COLOR.picked} strokeOpacity={0.2} strokeWidth={2} strokeDasharray="7 9" />
         <path ref={glowRef} data-wheel-trace-glow fill="none" stroke={COLOR.picked} strokeWidth={20} strokeLinecap="round" strokeLinejoin="round" opacity={0.18} />
         <path ref={pathRef} data-wheel-trace fill="none" stroke={COLOR.picked} strokeWidth={9} strokeLinecap="round" strokeLinejoin="round" />
 
@@ -434,7 +436,7 @@ export function LetterWheel({
               {focusTile === i && <circle r={r + 7} fill="none" stroke={COLOR.picked} strokeWidth={3} />}
               {highlight === i && !on && <circle data-wheel-hint r={r + 9} fill="none" stroke={COLOR.good} strokeWidth={3} strokeDasharray="6 5" />}
               <g ref={(el) => { scaleRefs.current[i] = el; }} transform={`scale(${renderedScale.toFixed(3)})`}>
-                <circle r={r} fill={on ? COLOR.picked : COLOR.muted} stroke={on ? COLOR.pickedEdge : COLOR.edge} strokeOpacity={on ? 1 : 0.45} strokeWidth={3} />
+                <circle r={r} fill={on ? COLOR.picked : COLOR.surface} stroke={on ? COLOR.pickedEdge : COLOR.picked} strokeOpacity={on ? 1 : 0.4} strokeWidth={3} />
                 <text
                   textAnchor="middle"
                   dominantBaseline="central"

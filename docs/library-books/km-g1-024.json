@@ -1,0 +1,171 @@
+{
+  "id": "km-g1-024",
+  "rev": 0,
+  "language": "km",
+  "band": "A",
+  "ages": [
+    6,
+    7
+  ],
+  "topics": [],
+  "questionCounts": {
+    "understand": 0,
+    "words": 0,
+    "spell": 4
+  },
+  "title": "មេរៀនទី ២៤ · អក្សរ ភ ម",
+  "category": "Khmer",
+  "picture": "khmer-school",
+  "sentences": [
+    {
+      "id": "s1",
+      "text": "ភ ភា ភិ ភី ភឹ ភឺ ភុ ភូ ភួ ភើ ភឿ ភៀ ភេ",
+      "words": [
+        "ភ ",
+        "ភា ",
+        "ភិ ",
+        "ភី ",
+        "ភឹ ",
+        "ភឺ ",
+        "ភុ ",
+        "ភូ ",
+        "ភួ ",
+        "ភើ ",
+        "ភឿ ",
+        "ភៀ ",
+        "ភេ"
+      ]
+    },
+    {
+      "id": "s2",
+      "text": "ភែ ភៃ ភោ ភៅ ភុំ ភំ ភាំ ភះ ភុះ ភេះ ភោះ",
+      "words": [
+        "ភែ ",
+        "ភៃ ",
+        "ភោ ",
+        "ភៅ ",
+        "ភុំ ",
+        "ភំ ",
+        "ភាំ ",
+        "ភះ ",
+        "ភុះ ",
+        "ភេះ ",
+        "ភោះ"
+      ]
+    },
+    {
+      "id": "s3",
+      "text": "ម មា មិ មី មឹ មឺ មុ មូ មួ មើ មឿ មៀ មេ",
+      "words": [
+        "ម ",
+        "មា ",
+        "មិ ",
+        "មី ",
+        "មឹ ",
+        "មឺ ",
+        "មុ ",
+        "មូ ",
+        "មួ ",
+        "មើ ",
+        "មឿ ",
+        "មៀ ",
+        "មេ"
+      ]
+    },
+    {
+      "id": "s4",
+      "text": "មែ មៃ មោ មៅ មុំ មំ មាំ មះ មុះ មេះ មោះ",
+      "words": [
+        "មែ ",
+        "មៃ ",
+        "មោ ",
+        "មៅ ",
+        "មុំ ",
+        "មំ ",
+        "មាំ ",
+        "មះ ",
+        "មុះ ",
+        "មេះ ",
+        "មោះ"
+      ]
+    },
+    {
+      "id": "s5",
+      "text": "មី មេ មុំ",
+      "words": [
+        "មី ",
+        "មេ ",
+        "មុំ"
+      ]
+    },
+    {
+      "id": "s6",
+      "text": "មេហៅចៅ។",
+      "words": [
+        "មេ",
+        "ហៅ",
+        "ចៅ។"
+      ]
+    },
+    {
+      "id": "s7",
+      "text": "តាជាមេ។",
+      "words": [
+        "តា",
+        "ជា",
+        "មេ។"
+      ]
+    },
+    {
+      "id": "s8",
+      "text": "មីនេះឆៅទេ។",
+      "words": [
+        "មី",
+        "នេះ",
+        "ឆៅ",
+        "ទេ។"
+      ]
+    },
+    {
+      "id": "s9",
+      "text": "គេដាំឈើនៅទីនេះ។",
+      "words": [
+        "គេ",
+        "ដាំ",
+        "ឈើ",
+        "នៅ",
+        "ទី",
+        "នេះ។"
+      ]
+    }
+  ],
+  "questions": [
+    {
+      "id": "sp1",
+      "kind": "spell",
+      "sentence": "s8",
+      "word": "មី"
+    },
+    {
+      "id": "sp2",
+      "kind": "spell",
+      "sentence": "s6",
+      "word": "មេ"
+    },
+    {
+      "id": "sp3",
+      "kind": "spell",
+      "sentence": "s4",
+      "word": "មុំ"
+    },
+    {
+      "id": "sp4",
+      "kind": "spell",
+      "sentence": "s9",
+      "word": "ឈើ"
+    }
+  ],
+  "pictures": {},
+  "noRecording": [],
+  "provenance": "Original lesson written for Koda, 2026. It follows the order in which Grade 1 Khmer teaches letters; the words and sentences are new. Draft: not yet reviewed by a native speaker."
+}

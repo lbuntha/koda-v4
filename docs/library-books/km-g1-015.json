@@ -1,0 +1,116 @@
+{
+  "id": "km-g1-015",
+  "rev": 0,
+  "language": "km",
+  "band": "A",
+  "ages": [
+    6,
+    7
+  ],
+  "topics": [],
+  "questionCounts": {
+    "understand": 0,
+    "words": 0,
+    "spell": 3
+  },
+  "title": "មេរៀនទី ១៥ · អក្សរ ឃ",
+  "category": "Khmer",
+  "picture": "khmer-school",
+  "sentences": [
+    {
+      "id": "s1",
+      "text": "ឃ ឃា ឃិ ឃី ឃឹ ឃឺ ឃុ ឃូ ឃួ ឃើ ឃឿ ឃៀ ឃេ",
+      "words": [
+        "ឃ ",
+        "ឃា ",
+        "ឃិ ",
+        "ឃី ",
+        "ឃឹ ",
+        "ឃឺ ",
+        "ឃុ ",
+        "ឃូ ",
+        "ឃួ ",
+        "ឃើ ",
+        "ឃឿ ",
+        "ឃៀ ",
+        "ឃេ"
+      ]
+    },
+    {
+      "id": "s2",
+      "text": "ឃែ ឃៃ ឃោ ឃៅ ឃុំ ឃំ ឃាំ ឃះ ឃុះ ឃេះ ឃោះ",
+      "words": [
+        "ឃែ ",
+        "ឃៃ ",
+        "ឃោ ",
+        "ឃៅ ",
+        "ឃុំ ",
+        "ឃំ ",
+        "ឃាំ ",
+        "ឃះ ",
+        "ឃុះ ",
+        "ឃេះ ",
+        "ឃោះ"
+      ]
+    },
+    {
+      "id": "s3",
+      "text": "ឃុំ គោ គេ ណា",
+      "words": [
+        "ឃុំ ",
+        "គោ ",
+        "គេ ",
+        "ណា"
+      ]
+    },
+    {
+      "id": "s4",
+      "text": "តើឃុំណា?",
+      "words": [
+        "តើ",
+        "ឃុំ",
+        "ណា?"
+      ]
+    },
+    {
+      "id": "s5",
+      "text": "ឃុំតា។",
+      "words": [
+        "ឃុំ",
+        "តា។"
+      ]
+    },
+    {
+      "id": "s6",
+      "text": "ចៅគោះតុ។",
+      "words": [
+        "ចៅ",
+        "គោះ",
+        "តុ។"
+      ]
+    }
+  ],
+  "questions": [
+    {
+      "id": "sp1",
+      "kind": "spell",
+      "sentence": "s4",
+      "word": "ណា"
+    },
+    {
+      "id": "sp2",
+      "kind": "spell",
+      "sentence": "s5",
+      "word": "ឃុំ"
+    },
+    {
+      "id": "sp3",
+      "kind": "spell",
+      "sentence": "s6",
+      "word": "គោះ"
+    }
+  ],
+  "pictures": {},
+  "noRecording": [],
+  "provenance": "Original lesson written for Koda, 2026. It follows the order in which Grade 1 Khmer teaches letters; the words and sentences are new. Draft: not yet reviewed by a native speaker."
+}

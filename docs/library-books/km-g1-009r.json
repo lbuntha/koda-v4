@@ -1,0 +1,113 @@
+{
+  "id": "km-g1-009r",
+  "rev": 0,
+  "language": "km",
+  "band": "A",
+  "ages": [
+    6,
+    7
+  ],
+  "topics": [],
+  "questionCounts": {
+    "understand": 0,
+    "words": 0,
+    "spell": 4
+  },
+  "title": "រៀនសាឡើងវិញ · ដ ឋ ណ",
+  "category": "Khmer",
+  "picture": "khmer-school",
+  "sentences": [
+    {
+      "id": "s1",
+      "text": "ដា ឋា ណា",
+      "words": [
+        "ដា ",
+        "ឋា ",
+        "ណា"
+      ]
+    },
+    {
+      "id": "s2",
+      "text": "ដី ឋី ណី",
+      "words": [
+        "ដី ",
+        "ឋី ",
+        "ណី"
+      ]
+    },
+    {
+      "id": "s3",
+      "text": "ដូ ឋូ ណូ",
+      "words": [
+        "ដូ ",
+        "ឋូ ",
+        "ណូ"
+      ]
+    },
+    {
+      "id": "s4",
+      "text": "ដីណាឆេះ?",
+      "words": [
+        "ដី",
+        "ណា",
+        "ឆេះ?"
+      ]
+    },
+    {
+      "id": "s5",
+      "text": "ណាចេះដាំ?",
+      "words": [
+        "ណា",
+        "ចេះ",
+        "ដាំ?"
+      ]
+    },
+    {
+      "id": "s6",
+      "text": "ដោះខោណា?",
+      "words": [
+        "ដោះ",
+        "ខោ",
+        "ណា?"
+      ]
+    },
+    {
+      "id": "s7",
+      "text": "កុំខាំដៃ។",
+      "words": [
+        "កុំ",
+        "ខាំ",
+        "ដៃ។"
+      ]
+    }
+  ],
+  "questions": [
+    {
+      "id": "sp1",
+      "kind": "spell",
+      "sentence": "s4",
+      "word": "ឆេះ"
+    },
+    {
+      "id": "sp2",
+      "kind": "spell",
+      "sentence": "s5",
+      "word": "ចេះ"
+    },
+    {
+      "id": "sp3",
+      "kind": "spell",
+      "sentence": "s6",
+      "word": "ដោះ"
+    },
+    {
+      "id": "sp4",
+      "kind": "spell",
+      "sentence": "s7",
+      "word": "ខាំ"
+    }
+  ],
+  "pictures": {},
+  "noRecording": [],
+  "provenance": "Original lesson written for Koda, 2026. It follows the order in which Grade 1 Khmer teaches letters; the words and sentences are new. Draft: not yet reviewed by a native speaker."
+}

@@ -1,0 +1,82 @@
+{
+  "id": "km-g1-096",
+  "rev": 0,
+  "language": "km",
+  "band": "A",
+  "ages": [
+    6,
+    7
+  ],
+  "topics": [],
+  "questionCounts": {
+    "understand": 0,
+    "words": 0,
+    "spell": 3
+  },
+  "title": "មេរៀនទី ៩៦ · ព្យញ្ជនៈ ត្រួត ណ្ដ",
+  "category": "Khmer",
+  "picture": "khmer-school",
+  "sentences": [
+    {
+      "id": "s1",
+      "text": "កណ្ដុរ កណ្ដាល អណ្ដើក",
+      "words": [
+        "កណ្ដុរ ",
+        "កណ្ដាល ",
+        "អណ្ដើក"
+      ]
+    },
+    {
+      "id": "s2",
+      "text": "ឆ្មាចាប់កណ្ដុរ។",
+      "words": [
+        "ឆ្មា",
+        "ចាប់",
+        "កណ្ដុរ។"
+      ]
+    },
+    {
+      "id": "s3",
+      "text": "ផ្ទះខ្ញុំនៅកណ្ដាលភូមិ។",
+      "words": [
+        "ផ្ទះ",
+        "ខ្ញុំ",
+        "នៅ",
+        "កណ្ដាល",
+        "ភូមិ។"
+      ]
+    },
+    {
+      "id": "s4",
+      "text": "អណ្ដើកដើរយឺត។",
+      "words": [
+        "អណ្ដើក",
+        "ដើរ",
+        "យឺត។"
+      ]
+    }
+  ],
+  "questions": [
+    {
+      "id": "sp1",
+      "kind": "spell",
+      "sentence": "s2",
+      "word": "កណ្ដុរ"
+    },
+    {
+      "id": "sp2",
+      "kind": "spell",
+      "sentence": "s3",
+      "word": "កណ្ដាល"
+    },
+    {
+      "id": "sp3",
+      "kind": "spell",
+      "sentence": "s4",
+      "word": "អណ្ដើក"
+    }
+  ],
+  "pictures": {},
+  "noRecording": [],
+  "provenance": "Original lesson written for Koda, 2026. It follows the order in which Grade 1 Khmer teaches letters; the words and sentences are new. Draft: not yet reviewed by a native speaker."
+}

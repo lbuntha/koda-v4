@@ -1,0 +1,100 @@
+{
+  "id": "km-g1-002",
+  "rev": 0,
+  "language": "km",
+  "band": "A",
+  "ages": [
+    6,
+    7
+  ],
+  "topics": [],
+  "questionCounts": {
+    "understand": 0,
+    "words": 0,
+    "spell": 0
+  },
+  "title": "មេរៀនទី ២ · ព្យញ្ជនៈ ៣៣ តួ",
+  "category": "Khmer",
+  "picture": "khmer-school",
+  "sentences": [
+    {
+      "id": "s1",
+      "text": "ក ខ គ ឃ ង",
+      "words": [
+        "ក ",
+        "ខ ",
+        "គ ",
+        "ឃ ",
+        "ង"
+      ]
+    },
+    {
+      "id": "s2",
+      "text": "ច ឆ ជ ឈ ញ",
+      "words": [
+        "ច ",
+        "ឆ ",
+        "ជ ",
+        "ឈ ",
+        "ញ"
+      ]
+    },
+    {
+      "id": "s3",
+      "text": "ដ ឋ ឌ ឍ ណ",
+      "words": [
+        "ដ ",
+        "ឋ ",
+        "ឌ ",
+        "ឍ ",
+        "ណ"
+      ]
+    },
+    {
+      "id": "s4",
+      "text": "ត ថ ទ ធ ន",
+      "words": [
+        "ត ",
+        "ថ ",
+        "ទ ",
+        "ធ ",
+        "ន"
+      ]
+    },
+    {
+      "id": "s5",
+      "text": "ប ផ ព ភ ម",
+      "words": [
+        "ប ",
+        "ផ ",
+        "ព ",
+        "ភ ",
+        "ម"
+      ]
+    },
+    {
+      "id": "s6",
+      "text": "យ រ ល វ ស",
+      "words": [
+        "យ ",
+        "រ ",
+        "ល ",
+        "វ ",
+        "ស"
+      ]
+    },
+    {
+      "id": "s7",
+      "text": "ហ ឡ អ",
+      "words": [
+        "ហ ",
+        "ឡ ",
+        "អ"
+      ]
+    }
+  ],
+  "questions": [],
+  "pictures": {},
+  "noRecording": [],
+  "provenance": "Original lesson written for Koda, 2026. It follows the order in which Grade 1 Khmer teaches letters; the words and sentences are new. Draft: not yet reviewed by a native speaker."
+}

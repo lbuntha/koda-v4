@@ -1,0 +1,123 @@
+{
+  "id": "km-g1-013r",
+  "rev": 0,
+  "language": "km",
+  "band": "A",
+  "ages": [
+    6,
+    7
+  ],
+  "topics": [],
+  "questionCounts": {
+    "understand": 0,
+    "words": 0,
+    "spell": 4
+  },
+  "title": "រៀនសាឡើងវិញ · ក ដល់ អ",
+  "category": "Khmer",
+  "picture": "khmer-school",
+  "sentences": [
+    {
+      "id": "s1",
+      "text": "កា ដា តា បា សា ហា ឡា អា",
+      "words": [
+        "កា ",
+        "ដា ",
+        "តា ",
+        "បា ",
+        "សា ",
+        "ហា ",
+        "ឡា ",
+        "អា"
+      ]
+    },
+    {
+      "id": "s2",
+      "text": "កី ដី តី បី សី ហី ឡី អី",
+      "words": [
+        "កី ",
+        "ដី ",
+        "តី ",
+        "បី ",
+        "សី ",
+        "ហី ",
+        "ឡី ",
+        "អី"
+      ]
+    },
+    {
+      "id": "s3",
+      "text": "ហៅចៅបី។",
+      "words": [
+        "ហៅ",
+        "ចៅ",
+        "បី។"
+      ]
+    },
+    {
+      "id": "s4",
+      "text": "សេះចុះកោះ។",
+      "words": [
+        "សេះ",
+        "ចុះ",
+        "កោះ។"
+      ]
+    },
+    {
+      "id": "s5",
+      "text": "តាខំដាំតែ។",
+      "words": [
+        "តា",
+        "ខំ",
+        "ដាំ",
+        "តែ។"
+      ]
+    },
+    {
+      "id": "s6",
+      "text": "កៅអីឆេះ។",
+      "words": [
+        "កៅអី",
+        "ឆេះ។"
+      ]
+    },
+    {
+      "id": "s7",
+      "text": "ថៅកែចេះចាំ។",
+      "words": [
+        "ថៅកែ",
+        "ចេះ",
+        "ចាំ។"
+      ]
+    }
+  ],
+  "questions": [
+    {
+      "id": "sp1",
+      "kind": "spell",
+      "sentence": "s3",
+      "word": "ហៅ"
+    },
+    {
+      "id": "sp2",
+      "kind": "spell",
+      "sentence": "s4",
+      "word": "កោះ"
+    },
+    {
+      "id": "sp3",
+      "kind": "spell",
+      "sentence": "s6",
+      "word": "កៅអី"
+    },
+    {
+      "id": "sp4",
+      "kind": "spell",
+      "sentence": "s7",
+      "word": "ថៅកែ"
+    }
+  ],
+  "pictures": {},
+  "noRecording": [],
+  "provenance": "Original lesson written for Koda, 2026. It follows the order in which Grade 1 Khmer teaches letters; the words and sentences are new. Draft: not yet reviewed by a native speaker."
+}

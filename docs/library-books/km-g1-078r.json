@@ -1,0 +1,88 @@
+{
+  "id": "km-g1-078r",
+  "rev": 0,
+  "language": "km",
+  "band": "A",
+  "ages": [
+    6,
+    7
+  ],
+  "topics": [],
+  "questionCounts": {
+    "understand": 0,
+    "words": 0,
+    "spell": 3
+  },
+  "title": "រៀនសាឡើងវិញ · ជើង ជ ឈ ត",
+  "category": "Khmer",
+  "picture": "khmer-school",
+  "sentences": [
+    {
+      "id": "s1",
+      "text": "ជ្រ ជ្វ ឈ្ង ឈ្ន ឈ្ម ឈ្ល ត្ប ត្ន ត្រ",
+      "words": [
+        "ជ្រ ",
+        "ជ្វ ",
+        "ឈ្ង ",
+        "ឈ្ន ",
+        "ឈ្ម ",
+        "ឈ្ល ",
+        "ត្ប ",
+        "ត្ន ",
+        "ត្រ"
+      ]
+    },
+    {
+      "id": "s2",
+      "text": "ត្រីចៀនឈ្ងុយ។",
+      "words": [
+        "ត្រី",
+        "ចៀន",
+        "ឈ្ងុយ។"
+      ]
+    },
+    {
+      "id": "s3",
+      "text": "កុំហែលទឹកជ្រៅ។",
+      "words": [
+        "កុំ",
+        "ហែល",
+        "ទឹក",
+        "ជ្រៅ។"
+      ]
+    },
+    {
+      "id": "s4",
+      "text": "ក្រុមយើងឈ្នះទៀត។",
+      "words": [
+        "ក្រុម",
+        "យើង",
+        "ឈ្នះ",
+        "ទៀត។"
+      ]
+    }
+  ],
+  "questions": [
+    {
+      "id": "sp1",
+      "kind": "spell",
+      "sentence": "s2",
+      "word": "ឈ្ងុយ"
+    },
+    {
+      "id": "sp2",
+      "kind": "spell",
+      "sentence": "s3",
+      "word": "ជ្រៅ"
+    },
+    {
+      "id": "sp3",
+      "kind": "spell",
+      "sentence": "s4",
+      "word": "ឈ្នះ"
+    }
+  ],
+  "pictures": {},
+  "noRecording": [],
+  "provenance": "Original lesson written for Koda, 2026. It follows the order in which Grade 1 Khmer teaches letters; the words and sentences are new. Draft: not yet reviewed by a native speaker."
+}

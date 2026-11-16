@@ -1,0 +1,87 @@
+{
+  "id": "km-g1-069r",
+  "rev": 0,
+  "language": "km",
+  "band": "A",
+  "ages": [
+    6,
+    7
+  ],
+  "topics": [],
+  "questionCounts": {
+    "understand": 0,
+    "words": 0,
+    "spell": 3
+  },
+  "title": "រៀនសាឡើងវិញ · ជើង ខ",
+  "category": "Khmer",
+  "picture": "khmer-school",
+  "sentences": [
+    {
+      "id": "s1",
+      "text": "ខ្ច ខ្ញ ខ្ទ ខ្ន ខ្ម ខ្យ ខ្ល ខ្វ ខ្ស",
+      "words": [
+        "ខ្ច ",
+        "ខ្ញ ",
+        "ខ្ទ ",
+        "ខ្ន ",
+        "ខ្ម ",
+        "ខ្យ ",
+        "ខ្ល ",
+        "ខ្វ ",
+        "ខ្ស"
+      ]
+    },
+    {
+      "id": "s2",
+      "text": "ខ្ញុំពាក់អាវខ្មៅ។",
+      "words": [
+        "ខ្ញុំ",
+        "ពាក់",
+        "អាវ",
+        "ខ្មៅ។"
+      ]
+    },
+    {
+      "id": "s3",
+      "text": "ខ្យល់ក្តៅណាស់។",
+      "words": [
+        "ខ្យល់",
+        "ក្តៅ",
+        "ណាស់។"
+      ]
+    },
+    {
+      "id": "s4",
+      "text": "ខ្ញុំចងខ្សែ។",
+      "words": [
+        "ខ្ញុំ",
+        "ចង",
+        "ខ្សែ។"
+      ]
+    }
+  ],
+  "questions": [
+    {
+      "id": "sp1",
+      "kind": "spell",
+      "sentence": "s2",
+      "word": "អាវ"
+    },
+    {
+      "id": "sp2",
+      "kind": "spell",
+      "sentence": "s3",
+      "word": "ក្តៅ"
+    },
+    {
+      "id": "sp3",
+      "kind": "spell",
+      "sentence": "s4",
+      "word": "ចង"
+    }
+  ],
+  "pictures": {},
+  "noRecording": [],
+  "provenance": "Original lesson written for Koda, 2026. It follows the order in which Grade 1 Khmer teaches letters; the words and sentences are new. Draft: not yet reviewed by a native speaker."
+}

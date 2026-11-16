@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+  <title>Read again</title>
+  <path fill="#6366F1" d="M8 28 a6 6 0 0 1 7 -6 C28 24 40 28 50 36 V84 C40 76 28 72 15 70 a6 6 0 0 1 -7 -6 Z" />
+  <path fill="#818CF8" d="M15 22 C28 24 40 28 50 36 L8 58 V28 a6 6 0 0 1 7 -6 Z" />
+  <path fill="#8B5CF6" d="M92 28 a6 6 0 0 0 -7 -6 C72 24 60 28 50 36 V84 C60 76 72 72 85 70 a6 6 0 0 0 7 -6 Z" />
+  <path fill="#A78BFA" d="M85 22 C72 24 60 28 50 36 V56 L92 32 V28 a6 6 0 0 0 -7 -6 Z" />
+  <path fill="none" stroke="#FFFFFF" stroke-width="5" stroke-linecap="round" d="M18 38 C26 39 33 41 40 45 M18 50 C26 51 33 53 40 57" />
+  <circle cx="72" cy="52" r="15" fill="#FFFFFF" />
+  <path fill="none" stroke="#8B5CF6" stroke-width="5" stroke-linecap="round" d="M80 49 a9 9 0 1 0 -1 8" />
+  <path fill="#8B5CF6" d="M84 42 L84 52 L74 50 Z" />
+</svg>

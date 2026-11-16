@@ -1,0 +1,115 @@
+{
+  "id": "km-g1-037",
+  "rev": 0,
+  "language": "km",
+  "band": "A",
+  "ages": [
+    6,
+    7
+  ],
+  "topics": [],
+  "questionCounts": {
+    "understand": 0,
+    "words": 0,
+    "spell": 3
+  },
+  "title": "មេរៀនទី ៣៧ · ហ៊",
+  "category": "Khmer",
+  "picture": "khmer-school",
+  "sentences": [
+    {
+      "id": "s1",
+      "text": "ហ៊ ហ៊ា ហ៊ិ ហ៊ី ហ៊ឹ ហ៊ឺ ហ៊ុ ហ៊ូ ហ៊ួ ហ៊ើ ហ៊ឿ ហ៊ៀ ហ៊េ",
+      "words": [
+        "ហ៊ ",
+        "ហ៊ា ",
+        "ហ៊ិ ",
+        "ហ៊ី ",
+        "ហ៊ឹ ",
+        "ហ៊ឺ ",
+        "ហ៊ុ ",
+        "ហ៊ូ ",
+        "ហ៊ួ ",
+        "ហ៊ើ ",
+        "ហ៊ឿ ",
+        "ហ៊ៀ ",
+        "ហ៊េ"
+      ]
+    },
+    {
+      "id": "s2",
+      "text": "ហ៊ែ ហ៊ៃ ហ៊ោ ហ៊ៅ ហ៊ុំ ហ៊ំ ហ៊ាំ ហ៊ះ ហ៊ុះ ហ៊េះ ហ៊ោះ",
+      "words": [
+        "ហ៊ែ ",
+        "ហ៊ៃ ",
+        "ហ៊ោ ",
+        "ហ៊ៅ ",
+        "ហ៊ុំ ",
+        "ហ៊ំ ",
+        "ហ៊ាំ ",
+        "ហ៊ះ ",
+        "ហ៊ុះ ",
+        "ហ៊េះ ",
+        "ហ៊ោះ"
+      ]
+    },
+    {
+      "id": "s3",
+      "text": "ហ៊ា ហ៊ុំ ហ៊ោ",
+      "words": [
+        "ហ៊ា ",
+        "ហ៊ុំ ",
+        "ហ៊ោ"
+      ]
+    },
+    {
+      "id": "s4",
+      "text": "ចៅហ៊ាទៅ។",
+      "words": [
+        "ចៅ",
+        "ហ៊ា",
+        "ទៅ។"
+      ]
+    },
+    {
+      "id": "s5",
+      "text": "គេហ៊ោ។",
+      "words": [
+        "គេ",
+        "ហ៊ោ។"
+      ]
+    },
+    {
+      "id": "s6",
+      "text": "គេហ៊ុំតុ។",
+      "words": [
+        "គេ",
+        "ហ៊ុំ",
+        "តុ។"
+      ]
+    }
+  ],
+  "questions": [
+    {
+      "id": "sp1",
+      "kind": "spell",
+      "sentence": "s4",
+      "word": "ហ៊ា"
+    },
+    {
+      "id": "sp2",
+      "kind": "spell",
+      "sentence": "s5",
+      "word": "ហ៊ោ"
+    },
+    {
+      "id": "sp3",
+      "kind": "spell",
+      "sentence": "s6",
+      "word": "ហ៊ុំ"
+    }
+  ],
+  "pictures": {},
+  "noRecording": [],
+  "provenance": "Original lesson written for Koda, 2026. It follows the order in which Grade 1 Khmer teaches letters; the words and sentences are new. Draft: not yet reviewed by a native speaker."
+}

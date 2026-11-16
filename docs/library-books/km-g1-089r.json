@@ -1,0 +1,88 @@
+{
+  "id": "km-g1-089r",
+  "rev": 0,
+  "language": "km",
+  "band": "A",
+  "ages": [
+    6,
+    7
+  ],
+  "topics": [],
+  "questionCounts": {
+    "understand": 0,
+    "words": 0,
+    "spell": 3
+  },
+  "title": "រៀនសាឡើងវិញ · ជើង ម",
+  "category": "Khmer",
+  "picture": "khmer-school",
+  "sentences": [
+    {
+      "id": "s1",
+      "text": "ម្ក ម្ច ម្ដ ម្ជ ម្ទ ម្ន ម្ភ ម្រ ម្ល",
+      "words": [
+        "ម្ក ",
+        "ម្ច ",
+        "ម្ដ ",
+        "ម្ជ ",
+        "ម្ទ ",
+        "ម្ន ",
+        "ម្ភ ",
+        "ម្រ ",
+        "ម្ល"
+      ]
+    },
+    {
+      "id": "s2",
+      "text": "ម្ដាយទិញម្នាស់ម្ភៃផ្លែ។",
+      "words": [
+        "ម្ដាយ",
+        "ទិញ",
+        "ម្នាស់",
+        "ម្ភៃ",
+        "ផ្លែ។"
+      ]
+    },
+    {
+      "id": "s3",
+      "text": "ម្ជុលតូចណាស់។",
+      "words": [
+        "ម្ជុល",
+        "តូច",
+        "ណាស់។"
+      ]
+    },
+    {
+      "id": "s4",
+      "text": "ម្ទេសនេះថ្លៃ។",
+      "words": [
+        "ម្ទេស",
+        "នេះ",
+        "ថ្លៃ។"
+      ]
+    }
+  ],
+  "questions": [
+    {
+      "id": "sp1",
+      "kind": "spell",
+      "sentence": "s2",
+      "word": "ផ្លែ"
+    },
+    {
+      "id": "sp2",
+      "kind": "spell",
+      "sentence": "s3",
+      "word": "ម្ជុល"
+    },
+    {
+      "id": "sp3",
+      "kind": "spell",
+      "sentence": "s4",
+      "word": "ម្ទេស"
+    }
+  ],
+  "pictures": {},
+  "noRecording": [],
+  "provenance": "Original lesson written for Koda, 2026. It follows the order in which Grade 1 Khmer teaches letters; the words and sentences are new. Draft: not yet reviewed by a native speaker."
+}

@@ -1,0 +1,118 @@
+{
+  "id": "km-g1-057r",
+  "rev": 0,
+  "language": "km",
+  "band": "A",
+  "ages": [
+    6,
+    7
+  ],
+  "topics": [],
+  "questionCounts": {
+    "understand": 0,
+    "words": 0,
+    "spell": 4
+  },
+  "title": "រៀនសាឡើងវិញ · ◌ប ◌ម ◌យ",
+  "category": "Khmer",
+  "picture": "khmer-school",
+  "sentences": [
+    {
+      "id": "s1",
+      "text": "ចាប់ ស៊ុប ថើប ដប",
+      "words": [
+        "ចាប់ ",
+        "ស៊ុប ",
+        "ថើប ",
+        "ដប"
+      ]
+    },
+    {
+      "id": "s2",
+      "text": "សូម ដើម ចៀម បូម",
+      "words": [
+        "សូម ",
+        "ដើម ",
+        "ចៀម ",
+        "បូម"
+      ]
+    },
+    {
+      "id": "s3",
+      "text": "បាយ ហើយ មួយ ជួយ លុយ",
+      "words": [
+        "បាយ ",
+        "ហើយ ",
+        "មួយ ",
+        "ជួយ ",
+        "លុយ"
+      ]
+    },
+    {
+      "id": "s4",
+      "text": "ចៅចាប់ដៃយាយ។",
+      "words": [
+        "ចៅ",
+        "ចាប់",
+        "ដៃ",
+        "យាយ។"
+      ]
+    },
+    {
+      "id": "s5",
+      "text": "ប៉ាបូមទឹក។",
+      "words": [
+        "ប៉ា",
+        "បូម",
+        "ទឹក។"
+      ]
+    },
+    {
+      "id": "s6",
+      "text": "ចៀមមួយដេក។",
+      "words": [
+        "ចៀម",
+        "មួយ",
+        "ដេក។"
+      ]
+    },
+    {
+      "id": "s7",
+      "text": "យាយដាំបាយ។",
+      "words": [
+        "យាយ",
+        "ដាំ",
+        "បាយ។"
+      ]
+    }
+  ],
+  "questions": [
+    {
+      "id": "sp1",
+      "kind": "spell",
+      "sentence": "s4",
+      "word": "ចាប់"
+    },
+    {
+      "id": "sp2",
+      "kind": "spell",
+      "sentence": "s5",
+      "word": "បូម"
+    },
+    {
+      "id": "sp3",
+      "kind": "spell",
+      "sentence": "s6",
+      "word": "មួយ"
+    },
+    {
+      "id": "sp4",
+      "kind": "spell",
+      "sentence": "s7",
+      "word": "បាយ"
+    }
+  ],
+  "pictures": {},
+  "noRecording": [],
+  "provenance": "Original lesson written for Koda, 2026. It follows the order in which Grade 1 Khmer teaches letters; the words and sentences are new. Draft: not yet reviewed by a native speaker."
+}

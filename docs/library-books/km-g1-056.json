@@ -1,0 +1,162 @@
+{
+  "id": "km-g1-056",
+  "rev": 0,
+  "language": "km",
+  "band": "A",
+  "ages": [
+    6,
+    7
+  ],
+  "topics": [],
+  "questionCounts": {
+    "understand": 0,
+    "words": 0,
+    "spell": 5
+  },
+  "title": "មេរៀនទី ៥៦ · ក្រោយ ◌យ (ព្យញ្ជនៈ យ)",
+  "category": "Khmer",
+  "picture": "khmer-school",
+  "sentences": [
+    {
+      "id": "s1",
+      "text": "កយ ខយ ចយ ដយ តយ បយ សយ ហយ អយ",
+      "words": [
+        "កយ ",
+        "ខយ ",
+        "ចយ ",
+        "ដយ ",
+        "តយ ",
+        "បយ ",
+        "សយ ",
+        "ហយ ",
+        "អយ"
+      ]
+    },
+    {
+      "id": "s2",
+      "text": "កាយ ខាយ ចាយ ដាយ តាយ បាយ សាយ ហាយ អាយ",
+      "words": [
+        "កាយ ",
+        "ខាយ ",
+        "ចាយ ",
+        "ដាយ ",
+        "តាយ ",
+        "បាយ ",
+        "សាយ ",
+        "ហាយ ",
+        "អាយ"
+      ]
+    },
+    {
+      "id": "s3",
+      "text": "កាយ ចាយ បាយ ហុយ ហើយ អើយ ដោយ អូយ",
+      "words": [
+        "កាយ ",
+        "ចាយ ",
+        "បាយ ",
+        "ហុយ ",
+        "ហើយ ",
+        "អើយ ",
+        "ដោយ ",
+        "អូយ"
+      ]
+    },
+    {
+      "id": "s4",
+      "text": "ចៅញ៉ាំបាយ។",
+      "words": [
+        "ចៅ",
+        "ញ៉ាំ",
+        "បាយ។"
+      ]
+    },
+    {
+      "id": "s5",
+      "text": "ប៉ាទៅហើយ។",
+      "words": [
+        "ប៉ា",
+        "ទៅ",
+        "ហើយ។"
+      ]
+    },
+    {
+      "id": "s6",
+      "text": "ចៅដេកហើយ។",
+      "words": [
+        "ចៅ",
+        "ដេក",
+        "ហើយ។"
+      ]
+    },
+    {
+      "id": "s7",
+      "text": "ចៅអើយ។",
+      "words": [
+        "ចៅ",
+        "អើយ។"
+      ]
+    },
+    {
+      "id": "s8",
+      "text": "អូយឈឺ។",
+      "words": [
+        "អូយ",
+        "ឈឺ។"
+      ]
+    },
+    {
+      "id": "s9",
+      "text": "ម៉ែដាំបាយ។",
+      "words": [
+        "ម៉ែ",
+        "ដាំ",
+        "បាយ។"
+      ]
+    },
+    {
+      "id": "s10",
+      "text": "ចៅទៅដោយទូក។",
+      "words": [
+        "ចៅ",
+        "ទៅ",
+        "ដោយ",
+        "ទូក។"
+      ]
+    }
+  ],
+  "questions": [
+    {
+      "id": "sp1",
+      "kind": "spell",
+      "sentence": "s4",
+      "word": "បាយ"
+    },
+    {
+      "id": "sp2",
+      "kind": "spell",
+      "sentence": "s5",
+      "word": "ហើយ"
+    },
+    {
+      "id": "sp3",
+      "kind": "spell",
+      "sentence": "s8",
+      "word": "អូយ"
+    },
+    {
+      "id": "sp4",
+      "kind": "spell",
+      "sentence": "s10",
+      "word": "ដោយ"
+    },
+    {
+      "id": "sp5",
+      "kind": "spell",
+      "sentence": "s3",
+      "word": "ហុយ"
+    }
+  ],
+  "pictures": {},
+  "noRecording": [],
+  "provenance": "Original lesson written for Koda, 2026. It follows the order in which Grade 1 Khmer teaches letters; the words and sentences are new. Draft: not yet reviewed by a native speaker."
+}

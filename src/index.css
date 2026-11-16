@@ -696,6 +696,28 @@ html.theme-light,
 }
 .ui-scrim-in { animation: ui-scrim-in 0.25s ease-out both; }
 
+/* An arrow that leans forward and back: "this way". */
+@keyframes ui-nudge {
+  0%, 100% { transform: translateX(0); }
+  50% { transform: translateX(4px); }
+}
+
+/* A right answer button: one happy bump. */
+@keyframes ui-bump {
+  0%, 100% { transform: scale(1); }
+  40% { transform: scale(1.04); }
+}
+.ui-bump { animation: ui-bump 0.35s ease-out both; }
+
+/* A wrong answer button: a small side-to-side "no", then still. */
+@keyframes ui-wobble {
+  0%, 100% { transform: translateX(0); }
+  20% { transform: translateX(-6px); }
+  45% { transform: translateX(5px); }
+  70% { transform: translateX(-3px); }
+}
+.ui-wobble { animation: ui-wobble 0.45s ease-in-out both; }
+
 /* Points rise from the medallion and settle. */
 @keyframes ui-float-up {
   0% { transform: translateY(10px) scale(0.8); opacity: 0; }
@@ -742,6 +764,8 @@ html.theme-light,
   .ui-glow,
   .ui-float-up,
   .ui-flash-in,
+  .ui-bump,
+  .ui-wobble,
   .ui-scrim-in,
   .ui-points-pop,
   .rebus-bot-oops,

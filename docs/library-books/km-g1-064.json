@@ -1,0 +1,117 @@
+{
+  "id": "km-g1-064",
+  "rev": 0,
+  "language": "km",
+  "band": "A",
+  "ages": [
+    6,
+    7
+  ],
+  "topics": [],
+  "questionCounts": {
+    "understand": 0,
+    "words": 0,
+    "spell": 4
+  },
+  "title": "មេរៀនទី ៦៤ · ស្រៈពេញតួ ឫ ឬ ឭ ឮ ឯ ឰ ឱ ឳ",
+  "category": "Khmer",
+  "picture": "khmer-school",
+  "sentences": [
+    {
+      "id": "s1",
+      "text": "ឫ ឬ ឭ ឮ ឯ ឰ ឱ ឳ",
+      "words": [
+        "ឫ ",
+        "ឬ ",
+        "ឭ ",
+        "ឮ ",
+        "ឯ ",
+        "ឰ ",
+        "ឱ ",
+        "ឳ"
+      ]
+    },
+    {
+      "id": "s2",
+      "text": "ឬ ឮ ឯង ឯណា ឱកាស",
+      "words": [
+        "ឬ ",
+        "ឮ ",
+        "ឯង ",
+        "ឯណា ",
+        "ឱកាស"
+      ]
+    },
+    {
+      "id": "s3",
+      "text": "ចៅឮសូរមាន់។",
+      "words": [
+        "ចៅ",
+        "ឮ",
+        "សូរ",
+        "មាន់។"
+      ]
+    },
+    {
+      "id": "s4",
+      "text": "ឯងទៅឯណា?",
+      "words": [
+        "ឯង",
+        "ទៅ",
+        "ឯណា?"
+      ]
+    },
+    {
+      "id": "s5",
+      "text": "តាមានឱកាសទៅលេងភូមិ។",
+      "words": [
+        "តា",
+        "មាន",
+        "ឱកាស",
+        "ទៅ",
+        "លេង",
+        "ភូមិ។"
+      ]
+    },
+    {
+      "id": "s6",
+      "text": "ចៅញ៉ាំបាយឬនំ?",
+      "words": [
+        "ចៅ",
+        "ញ៉ាំ",
+        "បាយ",
+        "ឬ",
+        "នំ?"
+      ]
+    }
+  ],
+  "questions": [
+    {
+      "id": "sp1",
+      "kind": "spell",
+      "sentence": "s3",
+      "word": "មាន់"
+    },
+    {
+      "id": "sp2",
+      "kind": "spell",
+      "sentence": "s4",
+      "word": "ឯណា"
+    },
+    {
+      "id": "sp3",
+      "kind": "spell",
+      "sentence": "s5",
+      "word": "ឱកាស"
+    },
+    {
+      "id": "sp4",
+      "kind": "spell",
+      "sentence": "s2",
+      "word": "ឯង"
+    }
+  ],
+  "pictures": {},
+  "noRecording": [],
+  "provenance": "Original lesson written for Koda, 2026. It follows the order in which Grade 1 Khmer teaches letters; the words and sentences are new. Draft: not yet reviewed by a native speaker."
+}

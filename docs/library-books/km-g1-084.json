@@ -1,0 +1,103 @@
+{
+  "id": "km-g1-084",
+  "rev": 0,
+  "language": "km",
+  "band": "A",
+  "ages": [
+    6,
+    7
+  ],
+  "topics": [],
+  "questionCounts": {
+    "understand": 0,
+    "words": 0,
+    "spell": 4
+  },
+  "title": "មេរៀនទី ៨៤ · ជើង ផ្ត ផ្ទ ផ្ន ផ្ល ផ្ស ផ្អ",
+  "category": "Khmer",
+  "picture": "khmer-school",
+  "sentences": [
+    {
+      "id": "s1",
+      "text": "ផ្តា ផ្ទា ផ្នា ផ្លា ផ្សា ផ្អា",
+      "words": [
+        "ផ្តា ",
+        "ផ្ទា ",
+        "ផ្នា ",
+        "ផ្លា ",
+        "ផ្សា ",
+        "ផ្អា"
+      ]
+    },
+    {
+      "id": "s2",
+      "text": "ផ្ទះ ផ្លូវ ផ្សារ ផ្អែម ផ្តល់ ផ្លែ",
+      "words": [
+        "ផ្ទះ ",
+        "ផ្លូវ ",
+        "ផ្សារ ",
+        "ផ្អែម ",
+        "ផ្តល់ ",
+        "ផ្លែ"
+      ]
+    },
+    {
+      "id": "s3",
+      "text": "ផ្ទះខ្ញុំនៅជិតផ្សារ។",
+      "words": [
+        "ផ្ទះ",
+        "ខ្ញុំ",
+        "នៅ",
+        "ជិត",
+        "ផ្សារ។"
+      ]
+    },
+    {
+      "id": "s4",
+      "text": "ផ្លូវនេះវែង។",
+      "words": [
+        "ផ្លូវ",
+        "នេះ",
+        "វែង។"
+      ]
+    },
+    {
+      "id": "s5",
+      "text": "នំនេះផ្អែម។",
+      "words": [
+        "នំ",
+        "នេះ",
+        "ផ្អែម។"
+      ]
+    }
+  ],
+  "questions": [
+    {
+      "id": "sp1",
+      "kind": "spell",
+      "sentence": "s3",
+      "word": "ផ្ទះ"
+    },
+    {
+      "id": "sp2",
+      "kind": "spell",
+      "sentence": "s2",
+      "word": "ផ្សារ"
+    },
+    {
+      "id": "sp3",
+      "kind": "spell",
+      "sentence": "s4",
+      "word": "ផ្លូវ"
+    },
+    {
+      "id": "sp4",
+      "kind": "spell",
+      "sentence": "s5",
+      "word": "ផ្អែម"
+    }
+  ],
+  "pictures": {},
+  "noRecording": [],
+  "provenance": "Original lesson written for Koda, 2026. It follows the order in which Grade 1 Khmer teaches letters; the words and sentences are new. Draft: not yet reviewed by a native speaker."
+}

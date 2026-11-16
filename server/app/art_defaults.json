@@ -240,6 +240,11 @@
     "markup": "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 100 100\">\n  <title>Hint</title>\n  <circle cx=\"50\" cy=\"30\" r=\"20\" fill=\"#8B5CF6\" />\n  <path fill=\"#A78BFA\" d=\"M50 10 A20 20 0 0 0 34 42 L42 36 A10 10 0 0 1 50 20 Z\" />\n  <rect x=\"42\" y=\"48\" width=\"16\" height=\"8\" rx=\"3\" fill=\"#6D28D9\" />\n  <path fill=\"#FFFFFF\" d=\"M50 18 C51 25 52 26 59 28 C52 30 51 31 50 38 C49 31 48 30 41 28 C48 26 49 25 50 18 Z\" />\n  <path fill=\"#FBCFB0\" d=\"M10 74 C18 66 30 62 42 64 L60 66 a6 6 0 0 1 0 12 H48 L66 80 L84 70 a7 7 0 0 1 8 11 L70 94 H30 L10 88 Z\" />\n  <path fill=\"#F9B892\" d=\"M10 74 C18 66 30 62 42 64 L48 65 C36 66 24 72 18 80 L10 82 Z\" />\n</svg>"
   },
   {
+    "id": "kit-hint",
+    "category": "kit",
+    "markup": "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 100 100\">\n  <title>Hint</title>\n  <path fill=\"#8B5CF6\" d=\"M50 10 a28 28 0 0 1 17 50 c-4 3 -6 7 -6 11 V74 H39 V71 c0 -4 -2 -8 -6 -11 A28 28 0 0 1 50 10 Z\" />\n  <path fill=\"#A78BFA\" d=\"M50 10 a28 28 0 0 1 14 3.8 L30 52 A28 28 0 0 1 50 10 Z\" />\n  <path fill=\"none\" stroke=\"#FFFFFF\" stroke-width=\"5\" stroke-linecap=\"round\" stroke-linejoin=\"round\" d=\"M43 58 L50 44 L57 58\" opacity=\"0.9\" />\n  <rect x=\"38\" y=\"76\" width=\"24\" height=\"7\" rx=\"3.5\" fill=\"#6366F1\" />\n  <rect x=\"42\" y=\"85\" width=\"16\" height=\"7\" rx=\"3.5\" fill=\"#6366F1\" />\n  <circle cx=\"41\" cy=\"27\" r=\"5\" fill=\"#FFFFFF\" opacity=\"0.85\" />\n</svg>"
+  },
+  {
     "id": "kit-hours",
     "category": "kit",
     "markup": "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 100 100\">\n  <title>Play hours</title>\n  <circle cx=\"50\" cy=\"50\" r=\"40\" fill=\"#6366F1\" />\n  <path fill=\"#818CF8\" d=\"M50 10 A40 40 0 0 0 16 72 L28 64 A26 26 0 0 1 50 24 Z\" />\n  <circle cx=\"50\" cy=\"50\" r=\"30\" fill=\"#FFFFFF\" />\n  <rect x=\"47\" y=\"24\" width=\"6\" height=\"7\" rx=\"3\" fill=\"#C7D2FE\" />\n  <rect x=\"47\" y=\"69\" width=\"6\" height=\"7\" rx=\"3\" fill=\"#C7D2FE\" />\n  <rect x=\"24\" y=\"47\" width=\"7\" height=\"6\" rx=\"3\" fill=\"#C7D2FE\" />\n  <rect x=\"69\" y=\"47\" width=\"7\" height=\"6\" rx=\"3\" fill=\"#C7D2FE\" />\n  <path fill=\"none\" stroke=\"#3730A3\" stroke-width=\"6\" stroke-linecap=\"round\" stroke-linejoin=\"round\" d=\"M50 34 V50 L62 58\" />\n  <path fill=\"#8B5CF6\" d=\"M84 8 a14 14 0 1 0 8 24 a12 12 0 0 1 -8 -24 Z\" />\n</svg>"
@@ -283,6 +288,11 @@
     "id": "kit-question",
     "category": "kit",
     "markup": "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 100 100\">\n  <title>Question</title>\n  <path fill=\"#EC4899\" d=\"M24 12 H76 a14 14 0 0 1 14 14 V62 a14 14 0 0 1 -14 14 H46 L28 90 V76 H24 a14 14 0 0 1 -14 -14 V26 a14 14 0 0 1 14 -14 Z\" />\n  <path fill=\"#F472B6\" d=\"M24 12 H62 L18 72 a14 14 0 0 1 -8 -10 V26 a14 14 0 0 1 14 -14 Z\" />\n  <path fill=\"none\" stroke=\"#FFFFFF\" stroke-width=\"8\" stroke-linecap=\"round\" stroke-linejoin=\"round\" d=\"M38 34 a12 12 0 1 1 18 10 c-4 3 -6 5 -6 10\" />\n  <circle cx=\"50\" cy=\"65\" r=\"5\" fill=\"#FFFFFF\" />\n</svg>"
+  },
+  {
+    "id": "kit-read-again",
+    "category": "kit",
+    "markup": "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 100 100\">\n  <title>Read again</title>\n  <path fill=\"#6366F1\" d=\"M8 28 a6 6 0 0 1 7 -6 C28 24 40 28 50 36 V84 C40 76 28 72 15 70 a6 6 0 0 1 -7 -6 Z\" />\n  <path fill=\"#818CF8\" d=\"M15 22 C28 24 40 28 50 36 L8 58 V28 a6 6 0 0 1 7 -6 Z\" />\n  <path fill=\"#8B5CF6\" d=\"M92 28 a6 6 0 0 0 -7 -6 C72 24 60 28 50 36 V84 C60 76 72 72 85 70 a6 6 0 0 0 7 -6 Z\" />\n  <path fill=\"#A78BFA\" d=\"M85 22 C72 24 60 28 50 36 V56 L92 32 V28 a6 6 0 0 0 -7 -6 Z\" />\n  <path fill=\"none\" stroke=\"#FFFFFF\" stroke-width=\"5\" stroke-linecap=\"round\" d=\"M18 38 C26 39 33 41 40 45 M18 50 C26 51 33 53 40 57\" />\n  <circle cx=\"72\" cy=\"52\" r=\"15\" fill=\"#FFFFFF\" />\n  <path fill=\"none\" stroke=\"#8B5CF6\" stroke-width=\"5\" stroke-linecap=\"round\" d=\"M80 49 a9 9 0 1 0 -1 8\" />\n  <path fill=\"#8B5CF6\" d=\"M84 42 L84 52 L74 50 Z\" />\n</svg>"
   },
   {
     "id": "kit-recent",

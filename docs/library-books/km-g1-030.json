@@ -1,0 +1,130 @@
+{
+  "id": "km-g1-030",
+  "rev": 0,
+  "language": "km",
+  "band": "A",
+  "ages": [
+    6,
+    7
+  ],
+  "topics": [],
+  "questionCounts": {
+    "understand": 0,
+    "words": 0,
+    "spell": 4
+  },
+  "title": "មេរៀនទី ៣០ · ប៉",
+  "category": "Khmer",
+  "picture": "khmer-school",
+  "sentences": [
+    {
+      "id": "s1",
+      "text": "ប៉ ប៉ា ប៉ិ ប៉ី ប៉ឹ ប៉ឺ ប៉ុ ប៉ូ ប៉ួ ប៉ើ ប៉ឿ ប៉ៀ ប៉េ",
+      "words": [
+        "ប៉ ",
+        "ប៉ា ",
+        "ប៉ិ ",
+        "ប៉ី ",
+        "ប៉ឹ ",
+        "ប៉ឺ ",
+        "ប៉ុ ",
+        "ប៉ូ ",
+        "ប៉ួ ",
+        "ប៉ើ ",
+        "ប៉ឿ ",
+        "ប៉ៀ ",
+        "ប៉េ"
+      ]
+    },
+    {
+      "id": "s2",
+      "text": "ប៉ែ ប៉ៃ ប៉ោ ប៉ៅ ប៉ុំ ប៉ំ ប៉ាំ ប៉ះ ប៉ុះ ប៉េះ ប៉ោះ",
+      "words": [
+        "ប៉ែ ",
+        "ប៉ៃ ",
+        "ប៉ោ ",
+        "ប៉ៅ ",
+        "ប៉ុំ ",
+        "ប៉ំ ",
+        "ប៉ាំ ",
+        "ប៉ះ ",
+        "ប៉ុះ ",
+        "ប៉េះ ",
+        "ប៉ោះ"
+      ]
+    },
+    {
+      "id": "s3",
+      "text": "ប៉ា ប៉ះ",
+      "words": [
+        "ប៉ា ",
+        "ប៉ះ"
+      ]
+    },
+    {
+      "id": "s4",
+      "text": "ប៉ាហៅចៅ។",
+      "words": [
+        "ប៉ា",
+        "ហៅ",
+        "ចៅ។"
+      ]
+    },
+    {
+      "id": "s5",
+      "text": "កុំប៉ះទូ។",
+      "words": [
+        "កុំ",
+        "ប៉ះ",
+        "ទូ។"
+      ]
+    },
+    {
+      "id": "s6",
+      "text": "ប៉ាញ៉ាំមី។",
+      "words": [
+        "ប៉ា",
+        "ញ៉ាំ",
+        "មី។"
+      ]
+    },
+    {
+      "id": "s7",
+      "text": "ចៅហៅប៉ា។",
+      "words": [
+        "ចៅ",
+        "ហៅ",
+        "ប៉ា។"
+      ]
+    }
+  ],
+  "questions": [
+    {
+      "id": "sp1",
+      "kind": "spell",
+      "sentence": "s4",
+      "word": "ប៉ា"
+    },
+    {
+      "id": "sp2",
+      "kind": "spell",
+      "sentence": "s2",
+      "word": "ប៉ះ"
+    },
+    {
+      "id": "sp3",
+      "kind": "spell",
+      "sentence": "s5",
+      "word": "ទូ"
+    },
+    {
+      "id": "sp4",
+      "kind": "spell",
+      "sentence": "s7",
+      "word": "ហៅ"
+    }
+  ],
+  "pictures": {},
+  "noRecording": [],
+  "provenance": "Original lesson written for Koda, 2026. It follows the order in which Grade 1 Khmer teaches letters; the words and sentences are new. Draft: not yet reviewed by a native speaker."
+}

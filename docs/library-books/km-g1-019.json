@@ -1,0 +1,115 @@
+{
+  "id": "km-g1-019",
+  "rev": 0,
+  "language": "km",
+  "band": "A",
+  "ages": [
+    6,
+    7
+  ],
+  "topics": [],
+  "questionCounts": {
+    "understand": 0,
+    "words": 0,
+    "spell": 3
+  },
+  "title": "មេរៀនទី ១៩ · អក្សរ ញ",
+  "category": "Khmer",
+  "picture": "khmer-school",
+  "sentences": [
+    {
+      "id": "s1",
+      "text": "ញ ញា ញិ ញី ញឹ ញឺ ញុ ញូ ញួ ញើ ញឿ ញៀ ញេ",
+      "words": [
+        "ញ ",
+        "ញា ",
+        "ញិ ",
+        "ញី ",
+        "ញឹ ",
+        "ញឺ ",
+        "ញុ ",
+        "ញូ ",
+        "ញួ ",
+        "ញើ ",
+        "ញឿ ",
+        "ញៀ ",
+        "ញេ"
+      ]
+    },
+    {
+      "id": "s2",
+      "text": "ញែ ញៃ ញោ ញៅ ញុំ ញំ ញាំ ញះ ញុះ ញេះ ញោះ",
+      "words": [
+        "ញែ ",
+        "ញៃ ",
+        "ញោ ",
+        "ញៅ ",
+        "ញុំ ",
+        "ញំ ",
+        "ញាំ ",
+        "ញះ ",
+        "ញុះ ",
+        "ញេះ ",
+        "ញោះ"
+      ]
+    },
+    {
+      "id": "s3",
+      "text": "ញី គោ សេះ",
+      "words": [
+        "ញី ",
+        "គោ ",
+        "សេះ"
+      ]
+    },
+    {
+      "id": "s4",
+      "text": "សេះញី។",
+      "words": [
+        "សេះ",
+        "ញី។"
+      ]
+    },
+    {
+      "id": "s5",
+      "text": "គោញី។",
+      "words": [
+        "គោ",
+        "ញី។"
+      ]
+    },
+    {
+      "id": "s6",
+      "text": "តាហៅគោញី។",
+      "words": [
+        "តា",
+        "ហៅ",
+        "គោ",
+        "ញី។"
+      ]
+    }
+  ],
+  "questions": [
+    {
+      "id": "sp1",
+      "kind": "spell",
+      "sentence": "s4",
+      "word": "ញី"
+    },
+    {
+      "id": "sp2",
+      "kind": "spell",
+      "sentence": "s3",
+      "word": "សេះ"
+    },
+    {
+      "id": "sp3",
+      "kind": "spell",
+      "sentence": "s5",
+      "word": "គោ"
+    }
+  ],
+  "pictures": {},
+  "noRecording": [],
+  "provenance": "Original lesson written for Koda, 2026. It follows the order in which Grade 1 Khmer teaches letters; the words and sentences are new. Draft: not yet reviewed by a native speaker."
+}

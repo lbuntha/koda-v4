@@ -26,7 +26,7 @@ export interface UIReaderToolbarProps {
  * grouped in one pill instead, so they read as a single tool, and each keeps a
  * 44px target for a finger.
  */
-const tool = "grid h-11 w-11 shrink-0 place-items-center rounded-full text-ink transition-[background-color,color,transform] duration-150 hover:bg-surface-muted active:scale-90 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 disabled:cursor-not-allowed disabled:opacity-30 disabled:hover:bg-transparent disabled:active:scale-100 motion-reduce:transition-none [&>svg]:h-[1.15rem] [&>svg]:w-[1.15rem]";
+const tool = "grid h-10 w-10 sm:h-11 sm:w-11 shrink-0 place-items-center rounded-full text-ink transition-[background-color,color,transform] duration-150 hover:bg-surface-muted active:scale-90 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 disabled:cursor-not-allowed disabled:opacity-30 disabled:hover:bg-transparent disabled:active:scale-100 motion-reduce:transition-none [&>svg]:h-[1.15rem] [&>svg]:w-[1.15rem]";
 
 /** Shared reader controls: one mobile-safe toolbar for books and other readers. */
 export const UIReaderToolbar: React.FC<UIReaderToolbarProps> = ({
@@ -47,11 +47,12 @@ export const UIReaderToolbar: React.FC<UIReaderToolbarProps> = ({
   return (
   <div className={`mobile-reader-toolbar ${className}`}>
     <div className="mobile-reader-toolbar-row flex items-center justify-between gap-2 py-1">
-      <button type="button" onClick={onBack} aria-label={t("reader.backToBook")} className="-ml-2 inline-flex h-11 items-center gap-1.5 rounded-full pl-2.5 pr-4 text-sm font-bold text-ink transition-colors hover:bg-surface-muted focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600">
+      <button type="button" onClick={onBack} aria-label={t("reader.backToBook")} className="-ml-2 inline-flex h-11 shrink-0 items-center gap-1.5 rounded-full px-2.5 sm:pr-4 text-sm font-bold text-ink transition-colors hover:bg-surface-muted focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600">
         <ArrowLeft className="h-4 w-4" aria-hidden="true" />
-        {backLabel ?? t("reader.back")}
+        {/* The word only where it fits: on a phone the arrow alone keeps all the tools on one row. */}
+        <span className="hidden sm:inline">{backLabel ?? t("reader.back")}</span>
       </button>
-      <div className="flex items-center gap-0.5 rounded-full bg-surface-muted/60 p-0.5 dark:bg-surface-muted/50">
+      <div className="flex min-w-0 items-center gap-0.5 rounded-full bg-surface-muted/60 p-0.5 dark:bg-surface-muted/50">
         <div role="group" aria-label={t("reader.textSize")} className="flex items-center">
           <button type="button" onClick={onSmallerText} disabled={smallerDisabled} aria-label={t("reader.smaller")} className={tool}>
             <span aria-hidden="true" className="font-serif text-sm font-bold leading-none">A</span>

@@ -1,0 +1,114 @@
+{
+  "id": "km-g1-006",
+  "rev": 0,
+  "language": "km",
+  "band": "A",
+  "ages": [
+    6,
+    7
+  ],
+  "topics": [],
+  "questionCounts": {
+    "understand": 0,
+    "words": 0,
+    "spell": 3
+  },
+  "title": "មេរៀនទី ៦ · អក្សរ ឆ",
+  "category": "Khmer",
+  "picture": "khmer-school",
+  "sentences": [
+    {
+      "id": "s1",
+      "text": "ឆ ឆា ឆិ ឆី ឆឹ ឆឺ ឆុ ឆូ ឆួ ឆើ ឆឿ ឆៀ ឆេ",
+      "words": [
+        "ឆ ",
+        "ឆា ",
+        "ឆិ ",
+        "ឆី ",
+        "ឆឹ ",
+        "ឆឺ ",
+        "ឆុ ",
+        "ឆូ ",
+        "ឆួ ",
+        "ឆើ ",
+        "ឆឿ ",
+        "ឆៀ ",
+        "ឆេ"
+      ]
+    },
+    {
+      "id": "s2",
+      "text": "ឆែ ឆៃ ឆោ ឆៅ ឆុំ ឆំ ឆាំ ឆះ ឆុះ ឆេះ ឆោះ",
+      "words": [
+        "ឆែ ",
+        "ឆៃ ",
+        "ឆោ ",
+        "ឆៅ ",
+        "ឆុំ ",
+        "ឆំ ",
+        "ឆាំ ",
+        "ឆះ ",
+        "ឆុះ ",
+        "ឆេះ ",
+        "ឆោះ"
+      ]
+    },
+    {
+      "id": "s3",
+      "text": "ឆា ឆេះ ឆៅ",
+      "words": [
+        "ឆា ",
+        "ឆេះ ",
+        "ឆៅ"
+      ]
+    },
+    {
+      "id": "s4",
+      "text": "ចៅចាំឆា។",
+      "words": [
+        "ចៅ",
+        "ចាំ",
+        "ឆា។"
+      ]
+    },
+    {
+      "id": "s5",
+      "text": "កុំឆេះ។",
+      "words": [
+        "កុំ",
+        "ឆេះ។"
+      ]
+    },
+    {
+      "id": "s6",
+      "text": "ខោឆេះ។",
+      "words": [
+        "ខោ",
+        "ឆេះ។"
+      ]
+    }
+  ],
+  "questions": [
+    {
+      "id": "sp1",
+      "kind": "spell",
+      "sentence": "s4",
+      "word": "ឆា"
+    },
+    {
+      "id": "sp2",
+      "kind": "spell",
+      "sentence": "s5",
+      "word": "ឆេះ"
+    },
+    {
+      "id": "sp3",
+      "kind": "spell",
+      "sentence": "s2",
+      "word": "ឆៅ"
+    }
+  ],
+  "pictures": {},
+  "noRecording": [],
+  "provenance": "Original lesson written for Koda, 2026. It follows the order in which Grade 1 Khmer teaches letters; the words and sentences are new. Draft: not yet reviewed by a native speaker."
+}

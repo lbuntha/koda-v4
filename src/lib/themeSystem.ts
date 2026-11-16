@@ -26,6 +26,8 @@ export type SurfaceVariant = "default" | "glass" | "bordered" | "interactive";
 export type PathNodeState = "completed" | "current" | "available" | "locked" | "premium";
 export type KidMessageTone = "correct" | "tryAgain" | "hint" | "celebrate" | "nudge";
 export type AnswerFlashTone = "correct" | "tryAgain";
+export type QuizStepState = "now" | "done" | "next";
+export type QuizChoiceState = "idle" | "right" | "wrong" | "rest";
 export type FieldSize = "sm" | "md" | "lg";
 
 /**
@@ -450,6 +452,56 @@ export const themeSystem = {
         nudge: "bg-violet-600 hover:bg-violet-500 border-violet-800",
       }[tone]}`;
     },
+  },
+
+  /*
+   * A book's quiz (Understand, Words, Spell): the part steps along the top, the
+   * question card, and answer buttons a child wants to press — raised like a
+   * key, lifting under the pointer, a right answer bumps green and a wrong one
+   * wobbles once and steps back. Colour never alone: each state has a badge.
+   */
+  quiz: {
+    step: (state: QuizStepState) =>
+      "flex min-w-0 flex-col items-center gap-1 text-center sm:flex-row sm:gap-2 sm:text-left rounded-2xl border-2 px-1.5 py-1.5 sm:px-3 sm:py-2 transition-colors duration-300 motion-reduce:transition-none " +
+      {
+        now: "border-indigo-300 bg-indigo-50 dark:border-indigo-700 dark:bg-indigo-950/50",
+        done: "border-emerald-200 bg-emerald-50 dark:border-emerald-800 dark:bg-emerald-950/40",
+        next: "border-line bg-surface opacity-80",
+      }[state],
+    stepLabel: "block truncate text-xs sm:text-sm font-extrabold text-ink",
+    stepCount: "block text-[11px] font-bold tabular-nums text-muted",
+    card: "rounded-3xl border border-line bg-surface p-4 sm:p-6 shadow-sm shadow-slate-900/5",
+    eyebrow:
+      "flex items-center gap-1.5 text-xs font-extrabold uppercase tracking-wider text-indigo-600 dark:text-indigo-300",
+    question: "mt-2 text-xl sm:text-2xl font-extrabold leading-snug text-ink",
+    choice: (state: QuizChoiceState, picture = false) =>
+      "relative flex w-full rounded-2xl border-2 border-b-4 font-extrabold transition-[transform,background-color,border-color] duration-150 " +
+      "focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 motion-reduce:transition-none " +
+      (picture ? "flex-col items-center gap-2 p-2 sm:p-3 " : "min-h-16 items-center gap-3 px-3 py-3 sm:px-4 text-left text-lg ") +
+      {
+        idle: "cursor-pointer border-line bg-surface text-ink hover:-translate-y-0.5 hover:border-indigo-300 hover:bg-indigo-50/60 active:translate-y-0.5 active:border-b-2 dark:hover:border-indigo-700 dark:hover:bg-indigo-950/30",
+        right: "ui-bump border-emerald-500 bg-emerald-50 text-emerald-900 dark:bg-emerald-950/50 dark:text-emerald-100",
+        wrong: "ui-wobble border-rose-200 bg-rose-50/70 text-ink/50 dark:border-rose-900 dark:bg-rose-950/30",
+        rest: "border-line bg-surface text-ink opacity-50",
+      }[state],
+    badge: (state: QuizChoiceState) =>
+      "grid h-9 w-9 shrink-0 place-items-center rounded-xl text-sm font-black [&>svg]:h-5 [&>svg]:w-5 " +
+      {
+        idle: "bg-indigo-50 text-indigo-700 dark:bg-indigo-950 dark:text-indigo-200",
+        right: "bg-emerald-500 text-white",
+        wrong: "bg-rose-400 text-white",
+        rest: "bg-surface-muted text-muted",
+      }[state],
+    picture: "block h-20 w-full rounded-xl bg-surface-muted p-2 sm:h-28",
+    /* The quiz toolbar's helpers (Read again, Hint): one pill shape, an art icon and a word. */
+    tool:
+      "inline-flex h-11 shrink-0 items-center gap-1.5 rounded-full border border-line bg-surface pl-1.5 pr-3.5 text-sm font-bold text-ink shadow-sm " +
+      "transition-[background-color,border-color,transform] duration-150 hover:border-indigo-300 hover:bg-indigo-50/60 active:scale-95 " +
+      "dark:hover:border-indigo-700 dark:hover:bg-indigo-950/40 disabled:cursor-not-allowed disabled:opacity-40 disabled:active:scale-100 " +
+      "focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 motion-reduce:transition-none",
+    back:
+      "inline-flex h-11 shrink-0 items-center gap-1.5 rounded-full px-3 text-sm font-bold text-ink transition-colors hover:bg-surface-muted " +
+      "focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600",
   },
 
   /*

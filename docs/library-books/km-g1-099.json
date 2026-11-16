@@ -1,0 +1,82 @@
+{
+  "id": "km-g1-099",
+  "rev": 0,
+  "language": "km",
+  "band": "A",
+  "ages": [
+    6,
+    7
+  ],
+  "topics": [],
+  "questionCounts": {
+    "understand": 0,
+    "words": 0,
+    "spell": 3
+  },
+  "title": "មេរៀនទី ៩៩ · ព្យញ្ជនៈ ត្រួត ង្ក្រ ង្គ្រ",
+  "category": "Khmer",
+  "picture": "khmer-school",
+  "sentences": [
+    {
+      "id": "s1",
+      "text": "ចង្ក្រាន អង្ក្រង សង្គ្រោះ",
+      "words": [
+        "ចង្ក្រាន ",
+        "អង្ក្រង ",
+        "សង្គ្រោះ"
+      ]
+    },
+    {
+      "id": "s2",
+      "text": "ម៉ែដាំបាយលើចង្ក្រាន។",
+      "words": [
+        "ម៉ែ",
+        "ដាំ",
+        "បាយ",
+        "លើ",
+        "ចង្ក្រាន។"
+      ]
+    },
+    {
+      "id": "s3",
+      "text": "អង្ក្រងខាំដៃ។",
+      "words": [
+        "អង្ក្រង",
+        "ខាំ",
+        "ដៃ។"
+      ]
+    },
+    {
+      "id": "s4",
+      "text": "ពូសង្គ្រោះឆ្មា។",
+      "words": [
+        "ពូ",
+        "សង្គ្រោះ",
+        "ឆ្មា។"
+      ]
+    }
+  ],
+  "questions": [
+    {
+      "id": "sp1",
+      "kind": "spell",
+      "sentence": "s2",
+      "word": "ចង្ក្រាន"
+    },
+    {
+      "id": "sp2",
+      "kind": "spell",
+      "sentence": "s3",
+      "word": "អង្ក្រង"
+    },
+    {
+      "id": "sp3",
+      "kind": "spell",
+      "sentence": "s4",
+      "word": "សង្គ្រោះ"
+    }
+  ],
+  "pictures": {},
+  "noRecording": [],
+  "provenance": "Original lesson written for Koda, 2026. It follows the order in which Grade 1 Khmer teaches letters; the words and sentences are new. Draft: not yet reviewed by a native speaker."
+}

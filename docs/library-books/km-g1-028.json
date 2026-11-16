@@ -1,0 +1,121 @@
+{
+  "id": "km-g1-028",
+  "rev": 0,
+  "language": "km",
+  "band": "A",
+  "ages": [
+    6,
+    7
+  ],
+  "topics": [],
+  "questionCounts": {
+    "understand": 0,
+    "words": 0,
+    "spell": 3
+  },
+  "title": "មេរៀនទី ២៨ · ង៉",
+  "category": "Khmer",
+  "picture": "khmer-school",
+  "sentences": [
+    {
+      "id": "s1",
+      "text": "ង៉ ង៉ា ង៉ិ ង៉ី ង៉ឹ ង៉ឺ ង៉ុ ង៉ូ ង៉ួ ង៉ើ ង៉ឿ ង៉ៀ ង៉េ",
+      "words": [
+        "ង៉ ",
+        "ង៉ា ",
+        "ង៉ិ ",
+        "ង៉ី ",
+        "ង៉ឹ ",
+        "ង៉ឺ ",
+        "ង៉ុ ",
+        "ង៉ូ ",
+        "ង៉ួ ",
+        "ង៉ើ ",
+        "ង៉ឿ ",
+        "ង៉ៀ ",
+        "ង៉េ"
+      ]
+    },
+    {
+      "id": "s2",
+      "text": "ង៉ែ ង៉ៃ ង៉ោ ង៉ៅ ង៉ុំ ង៉ំ ង៉ាំ ង៉ះ ង៉ុះ ង៉េះ ង៉ោះ",
+      "words": [
+        "ង៉ែ ",
+        "ង៉ៃ ",
+        "ង៉ោ ",
+        "ង៉ៅ ",
+        "ង៉ុំ ",
+        "ង៉ំ ",
+        "ង៉ាំ ",
+        "ង៉ះ ",
+        "ង៉ុះ ",
+        "ង៉េះ ",
+        "ង៉ោះ"
+      ]
+    },
+    {
+      "id": "s3",
+      "text": "ទា ទៅ ទី លើ លា",
+      "words": [
+        "ទា ",
+        "ទៅ ",
+        "ទី ",
+        "លើ ",
+        "លា"
+      ]
+    },
+    {
+      "id": "s4",
+      "text": "ពូហៅចៅទៅឃុំ។",
+      "words": [
+        "ពូ",
+        "ហៅ",
+        "ចៅ",
+        "ទៅ",
+        "ឃុំ។"
+      ]
+    },
+    {
+      "id": "s5",
+      "text": "ទាពូធំ។",
+      "words": [
+        "ទា",
+        "ពូ",
+        "ធំ។"
+      ]
+    },
+    {
+      "id": "s6",
+      "text": "ចៅពៅគូទា។",
+      "words": [
+        "ចៅ",
+        "ពៅ",
+        "គូ",
+        "ទា។"
+      ]
+    }
+  ],
+  "questions": [
+    {
+      "id": "sp1",
+      "kind": "spell",
+      "sentence": "s4",
+      "word": "ហៅ"
+    },
+    {
+      "id": "sp2",
+      "kind": "spell",
+      "sentence": "s5",
+      "word": "ធំ"
+    },
+    {
+      "id": "sp3",
+      "kind": "spell",
+      "sentence": "s6",
+      "word": "គូ"
+    }
+  ],
+  "pictures": {},
+  "noRecording": [],
+  "provenance": "Original lesson written for Koda, 2026. It follows the order in which Grade 1 Khmer teaches letters; the words and sentences are new. Draft: not yet reviewed by a native speaker."
+}

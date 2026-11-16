@@ -1,0 +1,126 @@
+{
+  "id": "km-g1-007",
+  "rev": 0,
+  "language": "km",
+  "band": "A",
+  "ages": [
+    6,
+    7
+  ],
+  "topics": [],
+  "questionCounts": {
+    "understand": 0,
+    "words": 0,
+    "spell": 4
+  },
+  "title": "មេរៀនទី ៧ · អក្សរ ដ",
+  "category": "Khmer",
+  "picture": "khmer-school",
+  "sentences": [
+    {
+      "id": "s1",
+      "text": "ដ ដា ដិ ដី ដឹ ដឺ ដុ ដូ ដួ ដើ ដឿ ដៀ ដេ",
+      "words": [
+        "ដ ",
+        "ដា ",
+        "ដិ ",
+        "ដី ",
+        "ដឹ ",
+        "ដឺ ",
+        "ដុ ",
+        "ដូ ",
+        "ដួ ",
+        "ដើ ",
+        "ដឿ ",
+        "ដៀ ",
+        "ដេ"
+      ]
+    },
+    {
+      "id": "s2",
+      "text": "ដែ ដៃ ដោ ដៅ ដុំ ដំ ដាំ ដះ ដុះ ដេះ ដោះ",
+      "words": [
+        "ដែ ",
+        "ដៃ ",
+        "ដោ ",
+        "ដៅ ",
+        "ដុំ ",
+        "ដំ ",
+        "ដាំ ",
+        "ដះ ",
+        "ដុះ ",
+        "ដេះ ",
+        "ដោះ"
+      ]
+    },
+    {
+      "id": "s3",
+      "text": "ដៃ ដី ដុំ ដោះ ដាំ",
+      "words": [
+        "ដៃ ",
+        "ដី ",
+        "ដុំ ",
+        "ដោះ ",
+        "ដាំ"
+      ]
+    },
+    {
+      "id": "s4",
+      "text": "ចៅចេះដាំដី។",
+      "words": [
+        "ចៅ",
+        "ចេះ",
+        "ដាំ",
+        "ដី។"
+      ]
+    },
+    {
+      "id": "s5",
+      "text": "កុំដោះខោ។",
+      "words": [
+        "កុំ",
+        "ដោះ",
+        "ខោ។"
+      ]
+    },
+    {
+      "id": "s6",
+      "text": "ដៃចៅខំដាំ។",
+      "words": [
+        "ដៃ",
+        "ចៅ",
+        "ខំ",
+        "ដាំ។"
+      ]
+    }
+  ],
+  "questions": [
+    {
+      "id": "sp1",
+      "kind": "spell",
+      "sentence": "s6",
+      "word": "ដៃ"
+    },
+    {
+      "id": "sp2",
+      "kind": "spell",
+      "sentence": "s4",
+      "word": "ដី"
+    },
+    {
+      "id": "sp3",
+      "kind": "spell",
+      "sentence": "s2",
+      "word": "ដាំ"
+    },
+    {
+      "id": "sp4",
+      "kind": "spell",
+      "sentence": "s5",
+      "word": "ដោះ"
+    }
+  ],
+  "pictures": {},
+  "noRecording": [],
+  "provenance": "Original lesson written for Koda, 2026. It follows the order in which Grade 1 Khmer teaches letters; the words and sentences are new. Draft: not yet reviewed by a native speaker."
+}

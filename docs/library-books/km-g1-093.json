@@ -1,0 +1,96 @@
+{
+  "id": "km-g1-093",
+  "rev": 0,
+  "language": "km",
+  "band": "A",
+  "ages": [
+    6,
+    7
+  ],
+  "topics": [],
+  "questionCounts": {
+    "understand": 0,
+    "words": 0,
+    "spell": 4
+  },
+  "title": "មេរៀនទី ៩៣ · ព្យញ្ជនៈ ត្រួត ង្ក ង្គ ង្ហ",
+  "category": "Khmer",
+  "picture": "khmer-school",
+  "sentences": [
+    {
+      "id": "s1",
+      "text": "បង្កង ចង្កៀង អង្ករ អង្គុយ កង្ហារ",
+      "words": [
+        "បង្កង ",
+        "ចង្កៀង ",
+        "អង្ករ ",
+        "អង្គុយ ",
+        "កង្ហារ"
+      ]
+    },
+    {
+      "id": "s2",
+      "text": "ចង្កៀងភ្លឺ។",
+      "words": [
+        "ចង្កៀង",
+        "ភ្លឺ។"
+      ]
+    },
+    {
+      "id": "s3",
+      "text": "យាយលាងអង្ករ។",
+      "words": [
+        "យាយ",
+        "លាង",
+        "អង្ករ។"
+      ]
+    },
+    {
+      "id": "s4",
+      "text": "ខ្ញុំអង្គុយលើកៅអី។",
+      "words": [
+        "ខ្ញុំ",
+        "អង្គុយ",
+        "លើ",
+        "កៅអី។"
+      ]
+    },
+    {
+      "id": "s5",
+      "text": "កង្ហារវិល។",
+      "words": [
+        "កង្ហារ",
+        "វិល។"
+      ]
+    }
+  ],
+  "questions": [
+    {
+      "id": "sp1",
+      "kind": "spell",
+      "sentence": "s2",
+      "word": "ចង្កៀង"
+    },
+    {
+      "id": "sp2",
+      "kind": "spell",
+      "sentence": "s3",
+      "word": "អង្ករ"
+    },
+    {
+      "id": "sp3",
+      "kind": "spell",
+      "sentence": "s4",
+      "word": "អង្គុយ"
+    },
+    {
+      "id": "sp4",
+      "kind": "spell",
+      "sentence": "s5",
+      "word": "កង្ហារ"
+    }
+  ],
+  "pictures": {},
+  "noRecording": [],
+  "provenance": "Original lesson written for Koda, 2026. It follows the order in which Grade 1 Khmer teaches letters; the words and sentences are new. Draft: not yet reviewed by a native speaker."
+}

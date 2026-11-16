@@ -1,0 +1,98 @@
+{
+  "id": "km-g1-097",
+  "rev": 0,
+  "language": "km",
+  "band": "A",
+  "ages": [
+    6,
+    7
+  ],
+  "topics": [],
+  "questionCounts": {
+    "understand": 0,
+    "words": 0,
+    "spell": 4
+  },
+  "title": "មេរៀនទី ៩៧ · ព្យញ្ជនៈ ត្រួត ន្ទ ន្ល ន្ស",
+  "category": "Khmer",
+  "picture": "khmer-school",
+  "sentences": [
+    {
+      "id": "s1",
+      "text": "ទន្សាយ បន្លែ ទន្លេ ចន្ទ ពន្លឺ",
+      "words": [
+        "ទន្សាយ ",
+        "បន្លែ ",
+        "ទន្លេ ",
+        "ចន្ទ ",
+        "ពន្លឺ"
+      ]
+    },
+    {
+      "id": "s2",
+      "text": "ទន្សាយរត់លឿន។",
+      "words": [
+        "ទន្សាយ",
+        "រត់",
+        "លឿន។"
+      ]
+    },
+    {
+      "id": "s3",
+      "text": "ម៉ែទិញបន្លែ។",
+      "words": [
+        "ម៉ែ",
+        "ទិញ",
+        "បន្លែ។"
+      ]
+    },
+    {
+      "id": "s4",
+      "text": "យើងហែលទឹកទន្លេ។",
+      "words": [
+        "យើង",
+        "ហែល",
+        "ទឹក",
+        "ទន្លេ។"
+      ]
+    },
+    {
+      "id": "s5",
+      "text": "ព្រះចន្ទភ្លឺ។",
+      "words": [
+        "ព្រះ",
+        "ចន្ទ",
+        "ភ្លឺ។"
+      ]
+    }
+  ],
+  "questions": [
+    {
+      "id": "sp1",
+      "kind": "spell",
+      "sentence": "s2",
+      "word": "ទន្សាយ"
+    },
+    {
+      "id": "sp2",
+      "kind": "spell",
+      "sentence": "s3",
+      "word": "បន្លែ"
+    },
+    {
+      "id": "sp3",
+      "kind": "spell",
+      "sentence": "s4",
+      "word": "ទន្លេ"
+    },
+    {
+      "id": "sp4",
+      "kind": "spell",
+      "sentence": "s5",
+      "word": "ចន្ទ"
+    }
+  ],
+  "pictures": {},
+  "noRecording": [],
+  "provenance": "Original lesson written for Koda, 2026. It follows the order in which Grade 1 Khmer teaches letters; the words and sentences are new. Draft: not yet reviewed by a native speaker."
+}
