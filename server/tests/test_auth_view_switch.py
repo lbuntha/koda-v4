@@ -60,3 +60,23 @@ async def test_signing_in_again_after_admin_view_opens_the_family(client, db, si
         "email": body["email"], "password": body["password"], "installId": "tab-1",
     })).json()
     assert login2["familyId"] == login["familyId"]
+
+
+async def test_make_admin_keeps_the_family_and_offers_the_switch(client, db, signup_body):
+    from app.repos import users
+    from app.security import passwords
+
+    await users.create(db, "boss@example.com", passwords.hash_password("boss-pass-123"), platform_role="admin")
+    boss = (await client.post("/auth/login", json={"email": "boss@example.com", "password": "boss-pass-123"})).json()
+    body = signup_body()
+    await client.post("/auth/signup", json=body)
+    owner = await db.users.find_one({"email": body["email"]})
+
+    made = await client.patch(f"/admin/users/{owner['_id']}", headers=_auth(boss), json={"platformRole": "admin"})
+    assert made.status_code == 200, made.text
+    assert await db.memberships.count_documents({"userId": owner["_id"], "role": "owner"}) == 1
+
+    login = (await client.post("/auth/login", json={"email": body["email"], "password": body["password"]})).json()
+    assert login["familyId"]
+    me = (await client.get("/auth/me", headers=_auth(login))).json()
+    assert me["views"] == ["family", "admin"]
