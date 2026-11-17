@@ -31,7 +31,7 @@ from app.rebus_verify import describe, validate_puzzle
 from app.repos import rebus as repo
 from app.repos import rebus_categories as categories_repo
 from app.routers.library import AudioSaved, ImageWrite, store_image
-from app.security import principal_can
+from app.security import ownership, principal_can
 
 router = APIRouter(prefix="/rebus", tags=["rebus"], dependencies=[AUTHENTICATED])
 
@@ -45,6 +45,29 @@ def _may_author(p: CurrentPrincipal) -> Principal:
 
 
 CanWrite = Annotated[Principal, Depends(_may_author)]
+
+
+def _may_run(p: CanWrite) -> Principal:
+    """What changes the game for everyone — categories, releases, the AI prompt — is the admin's."""
+    if not ownership.sees_all(p):
+        raise Forbidden("Only a Koda admin can change this for everyone.", "not_an_operator")
+    return p
+
+
+CanRun = Annotated[Principal, Depends(_may_run)]
+
+
+def _mine_only(p: Principal) -> str | None:
+    """The creator a listing is narrowed to: nobody for an admin, the caller otherwise."""
+    return None if ownership.sees_all(p) else p.subject_id
+
+
+async def _owned(db: Any, p: Principal, puzzle_id: str) -> dict[str, Any]:
+    """A puzzle this person may work on — their own, or any for an admin — or the same 404 as a missing one."""
+    row = await repo.get(db, puzzle_id)
+    if not row or not (ownership.sees_all(p) or row.get("createdBy") == p.subject_id):
+        raise NotFound("There is no such puzzle.")
+    return row
 
 
 def _out(row: dict[str, Any]) -> dict[str, Any]:
@@ -123,7 +146,7 @@ async def studio_categories(db: Db, p: CanWrite) -> dict[str, Any]:
 
 
 @router.post("/studio/categories", status_code=201)
-async def add_category(body: CategoryIn, db: Db, p: CanWrite) -> dict[str, Any]:
+async def add_category(body: CategoryIn, db: Db, p: CanRun) -> dict[str, Any]:
     if await categories_repo.get(db, body.id):
         raise Conflict("There is already a category with that id.", "category_exists")
     row = await categories_repo.create(db, category_id=body.id, names=body.names, tone=body.tone, topic=body.topic)
@@ -132,7 +155,7 @@ async def add_category(body: CategoryIn, db: Db, p: CanWrite) -> dict[str, Any]:
 
 
 @router.patch("/studio/categories/{category_id}")
-async def change_category(category_id: str, body: CategoryPatch, db: Db, p: CanWrite) -> dict[str, Any]:
+async def change_category(category_id: str, body: CategoryPatch, db: Db, p: CanRun) -> dict[str, Any]:
     fields = {k: v for k, v in body.model_dump().items() if v is not None}
     row = await categories_repo.update(db, category_id, fields) if fields else await categories_repo.get(db, category_id)
     if row is None:
@@ -142,14 +165,14 @@ async def change_category(category_id: str, body: CategoryPatch, db: Db, p: CanW
 
 
 @router.post("/studio/categories/reorder")
-async def reorder_categories(body: ReorderIn, db: Db, p: CanWrite) -> dict[str, Any]:
+async def reorder_categories(body: ReorderIn, db: Db, p: CanRun) -> dict[str, Any]:
     await categories_repo.reorder(db, body.order)
     await repo.bump(db)
     return {"categories": await categories_repo.enabled(db)}
 
 
 @router.delete("/studio/categories/{category_id}")
-async def delete_category(category_id: str, db: Db, p: CanWrite) -> dict[str, str]:
+async def delete_category(category_id: str, db: Db, p: CanRun) -> dict[str, str]:
     row = await categories_repo.get(db, category_id)
     if row is None:
         raise NotFound("There is no such category.", "category_not_found")
@@ -196,7 +219,8 @@ async def studio_list(
     limit: Annotated[int, Query(ge=1, le=100)] = 50,
 ) -> dict[str, Any]:
     rows, total = await repo.listing(
-        db, status=status, category=category, source=source, icon=icon, kind=kind, query=q, skip=skip, limit=limit
+        db, status=status, category=category, source=source, icon=icon, kind=kind, query=q, skip=skip, limit=limit,
+        created_by=_mine_only(p),
     )
     who = await repo.names(db, {r["createdBy"] for r in rows if r.get("createdBy")})
     checks = await _checks(db)
@@ -206,9 +230,7 @@ async def studio_list(
 
 @router.get("/studio/puzzles/{puzzle_id}")
 async def studio_get(puzzle_id: str, db: Db, p: CanWrite) -> dict[str, Any]:
-    row = await repo.get(db, puzzle_id)
-    if not row:
-        raise NotFound("There is no such puzzle.")
+    row = await _owned(db, p, puzzle_id)
     who = await repo.names(db, {row["createdBy"]} if row.get("createdBy") else set())
     return {**_out(row), "issues": await _problems(db, row), "createdByName": who.get(row.get("createdBy", ""))}
 
@@ -232,9 +254,7 @@ async def studio_create(body: PuzzleIn, db: Db, p: CanWrite) -> dict[str, Any]:
 
 @router.patch("/studio/puzzles/{puzzle_id}")
 async def studio_edit(puzzle_id: str, body: PuzzlePatch, db: Db, p: CanWrite) -> dict[str, Any]:
-    row = await repo.get(db, puzzle_id)
-    if not row:
-        raise NotFound("There is no such puzzle.")
+    row = await _owned(db, p, puzzle_id)
     changes = body.model_dump(mode="json", exclude_none=True)
     merged = {**row, **changes}
     if row.get("kind") == "choice":
@@ -266,10 +286,11 @@ async def studio_edit(puzzle_id: str, body: PuzzlePatch, db: Db, p: CanWrite) ->
 @router.post("/studio/puzzles/{puzzle_id}/status")
 async def studio_status(puzzle_id: str, body: StatusIn, db: Db, p: CanWrite) -> dict[str, Any]:
     """Draft → approved (checked) → published (with the next release); live ↔ unpublished; rejected."""
-    row = await repo.get(db, puzzle_id)
-    if not row:
-        raise NotFound("There is no such puzzle.")
+    row = await _owned(db, p, puzzle_id)
     current, wanted = row["status"], body.status
+    if "published" in (current, wanted) and not ownership.sees_all(p):
+        # Taking a puzzle off (or back onto) children's screens is the admin's call.
+        raise Forbidden("Only a Koda admin can put a puzzle live or take it off.", "not_an_operator")
     allowed = {
         "draft": {"approved", "rejected"},
         "approved": {"draft", "rejected"},
@@ -303,7 +324,7 @@ async def studio_approve_all(body: ApproveAllIn, db: Db, p: CanWrite) -> dict[st
     """
     approved, skipped = 0, 0
     checks = await _checks(db)
-    for row in await repo.drafts_in_scope(db, body.category):
+    for row in await repo.drafts_in_scope(db, body.category, _mine_only(p)):
         if checks.codes(row):
             skipped += 1
             continue
@@ -315,16 +336,14 @@ async def studio_approve_all(body: ApproveAllIn, db: Db, p: CanWrite) -> dict[st
 @router.delete("/studio/puzzles/{puzzle_id}", status_code=204)
 async def studio_delete(puzzle_id: str, db: Db, p: CanWrite) -> None:
     """Only a draft or a rejected one that is not seed data: anything else is unpublished or rejected, so it can come back."""
-    row = await repo.get(db, puzzle_id)
-    if not row:
-        raise NotFound("There is no such puzzle.")
+    row = await _owned(db, p, puzzle_id)
     if row["status"] not in ("draft", "rejected") or row.get("seeded"):
         raise AppError(409, "not_deletable", "Unpublish a live puzzle, or reject a seed puzzle, instead; it can be brought back.")
     await repo.delete(db, puzzle_id)
 
 
 @router.post("/studio/publish")
-async def studio_publish(body: PublishIn, db: Db, p: CanWrite) -> dict[str, Any]:
+async def studio_publish(body: PublishIn, db: Db, p: CanRun) -> dict[str, Any]:
     """Make every approved puzzle live, as one release that can be taken back."""
     release = await repo.publish_approved(db, by=p.subject_id, note=body.note)
     if not release:
@@ -340,7 +359,7 @@ async def studio_releases(db: Db, p: CanWrite) -> dict[str, Any]:
 
 
 @router.post("/studio/releases/{number}/rollback")
-async def studio_rollback(number: int, db: Db, p: CanWrite) -> dict[str, Any]:
+async def studio_rollback(number: int, db: Db, p: CanRun) -> dict[str, Any]:
     release = await repo.rollback(db, number)
     if not release:
         raise NotFound("That release is not live, or does not exist.")
@@ -364,7 +383,7 @@ async def studio_prompt(db: Db, p: CanWrite) -> dict[str, Any]:
 
 
 @router.post("/studio/prompt", status_code=201)
-async def studio_save_prompt(body: PromptIn, db: Db, p: CanWrite) -> dict[str, Any]:
+async def studio_save_prompt(body: PromptIn, db: Db, p: CanRun) -> dict[str, Any]:
     return await repo.save_prompt(db, text=body.text.strip(), by=p.subject_id)
 
 

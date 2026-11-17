@@ -57,3 +57,47 @@ async def test_a_creator_cannot_reach_users_or_cleanup(client, db):
     ana = await _login(client, db, "ana@example.com", platform_role="creator")
     assert (await client.get("/admin/users", headers=ana)).status_code == 403
     assert (await client.get("/admin/cleanup/summary", headers=ana)).status_code == 403
+
+
+async def test_trace_creators_see_only_their_own_items_and_the_admin_sees_all(client, db):
+    from tests.test_trace import LINE, PASSED, PLAN
+
+    ana = await _login(client, db, "ana@example.com", platform_role="creator")
+    ben = await _login(client, db, "ben@example.com", platform_role="creator")
+    boss = await _login(client, db, "boss@example.com", platform_role="admin")
+    body = {"item": LINE, "plan": PLAN, "tests": PASSED}
+    assert (await client.put("/trace/studio/items/ana-line", json=body, headers=ana)).status_code == 200
+    assert (await client.put("/trace/studio/items/ben-line", json=body, headers=ben)).status_code == 200
+
+    ids = lambda r: sorted(i["id"] for i in r.json()["items"])  # noqa: E731
+    assert ids(await client.get("/trace/studio/items", headers=ana)) == ["ana-line"]
+    assert ids(await client.get("/trace/studio/items", headers=boss)) == ["ana-line", "ben-line"]
+    assert (await client.delete("/trace/studio/items/ana-line", headers=ben)).status_code in (403, 404)
+    assert (await db.trace_items.find_one({"_id": "ana-line"}) or await db.trace_items.find_one({"id": "ana-line"})) is not None
+
+
+async def test_rebus_creators_work_on_their_own_quizzes_and_cannot_publish_for_everyone(client, db):
+    from app.repos import rebus as rebus_repo
+    from tests.test_rebus_categories import SEED, puzzle
+
+    await rebus_repo.ensure_seed(db, SEED)
+    ana = await _login(client, db, "ana@example.com", platform_role="creator")
+    ben = await _login(client, db, "ben@example.com", platform_role="creator")
+    boss = await _login(client, db, "boss@example.com", platform_role="admin")
+
+    made = await client.post("/rebus/studio/puzzles", json=puzzle("food", answer="Cheese pie ana"), headers=ana)
+    assert made.status_code == 201, made.text
+    pid = made.json()["id"]
+
+    mine = (await client.get("/rebus/studio/puzzles?limit=100", headers=ana)).json()
+    assert [r["id"] for r in mine["puzzles"]] == [pid] and mine["total"] == 1
+    assert (await client.get("/rebus/studio/puzzles", headers=ben)).json()["total"] == 0
+    assert (await client.get("/rebus/studio/puzzles", headers=boss)).json()["total"] > 1
+
+    assert (await client.get(f"/rebus/studio/puzzles/{pid}", headers=ben)).status_code == 404
+    assert (await client.patch(f"/rebus/studio/puzzles/{pid}", json={"explanation": "x"}, headers=ben)).status_code == 404
+    assert (await client.delete(f"/rebus/studio/puzzles/{pid}", headers=ben)).status_code == 404
+    assert (await client.get(f"/rebus/studio/puzzles/{pid}", headers=boss)).status_code == 200
+
+    assert (await client.post("/rebus/studio/publish", json={}, headers=ana)).status_code == 403
+    assert (await client.post("/rebus/studio/categories/reorder", json={"order": []}, headers=ana)).status_code == 403

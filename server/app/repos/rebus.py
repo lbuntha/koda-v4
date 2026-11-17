@@ -305,8 +305,11 @@ async def listing(
     query: str | None = None,
     skip: int = 0,
     limit: int = 50,
+    created_by: str | None = None,
 ) -> tuple[list[dict[str, Any]], int]:
     flt: dict[str, Any] = {}
+    if created_by:
+        flt["createdBy"] = created_by
     if status:
         flt["status"] = status
     if category:
@@ -429,8 +432,10 @@ async def icon_usage(db: AsyncIOMotorDatabase, *, sample: int = 8) -> dict[str, 
     return out
 
 
-async def drafts_in_scope(db: AsyncIOMotorDatabase, category: str | None) -> list[dict[str, Any]]:
-    flt: dict[str, Any] = {"status": "draft"}
+async def drafts_in_scope(
+    db: AsyncIOMotorDatabase, category: str | None, created_by: str | None = None
+) -> list[dict[str, Any]]:
+    flt: dict[str, Any] = {"status": "draft", **({"createdBy": created_by} if created_by else {})}
     if category:
         flt["category"] = category
     return await db.rebus_puzzles.find(flt).sort("id", 1).to_list(length=5000)

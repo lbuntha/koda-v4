@@ -36,7 +36,7 @@ from app.repos import learners as learners_repo
 from app.repos import paintings as paintings_repo
 from app.repos import trace as trace_repo
 from app.routers.library import AudioSaved, AudioWrite, ImageWrite, store_audio, store_image
-from app.security import principal_can
+from app.security import ownership, principal_can
 from app.services.entitlements import entitlements
 from app.topics import clean_topics
 from app.trace_verify import for_children, item_problems
@@ -58,7 +58,9 @@ CanReadChild = Annotated[Principal, Depends(require("learner:read"))]
 
 def _is_admin(p: Principal) -> bool:
     """An operator: sees and edits every creator's work, publishes without review."""
-    return principal_can(p, "content:write")
+    # `content:all`, not `content:write`: a Content creator can author but is
+    # not an operator, so they see their own work and go through review.
+    return ownership.sees_all(p)
 
 
 def _mine(row: dict[str, Any] | None, p: Principal) -> None:
@@ -79,7 +81,7 @@ MAX_ITEM_BYTES = 1_500_000
 MAX_ITEMS_PER_COLLECTION = 500
 MAX_TITLE = 80
 MAX_DESCRIPTION = 400
-# How much one creator may make. Admins (who hold `content:write`) are not limited.
+# How much one creator may make. Admins (who hold `content:all`) are not limited.
 MAX_ITEMS_PER_CREATOR = 1500
 MAX_COLLECTIONS_PER_CREATOR = 60
 

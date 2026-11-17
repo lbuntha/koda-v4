@@ -177,6 +177,7 @@ PLATFORM_PERMISSIONS: dict[str, set[str]] = {
         "settings:read",
         "settings:write",
         "content:write",
+        "content:all",
         "trace:create",
         "scoring:write",
         "menu:manage",
