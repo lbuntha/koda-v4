@@ -51,7 +51,9 @@ else
   docker compose pull --quiet app api
 fi
 docker logout ghcr.io >/dev/null 2>&1 || true
-docker compose up -d --remove-orphans
+# Never reach for the registry here: a --no-pull deploy runs images loaded by
+# hand, which the registry does not have, and asking for them fails the restart.
+docker compose up -d --remove-orphans --pull never
 docker image prune -f >/dev/null
 
 # The nginx site, once. After that it belongs to the server (certbot edits it).
