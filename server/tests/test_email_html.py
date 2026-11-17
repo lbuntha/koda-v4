@@ -54,3 +54,15 @@ def test_every_message_goes_as_text_and_html(monkeypatch):
     assert parsed.get_content_type() == "multipart/alternative"
     kinds = [part.get_content_type() for part in parsed.walk() if not part.is_multipart()]
     assert kinds == ["text/plain", "text/html"]
+
+
+def test_the_subject_heads_the_card_and_the_footer_names_the_site():
+    page = email_html.render(WEEKLY, "[Test] Your family's week on Koda", APP)
+    assert ">Your family&#x27;s week on Koda</h1>" in page
+    assert f'src="{APP}/icons/icon-192.png"' in page
+    assert email_html.SAFETY in page
+
+
+def test_a_khmer_email_ends_with_the_khmer_safety_line():
+    page = email_html.render("សួស្ដី Dara\n\nសប្ដាហ៍នេះ", "s", APP)
+    assert email_html.SAFETY_KM in page and email_html.SAFETY not in page
