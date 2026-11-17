@@ -874,7 +874,7 @@ const SkillDetail: React.FC<{
   const configurationPending = SkillRegistryAPI.hasPendingConfiguration(manifest.id);
   const { can } = usePermissions();
   const session = useSession();
-  const canPublish = Boolean(session && !session.familyId && can("content:write"));
+  const canPublish = Boolean(session && !session.familyId && can("content:all"));
   const [publishing, setPublishing] = useState(false);
   const [publishError, setPublishError] = useState<string | null>(null);
   const isEnabled = stored?.isEnabled ?? true;
@@ -899,7 +899,7 @@ const SkillDetail: React.FC<{
    */
   const translationPrefix = `skills.${manifest.id}.`;
   const translationCount = [...catalogMessages("en").keys()].filter((key) => key.startsWith(translationPrefix)).length;
-  const canTranslate = translationCount > 0 && can("content:write");
+  const canTranslate = translationCount > 0 && can("content:all");
   /** "Touch and Count" for `orbit`, a lesson's title for `lessons.<id>`. */
   const translationSection = (section: string): string | undefined => {
     if (section.startsWith("lessons.")) {

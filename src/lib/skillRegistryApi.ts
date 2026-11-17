@@ -240,10 +240,8 @@ export async function flushSkillConfiguration(): Promise<void> {
   if (flushing) return flushing;
   flushing = (async () => {
     const session = SessionAPI.current();
-    const mayManage =
-      session?.permissions?.includes("content:write") ||
-      session?.platformRole === "admin" ||
-      session?.platformRole === "developer";
+    // Only someone who may configure skills for everyone: a refused write would sit in the outbox forever.
+    const mayManage = Boolean(session?.permissions?.includes("content:all"));
     if (!session || session.familyId || !mayManage) return;
     while (true) {
       const batch = Object.entries(pending());

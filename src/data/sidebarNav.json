@@ -45,19 +45,19 @@
      "label": "Skills",
      "icon": "brain",
      "badge": "Manage",
-     "requires": "content:write"
+     "requires": "content:all"
     },
     {
      "id": "subjects",
      "label": "Subjects",
      "icon": "list",
-     "requires": "content:write"
+     "requires": "content:all"
     },
     {
      "id": "translations",
      "label": "Translations",
      "icon": "languages",
-     "requires": "content:write"
+     "requires": "content:all"
     },
     {
      "id": "assets",

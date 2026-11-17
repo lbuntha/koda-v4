@@ -56,7 +56,8 @@ from app.system_defaults import BY_ID, with_master_applied
 router = APIRouter(prefix="/system", tags=["system"], dependencies=[AUTHENTICATED])
 
 CanOperate = Annotated[Principal, Depends(require("system:write"))]
-CanManageSubjects = Annotated[Principal, Depends(require("content:write"))]
+# Subjects shape every family's catalogue: an admin's call, not a Content creator's.
+CanManageSubjects = Annotated[Principal, Depends(require("content:all"))]
 
 
 class SettingOut(Model):

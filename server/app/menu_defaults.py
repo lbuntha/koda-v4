@@ -31,13 +31,13 @@ DEFAULT_MENU: list[dict] = [
     {"itemId": "notification-settings", "label": "Notification Settings", "icon": "art:menu-notification-settings",
      "requires": "system:write", "order": 28},
     {"itemId": "skills", "label": "Skills", "icon": "art:menu-skills", "badge": "Manage",
-     "requires": "content:write", "order": 30},
+     "requires": "content:all", "order": 30},
     {"itemId": "subjects", "label": "Subjects", "icon": "art:menu-subjects",
-     "requires": "content:write", "order": 35},
+     "requires": "content:all", "order": 35},
     # Corrections to the app's wording, per language. Same gate as Art: it
     # changes what every family on the service reads.
     {"itemId": "translations", "label": "Translations", "icon": "languages",
-     "requires": "content:write", "order": 38},
+     "requires": "content:all", "order": 38},
     {"itemId": "assets", "label": "Art", "icon": "art:menu-art", "badge": "{art} SVG",
      "requires": "content:write", "order": 40},
     # Where library books are written, reviewed and published. Same gate as Art.

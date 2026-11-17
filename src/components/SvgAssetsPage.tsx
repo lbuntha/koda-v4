@@ -74,7 +74,7 @@ export const SvgAssetsPage: React.FC = () => {
   const { can } = usePermissions();
   // Anyone who authors content may add drawings; each drawing says whether this
   // person may change it (a Content creator changes only their own).
-  const canEdit = Boolean(session) && (can("content:write") || session?.platformRole === "admin" || session?.platformRole === "developer");
+  const canEdit = Boolean(session) && can("content:write");
   const mayChange = (asset: SvgAssetRecord) => canEdit && (asset.editable ?? can("content:all"));
   const [assets, setAssets] = useState<SvgAssetRecord[]>(() =>
     svgAssets.map((asset) => ({

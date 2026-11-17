@@ -110,22 +110,27 @@ _CHILD = {
     "device:revoke",
 }
 
+#: Rights over the whole service, never a family's. No family role holds one,
+#: however senior: the family roles below are "everything minus a list", and a
+#: staff right added to PERMISSIONS without being listed would otherwise reach
+#: every parent. Subtracting this set once makes that impossible to forget.
+STAFF_ONLY = {
+    "system:write",
+    "user:manage",
+    "role:manage",
+    "menu:manage",
+    # The shared library belongs to the deployment, not to the most senior
+    # adult in one household.
+    "content:write",
+    "content:all",
+    "trace:create",
+}
+
 ROLE_PERMISSIONS: dict[str, set[str]] = {
     # Signed up. Everything in the family — except rewriting a child's record,
     # and except the switchboard, which is not theirs however senior they are:
     # it governs every family on the deployment, not just this one.
-    "owner": PERMISSIONS
-    - {
-        "learner_data:write",
-        "system:write",
-        "user:manage",
-        "role:manage",
-        "menu:manage",
-        # The shared library belongs to the deployment, not to the most senior
-        # adult in one household.
-        "content:write",
-        "trace:create",
-    },
+    "owner": PERMISSIONS - STAFF_ONLY - {"learner_data:write"},
     # A second adult: everything except destroying or handing over the family,
     # and except the two the owner keeps — see `scoring:write` above. The Roles
     # page grants either to a particular parent when a family wants that.
@@ -137,13 +142,8 @@ ROLE_PERMISSIONS: dict[str, set[str]] = {
         "member:remove",
         "learner_data:write",
         "scoring:write",
-        "system:write",
-        "user:manage",
-        "role:manage",
-        "menu:manage",
-        "content:write",
-        "trace:create",
-    },
+    }
+    - STAFF_ONLY,
     # A grandparent or tutor: reads the children and their records, changes nothing.
     "caregiver": {
         "family:read",

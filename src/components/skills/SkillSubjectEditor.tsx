@@ -12,7 +12,7 @@ export function SkillSubjectEditor({ skillId }: { skillId: string }) {
   const [choice, setChoice] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
-  if (!can("content:write")) return null;
+  if (!can("content:all")) return null;
   const value = choice ?? catalog.assignments[skillId] ?? "";
   const save = async () => {
     setSaving(true); setError("");

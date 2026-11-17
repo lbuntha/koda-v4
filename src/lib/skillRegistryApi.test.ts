@@ -132,7 +132,7 @@ describe("server-backed skill registry", () => {
         ...session,
         familyId: null,
         platformRole: "developer",
-        permissions: ["content:write"],
+        permissions: ["content:write", "content:all"],
       }),
     );
     localStorage.setItem(

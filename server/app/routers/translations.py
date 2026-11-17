@@ -23,7 +23,8 @@ from app.repos import translations as repo
 
 router = APIRouter(prefix="/translations", tags=["translations"])
 
-CanEdit = Annotated[Principal, Depends(require("content:write"))]
+# Wording corrections change what every family reads: an admin's call, not a Content creator's.
+CanEdit = Annotated[Principal, Depends(require("content:all"))]
 
 #: BCP 47-ish: `km`, `en`, `pt-BR`.
 LANG = re.compile(r"^[a-z]{2,3}(-[A-Za-z0-9]{2,8})?$")

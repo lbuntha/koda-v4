@@ -207,7 +207,11 @@ export default function App() {
       /* asked again next launch at worst */
     }
   };
-  const canManageSkills = Boolean(session && can("content:write"));
+  // Two content rights. `content:write` makes your own books, quizzes, Trace and
+  // art; `content:all` changes what every family gets — skills, subjects, the
+  // app's wording — and is held by admins (and developers), not Content creators.
+  const canRunContent = Boolean(session && can("content:all"));
+  const canManageSkills = canRunContent;
   // The shared art library is the deployment's, not a family's — see
   // `content:write` in the policy table. Hiding the nav entry is not enough on
   // its own: the tab id survives a sign-out, so the page itself is gated too.
@@ -374,7 +378,8 @@ export default function App() {
     if (activeTab === "assets" && !canEditArt) setActiveTab("home");
     if (activeTab === "library-studio" && !canEditArt) setActiveTab("home");
     if (activeTab === "rebus-studio" && !canEditArt) setActiveTab("home");
-    if (activeTab === "translations" && !canEditArt) setActiveTab("home");
+    if (activeTab === "translations" && !canRunContent) setActiveTab("home");
+    if (activeTab === "subjects" && !canRunContent) setActiveTab("home");
     if (activeTab === "trace-studio" && !canTrace) setActiveTab("home");
     if (activeTab === "skills" && !canManageSkills) setActiveTab("home");
     if (activeTab === "koda" && !canOperate) setActiveTab("home");
@@ -1116,8 +1121,8 @@ export default function App() {
               />
             </Deferred>
           )}
-          {activeTab === "subjects" && <Deferred label="Loading Subjects"><SubjectsPage /></Deferred>}
-          {activeTab === "translations" && canEditArt && (
+          {activeTab === "subjects" && canRunContent && <Deferred label="Loading Subjects"><SubjectsPage /></Deferred>}
+          {activeTab === "translations" && canRunContent && (
             <Deferred label="Loading Translations">
               <TranslationsPage />
             </Deferred>

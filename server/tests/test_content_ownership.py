@@ -168,3 +168,40 @@ async def test_the_art_list_says_which_drawings_the_caller_may_change(client, db
     flag = lambda r: {a["id"]: a["editable"] for a in r.json()["assets"]}["ana-sun"]  # noqa: E731
     assert flag(await client.get("/art", headers=ana)) is True
     assert flag(await client.get("/art", headers=ben)) is False
+
+
+async def test_a_creator_cannot_change_what_every_family_gets(client, db):
+    """Skills, subjects and the app's wording are the admin's; a Content creator is refused on the server."""
+    ana = await _login(client, db, "ana@example.com", platform_role="creator")
+    boss = await _login(client, db, "boss@example.com", platform_role="admin")
+
+    assert (await client.patch("/system/subjects", json={}, headers=ana)).status_code == 403
+    assert (await client.put("/translations/km/nav.home", json={"text": "x"}, headers=ana)).status_code == 403
+    assert (await client.delete("/translations/km/nav.home", headers=ana)).status_code == 403
+    assert (await client.get("/admin/content/owners", headers=ana)).status_code == 403
+    assert (await client.post("/admin/content/reassign", json={"kind": "all", "from": "x", "to": "y"}, headers=ana)).status_code == 403
+    assert (await client.put("/translations/km/nav.home", json={"text": "x"}, headers=boss)).status_code != 403
+
+    # The sidebar matches: a creator is offered their Studios, never the admin pages.
+    from app.menu_defaults import DEFAULT_MENU
+    from app.repos import menu as menu_repo
+
+    for row in DEFAULT_MENU:
+        await menu_repo.seed_default(db, row)
+    items = {i["id"] for i in (await client.get("/menu", headers=ana)).json()["items"]}
+    assert {"library-studio", "rebus-studio", "assets"} <= items
+    assert not items & {"skills", "subjects", "translations", "users", "roles", "admin", "cleanup", "menu"}
+
+
+def test_no_family_role_holds_a_staff_right():
+    from app.security.policy import ROLE_PERMISSIONS, STAFF_ONLY
+
+    for role, held in ROLE_PERMISSIONS.items():
+        assert not held & STAFF_ONLY, (role, held & STAFF_ONLY)
+
+
+async def test_a_parent_cannot_reach_content_owners(client, signup_body):
+    tokens = (await client.post("/auth/signup", json=signup_body())).json()
+    parent = {"Authorization": f"Bearer {tokens['accessToken']}"}
+    assert (await client.get("/admin/content/owners", headers=parent)).status_code == 403
+    assert (await client.post("/admin/content/reassign", json={"kind": "all", "from": "x", "to": "y"}, headers=parent)).status_code == 403

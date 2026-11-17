@@ -212,8 +212,8 @@ export function TranslationsPage() {
   const { can } = usePermissions();
   const { t } = useT();
 
-  if (!can("content:write")) {
-    return <NoAccess title={t("nav.translations")} permission="content:write" what={t("admin.translations.who")} />;
+  if (!can("content:all")) {
+    return <NoAccess title={t("nav.translations")} permission="content:all" what={t("admin.translations.who")} />;
   }
 
   return (

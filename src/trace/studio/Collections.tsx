@@ -196,7 +196,8 @@ export function CollectionsList({ onOpen, onOpenItem, creating, onCreating }: { 
   const [reports, setReports] = useState<Report[]>([]);
   const [queue, setQueue] = useState<PendingCollection[]>([]);
   const { can } = usePermissions();
-  const isAdmin = can("content:write");
+  // An operator (content:all) publishes directly; a Content creator goes through review.
+  const isAdmin = can("content:all");
   const [error, setError] = useState(false);
   useSyncExternalStore(TraceDrafts.subscribe, TraceDrafts.version);
 
@@ -383,7 +384,8 @@ export function CollectionBoard({ id, onBack, onOpenItem }: { id: string; onBack
   const [flags, setFlags] = useState<Record<string, number>>({});
   const [stats, setStats] = useState<Record<string, ItemStats>>({});
   const { can } = usePermissions();
-  const isAdmin = can("content:write");
+  // An operator (content:all) publishes directly; a Content creator goes through review.
+  const isAdmin = can("content:all");
   const [dragFrom, setDragFrom] = useState<number | null>(null);
   const [dragOver, setDragOver] = useState<number | null>(null);
   const [aboutShown, setAboutShown] = useState(() => {
