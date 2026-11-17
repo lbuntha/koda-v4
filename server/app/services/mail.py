@@ -10,9 +10,10 @@ consequences worth having:
 * **Moving to SES or Postmark later is a driver, not a refactor.** Nothing that
   calls `send()` knows or cares which one is running.
 
-Deliberately plain text. An HTML mail is a rendering problem — inlined CSS, a
-dozen clients, a plain-text fallback anyway — and nothing sent from here yet is
-worth that. The one message this exists for is a sentence and a link.
+Written as plain text, sent as text *and* HTML. The text is the message — the
+shipped wording or an operator's — and `email_html` dresses it into a clean
+formatted copy (a button for the app, a short "Unsubscribe" instead of a long
+address). Clients that read text only get the text.
 """
 
 import asyncio
@@ -20,6 +21,7 @@ import logging
 import smtplib
 from email.message import EmailMessage
 
+from app.services import email_html
 from app.settings import settings
 
 log = logging.getLogger("koda.mail")
@@ -36,6 +38,9 @@ def _compose(to: str, subject: str, body: str, headers: dict[str, str] | None = 
     for name, value in (headers or {}).items():
         message[name] = value
     message.set_content(body)
+    # The formatted twin, made from the same text, for clients that show HTML;
+    # the text above stays the fallback and the source of truth.
+    message.add_alternative(email_html.render(body, subject, settings().app_base_url), subtype="html")
     return message
 
 

@@ -44,7 +44,7 @@ PHRASES: dict[str, Any] = {
     "there": "there",
     "yourFamily": "your family",
     "approved": "approved",
-    "summaryLine": "• {learner}: practised on {practice} — {rounds}, {time}",
+    "summaryLine": "• {learner}: {practice} · {rounds} · {time}",
     "digestLine": "• {learner}: {rounds}, {time}",
     "goalMetToday": " — today's goal met",
     "mastered": "mastered {lessons}",

@@ -202,7 +202,7 @@ DEFAULT_KINDS: list[dict[str, Any]] = [
         #: `{summary}` is a line per child who practised.
         "email": {
             "subject": "Your family's week on Koda",
-            "body": "Here's how the week went.\n\n{summary}\n\nSee each child's progress:\n{app_link}",
+            "body": "This week on Koda:\n\n{summary}\n\nSee their progress: {app_link}",
             "placeholders": ["summary"],
             "settingId": "email.weeklySummary",
             "default": True,
@@ -486,16 +486,16 @@ SAMPLES = {
     # Email-only: the frame and the links every email carries.
     "parent": "Dara",
     "family": "The Riveras",
-    "app_link": "https://learn-with-koda.web.app",
+    "app_link": "https://learnwithkoda.tech",
     "kind_label": "Announcements",
-    "unsubscribe_link": "https://learn-with-koda.web.app/v1/notifications/unsubscribe?token=…",
+    "unsubscribe_link": "https://learnwithkoda.tech/v1/notifications/unsubscribe?token=…",
     "rounds_done": "12 rounds",
     "time": "38 minutes",
     "lessons": "Count On",
     "lesson": "Take Away",
     "book": "The Rainy Day",
     "minutes": "30 minutes",
-    "summary": "• Mia: practised on 4 days — 12 rounds, 38 minutes\n• Leo: practised on 2 days — 5 rounds, 14 minutes",
+    "summary": "• Mia: 4 days · 12 rounds · 38 minutes\n• Leo: 2 days · 5 rounds · 14 minutes",
 }
 
 #: Longest a notification may be. A lock screen truncates well before this;
@@ -520,8 +520,8 @@ EMAIL_MASTER = "email.enabled"
 EMAIL_FRAME: dict[str, str] = {
     "body": "Hi {parent},\n\n{message}\n\n— Koda",
     "footer": (
-        "You're getting this because {kind_label} emails are on for your Koda account.\n"
-        "Stop these emails: {unsubscribe_link}"
+        "You get this because {kind_label} emails are on. "
+        "Don't want them? Unsubscribe: {unsubscribe_link}"
     ),
     "accountFooter": "This is a notice about your Koda account, so it is always sent.",
 }

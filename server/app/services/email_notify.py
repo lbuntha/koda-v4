@@ -322,7 +322,8 @@ async def send_test(
 
     if kind and (BY_KIND.get(kind) or {}).get("email"):
         language = notify_i18n.known(language)
-        samples = {**SAMPLES, **notify_i18n.samples(language)}
+        # The real address, so a test's links go where a parent's would.
+        samples = {**SAMPLES, **notify_i18n.samples(language), "app_link": cfg.app_base_url}
         subject, _, text = await compose(
             db,
             kind,

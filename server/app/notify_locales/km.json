@@ -17,7 +17,7 @@
     "there": "លោកអ្នក",
     "yourFamily": "គ្រួសាររបស់អ្នក",
     "approved": "ត្រូវបានយល់ព្រម",
-    "summaryLine": "• {learner}៖ បានហាត់ {practice} — {rounds}, {time}",
+    "summaryLine": "• {learner}៖ {practice} · {rounds} · {time}",
     "digestLine": "• {learner}៖ {rounds}, {time}",
     "mastered": "បានស្ទាត់ {lessons}",
     "tricky": "កំពុងពិបាកនឹង {lessons}",
@@ -66,7 +66,7 @@
       "body": "{learner} បានហាត់ {practice} ក្នុងសប្តាហ៍នេះ — {rounds_done}, {time}។",
       "email": {
         "subject": "សប្តាហ៍របស់គ្រួសារអ្នកនៅលើ Koda",
-        "body": "នេះជាអ្វីដែលបានកើតឡើងក្នុងសប្តាហ៍នេះ។\n\n{summary}\n\nមើលវឌ្ឍនភាពរបស់កូននីមួយៗ៖\n{app_link}"
+        "body": "សប្ដាហ៍នេះនៅលើ Koda៖\n\n{summary}\n\nមើលវឌ្ឍនភាព៖ {app_link}"
       }
     },
     "learn.goal_met": {
@@ -161,7 +161,7 @@
   },
   "frame": {
     "body": "សួស្ដី {parent}\n\n{message}\n\n— Koda",
-    "footer": "អ្នកទទួលបានអ៊ីមែលនេះ ព្រោះអ៊ីមែល{kind_label}បានបើកសម្រាប់គណនី Koda របស់អ្នក។\nបញ្ឈប់អ៊ីមែលទាំងនេះ៖ {unsubscribe_link}",
+    "footer": "អ្នកទទួលអ៊ីមែលនេះ ព្រោះអ៊ីមែល{kind_label}បានបើក។ មិនចង់ទទួលទៀតទេ? ឈប់ទទួល៖ {unsubscribe_link}",
     "accountFooter": "នេះជាសេចក្ដីជូនដំណឹងអំពីគណនី Koda របស់អ្នក ដូច្នេះវាតែងតែត្រូវបានផ្ញើ។"
   },
   "samples": {
@@ -174,6 +174,6 @@
     "rounds_done": "12 ជុំ",
     "time": "38 នាទី",
     "minutes": "30 នាទី",
-    "summary": "• Mia៖ បានហាត់ 4 ថ្ងៃ — 12 ជុំ, 38 នាទី\n• Leo៖ បានហាត់ 2 ថ្ងៃ — 5 ជុំ, 14 នាទី"
+    "summary": "• Mia៖ 4 ថ្ងៃ · 12 ជុំ · 38 នាទី\n• Leo៖ 2 ថ្ងៃ · 5 ជុំ · 14 នាទី"
   }
 }
