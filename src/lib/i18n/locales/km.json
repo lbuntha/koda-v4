@@ -200,6 +200,19 @@
       "firstMessage": "យើងមិនអាចផ្ញើអ៊ីមែលបានទេ។ ពិនិត្យអាសយដ្ឋាន ហើយសាកម្ដងទៀត។"
     }
   },
+  "install": {
+    "button": "បន្ថែមទៅអេក្រង់ដើម",
+    "title": "បន្ថែម Koda ទៅអេក្រង់ដើម",
+    "intro": "Koda នឹងបើកដូចកម្មវិធី ពេញអេក្រង់ ហើយប្រើបានដោយគ្មានអ៊ីនធឺណិត។",
+    "iosStep1": "ចុចប៊ូតុង Share នៅខាងក្រោម Safari",
+    "iosStep2": "ជ្រើស \"Add to Home Screen\" រួចចុច Add",
+    "inAppIntro": "កម្មវិធីរុករកនៅក្នុងកម្មវិធីផ្សេងនេះ មិនអាចបន្ថែម Koda បានទេ។ សូមបើកវានៅក្នុង Chrome ឬ Safari ជាមុនសិន។",
+    "inAppStep1": "ចុចម៉ឺនុយ (⋮ ឬ …) ហើយជ្រើស \"Open in browser\"",
+    "inAppStep2": "នៅក្នុង Chrome ឬ Safari ចុច បន្ថែមទៅអេក្រង់ដើម ម្ដងទៀត",
+    "manualStep1": "បើកម៉ឺនុយរបស់កម្មវិធីរុករក (⋮)",
+    "manualStep2": "ជ្រើស \"Add to Home screen\" ឬ \"Install app\"",
+    "gotIt": "យល់ហើយ"
+  },
   "menu": {
     "currentAccount": "គណនីបច្ចុប្បន្ន",
     "switchAccount": "ប្ដូរគណនី",

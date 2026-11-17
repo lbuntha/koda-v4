@@ -6,6 +6,8 @@ import { ThemeProvider } from './context/ThemeContext';
 import { PwaStatus } from './components/PwaStatus';
 import { AppErrorBoundary, installChunkRecovery } from './components/AppErrorBoundary';
 import { blockPinchZoom } from './pwa/blockPinchZoom';
+// Listens for the browser's install offer from boot; it can arrive before React draws.
+import './lib/install';
 // The app's own recordings — numbers, and praise that names no subject. A skill
 // registers its own on import; this belongs to no skill, so it is registered here.
 import './voice/common';

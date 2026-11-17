@@ -1,5 +1,5 @@
 import React from "react";
-import { Check, House, LogOut, Moon, ShieldCheck, Smile, Sun, UserRound } from "lucide-react";
+import { Check, House, LogOut, Moon, ShieldCheck, Smartphone, Smile, Sun, UserRound } from "lucide-react";
 import { playSound } from "../utils/audio";
 import { useTheme } from "../context/ThemeContext";
 import {
@@ -16,6 +16,8 @@ import { themeSystem } from "../lib/themeSystem";
 import { ApiError, SessionAPI, type Session, useSession } from "../lib/sync";
 import { AvatarPickerModal } from "./account/AvatarPickerModal";
 import { PinPrompt } from "./account/PinPrompt";
+import { InstallAppSheet } from "./InstallAppSheet";
+import { promptInstall, useInstallKind, type InstallKind } from "../lib/install";
 import { translate, useT } from "../lib/i18n";
 
 /** Two letters from the active account's name, so the avatar stays recognisable. */
@@ -186,6 +188,20 @@ export const AccountMenu: React.FC<AccountMenuProps> = ({
       setSwitchError((error as ApiError).message ?? String(error));
     });
   };
+  // "Add to home screen": the browser's own install box where it has one, the
+  // steps where it does not, nothing once installed or on a computer that cannot.
+  const installKind = useInstallKind();
+  const [installHelp, setInstallHelp] = React.useState<InstallKind | null>(null);
+  const showInstall = installKind !== "installed" && installKind !== "unsupported";
+  const install = () => {
+    if (installKind === "prompt") {
+      void promptInstall().then((outcome) => {
+        if (outcome === "unavailable") setInstallHelp("manual");
+      });
+    } else {
+      setInstallHelp(installKind);
+    }
+  };
   const viewLabel = otherView === "admin" ? t("menu.switchToAdmin") : t("menu.backToFamily");
   const ViewIcon = otherView === "admin" ? ShieldCheck : House;
 
@@ -303,6 +319,17 @@ export const AccountMenu: React.FC<AccountMenuProps> = ({
                   >
                     {t("menu.changeAvatar")}
                   </UIMenuItem>
+                  {showInstall && (
+                    <UIMenuItem
+                      icon={<Smartphone />}
+                      onSelect={() => {
+                        closeMenu();
+                        choose(install)();
+                      }}
+                    >
+                      {t("install.button")}
+                    </UIMenuItem>
+                  )}
                   {otherView && (
                     <UIMenuItem
                       icon={<ViewIcon />}
@@ -497,6 +524,16 @@ export const AccountMenu: React.FC<AccountMenuProps> = ({
                       <span className={l.rowTitle}>{t("menu.changeAvatar")}</span>
                     </span>
                   </button>
+                  {showInstall && (
+                    <button className={l.rowTap} onClick={choose(install)}>
+                      <span className="flex items-center gap-3 min-w-0">
+                        <span className={l.rowIcon}>
+                          <Smartphone />
+                        </span>
+                        <span className={l.rowTitle}>{t("install.button")}</span>
+                      </span>
+                    </button>
+                  )}
                   {otherView && (
                     <button className={l.rowTap} onClick={choose(switchView)}>
                       <span className="flex items-center gap-3 min-w-0">
@@ -525,6 +562,7 @@ export const AccountMenu: React.FC<AccountMenuProps> = ({
         </>
       )}
 
+      <InstallAppSheet kind={installHelp} onClose={() => setInstallHelp(null)} />
       {switchError && (
         <p
           role="alert"

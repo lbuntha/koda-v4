@@ -205,6 +205,19 @@
       "firstMessage": "We couldn't send the email. Check the address and try again."
     }
   },
+  "install": {
+    "button": "Add to home screen",
+    "title": "Add Koda to your home screen",
+    "intro": "Koda opens like an app, full screen, and works offline.",
+    "iosStep1": "Tap the Share button at the bottom of Safari",
+    "iosStep2": "Choose \"Add to Home Screen\", then Add",
+    "inAppIntro": "This browser inside another app cannot add Koda. Open it in Chrome or Safari first.",
+    "inAppStep1": "Tap the menu (⋮ or …) and choose \"Open in browser\"",
+    "inAppStep2": "In Chrome or Safari, tap Add to home screen again",
+    "manualStep1": "Open your browser's menu (⋮)",
+    "manualStep2": "Choose \"Add to Home screen\" or \"Install app\"",
+    "gotIt": "Got it"
+  },
   "menu": {
     "currentAccount": "Current account",
     "switchAccount": "Switch account",
