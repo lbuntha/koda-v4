@@ -25,7 +25,7 @@ export type InstallKind =
   | "installed"
   /** The browser's own install box is one tap away. */
   | "prompt"
-  /** iPhone/iPad Safari: Share → Add to Home Screen. */
+  /** iPhone/iPad: every browser goes through Share → Add to Home Screen. */
   | "ios"
   /** Facebook, Messenger and friends: open in a real browser first. */
   | "in-app"
@@ -64,6 +64,25 @@ function isStandalone(): boolean {
   );
 }
 
+/**
+ * Where an iPhone or iPad keeps the Share button, so the guide can point at it.
+ *
+ * - `bottom`: Safari on iPhone up to 18, the middle of the bottom bar.
+ * - `more`: Safari 26 on iPhone, inside the ••• button at the bottom right.
+ * - `top`: Safari on iPad, and Chrome on iPhone and iPad, at the top right.
+ * - `menu`: Firefox and Edge, inside their menu at the bottom right.
+ */
+export type ShareSpot = "bottom" | "more" | "top" | "menu";
+
+export function shareSpot(ua: string = navigator.userAgent): ShareSpot {
+  const ipad = /iPad/.test(ua) || (/Macintosh/.test(ua) && navigator.maxTouchPoints > 1);
+  if (/CriOS/.test(ua)) return "top";
+  if (/FxiOS|EdgiOS/.test(ua)) return "menu";
+  if (ipad) return "top";
+  const safari = Number(/Version\/(\d+)/.exec(ua)?.[1] ?? 0);
+  return safari >= 26 ? "more" : "bottom";
+}
+
 export function installKind(ua: string = navigator.userAgent): InstallKind {
   if (installedNow || isStandalone()) return "installed";
   if (/FBAN|FBAV|FB_IAB|Messenger|Instagram|Line\/|MicroMessenger|TikTok|Snapchat/i.test(ua)) return "in-app";
@@ -87,8 +106,32 @@ export async function promptInstall(): Promise<"accepted" | "dismissed" | "unava
   return outcome;
 }
 
-/** The current kind, re-read whenever the browser's answer changes. */
-export function useInstallKind(): InstallKind {
+// ------------------------------------------------------------ the guide
+
+let help: InstallKind | null = null;
+
+/** The steps the guide is showing, or null when it is closed. */
+export const installHelp = () => help;
+
+export function closeInstallHelp(): void {
+  help = null;
+  notify();
+}
+
+/**
+ * What the "Add to home screen" buttons do: the browser's own install box
+ * where there is one, otherwise the guide for this browser.
+ */
+export async function startInstall(): Promise<void> {
+  const kind = installKind();
+  if (kind === "installed" || kind === "unsupported") return;
+  if (kind === "prompt" && (await promptInstall()) !== "unavailable") return;
+  help = kind === "prompt" ? "manual" : kind;
+  notify();
+}
+
+/** Re-render when the install state or the guide changes. */
+export function useInstallState(): void {
   useSyncExternalStore(
     (fn) => {
       listeners.add(fn);
@@ -97,5 +140,10 @@ export function useInstallKind(): InstallKind {
     () => version,
     () => version,
   );
+}
+
+/** The current kind, re-read whenever the browser's answer changes. */
+export function useInstallKind(): InstallKind {
+  useInstallState();
   return typeof window === "undefined" ? "unsupported" : installKind();
 }

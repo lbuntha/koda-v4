@@ -4,6 +4,7 @@ import {MotionConfig} from 'motion/react';
 import App from './App.tsx';
 import { ThemeProvider } from './context/ThemeContext';
 import { PwaStatus } from './components/PwaStatus';
+import { InstallGuide, InstallNudge } from './components/InstallGuide';
 import { AppErrorBoundary, installChunkRecovery } from './components/AppErrorBoundary';
 import { blockPinchZoom } from './pwa/blockPinchZoom';
 // Listens for the browser's install offer from boot; it can arrive before React draws.
@@ -44,6 +45,8 @@ function LanguageRoot() {
     <>
       <App />
       <PwaStatus />
+      <InstallNudge />
+      <InstallGuide />
     </>
   );
 }
