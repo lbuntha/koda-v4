@@ -4967,7 +4967,7 @@
       "range": "The answer is between {low} and {high}"
     },
     "turns": {
-      "openCard": "Take turns on this device",
+      "openCard": "Play together on one phone",
       "title": "Take turns",
       "subtitle": "Pass the device back and forth. No internet needed.",
       "players": "Players",

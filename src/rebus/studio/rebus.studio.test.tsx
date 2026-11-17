@@ -4,6 +4,13 @@ import { SAMPLE_PUZZLES } from "../fixtures/samplePuzzles";
 import { RebusStudio } from "./RebusStudio";
 import { StudioAPI, type Overview, type StudioPuzzle } from "./studioApi";
 
+// The Koda owner by default; a test narrows it to a Content creator.
+let rights = new Set(["content:write", "content:all"]);
+vi.mock("../../lib/sync", async () => {
+  const actual = await vi.importActual<typeof import("../../lib/sync")>("../../lib/sync");
+  return { ...actual, usePermissions: () => ({ can: (right: string) => rights.has(right), known: true }) };
+});
+
 vi.mock("./studioApi", async () => {
   const actual = await vi.importActual<typeof import("./studioApi")>("./studioApi");
   return {
@@ -34,6 +41,7 @@ const overview = (status: Partial<Overview["byStatus"]> = {}): Overview => ({
 });
 
 beforeEach(() => {
+  rights = new Set(["content:write", "content:all"]);
   Object.values(api).forEach((fn) => fn.mockReset());
   api.overview.mockResolvedValue(overview());
   api.list.mockResolvedValue({ puzzles: [puzzle(7), puzzle(8), puzzle(9)], total: 3 });
@@ -308,5 +316,16 @@ describe("creating", () => {
     fireEvent.click(screen.getByRole("button", { name: "Save & approve" }));
     await screen.findByText(/Saved “Cheese pie” and approved it/);
     expect(api.create).toHaveBeenCalledWith(expect.objectContaining({ approve: true, answer: "Cheese pie", ages: [6, 8], difficulty: 1 }));
+  });
+});
+
+
+describe("a Content creator", () => {
+  it("does not see Publish or Categories, which change the game for everyone", async () => {
+    rights = new Set(["content:write"]);
+    render(<RebusStudio />);
+    expect(await screen.findByRole("tab", { name: /All puzzles/ })).toBeTruthy();
+    expect(screen.queryByRole("tab", { name: /Publish/ })).toBeNull();
+    expect(screen.queryByRole("tab", { name: /Categories/ })).toBeNull();
   });
 });

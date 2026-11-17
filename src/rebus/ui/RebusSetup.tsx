@@ -53,7 +53,6 @@ const STATUS_KEYS: readonly StatusFilter[] = ["all", "new", "retry", "clean"];
 
 export const RebusSetup: React.FC<RebusSetupProps> = ({ bank, settings, results = {}, onStart, onGroup, onTurns, onBack }) => {
   const { t } = useT();
-  const total = bank.puzzles.length;
   const cats = useRebusCategories();
   const firstWithPuzzles = cats.find((c) => (bank.counts[c.id] ?? 0) > 0)?.id ?? "mixed";
   const [category, setCategory] = useState<CategoryId | "mixed">(firstWithPuzzles);
@@ -119,9 +118,10 @@ export const RebusSetup: React.FC<RebusSetupProps> = ({ bank, settings, results 
                 ...cats.map((c) => ({
                   id: c.id as CategoryId | "mixed",
                   name: categoryLabel(c.id),
-                  n: bank.counts[c.id] ?? 0,
+                  // What a child can actually play: one puzzle per answer, the same count "played" uses.
+                  n: played[c.id]?.total ?? 0,
                 })),
-                { id: "mixed" as const, name: t("rebus.mixed"), n: total },
+                { id: "mixed" as const, name: t("rebus.mixed"), n: played.mixed?.total ?? 0 },
               ].map(({ id, name, n }) => {
                 const empty = n === 0;
                 const selected = id === category;
