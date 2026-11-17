@@ -29,6 +29,7 @@ from app.library_verify import verify_passage
 from app.models.auth import Principal
 from app.models.common import Model
 from app.repos import library as library_repo
+from app.repos.rebus import names as rebus_names
 from app.security import ownership, principal_can
 from app.topics import clean_topics
 
@@ -287,6 +288,8 @@ class BookSummary(Model):
     created_at: Any = Field(default=None, alias="createdAt")
     updated_at: Any = Field(default=None, alias="updatedAt")
     published_at: Any = Field(default=None, alias="publishedAt")
+    owner_id: str | None = Field(default=None, alias="ownerId")
+    owner_name: str | None = Field(default=None, alias="ownerName")
 
 
 class StudioStats(Model):
@@ -355,16 +358,24 @@ async def list_drafts(
     sort: Annotated[str, Query(pattern="^(" + "|".join(library_repo.STUDIO_SORTS) + ")$")] = "updated",
     page: Annotated[int, Query(ge=1)] = 1,
     page_size: Annotated[int, Query(alias="pageSize", ge=PAGE_SIZE_MIN, le=PAGE_SIZE_MAX)] = 25,
+    owner: Annotated[str | None, Query(max_length=64)] = None,
 ) -> StudioPage:
-    """The studio's list: a page of summaries, searched and filtered in the database."""
+    """The studio's list: a page of summaries, searched and filtered in the database.
+
+    `owner` (an account id, or "none" for books from before owners) narrows an
+    admin's list to one person's books; a creator's list is theirs regardless.
+    """
     mine = ownership.scope(p)
+    if not mine and owner:
+        mine = {"ownerId": {"$in": [None]}} if owner == "none" else {"ownerId": owner}
     got = await library_repo.studio_page(
         db, query=q, status=status, language=language, band=band, category=category, sort=sort, page=page,
         page_size=page_size, owner=mine,
     )
     total = got["total"]
+    who = await rebus_names(db, {r["ownerId"] for r in got["items"] if r.get("ownerId")})
     return StudioPage(
-        books=[BookSummary(**row) for row in got["items"]],
+        books=[BookSummary(**row, ownerName=who.get(row.get("ownerId") or "")) for row in got["items"]],
         page=page,
         pageSize=page_size,
         total=total,

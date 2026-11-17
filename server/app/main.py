@@ -33,6 +33,7 @@ from app.repos import system as system_repo
 from app.role_defaults import DEFAULT_PLATFORM_ROLES
 from app.routers import (
     admin_cleanup,
+    admin_content,
     admin_roles,
     admin_users,
     art,
@@ -301,6 +302,7 @@ def create_app() -> FastAPI:
         health.router,
         auth.router,
         admin_cleanup.router,
+        admin_content.router,
         admin_roles.router,
         admin_users.router,
         art.router,

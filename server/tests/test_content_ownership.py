@@ -130,3 +130,41 @@ async def test_only_the_admin_publishes_skills(client, db):
     ana = await _login(client, db, "ana@example.com", platform_role="creator")
     refused = await client.patch("/skills/anything/publication", json={"status": "published"}, headers=ana)
     assert refused.status_code == 403
+
+
+async def _id(db, email):
+    return (await db.users.find_one({"email": email}))["_id"]
+
+
+async def test_the_admin_sees_who_owns_what_and_moves_it(client, db):
+    ana = await _login(client, db, "ana@example.com", platform_role="creator")
+    boss = await _login(client, db, "boss@example.com", platform_role="admin")
+    await _login(client, db, "ben@example.com", platform_role="creator")
+    await client.put("/library/drafts/ana-1", json=_draft(MARKET), headers=ana)
+    await client.put("/library/drafts/ana-2", json=_draft(RAINY), headers=ana)
+    await client.put("/art/ana-sun", json={"markup": SVG}, headers=ana)
+
+    assert (await client.get("/admin/content/owners", headers=ana)).status_code == 403
+    owners = (await client.get("/admin/content/owners", headers=boss)).json()["owners"]
+    by_email = {o["email"]: o for o in owners}
+    assert by_email["ana@example.com"]["counts"] == {"book": 2, "art": 1}
+    assert by_email["ben@example.com"]["counts"] == {}
+
+    ana_id, ben_id = await _id(db, "ana@example.com"), await _id(db, "ben@example.com")
+    one = await client.post("/admin/content/reassign", json={"kind": "book", "ids": ["ana-1"], "to": ben_id}, headers=boss)
+    assert one.json()["moved"] == {"book": 1}
+    rest = await client.post("/admin/content/reassign", json={"kind": "all", "from": ana_id, "to": ben_id}, headers=boss)
+    assert rest.json()["moved"] == {"book": 1, "art": 1}
+    assert (await client.get("/library/drafts", headers=ana)).json()["books"] == []
+
+    listed = (await client.get(f"/library/drafts?owner={ben_id}", headers=boss)).json()["books"]
+    assert sorted(b["id"] for b in listed) == ["ana-1", "ana-2"] and listed[0]["ownerName"] == "ben@example.com"
+
+
+async def test_the_art_list_says_which_drawings_the_caller_may_change(client, db):
+    ana = await _login(client, db, "ana@example.com", platform_role="creator")
+    ben = await _login(client, db, "ben@example.com", platform_role="creator")
+    await client.put("/art/ana-sun", json={"markup": SVG}, headers=ana)
+    flag = lambda r: {a["id"]: a["editable"] for a in r.json()["assets"]}["ana-sun"]  # noqa: E731
+    assert flag(await client.get("/art", headers=ana)) is True
+    assert flag(await client.get("/art", headers=ben)) is False

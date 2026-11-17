@@ -9,6 +9,8 @@ export interface SvgAssetRecord {
   markup: string;
   /** Last Mongo update, as epoch milliseconds. */
   modified?: number;
+  /** Whether the signed-in person may change it (absent offline: fall back to their role). */
+  editable?: boolean;
 }
 
 /** Art at the top level belongs to no category yet, which is a legitimate state. */

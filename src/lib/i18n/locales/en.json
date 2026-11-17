@@ -810,6 +810,7 @@
     },
     "edit": "Edit",
     "editBook": "Edit {title}",
+    "byOwner": "by {name}",
     "col": {
       "book": "Book",
       "status": "Status",
@@ -2218,6 +2219,26 @@
     }
   },
   "admin": {
+      "contentOwners": {
+        "tab": "Content owners",
+        "title": "Content owners",
+        "subtitle": "Who made which books, quizzes, Trace and art. Content creators see only their own; move it here when someone leaves or changes role.",
+        "kind": {
+          "book": "books",
+          "puzzle": "quizzes",
+          "traceItem": "Trace items",
+          "traceCollection": "Trace collections",
+          "art": "drawings"
+        },
+        "unowned": "From before owners (only admins see it)",
+        "orphaned": "Owned by deleted accounts",
+        "nothingYet": "Nothing yet",
+        "moveTo": "Move to…",
+        "moveAll": "Move all",
+        "moved": "Moved {count} items to {name}.",
+        "confirmTitle": "Move all their content?",
+        "confirmBody": "All {count} items from {from} will belong to {to}. They can be moved back the same way."
+      },
     "learningLogPanel": {
       "whatGoesWrong": "What goes wrong",
       "wantExpected": "(want {expected})",

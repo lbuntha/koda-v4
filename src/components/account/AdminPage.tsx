@@ -15,6 +15,7 @@ import { BillingPage } from "./BillingPage";
 import { ScoringPage } from "./ScoringPage";
 import { NoAccess } from "./NoAccess";
 import { RebusAdminPanel } from "../../rebus/admin/RebusAdminPanel";
+import { ContentOwnersPanel } from "./ContentOwnersPanel";
 
 import { translate } from "../../lib/i18n";
 interface Setting {
@@ -440,7 +441,7 @@ const SystemPanel: React.FC<{
   );
 };
 
-type AdminTab = "scoring" | "badges" | "billing" | "keys" | "rebus" | "system";
+type AdminTab = "scoring" | "badges" | "billing" | "keys" | "rebus" | "owners" | "system";
 
 /**
  * What runs Koda, rather than what a family uses it with.
@@ -482,6 +483,8 @@ export const AdminPage: React.FC<{
         { id: "billing", label: translate("admin.adminPage.billing") },
         { id: "keys", label: translate("admin.adminPage.apiKeys") },
         { id: "rebus", label: translate("rebus.admin.tab") },
+        // Who owns which Studio content: only for whoever sees everyone's.
+        ...(can("content:all") ? [{ id: "owners", label: translate("admin.contentOwners.tab") }] : []),
         { id: "system", label: translate("admin.adminPage.system") },
       ]
     : [];
@@ -536,6 +539,7 @@ export const AdminPage: React.FC<{
       <div hidden={active !== "rebus"}>
         <RebusAdminPanel />
       </div>
+      {active === "owners" && <ContentOwnersPanel />}
       <div hidden={active !== "system"}>
         <SystemPanel embedded show="switches" />
       </div>

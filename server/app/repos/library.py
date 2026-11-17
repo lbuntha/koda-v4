@@ -54,7 +54,7 @@ def _either(field: str, default: Any = None) -> dict[str, Any]:
 
 # Only what a summary needs leaves the collection: never the sentences' text.
 _SUMMARY_PROJECTION: dict[str, Any] = {
-    "_id": 0, "id": 1, "rev": 1, "createdAt": 1, "updatedAt": 1, "publishedAt": 1,
+    "_id": 0, "id": 1, "rev": 1, "createdAt": 1, "updatedAt": 1, "publishedAt": 1, "ownerId": 1,
     **{f"{side}.{f}": 1 for side in ("draft", "published") for f in ("title", "language", "band", "category", "picture")},
     **{f"{side}.{f}.id": 1 for side in ("draft", "published") for f in ("sentences", "questions")},
     "hasPublished": {"$ne": [{"$ifNull": ["$published", None]}, None]},

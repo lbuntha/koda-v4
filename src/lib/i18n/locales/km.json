@@ -744,6 +744,7 @@
     "questions": "{count} សំណួរ",
     "edit": "កែ",
     "editBook": "កែ {title}",
+    "byOwner": "ដោយ {name}",
     "col": {
       "book": "សៀវភៅ",
       "status": "ស្ថានភាព",
@@ -2077,6 +2078,26 @@
     }
   },
   "admin": {
+      "contentOwners": {
+        "tab": "ម្ចាស់ខ្លឹមសារ",
+        "title": "ម្ចាស់ខ្លឹមសារ",
+        "subtitle": "អ្នកណាបានបង្កើតសៀវភៅ សំណួរ Trace និងរូបភាពណាខ្លះ។ អ្នកបង្កើតខ្លឹមសារមើលឃើញតែរបស់ខ្លួន។ ផ្ទេរវានៅទីនេះ ពេលនរណាម្នាក់ចាកចេញ ឬប្ដូរតួនាទី។",
+        "kind": {
+          "book": "សៀវភៅ",
+          "puzzle": "សំណួរ",
+          "traceItem": "ធាតុ Trace",
+          "traceCollection": "សំណុំ Trace",
+          "art": "គំនូរ"
+        },
+        "unowned": "មុនពេលមានម្ចាស់ (មានតែអ្នកគ្រប់គ្រងមើលឃើញ)",
+        "orphaned": "ជារបស់គណនីដែលបានលុប",
+        "nothingYet": "មិនទាន់មាន",
+        "moveTo": "ផ្ទេរទៅ…",
+        "moveAll": "ផ្ទេរទាំងអស់",
+        "moved": "បានផ្ទេរ {count} ធាតុទៅ {name}។",
+        "confirmTitle": "ផ្ទេរខ្លឹមសារទាំងអស់?",
+        "confirmBody": "ធាតុទាំង {count} ពី {from} នឹងក្លាយជារបស់ {to}។ អាចផ្ទេរត្រឡប់វិញតាមរបៀបដដែល។"
+      },
     "learningLogPanel": {
       "whatGoesWrong": "អ្វីដែលខុស",
       "wantExpected": "(ចង់បាន {expected})",

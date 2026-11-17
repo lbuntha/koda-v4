@@ -58,6 +58,9 @@ export interface BookSummary {
   createdAt?: string | null;
   updatedAt?: string | null;
   publishedAt?: string | null;
+  /** Who made it; shown to an admin, who sees every creator's books. */
+  ownerId?: string | null;
+  ownerName?: string | null;
 }
 
 export type StudioStatus = "draft" | "published" | "changed" | "reported";

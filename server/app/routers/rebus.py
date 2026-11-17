@@ -217,10 +217,12 @@ async def studio_list(
     q: Annotated[str | None, Query(max_length=60)] = None,
     skip: Annotated[int, Query(ge=0)] = 0,
     limit: Annotated[int, Query(ge=1, le=100)] = 50,
+    owner: Annotated[str | None, Query(max_length=64)] = None,
 ) -> dict[str, Any]:
+    # An admin may narrow to one person's quizzes; a creator only ever sees their own.
     rows, total = await repo.listing(
         db, status=status, category=category, source=source, icon=icon, kind=kind, query=q, skip=skip, limit=limit,
-        created_by=_mine_only(p),
+        created_by=_mine_only(p) or owner,
     )
     who = await repo.names(db, {r["createdBy"] for r in rows if r.get("createdBy")})
     checks = await _checks(db)

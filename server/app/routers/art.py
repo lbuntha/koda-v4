@@ -54,6 +54,9 @@ class ArtAsset(Model):
     id: str
     category: str
     markup: str
+    # Whether the caller may change it: a Content creator draws with every
+    # drawing but edits only their own. False for everyone who cannot author.
+    editable: bool = False
     rev: int = 1
     modified: int
 
@@ -118,8 +121,14 @@ def _out(row: dict) -> ArtAsset:
 
 
 @router.get("")
-async def list_art(db: Db, _: CanRead) -> ArtList:
-    return ArtList(assets=[_out(row) for row in await art_repo.list_all(db)])
+async def list_art(db: Db, p: CanRead) -> ArtList:
+    author = principal_can(p, "content:write")
+    return ArtList(
+        assets=[
+            _out(row).model_copy(update={"editable": author and ownership.may_touch(p, row)})
+            for row in await art_repo.list_all(db)
+        ]
+    )
 
 
 def _yours(p: Principal, row: dict | None) -> None:

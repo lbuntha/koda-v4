@@ -6,6 +6,7 @@ import { deleteBook, fetchStudioBooks, type BookSummary, type StudioMeta, type S
 import { BANDS, type Band } from "../data/passage";
 import { Picture } from "../Picture";
 import { currentLanguage, formatDate, translate, useT } from "../../lib/i18n";
+import { usePermissions } from "../../lib/sync";
 
 /**
  * The studio's front page: every book, a page at a time.
@@ -208,6 +209,7 @@ export function StudioHome({ meta, onOpen, onNew, onSoundNames, opening = null, 
    * how big it is, and when it was touched. Seven columns ran off the side of a
    * laptop and pushed the Edit button out of sight.
    */
+  const seesAll = usePermissions().can("content:all");
   const columns = useMemo<UIDataTableColumn<BookSummary>[]>(() => [
     {
       key: "select",
@@ -264,7 +266,19 @@ export function StudioHome({ meta, onOpen, onNew, onSoundNames, opening = null, 
       ),
     },
     { key: "content", header: t("studio.col.content"), nowrap: true, muted: true, render: (b) => `${t("studio.sentences", { count: b.sentences })} · ${t("studio.questions", { count: b.questions })}` },
-    { key: "edited", header: t("studio.col.edited"), nowrap: true, muted: true, render: (b) => <time dateTime={b.updatedAt ?? undefined} title={fullDate(b.updatedAt)}>{relative(b.updatedAt)}</time> },
+    {
+      key: "edited",
+      header: t("studio.col.edited"),
+      nowrap: true,
+      muted: true,
+      render: (b) => (
+        <div>
+          <time dateTime={b.updatedAt ?? undefined} title={fullDate(b.updatedAt)}>{relative(b.updatedAt)}</time>
+          {/* Whose book: only an admin's list mixes creators. */}
+          {seesAll && b.ownerName && <div className="text-xs text-muted truncate max-w-[12rem]">{t("studio.byOwner", { name: b.ownerName })}</div>}
+        </div>
+      ),
+    },
     {
       key: "actions",
       header: "",
@@ -279,7 +293,7 @@ export function StudioHome({ meta, onOpen, onNew, onSoundNames, opening = null, 
         </div>
       ),
     },
-  ], [onOpen, opening, t, selected, deleting]);
+  ], [onOpen, opening, t, selected, deleting, seesAll]);
 
   const firstLoad = loading && !result;
   const empty = result && result.total === 0;

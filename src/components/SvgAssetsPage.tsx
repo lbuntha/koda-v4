@@ -29,7 +29,7 @@ import {
 } from "../lib/svgAssetsApi";
 import { SvgAssetEditorModal } from "./SvgAssetEditorModal";
 import { SvgAssetPreviewModal } from "./SvgAssetPreviewModal";
-import { useSession } from "../lib/sync";
+import { usePermissions, useSession } from "../lib/sync";
 import { UISectionHeader, UIStatGrid, UIStatTile, UISearchInput } from "./ui";
 
 import { translate } from "../lib/i18n";
@@ -71,7 +71,11 @@ const CategoryRow: React.FC<{
  */
 export const SvgAssetsPage: React.FC = () => {
   const session = useSession();
-  const canEdit = session?.platformRole === "admin" || session?.platformRole === "developer";
+  const { can } = usePermissions();
+  // Anyone who authors content may add drawings; each drawing says whether this
+  // person may change it (a Content creator changes only their own).
+  const canEdit = Boolean(session) && (can("content:write") || session?.platformRole === "admin" || session?.platformRole === "developer");
+  const mayChange = (asset: SvgAssetRecord) => canEdit && (asset.editable ?? can("content:all"));
   const [assets, setAssets] = useState<SvgAssetRecord[]>(() =>
     svgAssets.map((asset) => ({
       id: asset.id,
@@ -373,7 +377,7 @@ export const SvgAssetsPage: React.FC = () => {
                           }`,
                         )}
                       >
-                        {canEdit && (
+                        {mayChange(asset) && (
                           <label
                             className={`absolute top-2 left-2 z-10 transition-opacity ${
                               selected.has(asset.id)
@@ -408,7 +412,7 @@ export const SvgAssetsPage: React.FC = () => {
                               <Copy className="w-3 h-3" />
                             )}
                           </button>
-                          {canEdit && (
+                          {mayChange(asset) && (
                             <button
                               onClick={() => {
                                 playSound("pop");
@@ -627,7 +631,7 @@ export const SvgAssetsPage: React.FC = () => {
       {previewAsset && (
         <SvgAssetPreviewModal
           asset={previewAsset}
-          canEdit={canEdit}
+          canEdit={mayChange(previewAsset)}
           onEdit={() => {
             setEditor({
               id: previewAsset.id,
