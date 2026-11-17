@@ -232,6 +232,43 @@ async function providerKey(which: AiCredential, authorization?: string): Promise
   return fallback ? { key: fallback, source: "env" } : {};
 }
 
+/** Providers a person can keep their own key for (Settings → My AI keys). */
+const PERSONAL_PROVIDERS = new Set<AiCredential>(["gemini", "openai", "anthropic"]);
+
+/** The signed-in person's own key for a provider, if they saved one. Never throws: no key is the usual answer. */
+async function personalKey(which: AiCredential, authorization?: string): Promise<string | undefined> {
+  if (!PERSONAL_PROVIDERS.has(which) || !authorization || !TUTOR_SERVICE_TOKEN) return undefined;
+  try {
+    const res = await fetch(`${API_URL}/v1/me/ai-keys/${which}/resolve`, {
+      method: "POST",
+      headers: { Authorization: authorization, "X-Service-Token": TUTOR_SERVICE_TOKEN },
+    });
+    if (!res.ok) return undefined;
+    const body = (await res.json()) as { value?: string };
+    return body.value?.trim() || undefined;
+  } catch {
+    return undefined;
+  }
+}
+
+/**
+ * The key for Studio AI — books, quizzes, Trace and art: the maker's own key
+ * when they saved one, so their work is paid from their account, else Koda's.
+ * Learner-facing AI (Ask Koda, the tutor, a family's photo pages) never comes
+ * here: it is always Koda's.
+ */
+async function studioKey(which: AiCredential, authorization?: string): Promise<{ key?: string; source?: "personal" | "saved" | "env" }> {
+  const own = await personalKey(which, authorization);
+  if (own) return { key: own, source: "personal" };
+  return providerKey(which, authorization);
+}
+
+/** Studio Gemini: the maker's own key, else the deployment's. */
+async function studioGeminiKey(authorization?: string): Promise<KeyLookup> {
+  const own = await personalKey("gemini", authorization);
+  return own ? { key: own } : systemApiKey(authorization);
+}
+
 // Lazy initialize Gemini client
 function getGeminiClient(lookup?: KeyLookup | string) {
   const found = typeof lookup === "string" ? lookup : lookup?.key;
@@ -651,7 +688,7 @@ app.post("/api/trace/stroke-order", async (req, res) => {
   if (typeof image !== "string" || image.length > 3_000_000 || !Array.isArray(pieces) || pieces.length === 0 || pieces.length > 80) {
     return res.status(400).json({ error: { code: "bad_request", message: "Send the picture and between 1 and 80 pieces." } });
   }
-  const ai = getGeminiClient(await systemApiKey(authorization));
+  const ai = getGeminiClient(await studioGeminiKey(authorization));
   if (!ai) {
     return res.status(503).json({ error: { code: "no_ai_key", message: "No AI key is set up for this Koda. Ask an admin." } });
   }
@@ -711,7 +748,7 @@ app.post("/api/trace/colour-steps", async (req, res) => {
   if (typeof image !== "string" || image.length > 3_000_000 || !Array.isArray(parts) || parts.length === 0 || parts.length > 160) {
     return res.status(400).json({ error: { code: "bad_request", message: "Send the picture and between 1 and 160 parts." } });
   }
-  const ai = getGeminiClient(await systemApiKey(authorization));
+  const ai = getGeminiClient(await studioGeminiKey(authorization));
   if (!ai) {
     return res.status(503).json({ error: { code: "no_ai_key", message: "No AI key is set up for this Koda. Ask an admin." } });
   }
@@ -872,7 +909,7 @@ app.post("/api/trace/colouring-page", async (req, res) => {
   if (!photo) {
     return res.status(400).json({ error: { code: "bad_request", message: "Send the photo as a JPG, PNG or WebP under 2 MB." } });
   }
-  const ai = getGeminiClient(await systemApiKey(authorization));
+  const ai = getGeminiClient(await studioGeminiKey(authorization));
   if (!ai) {
     return res.status(503).json({ error: { code: "no_ai_key", message: "No AI key is set up for this Koda. Ask an admin." } });
   }
@@ -1109,16 +1146,16 @@ app.post("/api/art/generate", async (req, res) => {
 
     if (provider === "chatgpt" || provider === "openai" || provider === "codex") {
       const key =
-        (await providerKey("openai", req.headers.authorization)).key;
+        (await studioKey("openai", req.headers.authorization)).key;
       if (!key) return res.status(503).json(noKey("ChatGPT"));
       text = await drawWithChatGPT(key, instruction, brief);
     } else if (provider === "claude" || provider === "anthropic") {
       const key =
-        (await providerKey("anthropic", req.headers.authorization)).key;
+        (await studioKey("anthropic", req.headers.authorization)).key;
       if (!key) return res.status(503).json(noKey("Claude"));
       text = await drawWithClaude(key, instruction, brief);
     } else {
-      const ai = getGeminiClient(await systemApiKey(req.headers.authorization));
+      const ai = getGeminiClient(await studioGeminiKey(req.headers.authorization));
       if (!ai) return res.status(503).json(noKey("Gemini"));
       const response = await ai.models.generateContent({
         model: process.env.GEMINI_ART_MODEL ?? "gemini-3.7-flash",
@@ -1330,7 +1367,7 @@ app.post("/api/library/voice", async (req, res) => {
   if (!(await systemAllows("ai.libraryVoice", authorization))) {
     return res.status(503).json({ error: { code: "feature_disabled", message: "Gemini voice for library books is switched off (ai.libraryVoice)." } });
   }
-  const ai = getGeminiClient(await systemApiKey(authorization));
+  const ai = getGeminiClient(await studioGeminiKey(authorization));
   if (!ai) return res.status(503).json(noKey("Gemini"));
   try {
     const characterId = String(req.body?.character ?? "lila");
@@ -1532,7 +1569,7 @@ app.post("/api/library/image/gemini", async (req, res) => {
   const parsed = readImageRequest(req, res);
   if (!parsed) return;
   if (!(await canGenerateBookImage(req, res))) return;
-  const ai = getGeminiClient(await systemApiKey(req.headers.authorization));
+  const ai = getGeminiClient(await studioGeminiKey(req.headers.authorization));
   if (!ai) return res.status(503).json(noKey("Gemini"));
   try {
     // The Imagen `predict` family (`generateImages`) needs its own API
@@ -1597,11 +1634,11 @@ app.post("/api/library/image/prompt", async (req, res) => {
   try {
     let brief = "";
     if (req.body?.provider === "openai") {
-      const key = (await providerKey("openai", authorization)).key;
+      const key = (await studioKey("openai", authorization)).key;
       if (!key) return res.status(503).json(noKey("ChatGPT"));
       brief = await drawWithChatGPT(key, instruction, text);
     } else {
-      const ai = getGeminiClient(await systemApiKey(authorization));
+      const ai = getGeminiClient(await studioGeminiKey(authorization));
       if (!ai) return res.status(503).json(noKey("Gemini"));
       const response = await ai.models.generateContent({
         model: process.env.GEMINI_LIBRARY_MODEL ?? process.env.GEMINI_ART_MODEL ?? "gemini-3.7-flash",
@@ -1623,7 +1660,7 @@ app.post("/api/library/image/openai", async (req, res) => {
   const parsed = readImageRequest(req, res);
   if (!parsed) return;
   if (!(await canGenerateBookImage(req, res))) return;
-  const key = (await providerKey("openai", req.headers.authorization)).key;
+  const key = (await studioKey("openai", req.headers.authorization)).key;
   if (!key) return res.status(503).json(noKey("ChatGPT"));
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), BOOK_IMAGE_TIMEOUT_MS);
@@ -1678,7 +1715,7 @@ app.post("/api/library/voice/openai", async (req, res) => {
   if (!OPENAI_LIBRARY_VOICES.includes(voice)) return res.status(400).json({ error: { code: "bad_voice", message: "Choose one of ChatGPT's voices." } });
   if (!(await libraryOperatorOnly(req, res))) return;
   const authorization = req.headers.authorization;
-  const key = (await providerKey("openai", authorization)).key;
+  const key = (await studioKey("openai", authorization)).key;
   if (!key) return res.status(503).json(noKey("ChatGPT"));
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), OPENAI_LIBRARY_TIMEOUT_MS);
@@ -1747,7 +1784,7 @@ app.post("/api/trace/voice", async (req, res) => {
     let audio: Buffer;
     let type = "audio/wav";
     if (provider === "gemini") {
-      const ai = getGeminiClient(await systemApiKey(authorization));
+      const ai = getGeminiClient(await studioGeminiKey(authorization));
       if (!ai) return res.status(503).json(noKey("Gemini"));
       const character = LIBRARY_VOICE_CHARACTERS[voice as keyof typeof LIBRARY_VOICE_CHARACTERS] ?? LIBRARY_VOICE_CHARACTERS.lila;
       const response = await ai.models.generateContent({
@@ -1771,7 +1808,7 @@ app.post("/api/trace/voice", async (req, res) => {
       audio = Buffer.from(await reply.arrayBuffer());
       type = reply.headers.get("content-type") ?? type;
     } else {
-      const key = (await providerKey("openai", authorization)).key;
+      const key = (await studioKey("openai", authorization)).key;
       if (!key) return res.status(503).json(noKey("ChatGPT"));
       const reply = await fetch("https://api.openai.com/v1/audio/speech", {
         method: "POST",
@@ -1857,15 +1894,15 @@ app.post("/api/library/story", async (req, res) => {
   try {
     let text = "";
     if (provider === "chatgpt" || provider === "openai") {
-      const key = (await providerKey("openai", authorization)).key;
+      const key = (await studioKey("openai", authorization)).key;
       if (!key) return res.status(503).json(noKey("ChatGPT"));
       text = await drawWithChatGPT(key, instruction, content);
     } else if (provider === "claude" || provider === "anthropic") {
-      const key = (await providerKey("anthropic", authorization)).key;
+      const key = (await studioKey("anthropic", authorization)).key;
       if (!key) return res.status(503).json(noKey("Claude"));
       text = await drawWithClaude(key, instruction, content);
     } else {
-      const ai = getGeminiClient(await systemApiKey(authorization));
+      const ai = getGeminiClient(await studioGeminiKey(authorization));
       if (!ai) return res.status(503).json(noKey("Gemini"));
       const response = await ai.models.generateContent({
         model: process.env.GEMINI_LIBRARY_MODEL ?? process.env.GEMINI_ART_MODEL ?? "gemini-3.7-flash",
@@ -1926,15 +1963,15 @@ app.post("/api/library/draft", async (req, res) => {
   try {
     let text = "";
     if (provider === "chatgpt" || provider === "openai") {
-      const key = (await providerKey("openai", authorization)).key;
+      const key = (await studioKey("openai", authorization)).key;
       if (!key) return res.status(503).json(noKey("ChatGPT"));
       text = await drawWithChatGPT(key, instruction, story);
     } else if (provider === "claude" || provider === "anthropic") {
-      const key = (await providerKey("anthropic", authorization)).key;
+      const key = (await studioKey("anthropic", authorization)).key;
       if (!key) return res.status(503).json(noKey("Claude"));
       text = await drawWithClaude(key, instruction, story);
     } else {
-      const ai = getGeminiClient(await systemApiKey(authorization));
+      const ai = getGeminiClient(await studioGeminiKey(authorization));
       if (!ai) return res.status(503).json(noKey("Gemini"));
       const response = await ai.models.generateContent({
         model: process.env.GEMINI_LIBRARY_MODEL ?? process.env.GEMINI_ART_MODEL ?? "gemini-3.7-flash",
@@ -2003,18 +2040,18 @@ app.post("/api/rebus/generate", async (req, res) => {
 
   const askModel = async (system: string, user: string): Promise<string> => {
     if (provider === "chatgpt" || provider === "openai") {
-      const key = (await providerKey("openai", authorization)).key;
+      const key = (await studioKey("openai", authorization)).key;
       if (!key) throw new NoProviderKey("ChatGPT");
       return drawWithChatGPT(key, system, user);
     }
     if (provider === "claude" || provider === "anthropic") {
-      const key = (await providerKey("anthropic", authorization)).key;
+      const key = (await studioKey("anthropic", authorization)).key;
       if (!key) throw new NoProviderKey("Claude");
       const response = await new Anthropic({ apiKey: key }).messages.create({ model: claudeModel, max_tokens: 8000, system, messages: [{ role: "user", content: user }] });
       if (response.stop_reason === "refusal") throw new Error("The model declined to write these puzzles.");
       return response.content.filter((b): b is Anthropic.TextBlock => b.type === "text").map((b) => b.text).join("\n");
     }
-    const ai = getGeminiClient(await systemApiKey(authorization));
+    const ai = getGeminiClient(await studioGeminiKey(authorization));
     if (!ai) throw new NoProviderKey("Gemini");
     const response = await ai.models.generateContent({ model: process.env.GEMINI_LIBRARY_MODEL ?? process.env.GEMINI_ART_MODEL ?? "gemini-3.7-flash", contents: user, config: { systemInstruction: system, responseMimeType: "application/json" } });
     return response.text ?? "";
@@ -2039,7 +2076,7 @@ async function askLibraryAi(authorization: string, askedProvider: unknown, instr
   const settings = await systemSettings(authorization);
   const provider = String(askedProvider ?? settings["ai.libraryProvider"] ?? settings["ai.artProvider"] ?? "gemini").toLowerCase();
   if (provider === "chatgpt" || provider === "openai") {
-    const key = (await providerKey("openai", authorization)).key;
+    const key = (await studioKey("openai", authorization)).key;
     if (!key) {
       res.status(503).json(noKey("ChatGPT"));
       return null;
@@ -2047,14 +2084,14 @@ async function askLibraryAi(authorization: string, askedProvider: unknown, instr
     return { text: await drawWithChatGPT(key, instruction, story), provider };
   }
   if (provider === "claude" || provider === "anthropic") {
-    const key = (await providerKey("anthropic", authorization)).key;
+    const key = (await studioKey("anthropic", authorization)).key;
     if (!key) {
       res.status(503).json(noKey("Claude"));
       return null;
     }
     return { text: await drawWithClaude(key, instruction, story), provider };
   }
-  const ai = getGeminiClient(await systemApiKey(authorization));
+  const ai = getGeminiClient(await studioGeminiKey(authorization));
   if (!ai) {
     res.status(503).json(noKey("Gemini"));
     return null;

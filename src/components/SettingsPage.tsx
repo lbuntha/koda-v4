@@ -5,6 +5,7 @@ import { playSound } from "../utils/audio";
 import { UIPageHeader, UISettingGroup, UISettingRow, UIToggle, UIArtIcon } from "./ui";
 import { YourLearning } from "./account/YourLearning";
 import { PlanCard } from "./account/PlanCard";
+import { MyAiKeysCard } from "./account/MyAiKeysCard";
 import { DevicesPage } from "./account/DevicesPage";
 import { NotificationsSettings } from "./account/NotificationsSettings";
 import { usePermissions, useSession } from "../lib/sync";
@@ -83,6 +84,8 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({
   // Shown to whoever runs the family, not to a child: a seven-year-old has no
   // use for a renewal date, and "not included" reads as a scolding.
   const showsPlan = can("learner:create");
+  // Content makers may pay for their own Studio AI with their own key.
+  const showsAiKeys = can("content:write");
   /*
    * The device list, which used to be a sidebar row of its own.
    *
@@ -234,6 +237,8 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({
       )}
 
       {showsPlan && <PlanCard />}
+
+      {showsAiKeys && <MyAiKeysCard />}
 
       {showsDevices && <DevicesPage embedded />}
     </div>

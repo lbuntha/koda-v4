@@ -122,6 +122,7 @@ async def purge_user(db: AsyncIOMotorDatabase, user_id: str) -> dict[str, int]:
     await db.skill_registrations.delete_many({"ownerType": "user", "ownerId": user_id})
     await db.profile_stats.delete_one({"_id": user_id})
     await db.notifications.delete_many({"userId": user_id})
+    await db.user_ai_keys.delete_many({"userId": user_id})
     await push_tokens.delete_for_user(db, user_id)
     await notify_prefs.forget_user(db, user_id)
     await notify_schedule.forget_user(db, user_id)

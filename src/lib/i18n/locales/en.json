@@ -129,6 +129,21 @@
     "weeksChip": "{count} week streak"
   },
   "settings": {
+      "aiKeys": {
+        "title": "My AI keys",
+        "subtitle": "Use your own Gemini, OpenAI or Claude key for AI in the Studio: books, quizzes, Trace and art.",
+        "privacy": "Your key is encrypted and never shown again, not even to admins. Only the last 4 characters are kept visible. Without a key, Koda's key is used.",
+        "unavailable": "This Koda cannot keep personal keys yet. Ask an admin.",
+        "saved": "Key saved. Studio AI now uses it.",
+        "removed": "Key removed. Studio AI uses Koda's key again.",
+        "inUse": "Your key ····{last4} is in use",
+        "usingKoda": "Using Koda's key",
+        "replace": "Paste a new key to replace it",
+        "paste": "Paste your {name} API key",
+        "save": "Save",
+        "remove": "Remove",
+        "getOne": "Get a key at {where}"
+      },
     "title": "Settings",
     "subtitle": "Shared across your family’s devices.",
     "language": {

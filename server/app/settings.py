@@ -73,6 +73,12 @@ class Settings(BaseSettings):
     #: an endpoint it never meant to expose.
     tutor_service_token: str | None = None
 
+    #: Encrypts the AI keys people save for themselves (Settings → My AI keys).
+    #: Any long random string; changing it makes every saved personal key
+    #: unreadable, and people add theirs again. Unset outside development means
+    #: personal keys cannot be saved — never stored in the clear.
+    ai_keys_secret: str | None = None
+
     #: Where mail goes. `console` logs it and sends nothing, which is what local
     #: work and the test suite want; `smtp` is a real server — Mailpit next door
     #: in compose, or Gmail with an app password.

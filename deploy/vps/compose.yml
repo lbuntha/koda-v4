@@ -88,6 +88,8 @@ services:
       MONGODB_DB: koda_v4
       JWT_SECRET: ${JWT_SECRET:?set JWT_SECRET in .env}
       TUTOR_SERVICE_TOKEN: ${TUTOR_SERVICE_TOKEN}
+      # Encrypts the AI keys people save for themselves. Required for that feature.
+      AI_KEYS_SECRET: ${AI_KEYS_SECRET:-}
       GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID:-}
       APP_BASE_URL: https://${DOMAIN}
       CORS_ORIGINS: '["https://${DOMAIN}"]'
