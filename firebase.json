@@ -1,15 +1,21 @@
 {
   "hosting": {
     "public": ".firebase-hosting",
-    "ignore": ["firebase.json", "**/.*", "**/node_modules/**"],
-    "rewrites": [
+    "ignore": [
+      "firebase.json",
+      "**/.*",
+      "**/node_modules/**"
+    ],
+    "redirects": [
       {
-        "source": "**",
-        "run": {
-          "serviceId": "koda-app",
-          "region": "us-central1",
-          "pinTag": true
-        }
+        "source": "/",
+        "destination": "https://learnwithkoda.tech/",
+        "type": 301
+      },
+      {
+        "source": "/:path*",
+        "destination": "https://learnwithkoda.tech/:path*",
+        "type": 301
       }
     ]
   }
