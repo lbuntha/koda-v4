@@ -31,7 +31,7 @@ beforeEach(() => {
 });
 afterEach(() => vi.useRealTimers());
 
-const advance = async (ms = 1100) => { await act(async () => { vi.advanceTimersByTime(ms); }); };
+const advance = async (ms = 1700) => { await act(async () => { vi.advanceTimersByTime(ms); }); };
 const tile = (unit: string, nth = 0) =>
   [...document.querySelectorAll<SVGGElement>("[data-wheel-tile]")].filter((g) => g.getAttribute("aria-label")?.split(",")[0] === unitLabel(unit))[nth];
 const centre = (g: SVGGElement) => {
@@ -60,7 +60,7 @@ async function toSpelling() {
   fireEvent.click(screen.getByRole("button", { name: new RegExp(`^${KM.title}\\.`) }));
   fireEvent.click(screen.getByRole("button", { name: "Read" }));
   while (screen.queryByRole("button", { name: "Next page" })) fireEvent.click(screen.getByRole("button", { name: "Next page" }));
-  fireEvent.click(screen.getByRole("button", { name: "Check my learning" }));
+  fireEvent.click(screen.getByRole("button", { name: "Quiz time!" }));
   for (const q of KM.questions.filter((x): x is ComprehensionQuestion => x.kind === "comprehension")) {
     fireEvent.click(screen.getByRole("button", { name: q.options[q.answer] }));
     await advance();

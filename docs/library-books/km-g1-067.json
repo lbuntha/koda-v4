@@ -1,0 +1,132 @@
+{
+  "id": "km-g1-067",
+  "rev": 0,
+  "language": "km",
+  "band": "A",
+  "ages": [
+    6,
+    7
+  ],
+  "topics": [],
+  "questionCounts": {
+    "understand": 0,
+    "words": 0,
+    "spell": 5
+  },
+  "title": "មេរៀនទី ៦៧ · ជើង ក្ង ក្ន ក្ម ក្រ ក្ល",
+  "category": "Khmer",
+  "picture": "khmer-school",
+  "sentences": [
+    {
+      "id": "s1",
+      "text": "ក្ងា ក្នា ក្មា ក្រា ក្លា",
+      "words": [
+        "ក្ងា ",
+        "ក្នា ",
+        "ក្មា ",
+        "ក្រា ",
+        "ក្លា"
+      ]
+    },
+    {
+      "id": "s2",
+      "text": "ក្ងោ ក្នុ ក្មេ ក្រី ក្លី",
+      "words": [
+        "ក្ងោ ",
+        "ក្នុ ",
+        "ក្មេ ",
+        "ក្រី ",
+        "ក្លី"
+      ]
+    },
+    {
+      "id": "s3",
+      "text": "ក្ងោក ក្នុង ក្មេង ក្រុង ក្រោយ ក្រៅ ក្លិន",
+      "words": [
+        "ក្ងោក ",
+        "ក្នុង ",
+        "ក្មេង ",
+        "ក្រុង ",
+        "ក្រោយ ",
+        "ក្រៅ ",
+        "ក្លិន"
+      ]
+    },
+    {
+      "id": "s4",
+      "text": "ក្មេងលេងនៅក្រៅ។",
+      "words": [
+        "ក្មេង",
+        "លេង",
+        "នៅ",
+        "ក្រៅ។"
+      ]
+    },
+    {
+      "id": "s5",
+      "text": "ក្ងោកមានរោមវែង។",
+      "words": [
+        "ក្ងោក",
+        "មាន",
+        "រោម",
+        "វែង។"
+      ]
+    },
+    {
+      "id": "s6",
+      "text": "បាយមានក្លិនឆេះ។",
+      "words": [
+        "បាយ",
+        "មាន",
+        "ក្លិន",
+        "ឆេះ។"
+      ]
+    },
+    {
+      "id": "s7",
+      "text": "ចៅរស់នៅក្នុងក្រុង។",
+      "words": [
+        "ចៅ",
+        "រស់",
+        "នៅ",
+        "ក្នុង",
+        "ក្រុង។"
+      ]
+    }
+  ],
+  "questions": [
+    {
+      "id": "sp1",
+      "kind": "spell",
+      "sentence": "s4",
+      "word": "ក្មេង"
+    },
+    {
+      "id": "sp2",
+      "kind": "spell",
+      "sentence": "s5",
+      "word": "ក្ងោក"
+    },
+    {
+      "id": "sp3",
+      "kind": "spell",
+      "sentence": "s6",
+      "word": "ក្លិន"
+    },
+    {
+      "id": "sp4",
+      "kind": "spell",
+      "sentence": "s7",
+      "word": "ក្នុង"
+    },
+    {
+      "id": "sp5",
+      "kind": "spell",
+      "sentence": "s3",
+      "word": "ក្រៅ"
+    }
+  ],
+  "pictures": {},
+  "noRecording": [],
+  "provenance": "Original lesson written for Koda, 2026. It follows the order in which Grade 1 Khmer teaches letters; the words and sentences are new. Draft: not yet reviewed by a native speaker."
+}

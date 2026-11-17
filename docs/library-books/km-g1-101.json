@@ -1,0 +1,92 @@
+{
+  "id": "km-g1-101",
+  "rev": 0,
+  "language": "km",
+  "band": "A",
+  "ages": [
+    6,
+    7
+  ],
+  "topics": [],
+  "questionCounts": {
+    "understand": 0,
+    "words": 0,
+    "spell": 4
+  },
+  "title": "មេរៀនទី ១០១ · គ្រូ ខ្ញុំ",
+  "category": "Khmer",
+  "picture": "khmer-school",
+  "sentences": [
+    {
+      "id": "s1",
+      "text": "គ្រូខ្ញុំឈ្មោះសុភា។",
+      "words": [
+        "គ្រូ",
+        "ខ្ញុំ",
+        "ឈ្មោះ",
+        "សុភា។"
+      ]
+    },
+    {
+      "id": "s2",
+      "text": "គាត់បង្រៀនខ្ញុំអាននិងសរសេរ។",
+      "words": [
+        "គាត់",
+        "បង្រៀន",
+        "ខ្ញុំ",
+        "អាន",
+        "និង",
+        "សរសេរ។"
+      ]
+    },
+    {
+      "id": "s3",
+      "text": "គ្រូនិយាយទន់ភ្លន់។",
+      "words": [
+        "គ្រូ",
+        "និយាយ",
+        "ទន់ភ្លន់។"
+      ]
+    },
+    {
+      "id": "s4",
+      "text": "ខ្ញុំស្រឡាញ់គ្រូខ្ញុំណាស់។",
+      "words": [
+        "ខ្ញុំ",
+        "ស្រឡាញ់",
+        "គ្រូ",
+        "ខ្ញុំ",
+        "ណាស់។"
+      ]
+    }
+  ],
+  "questions": [
+    {
+      "id": "sp1",
+      "kind": "spell",
+      "sentence": "s1",
+      "word": "ឈ្មោះ"
+    },
+    {
+      "id": "sp2",
+      "kind": "spell",
+      "sentence": "s2",
+      "word": "បង្រៀន"
+    },
+    {
+      "id": "sp3",
+      "kind": "spell",
+      "sentence": "s3",
+      "word": "ទន់ភ្លន់"
+    },
+    {
+      "id": "sp4",
+      "kind": "spell",
+      "sentence": "s4",
+      "word": "ស្រឡាញ់"
+    }
+  ],
+  "pictures": {},
+  "noRecording": [],
+  "provenance": "Original lesson written for Koda, 2026. It follows the order in which Grade 1 Khmer teaches letters; the words and sentences are new. Draft: not yet reviewed by a native speaker."
+}

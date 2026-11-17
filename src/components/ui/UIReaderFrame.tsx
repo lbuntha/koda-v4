@@ -1,6 +1,7 @@
 import React, { type RefObject } from "react";
-import { ArrowLeft, BookOpen, ChevronLeft, ChevronRight } from "lucide-react";
-import { UIButton } from "./ThemeUI";
+import { ArrowLeft, ArrowRight, ChevronLeft, ChevronRight } from "lucide-react";
+import { themeSystem } from "../../lib/themeSystem";
+import { UIArtIcon } from "./UIArtIcon";
 import { useT } from "../../lib/i18n";
 
 export interface UIReaderFrameProps {
@@ -49,19 +50,28 @@ export interface UIQuizToolbarProps {
   hintHostRef?: React.Ref<HTMLDivElement>;
 }
 
-/** Shared quiz toolbar: navigation and support actions stay in one stable row. */
+/**
+ * Shared quiz toolbar: the way back on the left, the helpers on the right.
+ *
+ * Read again and Hint are the same pill — an art icon from the kit and a word —
+ * so the two ways of getting help look like a pair. The hint button is drawn by
+ * the question (it knows how many hints are left) into `hintHostRef`, wearing
+ * `themeSystem.quiz.tool` like this one.
+ */
 export const UIQuizToolbar: React.FC<UIQuizToolbarProps> = ({ onBack, onReadAgain, hintHostRef }) => {
   const { t } = useT();
   return (
   <div className="mobile-reader-toolbar">
     <div className="mobile-reader-toolbar-row flex items-center justify-between gap-2">
-      <UIButton type="button" variant="secondary" size="md" icon={<ArrowLeft aria-hidden="true" />} onClick={onBack}>
-        {t("reader.back")}
-      </UIButton>
+      <button type="button" onClick={onBack} aria-label={t("reader.back")} className={`-ml-1 ${themeSystem.quiz.back}`}>
+        <ArrowLeft className="h-4 w-4" aria-hidden="true" />
+        <span className="hidden sm:inline">{t("reader.back")}</span>
+      </button>
       <div className="flex items-center gap-2">
-        <UIButton type="button" variant="secondary" size="md" icon={<BookOpen aria-hidden="true" />} onClick={onReadAgain}>
+        <button type="button" onClick={onReadAgain} className={themeSystem.quiz.tool}>
+          <UIArtIcon id="kit-read-again" className="h-7 w-7" />
           {t("reader.readAgain")}
-        </UIButton>
+        </button>
         <div ref={hintHostRef} className="flex items-center" />
       </div>
     </div>
@@ -77,6 +87,10 @@ export interface UIReaderPaginationProps {
   onNext(): void;
   onComplete(): void;
   completeLabel?: string;
+  /** A short line under the label, e.g. "3 questions about the story". */
+  completeHint?: string;
+  /** The picture on the button: a star for a quiz, a party for "I finished!". */
+  completeArt?: "kit-star" | "kit-party";
 }
 
 /**
@@ -94,15 +108,42 @@ export const UIReaderPagination: React.FC<UIReaderPaginationProps> = ({
   onNext,
   onComplete,
   completeLabel,
+  completeHint,
+  completeArt = "kit-star",
 }) => {
   const { t } = useT();
   const last = pageCount - 1;
+  /*
+   * The last page: an invitation, not a form button. A full-width bar read as
+   * "submit"; this is one friendly pill in the middle — a picture, a short
+   * title, how much is in it, and an arrow that nudges — so the next step
+   * looks like something to play. It glows twice to catch the eye, then rests.
+   * The back arrow stays, so a child can still look at the story again.
+   */
   if (page === last) {
+    const label = completeLabel ?? t("reader.quizTime");
     return (
-      <nav aria-label={t("reader.pages")} className="ui-reader-pagination ui-reader-pagination-final">
-        <UIButton type="button" variant="primary" size="md" onClick={onComplete} className="!min-h-12 w-full shadow-[0_6px_18px_rgba(79,70,229,0.22)] active:shadow-[0_3px_10px_rgba(79,70,229,0.18)]">
-          {completeLabel ?? t("reader.checkLearning")}
-        </UIButton>
+      <nav aria-label={t("reader.pages")} className="ui-reader-pagination">
+        <button type="button" onClick={onPrevious} disabled={page === 0} aria-label={t("reader.previousPage")} className={`${turnButton} border-line bg-surface text-ink hover:bg-surface-muted`}>
+          <ChevronLeft aria-hidden="true" />
+        </button>
+        <button
+          type="button"
+          onClick={onComplete}
+          aria-label={label}
+          className="ui-glow group flex min-h-14 min-w-0 flex-1 sm:max-w-sm items-center gap-3 rounded-full bg-gradient-to-r from-indigo-600 to-violet-600 py-2 pl-2 pr-5 text-left text-white shadow-[0_8px_24px_rgba(79,70,229,0.30)] transition-transform duration-150 hover:-translate-y-0.5 active:translate-y-0 active:scale-[0.98] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 motion-reduce:transition-none"
+        >
+          <span className="grid h-11 w-11 shrink-0 place-items-center rounded-full bg-white shadow-sm">
+            <UIArtIcon id={completeArt} className="h-7 w-7" />
+          </span>
+          <span className="min-w-0 flex-1 leading-tight">
+            <span className="block truncate text-base font-black">{label}</span>
+            {completeHint && <span className="block truncate text-xs font-semibold text-white/80">{completeHint}</span>}
+          </span>
+          <ArrowRight aria-hidden="true" className="h-5 w-5 shrink-0 transition-transform duration-200 group-hover:translate-x-1 motion-safe:animate-[ui-nudge_1.6s_ease-in-out_2]" />
+        </button>
+        {/* Keeps the pill centred: the same width as the back arrow. */}
+        <span className="hidden h-12 w-12 shrink-0 sm:block" aria-hidden="true" />
       </nav>
     );
   }

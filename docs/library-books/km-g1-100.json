@@ -1,0 +1,82 @@
+{
+  "id": "km-g1-100",
+  "rev": 0,
+  "language": "km",
+  "band": "A",
+  "ages": [
+    6,
+    7
+  ],
+  "topics": [],
+  "questionCounts": {
+    "understand": 0,
+    "words": 0,
+    "spell": 3
+  },
+  "title": "មេរៀនទី ១០០ · ព្យញ្ជនៈ ត្រួត ញ្ច្រ ញ្ជ្រ",
+  "category": "Khmer",
+  "picture": "khmer-school",
+  "sentences": [
+    {
+      "id": "s1",
+      "text": "កញ្ជ្រោង កញ្ច្រែង",
+      "words": [
+        "កញ្ជ្រោង ",
+        "កញ្ច្រែង"
+      ]
+    },
+    {
+      "id": "s2",
+      "text": "កញ្ជ្រោងរស់ក្នុងព្រៃ។",
+      "words": [
+        "កញ្ជ្រោង",
+        "រស់",
+        "ក្នុង",
+        "ព្រៃ។"
+      ]
+    },
+    {
+      "id": "s3",
+      "text": "យាយដាក់ត្រីក្នុងកញ្ច្រែង។",
+      "words": [
+        "យាយ",
+        "ដាក់",
+        "ត្រី",
+        "ក្នុង",
+        "កញ្ច្រែង។"
+      ]
+    },
+    {
+      "id": "s4",
+      "text": "កញ្ច្រែងនេះធំ។",
+      "words": [
+        "កញ្ច្រែង",
+        "នេះ",
+        "ធំ។"
+      ]
+    }
+  ],
+  "questions": [
+    {
+      "id": "sp1",
+      "kind": "spell",
+      "sentence": "s1",
+      "word": "កញ្ជ្រោង"
+    },
+    {
+      "id": "sp2",
+      "kind": "spell",
+      "sentence": "s3",
+      "word": "កញ្ច្រែង"
+    },
+    {
+      "id": "sp3",
+      "kind": "spell",
+      "sentence": "s2",
+      "word": "ព្រៃ"
+    }
+  ],
+  "pictures": {},
+  "noRecording": [],
+  "provenance": "Original lesson written for Koda, 2026. It follows the order in which Grade 1 Khmer teaches letters; the words and sentences are new. Draft: not yet reviewed by a native speaker."
+}

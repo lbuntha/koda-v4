@@ -1,0 +1,124 @@
+{
+  "id": "km-g1-051r",
+  "rev": 0,
+  "language": "km",
+  "band": "A",
+  "ages": [
+    6,
+    7
+  ],
+  "topics": [],
+  "questionCounts": {
+    "understand": 0,
+    "words": 0,
+    "spell": 5
+  },
+  "title": "រៀនសាឡើងវិញ · ◌ញ ◌ត ◌ន",
+  "category": "Khmer",
+  "picture": "khmer-school",
+  "sentences": [
+    {
+      "id": "s1",
+      "text": "ចេញ ទិញ វិញ ឃើញ",
+      "words": [
+        "ចេញ ",
+        "ទិញ ",
+        "វិញ ",
+        "ឃើញ"
+      ]
+    },
+    {
+      "id": "s2",
+      "text": "ហត់ រត់ ដុត ទៀត គាត់",
+      "words": [
+        "ហត់ ",
+        "រត់ ",
+        "ដុត ",
+        "ទៀត ",
+        "គាត់"
+      ]
+    },
+    {
+      "id": "s3",
+      "text": "អាន រៀន មាន មិន បាន",
+      "words": [
+        "អាន ",
+        "រៀន ",
+        "មាន ",
+        "មិន ",
+        "បាន"
+      ]
+    },
+    {
+      "id": "s4",
+      "text": "ចៅរៀនអាន។",
+      "words": [
+        "ចៅ",
+        "រៀន",
+        "អាន។"
+      ]
+    },
+    {
+      "id": "s5",
+      "text": "ម៉ែទិញមី។",
+      "words": [
+        "ម៉ែ",
+        "ទិញ",
+        "មី។"
+      ]
+    },
+    {
+      "id": "s6",
+      "text": "គាត់មិនហត់។",
+      "words": [
+        "គាត់",
+        "មិន",
+        "ហត់។"
+      ]
+    },
+    {
+      "id": "s7",
+      "text": "ចៅរត់ចេញ។",
+      "words": [
+        "ចៅ",
+        "រត់",
+        "ចេញ។"
+      ]
+    }
+  ],
+  "questions": [
+    {
+      "id": "sp1",
+      "kind": "spell",
+      "sentence": "s4",
+      "word": "អាន"
+    },
+    {
+      "id": "sp2",
+      "kind": "spell",
+      "sentence": "s5",
+      "word": "ទិញ"
+    },
+    {
+      "id": "sp3",
+      "kind": "spell",
+      "sentence": "s6",
+      "word": "ហត់"
+    },
+    {
+      "id": "sp4",
+      "kind": "spell",
+      "sentence": "s7",
+      "word": "រត់"
+    },
+    {
+      "id": "sp5",
+      "kind": "spell",
+      "sentence": "s3",
+      "word": "មិន"
+    }
+  ],
+  "pictures": {},
+  "noRecording": [],
+  "provenance": "Original lesson written for Koda, 2026. It follows the order in which Grade 1 Khmer teaches letters; the words and sentences are new. Draft: not yet reviewed by a native speaker."
+}

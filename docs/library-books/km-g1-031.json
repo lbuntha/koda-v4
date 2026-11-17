@@ -1,0 +1,130 @@
+{
+  "id": "km-g1-031",
+  "rev": 0,
+  "language": "km",
+  "band": "A",
+  "ages": [
+    6,
+    7
+  ],
+  "topics": [],
+  "questionCounts": {
+    "understand": 0,
+    "words": 0,
+    "spell": 4
+  },
+  "title": "មេរៀនទី ៣១ · ម៉",
+  "category": "Khmer",
+  "picture": "khmer-school",
+  "sentences": [
+    {
+      "id": "s1",
+      "text": "ម៉ ម៉ា ម៉ិ ម៉ី ម៉ឹ ម៉ឺ ម៉ុ ម៉ូ ម៉ួ ម៉ើ ម៉ឿ ម៉ៀ ម៉េ",
+      "words": [
+        "ម៉ ",
+        "ម៉ា ",
+        "ម៉ិ ",
+        "ម៉ី ",
+        "ម៉ឹ ",
+        "ម៉ឺ ",
+        "ម៉ុ ",
+        "ម៉ូ ",
+        "ម៉ួ ",
+        "ម៉ើ ",
+        "ម៉ឿ ",
+        "ម៉ៀ ",
+        "ម៉េ"
+      ]
+    },
+    {
+      "id": "s2",
+      "text": "ម៉ែ ម៉ៃ ម៉ោ ម៉ៅ ម៉ុំ ម៉ំ ម៉ាំ ម៉ះ ម៉ុះ ម៉េះ ម៉ោះ",
+      "words": [
+        "ម៉ែ ",
+        "ម៉ៃ ",
+        "ម៉ោ ",
+        "ម៉ៅ ",
+        "ម៉ុំ ",
+        "ម៉ំ ",
+        "ម៉ាំ ",
+        "ម៉ះ ",
+        "ម៉ុះ ",
+        "ម៉េះ ",
+        "ម៉ោះ"
+      ]
+    },
+    {
+      "id": "s3",
+      "text": "ម៉ែ ម៉ា",
+      "words": [
+        "ម៉ែ ",
+        "ម៉ា"
+      ]
+    },
+    {
+      "id": "s4",
+      "text": "ម៉ែដាំមី។",
+      "words": [
+        "ម៉ែ",
+        "ដាំ",
+        "មី។"
+      ]
+    },
+    {
+      "id": "s5",
+      "text": "ម៉ែចេះឆា។",
+      "words": [
+        "ម៉ែ",
+        "ចេះ",
+        "ឆា។"
+      ]
+    },
+    {
+      "id": "s6",
+      "text": "ម៉ែទៅឃុំ។",
+      "words": [
+        "ម៉ែ",
+        "ទៅ",
+        "ឃុំ។"
+      ]
+    },
+    {
+      "id": "s7",
+      "text": "ម៉ែថែទា។",
+      "words": [
+        "ម៉ែ",
+        "ថែ",
+        "ទា។"
+      ]
+    }
+  ],
+  "questions": [
+    {
+      "id": "sp1",
+      "kind": "spell",
+      "sentence": "s4",
+      "word": "ដាំ"
+    },
+    {
+      "id": "sp2",
+      "kind": "spell",
+      "sentence": "s5",
+      "word": "ឆា"
+    },
+    {
+      "id": "sp3",
+      "kind": "spell",
+      "sentence": "s6",
+      "word": "ឃុំ"
+    },
+    {
+      "id": "sp4",
+      "kind": "spell",
+      "sentence": "s7",
+      "word": "ម៉ែ"
+    }
+  ],
+  "pictures": {},
+  "noRecording": [],
+  "provenance": "Original lesson written for Koda, 2026. It follows the order in which Grade 1 Khmer teaches letters; the words and sentences are new. Draft: not yet reviewed by a native speaker."
+}

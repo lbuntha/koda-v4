@@ -1,0 +1,108 @@
+{
+  "id": "km-g1-087",
+  "rev": 0,
+  "language": "km",
+  "band": "A",
+  "ages": [
+    6,
+    7
+  ],
+  "topics": [],
+  "questionCounts": {
+    "understand": 0,
+    "words": 0,
+    "spell": 4
+  },
+  "title": "មេរៀនទី ៨៧ · ជើង ម្ក ម្ច ម្ដ",
+  "category": "Khmer",
+  "picture": "khmer-school",
+  "sentences": [
+    {
+      "id": "s1",
+      "text": "ម្កា ម្ចា ម្ដា",
+      "words": [
+        "ម្កា ",
+        "ម្ចា ",
+        "ម្ដា"
+      ]
+    },
+    {
+      "id": "s2",
+      "text": "ម្កាក់ ម្ចាស់ ម្ដាយ ម្ដង",
+      "words": [
+        "ម្កាក់ ",
+        "ម្ចាស់ ",
+        "ម្ដាយ ",
+        "ម្ដង"
+      ]
+    },
+    {
+      "id": "s3",
+      "text": "ម្ដាយខ្ញុំជាគ្រូ។",
+      "words": [
+        "ម្ដាយ",
+        "ខ្ញុំ",
+        "ជា",
+        "គ្រូ។"
+      ]
+    },
+    {
+      "id": "s4",
+      "text": "ម្កាក់នេះជូរ។",
+      "words": [
+        "ម្កាក់",
+        "នេះ",
+        "ជូរ។"
+      ]
+    },
+    {
+      "id": "s5",
+      "text": "ម្ចាស់ឆ្កែហៅវា។",
+      "words": [
+        "ម្ចាស់",
+        "ឆ្កែ",
+        "ហៅ",
+        "វា។"
+      ]
+    },
+    {
+      "id": "s6",
+      "text": "ខ្ញុំអានម្ដងទៀត។",
+      "words": [
+        "ខ្ញុំ",
+        "អាន",
+        "ម្ដង",
+        "ទៀត។"
+      ]
+    }
+  ],
+  "questions": [
+    {
+      "id": "sp1",
+      "kind": "spell",
+      "sentence": "s3",
+      "word": "ម្ដាយ"
+    },
+    {
+      "id": "sp2",
+      "kind": "spell",
+      "sentence": "s4",
+      "word": "ម្កាក់"
+    },
+    {
+      "id": "sp3",
+      "kind": "spell",
+      "sentence": "s5",
+      "word": "ម្ចាស់"
+    },
+    {
+      "id": "sp4",
+      "kind": "spell",
+      "sentence": "s6",
+      "word": "ម្ដង"
+    }
+  ],
+  "pictures": {},
+  "noRecording": [],
+  "provenance": "Original lesson written for Koda, 2026. It follows the order in which Grade 1 Khmer teaches letters; the words and sentences are new. Draft: not yet reviewed by a native speaker."
+}

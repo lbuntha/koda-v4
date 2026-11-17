@@ -299,6 +299,35 @@ async def test_a_photo_is_stored_by_its_hash_and_shown_to_readers(client, db):
     assert got.headers["content-type"] == "image/png" and got.headers["x-content-type-options"] == "nosniff"
 
 
+async def test_ai_pictures_are_listed_newest_first_and_found_by_description(client, db):
+    dev = await _login(client, db, "dev@example.com", platform_role="developer")
+    plain = await client.post("/library/images", json={"mime": "image/png", "data": base64.b64encode(PNG).decode()}, headers=dev)
+    assert plain.status_code == 200
+    assert (await client.get("/library/images", headers=dev)).json() == {"images": []}
+
+    first = PNG + b"\x01"
+    second = PNG + b"\x02"
+    for data, prompt in ((first, "A mango tree"), (second, "A school in Cambodia")):
+        body = {"mime": "image/png", "data": base64.b64encode(data).decode(), "source": "ai", "prompt": prompt}
+        up = await client.post("/library/images", json=body, headers=dev)
+        assert up.status_code == 200, up.text
+
+    listed = (await client.get("/library/images", headers=dev)).json()["images"]
+    assert [i["prompt"] for i in listed] == ["A school in Cambodia", "A mango tree"]
+    assert listed[1]["id"] == hashlib.sha256(first).hexdigest() and "data" not in listed[1]
+    found = (await client.get("/library/images", params={"q": "mango"}, headers=dev)).json()["images"]
+    assert [i["prompt"] for i in found] == ["A mango tree"]
+
+    # A plain photo later made again by AI is labelled too.
+    blank = {"mime": "image/png", "data": base64.b64encode(PNG).decode()}
+    await client.post("/library/images", json={**blank, "source": "ai", "prompt": "Blank"}, headers=dev)
+    assert len((await client.get("/library/images", headers=dev)).json()["images"]) == 3
+    every = (await client.get("/library/images", params={"source": "all"}, headers=dev)).json()["images"]
+    assert len(every) == 3
+    refused = await client.post("/library/images", json={**blank, "source": "other"}, headers=dev)
+    assert refused.status_code in (400, 422)
+
+
 async def test_only_real_photos_are_accepted(client, db):
     dev = await _login(client, db, "dev@example.com", platform_role="developer")
     svg = base64.b64encode(b"<svg onload='x'/>").decode()

@@ -1,0 +1,86 @@
+{
+  "id": "km-g1-098r",
+  "rev": 0,
+  "language": "km",
+  "band": "A",
+  "ages": [
+    6,
+    7
+  ],
+  "topics": [],
+  "questionCounts": {
+    "understand": 0,
+    "words": 0,
+    "spell": 3
+  },
+  "title": "រៀនសាឡើងវិញ · ព្យញ្ជនៈ ត្រួត",
+  "category": "Khmer",
+  "picture": "khmer-school",
+  "sentences": [
+    {
+      "id": "s1",
+      "text": "ញ្ច ញ្ជ ណ្ដ ន្ទ ន្ល ន្ស ម្ប ម្ព",
+      "words": [
+        "ញ្ច ",
+        "ញ្ជ ",
+        "ណ្ដ ",
+        "ន្ទ ",
+        "ន្ល ",
+        "ន្ស ",
+        "ម្ប ",
+        "ម្ព"
+      ]
+    },
+    {
+      "id": "s2",
+      "text": "ទន្សាយស៊ីបន្លែ។",
+      "words": [
+        "ទន្សាយ",
+        "ស៊ី",
+        "បន្លែ។"
+      ]
+    },
+    {
+      "id": "s3",
+      "text": "កណ្ដុរនៅក្បែរជញ្ជាំង។",
+      "words": [
+        "កណ្ដុរ",
+        "នៅ",
+        "ក្បែរ",
+        "ជញ្ជាំង។"
+      ]
+    },
+    {
+      "id": "s4",
+      "text": "ពន្លឺចង្កៀងភ្លឺ។",
+      "words": [
+        "ពន្លឺ",
+        "ចង្កៀង",
+        "ភ្លឺ។"
+      ]
+    }
+  ],
+  "questions": [
+    {
+      "id": "sp1",
+      "kind": "spell",
+      "sentence": "s2",
+      "word": "ទន្សាយ"
+    },
+    {
+      "id": "sp2",
+      "kind": "spell",
+      "sentence": "s3",
+      "word": "ជញ្ជាំង"
+    },
+    {
+      "id": "sp3",
+      "kind": "spell",
+      "sentence": "s4",
+      "word": "ពន្លឺ"
+    }
+  ],
+  "pictures": {},
+  "noRecording": [],
+  "provenance": "Original lesson written for Koda, 2026. It follows the order in which Grade 1 Khmer teaches letters; the words and sentences are new. Draft: not yet reviewed by a native speaker."
+}

@@ -1,0 +1,89 @@
+{
+  "id": "km-g1-039",
+  "rev": 0,
+  "language": "km",
+  "band": "A",
+  "ages": [
+    6,
+    7
+  ],
+  "topics": [],
+  "questionCounts": {
+    "understand": 0,
+    "words": 0,
+    "spell": 4
+  },
+  "title": "មេរៀនទី ៣៩ · គ្រួសារ របស់ ខ្ញុំ",
+  "category": "Khmer",
+  "picture": "khmer-school",
+  "sentences": [
+    {
+      "id": "s1",
+      "text": "ម៉ែដាំនំ។",
+      "words": [
+        "ម៉ែ",
+        "ដាំ",
+        "នំ។"
+      ]
+    },
+    {
+      "id": "s2",
+      "text": "ប៉ាពុះឈើធំ។",
+      "words": [
+        "ប៉ា",
+        "ពុះ",
+        "ឈើ",
+        "ធំ។"
+      ]
+    },
+    {
+      "id": "s3",
+      "text": "តាថែគោញី។",
+      "words": [
+        "តា",
+        "ថែ",
+        "គោ",
+        "ញី។"
+      ]
+    },
+    {
+      "id": "s4",
+      "text": "ចៅជុំម៉ែប៉ា។",
+      "words": [
+        "ចៅ",
+        "ជុំ",
+        "ម៉ែ",
+        "ប៉ា។"
+      ]
+    }
+  ],
+  "questions": [
+    {
+      "id": "sp1",
+      "kind": "spell",
+      "sentence": "s1",
+      "word": "នំ"
+    },
+    {
+      "id": "sp2",
+      "kind": "spell",
+      "sentence": "s2",
+      "word": "ពុះ"
+    },
+    {
+      "id": "sp3",
+      "kind": "spell",
+      "sentence": "s3",
+      "word": "ថែ"
+    },
+    {
+      "id": "sp4",
+      "kind": "spell",
+      "sentence": "s4",
+      "word": "ជុំ"
+    }
+  ],
+  "pictures": {},
+  "noRecording": [],
+  "provenance": "Original lesson written for Koda, 2026. It follows the order in which Grade 1 Khmer teaches letters; the words and sentences are new. Draft: not yet reviewed by a native speaker."
+}

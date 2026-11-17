@@ -1,0 +1,129 @@
+{
+  "id": "km-g1-070",
+  "rev": 0,
+  "language": "km",
+  "band": "A",
+  "ages": [
+    6,
+    7
+  ],
+  "topics": [],
+  "questionCounts": {
+    "understand": 0,
+    "words": 0,
+    "spell": 5
+  },
+  "title": "មេរៀនទី ៧០ · ជើង គ្ន គ្ម គ្រ",
+  "category": "Khmer",
+  "picture": "khmer-school",
+  "sentences": [
+    {
+      "id": "s1",
+      "text": "គ្នា គ្មា គ្រា គ្រី គ្រូ",
+      "words": [
+        "គ្នា ",
+        "គ្មា ",
+        "គ្រា ",
+        "គ្រី ",
+        "គ្រូ"
+      ]
+    },
+    {
+      "id": "s2",
+      "text": "គ្នា គ្មាន គ្រូ គ្រប់ គ្រួសារ គ្រែ",
+      "words": [
+        "គ្នា ",
+        "គ្មាន ",
+        "គ្រូ ",
+        "គ្រប់ ",
+        "គ្រួសារ ",
+        "គ្រែ"
+      ]
+    },
+    {
+      "id": "s3",
+      "text": "យើងលេងជាមួយគ្នា។",
+      "words": [
+        "យើង",
+        "លេង",
+        "ជាមួយ",
+        "គ្នា។"
+      ]
+    },
+    {
+      "id": "s4",
+      "text": "គ្រូហៅខ្ញុំ។",
+      "words": [
+        "គ្រូ",
+        "ហៅ",
+        "ខ្ញុំ។"
+      ]
+    },
+    {
+      "id": "s5",
+      "text": "ខ្ញុំគ្មានលុយទេ។",
+      "words": [
+        "ខ្ញុំ",
+        "គ្មាន",
+        "លុយ",
+        "ទេ។"
+      ]
+    },
+    {
+      "id": "s6",
+      "text": "គ្រួសារខ្ញុំមានបួននាក់។",
+      "words": [
+        "គ្រួសារ",
+        "ខ្ញុំ",
+        "មាន",
+        "បួន",
+        "នាក់។"
+      ]
+    },
+    {
+      "id": "s7",
+      "text": "ចៅដេកលើគ្រែ។",
+      "words": [
+        "ចៅ",
+        "ដេក",
+        "លើ",
+        "គ្រែ។"
+      ]
+    }
+  ],
+  "questions": [
+    {
+      "id": "sp1",
+      "kind": "spell",
+      "sentence": "s3",
+      "word": "គ្នា"
+    },
+    {
+      "id": "sp2",
+      "kind": "spell",
+      "sentence": "s4",
+      "word": "គ្រូ"
+    },
+    {
+      "id": "sp3",
+      "kind": "spell",
+      "sentence": "s5",
+      "word": "គ្មាន"
+    },
+    {
+      "id": "sp4",
+      "kind": "spell",
+      "sentence": "s6",
+      "word": "គ្រួសារ"
+    },
+    {
+      "id": "sp5",
+      "kind": "spell",
+      "sentence": "s7",
+      "word": "គ្រែ"
+    }
+  ],
+  "pictures": {},
+  "noRecording": [],
+  "provenance": "Original lesson written for Koda, 2026. It follows the order in which Grade 1 Khmer teaches letters; the words and sentences are new. Draft: not yet reviewed by a native speaker."
+}

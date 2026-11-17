@@ -1,0 +1,106 @@
+{
+  "id": "km-g1-077",
+  "rev": 0,
+  "language": "km",
+  "band": "A",
+  "ages": [
+    6,
+    7
+  ],
+  "topics": [],
+  "questionCounts": {
+    "understand": 0,
+    "words": 0,
+    "spell": 4
+  },
+  "title": "មេរៀនទី ៧៧ · ជើង ឈ្ង ឈ្ន ឈ្ម ឈ្ល",
+  "category": "Khmer",
+  "picture": "khmer-school",
+  "sentences": [
+    {
+      "id": "s1",
+      "text": "ឈ្ងា ឈ្នា ឈ្មា ឈ្លា",
+      "words": [
+        "ឈ្ងា ",
+        "ឈ្នា ",
+        "ឈ្មា ",
+        "ឈ្លា"
+      ]
+    },
+    {
+      "id": "s2",
+      "text": "ឈ្ងុយ ឈ្នះ ឈ្មោះ ឈ្លូស",
+      "words": [
+        "ឈ្ងុយ ",
+        "ឈ្នះ ",
+        "ឈ្មោះ ",
+        "ឈ្លូស"
+      ]
+    },
+    {
+      "id": "s3",
+      "text": "ខ្ញុំឈ្មោះសុខា។",
+      "words": [
+        "ខ្ញុំ",
+        "ឈ្មោះ",
+        "សុខា។"
+      ]
+    },
+    {
+      "id": "s4",
+      "text": "នំឈ្ងុយណាស់។",
+      "words": [
+        "នំ",
+        "ឈ្ងុយ",
+        "ណាស់។"
+      ]
+    },
+    {
+      "id": "s5",
+      "text": "ក្រុមខ្ញុំឈ្នះ។",
+      "words": [
+        "ក្រុម",
+        "ខ្ញុំ",
+        "ឈ្នះ។"
+      ]
+    },
+    {
+      "id": "s6",
+      "text": "ឈ្លូសរត់លឿន។",
+      "words": [
+        "ឈ្លូស",
+        "រត់",
+        "លឿន។"
+      ]
+    }
+  ],
+  "questions": [
+    {
+      "id": "sp1",
+      "kind": "spell",
+      "sentence": "s3",
+      "word": "ឈ្មោះ"
+    },
+    {
+      "id": "sp2",
+      "kind": "spell",
+      "sentence": "s4",
+      "word": "ឈ្ងុយ"
+    },
+    {
+      "id": "sp3",
+      "kind": "spell",
+      "sentence": "s5",
+      "word": "ឈ្នះ"
+    },
+    {
+      "id": "sp4",
+      "kind": "spell",
+      "sentence": "s6",
+      "word": "ឈ្លូស"
+    }
+  ],
+  "pictures": {},
+  "noRecording": [],
+  "provenance": "Original lesson written for Koda, 2026. It follows the order in which Grade 1 Khmer teaches letters; the words and sentences are new. Draft: not yet reviewed by a native speaker."
+}

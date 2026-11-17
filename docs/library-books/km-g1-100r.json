@@ -1,0 +1,88 @@
+{
+  "id": "km-g1-100r",
+  "rev": 0,
+  "language": "km",
+  "band": "A",
+  "ages": [
+    6,
+    7
+  ],
+  "topics": [],
+  "questionCounts": {
+    "understand": 0,
+    "words": 0,
+    "spell": 3
+  },
+  "title": "រៀនសាឡើងវិញ · អាន រឿង ខ្លី",
+  "category": "Khmer",
+  "picture": "khmer-school",
+  "sentences": [
+    {
+      "id": "s1",
+      "text": "ថ្ងៃមួយក្មេងពីរនាក់ដើរចូលព្រៃ។",
+      "words": [
+        "ថ្ងៃ",
+        "មួយ",
+        "ក្មេង",
+        "ពីរ",
+        "នាក់",
+        "ដើរ",
+        "ចូល",
+        "ព្រៃ។"
+      ]
+    },
+    {
+      "id": "s2",
+      "text": "គេឃើញកញ្ជ្រោងតូចមួយ។",
+      "words": [
+        "គេ",
+        "ឃើញ",
+        "កញ្ជ្រោង",
+        "តូច",
+        "មួយ។"
+      ]
+    },
+    {
+      "id": "s3",
+      "text": "កញ្ជ្រោងឃ្លាន។",
+      "words": [
+        "កញ្ជ្រោង",
+        "ឃ្លាន។"
+      ]
+    },
+    {
+      "id": "s4",
+      "text": "ក្មេងចែកនំដល់វា។",
+      "words": [
+        "ក្មេង",
+        "ចែក",
+        "នំ",
+        "ដល់",
+        "វា។"
+      ]
+    }
+  ],
+  "questions": [
+    {
+      "id": "sp1",
+      "kind": "spell",
+      "sentence": "s2",
+      "word": "ឃើញ"
+    },
+    {
+      "id": "sp2",
+      "kind": "spell",
+      "sentence": "s3",
+      "word": "ឃ្លាន"
+    },
+    {
+      "id": "sp3",
+      "kind": "spell",
+      "sentence": "s4",
+      "word": "ចែក"
+    }
+  ],
+  "pictures": {},
+  "noRecording": [],
+  "provenance": "Original lesson written for Koda, 2026. It follows the order in which Grade 1 Khmer teaches letters; the words and sentences are new. Draft: not yet reviewed by a native speaker."
+}

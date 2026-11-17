@@ -1,0 +1,87 @@
+{
+  "id": "km-g1-072",
+  "rev": 0,
+  "language": "km",
+  "band": "A",
+  "ages": [
+    6,
+    7
+  ],
+  "topics": [],
+  "questionCounts": {
+    "understand": 0,
+    "words": 0,
+    "spell": 4
+  },
+  "title": "មេរៀនទី ៧២ · ចម្រៀង ដើរ ទៅ សាលា",
+  "category": "Khmer",
+  "picture": "khmer-school",
+  "sentences": [
+    {
+      "id": "s1",
+      "text": "ខ្ញុំដើរទៅសាលា។",
+      "words": [
+        "ខ្ញុំ",
+        "ដើរ",
+        "ទៅ",
+        "សាលា។"
+      ]
+    },
+    {
+      "id": "s2",
+      "text": "កាន់សៀវភៅខ្មៅ។",
+      "words": [
+        "កាន់",
+        "សៀវភៅ",
+        "ខ្មៅ។"
+      ]
+    },
+    {
+      "id": "s3",
+      "text": "ដើរជាមួយគ្នា។",
+      "words": [
+        "ដើរ",
+        "ជាមួយ",
+        "គ្នា។"
+      ]
+    },
+    {
+      "id": "s4",
+      "text": "ក្មេងៗដើរយឺតៗ។",
+      "words": [
+        "ក្មេងៗ",
+        "ដើរ",
+        "យឺតៗ។"
+      ]
+    }
+  ],
+  "questions": [
+    {
+      "id": "sp1",
+      "kind": "spell",
+      "sentence": "s1",
+      "word": "សាលា"
+    },
+    {
+      "id": "sp2",
+      "kind": "spell",
+      "sentence": "s2",
+      "word": "សៀវភៅ"
+    },
+    {
+      "id": "sp3",
+      "kind": "spell",
+      "sentence": "s3",
+      "word": "គ្នា"
+    },
+    {
+      "id": "sp4",
+      "kind": "spell",
+      "sentence": "s4",
+      "word": "ដើរ"
+    }
+  ],
+  "pictures": {},
+  "noRecording": [],
+  "provenance": "Original lesson written for Koda, 2026. It follows the order in which Grade 1 Khmer teaches letters; the words and sentences are new. Draft: not yet reviewed by a native speaker."
+}

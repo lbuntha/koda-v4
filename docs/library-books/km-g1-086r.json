@@ -1,0 +1,92 @@
+{
+  "id": "km-g1-086r",
+  "rev": 0,
+  "language": "km",
+  "band": "A",
+  "ages": [
+    6,
+    7
+  ],
+  "topics": [],
+  "questionCounts": {
+    "understand": 0,
+    "words": 0,
+    "spell": 3
+  },
+  "title": "រៀនសាឡើងវិញ · ជើង ផ ព ភ",
+  "category": "Khmer",
+  "picture": "khmer-school",
+  "sentences": [
+    {
+      "id": "s1",
+      "text": "ផ្ត ផ្ទ ផ្ន ផ្ល ផ្ស ផ្អ ព្យ ព្រ ព្ល ភ្ជ ភ្ញ ភ្ន ភ្ល",
+      "words": [
+        "ផ្ត ",
+        "ផ្ទ ",
+        "ផ្ន ",
+        "ផ្ល ",
+        "ផ្ស ",
+        "ផ្អ ",
+        "ព្យ ",
+        "ព្រ ",
+        "ព្ល ",
+        "ភ្ជ ",
+        "ភ្ញ ",
+        "ភ្ន ",
+        "ភ្ល"
+      ]
+    },
+    {
+      "id": "s2",
+      "text": "ភ្នំនៅឆ្ងាយ។",
+      "words": [
+        "ភ្នំ",
+        "នៅ",
+        "ឆ្ងាយ។"
+      ]
+    },
+    {
+      "id": "s3",
+      "text": "ផ្លូវទៅផ្សារមានភ្លើង។",
+      "words": [
+        "ផ្លូវ",
+        "ទៅ",
+        "ផ្សារ",
+        "មាន",
+        "ភ្លើង។"
+      ]
+    },
+    {
+      "id": "s4",
+      "text": "ព្រលឹមនេះត្រជាក់។",
+      "words": [
+        "ព្រលឹម",
+        "នេះ",
+        "ត្រជាក់។"
+      ]
+    }
+  ],
+  "questions": [
+    {
+      "id": "sp1",
+      "kind": "spell",
+      "sentence": "s2",
+      "word": "ភ្នំ"
+    },
+    {
+      "id": "sp2",
+      "kind": "spell",
+      "sentence": "s3",
+      "word": "ភ្លើង"
+    },
+    {
+      "id": "sp3",
+      "kind": "spell",
+      "sentence": "s4",
+      "word": "ព្រលឹម"
+    }
+  ],
+  "pictures": {},
+  "noRecording": [],
+  "provenance": "Original lesson written for Koda, 2026. It follows the order in which Grade 1 Khmer teaches letters; the words and sentences are new. Draft: not yet reviewed by a native speaker."
+}

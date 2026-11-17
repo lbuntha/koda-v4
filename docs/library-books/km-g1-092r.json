@@ -1,0 +1,92 @@
+{
+  "id": "km-g1-092r",
+  "rev": 0,
+  "language": "km",
+  "band": "A",
+  "ages": [
+    6,
+    7
+  ],
+  "topics": [],
+  "questionCounts": {
+    "understand": 0,
+    "words": 0,
+    "spell": 3
+  },
+  "title": "រៀនសាឡើងវិញ · ជើង ល ស",
+  "category": "Khmer",
+  "picture": "khmer-school",
+  "sentences": [
+    {
+      "id": "s1",
+      "text": "ល្ង ល្ប ល្ព ល្អ ស្ក ស្ដ ស្ត ស្ប ស្រ ស្ង ស្ន ស្ម ស្ល ស្វ ស្អ",
+      "words": [
+        "ល្ង ",
+        "ល្ប ",
+        "ល្ព ",
+        "ល្អ ",
+        "ស្ក ",
+        "ស្ដ ",
+        "ស្ត ",
+        "ស្ប ",
+        "ស្រ ",
+        "ស្ង ",
+        "ស្ន ",
+        "ស្ម ",
+        "ស្ល ",
+        "ស្វ ",
+        "ស្អ"
+      ]
+    },
+    {
+      "id": "s2",
+      "text": "ល្ងាចនេះស្ងាត់។",
+      "words": [
+        "ល្ងាច",
+        "នេះ",
+        "ស្ងាត់។"
+      ]
+    },
+    {
+      "id": "s3",
+      "text": "ស្រីពាក់ស្បែកជើងថ្មី។",
+      "words": [
+        "ស្រី",
+        "ពាក់",
+        "ស្បែកជើង",
+        "ថ្មី។"
+      ]
+    },
+    {
+      "id": "s4",
+      "text": "ស្ករផ្អែម។",
+      "words": [
+        "ស្ករ",
+        "ផ្អែម។"
+      ]
+    }
+  ],
+  "questions": [
+    {
+      "id": "sp1",
+      "kind": "spell",
+      "sentence": "s2",
+      "word": "ស្ងាត់"
+    },
+    {
+      "id": "sp2",
+      "kind": "spell",
+      "sentence": "s3",
+      "word": "ស្រី"
+    },
+    {
+      "id": "sp3",
+      "kind": "spell",
+      "sentence": "s4",
+      "word": "ស្ករ"
+    }
+  ],
+  "pictures": {},
+  "noRecording": [],
+  "provenance": "Original lesson written for Koda, 2026. It follows the order in which Grade 1 Khmer teaches letters; the words and sentences are new. Draft: not yet reviewed by a native speaker."
+}

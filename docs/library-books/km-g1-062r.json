@@ -1,0 +1,133 @@
+{
+  "id": "km-g1-062r",
+  "rev": 0,
+  "language": "km",
+  "band": "A",
+  "ages": [
+    6,
+    7
+  ],
+  "topics": [],
+  "questionCounts": {
+    "understand": 0,
+    "words": 0,
+    "spell": 5
+  },
+  "title": "រៀនសាឡើងវិញ · ◌ល ◌វ ◌ស",
+  "category": "Khmer",
+  "picture": "khmer-school",
+  "sentences": [
+    {
+      "id": "s1",
+      "text": "បាល់ ដួល ចូល មើល ពេល",
+      "words": [
+        "បាល់ ",
+        "ដួល ",
+        "ចូល ",
+        "មើល ",
+        "ពេល"
+      ]
+    },
+    {
+      "id": "s2",
+      "text": "អាវ កែវ សៀវភៅ ចែវ",
+      "words": [
+        "អាវ ",
+        "កែវ ",
+        "សៀវភៅ ",
+        "ចែវ"
+      ]
+    },
+    {
+      "id": "s3",
+      "text": "ចាស់ ដុស មាស រើស ទោស",
+      "words": [
+        "ចាស់ ",
+        "ដុស ",
+        "មាស ",
+        "រើស ",
+        "ទោស"
+      ]
+    },
+    {
+      "id": "s4",
+      "text": "ចៅទាត់បាល់។",
+      "words": [
+        "ចៅ",
+        "ទាត់",
+        "បាល់។"
+      ]
+    },
+    {
+      "id": "s5",
+      "text": "ម៉ែពាក់អាវ។",
+      "words": [
+        "ម៉ែ",
+        "ពាក់",
+        "អាវ។"
+      ]
+    },
+    {
+      "id": "s6",
+      "text": "តាចែវទូក។",
+      "words": [
+        "តា",
+        "ចែវ",
+        "ទូក។"
+      ]
+    },
+    {
+      "id": "s7",
+      "text": "ចៅរើសសៀវភៅ។",
+      "words": [
+        "ចៅ",
+        "រើស",
+        "សៀវភៅ។"
+      ]
+    },
+    {
+      "id": "s8",
+      "text": "យាយចាស់ហើយ។",
+      "words": [
+        "យាយ",
+        "ចាស់",
+        "ហើយ។"
+      ]
+    }
+  ],
+  "questions": [
+    {
+      "id": "sp1",
+      "kind": "spell",
+      "sentence": "s4",
+      "word": "បាល់"
+    },
+    {
+      "id": "sp2",
+      "kind": "spell",
+      "sentence": "s5",
+      "word": "អាវ"
+    },
+    {
+      "id": "sp3",
+      "kind": "spell",
+      "sentence": "s6",
+      "word": "ចែវ"
+    },
+    {
+      "id": "sp4",
+      "kind": "spell",
+      "sentence": "s7",
+      "word": "រើស"
+    },
+    {
+      "id": "sp5",
+      "kind": "spell",
+      "sentence": "s8",
+      "word": "ចាស់"
+    }
+  ],
+  "pictures": {},
+  "noRecording": [],
+  "provenance": "Original lesson written for Koda, 2026. It follows the order in which Grade 1 Khmer teaches letters; the words and sentences are new. Draft: not yet reviewed by a native speaker."
+}

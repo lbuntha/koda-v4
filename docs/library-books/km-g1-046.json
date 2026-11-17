@@ -1,0 +1,155 @@
+{
+  "id": "km-g1-046",
+  "rev": 0,
+  "language": "km",
+  "band": "A",
+  "ages": [
+    6,
+    7
+  ],
+  "topics": [],
+  "questionCounts": {
+    "understand": 0,
+    "words": 0,
+    "spell": 4
+  },
+  "title": "មេរៀនទី ៤៦ · ក្រោយ ◌ញ ◌ញ់ (ព្យញ្ជនៈ ញ)",
+  "category": "Khmer",
+  "picture": "khmer-school",
+  "sentences": [
+    {
+      "id": "s1",
+      "text": "កញ ខញ ចញ ដញ តញ បញ សញ ហញ អញ",
+      "words": [
+        "កញ ",
+        "ខញ ",
+        "ចញ ",
+        "ដញ ",
+        "តញ ",
+        "បញ ",
+        "សញ ",
+        "ហញ ",
+        "អញ"
+      ]
+    },
+    {
+      "id": "s2",
+      "text": "កញ់ ខញ់ ចញ់ ដញ់ តញ់ បញ់ សញ់ ហញ់ អញ់",
+      "words": [
+        "កញ់ ",
+        "ខញ់ ",
+        "ចញ់ ",
+        "ដញ់ ",
+        "តញ់ ",
+        "បញ់ ",
+        "សញ់ ",
+        "ហញ់ ",
+        "អញ់"
+      ]
+    },
+    {
+      "id": "s3",
+      "text": "កាញ ខាញ ចាញ ដាញ តាញ បាញ សាញ ហាញ អាញ",
+      "words": [
+        "កាញ ",
+        "ខាញ ",
+        "ចាញ ",
+        "ដាញ ",
+        "តាញ ",
+        "បាញ ",
+        "សាញ ",
+        "ហាញ ",
+        "អាញ"
+      ]
+    },
+    {
+      "id": "s4",
+      "text": "កាញ់ ខាញ់ ចាញ់ ដាញ់ តាញ់ បាញ់ សាញ់ ហាញ់ អាញ់",
+      "words": [
+        "កាញ់ ",
+        "ខាញ់ ",
+        "ចាញ់ ",
+        "ដាញ់ ",
+        "តាញ់ ",
+        "បាញ់ ",
+        "សាញ់ ",
+        "ហាញ់ ",
+        "អាញ់"
+      ]
+    },
+    {
+      "id": "s5",
+      "text": "ចេញ ដេញ បាញ់ ចាញ់",
+      "words": [
+        "ចេញ ",
+        "ដេញ ",
+        "បាញ់ ",
+        "ចាញ់"
+      ]
+    },
+    {
+      "id": "s6",
+      "text": "ចៅចេញ។",
+      "words": [
+        "ចៅ",
+        "ចេញ។"
+      ]
+    },
+    {
+      "id": "s7",
+      "text": "កុំដេញគោ។",
+      "words": [
+        "កុំ",
+        "ដេញ",
+        "គោ។"
+      ]
+    },
+    {
+      "id": "s8",
+      "text": "កុំបាញ់ទា។",
+      "words": [
+        "កុំ",
+        "បាញ់",
+        "ទា។"
+      ]
+    },
+    {
+      "id": "s9",
+      "text": "ពូចាញ់ចៅ។",
+      "words": [
+        "ពូ",
+        "ចាញ់",
+        "ចៅ។"
+      ]
+    }
+  ],
+  "questions": [
+    {
+      "id": "sp1",
+      "kind": "spell",
+      "sentence": "s6",
+      "word": "ចេញ"
+    },
+    {
+      "id": "sp2",
+      "kind": "spell",
+      "sentence": "s7",
+      "word": "ដេញ"
+    },
+    {
+      "id": "sp3",
+      "kind": "spell",
+      "sentence": "s8",
+      "word": "បាញ់"
+    },
+    {
+      "id": "sp4",
+      "kind": "spell",
+      "sentence": "s9",
+      "word": "ចាញ់"
+    }
+  ],
+  "pictures": {},
+  "noRecording": [],
+  "provenance": "Original lesson written for Koda, 2026. It follows the order in which Grade 1 Khmer teaches letters; the words and sentences are new. Draft: not yet reviewed by a native speaker."
+}

@@ -1,0 +1,188 @@
+{
+  "id": "km-g1-022",
+  "rev": 0,
+  "language": "km",
+  "band": "A",
+  "ages": [
+    6,
+    7
+  ],
+  "topics": [],
+  "questionCounts": {
+    "understand": 0,
+    "words": 0,
+    "spell": 5
+  },
+  "title": "មេរៀនទី ២២ · អក្សរ ទ ធ",
+  "category": "Khmer",
+  "picture": "khmer-school",
+  "sentences": [
+    {
+      "id": "s1",
+      "text": "ទ ទា ទិ ទី ទឹ ទឺ ទុ ទូ ទួ ទើ ទឿ ទៀ ទេ",
+      "words": [
+        "ទ ",
+        "ទា ",
+        "ទិ ",
+        "ទី ",
+        "ទឹ ",
+        "ទឺ ",
+        "ទុ ",
+        "ទូ ",
+        "ទួ ",
+        "ទើ ",
+        "ទឿ ",
+        "ទៀ ",
+        "ទេ"
+      ]
+    },
+    {
+      "id": "s2",
+      "text": "ទែ ទៃ ទោ ទៅ ទុំ ទំ ទាំ ទះ ទុះ ទេះ ទោះ",
+      "words": [
+        "ទែ ",
+        "ទៃ ",
+        "ទោ ",
+        "ទៅ ",
+        "ទុំ ",
+        "ទំ ",
+        "ទាំ ",
+        "ទះ ",
+        "ទុះ ",
+        "ទេះ ",
+        "ទោះ"
+      ]
+    },
+    {
+      "id": "s3",
+      "text": "ធ ធា ធិ ធី ធឹ ធឺ ធុ ធូ ធួ ធើ ធឿ ធៀ ធេ",
+      "words": [
+        "ធ ",
+        "ធា ",
+        "ធិ ",
+        "ធី ",
+        "ធឹ ",
+        "ធឺ ",
+        "ធុ ",
+        "ធូ ",
+        "ធួ ",
+        "ធើ ",
+        "ធឿ ",
+        "ធៀ ",
+        "ធេ"
+      ]
+    },
+    {
+      "id": "s4",
+      "text": "ធែ ធៃ ធោ ធៅ ធុំ ធំ ធាំ ធះ ធុះ ធេះ ធោះ",
+      "words": [
+        "ធែ ",
+        "ធៃ ",
+        "ធោ ",
+        "ធៅ ",
+        "ធុំ ",
+        "ធំ ",
+        "ធាំ ",
+        "ធះ ",
+        "ធុះ ",
+        "ធេះ ",
+        "ធោះ"
+      ]
+    },
+    {
+      "id": "s5",
+      "text": "ទា ទី ទៅ ទេ ទូ ទុំ ធូ ធំ",
+      "words": [
+        "ទា ",
+        "ទី ",
+        "ទៅ ",
+        "ទេ ",
+        "ទូ ",
+        "ទុំ ",
+        "ធូ ",
+        "ធំ"
+      ]
+    },
+    {
+      "id": "s6",
+      "text": "តាទៅដាំដី។",
+      "words": [
+        "តា",
+        "ទៅ",
+        "ដាំ",
+        "ដី។"
+      ]
+    },
+    {
+      "id": "s7",
+      "text": "ទាហោះទេ។",
+      "words": [
+        "ទា",
+        "ហោះ",
+        "ទេ។"
+      ]
+    },
+    {
+      "id": "s8",
+      "text": "ទូជាឈើ។",
+      "words": [
+        "ទូ",
+        "ជា",
+        "ឈើ។"
+      ]
+    },
+    {
+      "id": "s9",
+      "text": "គេទៅទីណា?",
+      "words": [
+        "គេ",
+        "ទៅ",
+        "ទី",
+        "ណា?"
+      ]
+    },
+    {
+      "id": "s10",
+      "text": "កុំទៅ។",
+      "words": [
+        "កុំ",
+        "ទៅ។"
+      ]
+    }
+  ],
+  "questions": [
+    {
+      "id": "sp1",
+      "kind": "spell",
+      "sentence": "s7",
+      "word": "ទា"
+    },
+    {
+      "id": "sp2",
+      "kind": "spell",
+      "sentence": "s9",
+      "word": "ទី"
+    },
+    {
+      "id": "sp3",
+      "kind": "spell",
+      "sentence": "s6",
+      "word": "ទៅ"
+    },
+    {
+      "id": "sp4",
+      "kind": "spell",
+      "sentence": "s1",
+      "word": "ទេ"
+    },
+    {
+      "id": "sp5",
+      "kind": "spell",
+      "sentence": "s8",
+      "word": "ទូ"
+    }
+  ],
+  "pictures": {},
+  "noRecording": [],
+  "provenance": "Original lesson written for Koda, 2026. It follows the order in which Grade 1 Khmer teaches letters; the words and sentences are new. Draft: not yet reviewed by a native speaker."
+}

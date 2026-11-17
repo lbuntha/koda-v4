@@ -311,7 +311,8 @@ export function BookReader({ book, onBack, onReady, preview = false, pageControl
 }) {
   const { theme, toggleTheme } = useTheme();
   const { t } = useT();
-  const hasQuiz = useMemo(() => quizOf(book).length > 0, [book]);
+  const quizSize = useMemo(() => quizOf(book).length, [book]);
+  const hasQuiz = quizSize > 0;
   const pages = useMemo(() => layoutBook(book), [book]);
   const reduce = useReducedMotion() ?? false;
   const km = book.language === "km";
@@ -763,6 +764,8 @@ export function BookReader({ book, onBack, onReady, preview = false, pageControl
         onComplete={() => leaveBy(() => { hush(); record.finish(); onReady(); })}
         // A book with no questions has nothing to check: the last page just finishes it.
         completeLabel={hasQuiz ? undefined : t("reader.finishBook")}
+        completeHint={hasQuiz ? t("reader.quizCount", { count: quizSize }) : undefined}
+        completeArt={hasQuiz ? "kit-star" : "kit-party"}
       />}
     >
       <section

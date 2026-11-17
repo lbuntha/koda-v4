@@ -1,0 +1,113 @@
+{
+  "id": "km-g1-024r",
+  "rev": 0,
+  "language": "km",
+  "band": "A",
+  "ages": [
+    6,
+    7
+  ],
+  "topics": [],
+  "questionCounts": {
+    "understand": 0,
+    "words": 0,
+    "spell": 4
+  },
+  "title": "រៀនសាឡើងវិញ · ន ព ភ ម",
+  "category": "Khmer",
+  "picture": "khmer-school",
+  "sentences": [
+    {
+      "id": "s1",
+      "text": "ណា ពា ភា មា",
+      "words": [
+        "ណា ",
+        "ពា ",
+        "ភា ",
+        "មា"
+      ]
+    },
+    {
+      "id": "s2",
+      "text": "នេះ នោះ នៅ នំ ពី ពៅ ពូ មី មេ",
+      "words": [
+        "នេះ ",
+        "នោះ ",
+        "នៅ ",
+        "នំ ",
+        "ពី ",
+        "ពៅ ",
+        "ពូ ",
+        "មី ",
+        "មេ"
+      ]
+    },
+    {
+      "id": "s3",
+      "text": "ពូឆាមី។",
+      "words": [
+        "ពូ",
+        "ឆា",
+        "មី។"
+      ]
+    },
+    {
+      "id": "s4",
+      "text": "មេទៅពីទីនោះ។",
+      "words": [
+        "មេ",
+        "ទៅ",
+        "ពី",
+        "ទី",
+        "នោះ។"
+      ]
+    },
+    {
+      "id": "s5",
+      "text": "ពៅទៅណា?",
+      "words": [
+        "ពៅ",
+        "ទៅ",
+        "ណា?"
+      ]
+    },
+    {
+      "id": "s6",
+      "text": "នំពូឆេះ។",
+      "words": [
+        "នំ",
+        "ពូ",
+        "ឆេះ។"
+      ]
+    }
+  ],
+  "questions": [
+    {
+      "id": "sp1",
+      "kind": "spell",
+      "sentence": "s3",
+      "word": "ពូ"
+    },
+    {
+      "id": "sp2",
+      "kind": "spell",
+      "sentence": "s4",
+      "word": "មេ"
+    },
+    {
+      "id": "sp3",
+      "kind": "spell",
+      "sentence": "s5",
+      "word": "ពៅ"
+    },
+    {
+      "id": "sp4",
+      "kind": "spell",
+      "sentence": "s6",
+      "word": "នំ"
+    }
+  ],
+  "pictures": {},
+  "noRecording": [],
+  "provenance": "Original lesson written for Koda, 2026. It follows the order in which Grade 1 Khmer teaches letters; the words and sentences are new. Draft: not yet reviewed by a native speaker."
+}

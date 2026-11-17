@@ -1,0 +1,165 @@
+{
+  "id": "km-g1-054",
+  "rev": 0,
+  "language": "km",
+  "band": "A",
+  "ages": [
+    6,
+    7
+  ],
+  "topics": [],
+  "questionCounts": {
+    "understand": 0,
+    "words": 0,
+    "spell": 5
+  },
+  "title": "មេរៀនទី ៥៤ · ក្រោយ ◌ម (ព្យញ្ជនៈ ម)",
+  "category": "Khmer",
+  "picture": "khmer-school",
+  "sentences": [
+    {
+      "id": "s1",
+      "text": "កម ខម ចម ដម តម បម សម ហម អម",
+      "words": [
+        "កម ",
+        "ខម ",
+        "ចម ",
+        "ដម ",
+        "តម ",
+        "បម ",
+        "សម ",
+        "ហម ",
+        "អម"
+      ]
+    },
+    {
+      "id": "s2",
+      "text": "កាម ខាម ចាម ដាម តាម បាម សាម ហាម អាម",
+      "words": [
+        "កាម ",
+        "ខាម ",
+        "ចាម ",
+        "ដាម ",
+        "តាម ",
+        "បាម ",
+        "សាម ",
+        "ហាម ",
+        "អាម"
+      ]
+    },
+    {
+      "id": "s3",
+      "text": "សម ចាម សាម ហាម បូម សូម ដើម ចៀម សៀម សើម ហើម",
+      "words": [
+        "សម ",
+        "ចាម ",
+        "សាម ",
+        "ហាម ",
+        "បូម ",
+        "សូម ",
+        "ដើម ",
+        "ចៀម ",
+        "សៀម ",
+        "សើម ",
+        "ហើម"
+      ]
+    },
+    {
+      "id": "s4",
+      "text": "ចៅសូមនំ។",
+      "words": [
+        "ចៅ",
+        "សូម",
+        "នំ។"
+      ]
+    },
+    {
+      "id": "s5",
+      "text": "ពូបូមទឹក។",
+      "words": [
+        "ពូ",
+        "បូម",
+        "ទឹក។"
+      ]
+    },
+    {
+      "id": "s6",
+      "text": "ដើមឈើ។",
+      "words": [
+        "ដើម",
+        "ឈើ។"
+      ]
+    },
+    {
+      "id": "s7",
+      "text": "ចៀមនៅទីនោះ។",
+      "words": [
+        "ចៀម",
+        "នៅ",
+        "ទី",
+        "នោះ។"
+      ]
+    },
+    {
+      "id": "s8",
+      "text": "កុំហាមចៅ។",
+      "words": [
+        "កុំ",
+        "ហាម",
+        "ចៅ។"
+      ]
+    },
+    {
+      "id": "s9",
+      "text": "ចៅហើមជើង។",
+      "words": [
+        "ចៅ",
+        "ហើម",
+        "ជើង។"
+      ]
+    },
+    {
+      "id": "s10",
+      "text": "ខោសើម។",
+      "words": [
+        "ខោ",
+        "សើម។"
+      ]
+    }
+  ],
+  "questions": [
+    {
+      "id": "sp1",
+      "kind": "spell",
+      "sentence": "s4",
+      "word": "សូម"
+    },
+    {
+      "id": "sp2",
+      "kind": "spell",
+      "sentence": "s5",
+      "word": "បូម"
+    },
+    {
+      "id": "sp3",
+      "kind": "spell",
+      "sentence": "s6",
+      "word": "ដើម"
+    },
+    {
+      "id": "sp4",
+      "kind": "spell",
+      "sentence": "s7",
+      "word": "ចៀម"
+    },
+    {
+      "id": "sp5",
+      "kind": "spell",
+      "sentence": "s9",
+      "word": "ហើម"
+    }
+  ],
+  "pictures": {},
+  "noRecording": [],
+  "provenance": "Original lesson written for Koda, 2026. It follows the order in which Grade 1 Khmer teaches letters; the words and sentences are new. Draft: not yet reviewed by a native speaker."
+}

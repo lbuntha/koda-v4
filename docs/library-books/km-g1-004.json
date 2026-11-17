@@ -1,0 +1,121 @@
+{
+  "id": "km-g1-004",
+  "rev": 0,
+  "language": "km",
+  "band": "A",
+  "ages": [
+    6,
+    7
+  ],
+  "topics": [],
+  "questionCounts": {
+    "understand": 0,
+    "words": 0,
+    "spell": 4
+  },
+  "title": "មេរៀនទី ៤ · អក្សរ ខ",
+  "category": "Khmer",
+  "picture": "khmer-school",
+  "sentences": [
+    {
+      "id": "s1",
+      "text": "ខ ខា ខិ ខី ខឹ ខឺ ខុ ខូ ខួ ខើ ខឿ ខៀ ខេ",
+      "words": [
+        "ខ ",
+        "ខា ",
+        "ខិ ",
+        "ខី ",
+        "ខឹ ",
+        "ខឺ ",
+        "ខុ ",
+        "ខូ ",
+        "ខួ ",
+        "ខើ ",
+        "ខឿ ",
+        "ខៀ ",
+        "ខេ"
+      ]
+    },
+    {
+      "id": "s2",
+      "text": "ខែ ខៃ ខោ ខៅ ខុំ ខំ ខាំ ខះ ខុះ ខេះ ខោះ",
+      "words": [
+        "ខែ ",
+        "ខៃ ",
+        "ខោ ",
+        "ខៅ ",
+        "ខុំ ",
+        "ខំ ",
+        "ខាំ ",
+        "ខះ ",
+        "ខុះ ",
+        "ខេះ ",
+        "ខោះ"
+      ]
+    },
+    {
+      "id": "s3",
+      "text": "ខែ ខោ ខំ ខាំ",
+      "words": [
+        "ខែ ",
+        "ខោ ",
+        "ខំ ",
+        "ខាំ"
+      ]
+    },
+    {
+      "id": "s4",
+      "text": "កុំខាំ។",
+      "words": [
+        "កុំ",
+        "ខាំ។"
+      ]
+    },
+    {
+      "id": "s5",
+      "text": "ខំកែ។",
+      "words": [
+        "ខំ",
+        "កែ។"
+      ]
+    },
+    {
+      "id": "s6",
+      "text": "ខែកែខោ។",
+      "words": [
+        "ខែ",
+        "កែ",
+        "ខោ។"
+      ]
+    }
+  ],
+  "questions": [
+    {
+      "id": "sp1",
+      "kind": "spell",
+      "sentence": "s6",
+      "word": "ខែ"
+    },
+    {
+      "id": "sp2",
+      "kind": "spell",
+      "sentence": "s2",
+      "word": "ខោ"
+    },
+    {
+      "id": "sp3",
+      "kind": "spell",
+      "sentence": "s5",
+      "word": "ខំ"
+    },
+    {
+      "id": "sp4",
+      "kind": "spell",
+      "sentence": "s4",
+      "word": "ខាំ"
+    }
+  ],
+  "pictures": {},
+  "noRecording": [],
+  "provenance": "Original lesson written for Koda, 2026. It follows the order in which Grade 1 Khmer teaches letters; the words and sentences are new. Draft: not yet reviewed by a native speaker."
+}

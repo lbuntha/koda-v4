@@ -1,0 +1,110 @@
+{
+  "id": "km-g1-091",
+  "rev": 0,
+  "language": "km",
+  "band": "A",
+  "ages": [
+    6,
+    7
+  ],
+  "topics": [],
+  "questionCounts": {
+    "understand": 0,
+    "words": 0,
+    "spell": 4
+  },
+  "title": "មេរៀនទី ៩១ · ជើង ស្ក ស្ដ ស្ត ស្ប ស្រ",
+  "category": "Khmer",
+  "picture": "khmer-school",
+  "sentences": [
+    {
+      "id": "s1",
+      "text": "ស្កា ស្ដា ស្តា ស្បា ស្រា",
+      "words": [
+        "ស្កា ",
+        "ស្ដា ",
+        "ស្តា ",
+        "ស្បា ",
+        "ស្រា"
+      ]
+    },
+    {
+      "id": "s2",
+      "text": "ស្ករ ស្ដាំ ស្តាប់ ស្បែកជើង ស្រី ស្រូវ",
+      "words": [
+        "ស្ករ ",
+        "ស្ដាំ ",
+        "ស្តាប់ ",
+        "ស្បែកជើង ",
+        "ស្រី ",
+        "ស្រូវ"
+      ]
+    },
+    {
+      "id": "s3",
+      "text": "ខ្ញុំសរសេរដៃស្ដាំ។",
+      "words": [
+        "ខ្ញុំ",
+        "សរសេរ",
+        "ដៃ",
+        "ស្ដាំ។"
+      ]
+    },
+    {
+      "id": "s4",
+      "text": "ក្មេងស្តាប់គ្រូ។",
+      "words": [
+        "ក្មេង",
+        "ស្តាប់",
+        "គ្រូ។"
+      ]
+    },
+    {
+      "id": "s5",
+      "text": "ពូច្រូតស្រូវ។",
+      "words": [
+        "ពូ",
+        "ច្រូត",
+        "ស្រូវ។"
+      ]
+    },
+    {
+      "id": "s6",
+      "text": "ម៉ែទិញស្បែកជើង។",
+      "words": [
+        "ម៉ែ",
+        "ទិញ",
+        "ស្បែកជើង។"
+      ]
+    }
+  ],
+  "questions": [
+    {
+      "id": "sp1",
+      "kind": "spell",
+      "sentence": "s3",
+      "word": "ស្ដាំ"
+    },
+    {
+      "id": "sp2",
+      "kind": "spell",
+      "sentence": "s4",
+      "word": "ស្តាប់"
+    },
+    {
+      "id": "sp3",
+      "kind": "spell",
+      "sentence": "s5",
+      "word": "ស្រូវ"
+    },
+    {
+      "id": "sp4",
+      "kind": "spell",
+      "sentence": "s6",
+      "word": "ស្បែកជើង"
+    }
+  ],
+  "pictures": {},
+  "noRecording": [],
+  "provenance": "Original lesson written for Koda, 2026. It follows the order in which Grade 1 Khmer teaches letters; the words and sentences are new. Draft: not yet reviewed by a native speaker."
+}

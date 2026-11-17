@@ -1,0 +1,78 @@
+{
+  "id": "km-g1-001",
+  "rev": 0,
+  "language": "km",
+  "band": "A",
+  "ages": [
+    6,
+    7
+  ],
+  "topics": [],
+  "questionCounts": {
+    "understand": 0,
+    "words": 0,
+    "spell": 0
+  },
+  "title": "មេរៀនទី ១ · ស្រៈនិស្ស័យ",
+  "category": "Khmer",
+  "picture": "khmer-school",
+  "sentences": [
+    {
+      "id": "s1",
+      "text": "ា ិ ី ឹ ឺ",
+      "words": [
+        "ា ",
+        "ិ ",
+        "ី ",
+        "ឹ ",
+        "ឺ"
+      ]
+    },
+    {
+      "id": "s2",
+      "text": "ុ ូ ួ ើ ឿ",
+      "words": [
+        "ុ ",
+        "ូ ",
+        "ួ ",
+        "ើ ",
+        "ឿ"
+      ]
+    },
+    {
+      "id": "s3",
+      "text": "ៀ េ ែ ៃ ោ",
+      "words": [
+        "ៀ ",
+        "េ ",
+        "ែ ",
+        "ៃ ",
+        "ោ"
+      ]
+    },
+    {
+      "id": "s4",
+      "text": "ៅ ុំ ំ ាំ ះ",
+      "words": [
+        "ៅ ",
+        "ុំ ",
+        "ំ ",
+        "ាំ ",
+        "ះ"
+      ]
+    },
+    {
+      "id": "s5",
+      "text": "ុះ េះ ោះ",
+      "words": [
+        "ុះ ",
+        "េះ ",
+        "ោះ"
+      ]
+    }
+  ],
+  "questions": [],
+  "pictures": {},
+  "noRecording": [],
+  "provenance": "Original lesson written for Koda, 2026. It follows the order in which Grade 1 Khmer teaches letters; the words and sentences are new. Draft: not yet reviewed by a native speaker."
+}

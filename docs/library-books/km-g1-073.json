@@ -1,0 +1,110 @@
+{
+  "id": "km-g1-073",
+  "rev": 0,
+  "language": "km",
+  "band": "A",
+  "ages": [
+    6,
+    7
+  ],
+  "topics": [],
+  "questionCounts": {
+    "understand": 0,
+    "words": 0,
+    "spell": 4
+  },
+  "title": "មេរៀនទី ៧៣ · ជើង ច្ប ច្ន ច្រ",
+  "category": "Khmer",
+  "picture": "khmer-school",
+  "sentences": [
+    {
+      "id": "s1",
+      "text": "ច្បា ច្នា ច្រា ច្រី ច្រើ",
+      "words": [
+        "ច្បា ",
+        "ច្នា ",
+        "ច្រា ",
+        "ច្រី ",
+        "ច្រើ"
+      ]
+    },
+    {
+      "id": "s2",
+      "text": "ច្បាប់ ច្បារ ច្នៃ ច្រើន ច្រៀង",
+      "words": [
+        "ច្បាប់ ",
+        "ច្បារ ",
+        "ច្នៃ ",
+        "ច្រើន ",
+        "ច្រៀង"
+      ]
+    },
+    {
+      "id": "s3",
+      "text": "ខ្ញុំច្រៀងជាមួយគ្រូ។",
+      "words": [
+        "ខ្ញុំ",
+        "ច្រៀង",
+        "ជាមួយ",
+        "គ្រូ។"
+      ]
+    },
+    {
+      "id": "s4",
+      "text": "យាយមានច្បារធំ។",
+      "words": [
+        "យាយ",
+        "មាន",
+        "ច្បារ",
+        "ធំ។"
+      ]
+    },
+    {
+      "id": "s5",
+      "text": "ពូច្នៃឈើ។",
+      "words": [
+        "ពូ",
+        "ច្នៃ",
+        "ឈើ។"
+      ]
+    },
+    {
+      "id": "s6",
+      "text": "ទឹកច្រើនណាស់។",
+      "words": [
+        "ទឹក",
+        "ច្រើន",
+        "ណាស់។"
+      ]
+    }
+  ],
+  "questions": [
+    {
+      "id": "sp1",
+      "kind": "spell",
+      "sentence": "s3",
+      "word": "ច្រៀង"
+    },
+    {
+      "id": "sp2",
+      "kind": "spell",
+      "sentence": "s4",
+      "word": "ច្បារ"
+    },
+    {
+      "id": "sp3",
+      "kind": "spell",
+      "sentence": "s5",
+      "word": "ច្នៃ"
+    },
+    {
+      "id": "sp4",
+      "kind": "spell",
+      "sentence": "s6",
+      "word": "ច្រើន"
+    }
+  ],
+  "pictures": {},
+  "noRecording": [],
+  "provenance": "Original lesson written for Koda, 2026. It follows the order in which Grade 1 Khmer teaches letters; the words and sentences are new. Draft: not yet reviewed by a native speaker."
+}

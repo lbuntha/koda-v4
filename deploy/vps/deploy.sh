@@ -3,6 +3,8 @@
 #
 #   VPS=root@<ip> deploy/vps/deploy.sh           pull the images GitHub built
 #   VPS=root@<ip> deploy/vps/deploy.sh --build   copy the source, build there
+#   KODA_TAG=local deploy/vps/deploy.sh --no-pull  run images already on the
+#                                                  server (docker load)
 #
 # Pulling is the normal path: the web build needs more memory than a server
 # shared with other services can spare. Optional environment:
@@ -19,7 +21,11 @@ set -euo pipefail
 REMOTE_DIR=${REMOTE_DIR:-/opt/koda}
 KODA_TAG=${KODA_TAG:-latest}
 build=false
-[ "${1:-}" = "--build" ] && build=true
+pull=true
+case "${1:-}" in
+  --build) build=true ;;
+  --no-pull) pull=false ;;
+esac
 cd "$(dirname "$0")/../.."
 
 if $build; then
@@ -39,7 +45,7 @@ if [ -n "${GHCR_TOKEN:-}" ]; then
   ssh "$VPS" "docker login ghcr.io -u '${GHCR_USER:?set GHCR_USER with GHCR_TOKEN}' --password-stdin" <<<"$GHCR_TOKEN" >/dev/null
 fi
 
-ssh "$VPS" bash -s -- "$REMOTE_DIR" "$KODA_TAG" "$build" <<'REMOTE'
+ssh "$VPS" bash -s -- "$REMOTE_DIR" "$KODA_TAG" "$build" "$pull" <<'REMOTE'
 set -euo pipefail
 cd "$1/deploy/vps"
 export KODA_TAG="$2"
@@ -47,21 +53,21 @@ mkdir -p secrets backups
 
 if [ "$3" = true ]; then
   docker compose build app api
-else
+elif [ "$4" = true ]; then
   docker compose pull --quiet app api
 fi
 docker logout ghcr.io >/dev/null 2>&1 || true
 # Never reach for the registry here: a --no-pull deploy runs images loaded by
 # hand, which the registry does not have, and asking for them fails the restart.
 docker compose up -d --remove-orphans --pull never
-docker image prune -f >/dev/null
 
 # The nginx site, once. After that it belongs to the server (certbot edits it).
 domain=$(grep -E '^DOMAIN=' .env | cut -d= -f2-)
 port=$(grep -E '^APP_PORT=' .env | cut -d= -f2-)
 port=${port:-3101}
 if command -v nginx >/dev/null && [ ! -e /etc/nginx/sites-available/koda ]; then
-  sed -e "s/KODA_DOMAIN/$domain/" -e "s/KODA_PORT/$port/" nginx-site.conf > /etc/nginx/sites-available/koda
+  ip=$(hostname -I | awk '{print $1}')
+  sed -e "s/KODA_DOMAIN/$domain/g" -e "s/KODA_PORT/$port/g" -e "s/KODA_IP/$ip/g" nginx-site.conf > /etc/nginx/sites-available/koda
   ln -sf /etc/nginx/sites-available/koda /etc/nginx/sites-enabled/koda
   nginx -t && systemctl reload nginx
   echo "nginx: site for $domain installed — run certbot for HTTPS (README.md, step 3)"

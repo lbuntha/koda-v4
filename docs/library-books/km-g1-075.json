@@ -1,0 +1,125 @@
+{
+  "id": "km-g1-075",
+  "rev": 0,
+  "language": "km",
+  "band": "A",
+  "ages": [
+    6,
+    7
+  ],
+  "topics": [],
+  "questionCounts": {
+    "understand": 0,
+    "words": 0,
+    "spell": 5
+  },
+  "title": "មេរៀនទី ៧៥ · ជើង ឆ្ម ឆ្ល ឆ្វ ឆ្អ",
+  "category": "Khmer",
+  "picture": "khmer-school",
+  "sentences": [
+    {
+      "id": "s1",
+      "text": "ឆ្មា ឆ្លា ឆ្វា ឆ្អា",
+      "words": [
+        "ឆ្មា ",
+        "ឆ្លា ",
+        "ឆ្វា ",
+        "ឆ្អា"
+      ]
+    },
+    {
+      "id": "s2",
+      "text": "ឆ្មា ឆ្លង ឆ្លាត ឆ្វេង ឆ្អឹង ឆ្អែត",
+      "words": [
+        "ឆ្មា ",
+        "ឆ្លង ",
+        "ឆ្លាត ",
+        "ឆ្វេង ",
+        "ឆ្អឹង ",
+        "ឆ្អែត"
+      ]
+    },
+    {
+      "id": "s3",
+      "text": "ឆ្មាដេកលើកៅអី។",
+      "words": [
+        "ឆ្មា",
+        "ដេក",
+        "លើ",
+        "កៅអី។"
+      ]
+    },
+    {
+      "id": "s4",
+      "text": "ចៅឆ្លាតណាស់។",
+      "words": [
+        "ចៅ",
+        "ឆ្លាត",
+        "ណាស់។"
+      ]
+    },
+    {
+      "id": "s5",
+      "text": "ខ្ញុំសរសេរដៃឆ្វេង។",
+      "words": [
+        "ខ្ញុំ",
+        "សរសេរ",
+        "ដៃ",
+        "ឆ្វេង។"
+      ]
+    },
+    {
+      "id": "s6",
+      "text": "ឆ្កែខាំឆ្អឹង។",
+      "words": [
+        "ឆ្កែ",
+        "ខាំ",
+        "ឆ្អឹង។"
+      ]
+    },
+    {
+      "id": "s7",
+      "text": "ខ្ញុំឆ្អែតហើយ។",
+      "words": [
+        "ខ្ញុំ",
+        "ឆ្អែត",
+        "ហើយ។"
+      ]
+    }
+  ],
+  "questions": [
+    {
+      "id": "sp1",
+      "kind": "spell",
+      "sentence": "s3",
+      "word": "ឆ្មា"
+    },
+    {
+      "id": "sp2",
+      "kind": "spell",
+      "sentence": "s4",
+      "word": "ឆ្លាត"
+    },
+    {
+      "id": "sp3",
+      "kind": "spell",
+      "sentence": "s5",
+      "word": "ឆ្វេង"
+    },
+    {
+      "id": "sp4",
+      "kind": "spell",
+      "sentence": "s6",
+      "word": "ឆ្អឹង"
+    },
+    {
+      "id": "sp5",
+      "kind": "spell",
+      "sentence": "s7",
+      "word": "ឆ្អែត"
+    }
+  ],
+  "pictures": {},
+  "noRecording": [],
+  "provenance": "Original lesson written for Koda, 2026. It follows the order in which Grade 1 Khmer teaches letters; the words and sentences are new. Draft: not yet reviewed by a native speaker."
+}

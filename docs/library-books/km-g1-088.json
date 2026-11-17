@@ -1,0 +1,91 @@
+{
+  "id": "km-g1-088",
+  "rev": 0,
+  "language": "km",
+  "band": "A",
+  "ages": [
+    6,
+    7
+  ],
+  "topics": [],
+  "questionCounts": {
+    "understand": 0,
+    "words": 0,
+    "spell": 3
+  },
+  "title": "មេរៀនទី ៨៨ · ជើង ម្ជ ម្ទ ម្ន",
+  "category": "Khmer",
+  "picture": "khmer-school",
+  "sentences": [
+    {
+      "id": "s1",
+      "text": "ម្ជា ម្ទា ម្នា",
+      "words": [
+        "ម្ជា ",
+        "ម្ទា ",
+        "ម្នា"
+      ]
+    },
+    {
+      "id": "s2",
+      "text": "ម្ជុល ម្ទេស ម្នាក់",
+      "words": [
+        "ម្ជុល ",
+        "ម្ទេស ",
+        "ម្នាក់"
+      ]
+    },
+    {
+      "id": "s3",
+      "text": "យាយដេរដោយម្ជុល។",
+      "words": [
+        "យាយ",
+        "ដេរ",
+        "ដោយ",
+        "ម្ជុល។"
+      ]
+    },
+    {
+      "id": "s4",
+      "text": "ម្ទេសហឹរណាស់។",
+      "words": [
+        "ម្ទេស",
+        "ហឹរ",
+        "ណាស់។"
+      ]
+    },
+    {
+      "id": "s5",
+      "text": "ខ្ញុំមកម្នាក់ឯង។",
+      "words": [
+        "ខ្ញុំ",
+        "មក",
+        "ម្នាក់",
+        "ឯង។"
+      ]
+    }
+  ],
+  "questions": [
+    {
+      "id": "sp1",
+      "kind": "spell",
+      "sentence": "s3",
+      "word": "ម្ជុល"
+    },
+    {
+      "id": "sp2",
+      "kind": "spell",
+      "sentence": "s4",
+      "word": "ម្ទេស"
+    },
+    {
+      "id": "sp3",
+      "kind": "spell",
+      "sentence": "s5",
+      "word": "ម្នាក់"
+    }
+  ],
+  "pictures": {},
+  "noRecording": [],
+  "provenance": "Original lesson written for Koda, 2026. It follows the order in which Grade 1 Khmer teaches letters; the words and sentences are new. Draft: not yet reviewed by a native speaker."
+}

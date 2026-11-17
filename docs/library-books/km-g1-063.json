@@ -1,0 +1,102 @@
+{
+  "id": "km-g1-063",
+  "rev": 0,
+  "language": "km",
+  "band": "A",
+  "ages": [
+    6,
+    7
+  ],
+  "topics": [],
+  "questionCounts": {
+    "understand": 0,
+    "words": 0,
+    "spell": 4
+  },
+  "title": "មេរៀនទី ៦៣ · ស្រៈពេញតួ ឥ ឦ ឧ ឩ ឪ",
+  "category": "Khmer",
+  "picture": "khmer-school",
+  "sentences": [
+    {
+      "id": "s1",
+      "text": "ឥ ឦ ឧ ឩ ឪ",
+      "words": [
+        "ឥ ",
+        "ឦ ",
+        "ឧ ",
+        "ឩ ",
+        "ឪ"
+      ]
+    },
+    {
+      "id": "s2",
+      "text": "ឥឡូវ ឥត ឧស ឪពុក",
+      "words": [
+        "ឥឡូវ ",
+        "ឥត ",
+        "ឧស ",
+        "ឪពុក"
+      ]
+    },
+    {
+      "id": "s3",
+      "text": "ឪពុកពុះឧស។",
+      "words": [
+        "ឪពុក",
+        "ពុះ",
+        "ឧស។"
+      ]
+    },
+    {
+      "id": "s4",
+      "text": "ឥឡូវចៅចេះអានហើយ។",
+      "words": [
+        "ឥឡូវ",
+        "ចៅ",
+        "ចេះ",
+        "អាន",
+        "ហើយ។"
+      ]
+    },
+    {
+      "id": "s5",
+      "text": "តាឥតញ៉ាំបាយទេ។",
+      "words": [
+        "តា",
+        "ឥត",
+        "ញ៉ាំ",
+        "បាយ",
+        "ទេ។"
+      ]
+    }
+  ],
+  "questions": [
+    {
+      "id": "sp1",
+      "kind": "spell",
+      "sentence": "s3",
+      "word": "ឪពុក"
+    },
+    {
+      "id": "sp2",
+      "kind": "spell",
+      "sentence": "s2",
+      "word": "ឧស"
+    },
+    {
+      "id": "sp3",
+      "kind": "spell",
+      "sentence": "s4",
+      "word": "ឥឡូវ"
+    },
+    {
+      "id": "sp4",
+      "kind": "spell",
+      "sentence": "s5",
+      "word": "ឥត"
+    }
+  ],
+  "pictures": {},
+  "noRecording": [],
+  "provenance": "Original lesson written for Koda, 2026. It follows the order in which Grade 1 Khmer teaches letters; the words and sentences are new. Draft: not yet reviewed by a native speaker."
+}

@@ -1,0 +1,87 @@
+{
+  "id": "km-g1-080r",
+  "rev": 0,
+  "language": "km",
+  "band": "A",
+  "ages": [
+    6,
+    7
+  ],
+  "topics": [],
+  "questionCounts": {
+    "understand": 0,
+    "words": 0,
+    "spell": 3
+  },
+  "title": "រៀនសាឡើងវិញ · ជើង ថ ទ",
+  "category": "Khmer",
+  "picture": "khmer-school",
+  "sentences": [
+    {
+      "id": "s1",
+      "text": "ថ្ង ថ្ន ថ្ម ថ្ល ថ្វ ទ្រ ទ្វ",
+      "words": [
+        "ថ្ង ",
+        "ថ្ន ",
+        "ថ្ម ",
+        "ថ្ល ",
+        "ថ្វ ",
+        "ទ្រ ",
+        "ទ្វ"
+      ]
+    },
+    {
+      "id": "s2",
+      "text": "ទ្វារថ្មីថ្លៃ។",
+      "words": [
+        "ទ្វារ",
+        "ថ្មី",
+        "ថ្លៃ។"
+      ]
+    },
+    {
+      "id": "s3",
+      "text": "ថ្មធំនៅក្បែរទ្រុង។",
+      "words": [
+        "ថ្ម",
+        "ធំ",
+        "នៅ",
+        "ក្បែរ",
+        "ទ្រុង។"
+      ]
+    },
+    {
+      "id": "s4",
+      "text": "ម៉ែថ្វាយបាយលោក។",
+      "words": [
+        "ម៉ែ",
+        "ថ្វាយ",
+        "បាយ",
+        "លោក។"
+      ]
+    }
+  ],
+  "questions": [
+    {
+      "id": "sp1",
+      "kind": "spell",
+      "sentence": "s2",
+      "word": "ថ្លៃ"
+    },
+    {
+      "id": "sp2",
+      "kind": "spell",
+      "sentence": "s3",
+      "word": "ថ្ម"
+    },
+    {
+      "id": "sp3",
+      "kind": "spell",
+      "sentence": "s4",
+      "word": "ថ្វាយ"
+    }
+  ],
+  "pictures": {},
+  "noRecording": [],
+  "provenance": "Original lesson written for Koda, 2026. It follows the order in which Grade 1 Khmer teaches letters; the words and sentences are new. Draft: not yet reviewed by a native speaker."
+}

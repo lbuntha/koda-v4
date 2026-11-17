@@ -1,0 +1,131 @@
+{
+  "id": "km-g1-018",
+  "rev": 0,
+  "language": "km",
+  "band": "A",
+  "ages": [
+    6,
+    7
+  ],
+  "topics": [],
+  "questionCounts": {
+    "understand": 0,
+    "words": 0,
+    "spell": 4
+  },
+  "title": "មេរៀនទី ១៨ · អក្សរ ឈ",
+  "category": "Khmer",
+  "picture": "khmer-school",
+  "sentences": [
+    {
+      "id": "s1",
+      "text": "ឈ ឈា ឈិ ឈី ឈឹ ឈឺ ឈុ ឈូ ឈួ ឈើ ឈឿ ឈៀ ឈេ",
+      "words": [
+        "ឈ ",
+        "ឈា ",
+        "ឈិ ",
+        "ឈី ",
+        "ឈឹ ",
+        "ឈឺ ",
+        "ឈុ ",
+        "ឈូ ",
+        "ឈួ ",
+        "ឈើ ",
+        "ឈឿ ",
+        "ឈៀ ",
+        "ឈេ"
+      ]
+    },
+    {
+      "id": "s2",
+      "text": "ឈែ ឈៃ ឈោ ឈៅ ឈុំ ឈំ ឈាំ ឈះ ឈុះ ឈេះ ឈោះ",
+      "words": [
+        "ឈែ ",
+        "ឈៃ ",
+        "ឈោ ",
+        "ឈៅ ",
+        "ឈុំ ",
+        "ឈំ ",
+        "ឈាំ ",
+        "ឈះ ",
+        "ឈុះ ",
+        "ឈេះ ",
+        "ឈោះ"
+      ]
+    },
+    {
+      "id": "s3",
+      "text": "ឈើ តុ កៅអី",
+      "words": [
+        "ឈើ ",
+        "តុ ",
+        "កៅអី"
+      ]
+    },
+    {
+      "id": "s4",
+      "text": "តាចេះកែឈើ។",
+      "words": [
+        "តា",
+        "ចេះ",
+        "កែ",
+        "ឈើ។"
+      ]
+    },
+    {
+      "id": "s5",
+      "text": "តុជាឈើ។",
+      "words": [
+        "តុ",
+        "ជា",
+        "ឈើ។"
+      ]
+    },
+    {
+      "id": "s6",
+      "text": "កៅអីជាឈើ។",
+      "words": [
+        "កៅអី",
+        "ជា",
+        "ឈើ។"
+      ]
+    },
+    {
+      "id": "s7",
+      "text": "ឈើឆេះ។",
+      "words": [
+        "ឈើ",
+        "ឆេះ។"
+      ]
+    }
+  ],
+  "questions": [
+    {
+      "id": "sp1",
+      "kind": "spell",
+      "sentence": "s5",
+      "word": "ឈើ"
+    },
+    {
+      "id": "sp2",
+      "kind": "spell",
+      "sentence": "s3",
+      "word": "តុ"
+    },
+    {
+      "id": "sp3",
+      "kind": "spell",
+      "sentence": "s6",
+      "word": "កៅអី"
+    },
+    {
+      "id": "sp4",
+      "kind": "spell",
+      "sentence": "s4",
+      "word": "កែ"
+    }
+  ],
+  "pictures": {},
+  "noRecording": [],
+  "provenance": "Original lesson written for Koda, 2026. It follows the order in which Grade 1 Khmer teaches letters; the words and sentences are new. Draft: not yet reviewed by a native speaker."
+}

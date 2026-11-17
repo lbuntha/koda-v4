@@ -1,0 +1,108 @@
+{
+  "id": "km-g1-071",
+  "rev": 0,
+  "language": "km",
+  "band": "A",
+  "ages": [
+    6,
+    7
+  ],
+  "topics": [],
+  "questionCounts": {
+    "understand": 0,
+    "words": 0,
+    "spell": 4
+  },
+  "title": "មេរៀនទី ៧១ · ជើង ឃ្ន ឃ្ម ឃ្ល ឃ្វ",
+  "category": "Khmer",
+  "picture": "khmer-school",
+  "sentences": [
+    {
+      "id": "s1",
+      "text": "ឃ្នា ឃ្មា ឃ្លា ឃ្វា",
+      "words": [
+        "ឃ្នា ",
+        "ឃ្មា ",
+        "ឃ្លា ",
+        "ឃ្វា"
+      ]
+    },
+    {
+      "id": "s2",
+      "text": "ឃ្មុំ ឃ្លាន ឃ្វាល ឃ្លោក",
+      "words": [
+        "ឃ្មុំ ",
+        "ឃ្លាន ",
+        "ឃ្វាល ",
+        "ឃ្លោក"
+      ]
+    },
+    {
+      "id": "s3",
+      "text": "ឃ្មុំទិចដៃខ្ញុំ។",
+      "words": [
+        "ឃ្មុំ",
+        "ទិច",
+        "ដៃ",
+        "ខ្ញុំ។"
+      ]
+    },
+    {
+      "id": "s4",
+      "text": "ខ្ញុំឃ្លានបាយ។",
+      "words": [
+        "ខ្ញុំ",
+        "ឃ្លាន",
+        "បាយ។"
+      ]
+    },
+    {
+      "id": "s5",
+      "text": "ពូឃ្វាលគោ។",
+      "words": [
+        "ពូ",
+        "ឃ្វាល",
+        "គោ។"
+      ]
+    },
+    {
+      "id": "s6",
+      "text": "ម៉ែដាំស៊ុបឃ្លោក។",
+      "words": [
+        "ម៉ែ",
+        "ដាំ",
+        "ស៊ុប",
+        "ឃ្លោក។"
+      ]
+    }
+  ],
+  "questions": [
+    {
+      "id": "sp1",
+      "kind": "spell",
+      "sentence": "s3",
+      "word": "ឃ្មុំ"
+    },
+    {
+      "id": "sp2",
+      "kind": "spell",
+      "sentence": "s4",
+      "word": "ឃ្លាន"
+    },
+    {
+      "id": "sp3",
+      "kind": "spell",
+      "sentence": "s5",
+      "word": "ឃ្វាល"
+    },
+    {
+      "id": "sp4",
+      "kind": "spell",
+      "sentence": "s6",
+      "word": "ឃ្លោក"
+    }
+  ],
+  "pictures": {},
+  "noRecording": [],
+  "provenance": "Original lesson written for Koda, 2026. It follows the order in which Grade 1 Khmer teaches letters; the words and sentences are new. Draft: not yet reviewed by a native speaker."
+}

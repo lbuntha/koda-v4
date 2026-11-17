@@ -1,0 +1,124 @@
+{
+  "id": "km-g1-019r",
+  "rev": 0,
+  "language": "km",
+  "band": "A",
+  "ages": [
+    6,
+    7
+  ],
+  "topics": [],
+  "questionCounts": {
+    "understand": 0,
+    "words": 0,
+    "spell": 5
+  },
+  "title": "រៀនសាឡើងវិញ · គ ឃ ង ជ ឈ ញ",
+  "category": "Khmer",
+  "picture": "khmer-school",
+  "sentences": [
+    {
+      "id": "s1",
+      "text": "គា ឃា ងា ជា ឈា ញា",
+      "words": [
+        "គា ",
+        "ឃា ",
+        "ងា ",
+        "ជា ",
+        "ឈា ",
+        "ញា"
+      ]
+    },
+    {
+      "id": "s2",
+      "text": "គោ គេ គូ គោះ ឃុំ ជា ជី ជុំ ឈើ ញី",
+      "words": [
+        "គោ ",
+        "គេ ",
+        "គូ ",
+        "គោះ ",
+        "ឃុំ ",
+        "ជា ",
+        "ជី ",
+        "ជុំ ",
+        "ឈើ ",
+        "ញី"
+      ]
+    },
+    {
+      "id": "s3",
+      "text": "គោញីជាគោតា។",
+      "words": [
+        "គោ",
+        "ញី",
+        "ជា",
+        "គោ",
+        "តា។"
+      ]
+    },
+    {
+      "id": "s4",
+      "text": "គេកែកៅអីឈើ។",
+      "words": [
+        "គេ",
+        "កែ",
+        "កៅអី",
+        "ឈើ។"
+      ]
+    },
+    {
+      "id": "s5",
+      "text": "តើគោញីណា?",
+      "words": [
+        "តើ",
+        "គោ",
+        "ញី",
+        "ណា?"
+      ]
+    },
+    {
+      "id": "s6",
+      "text": "ចៅជុំតា។",
+      "words": [
+        "ចៅ",
+        "ជុំ",
+        "តា។"
+      ]
+    }
+  ],
+  "questions": [
+    {
+      "id": "sp1",
+      "kind": "spell",
+      "sentence": "s3",
+      "word": "ញី"
+    },
+    {
+      "id": "sp2",
+      "kind": "spell",
+      "sentence": "s4",
+      "word": "ឈើ"
+    },
+    {
+      "id": "sp3",
+      "kind": "spell",
+      "sentence": "s5",
+      "word": "គោ"
+    },
+    {
+      "id": "sp4",
+      "kind": "spell",
+      "sentence": "s6",
+      "word": "ជុំ"
+    },
+    {
+      "id": "sp5",
+      "kind": "spell",
+      "sentence": "s2",
+      "word": "ឃុំ"
+    }
+  ],
+  "pictures": {},
+  "noRecording": [],
+  "provenance": "Original lesson written for Koda, 2026. It follows the order in which Grade 1 Khmer teaches letters; the words and sentences are new. Draft: not yet reviewed by a native speaker."
+}

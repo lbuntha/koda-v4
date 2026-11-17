@@ -1,0 +1,114 @@
+{
+  "id": "km-g1-034r",
+  "rev": 0,
+  "language": "km",
+  "band": "A",
+  "ages": [
+    6,
+    7
+  ],
+  "topics": [],
+  "questionCounts": {
+    "understand": 0,
+    "words": 0,
+    "spell": 4
+  },
+  "title": "រៀនសាឡើងវិញ · ង៉ ញ៉ ប៉ ម៉ យ៉ រ៉ វ៉",
+  "category": "Khmer",
+  "picture": "khmer-school",
+  "sentences": [
+    {
+      "id": "s1",
+      "text": "ង៉ា ញ៉ា ប៉ា ម៉ា យ៉ា រ៉ា វ៉ា",
+      "words": [
+        "ង៉ា ",
+        "ញ៉ា ",
+        "ប៉ា ",
+        "ម៉ា ",
+        "យ៉ា ",
+        "រ៉ា ",
+        "វ៉ា"
+      ]
+    },
+    {
+      "id": "s2",
+      "text": "ញ៉ាំ ប៉ា ប៉ះ ម៉ែ ម៉ា",
+      "words": [
+        "ញ៉ាំ ",
+        "ប៉ា ",
+        "ប៉ះ ",
+        "ម៉ែ ",
+        "ម៉ា"
+      ]
+    },
+    {
+      "id": "s3",
+      "text": "ចៅញ៉ាំមីឆា។",
+      "words": [
+        "ចៅ",
+        "ញ៉ាំ",
+        "មី",
+        "ឆា។"
+      ]
+    },
+    {
+      "id": "s4",
+      "text": "ម៉ែថាកុំប៉ះផើ។",
+      "words": [
+        "ម៉ែ",
+        "ថា",
+        "កុំ",
+        "ប៉ះ",
+        "ផើ។"
+      ]
+    },
+    {
+      "id": "s5",
+      "text": "ពូពុះឈើធំ។",
+      "words": [
+        "ពូ",
+        "ពុះ",
+        "ឈើ",
+        "ធំ។"
+      ]
+    },
+    {
+      "id": "s6",
+      "text": "ចៅហៅម៉ែ។",
+      "words": [
+        "ចៅ",
+        "ហៅ",
+        "ម៉ែ។"
+      ]
+    }
+  ],
+  "questions": [
+    {
+      "id": "sp1",
+      "kind": "spell",
+      "sentence": "s3",
+      "word": "ញ៉ាំ"
+    },
+    {
+      "id": "sp2",
+      "kind": "spell",
+      "sentence": "s4",
+      "word": "ប៉ះ"
+    },
+    {
+      "id": "sp3",
+      "kind": "spell",
+      "sentence": "s5",
+      "word": "ពុះ"
+    },
+    {
+      "id": "sp4",
+      "kind": "spell",
+      "sentence": "s6",
+      "word": "ម៉ែ"
+    }
+  ],
+  "pictures": {},
+  "noRecording": [],
+  "provenance": "Original lesson written for Koda, 2026. It follows the order in which Grade 1 Khmer teaches letters; the words and sentences are new. Draft: not yet reviewed by a native speaker."
+}

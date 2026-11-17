@@ -6,9 +6,14 @@
  *
  * Two shapes, not one:
  *  - `icon-*.png` is the mark as drawn, for launchers that show it as-is.
- *  - `maskable-*.png` pads the mark into the safe zone, because Android crops
- *    an adaptive icon to a circle or squircle and an un-padded mark loses its
- *    corners.
+ *  - `maskable-*.png` is full-bleed: the gradient fills the whole square (the
+ *    launcher cuts its own circle or squircle out of it) and only the K and
+ *    the star shrink into the safe zone. Padding the whole rounded tile on a
+ *    dark backdrop instead showed as a frame — a gap around the logo.
+ *
+ * And the iPhone's `apple-touch-icon.png` is the same full-bleed square at the
+ * mark's own scale: iOS rounds the corners itself, and a tile that arrives
+ * already rounded shows a gap in each corner.
  *
  * And one that is not an icon at all: `badge-96.png`, the silhouette Android
  * puts in the status bar beside a notification. It is drawn from the *alpha*
@@ -25,10 +30,23 @@ const SRC = path.resolve("public/favicon.svg");
 const BADGE_SRC = path.resolve("public/badge.svg");
 const OUT = path.resolve("public/icons");
 const svg = await readFile(SRC);
+const source = svg.toString();
 
-// Android's maskable spec guarantees only the middle 80% is visible; the safe
-// zone is a circle of 40% radius. 12% padding a side keeps the glyph inside it.
-const MASKABLE_PAD = 0.12;
+/** The mark with square corners: the device's own mask does the rounding. */
+const square = source.replace(/<clipPath id="clip"><rect([^>]*?) rx="\d+"/, '<clipPath id="clip"><rect$1 rx="0"');
+if (square === source) throw new Error("favicon.svg: could not find the rounded clip to square off");
+
+/** Square, with the glyph (everything after the three background fills) scaled into the middle. */
+const MASKABLE_GLYPH = 0.8;
+const shift = (512 * (1 - MASKABLE_GLYPH)) / 2;
+const backgrounds = /(<rect width="512" height="512" fill="url\(#pink\)" \/>)/;
+if (!backgrounds.test(square)) throw new Error("favicon.svg: could not find the background fills");
+const maskable = square
+  .replace(backgrounds, `$1\n    <g transform="translate(${shift} ${shift}) scale(${MASKABLE_GLYPH})">`)
+  .replace(/(\s*<\/g>\s*<\/svg>\s*)$/, "\n    </g>$1");
+
+// Android's maskable spec guarantees only a centred circle of 40% radius is
+// visible; the glyph at 80% scale keeps the K and the star's tips inside it.
 const BACKDROP = "#3B1FB8"; // the darkest stop of the mark's own gradient
 
 const sizes = [64, 192, 512];
@@ -43,21 +61,17 @@ for (const size of sizes) {
 }
 
 for (const size of [192, 512]) {
-  const inner = Math.round(size * (1 - MASKABLE_PAD * 2));
-  const pad = Math.round((size - inner) / 2);
-  const mark = await sharp(svg, { density: 512 }).resize(inner, inner).png().toBuffer();
-  const png = await sharp({
-    create: { width: size, height: size, channels: 4, background: BACKDROP },
-  })
-    .composite([{ input: mark, top: pad, left: pad }])
+  const png = await sharp(Buffer.from(maskable), { density: 512 })
+    .resize(size, size)
+    .flatten({ background: BACKDROP })
     .png()
     .toBuffer();
   await writeFile(path.join(OUT, `maskable-${size}.png`), png);
 }
 
-// Apple ignores the manifest and reads a link tag, and it composites the icon
-// onto white — so this one is flattened rather than transparent.
-const apple = await sharp(svg, { density: 512 })
+// Apple ignores the manifest and reads a link tag, composites the icon onto
+// white and rounds it itself — so this one is square and opaque.
+const apple = await sharp(Buffer.from(square), { density: 512 })
   .resize(180, 180)
   .flatten({ background: BACKDROP })
   .png()

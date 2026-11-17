@@ -1,0 +1,120 @@
+{
+  "id": "km-g1-026r",
+  "rev": 0,
+  "language": "km",
+  "band": "A",
+  "ages": [
+    6,
+    7
+  ],
+  "topics": [],
+  "questionCounts": {
+    "understand": 0,
+    "words": 0,
+    "spell": 5
+  },
+  "title": "រៀនសាឡើងវិញ · ព្យញ្ជនៈ គ ដល់ វ",
+  "category": "Khmer",
+  "picture": "khmer-school",
+  "sentences": [
+    {
+      "id": "s1",
+      "text": "យា រា លា វា",
+      "words": [
+        "យា ",
+        "រា ",
+        "លា ",
+        "វា"
+      ]
+    },
+    {
+      "id": "s2",
+      "text": "លា លី លូ លើ វា វៃ វេះ រះ រុះ",
+      "words": [
+        "លា ",
+        "លី ",
+        "លូ ",
+        "លើ ",
+        "វា ",
+        "វៃ ",
+        "វេះ ",
+        "រះ ",
+        "រុះ"
+      ]
+    },
+    {
+      "id": "s3",
+      "text": "ពូហៅវា។",
+      "words": [
+        "ពូ",
+        "ហៅ",
+        "វា។"
+      ]
+    },
+    {
+      "id": "s4",
+      "text": "ចៅរាំលើដី។",
+      "words": [
+        "ចៅ",
+        "រាំ",
+        "លើ",
+        "ដី។"
+      ]
+    },
+    {
+      "id": "s5",
+      "text": "តាលាចៅទៅឃុំ។",
+      "words": [
+        "តា",
+        "លា",
+        "ចៅ",
+        "ទៅ",
+        "ឃុំ។"
+      ]
+    },
+    {
+      "id": "s6",
+      "text": "កុំវៃគោ។",
+      "words": [
+        "កុំ",
+        "វៃ",
+        "គោ។"
+      ]
+    }
+  ],
+  "questions": [
+    {
+      "id": "sp1",
+      "kind": "spell",
+      "sentence": "s3",
+      "word": "វា"
+    },
+    {
+      "id": "sp2",
+      "kind": "spell",
+      "sentence": "s4",
+      "word": "លើ"
+    },
+    {
+      "id": "sp3",
+      "kind": "spell",
+      "sentence": "s5",
+      "word": "លា"
+    },
+    {
+      "id": "sp4",
+      "kind": "spell",
+      "sentence": "s6",
+      "word": "វៃ"
+    },
+    {
+      "id": "sp5",
+      "kind": "spell",
+      "sentence": "s2",
+      "word": "លី"
+    }
+  ],
+  "pictures": {},
+  "noRecording": [],
+  "provenance": "Original lesson written for Koda, 2026. It follows the order in which Grade 1 Khmer teaches letters; the words and sentences are new. Draft: not yet reviewed by a native speaker."
+}

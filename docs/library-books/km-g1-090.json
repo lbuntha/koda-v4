@@ -1,0 +1,108 @@
+{
+  "id": "km-g1-090",
+  "rev": 0,
+  "language": "km",
+  "band": "A",
+  "ages": [
+    6,
+    7
+  ],
+  "topics": [],
+  "questionCounts": {
+    "understand": 0,
+    "words": 0,
+    "spell": 4
+  },
+  "title": "មេរៀនទី ៩០ · ជើង ល្ង ល្ប ល្ព ល្អ",
+  "category": "Khmer",
+  "picture": "khmer-school",
+  "sentences": [
+    {
+      "id": "s1",
+      "text": "ល្ងា ល្បា ល្ពា ល្អា",
+      "words": [
+        "ល្ងា ",
+        "ល្បា ",
+        "ល្ពា ",
+        "ល្អា"
+      ]
+    },
+    {
+      "id": "s2",
+      "text": "ល្ងាច ល្បែង ល្ពៅ ល្អ",
+      "words": [
+        "ល្ងាច ",
+        "ល្បែង ",
+        "ល្ពៅ ",
+        "ល្អ"
+      ]
+    },
+    {
+      "id": "s3",
+      "text": "ល្ងាចនេះខ្ញុំលេងបាល់។",
+      "words": [
+        "ល្ងាច",
+        "នេះ",
+        "ខ្ញុំ",
+        "លេង",
+        "បាល់។"
+      ]
+    },
+    {
+      "id": "s4",
+      "text": "ផ្កានេះល្អ។",
+      "words": [
+        "ផ្កា",
+        "នេះ",
+        "ល្អ។"
+      ]
+    },
+    {
+      "id": "s5",
+      "text": "ម៉ែចំអិនល្ពៅ។",
+      "words": [
+        "ម៉ែ",
+        "ចំអិន",
+        "ល្ពៅ។"
+      ]
+    },
+    {
+      "id": "s6",
+      "text": "ល្បែងនេះងាយ។",
+      "words": [
+        "ល្បែង",
+        "នេះ",
+        "ងាយ។"
+      ]
+    }
+  ],
+  "questions": [
+    {
+      "id": "sp1",
+      "kind": "spell",
+      "sentence": "s3",
+      "word": "ល្ងាច"
+    },
+    {
+      "id": "sp2",
+      "kind": "spell",
+      "sentence": "s4",
+      "word": "ល្អ"
+    },
+    {
+      "id": "sp3",
+      "kind": "spell",
+      "sentence": "s5",
+      "word": "ល្ពៅ"
+    },
+    {
+      "id": "sp4",
+      "kind": "spell",
+      "sentence": "s6",
+      "word": "ល្បែង"
+    }
+  ],
+  "pictures": {},
+  "noRecording": [],
+  "provenance": "Original lesson written for Koda, 2026. It follows the order in which Grade 1 Khmer teaches letters; the words and sentences are new. Draft: not yet reviewed by a native speaker."
+}

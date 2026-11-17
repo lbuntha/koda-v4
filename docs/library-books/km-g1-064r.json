@@ -1,0 +1,100 @@
+{
+  "id": "km-g1-064r",
+  "rev": 0,
+  "language": "km",
+  "band": "A",
+  "ages": [
+    6,
+    7
+  ],
+  "topics": [],
+  "questionCounts": {
+    "understand": 0,
+    "words": 0,
+    "spell": 3
+  },
+  "title": "រៀនសាឡើងវិញ · ស្រៈពេញតួ",
+  "category": "Khmer",
+  "picture": "khmer-school",
+  "sentences": [
+    {
+      "id": "s1",
+      "text": "ឥ ឦ ឧ ឩ ឪ ឫ ឬ",
+      "words": [
+        "ឥ ",
+        "ឦ ",
+        "ឧ ",
+        "ឩ ",
+        "ឪ ",
+        "ឫ ",
+        "ឬ"
+      ]
+    },
+    {
+      "id": "s2",
+      "text": "ឭ ឮ ឯ ឰ ឱ ឳ",
+      "words": [
+        "ឭ ",
+        "ឮ ",
+        "ឯ ",
+        "ឰ ",
+        "ឱ ",
+        "ឳ"
+      ]
+    },
+    {
+      "id": "s3",
+      "text": "ឪពុកឮចៅហៅ។",
+      "words": [
+        "ឪពុក",
+        "ឮ",
+        "ចៅ",
+        "ហៅ។"
+      ]
+    },
+    {
+      "id": "s4",
+      "text": "ឥឡូវឯងចេះអានឬនៅ?",
+      "words": [
+        "ឥឡូវ",
+        "ឯង",
+        "ចេះ",
+        "អាន",
+        "ឬ",
+        "នៅ?"
+      ]
+    },
+    {
+      "id": "s5",
+      "text": "ឧសនេះសើម។",
+      "words": [
+        "ឧស",
+        "នេះ",
+        "សើម។"
+      ]
+    }
+  ],
+  "questions": [
+    {
+      "id": "sp1",
+      "kind": "spell",
+      "sentence": "s3",
+      "word": "ឪពុក"
+    },
+    {
+      "id": "sp2",
+      "kind": "spell",
+      "sentence": "s4",
+      "word": "ឥឡូវ"
+    },
+    {
+      "id": "sp3",
+      "kind": "spell",
+      "sentence": "s5",
+      "word": "ឧស"
+    }
+  ],
+  "pictures": {},
+  "noRecording": [],
+  "provenance": "Original lesson written for Koda, 2026. It follows the order in which Grade 1 Khmer teaches letters; the words and sentences are new. Draft: not yet reviewed by a native speaker."
+}

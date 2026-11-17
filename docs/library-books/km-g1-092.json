@@ -1,0 +1,111 @@
+{
+  "id": "km-g1-092",
+  "rev": 0,
+  "language": "km",
+  "band": "A",
+  "ages": [
+    6,
+    7
+  ],
+  "topics": [],
+  "questionCounts": {
+    "understand": 0,
+    "words": 0,
+    "spell": 4
+  },
+  "title": "មេរៀនទី ៩២ · ជើង ស្ង ស្ន ស្ម ស្ល ស្វ ស្អ",
+  "category": "Khmer",
+  "picture": "khmer-school",
+  "sentences": [
+    {
+      "id": "s1",
+      "text": "ស្ងា ស្នា ស្មា ស្លា ស្វា ស្អា",
+      "words": [
+        "ស្ងា ",
+        "ស្នា ",
+        "ស្មា ",
+        "ស្លា ",
+        "ស្វា ",
+        "ស្អា"
+      ]
+    },
+    {
+      "id": "s2",
+      "text": "ស្ងាត់ ស្នាម ស្មៅ ស្លឹក ស្វា ស្អាត",
+      "words": [
+        "ស្ងាត់ ",
+        "ស្នាម ",
+        "ស្មៅ ",
+        "ស្លឹក ",
+        "ស្វា ",
+        "ស្អាត"
+      ]
+    },
+    {
+      "id": "s3",
+      "text": "គោស៊ីស្មៅ។",
+      "words": [
+        "គោ",
+        "ស៊ី",
+        "ស្មៅ។"
+      ]
+    },
+    {
+      "id": "s4",
+      "text": "ស្វាឡើងដើមឈើ។",
+      "words": [
+        "ស្វា",
+        "ឡើង",
+        "ដើម",
+        "ឈើ។"
+      ]
+    },
+    {
+      "id": "s5",
+      "text": "ផ្ទះខ្ញុំស្អាត។",
+      "words": [
+        "ផ្ទះ",
+        "ខ្ញុំ",
+        "ស្អាត។"
+      ]
+    },
+    {
+      "id": "s6",
+      "text": "ស្លឹកឈើជ្រុះ។",
+      "words": [
+        "ស្លឹក",
+        "ឈើ",
+        "ជ្រុះ។"
+      ]
+    }
+  ],
+  "questions": [
+    {
+      "id": "sp1",
+      "kind": "spell",
+      "sentence": "s3",
+      "word": "ស្មៅ"
+    },
+    {
+      "id": "sp2",
+      "kind": "spell",
+      "sentence": "s4",
+      "word": "ស្វា"
+    },
+    {
+      "id": "sp3",
+      "kind": "spell",
+      "sentence": "s5",
+      "word": "ស្អាត"
+    },
+    {
+      "id": "sp4",
+      "kind": "spell",
+      "sentence": "s6",
+      "word": "ស្លឹក"
+    }
+  ],
+  "pictures": {},
+  "noRecording": [],
+  "provenance": "Original lesson written for Koda, 2026. It follows the order in which Grade 1 Khmer teaches letters; the words and sentences are new. Draft: not yet reviewed by a native speaker."
+}

@@ -9,7 +9,7 @@ import { SVG_ID_PATTERN, UNCATEGORISED, listSvgAssets, saveSvgAsset } from "../.
 import { useSystem } from "../../lib/sync";
 import { inspectSvgMarkup, preprocessSvgMarkup } from "../../utils/svg";
 import { playSound } from "../../utils/audio";
-import { isPhoto, PHOTO_ACCEPT, uploadPhoto } from "../photos";
+import { isPhoto, listAiPictures, PHOTO_ACCEPT, uploadAiPicture, uploadPhoto, type AiPicture } from "../photos";
 import { describeShape, type PictureKind } from "../pictureShape";
 import { cropToShape, generateBookImage, improvePicturePrompt, type ImageProvider, type ImageStyle } from "../imageGenerationApi";
 import { Picture, PICTURE_KEYS } from "../Picture";
@@ -51,6 +51,8 @@ const KEBAB = (text: string) =>
 const STORY = "story";
 const BUILT_IN = "built-in";
 const EVERYTHING = "all";
+/** How many AI pictures show before "Load more": one row on a phone, two on a computer. */
+const AI_ROW = 6;
 /* Place names are worded under `studio.pages.place.<at>`. */
 const PLACE_ICON = { top: PanelTop, bottom: PanelBottom, left: PanelLeft, right: PanelRight } as const;
 
@@ -73,6 +75,12 @@ interface Draft {
   /** A painted picture, already cropped, and a URL to preview it by. */
   photo: Blob | null;
   preview: string;
+  /**
+   * The painted picture's key once it is kept on the server. It is kept the
+   * moment it is made, not when it is used, so a picture the author waited for
+   * is never lost to a closed drawer — it is waiting under "AI pictures".
+   */
+  saved: string | null;
   /** What "Improve description" is told, set from the context and the author's to change. */
   subjectOnly: boolean;
   cambodia: boolean;
@@ -167,7 +175,7 @@ export function PicturePanel({ title, note, chosen, how, promptSeed, brief, sugg
      drawn, the field is the author's to edit, not something re-seeded out from
      under them. */
   const [draft, setDraft] = useState<Draft>({
-    prompt: promptSeed ?? "", mode: "svg", kind: "banner", markup: "", name: "", category: STORY, photo: null, preview: "",
+    prompt: promptSeed ?? "", mode: "svg", kind: "banner", markup: "", name: "", category: STORY, photo: null, preview: "", saved: null,
     subjectOnly: brief?.subjectOnly ?? false, cambodia: brief?.cambodia ?? false, before: null,
   });
   const previewRef = useRef("");
@@ -308,6 +316,70 @@ function QuickTiles({ heading, keys, chosen, onUse }: { heading: string; keys: s
   );
 }
 
+/**
+ * Painted pictures made with AI in any book, newest first. They are photos, not
+ * named drawings, so the art library's search cannot find them: this row
+ * searches their descriptions instead, with the same search box.
+ */
+function AiPictures({ query, chosen, onUse }: { query: string; chosen: string | null; onUse(key: string): void }) {
+  const { t } = useT();
+  const [pictures, setPictures] = useState<AiPicture[] | null | undefined>(undefined);
+  const [shown, setShown] = useState(AI_ROW);
+  /** Every stored photo, for pictures made before AI ones were labelled. */
+  const [every, setEvery] = useState(false);
+
+  useEffect(() => {
+    let live = true;
+    // A short pause so a search is asked once, not once per letter.
+    const timer = setTimeout(() => {
+      void listAiPictures(query, every ? 200 : 60, every).then((found) => live && setPictures(found));
+    }, query ? 300 : 0);
+    setShown(AI_ROW);
+    return () => {
+      live = false;
+      clearTimeout(timer);
+    };
+  }, [query, every]);
+
+  if (pictures === undefined) return null;
+  // A search with no match: the library below already says so.
+  if (pictures && !pictures.length && query) return null;
+  return (
+    <div>
+      <div className="mb-2 flex items-center justify-between gap-2">
+        <p className="text-xs font-extrabold uppercase tracking-wider text-muted">{every ? t("studio.picture.allPhotos") : t("studio.picture.aiPictures")}</p>
+        <UILinkButton type="button" aria-pressed={every} onClick={() => setEvery((e) => !e)}>
+          {every ? t("studio.picture.onlyAiPictures") : t("studio.picture.showAllPhotos")}
+        </UILinkButton>
+      </div>
+      {pictures === null ? (
+        <p className="rounded-xl border border-dashed border-line px-3 py-3 text-sm text-muted">{t("studio.picture.aiPicturesOffline")}</p>
+      ) : !pictures.length ? (
+        <p className="rounded-xl border border-dashed border-line px-3 py-3 text-sm text-muted">{t("studio.picture.aiPicturesNone")}</p>
+      ) : (
+        <>
+          <ul className="grid grid-cols-3 gap-2 sm:grid-cols-4">
+            {pictures.slice(0, shown).map(({ key, prompt }) => (
+              <li key={key}>
+                <button type="button" onClick={() => onUse(key)} aria-pressed={chosen === key} aria-label={prompt || t("studio.pages.photo")} title={prompt}
+                  className={`flex w-full flex-col overflow-hidden rounded-xl border text-left ${chosen === key ? "border-indigo-600 ring-2 ring-indigo-600/30" : "border-line hover:border-indigo-400"}`}>
+                  <span className="block aspect-square w-full bg-play-sky"><Picture name={key} /></span>
+                  <span className="truncate px-2 py-1 text-xs text-muted">{prompt || t("studio.pages.photo")}</span>
+                </button>
+              </li>
+            ))}
+          </ul>
+          {pictures.length > shown && (
+            <UIButton type="button" variant="secondary" size="sm" fullWidth className="mt-2" onClick={() => setShown((n) => n + AI_ROW * 2)}>
+              {t("studio.picture.loadMore", { shown, total: pictures.length })}
+            </UIButton>
+          )}
+        </>
+      )}
+    </div>
+  );
+}
+
 /** The art library, browsed by collection. Loads the top 20, then "Load more" on request. */
 function LibraryWay({ library, loading, chosen, suggested, suggestedLabel, photos, onUse, onRedraw }: {
   library: ReturnType<typeof useArtLibrary>;
@@ -356,6 +428,7 @@ function LibraryWay({ library, loading, chosen, suggested, suggestedLabel, photo
     <div className="grid gap-4">
       <QuickTiles heading={suggestedLabel ?? t("studio.picture.fromWords")} keys={suggested} chosen={chosen} onUse={onUse} />
       <QuickTiles heading={t("studio.picture.photosInBook")} keys={photos} chosen={chosen} onUse={onUse} />
+      <AiPictures query={query} chosen={chosen} onUse={onUse} />
 
       <div className="grid gap-3">
         <UISearchInput label={t("studio.picture.search")} value={query} onChange={(e) => setQuery(e.target.value)} />
@@ -504,8 +577,13 @@ function AiWay({ library, draft, setDraft, prefs, setPrefs, onUsed }: {
         const fitted = await cropToShape(await generateBookImage(prompt, kind, provider, style), kind);
         setDraft((d) => {
           if (d.preview) URL.revokeObjectURL(d.preview);
-          return { ...d, photo: fitted, preview: URL.createObjectURL(fitted) };
+          return { ...d, photo: fitted, preview: URL.createObjectURL(fitted), saved: null };
         });
+        // Kept now, so it can be found again even if this drawer closes unused.
+        // A failure here is not an error yet: "Use" tries again.
+        void uploadAiPicture(fitted, prompt)
+          .then((key) => setDraft((d) => (d.photo === fitted ? { ...d, saved: key } : d)))
+          .catch(() => undefined);
       }
     } catch (e) {
       setError(e instanceof Error ? e.message : t("studio.picture.makeFailed"));
@@ -532,7 +610,7 @@ function AiWay({ library, draft, setDraft, prefs, setPrefs, onUsed }: {
         playSound("pop");
         onUsed(name);
       } else if (photo) {
-        onUsed(await uploadPhoto(photo));
+        onUsed(draft.saved ?? (await uploadAiPicture(photo, draft.prompt)));
       }
     } catch (e) {
       setError(e instanceof Error ? e.message : t("studio.picture.saveFailed"));

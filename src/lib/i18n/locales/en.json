@@ -534,6 +534,11 @@
       "sendAndLeave": "Send, then leave",
       "stay": "Stay here",
       "leaveWithout": "Leave without sending"
+    },
+    "quizTime": "Quiz time!",
+    "quizCount": {
+      "one": "{count} question",
+      "other": "{count} questions"
     }
   },
   "library": {
@@ -647,7 +652,10 @@
     },
     "feedback": {
       "right": "Yes! That’s right.",
-      "wrong": "Not quite — try another one."
+      "wrong": "Not quite — try another one.",
+      "notQuite": "Not quite",
+      "tryAnother": "Try another one.",
+      "spellAgain": "Look at the letters and try again."
     },
     "hearWord": "Hear the word",
     "notThisOne": "not this one",
@@ -718,7 +726,8 @@
       "words": "Words",
       "opposites": "Opposites",
       "readings": "How to read"
-    }
+    },
+    "questionOf": "Question {n} of {total}"
   },
   "coach": {
     "comesBefore": "Nearly! {want} comes before {got}. Spell it in the order you say it.",
@@ -1047,6 +1056,12 @@
       "builtIn": "Built-in",
       "fromWords": "From this page’s words",
       "photosInBook": "Photos in this book",
+      "aiPictures": "AI pictures",
+      "aiPicturesOffline": "Can’t reach AI pictures right now. Check the connection and open this again.",
+      "aiPicturesNone": "No AI pictures yet. Pictures you make with AI are kept here, ready for any book.",
+      "showAllPhotos": "Show all photos",
+      "onlyAiPictures": "Only AI pictures",
+      "allPhotos": "All photos",
       "search": "Search pictures",
       "collection": "Collection",
       "makeAgainKey": "Make {key} again",
@@ -5660,5 +5675,13 @@
       "screenTime": "Screen-time controls",
       "made": "Made in Cambodia, for Khmer families everywhere"
     }
+  },
+  "legal": {
+    "back": "Back to Koda",
+    "updated": "Last updated {date}",
+    "contact": "Questions or requests",
+    "contactNote": "To ask a question, get a copy of your family's information, or delete your account, email us at",
+    "privacy": "Privacy Policy",
+    "terms": "Terms of Use"
   }
 }

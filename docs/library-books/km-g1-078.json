@@ -1,0 +1,107 @@
+{
+  "id": "km-g1-078",
+  "rev": 0,
+  "language": "km",
+  "band": "A",
+  "ages": [
+    6,
+    7
+  ],
+  "topics": [],
+  "questionCounts": {
+    "understand": 0,
+    "words": 0,
+    "spell": 4
+  },
+  "title": "មេរៀនទី ៧៨ · ជើង ត្ប ត្ន ត្រ",
+  "category": "Khmer",
+  "picture": "khmer-school",
+  "sentences": [
+    {
+      "id": "s1",
+      "text": "ត្បា ត្នា ត្រា ត្រី ត្រូ",
+      "words": [
+        "ត្បា ",
+        "ត្នា ",
+        "ត្រា ",
+        "ត្រី ",
+        "ត្រូ"
+      ]
+    },
+    {
+      "id": "s2",
+      "text": "ត្បាញ ត្នោត ត្រី ត្រជាក់",
+      "words": [
+        "ត្បាញ ",
+        "ត្នោត ",
+        "ត្រី ",
+        "ត្រជាក់"
+      ]
+    },
+    {
+      "id": "s3",
+      "text": "យាយត្បាញក្រមា។",
+      "words": [
+        "យាយ",
+        "ត្បាញ",
+        "ក្រមា។"
+      ]
+    },
+    {
+      "id": "s4",
+      "text": "ពូឡើងដើមត្នោត។",
+      "words": [
+        "ពូ",
+        "ឡើង",
+        "ដើម",
+        "ត្នោត។"
+      ]
+    },
+    {
+      "id": "s5",
+      "text": "ម៉ែចៀនត្រី។",
+      "words": [
+        "ម៉ែ",
+        "ចៀន",
+        "ត្រី។"
+      ]
+    },
+    {
+      "id": "s6",
+      "text": "ទឹកត្រជាក់។",
+      "words": [
+        "ទឹក",
+        "ត្រជាក់។"
+      ]
+    }
+  ],
+  "questions": [
+    {
+      "id": "sp1",
+      "kind": "spell",
+      "sentence": "s3",
+      "word": "ត្បាញ"
+    },
+    {
+      "id": "sp2",
+      "kind": "spell",
+      "sentence": "s4",
+      "word": "ត្នោត"
+    },
+    {
+      "id": "sp3",
+      "kind": "spell",
+      "sentence": "s5",
+      "word": "ត្រី"
+    },
+    {
+      "id": "sp4",
+      "kind": "spell",
+      "sentence": "s6",
+      "word": "ត្រជាក់"
+    }
+  ],
+  "pictures": {},
+  "noRecording": [],
+  "provenance": "Original lesson written for Koda, 2026. It follows the order in which Grade 1 Khmer teaches letters; the words and sentences are new. Draft: not yet reviewed by a native speaker."
+}

@@ -1,0 +1,120 @@
+{
+  "id": "km-g1-008",
+  "rev": 0,
+  "language": "km",
+  "band": "A",
+  "ages": [
+    6,
+    7
+  ],
+  "topics": [],
+  "questionCounts": {
+    "understand": 0,
+    "words": 0,
+    "spell": 3
+  },
+  "title": "មេរៀនទី ៨ · អក្សរ ឋ",
+  "category": "Khmer",
+  "picture": "khmer-school",
+  "sentences": [
+    {
+      "id": "s1",
+      "text": "ឋ ឋា ឋិ ឋី ឋឹ ឋឺ ឋុ ឋូ ឋួ ឋើ ឋឿ ឋៀ ឋេ",
+      "words": [
+        "ឋ ",
+        "ឋា ",
+        "ឋិ ",
+        "ឋី ",
+        "ឋឹ ",
+        "ឋឺ ",
+        "ឋុ ",
+        "ឋូ ",
+        "ឋួ ",
+        "ឋើ ",
+        "ឋឿ ",
+        "ឋៀ ",
+        "ឋេ"
+      ]
+    },
+    {
+      "id": "s2",
+      "text": "ឋែ ឋៃ ឋោ ឋៅ ឋុំ ឋំ ឋាំ ឋះ ឋុះ ឋេះ ឋោះ",
+      "words": [
+        "ឋែ ",
+        "ឋៃ ",
+        "ឋោ ",
+        "ឋៅ ",
+        "ឋុំ ",
+        "ឋំ ",
+        "ឋាំ ",
+        "ឋះ ",
+        "ឋុះ ",
+        "ឋេះ ",
+        "ឋោះ"
+      ]
+    },
+    {
+      "id": "s3",
+      "text": "ដា ឋា ដី ឋី ដេ ឋេ",
+      "words": [
+        "ដា ",
+        "ឋា ",
+        "ដី ",
+        "ឋី ",
+        "ដេ ",
+        "ឋេ"
+      ]
+    },
+    {
+      "id": "s4",
+      "text": "ចៃខាំដៃចៅ។",
+      "words": [
+        "ចៃ",
+        "ខាំ",
+        "ដៃ",
+        "ចៅ។"
+      ]
+    },
+    {
+      "id": "s5",
+      "text": "ចៅចុះដី។",
+      "words": [
+        "ចៅ",
+        "ចុះ",
+        "ដី។"
+      ]
+    },
+    {
+      "id": "s6",
+      "text": "កុំដាំឆៅ។",
+      "words": [
+        "កុំ",
+        "ដាំ",
+        "ឆៅ។"
+      ]
+    }
+  ],
+  "questions": [
+    {
+      "id": "sp1",
+      "kind": "spell",
+      "sentence": "s4",
+      "word": "ចៅ"
+    },
+    {
+      "id": "sp2",
+      "kind": "spell",
+      "sentence": "s5",
+      "word": "ចុះ"
+    },
+    {
+      "id": "sp3",
+      "kind": "spell",
+      "sentence": "s6",
+      "word": "ឆៅ"
+    }
+  ],
+  "pictures": {},
+  "noRecording": [],
+  "provenance": "Original lesson written for Koda, 2026. It follows the order in which Grade 1 Khmer teaches letters; the words and sentences are new. Draft: not yet reviewed by a native speaker."
+}

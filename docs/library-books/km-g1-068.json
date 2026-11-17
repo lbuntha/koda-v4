@@ -1,0 +1,126 @@
+{
+  "id": "km-g1-068",
+  "rev": 0,
+  "language": "km",
+  "band": "A",
+  "ages": [
+    6,
+    7
+  ],
+  "topics": [],
+  "questionCounts": {
+    "understand": 0,
+    "words": 0,
+    "spell": 5
+  },
+  "title": "មេរៀនទី ៦៨ · ជើង ខ្ច ខ្ញ ខ្ទ ខ្ន",
+  "category": "Khmer",
+  "picture": "khmer-school",
+  "sentences": [
+    {
+      "id": "s1",
+      "text": "ខ្ចា ខ្ញា ខ្ទា ខ្នា",
+      "words": [
+        "ខ្ចា ",
+        "ខ្ញា ",
+        "ខ្ទា ",
+        "ខ្នា"
+      ]
+    },
+    {
+      "id": "s2",
+      "text": "ខ្ចី ខ្ញី ខ្ទី ខ្នី",
+      "words": [
+        "ខ្ចី ",
+        "ខ្ញី ",
+        "ខ្ទី ",
+        "ខ្នី"
+      ]
+    },
+    {
+      "id": "s3",
+      "text": "ខ្ចី ខ្ញុំ ខ្ញី ខ្ទះ ខ្នង",
+      "words": [
+        "ខ្ចី ",
+        "ខ្ញុំ ",
+        "ខ្ញី ",
+        "ខ្ទះ ",
+        "ខ្នង"
+      ]
+    },
+    {
+      "id": "s4",
+      "text": "ខ្ញុំខ្ចីសៀវភៅពូ។",
+      "words": [
+        "ខ្ញុំ",
+        "ខ្ចី",
+        "សៀវភៅ",
+        "ពូ។"
+      ]
+    },
+    {
+      "id": "s5",
+      "text": "ម៉ែដាក់ខ្ញីក្នុងស៊ុប។",
+      "words": [
+        "ម៉ែ",
+        "ដាក់",
+        "ខ្ញី",
+        "ក្នុង",
+        "ស៊ុប។"
+      ]
+    },
+    {
+      "id": "s6",
+      "text": "យាយឈឺខ្នង។",
+      "words": [
+        "យាយ",
+        "ឈឺ",
+        "ខ្នង។"
+      ]
+    },
+    {
+      "id": "s7",
+      "text": "ខ្ទះក្តៅណាស់។",
+      "words": [
+        "ខ្ទះ",
+        "ក្តៅ",
+        "ណាស់។"
+      ]
+    }
+  ],
+  "questions": [
+    {
+      "id": "sp1",
+      "kind": "spell",
+      "sentence": "s4",
+      "word": "ខ្ចី"
+    },
+    {
+      "id": "sp2",
+      "kind": "spell",
+      "sentence": "s5",
+      "word": "ខ្ញី"
+    },
+    {
+      "id": "sp3",
+      "kind": "spell",
+      "sentence": "s6",
+      "word": "ខ្នង"
+    },
+    {
+      "id": "sp4",
+      "kind": "spell",
+      "sentence": "s7",
+      "word": "ខ្ទះ"
+    },
+    {
+      "id": "sp5",
+      "kind": "spell",
+      "sentence": "s3",
+      "word": "ខ្ញុំ"
+    }
+  ],
+  "pictures": {},
+  "noRecording": [],
+  "provenance": "Original lesson written for Koda, 2026. It follows the order in which Grade 1 Khmer teaches letters; the words and sentences are new. Draft: not yet reviewed by a native speaker."
+}

@@ -1,0 +1,134 @@
+{
+  "id": "km-g1-038",
+  "rev": 0,
+  "language": "km",
+  "band": "A",
+  "ages": [
+    6,
+    7
+  ],
+  "topics": [],
+  "questionCounts": {
+    "understand": 0,
+    "words": 0,
+    "spell": 4
+  },
+  "title": "មេរៀនទី ៣៨ · អ៊",
+  "category": "Khmer",
+  "picture": "khmer-school",
+  "sentences": [
+    {
+      "id": "s1",
+      "text": "អ៊ អ៊ា អ៊ិ អ៊ី អ៊ឹ អ៊ឺ អ៊ុ អ៊ូ អ៊ួ អ៊ើ អ៊ឿ អ៊ៀ អ៊េ",
+      "words": [
+        "អ៊ ",
+        "អ៊ា ",
+        "អ៊ិ ",
+        "អ៊ី ",
+        "អ៊ឹ ",
+        "អ៊ឺ ",
+        "អ៊ុ ",
+        "អ៊ូ ",
+        "អ៊ួ ",
+        "អ៊ើ ",
+        "អ៊ឿ ",
+        "អ៊ៀ ",
+        "អ៊េ"
+      ]
+    },
+    {
+      "id": "s2",
+      "text": "អ៊ែ អ៊ៃ អ៊ោ អ៊ៅ អ៊ុំ អ៊ំ អ៊ាំ អ៊ះ អ៊ុះ អ៊េះ អ៊ោះ",
+      "words": [
+        "អ៊ែ ",
+        "អ៊ៃ ",
+        "អ៊ោ ",
+        "អ៊ៅ ",
+        "អ៊ុំ ",
+        "អ៊ំ ",
+        "អ៊ាំ ",
+        "អ៊ះ ",
+        "អ៊ុះ ",
+        "អ៊េះ ",
+        "អ៊ោះ"
+      ]
+    },
+    {
+      "id": "s3",
+      "text": "អ៊ុំ ម៉ែ ប៉ា",
+      "words": [
+        "អ៊ុំ ",
+        "ម៉ែ ",
+        "ប៉ា"
+      ]
+    },
+    {
+      "id": "s4",
+      "text": "អ៊ុំហៅចៅ។",
+      "words": [
+        "អ៊ុំ",
+        "ហៅ",
+        "ចៅ។"
+      ]
+    },
+    {
+      "id": "s5",
+      "text": "អ៊ុំនៅទីនេះ។",
+      "words": [
+        "អ៊ុំ",
+        "នៅ",
+        "ទី",
+        "នេះ។"
+      ]
+    },
+    {
+      "id": "s6",
+      "text": "ចៅទៅលាអ៊ុំ។",
+      "words": [
+        "ចៅ",
+        "ទៅ",
+        "លា",
+        "អ៊ុំ។"
+      ]
+    },
+    {
+      "id": "s7",
+      "text": "ម៉ែប៉ាហៅអ៊ុំ។",
+      "words": [
+        "ម៉ែ",
+        "ប៉ា",
+        "ហៅ",
+        "អ៊ុំ។"
+      ]
+    }
+  ],
+  "questions": [
+    {
+      "id": "sp1",
+      "kind": "spell",
+      "sentence": "s4",
+      "word": "អ៊ុំ"
+    },
+    {
+      "id": "sp2",
+      "kind": "spell",
+      "sentence": "s5",
+      "word": "នៅ"
+    },
+    {
+      "id": "sp3",
+      "kind": "spell",
+      "sentence": "s6",
+      "word": "លា"
+    },
+    {
+      "id": "sp4",
+      "kind": "spell",
+      "sentence": "s7",
+      "word": "ហៅ"
+    }
+  ],
+  "pictures": {},
+  "noRecording": [],
+  "provenance": "Original lesson written for Koda, 2026. It follows the order in which Grade 1 Khmer teaches letters; the words and sentences are new. Draft: not yet reviewed by a native speaker."
+}

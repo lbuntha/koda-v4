@@ -1,0 +1,168 @@
+{
+  "id": "km-g1-012",
+  "rev": 0,
+  "language": "km",
+  "band": "A",
+  "ages": [
+    6,
+    7
+  ],
+  "topics": [],
+  "questionCounts": {
+    "understand": 0,
+    "words": 0,
+    "spell": 4
+  },
+  "title": "មេរៀនទី ១២ · អក្សរ ស ហ",
+  "category": "Khmer",
+  "picture": "khmer-school",
+  "sentences": [
+    {
+      "id": "s1",
+      "text": "ស សា សិ សី សឹ សឺ សុ សូ សួ សើ សឿ សៀ សេ",
+      "words": [
+        "ស ",
+        "សា ",
+        "សិ ",
+        "សី ",
+        "សឹ ",
+        "សឺ ",
+        "សុ ",
+        "សូ ",
+        "សួ ",
+        "សើ ",
+        "សឿ ",
+        "សៀ ",
+        "សេ"
+      ]
+    },
+    {
+      "id": "s2",
+      "text": "សែ សៃ សោ សៅ សុំ សំ សាំ សះ សុះ សេះ សោះ",
+      "words": [
+        "សែ ",
+        "សៃ ",
+        "សោ ",
+        "សៅ ",
+        "សុំ ",
+        "សំ ",
+        "សាំ ",
+        "សះ ",
+        "សុះ ",
+        "សេះ ",
+        "សោះ"
+      ]
+    },
+    {
+      "id": "s3",
+      "text": "ហ ហា ហិ ហី ហឹ ហឺ ហុ ហូ ហួ ហើ ហឿ ហៀ ហេ",
+      "words": [
+        "ហ ",
+        "ហា ",
+        "ហិ ",
+        "ហី ",
+        "ហឹ ",
+        "ហឺ ",
+        "ហុ ",
+        "ហូ ",
+        "ហួ ",
+        "ហើ ",
+        "ហឿ ",
+        "ហៀ ",
+        "ហេ"
+      ]
+    },
+    {
+      "id": "s4",
+      "text": "ហែ ហៃ ហោ ហៅ ហុំ ហំ ហាំ ហះ ហុះ ហេះ ហោះ",
+      "words": [
+        "ហែ ",
+        "ហៃ ",
+        "ហោ ",
+        "ហៅ ",
+        "ហុំ ",
+        "ហំ ",
+        "ហាំ ",
+        "ហះ ",
+        "ហុះ ",
+        "ហេះ ",
+        "ហោះ"
+      ]
+    },
+    {
+      "id": "s5",
+      "text": "សោ សេះ ហា ហោះ ហៅ ហែ",
+      "words": [
+        "សោ ",
+        "សេះ ",
+        "ហា ",
+        "ហោះ ",
+        "ហៅ ",
+        "ហែ"
+      ]
+    },
+    {
+      "id": "s6",
+      "text": "ចៅហៅតា។",
+      "words": [
+        "ចៅ",
+        "ហៅ",
+        "តា។"
+      ]
+    },
+    {
+      "id": "s7",
+      "text": "សេះខាំចៅ។",
+      "words": [
+        "សេះ",
+        "ខាំ",
+        "ចៅ។"
+      ]
+    },
+    {
+      "id": "s8",
+      "text": "ផេះហោះ។",
+      "words": [
+        "ផេះ",
+        "ហោះ។"
+      ]
+    },
+    {
+      "id": "s9",
+      "text": "ចៅហា។",
+      "words": [
+        "ចៅ",
+        "ហា។"
+      ]
+    }
+  ],
+  "questions": [
+    {
+      "id": "sp1",
+      "kind": "spell",
+      "sentence": "s2",
+      "word": "សោ"
+    },
+    {
+      "id": "sp2",
+      "kind": "spell",
+      "sentence": "s7",
+      "word": "សេះ"
+    },
+    {
+      "id": "sp3",
+      "kind": "spell",
+      "sentence": "s8",
+      "word": "ហោះ"
+    },
+    {
+      "id": "sp4",
+      "kind": "spell",
+      "sentence": "s6",
+      "word": "ហៅ"
+    }
+  ],
+  "pictures": {},
+  "noRecording": [],
+  "provenance": "Original lesson written for Koda, 2026. It follows the order in which Grade 1 Khmer teaches letters; the words and sentences are new. Draft: not yet reviewed by a native speaker."
+}

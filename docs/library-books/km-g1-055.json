@@ -1,0 +1,129 @@
+{
+  "id": "km-g1-055",
+  "rev": 0,
+  "language": "km",
+  "band": "A",
+  "ages": [
+    6,
+    7
+  ],
+  "topics": [],
+  "questionCounts": {
+    "understand": 0,
+    "words": 0,
+    "spell": 4
+  },
+  "title": "មេរៀនទី ៥៥ · ក្រោយ ◌ម (ព្យញ្ជនៈ ម ទី ២)",
+  "category": "Khmer",
+  "picture": "khmer-school",
+  "sentences": [
+    {
+      "id": "s1",
+      "text": "គម ងម ជម ទម នម ពម មម យម រម លម",
+      "words": [
+        "គម ",
+        "ងម ",
+        "ជម ",
+        "ទម ",
+        "នម ",
+        "ពម ",
+        "មម ",
+        "យម ",
+        "រម ",
+        "លម"
+      ]
+    },
+    {
+      "id": "s2",
+      "text": "គាម ងាម ជាម ទាម នាម ពាម មាម យាម រាម លាម",
+      "words": [
+        "គាម ",
+        "ងាម ",
+        "ជាម ",
+        "ទាម ",
+        "នាម ",
+        "ពាម ",
+        "មាម ",
+        "យាម ",
+        "រាម ",
+        "លាម"
+      ]
+    },
+    {
+      "id": "s3",
+      "text": "ឈាម រោម យាម",
+      "words": [
+        "ឈាម ",
+        "រោម ",
+        "យាម"
+      ]
+    },
+    {
+      "id": "s4",
+      "text": "គាត់យាមទីនេះ។",
+      "words": [
+        "គាត់",
+        "យាម",
+        "ទី",
+        "នេះ។"
+      ]
+    },
+    {
+      "id": "s5",
+      "text": "គោមានរោម។",
+      "words": [
+        "គោ",
+        "មាន",
+        "រោម។"
+      ]
+    },
+    {
+      "id": "s6",
+      "text": "ជើងចៅមានឈាម។",
+      "words": [
+        "ជើង",
+        "ចៅ",
+        "មាន",
+        "ឈាម។"
+      ]
+    },
+    {
+      "id": "s7",
+      "text": "ម៉ែញ៉ាំចៀម។",
+      "words": [
+        "ម៉ែ",
+        "ញ៉ាំ",
+        "ចៀម។"
+      ]
+    }
+  ],
+  "questions": [
+    {
+      "id": "sp1",
+      "kind": "spell",
+      "sentence": "s6",
+      "word": "ឈាម"
+    },
+    {
+      "id": "sp2",
+      "kind": "spell",
+      "sentence": "s5",
+      "word": "រោម"
+    },
+    {
+      "id": "sp3",
+      "kind": "spell",
+      "sentence": "s4",
+      "word": "យាម"
+    },
+    {
+      "id": "sp4",
+      "kind": "spell",
+      "sentence": "s7",
+      "word": "ចៀម"
+    }
+  ],
+  "pictures": {},
+  "noRecording": [],
+  "provenance": "Original lesson written for Koda, 2026. It follows the order in which Grade 1 Khmer teaches letters; the words and sentences are new. Draft: not yet reviewed by a native speaker."
+}

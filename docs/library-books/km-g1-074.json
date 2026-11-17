@@ -1,0 +1,127 @@
+{
+  "id": "km-g1-074",
+  "rev": 0,
+  "language": "km",
+  "band": "A",
+  "ages": [
+    6,
+    7
+  ],
+  "topics": [],
+  "questionCounts": {
+    "understand": 0,
+    "words": 0,
+    "spell": 5
+  },
+  "title": "មេរៀនទី ៧៤ · ជើង ឆ្ក ឆ្ង ឆ្ន",
+  "category": "Khmer",
+  "picture": "khmer-school",
+  "sentences": [
+    {
+      "id": "s1",
+      "text": "ឆ្កា ឆ្ងា ឆ្នា ឆ្កែ ឆ្នេ",
+      "words": [
+        "ឆ្កា ",
+        "ឆ្ងា ",
+        "ឆ្នា ",
+        "ឆ្កែ ",
+        "ឆ្នេ"
+      ]
+    },
+    {
+      "id": "s2",
+      "text": "ឆ្កែ ឆ្ងាញ់ ឆ្ងាយ ឆ្នាំ ឆ្នាំង",
+      "words": [
+        "ឆ្កែ ",
+        "ឆ្ងាញ់ ",
+        "ឆ្ងាយ ",
+        "ឆ្នាំ ",
+        "ឆ្នាំង"
+      ]
+    },
+    {
+      "id": "s3",
+      "text": "ឆ្កែខ្ញុំដេក។",
+      "words": [
+        "ឆ្កែ",
+        "ខ្ញុំ",
+        "ដេក។"
+      ]
+    },
+    {
+      "id": "s4",
+      "text": "ស៊ុបម៉ែឆ្ងាញ់។",
+      "words": [
+        "ស៊ុប",
+        "ម៉ែ",
+        "ឆ្ងាញ់។"
+      ]
+    },
+    {
+      "id": "s5",
+      "text": "សាលានៅឆ្ងាយ។",
+      "words": [
+        "សាលា",
+        "នៅ",
+        "ឆ្ងាយ។"
+      ]
+    },
+    {
+      "id": "s6",
+      "text": "ខ្ញុំរៀនឆ្នាំទីមួយ។",
+      "words": [
+        "ខ្ញុំ",
+        "រៀន",
+        "ឆ្នាំ",
+        "ទី",
+        "មួយ។"
+      ]
+    },
+    {
+      "id": "s7",
+      "text": "ម៉ែដាំបាយក្នុងឆ្នាំង។",
+      "words": [
+        "ម៉ែ",
+        "ដាំ",
+        "បាយ",
+        "ក្នុង",
+        "ឆ្នាំង។"
+      ]
+    }
+  ],
+  "questions": [
+    {
+      "id": "sp1",
+      "kind": "spell",
+      "sentence": "s3",
+      "word": "ឆ្កែ"
+    },
+    {
+      "id": "sp2",
+      "kind": "spell",
+      "sentence": "s4",
+      "word": "ឆ្ងាញ់"
+    },
+    {
+      "id": "sp3",
+      "kind": "spell",
+      "sentence": "s5",
+      "word": "ឆ្ងាយ"
+    },
+    {
+      "id": "sp4",
+      "kind": "spell",
+      "sentence": "s6",
+      "word": "ឆ្នាំ"
+    },
+    {
+      "id": "sp5",
+      "kind": "spell",
+      "sentence": "s7",
+      "word": "ឆ្នាំង"
+    }
+  ],
+  "pictures": {},
+  "noRecording": [],
+  "provenance": "Original lesson written for Koda, 2026. It follows the order in which Grade 1 Khmer teaches letters; the words and sentences are new. Draft: not yet reviewed by a native speaker."
+}

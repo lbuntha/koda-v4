@@ -1,0 +1,111 @@
+{
+  "id": "km-g1-022r",
+  "rev": 0,
+  "language": "km",
+  "band": "A",
+  "ages": [
+    6,
+    7
+  ],
+  "topics": [],
+  "questionCounts": {
+    "understand": 0,
+    "words": 0,
+    "spell": 4
+  },
+  "title": "រៀនសាឡើងវិញ · ឌ ឍ ទ ធ",
+  "category": "Khmer",
+  "picture": "khmer-school",
+  "sentences": [
+    {
+      "id": "s1",
+      "text": "ឌា ឍា ទា ធា",
+      "words": [
+        "ឌា ",
+        "ឍា ",
+        "ទា ",
+        "ធា"
+      ]
+    },
+    {
+      "id": "s2",
+      "text": "ទា ទី ទៅ ទេ ទូ ទុំ ធូ ធំ",
+      "words": [
+        "ទា ",
+        "ទី ",
+        "ទៅ ",
+        "ទេ ",
+        "ទូ ",
+        "ទុំ ",
+        "ធូ ",
+        "ធំ"
+      ]
+    },
+    {
+      "id": "s3",
+      "text": "ទាទៅណា?",
+      "words": [
+        "ទា",
+        "ទៅ",
+        "ណា?"
+      ]
+    },
+    {
+      "id": "s4",
+      "text": "ទូតាធំ។",
+      "words": [
+        "ទូ",
+        "តា",
+        "ធំ។"
+      ]
+    },
+    {
+      "id": "s5",
+      "text": "តាទៅឃុំ។",
+      "words": [
+        "តា",
+        "ទៅ",
+        "ឃុំ។"
+      ]
+    },
+    {
+      "id": "s6",
+      "text": "ឌាចេះគូទា។",
+      "words": [
+        "ឌា",
+        "ចេះ",
+        "គូ",
+        "ទា។"
+      ]
+    }
+  ],
+  "questions": [
+    {
+      "id": "sp1",
+      "kind": "spell",
+      "sentence": "s3",
+      "word": "ទា"
+    },
+    {
+      "id": "sp2",
+      "kind": "spell",
+      "sentence": "s5",
+      "word": "ទៅ"
+    },
+    {
+      "id": "sp3",
+      "kind": "spell",
+      "sentence": "s4",
+      "word": "ទូ"
+    },
+    {
+      "id": "sp4",
+      "kind": "spell",
+      "sentence": "s6",
+      "word": "គូ"
+    }
+  ],
+  "pictures": {},
+  "noRecording": [],
+  "provenance": "Original lesson written for Koda, 2026. It follows the order in which Grade 1 Khmer teaches letters; the words and sentences are new. Draft: not yet reviewed by a native speaker."
+}
