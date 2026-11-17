@@ -135,6 +135,52 @@ export function coachIdleMs(value: unknown): number {
   return Math.min(120, Math.max(3, seconds)) * 1000;
 }
 
+/*
+ * "Got it" means it: once a learner puts the coach away in a skill, the coach
+ * stops speaking up on its own in that skill. Help stays one press of the Hint
+ * button away. Kept on this device, per skill, so it survives a new question, a
+ * new round and a reload; storage that is missing or blocked just means the
+ * choice lasts until the page closes.
+ */
+const QUIET_KEY = "koda.guide.quiet.v1";
+const quietThisSession = new Set<string>();
+
+function readQuiet(): string[] {
+  try {
+    const raw = window.localStorage.getItem(QUIET_KEY);
+    const list = raw ? JSON.parse(raw) : [];
+    return Array.isArray(list) ? list.filter((x): x is string => typeof x === "string") : [];
+  } catch {
+    return [];
+  }
+}
+
+/** Whether the learner has put the coach away in this skill. */
+export function isGuideQuiet(skillId: string): boolean {
+  return quietThisSession.has(skillId) || readQuiet().includes(skillId);
+}
+
+/** Remember that the learner put the coach away in this skill. */
+export function quietGuide(skillId: string): void {
+  quietThisSession.add(skillId);
+  try {
+    const list = readQuiet();
+    if (!list.includes(skillId)) window.localStorage.setItem(QUIET_KEY, JSON.stringify([...list, skillId]));
+  } catch {
+    /* Blocked storage: the in-memory set still holds it for this visit. */
+  }
+}
+
+/** Let the coach speak up on its own again, in every skill. */
+export function forgetGuideQuiet(): void {
+  quietThisSession.clear();
+  try {
+    window.localStorage.removeItem(QUIET_KEY);
+  } catch {
+    /* Nothing stored to forget. */
+  }
+}
+
 /** The lesson's `guide` block, if it authored one. */
 export function guideSetup(params: unknown): GuideSetup {
   const guide = (params as { guide?: unknown } | null | undefined)?.guide;
@@ -201,7 +247,7 @@ export interface GuideController {
    * asking twice.
    */
   ask(): void;
-  /** The child put it away. */
+  /** The child put it away. From then on it only comes back when asked for. */
   dismiss(): void;
   /** A good move: clears a gentle cue and restarts the clock. */
   moved(): void;
@@ -274,6 +320,9 @@ export function useGuide({
   const deepestRef = useRef(0);
   /** Cues raised on the open question without being asked for. */
   const unaskedRef = useRef(0);
+
+  /* Put away with "Got it" in this skill: no more help unless asked for. */
+  const [quiet, setQuiet] = useState(() => isGuideQuiet(koda.skillId));
 
   const mode = coachMode(koda.config.get("coachMode", "ladder"));
   const idleMs = coachIdleMs(koda.config.get("coachIdleSeconds", COACH_IDLE_DEFAULT_S));
@@ -363,6 +412,9 @@ export function useGuide({
      */
     if (level >= Math.min(3, rungs.length)) return;
 
+    /* The learner said "Got it": the clock never raises help on its own again. */
+    if (quiet) return;
+
     /* `once`: the single cue, after a flat stretch of stillness. Anything on
        screen — that cue, or one the child asked for — already is the help, so
        the clock has nothing to add to it. */
@@ -379,7 +431,7 @@ export function useGuide({
     const timer = window.setTimeout(() => raise("stalled"), wait);
     return () => window.clearTimeout(timer);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [enabled, paused, done, level, rungs.length, progress, questionId, raise, scale, mode, idleMs]);
+  }, [enabled, paused, done, level, rungs.length, progress, questionId, raise, scale, mode, idleMs, quiet]);
 
   /*
    * Said once per rung, not once per render.
@@ -446,8 +498,10 @@ export function useGuide({
 
   const dismiss = useCallback(() => {
     dismissedRef.current = true;
+    quietGuide(koda.skillId);
+    setQuiet(true);
     setLevel(0);
-  }, []);
+  }, [koda.skillId]);
 
   const moved = useCallback(() => {
     if (!enabled) return;
@@ -460,9 +514,9 @@ export function useGuide({
   const stumbled = useCallback(() => {
     if (!enabled) return;
     /* `once` promises an idle cue and nothing else unasked-for. */
-    if (mode === "once") return;
+    if (mode === "once" || quiet) return;
     raise("stumbled");
-  }, [enabled, raise, mode]);
+  }, [enabled, raise, mode, quiet]);
 
   const text = level > 0 ? rungs[level - 1] : undefined;
   const cue: GuideCue | null =

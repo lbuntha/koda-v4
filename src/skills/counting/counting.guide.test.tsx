@@ -8,7 +8,7 @@ import {
   nextTarget,
   skippedTopRow,
 } from "./internal/guide/countGuide";
-import { GUIDE_DEFAULTS, levelFor, waitMs } from "../kit";
+import { GUIDE_DEFAULTS, forgetGuideQuiet, levelFor, waitMs } from "../kit";
 
 /**
  * The coach, across every technique counting teaches.
@@ -120,6 +120,7 @@ describe("what the coach decides", () => {
 
 describe("the coach on screen", () => {
   beforeEach(() => {
+    forgetGuideQuiet();
     vi.useFakeTimers();
     // Four rockets, every time: a cue can then be read word for word.
     vi.spyOn(Math, "random").mockReturnValue(0);
@@ -214,7 +215,7 @@ describe("the coach on screen", () => {
     h.unmount();
   });
 
-  it("goes away when the learner says they are fine, and comes back patient", () => {
+  it("goes away for good when the learner says they are fine, until they ask", () => {
     const h = renderActivity(orbit, {
       params: lessonParams("count-in-a-row", { countRange: [4, 4], settleMs: 0 }),
       level: 1,
@@ -226,11 +227,21 @@ describe("the coach on screen", () => {
     press(/Got it/i);
     expect(coaching()).toBeNull();
 
-    wait(GUIDE_DEFAULTS.betweenMs - GUIDE_DEFAULTS.hurryMs);
-    expect(cues(h), "putting it away buys back the full wait").toEqual([1]);
-    wait(GUIDE_DEFAULTS.startMs);
-    expect(cues(h), "but it does come back").toEqual([1, 2]);
+    wait(GUIDE_DEFAULTS.startMs * 4);
+    expect(cues(h), "Got it means no more help on its own").toEqual([1]);
+    expect(coaching()).toBeNull();
+
+    press(/Hint/i);
+    expect(coaching(), "the Hint button still brings it back").not.toBeNull();
     h.unmount();
+
+    const again = renderActivity(orbit, {
+      params: lessonParams("count-in-a-row", { countRange: [4, 4], settleMs: 0 }),
+      level: 1,
+    });
+    wait(GUIDE_DEFAULTS.startMs * 4);
+    expect(coaching(), "nor in the next round of this skill").toBeNull();
+    again.unmount();
   });
 
   it("keeps the lesson's own method behind Back and Next", () => {
@@ -328,6 +339,7 @@ describe("the coach on screen", () => {
 
 describe("the coach set to speak up once", () => {
   beforeEach(() => {
+    forgetGuideQuiet();
     vi.useFakeTimers();
     vi.spyOn(Math, "random").mockReturnValue(0);
   });
@@ -411,6 +423,7 @@ describe("the coach set to speak up once", () => {
 
 describe("every technique is coached the same way", () => {
   beforeEach(() => {
+    forgetGuideQuiet();
     vi.useFakeTimers();
     vi.spyOn(Math, "random").mockReturnValue(0);
   });

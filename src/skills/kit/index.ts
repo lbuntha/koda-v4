@@ -53,6 +53,8 @@ export {
   levelFor,
   waitMs,
   GUIDE_DEFAULTS,
+  forgetGuideQuiet,
+  isGuideQuiet,
   PATIENCE,
   type GuideController,
   type GuideCue,
