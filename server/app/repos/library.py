@@ -61,9 +61,9 @@ _SUMMARY_PROJECTION: dict[str, Any] = {
 }
 
 
-def _summary_stages() -> list[dict[str, Any]]:
+def _summary_stages(owner: dict[str, Any] | None = None) -> list[dict[str, Any]]:
     return [
-        {"$match": {"deletedAt": None}},
+        {"$match": {"deletedAt": None, **(owner or {})}},
         {"$project": _SUMMARY_PROJECTION},
         {"$addFields": {
             "title": _either("title", "$id"),
@@ -93,8 +93,12 @@ async def studio_page(
     sort: str = "updated",
     page: int = 1,
     page_size: int = 25,
+    owner: dict[str, Any] | None = None,
 ) -> dict[str, Any]:
-    """One page of book summaries, plus counts per status for the same search."""
+    """One page of book summaries, plus counts per status for the same search.
+
+    `owner` narrows it to one person's books (security.ownership.scope).
+    """
     reported = await db.library_reports.distinct("bookId", {"resolvedAt": None})
     count_pipeline = [
         {"$match": {"resolvedAt": None}},
@@ -126,7 +130,7 @@ async def studio_page(
     order = STUDIO_SORTS.get(sort, STUDIO_SORTS["updated"])
 
     pipeline = [
-        *_summary_stages(),
+        *_summary_stages(owner),
         *([{"$match": narrow}] if narrow else []),
         {"$facet": {
             "items": [{"$match": pick}, {"$sort": dict(order)}, {"$skip": (page - 1) * page_size}, {"$limit": page_size}],
@@ -155,11 +159,11 @@ async def studio_page(
     }
 
 
-async def studio_facets(db: AsyncIOMotorDatabase) -> dict[str, list[dict[str, Any]]]:
+async def studio_facets(db: AsyncIOMotorDatabase, owner: dict[str, Any] | None = None) -> dict[str, list[dict[str, Any]]]:
     """The languages, levels and categories books actually have, with counts — the filter options."""
     group = lambda field: [{"$group": {"_id": f"${field}", "count": {"$sum": 1}}}, {"$sort": {"_id": 1}}]  # noqa: E731
     out = (await db.library_books.aggregate([
-        *_summary_stages(),
+        *_summary_stages(owner),
         {"$facet": {"languages": group("language"), "bands": group("band"), "categories": group("category")}},
     ]).to_list(length=1))[0]
     return {k: [{"value": row["_id"], "count": row["count"]} for row in v if row["_id"] is not None] for k, v in out.items()}
@@ -191,19 +195,26 @@ async def get(db: AsyncIOMotorDatabase, book_id: str) -> dict[str, Any] | None:
     return await db.library_books.find_one({"id": book_id, "deletedAt": None})
 
 
+async def get_any(db: AsyncIOMotorDatabase, book_id: str) -> dict[str, Any] | None:
+    """The row for an id even once deleted: an id stays its owner's, so a save cannot take it over."""
+    return await db.library_books.find_one({"id": book_id})
+
+
 async def save_draft(
     db: AsyncIOMotorDatabase,
     book_id: str,
     draft: dict[str, Any],
     meta: dict[str, Any],
     updated_by: str | None,
+    owner_id: str | None = None,
 ) -> dict[str, Any]:
     timestamp = now()
     await db.library_books.update_one(
         {"id": book_id},
         {
             "$set": {"draft": draft, **meta, "updatedAt": timestamp, "updatedBy": updated_by, "deletedAt": None},
-            "$setOnInsert": {"id": book_id, "createdAt": timestamp, "rev": 0, "published": None},
+            # The person who first saves a book owns it; later editors do not.
+            "$setOnInsert": {"id": book_id, "createdAt": timestamp, "rev": 0, "published": None, "ownerId": owner_id},
         },
         upsert=True,
     )
@@ -280,6 +291,14 @@ async def open_reports(db: AsyncIOMotorDatabase, book_id: str | None = None) -> 
     return await db.library_reports.find(match).sort("createdAt", -1).to_list(length=500)
 
 
+async def report_by_id(db: AsyncIOMotorDatabase, report_id: str) -> dict[str, Any] | None:
+    return await db.library_reports.find_one({"id": report_id, "resolvedAt": None})
+
+
+async def owned_ids(db: AsyncIOMotorDatabase, owner_id: str) -> list[dict[str, Any]]:
+    return await db.library_books.find({"ownerId": owner_id, "deletedAt": None}, {"_id": 0, "id": 1}).to_list(length=None)
+
+
 async def resolve_report(db: AsyncIOMotorDatabase, report_id: str, by: str | None) -> bool:
     result = await db.library_reports.update_one({"id": report_id, "resolvedAt": None}, {"$set": {"resolvedAt": now(), "resolvedBy": by}})
     return result.modified_count > 0
@@ -310,13 +329,17 @@ async def put_image(
     return image_id
 
 
-async def list_images(db: AsyncIOMotorDatabase, *, source: str, query: str = "", limit: int = 60) -> list[dict[str, Any]]:
+async def list_images(
+    db: AsyncIOMotorDatabase, *, source: str, query: str = "", limit: int = 60, made_by: str | None = None
+) -> list[dict[str, Any]]:
     """Photos newest first, without their bytes. `query` matches the description.
 
     `source="ai"` is the pictures made with AI; `"all"` is every stored photo,
     which is how a picture made before pictures were labelled is found again.
     """
     match: dict[str, Any] = {} if source == "all" else {"source": source}
+    if made_by:
+        match["createdBy"] = made_by
     if query:
         match["prompt"] = {"$regex": re.escape(query), "$options": "i"}
     order = "createdAt" if source == "all" else "madeAt"

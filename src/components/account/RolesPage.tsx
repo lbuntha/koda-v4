@@ -80,6 +80,8 @@ const LABELS: Record<string, { area: string; label: string }> = {
   // Koda Trace: make trace items and publish collections everyone can practise.
   // A platform grant — give it to a custom platform role, not a family role.
   "trace:create": { area: "Operator", get label() { return translate("admin.rolesPage.makeAndPublishTraceCollections"); } },
+  // Without it, a Content creator sees and changes only the Studio items they made.
+  "content:all": { area: "Operator", get label() { return translate("admin.rolesPage.seeAndEditEveryonesContent"); } },
   "menu:manage": { area: "Operator", get label() { return translate("admin.rolesPage.manageThePlatformSidebarMenu"); } },
   "learner:create": { area: "Children", get label() { return translate("admin.rolesPage.addAChild"); } },
   "learner:read": { area: "Children", get label() { return translate("admin.rolesPage.seeTheChildren"); } },

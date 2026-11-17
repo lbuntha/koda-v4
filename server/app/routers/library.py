@@ -29,7 +29,7 @@ from app.library_verify import verify_passage
 from app.models.auth import Principal
 from app.models.common import Model
 from app.repos import library as library_repo
-from app.security import principal_can
+from app.security import ownership, principal_can
 from app.topics import clean_topics
 
 router = APIRouter(prefix="/library", tags=["library"], dependencies=[AUTHENTICATED])
@@ -346,7 +346,7 @@ async def studio_meta(db: Db, _: CanWrite) -> StudioMeta:
 @router.get("/drafts")
 async def list_drafts(
     db: Db,
-    _: CanWrite,
+    p: CanWrite,
     q: Annotated[str, Query(max_length=100)] = "",
     status: Annotated[str | None, Query(pattern="^(" + "|".join(library_repo.STUDIO_STATUSES) + ")$")] = None,
     language: Annotated[str | None, Query(max_length=10)] = None,
@@ -357,8 +357,10 @@ async def list_drafts(
     page_size: Annotated[int, Query(alias="pageSize", ge=PAGE_SIZE_MIN, le=PAGE_SIZE_MAX)] = 25,
 ) -> StudioPage:
     """The studio's list: a page of summaries, searched and filtered in the database."""
+    mine = ownership.scope(p)
     got = await library_repo.studio_page(
-        db, query=q, status=status, language=language, band=band, category=category, sort=sort, page=page, page_size=page_size
+        db, query=q, status=status, language=language, band=band, category=category, sort=sort, page=page,
+        page_size=page_size, owner=mine,
     )
     total = got["total"]
     return StudioPage(
@@ -368,17 +370,23 @@ async def list_drafts(
         total=total,
         pages=max(1, (total + page_size - 1) // page_size),
         stats=StudioStats(**got["stats"]),
-        facets=StudioFacets(**await library_repo.studio_facets(db)),
+        facets=StudioFacets(**await library_repo.studio_facets(db, mine)),
     )
 
 
 @router.get("/drafts/{book_id}")
-async def get_draft(book_id: str, db: Db, _: CanWrite) -> BookOut:
+async def get_draft(book_id: str, db: Db, p: CanWrite) -> BookOut:
     """One book in full — its draft and live revision — for the editor."""
+    return _out(await _mine(db, p, book_id))
+
+
+async def _mine(db: Any, p: Principal, book_id: str) -> dict[str, Any]:
+    """A live book this person may work on, or the same 404 as a missing one."""
     row = await library_repo.get(db, _id(book_id))
-    if row is None:
+    if not ownership.may_touch(p, row):
         raise NotFound(f'No book "{book_id}".', "book_not_found")
-    return _out(row)
+    assert row is not None
+    return row
 
 
 @router.get("/studio/spelling-units")
@@ -393,9 +401,13 @@ async def spelling_units_in_use(db: Db, _: CanWrite, language: Annotated[str, Qu
 @router.put("/drafts/{book_id}")
 async def save_draft(book_id: str, body: DraftWrite, db: Db, p: CanWrite) -> BookOut:
     book_id = _id(book_id)
+    existing = await library_repo.get_any(db, book_id)
+    if existing is not None and not ownership.may_touch(p, existing):
+        raise AppError(409, "book_id_taken", f'The id "{book_id}" is already used by another book. Choose another id.')
     passage = _clean({**body.passage, "id": book_id})
     row = await library_repo.save_draft(
-        db, book_id, passage, {"confirmedSplit": body.confirmed_split, "provider": body.provider}, p.subject_id
+        db, book_id, passage, {"confirmedSplit": body.confirmed_split, "provider": body.provider}, p.subject_id,
+        owner_id=ownership.owner_for_new(p),
     )
     return _out(row)
 
@@ -403,8 +415,8 @@ async def save_draft(book_id: str, body: DraftWrite, db: Db, p: CanWrite) -> Boo
 @router.post("/drafts/{book_id}/publish")
 async def publish(book_id: str, db: Db, p: CanWrite) -> BookOut:
     book_id = _id(book_id)
-    row = await library_repo.get(db, book_id)
-    if row is None or not row.get("draft"):
+    row = await _mine(db, p, book_id)
+    if not row.get("draft"):
         raise NotFound(f'No draft "{book_id}".', "book_not_found")
     require_ages(row["draft"].get("ages"))
     verdict = verify_passage(row["draft"], confirmed_split=bool(row.get("confirmedSplit")))
@@ -423,6 +435,7 @@ async def publish(book_id: str, db: Db, p: CanWrite) -> BookOut:
 
 @router.post("/drafts/{book_id}/unpublish")
 async def unpublish(book_id: str, db: Db, p: CanWrite) -> BookOut:
+    await _mine(db, p, book_id)
     row = await library_repo.unpublish(db, _id(book_id), p.subject_id)
     if row is None:
         raise NotFound(f'No book "{book_id}".', "book_not_found")
@@ -431,6 +444,7 @@ async def unpublish(book_id: str, db: Db, p: CanWrite) -> BookOut:
 
 @router.delete("/drafts/{book_id}", status_code=204)
 async def delete(book_id: str, db: Db, p: CanWrite) -> None:
+    await _mine(db, p, book_id)
     if not await library_repo.delete(db, _id(book_id), p.subject_id):
         raise NotFound(f'No book "{book_id}".', "book_not_found")
 
@@ -515,13 +529,14 @@ async def upload_image(body: ImageWrite, db: Db, p: CanWrite) -> AudioSaved:
 @router.get("/images")
 async def list_images(
     db: Db,
-    _: CanWrite,
+    p: CanWrite,
     source: Literal["ai", "all"] = "ai",
     q: Annotated[str, Query(max_length=200)] = "",
     limit: Annotated[int, Query(ge=1, le=200)] = 60,
 ) -> ImageList:
     """Pictures made with AI in any book (or every stored photo), newest first, for the studio to offer again."""
-    rows = await library_repo.list_images(db, source=source, query=q.strip(), limit=limit)
+    made_by = None if ownership.sees_all(p) else p.subject_id
+    rows = await library_repo.list_images(db, source=source, query=q.strip(), limit=limit, made_by=made_by)
     return ImageList(images=[ImageListed(id=r["id"], prompt=r.get("prompt") or "", bytes=r.get("bytes") or 0) for r in rows])
 
 
@@ -626,8 +641,12 @@ async def report_book(book_id: str, body: ReportWrite, db: Db, p: CanRead) -> Re
 
 
 @router.get("/reports")
-async def list_reports(db: Db, _: CanWrite, book_id: Annotated[str | None, Query(alias="bookId", max_length=64)] = None) -> ReportList:
+async def list_reports(db: Db, p: CanWrite, book_id: Annotated[str | None, Query(alias="bookId", max_length=64)] = None) -> ReportList:
     rows = await library_repo.open_reports(db, book_id)
+    if not ownership.sees_all(p):
+        # A creator hears about their own books only.
+        mine = {r["id"] for r in await library_repo.owned_ids(db, p.subject_id)}
+        rows = [r for r in rows if r["bookId"] in mine]
     return ReportList(
         reports=[
             ReportOut(id=r["id"], bookId=r["bookId"], rev=r["rev"], reason=r["reason"], note=r.get("note", ""))
@@ -638,5 +657,8 @@ async def list_reports(db: Db, _: CanWrite, book_id: Annotated[str | None, Query
 
 @router.post("/reports/{report_id}/resolve", status_code=204)
 async def resolve_report(report_id: str, db: Db, p: CanWrite) -> None:
+    report = await library_repo.report_by_id(db, report_id)
+    if report is not None and not ownership.sees_all(p):
+        await _mine(db, p, report["bookId"])
     if not await library_repo.resolve_report(db, report_id, p.subject_id):
         raise NotFound("No open report with that id.", "report_not_found")

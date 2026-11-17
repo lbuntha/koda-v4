@@ -3267,7 +3267,8 @@
         "operator": "Operator",
         "other": "Other"
       },
-      "makeAndPublishTraceCollections": "Make and publish Trace collections (everyone can practise them)"
+      "makeAndPublishTraceCollections": "Make and publish Trace collections (everyone can practise them)",
+      "seeAndEditEveryonesContent": "See and edit everyone's Studio content (without it: only their own)"
     },
     "scoringPage": {
       "learningStreak": "Learning streak",

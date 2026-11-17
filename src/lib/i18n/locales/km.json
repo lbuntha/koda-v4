@@ -3126,7 +3126,8 @@
         "operator": "អ្នកដំណើរការ",
         "other": "ផ្សេងៗ"
       },
-      "makeAndPublishTraceCollections": "បង្កើត និងផ្សាយសំណុំគូសតាម (គ្រប់គ្នាអាចហាត់បាន)"
+      "makeAndPublishTraceCollections": "បង្កើត និងផ្សាយសំណុំគូសតាម (គ្រប់គ្នាអាចហាត់បាន)",
+      "seeAndEditEveryonesContent": "មើល និងកែខ្លឹមសារ Studio របស់គ្រប់គ្នា (បើគ្មាន៖ តែរបស់ខ្លួន)"
     },
     "scoringPage": {
       "learningStreak": "ការរៀនជាប់ៗគ្នា",

@@ -18,6 +18,13 @@ DEFAULT_PLATFORM_ROLES: list[dict] = [
         "builtIn": True,
     },
     {
+        "roleId": "creator",
+        "name": "Content creator",
+        "description": "Makes books, quizzes, Trace and art, and sees only their own.",
+        "permissions": sorted(PLATFORM_PERMISSIONS["creator"]),
+        "builtIn": True,
+    },
+    {
         "roleId": "support",
         "name": "Support",
         "description": "Read-only account, family, and device support access.",

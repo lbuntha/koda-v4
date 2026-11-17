@@ -74,6 +74,11 @@ PERMISSIONS = {
     # Granted only through a platform role; never by a family role, so a child
     # can never hold it.
     "trace:create",
+    # Seeing and changing *everyone's* Studio content. Without it, a person who
+    # can author (content:write, trace:create) works only on what they made:
+    # their own books, quizzes, Trace items and art. The admin role holds it;
+    # a Content creator does not. Platform-only, like the two above.
+    "content:all",
     "device:list",
     "device:revoke",
     # Platform account lifecycle. Kept separate from family membership roles:
@@ -176,12 +181,20 @@ PLATFORM_PERMISSIONS: dict[str, set[str]] = {
         "scoring:write",
         "menu:manage",
     },
+    # Makes Studio content — books, quizzes, Trace, art — and sees only their
+    # own. No accounts, no settings, no deployment switches.
+    "creator": {
+        "settings:read",
+        "content:write",
+        "trace:create",
+    },
     # Runs the service: account lifecycle, devices, deletion requests — plus the
     # content a developer manages, because an operator has to be able to fix it.
     "admin": {
         "settings:read",
         "settings:write",
         "content:write",
+        "content:all",
         "trace:create",
         "scoring:write",
         "system:write",
