@@ -5,8 +5,7 @@ on:
     branches: [main]
   pull_request:
     branches: [main]
-  # "Run workflow" in the Actions tab: tests, then the VPS only. The Cloud Run
-  # jobs run on a push and are skipped here.
+  # A push to main, or "Run workflow" in the Actions tab: tests, then the VPS.
   workflow_dispatch:
 
 permissions:
@@ -15,13 +14,6 @@ permissions:
 concurrency:
   group: koda-deploy-${{ github.ref }}
   cancel-in-progress: true
-
-env:
-  GCP_PROJECT_ID: learn-with-koda
-  GCP_REGION: us-central1
-  ARTIFACT_REPOSITORY: koda-repo
-  API_SERVICE: koda-backend
-  APP_SERVICE: koda-app
 
 jobs:
   ci-verification:
@@ -81,178 +73,8 @@ jobs:
           JWT_SECRET: ci-only-secret-at-least-32-characters
         run: pytest -q
 
-  deploy-api:
-    name: Deploy FastAPI service
-    runs-on: ubuntu-latest
-    needs: ci-verification
-    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
-    env:
-      MONGODB_URI: ${{ secrets.MONGODB_URI }}
-      JWT_SECRET: ${{ secrets.JWT_SECRET }}
-      TUTOR_SERVICE_TOKEN: ${{ secrets.TUTOR_SERVICE_TOKEN }}
-      # OAuth client ids are public identifiers, so this is a repository
-      # variable rather than a secret. Empty leaves Google sign-in disabled.
-      GOOGLE_CLIENT_ID: ${{ vars.GOOGLE_CLIENT_ID }}
-      REQUIRE_EMAIL_VERIFICATION: ${{ vars.REQUIRE_EMAIL_VERIFICATION || 'false' }}
-      MAIL_DRIVER: ${{ vars.MAIL_DRIVER || 'console' }}
-      SMTP_HOST: ${{ vars.SMTP_HOST }}
-      SMTP_PORT: ${{ vars.SMTP_PORT || '587' }}
-      SMTP_STARTTLS: ${{ vars.SMTP_STARTTLS || 'true' }}
-      SMTP_USER: ${{ secrets.SMTP_USER }}
-      SMTP_PASSWORD: ${{ secrets.SMTP_PASSWORD }}
-      MAIL_FROM: ${{ vars.MAIL_FROM || 'Koda <no-reply@koda.local>' }}
-      # `console` logs and sends nothing, which is the safe default for a
-      # deployment that has not been given a Firebase project yet.
-      PUSH_DRIVER: ${{ vars.PUSH_DRIVER || 'console' }}
-      FIREBASE_PROJECT_ID: ${{ vars.FIREBASE_PROJECT_ID }}
-      # Optional until the Library starts accepting production recordings.
-      # Once set, audio goes to GCS with the same sharded ids used locally.
-      LIBRARY_AUDIO_BUCKET: ${{ vars.LIBRARY_AUDIO_BUCKET }}
-      PUSH_TASK_AUDIENCE: ${{ vars.PUSH_TASK_AUDIENCE }}
-      PUSH_TASK_SERVICE_ACCOUNT: ${{ vars.PUSH_TASK_SERVICE_ACCOUNT }}
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Require production secrets
-        run: |
-          test -n "$MONGODB_URI"
-          test -n "$JWT_SECRET"
-          test -n "$TUTOR_SERVICE_TOKEN"
-          if [ "$REQUIRE_EMAIL_VERIFICATION" = "true" ]; then
-            test "$MAIL_DRIVER" = "smtp"
-            test -n "$SMTP_HOST"
-            test -n "$SMTP_USER"
-            test -n "$SMTP_PASSWORD"
-          fi
-
-      - name: Authenticate to Google Cloud
-        uses: google-github-actions/auth@v2
-        with:
-          credentials_json: ${{ secrets.GCP_SA_KEY }}
-
-      - name: Set up Cloud SDK
-        uses: google-github-actions/setup-gcloud@v2
-
-      - name: Authorize Docker for Artifact Registry
-        run: gcloud auth configure-docker "${GCP_REGION}-docker.pkg.dev" --quiet
-
-      - name: Build and push API image
-        env:
-          IMAGE: ${{ env.GCP_REGION }}-docker.pkg.dev/${{ env.GCP_PROJECT_ID }}/${{ env.ARTIFACT_REPOSITORY }}/koda-api:${{ github.sha }}
-        run: |
-          docker build --platform linux/amd64 -t "$IMAGE" server
-          docker push "$IMAGE"
-
-      - name: Deploy API to Cloud Run
-        env:
-          IMAGE: ${{ env.GCP_REGION }}-docker.pkg.dev/${{ env.GCP_PROJECT_ID }}/${{ env.ARTIFACT_REPOSITORY }}/koda-api:${{ github.sha }}
-        run: |
-          gcloud run deploy "$API_SERVICE" \
-            --project "$GCP_PROJECT_ID" \
-            --image "$IMAGE" \
-            --region "$GCP_REGION" \
-            --platform managed \
-            --port 8000 \
-            --allow-unauthenticated \
-            --set-env-vars "^|^ENVIRONMENT=production|MONGODB_URI=${MONGODB_URI}|MONGODB_DB=koda_v4|JWT_SECRET=${JWT_SECRET}|TUTOR_SERVICE_TOKEN=${TUTOR_SERVICE_TOKEN}|GOOGLE_CLIENT_ID=${GOOGLE_CLIENT_ID}|APP_BASE_URL=https://learn-with-koda.web.app|LIBRARY_AUDIO_BUCKET=${LIBRARY_AUDIO_BUCKET}|REQUIRE_EMAIL_VERIFICATION=${REQUIRE_EMAIL_VERIFICATION}|MAIL_DRIVER=${MAIL_DRIVER}|SMTP_HOST=${SMTP_HOST}|SMTP_PORT=${SMTP_PORT}|SMTP_STARTTLS=${SMTP_STARTTLS}|SMTP_USER=${SMTP_USER}|SMTP_PASSWORD=${SMTP_PASSWORD}|MAIL_FROM=${MAIL_FROM}|PUSH_DRIVER=${PUSH_DRIVER}|FIREBASE_PROJECT_ID=${FIREBASE_PROJECT_ID}|PUSH_TASK_AUDIENCE=${PUSH_TASK_AUDIENCE}|PUSH_TASK_SERVICE_ACCOUNT=${PUSH_TASK_SERVICE_ACCOUNT}"
-
-      - name: Verify API health
-        run: |
-          api_url="$(gcloud run services describe "$API_SERVICE" --project "$GCP_PROJECT_ID" --region "$GCP_REGION" --format='value(status.url)')"
-          curl --fail --show-error --silent --retry 6 --retry-all-errors --retry-delay 5 "$api_url/v1/health"
-
-  deploy-app:
-    name: Deploy Koda web service
-    runs-on: ubuntu-latest
-    needs: [ci-verification, deploy-api]
-    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
-    env:
-      TUTOR_SERVICE_TOKEN: ${{ secrets.TUTOR_SERVICE_TOKEN }}
-      GOOGLE_CLIENT_ID: ${{ vars.GOOGLE_CLIENT_ID }}
-      # Variables rather than secrets, like the OAuth client id above: these are
-      # public identifiers that ship inside the browser bundle, and calling them
-      # secrets would only teach somebody that a leaked one matters.
-      VITE_FIREBASE_API_KEY: ${{ vars.VITE_FIREBASE_API_KEY }}
-      VITE_FIREBASE_PROJECT_ID: ${{ vars.VITE_FIREBASE_PROJECT_ID }}
-      VITE_FIREBASE_APP_ID: ${{ vars.VITE_FIREBASE_APP_ID }}
-      VITE_FIREBASE_MESSAGING_SENDER_ID: ${{ vars.VITE_FIREBASE_MESSAGING_SENDER_ID }}
-      VITE_FIREBASE_VAPID_KEY: ${{ vars.VITE_FIREBASE_VAPID_KEY }}
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Require production secrets
-        run: test -n "$TUTOR_SERVICE_TOKEN"
-
-      - name: Authenticate to Google Cloud
-        uses: google-github-actions/auth@v2
-        with:
-          credentials_json: ${{ secrets.GCP_SA_KEY }}
-
-      - name: Set up Cloud SDK
-        uses: google-github-actions/setup-gcloud@v2
-
-      - name: Authorize Docker for Artifact Registry
-        run: gcloud auth configure-docker "${GCP_REGION}-docker.pkg.dev" --quiet
-
-      - name: Build and push app image
-        env:
-          IMAGE: ${{ env.GCP_REGION }}-docker.pkg.dev/${{ env.GCP_PROJECT_ID }}/${{ env.ARTIFACT_REPOSITORY }}/koda-app:${{ github.sha }}
-        run: |
-          docker build --platform linux/amd64 --target prod \
-            --build-arg VITE_GOOGLE_CLIENT_ID="$GOOGLE_CLIENT_ID" \
-            --build-arg VITE_FIREBASE_API_KEY="$VITE_FIREBASE_API_KEY" \
-            --build-arg VITE_FIREBASE_PROJECT_ID="$VITE_FIREBASE_PROJECT_ID" \
-            --build-arg VITE_FIREBASE_APP_ID="$VITE_FIREBASE_APP_ID" \
-            --build-arg VITE_FIREBASE_MESSAGING_SENDER_ID="$VITE_FIREBASE_MESSAGING_SENDER_ID" \
-            --build-arg VITE_FIREBASE_VAPID_KEY="$VITE_FIREBASE_VAPID_KEY" \
-            -t "$IMAGE" .
-          docker push "$IMAGE"
-
-      - name: Resolve API service URL
-        id: api
-        run: |
-          api_url="$(gcloud run services describe "$API_SERVICE" --project "$GCP_PROJECT_ID" --region "$GCP_REGION" --format='value(status.url)')"
-          test -n "$api_url"
-          echo "url=$api_url" >> "$GITHUB_OUTPUT"
-
-      # Where the browser may open the live-voice WebSocket.
-      #
-      # Firebase Hosting proxies every path to Cloud Run but does not perform
-      # the upgrade, so a handshake through learn-with-koda.web.app is answered
-      # 200 instead of 101 and the coach never connects. The page still loads
-      # from Hosting; only the socket goes straight to Cloud Run.
-      #
-      # Empty on the very first deploy, because the service has no URL until it
-      # exists — the app then falls back to same-origin, and the next deploy
-      # fills it in.
-      - name: Resolve this service's own public URL
-        id: appurl
-        run: |
-          app_url="$(gcloud run services describe "$APP_SERVICE" --project "$GCP_PROJECT_ID" --region "$GCP_REGION" --format='value(status.url)' 2>/dev/null || true)"
-          echo "url=$app_url" >> "$GITHUB_OUTPUT"
-
-      - name: Deploy app to Cloud Run
-        env:
-          IMAGE: ${{ env.GCP_REGION }}-docker.pkg.dev/${{ env.GCP_PROJECT_ID }}/${{ env.ARTIFACT_REPOSITORY }}/koda-app:${{ github.sha }}
-          API_URL: ${{ steps.api.outputs.url }}
-          LIVE_WS_ORIGIN: ${{ steps.appurl.outputs.url }}
-        run: |
-          gcloud run deploy "$APP_SERVICE" \
-            --project "$GCP_PROJECT_ID" \
-            --image "$IMAGE" \
-            --region "$GCP_REGION" \
-            --platform managed \
-            --port 3001 \
-            --allow-unauthenticated \
-            --set-env-vars "^|^NODE_ENV=production|API_URL=${API_URL}|TUTOR_SERVICE_TOKEN=${TUTOR_SERVICE_TOKEN}|LIVE_WS_ORIGIN=${LIVE_WS_ORIGIN}"
-
-      - name: Verify app health
-        run: |
-          app_url="$(gcloud run services describe "$APP_SERVICE" --project "$GCP_PROJECT_ID" --region "$GCP_REGION" --format='value(status.url)')"
-          curl --fail --show-error --silent --retry 6 --retry-all-errors --retry-delay 5 "$app_url/" > /dev/null
-
-  # The VPS (deploy/vps), beside Cloud Run until it replaces it. Needs only the
-  # tests, not the Google jobs, so it keeps working once those are removed.
+  # Production: the VPS (deploy/vps). Google Cloud Run is retired; only
+  # Firebase (push notifications) is still used, from the server itself.
   #
   # The images are built here and pushed to ghcr.io; the server only pulls
   # them, because it is shared with other services and the web build needs
@@ -323,19 +145,3 @@ jobs:
           GHCR_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: deploy/vps/deploy.sh
 
-  deploy-hosting:
-    name: Route Firebase Hosting to Koda
-    runs-on: ubuntu-latest
-    needs: deploy-app
-    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Deploy Firebase Hosting configuration
-        uses: FirebaseExtended/action-hosting-deploy@v0
-        with:
-          repoToken: ${{ secrets.GITHUB_TOKEN }}
-          firebaseServiceAccount: ${{ secrets.GCP_SA_KEY }}
-          channelId: live
-          projectId: learn-with-koda
-          entryPoint: .
