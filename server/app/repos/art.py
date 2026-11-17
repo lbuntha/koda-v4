@@ -17,8 +17,14 @@ async def get(db: AsyncIOMotorDatabase, asset_id: str) -> dict[str, Any] | None:
     return await db.art_assets.find_one({"id": asset_id, "deletedAt": None})
 
 
+async def get_any(db: AsyncIOMotorDatabase, asset_id: str) -> dict[str, Any] | None:
+    """The row for an id even once deleted: an id stays its owner's."""
+    return await db.art_assets.find_one({"id": asset_id})
+
+
 async def put(
-    db: AsyncIOMotorDatabase, asset_id: str, category: str, markup: str, updated_by: str | None
+    db: AsyncIOMotorDatabase, asset_id: str, category: str, markup: str, updated_by: str | None,
+    owner_id: str | None = None,
 ) -> tuple[dict[str, Any], bool, bool]:
     existing = await db.art_assets.find_one({"id": asset_id})
     created = existing is None or existing.get("deletedAt") is not None
@@ -34,7 +40,7 @@ async def put(
                 "updatedBy": updated_by,
                 "deletedAt": None,
             },
-            "$setOnInsert": {"id": asset_id, "createdAt": timestamp},
+            "$setOnInsert": {"id": asset_id, "createdAt": timestamp, "ownerId": owner_id},
             "$inc": {"rev": 1},
         },
         upsert=True,
@@ -84,6 +90,8 @@ async def move(
                 "updatedAt": timestamp,
                 "updatedBy": updated_by,
                 "deletedAt": None,
+                # A rename keeps the drawing its owner's.
+                "ownerId": existing.get("ownerId"),
             },
             "$setOnInsert": {"id": to_id, "createdAt": timestamp},
             "$inc": {"rev": 1},

@@ -13,6 +13,7 @@ from app.models.auth import Principal
 from app.models.common import Model
 from app.repos import skills as skills_repo
 from app.repos import users as users_repo
+from app.security import ownership
 from app.security.permissions import principal_can
 from app.services import tasks as task_service
 from app.services.entitlements import has_feature
@@ -24,7 +25,9 @@ CanRead = Annotated[Principal, Depends(require("settings:read"))]
 def _may_publish(p: CurrentPrincipal) -> Principal:
     # Publication changes the deployment for every family. Family settings
     # writers may tune their own copy but cannot release code platform-wide.
-    if p.family_id is not None or not principal_can(p, "content:write"):
+    # `content:all`: a Content creator authors content but does not release
+    # skills to every family.
+    if p.family_id is not None or not ownership.sees_all(p):
         raise Forbidden("Only an operator can publish a shared skill.", "not_an_operator")
     return p
 

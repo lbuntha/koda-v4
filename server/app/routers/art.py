@@ -12,7 +12,7 @@ from app.errors import AppError, Conflict, Forbidden, NotFound
 from app.models.auth import Principal
 from app.models.common import Model
 from app.repos import art as art_repo
-from app.security import principal_can
+from app.security import ownership, principal_can
 
 router = APIRouter(prefix="/art", tags=["art"], dependencies=[AUTHENTICATED])
 
@@ -122,11 +122,18 @@ async def list_art(db: Db, _: CanRead) -> ArtList:
     return ArtList(assets=[_out(row) for row in await art_repo.list_all(db)])
 
 
+def _yours(p: Principal, row: dict | None) -> None:
+    """Everyone draws with the shared art; only its owner (or an admin) changes it."""
+    if row is not None and not ownership.may_touch(p, row):
+        raise Forbidden("This drawing belongs to someone else. Make your own copy under a new name.", "art_not_yours")
+
+
 @router.put("/{asset_id}")
 async def save_art(asset_id: str, body: ArtWrite, db: Db, p: CanWrite) -> ArtSaved:
     asset_id = _name(asset_id, "id")
+    _yours(p, await art_repo.get_any(db, asset_id))
     row, created, moved = await art_repo.put(
-        db, asset_id, _category(body.category), _markup(body.markup), p.subject_id
+        db, asset_id, _category(body.category), _markup(body.markup), p.subject_id, owner_id=p.subject_id
     )
     return ArtSaved(**_out(row).model_dump(), created=created, moved=moved)
 
@@ -137,8 +144,11 @@ async def move_art(asset_id: str, body: ArtMove, db: Db, p: CanWrite) -> ArtAsse
     existing = await art_repo.get(db, asset_id)
     if existing is None:
         raise NotFound(f'No art asset "{asset_id}".', "art_not_found")
+    _yours(p, existing)
 
     to_id = _name(body.to_id or asset_id, "id")
+    if to_id != asset_id:
+        _yours(p, await art_repo.get_any(db, to_id))
     category = _category(body.category or existing.get("category"))
     if to_id != asset_id and await art_repo.get(db, to_id):
         raise Conflict(f'An art asset with id "{to_id}" already exists.', "art_id_exists")
@@ -151,5 +161,6 @@ async def move_art(asset_id: str, body: ArtMove, db: Db, p: CanWrite) -> ArtAsse
 @router.delete("/{asset_id}", status_code=204)
 async def delete_art(asset_id: str, db: Db, p: CanWrite) -> None:
     asset_id = _name(asset_id, "id")
+    _yours(p, await art_repo.get(db, asset_id))
     if not await art_repo.delete(db, asset_id, p.subject_id):
         raise NotFound(f'No art asset "{asset_id}".', "art_not_found")

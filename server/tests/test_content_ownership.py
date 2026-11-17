@@ -101,3 +101,32 @@ async def test_rebus_creators_work_on_their_own_quizzes_and_cannot_publish_for_e
 
     assert (await client.post("/rebus/studio/publish", json={}, headers=ana)).status_code == 403
     assert (await client.post("/rebus/studio/categories/reorder", json={"order": []}, headers=ana)).status_code == 403
+
+
+SVG = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 10 10"><circle cx="5" cy="5" r="4"/></svg>'
+
+
+async def test_art_is_shared_to_draw_with_but_only_its_owner_changes_it(client, db):
+    ana = await _login(client, db, "ana@example.com", platform_role="creator")
+    ben = await _login(client, db, "ben@example.com", platform_role="creator")
+    boss = await _login(client, db, "boss@example.com", platform_role="admin")
+
+    assert (await client.put("/art/ana-sun", json={"markup": SVG}, headers=ana)).status_code == 200
+    assert "ana-sun" in [a["id"] for a in (await client.get("/art", headers=ben)).json()["assets"]]
+
+    refused = await client.put("/art/ana-sun", json={"markup": SVG}, headers=ben)
+    assert refused.status_code == 403 and refused.json()["error"]["code"] == "art_not_yours"
+    assert (await client.patch("/art/ana-sun", json={"toId": "ben-sun"}, headers=ben)).status_code == 403
+    assert (await client.delete("/art/ana-sun", headers=ben)).status_code == 403
+
+    assert (await client.patch("/art/ana-sun", json={"toId": "ana-sun-2"}, headers=ana)).status_code == 200
+    assert (await db.art_assets.find_one({"id": "ana-sun-2"}))["ownerId"] == (
+        await db.users.find_one({"email": "ana@example.com"})
+    )["_id"]
+    assert (await client.delete("/art/ana-sun-2", headers=boss)).status_code == 204
+
+
+async def test_only_the_admin_publishes_skills(client, db):
+    ana = await _login(client, db, "ana@example.com", platform_role="creator")
+    refused = await client.patch("/skills/anything/publication", json={"status": "published"}, headers=ana)
+    assert refused.status_code == 403
