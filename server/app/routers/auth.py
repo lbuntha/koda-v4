@@ -34,6 +34,7 @@ from app.models.auth import (
     SignupIn,
     SwitchIn,
     TokenPair,
+    ViewIn,
 )
 from app.models.common import now
 from app.repos import devices, families, learners, memberships, platform_roles, users
@@ -146,6 +147,10 @@ async def _issue(db, family_id: str | None, role: str, *, user_id=None, learner_
         # `spent_hash` is set only by /auth/refresh — the one caller that is
         # spending a token rather than minting a session. See devices.rotate.
         await devices.rotate(db, device_id, refresh_hash, spent_hash)
+        if spent_hash is None:
+            # A fresh session on a reused row: the row must name the family this
+            # session is for, or the next refresh restores the one before it.
+            await devices.set_family(db, device_id, family_id)
 
     permissions = rbac.effective_permissions(role, extra, denied) if family_id else set()
     # Platform roles belong to staff accounts. A family member may have a
@@ -197,12 +202,18 @@ async def _learner_for_student(db, family_id: str, email: str) -> str | None:
     return created["_id"]
 
 
-async def _issue_for_user(db, user: dict, *, device_name: str, install_id: str | None) -> TokenPair:
-    """Turn an authenticated user into the same Koda session, however they signed in."""
+async def _issue_for_user(db, user: dict, *, device_name: str, install_id: str | None,
+                          device_id: str | None = None, view: str | None = None) -> TokenPair:
+    """Turn an authenticated user into the same Koda session, however they signed in.
+
+    Family membership wins unless `view` asks for the staff side: a parent the
+    platform made an admin still lands in their family, and reaches the admin
+    menu through /auth/view.
+    """
     rows = await memberships.for_user(db, user["_id"])
     platform_role = user.get("platformRole", "none")
 
-    if rows:
+    if rows and view != "admin":
         membership = rows[0]
         # A student is their own learner, and the session has to say so.
         learner_id = (
@@ -218,6 +229,7 @@ async def _issue_for_user(db, user: dict, *, device_name: str, install_id: str |
             learner_id=learner_id,
             device_name=device_name,
             install_id=install_id,
+            device_id=device_id,
             platform_role=platform_role,
             extra=membership.get("extraPermissions"),
             denied=membership.get("deniedPermissions"),
@@ -231,10 +243,38 @@ async def _issue_for_user(db, user: dict, *, device_name: str, install_id: str |
             user_id=user["_id"],
             device_name=device_name,
             install_id=install_id,
+            device_id=device_id,
             platform_role=platform_role,
         )
 
     raise Unauthorized("That account is not part of a family yet.", "no_family")
+
+
+async def _views_for(db, user: dict | None) -> list[str]:
+    """The sides of this account its owner may work in."""
+    if not user or user.get("status", "active") == "suspended":
+        return []
+    views = []
+    if await memberships.for_user(db, user["_id"]):
+        views.append("family")
+    if user.get("platformRole", "none") != "none":
+        views.append("admin")
+    return views
+
+
+@router.post("/view", dependencies=[AUTHENTICATED])
+async def switch_view(body: ViewIn, p: CurrentPrincipal, db: Db) -> TokenPair:
+    """Move this session between the person's family and their staff role.
+
+    The same device row is rotated rather than a new one written, so the device
+    list keeps one entry and signing out ends whichever view is open. Staff
+    permissions only ever ride on a session with no family, so the two never mix.
+    """
+    user = await users.by_id(db, p.subject_id) if p.kind == "user" else None
+    if not user or body.view not in await _views_for(db, user):
+        raise Forbidden("This account cannot open that view.", "view_unavailable")
+    return await _issue_for_user(db, user, device_name="This device", install_id=None,
+                                 device_id=p.device_id, view=body.view)
 
 
 async def _send_verification(db, user: dict) -> bool:
@@ -737,6 +777,7 @@ async def me(p: CurrentPrincipal, db: Db) -> MeOut:
             if p.permissions is not None
             else sorted(rbac.effective_permissions(p.role))
         ),
+        views=await _views_for(db, user),
     )
 
 

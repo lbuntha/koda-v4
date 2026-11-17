@@ -1,5 +1,5 @@
 import React from "react";
-import { Check, LogOut, Moon, Smile, Sun, UserRound } from "lucide-react";
+import { Check, House, LogOut, Moon, ShieldCheck, Smile, Sun, UserRound } from "lucide-react";
 import { playSound } from "../utils/audio";
 import { useTheme } from "../context/ThemeContext";
 import {
@@ -176,6 +176,19 @@ export const AccountMenu: React.FC<AccountMenuProps> = ({
    */
   const close = () => setSheetOpen(false);
 
+  // A parent the platform also made an admin works in one side at a time;
+  // this is the other one. Null for everybody else, who sees no switch.
+  const otherView: "family" | "admin" | null =
+    session?.views && session.views.length > 1 ? (session.familyId ? "admin" : "family") : null;
+  const switchView = () => {
+    if (!otherView) return;
+    void SessionAPI.switchView(otherView).catch((error) => {
+      setSwitchError((error as ApiError).message ?? String(error));
+    });
+  };
+  const viewLabel = otherView === "admin" ? t("menu.switchToAdmin") : t("menu.backToFamily");
+  const ViewIcon = otherView === "admin" ? ShieldCheck : House;
+
   const switchTo = (deviceId: string, name: string) => {
     playSound("pop");
     close();
@@ -290,6 +303,17 @@ export const AccountMenu: React.FC<AccountMenuProps> = ({
                   >
                     {t("menu.changeAvatar")}
                   </UIMenuItem>
+                  {otherView && (
+                    <UIMenuItem
+                      icon={<ViewIcon />}
+                      onSelect={() => {
+                        closeMenu();
+                        choose(switchView)();
+                      }}
+                    >
+                      {viewLabel}
+                    </UIMenuItem>
+                  )}
                 </>
               )}
 
@@ -473,6 +497,16 @@ export const AccountMenu: React.FC<AccountMenuProps> = ({
                       <span className={l.rowTitle}>{t("menu.changeAvatar")}</span>
                     </span>
                   </button>
+                  {otherView && (
+                    <button className={l.rowTap} onClick={choose(switchView)}>
+                      <span className="flex items-center gap-3 min-w-0">
+                        <span className={l.rowIcon}>
+                          <ViewIcon />
+                        </span>
+                        <span className={l.rowTitle}>{viewLabel}</span>
+                      </span>
+                    </button>
+                  )}
                   <button
                     className={l.rowTap}
                     onClick={choose(() => void SessionAPI.signOut())}

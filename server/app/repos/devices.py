@@ -136,6 +136,17 @@ async def rotate(
     )
 
 
+async def set_family(db: AsyncIOMotorDatabase, device_id: str, family_id: str | None) -> None:
+    """Which family this session row speaks for, read back at every refresh.
+
+    A row is reused when the same install signs in again or a person switches
+    between their family and their staff view; without this it would keep the
+    family of whichever session wrote it first, and the next refresh would
+    quietly put the person back in the view they had just left.
+    """
+    await db.devices.update_one({"_id": device_id}, {"$set": {"familyId": family_id}})
+
+
 async def _forget_push(db: AsyncIOMotorDatabase, mongo_filter: dict[str, Any]) -> None:
     """Drop the notification tokens belonging to sessions that are about to end.
 

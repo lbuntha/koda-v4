@@ -123,6 +123,16 @@ class SwitchIn(Model):
     install_id: str | None = Field(default=None, max_length=64, alias="installId")
 
 
+class ViewIn(Model):
+    """Which side of a two-sided account to work in: its family, or its staff role.
+
+    Only for a person who is both, say a parent the platform also made an
+    admin. Sign-in always opens the family; this is how they reach the rest.
+    """
+
+    view: Literal["family", "admin"]
+
+
 class RefreshIn(Model):
     refresh_token: str = Field(alias="refreshToken")
 
@@ -156,6 +166,9 @@ class MeOut(Model):
     # for everybody else. The profile page prints it as "Joined August 2026",
     # which was the one thing on that page it had to make up before this.
     joined_at: str | None = Field(default=None, alias="joinedAt")
+    # The views this person may switch between: "family", "admin", or both.
+    # Two entries is what puts "Switch to admin" / "Back to family" in the menu.
+    views: list[str] = Field(default_factory=list)
 
 
 class ProfileIn(Model):

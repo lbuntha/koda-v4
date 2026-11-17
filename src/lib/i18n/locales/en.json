@@ -215,6 +215,8 @@
     "accountLabel": "Account: {name}",
     "viewProfile": "View profile",
     "changeAvatar": "Change avatar",
+    "switchToAdmin": "Switch to admin",
+    "backToFamily": "Back to family",
     "signOut": "Sign out",
     "light": "Light",
     "dark": "Dark"

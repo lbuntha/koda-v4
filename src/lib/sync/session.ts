@@ -63,6 +63,11 @@ export interface Session {
   avatarSeed?: string;
   /** ISO timestamp this account first existed. Drawn as "Joined August 2026". */
   joinedAt?: string;
+  /**
+   * The sides this person may work in: "family", "admin", or both. Both is a
+   * parent the platform also made an admin, and is what offers the switch.
+   */
+  views?: string[];
 }
 
 interface TokenPair {
@@ -96,6 +101,7 @@ interface MeOut {
   learnerBirthYear: number | null;
   permissions?: string[];
   joinedAt?: string | null;
+  views?: string[];
 }
 
 const listeners = new Set<() => void>();
@@ -433,6 +439,7 @@ function mergeProfile(session: Session, me: MeOut): Session {
     platformRole: me.platformRole,
     permissions: me.permissions ?? session.permissions,
     joinedAt: me.joinedAt ?? session.joinedAt,
+    views: me.views ?? session.views,
   };
 }
 
@@ -613,6 +620,30 @@ export const SessionAPI = {
     activate(session, false);
     restartForAccount();
     return session;
+  },
+
+  /**
+   * Move this session between the person's family and their admin role.
+   *
+   * Sign-in always opens the family, so a parent who is also an admin reaches
+   * the admin menu here. The server rotates the same device row, and the app
+   * restarts the way it does after any switch, since menus, permissions and
+   * family-backed stores all change with it.
+   */
+  async switchView(view: "family" | "admin"): Promise<void> {
+    const was = current;
+    const token = await accessToken();
+    const pair = await request<TokenPair>("/auth/view", { method: "POST", token, body: { view } });
+    const session = fromPair(pair, {
+      userId: was?.userId,
+      email: was?.email,
+      displayName: was?.displayName,
+      avatarSeed: was?.avatarSeed,
+      joinedAt: was?.joinedAt,
+      views: was?.views,
+    });
+    activate(session, false);
+    restartForAccount();
   },
 
   /**
