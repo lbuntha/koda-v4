@@ -941,6 +941,19 @@ export interface TestEmailResult {
   note: string | null;
 }
 
+/**
+ * The formatted copy of a draft email, made by the server's own formatter —
+ * the code every real send goes through. Nothing is stored or sent.
+ */
+export async function previewEmailHtml(subject: string, text: string): Promise<string> {
+  const result = await request<{ html: string }>("/system/email/preview", {
+    method: "POST",
+    token: await accessToken(),
+    body: { subject, text },
+  });
+  return result.html;
+}
+
 /** Email the caller's own address. `kind` previews that kind's wording; never a recipient. */
 export async function sendTestEmail(kind?: string): Promise<TestEmailResult> {
   return await request<TestEmailResult>("/system/email/test", {

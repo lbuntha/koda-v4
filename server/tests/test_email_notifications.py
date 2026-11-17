@@ -363,3 +363,15 @@ async def test_the_log_says_which_channel(client, parent, admin, seeded, outbox)
         ("system.announcement", "push"),
         ("system.announcement", "email"),
     }
+
+
+async def test_the_editor_preview_is_the_formatted_email_and_sends_nothing(client, parent, admin, seeded, outbox):
+    text = "Hi Dara,\n\n• Mia: 4 days\n\nSee their progress: https://x.test\n\n---\nDon't want them? Unsubscribe: https://x.test/u?t=1"
+    answer = await client.post("/system/email/preview", headers=admin, json={"subject": "Week", "text": text})
+
+    assert answer.status_code == 200
+    page = answer.json()["html"]
+    assert ">Mia</strong>" in page and ">Unsubscribe</a>" in page
+    assert outbox == []
+    refused = await client.post("/system/email/preview", headers=parent, json={"subject": "s", "text": "t"})
+    assert refused.status_code == 403

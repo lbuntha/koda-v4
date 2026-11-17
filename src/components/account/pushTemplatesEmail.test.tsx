@@ -4,6 +4,9 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 
 const rewordNotificationEmail = vi.fn();
 const rewordEmailFrame = vi.fn();
+const previewEmailHtml = vi.fn((_subject: string, _text: string) =>
+  Promise.resolve("<!doctype html><html><body><strong>formatted</strong></body></html>"),
+);
 
 const wording = {
   templates: [
@@ -47,6 +50,7 @@ vi.mock("../../lib/push", () => ({
   resetEmailFrame: vi.fn(),
   sendTestEmail: vi.fn(),
   setWordingLanguage: vi.fn(),
+  previewEmailHtml: (subject: string, text: string) => previewEmailHtml(subject, text),
 }));
 
 vi.mock("../../lib/sync", () => ({ ApiError: class ApiError extends Error {} }));
@@ -121,5 +125,26 @@ describe("editing a notification email", () => {
 
     expect((within(frame).getByRole("button", { name: "Save frame" }) as HTMLButtonElement).disabled).toBe(true);
     expect(rewordEmailFrame).not.toHaveBeenCalled();
+  });
+});
+
+describe("the email preview", () => {
+  it("shows the formatted email the server makes from the framed text", async () => {
+    const card = await openEmail();
+    await waitFor(() => expect(previewEmailHtml).toHaveBeenCalled());
+    const [, text] = previewEmailHtml.mock.calls.at(-1)!;
+    expect(text).toContain("Hi Dara,");
+    expect(text).not.toContain("web.app");
+    const frame = (await within(card).findByTitle(/preview/i)) as HTMLIFrameElement;
+    expect(frame.getAttribute("srcdoc")).toContain("formatted");
+    expect(frame.getAttribute("sandbox")).toBe("allow-same-origin");
+  });
+
+  it("keeps the plain text when the server cannot be reached", async () => {
+    previewEmailHtml.mockImplementationOnce(() => Promise.reject(new Error("offline")));
+    const card = await openEmail();
+    await waitFor(() => expect(previewEmailHtml).toHaveBeenCalled());
+    expect(within(card).queryByTitle(/preview/i)).toBeNull();
+    expect(card.querySelector("pre")?.textContent).toContain("Hi Dara,");
   });
 });

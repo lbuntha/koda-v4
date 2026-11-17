@@ -47,7 +47,7 @@ from app.repos import notify_jobs, notify_prefs, notify_schedule, push_log, push
 from app.repos import system as system_repo
 from app.repos import users as users_repo
 from app.security.rate_limit import PUSH_TEST_PER_ACCOUNT, limiter
-from app.services import email_notify
+from app.services import email_html, email_notify
 from app.services import push as push_service
 from app.services import tasks as task_service
 from app.settings import settings
@@ -1228,6 +1228,22 @@ class EmailTestIn(Model):
 
     kind: str | None = Field(default=None, max_length=60)
     language: str | None = Field(default=None, max_length=20)
+
+
+class EmailPreviewIn(Model):
+    """A framed email as plain text — what the editor shows — to see as a parent will."""
+
+    subject: str = Field(default="", max_length=200)
+    text: str = Field(max_length=8000)
+
+
+@router.post("/email/preview")
+async def email_preview(p: CanOperate, body: EmailPreviewIn) -> dict[str, str]:
+    """The formatted copy of a draft, made by the code that formats every send.
+
+    Nothing is stored or sent; the editor shows the answer in a sandboxed frame.
+    """
+    return {"html": email_html.render(body.text, body.subject, settings().app_base_url)}
 
 
 @router.post("/email/test")

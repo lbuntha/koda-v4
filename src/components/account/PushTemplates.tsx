@@ -12,6 +12,7 @@ import {
   rewordEmailFrame,
   rewordNotification,
   rewordNotificationEmail,
+  previewEmailHtml,
   sendTestEmail,
   type EmailFrame,
   type EmailFramePart,
@@ -59,12 +60,12 @@ const SAMPLES: Record<string, string> = {
   title: "Koda",
   parent: "Dara",
   family: "The Riveras",
-  app_link: "https://learn-with-koda.web.app",
+  app_link: typeof window === "undefined" ? "https://learnwithkoda.tech" : window.location.origin,
   kind_label: "Announcements",
-  unsubscribe_link: "https://learn-with-koda.web.app/v1/notifications/unsubscribe?token=…",
+  unsubscribe_link: `${typeof window === "undefined" ? "https://learnwithkoda.tech" : window.location.origin}/v1/notifications/unsubscribe?token=…`,
   rounds_done: "12 rounds",
   time: "38 minutes",
-  summary: "• Mia: practised on 4 days — 12 rounds, 38 minutes\n• Leo: practised on 2 days — 5 rounds, 14 minutes",
+  summary: "• Mia: 4 days · 12 rounds · 38 minutes\n• Leo: 2 days · 5 rounds · 14 minutes",
 };
 
 export const filled = (text: string): string =>
@@ -85,6 +86,50 @@ export const framed = (frame: EmailFrame, row: NotificationTemplate, body: strin
   const footer =
     row.class === "account" ? frame.accountFooter : frame.footer.split("{kind_label}").join(row.label);
   return `${filled(letter)}\n\n---\n${filled(footer)}`;
+};
+
+/**
+ * The email as a parent's inbox shows it: the server formats the framed text
+ * with the code every real send uses, and it is drawn in a sandboxed frame (no
+ * scripts, nothing it can reach). Until that answer arrives — or with no
+ * connection — the plain text stands in, which is also what text-only mail
+ * clients show.
+ */
+const EmailLook: React.FC<{ subject: string; text: string }> = ({ subject, text }) => {
+  const [html, setHtml] = useState<string | null>(null);
+  const [height, setHeight] = useState(360);
+  useEffect(() => {
+    let live = true;
+    const timer = setTimeout(() => {
+      // Through a resolved promise, so a failure of any kind lands in `catch`
+      // and the plain text simply stays.
+      void Promise.resolve()
+        .then(() => previewEmailHtml(subject, text))
+        .then((page) => live && setHtml(page))
+        .catch(() => live && setHtml(null));
+    }, 350);
+    return () => {
+      live = false;
+      clearTimeout(timer);
+    };
+  }, [subject, text]);
+
+  if (html === null) {
+    return <pre className="mt-2 whitespace-pre-wrap break-words font-sans text-xs text-body">{text}</pre>;
+  }
+  return (
+    <iframe
+      title={translate("admin.pushTemplates.preview")}
+      srcDoc={html}
+      sandbox="allow-same-origin"
+      onLoad={(e) => {
+        const doc = e.currentTarget.contentDocument;
+        if (doc) setHeight(Math.min(900, doc.documentElement.scrollHeight + 4));
+      }}
+      style={{ height }}
+      className="mt-2 block w-full rounded-lg border border-line bg-white"
+    />
+  );
 };
 
 const describe = (error: unknown, fallback: string): string =>
@@ -317,9 +362,7 @@ const WordingCard: React.FC<{
         {email ? (
           <>
             <p className="mt-1 break-words text-sm font-bold text-ink">{filled(draft.subject)}</p>
-            <pre className="mt-2 whitespace-pre-wrap break-words font-sans text-xs text-body">
-              {framed(frame, row, draft.emailBody)}
-            </pre>
+            <EmailLook subject={filled(draft.subject)} text={framed(frame, row, draft.emailBody)} />
           </>
         ) : (
           <>
