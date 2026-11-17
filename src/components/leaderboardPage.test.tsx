@@ -142,7 +142,8 @@ describe("Buddy Leaderboard page", () => {
     render(<LeaderboardPage />);
 
     expect(await screen.findByText("840 XP")).toBeTruthy();
-    expect(screen.getAllByTitle("Fox avatar")).toHaveLength(2);
+    // The board shows StarFox once; the buddy list is behind "Manage buddies".
+    expect(screen.getAllByTitle("Fox avatar")).toHaveLength(1);
     expect(screen.getByText("You")).toBeTruthy();
     expect(screen.getByText("Sharing with 1 buddy")).toBeTruthy();
     expect(document.body.textContent).not.toContain("f_one");
@@ -177,6 +178,7 @@ describe("Buddy Leaderboard page", () => {
 
     expect(await screen.findByText("Ask a parent or account owner to turn on sharing.")).toBeTruthy();
     expect(screen.queryByRole("button", { name: "Buddies only" })).toBeNull();
+    fireEvent.click(screen.getByRole("button", { name: "Manage buddies (0)" }));
     expect(screen.queryByRole("button", { name: "Create buddy code" })).toBeNull();
     expect(screen.getByText("A parent or account owner manages buddy connections.")).toBeTruthy();
   });
@@ -193,6 +195,7 @@ describe("Buddy Leaderboard page", () => {
     );
     render(<LeaderboardPage />);
 
+    fireEvent.click(await screen.findByRole("button", { name: "Manage buddies (6)" }));
     const search = await screen.findByPlaceholderText("Search buddies");
     fireEvent.change(search, { target: { value: "zeb" } });
     expect(screen.getByText("Zebra")).toBeTruthy();
