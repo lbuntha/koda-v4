@@ -115,7 +115,8 @@ async def test_the_menu_offers_only_what_the_guard_would_allow(client, signup_bo
 
     items = (await client.get("/menu", headers=auth)).json()["items"]
     ids = [i["id"] for i in items]
-    assert "skills" in ids and "assets" in ids, "an admin manages content"
+    assert "assets" in ids and "library-studio" in ids, "an admin makes content"
+    assert "skills" not in ids, "but releasing skills to every family is the Koda owner's"
     assert "roles" in ids, "and can see who holds what"
 
     # A caregiver: reads, changes nothing — so no content pages.

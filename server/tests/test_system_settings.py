@@ -26,17 +26,25 @@ async def test_subject_lookup_round_trip_and_permissions(client, admin, owner):
     assert json.loads(effective["learning.subjects"]) == catalog
 
 
-async def test_developer_manages_subjects_but_not_system_switches(client, db, owner):
+async def test_only_the_koda_owner_manages_subjects(client, db, owner):
+    """Subjects shape every family's catalogue: the Koda owner's, not a developer's or an admin's."""
     from app.repos import users
     from app.security import passwords
-    await users.create(db, "developer@example.com", passwords.hash_password("correct horse battery"), platform_role="developer")
-    pair = (await client.post("/auth/login", json={"email": "developer@example.com", "password": "correct horse battery"})).json()
-    headers = {"Authorization": f"Bearer {pair['accessToken']}"}
+
+    async def staff(email, role):
+        await users.create(db, email, passwords.hash_password("correct horse battery"), platform_role=role)
+        pair = (await client.post("/auth/login", json={"email": email, "password": "correct horse battery"})).json()
+        return {"Authorization": f"Bearer {pair['accessToken']}"}
+
+    developer = await staff("developer@example.com", "developer")
+    ops = await staff("ops2@example.com", "admin")
+    core = await staff("core@example.com", "core")
     catalog = {"subjects": [{"id": "math", "name": "Math"}], "assignments": {"counting": "math"}}
     body = {"value": json.dumps(catalog)}
-    assert (await client.patch("/system/subjects", json=body, headers=headers)).status_code == 200
-    assert (await client.patch("/system/subjects", json=body, headers=owner)).status_code == 403
-    assert (await client.patch("/system/settings/system.readOnly", json={"value": True}, headers=headers)).status_code == 403
+    assert (await client.patch("/system/subjects", json=body, headers=core)).status_code == 200
+    for refused in (developer, ops, owner):
+        assert (await client.patch("/system/subjects", json=body, headers=refused)).status_code == 403
+    assert (await client.patch("/system/settings/system.readOnly", json={"value": True}, headers=developer)).status_code == 403
 
 
 @pytest.mark.parametrize("catalog", [

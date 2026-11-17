@@ -33,7 +33,8 @@ async def _operator(client, db) -> dict[str, str]:
         db,
         "skill-developer@example.com",
         passwords.hash_password("123456"),
-        platform_role="developer",
+        # Publishing a skill reaches every family: the Koda owner's call.
+        platform_role="core",
     )
     tokens = (
         await client.post(

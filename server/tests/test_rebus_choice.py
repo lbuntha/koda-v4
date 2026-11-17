@@ -87,7 +87,7 @@ async def admin(client, db):
     from app.repos import users
     from app.security import passwords
 
-    await users.create(db, "ops@example.com", passwords.hash_password("correct horse battery"), platform_role="admin")
+    await users.create(db, "ops@example.com", passwords.hash_password("correct horse battery"), platform_role="core")
     tokens = (await client.post("/auth/login", json={"email": "ops@example.com", "password": "correct horse battery"})).json()
     return {"Authorization": f"Bearer {tokens['accessToken']}"}
 

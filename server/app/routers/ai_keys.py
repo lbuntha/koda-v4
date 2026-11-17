@@ -2,8 +2,9 @@
 
 Content makers (`content:write`) can save a Gemini, OpenAI or Claude key of
 their own; the Studio's AI then calls with it instead of Koda's, so their
-books, quizzes, Trace and art are paid from their account. Without one, the
-Studio uses the key in Admin → API keys as before.
+books, quizzes, Trace and art are paid from their account. Without one, only
+the Koda owner (`ai:shared`) falls back to the key in Admin → API keys;
+everyone else must add their own before Studio AI works.
 
 What leaves this router:
 - to the person: which providers they have a key for and its last four
@@ -51,6 +52,8 @@ class KeysOut(Model):
     keys: list[KeyOut]
     #: False when this deployment has no AI_KEYS_SECRET: saving is refused.
     available: bool
+    #: Whether Studio AI falls back to Koda's keys for this person (the Koda owner only).
+    shared: bool
 
 
 def _out(row: dict[str, Any]) -> KeyOut:
@@ -60,7 +63,7 @@ def _out(row: dict[str, Any]) -> KeyOut:
 @router.get("")
 async def list_keys(db: Db, p: CanMake) -> KeysOut:
     rows = await db.user_ai_keys.find({"userId": p.subject_id}, {"sealed": 0}).sort("provider", 1).to_list(10)
-    return KeysOut(keys=[_out(r) for r in rows], available=key_box.available())
+    return KeysOut(keys=[_out(r) for r in rows], available=key_box.available(), shared=principal_can(p, "ai:shared"))
 
 
 @router.put("/{provider}")
@@ -103,6 +106,9 @@ async def resolve_key(
     # Only a content maker's Studio work spends their key; anyone else has none to use.
     row = await db.user_ai_keys.find_one({"_id": _id(p.subject_id, provider)}) if principal_can(p, "content:write") else None
     value = key_box.unseal(row["sealed"]) if row else None
-    if not value:
+    if value:
+        return {"value": value}
+    if principal_can(p, "ai:shared"):
+        # The Koda owner: the app server uses Koda's own key instead.
         raise NotFound("No personal key for this provider.", "no_personal_key")
-    return {"value": value}
+    raise Forbidden("Add your own AI key in Settings → My AI keys to use AI in the Studio.", "own_key_required")

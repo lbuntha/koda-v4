@@ -200,9 +200,10 @@ async def upload_image(body: ImageWrite, db: Db, p: CanWrite) -> AudioSaved:
 async def overview(db: Db, p: CanWrite) -> dict[str, Any]:
     # The first admin to open the Studio becomes the author of any seed puzzle
     # created before there was an admin to author it.
-    if p.platform_role == "admin":
+    if ownership.sees_all(p):
         await repo.adopt_seed(db, p.subject_id)
-    return await repo.overview(db)
+    # A creator's numbers are their own quizzes, not the whole game's.
+    return await repo.overview(db, _mine_only(p))
 
 
 @router.get("/studio/puzzles")

@@ -16,7 +16,7 @@ from app.errors import Conflict, NotFound
 from app.models.auth import Principal
 from app.models.common import Model
 from app.repos import devices, memberships, platform_roles, users
-from app.security import passwords
+from app.security import owner_guard, passwords
 from app.services.entitlements import plans_for_families
 
 router = APIRouter(prefix="/admin/users", tags=["admin users"], dependencies=[AUTHENTICATED])
@@ -205,6 +205,7 @@ async def create_user(body: CreateUserIn, db: Db, p: CanManageUsers) -> UserOut:
         raise Conflict("That email already has an account.", "email_taken")
     if body.platform_role == "none" or not await platform_roles.by_id(db, body.platform_role):
         raise Conflict("Choose an existing platform role.", "unknown_platform_role")
+    owner_guard.guard_account(p, None, body.platform_role)
     row = await users.create(
         db,
         body.email,
@@ -221,6 +222,7 @@ async def create_user(body: CreateUserIn, db: Db, p: CanManageUsers) -> UserOut:
 @router.patch("/{user_id}")
 async def update_user(user_id: str, body: UpdateUserIn, db: Db, p: CanManageUsers) -> UserOut:
     target = await users.by_id(db, user_id)
+    owner_guard.guard_account(p, target, body.platform_role)
     if not target:
         raise NotFound("No such user account.")
 
@@ -250,9 +252,9 @@ async def update_user(user_id: str, body: UpdateUserIn, db: Db, p: CanManageUser
         patch["platformRole"] = body.platform_role
 
     removes_active_admin = (
-        current_role == "admin"
+        current_role in owner_guard.ADMIN_ROLES
         and current_status == "active"
-        and (next_role != "admin" or next_status != "active")
+        and (next_role not in owner_guard.ADMIN_ROLES or next_status != "active")
     )
     if removes_active_admin and await users.active_admin_count(db) <= 1:
         raise Conflict("At least one active administrator must remain.", "last_active_admin")
@@ -279,6 +281,7 @@ async def update_membership_role(
     p: CanManageUsers,
 ) -> UserOut:
     target = await users.by_id(db, user_id)
+    owner_guard.guard_account(p, target)
     membership = await memberships.get(db, user_id, family_id)
     if not target or not membership:
         raise NotFound("No such family membership for this user.")
@@ -314,6 +317,7 @@ async def convert_to_staff(
     are removed here, and a family's owner has to hand ownership over first.
     """
     target = await users.by_id(db, user_id)
+    owner_guard.guard_account(p, target, body.platform_role)
     if not target:
         raise NotFound("No such user account.")
     if body.platform_role == "none" or not await platform_roles.by_id(db, body.platform_role):
@@ -334,6 +338,7 @@ async def convert_to_staff(
 
 @router.post("/{user_id}/password", status_code=status.HTTP_204_NO_CONTENT)
 async def reset_password(user_id: str, body: PasswordIn, db: Db, p: CanManageUsers) -> None:
+    owner_guard.guard_account(p, await users.by_id(db, user_id))
     if not await users.set_password(db, user_id, passwords.hash_password(body.password)):
         raise NotFound("No such user account.")
     await devices.revoke_all_for_user(db, user_id)
@@ -342,6 +347,7 @@ async def reset_password(user_id: str, body: PasswordIn, db: Db, p: CanManageUse
 @router.delete("/{user_id}", status_code=status.HTTP_204_NO_CONTENT)
 async def delete_user(user_id: str, db: Db, p: CanManageUsers) -> None:
     target = await users.by_id(db, user_id)
+    owner_guard.guard_account(p, target)
     if not target:
         raise NotFound("No such user account.")
     if user_id == p.subject_id:
@@ -352,7 +358,7 @@ async def delete_user(user_id: str, db: Db, p: CanManageUsers) -> None:
             "user_has_family",
         )
     if (
-        target.get("platformRole") == "admin"
+        target.get("platformRole") in owner_guard.ADMIN_ROLES
         and target.get("status", "active") == "active"
         and await users.active_admin_count(db) <= 1
     ):

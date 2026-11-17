@@ -82,7 +82,7 @@ async def get_menu(db: Db, p: CurrentPrincipal) -> MenuOut:
     # the one person who needs the whole map, and hiding a page from them just
     # means they cannot fix it. Everyone else is filtered by the same question
     # the guard asks, so the sidebar can never offer a page the API refuses.
-    if p.platform_role == "admin" and p.family_id is None:
+    if p.platform_role == "core" and p.family_id is None:
         visible = rows
     else:
         visible = [row for row in rows if _may_see(p, row)]
@@ -225,5 +225,5 @@ async def _effective_row(db, p: Principal, item_id: str) -> dict:
 
 def _require_operator(p: Principal) -> None:
     """Editing what every family starts from is an operator's act, not a parent's."""
-    if p.platform_role not in ("admin", "developer"):
+    if p.platform_role not in ("core", "admin", "developer"):
         raise Forbidden("Only an operator can change the shipped menu.", "not_an_operator")

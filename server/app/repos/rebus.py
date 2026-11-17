@@ -75,7 +75,9 @@ SYSTEM = "system"
 async def first_admin_id(db: AsyncIOMotorDatabase) -> str | None:
     """The platform admin account seed puzzles are authored by: the oldest active one."""
     # An older account has no status at all; only an explicitly inactive one is skipped.
-    user = await db.users.find_one({"platformRole": "admin", "status": {"$in": [None, "active"]}}, sort=[("createdAt", 1)])
+    user = await db.users.find_one(
+        {"platformRole": {"$in": ["core", "admin"]}, "status": {"$in": [None, "active"]}}, sort=[("createdAt", 1)]
+    )
     return user["_id"] if user else None
 
 
@@ -332,11 +334,13 @@ async def listing(
     return rows, total
 
 
-async def overview(db: AsyncIOMotorDatabase) -> dict[str, Any]:
-    """Counts the Studio shows on its first screen."""
+async def overview(db: AsyncIOMotorDatabase, created_by: str | None = None) -> dict[str, Any]:
+    """Counts the Studio shows on its first screen: everyone's, or one creator's own."""
     by_status = {s: 0 for s in STATUSES}
     by_category: dict[str, dict[str, int]] = {}
-    async for row in db.rebus_puzzles.aggregate([{"$group": {"_id": {"status": "$status", "category": "$category"}, "n": {"$sum": 1}}}]):
+    pipeline: list[dict[str, Any]] = [{"$match": {"createdBy": created_by}}] if created_by else []
+    pipeline.append({"$group": {"_id": {"status": "$status", "category": "$category"}, "n": {"$sum": 1}}})
+    async for row in db.rebus_puzzles.aggregate(pipeline):
         status, category = row["_id"]["status"], row["_id"]["category"]
         by_status[status] = by_status.get(status, 0) + row["n"]
         cat = by_category.setdefault(category, {s: 0 for s in STATUSES})

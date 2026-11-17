@@ -573,7 +573,7 @@ async def test_recordings_are_bounded(client, db):
 
 async def test_a_reader_reports_a_book_and_an_author_resolves_it(client, db, signup_body):
     # The admin: this book has no owner, and only `content:all` hears about those.
-    dev = await _login(client, db, "dev@example.com", platform_role="admin")
+    dev = await _login(client, db, "dev@example.com", platform_role="core")
     tokens = (await client.post("/auth/signup", json=signup_body())).json()
     parent = {"Authorization": f"Bearer {tokens['accessToken']}"}
 

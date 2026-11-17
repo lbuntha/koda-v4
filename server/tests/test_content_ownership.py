@@ -6,7 +6,7 @@ from tests.test_library import MARKET, RAINY, _draft, _login
 async def test_a_creator_sees_only_their_own_books_and_the_admin_sees_all(client, db):
     ana = await _login(client, db, "ana@example.com", platform_role="creator")
     ben = await _login(client, db, "ben@example.com", platform_role="creator")
-    boss = await _login(client, db, "boss@example.com", platform_role="admin")
+    boss = await _login(client, db, "boss@example.com", platform_role="core")
 
     assert (await client.put("/library/drafts/ana-book", json=_draft(MARKET), headers=ana)).status_code == 200
     assert (await client.put("/library/drafts/ben-book", json=_draft(RAINY), headers=ben)).status_code == 200
@@ -33,7 +33,7 @@ async def test_someone_elses_book_looks_missing_and_cannot_be_changed(client, db
 
 async def test_the_admin_edits_a_creators_book_without_taking_it_over(client, db):
     ana = await _login(client, db, "ana@example.com", platform_role="creator")
-    boss = await _login(client, db, "boss@example.com", platform_role="admin")
+    boss = await _login(client, db, "boss@example.com", platform_role="core")
     await client.put("/library/drafts/ana-book", json=_draft(MARKET), headers=ana)
     owner = (await db.library_books.find_one({"id": "ana-book"}))["ownerId"]
 
@@ -44,7 +44,7 @@ async def test_the_admin_edits_a_creators_book_without_taking_it_over(client, db
 
 async def test_books_from_before_owners_belong_to_the_admin(client, db):
     ana = await _login(client, db, "ana@example.com", platform_role="creator")
-    boss = await _login(client, db, "boss@example.com", platform_role="admin")
+    boss = await _login(client, db, "boss@example.com", platform_role="core")
     await client.put("/library/drafts/old-book", json=_draft(MARKET), headers=boss)
     await db.library_books.update_one({"id": "old-book"}, {"$unset": {"ownerId": ""}})
 
@@ -64,7 +64,7 @@ async def test_trace_creators_see_only_their_own_items_and_the_admin_sees_all(cl
 
     ana = await _login(client, db, "ana@example.com", platform_role="creator")
     ben = await _login(client, db, "ben@example.com", platform_role="creator")
-    boss = await _login(client, db, "boss@example.com", platform_role="admin")
+    boss = await _login(client, db, "boss@example.com", platform_role="core")
     body = {"item": LINE, "plan": PLAN, "tests": PASSED}
     assert (await client.put("/trace/studio/items/ana-line", json=body, headers=ana)).status_code == 200
     assert (await client.put("/trace/studio/items/ben-line", json=body, headers=ben)).status_code == 200
@@ -83,7 +83,7 @@ async def test_rebus_creators_work_on_their_own_quizzes_and_cannot_publish_for_e
     await rebus_repo.ensure_seed(db, SEED)
     ana = await _login(client, db, "ana@example.com", platform_role="creator")
     ben = await _login(client, db, "ben@example.com", platform_role="creator")
-    boss = await _login(client, db, "boss@example.com", platform_role="admin")
+    boss = await _login(client, db, "boss@example.com", platform_role="core")
 
     made = await client.post("/rebus/studio/puzzles", json=puzzle("food", answer="Cheese pie ana"), headers=ana)
     assert made.status_code == 201, made.text
@@ -99,6 +99,11 @@ async def test_rebus_creators_work_on_their_own_quizzes_and_cannot_publish_for_e
     assert (await client.delete(f"/rebus/studio/puzzles/{pid}", headers=ben)).status_code == 404
     assert (await client.get(f"/rebus/studio/puzzles/{pid}", headers=boss)).status_code == 200
 
+    # Ana's first screen counts her own quizzes only, not the whole game.
+    counts = (await client.get("/rebus/studio/overview", headers=ana)).json()["byStatus"]
+    assert sum(counts.values()) == 1 and counts["draft"] == 1
+    assert sum((await client.get("/rebus/studio/overview", headers=boss)).json()["byStatus"].values()) > 1
+
     assert (await client.post("/rebus/studio/publish", json={}, headers=ana)).status_code == 403
     assert (await client.post("/rebus/studio/categories/reorder", json={"order": []}, headers=ana)).status_code == 403
 
@@ -109,7 +114,7 @@ SVG = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 10 10"><circle cx="5
 async def test_art_is_shared_to_draw_with_but_only_its_owner_changes_it(client, db):
     ana = await _login(client, db, "ana@example.com", platform_role="creator")
     ben = await _login(client, db, "ben@example.com", platform_role="creator")
-    boss = await _login(client, db, "boss@example.com", platform_role="admin")
+    boss = await _login(client, db, "boss@example.com", platform_role="core")
 
     assert (await client.put("/art/ana-sun", json={"markup": SVG}, headers=ana)).status_code == 200
     assert "ana-sun" in [a["id"] for a in (await client.get("/art", headers=ben)).json()["assets"]]
@@ -138,7 +143,7 @@ async def _id(db, email):
 
 async def test_the_admin_sees_who_owns_what_and_moves_it(client, db):
     ana = await _login(client, db, "ana@example.com", platform_role="creator")
-    boss = await _login(client, db, "boss@example.com", platform_role="admin")
+    boss = await _login(client, db, "boss@example.com", platform_role="core")
     await _login(client, db, "ben@example.com", platform_role="creator")
     await client.put("/library/drafts/ana-1", json=_draft(MARKET), headers=ana)
     await client.put("/library/drafts/ana-2", json=_draft(RAINY), headers=ana)
@@ -173,7 +178,7 @@ async def test_the_art_list_says_which_drawings_the_caller_may_change(client, db
 async def test_a_creator_cannot_change_what_every_family_gets(client, db):
     """Skills, subjects and the app's wording are the admin's; a Content creator is refused on the server."""
     ana = await _login(client, db, "ana@example.com", platform_role="creator")
-    boss = await _login(client, db, "boss@example.com", platform_role="admin")
+    boss = await _login(client, db, "boss@example.com", platform_role="core")
 
     assert (await client.patch("/system/subjects", json={}, headers=ana)).status_code == 403
     assert (await client.put("/translations/km/nav.home", json={"text": "x"}, headers=ana)).status_code == 403
@@ -205,3 +210,33 @@ async def test_a_parent_cannot_reach_content_owners(client, signup_body):
     parent = {"Authorization": f"Bearer {tokens['accessToken']}"}
     assert (await client.get("/admin/content/owners", headers=parent)).status_code == 403
     assert (await client.post("/admin/content/reassign", json={"kind": "all", "from": "x", "to": "y"}, headers=parent)).status_code == 403
+
+
+async def test_only_the_koda_owner_sees_everyones_books(client, db):
+    ana = await _login(client, db, "ana@example.com", platform_role="creator")
+    ops = await _login(client, db, "ops@example.com", platform_role="admin")
+    core = await _login(client, db, "core@example.com", platform_role="core")
+    await client.put("/library/drafts/ana-1", json=_draft(MARKET), headers=ana)
+    await client.put("/library/drafts/ops-1", json=_draft(RAINY), headers=ops)
+    ids = lambda r: sorted(b["id"] for b in r.json()["books"])  # noqa: E731
+    assert ids(await client.get("/library/drafts", headers=ops)) == ["ops-1"]
+    assert ids(await client.get("/library/drafts", headers=core)) == ["ana-1", "ops-1"]
+    assert (await client.get("/admin/content/owners", headers=ops)).status_code == 403
+
+
+async def test_an_admin_cannot_take_over_the_owner(client, db):
+    ops = await _login(client, db, "ops@example.com", platform_role="admin")
+    core = await _login(client, db, "core@example.com", platform_role="core")
+    ops_id, core_id = await _id(db, "ops@example.com"), await _id(db, "core@example.com")
+
+    def refused(r):
+        return r.status_code == 403 and r.json()["error"]["code"] == "owner_only"
+
+    assert refused(await client.patch(f"/admin/users/{ops_id}", json={"platformRole": "core"}, headers=ops))
+    assert refused(await client.patch(f"/admin/users/{core_id}", json={"status": "suspended"}, headers=ops))
+    assert refused(await client.post(f"/admin/users/{core_id}/password", json={"password": "a new long password"}, headers=ops))
+    assert refused(await client.delete(f"/admin/users/{core_id}", headers=ops))
+    made = await client.post("/admin/roles", json={"name": "Sneaky", "permissions": ["content:all"]}, headers=ops)
+    assert refused(made)
+    # The owner may make another owner.
+    assert (await client.patch(f"/admin/users/{ops_id}", json={"platformRole": "core"}, headers=core)).status_code == 200

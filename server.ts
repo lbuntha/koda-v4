@@ -235,19 +235,25 @@ async function providerKey(which: AiCredential, authorization?: string): Promise
 /** Providers a person can keep their own key for (Settings → My AI keys). */
 const PERSONAL_PROVIDERS = new Set<AiCredential>(["gemini", "openai", "anthropic"]);
 
-/** The signed-in person's own key for a provider, if they saved one. Never throws: no key is the usual answer. */
-async function personalKey(which: AiCredential, authorization?: string): Promise<string | undefined> {
-  if (!PERSONAL_PROVIDERS.has(which) || !authorization || !TUTOR_SERVICE_TOKEN) return undefined;
+/**
+ * The signed-in person's own key for a provider. `shared` says whether, without
+ * one, they may fall back to Koda's key — only the Koda owner may (`ai:shared`).
+ * Never throws; anything unexpected means no key and no fallback.
+ */
+async function personalKey(which: AiCredential, authorization?: string): Promise<{ key?: string; shared: boolean }> {
+  if (!PERSONAL_PROVIDERS.has(which) || !authorization || !TUTOR_SERVICE_TOKEN) return { shared: false };
   try {
     const res = await fetch(`${API_URL}/v1/me/ai-keys/${which}/resolve`, {
       method: "POST",
       headers: { Authorization: authorization, "X-Service-Token": TUTOR_SERVICE_TOKEN },
     });
-    if (!res.ok) return undefined;
+    if (res.status === 404) return { shared: true };
+    if (!res.ok) return { shared: false };
     const body = (await res.json()) as { value?: string };
-    return body.value?.trim() || undefined;
+    const key = body.value?.trim();
+    return key ? { key, shared: false } : { shared: false };
   } catch {
-    return undefined;
+    return { shared: false };
   }
 }
 
@@ -259,15 +265,37 @@ async function personalKey(which: AiCredential, authorization?: string): Promise
  */
 async function studioKey(which: AiCredential, authorization?: string): Promise<{ key?: string; source?: "personal" | "saved" | "env" }> {
   const own = await personalKey(which, authorization);
-  if (own) return { key: own, source: "personal" };
-  return providerKey(which, authorization);
+  if (own.key) return { key: own.key, source: "personal" };
+  return own.shared ? providerKey(which, authorization) : {};
 }
 
-/** Studio Gemini: the maker's own key, else the deployment's. */
+/** Studio Gemini: the maker's own key, else — for the Koda owner only — the deployment's. */
 async function studioGeminiKey(authorization?: string): Promise<KeyLookup> {
   const own = await personalKey("gemini", authorization);
-  return own ? { key: own } : systemApiKey(authorization);
+  if (own.key) return { key: own.key };
+  return own.shared ? systemApiKey(authorization) : { reason: "unset" };
 }
+
+/** Which personal key a Studio request will spend: fixed by the route, else the provider it asks for. */
+function studioProvider(path: string, asked: unknown): "gemini" | "openai" | "anthropic" | undefined {
+  if (path.endsWith("/openai")) return "openai";
+  if (path.endsWith("/gemini") || path === "/api/library/voice" || path.startsWith("/api/trace/stroke-order")
+    || path === "/api/trace/colour-steps" || path === "/api/trace/colouring-page") return "gemini";
+  const name = String(asked ?? "").toLowerCase();
+  if (name === "openai" || name === "chatgpt" || name === "codex") return "openai";
+  if (name === "claude" || name === "anthropic") return "anthropic";
+  if (name === "gemini") return "gemini";
+  return undefined;
+}
+
+/** Studio AI routes: a maker with no key of their own (and no right to Koda's) is told where to add one. */
+const STUDIO_AI_ROUTES = new Set([
+  "/api/trace/stroke-order", "/api/trace/colour-steps", "/api/trace/colouring-page", "/api/trace/voice",
+  "/api/art/generate", "/api/rebus/generate",
+  "/api/library/story", "/api/library/draft", "/api/library/voice", "/api/library/voice/openai",
+  "/api/library/image/gemini", "/api/library/image/prompt", "/api/library/image/openai",
+  "/api/library/match-question", "/api/library/word-notes", "/api/library/correct-question",
+]);
 
 // Lazy initialize Gemini client
 function getGeminiClient(lookup?: KeyLookup | string) {
@@ -312,6 +340,37 @@ const LIVE_WS_ORIGIN = (process.env.LIVE_WS_ORIGIN ?? "").trim();
  * Public by design — an origin is not a secret, and it is needed before there is
  * a session to authenticate with.
  */
+app.use(async (req, res, next) => {
+  if (req.method !== "POST" || !STUDIO_AI_ROUTES.has(req.path) || !req.headers.authorization) return next();
+  try {
+    const r = await fetch(`${API_URL}/v1/me/ai-keys`, { headers: { Authorization: req.headers.authorization } });
+    // Not a content maker, or the data service is down: the route's own checks answer.
+    if (!r.ok) return next();
+    const mine = (await r.json()) as { keys?: { provider: string }[]; shared?: boolean };
+    // The Koda owner may use Koda's keys; everyone else only their own — no fallback.
+    if (mine.shared) return next();
+    const own = new Set((mine.keys ?? []).map((k) => k.provider));
+    if (own.size === 0) {
+      return res.status(403).json({
+        error: { code: "own_key_required", message: "Add your own AI key in Settings → My AI keys to use AI in the Studio." },
+      });
+    }
+    const wanted = studioProvider(req.path, req.body?.provider);
+    if (wanted && !own.has(wanted)) {
+      const name = AI_CREDENTIALS[wanted].name;
+      return res.status(403).json({
+        error: {
+          code: "own_key_required",
+          message: `You have no ${name} key. Add one in Settings → My AI keys, or choose a provider you have a key for.`,
+        },
+      });
+    }
+    return next();
+  } catch {
+    return next();
+  }
+});
+
 app.get("/api/config", (_req, res) => {
   res.json({ liveWsOrigin: LIVE_WS_ORIGIN });
 });

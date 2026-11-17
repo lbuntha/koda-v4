@@ -10,6 +10,7 @@
 import React, { useCallback, useEffect, useState } from "react";
 import { CheckCircle2, ClipboardCheck, EyeOff, Rocket } from "lucide-react";
 import { useT } from "../../lib/i18n";
+import { usePermissions } from "../../lib/sync";
 import { themeSystem } from "../../lib/themeSystem";
 import { UISectionHeader, UIStatGrid, UIStatTile, UITabs } from "../../components/ui";
 import { CategoriesPanel } from "./CategoriesPanel";
@@ -25,6 +26,8 @@ type Tab = "create" | "review" | "publish" | "puzzles" | "categories" | "drawing
 
 export const RebusStudio: React.FC = () => {
   const { t } = useT();
+  // Putting quizzes live and editing categories change the game for everyone: the Koda owner's.
+  const runsTheGame = usePermissions().can("content:all");
   const [tab, setTab] = useState<Tab | null>(null);
   const [overview, setOverview] = useState<Overview | null>(null);
   const [error, setError] = useState("");
@@ -58,7 +61,7 @@ export const RebusStudio: React.FC = () => {
       <UIStatGrid>
         <UIStatTile icon={<CheckCircle2 />} value={overview?.byStatus.published ?? "—"} label={t("rebus.studio.statLive")} tone="success" />
         <UIStatTile icon={<ClipboardCheck />} value={overview?.byStatus.draft ?? "—"} label={t("rebus.studio.statToReview")} tone="primary" onClick={() => setTab("review")} />
-        <UIStatTile icon={<Rocket />} value={overview?.byStatus.approved ?? "—"} label={t("rebus.studio.statWaiting")} tone="primary" onClick={() => setTab("publish")} />
+        <UIStatTile icon={<Rocket />} value={overview?.byStatus.approved ?? "—"} label={t("rebus.studio.statWaiting")} tone="primary" onClick={runsTheGame ? () => setTab("publish") : undefined} />
         <UIStatTile icon={<EyeOff />} value={overview?.byStatus.retired ?? "—"} label={t("rebus.studio.statRetired")} tone="danger" />
       </UIStatGrid>
 
@@ -67,9 +70,9 @@ export const RebusStudio: React.FC = () => {
         items={[
           { id: "create", label: t("rebus.studio.tabCreate") },
           { id: "review", label: t("rebus.studio.tabReview"), count: overview?.byStatus.draft },
-          { id: "publish", label: t("rebus.studio.tabPublish"), count: overview?.byStatus.approved },
+          ...(runsTheGame ? [{ id: "publish", label: t("rebus.studio.tabPublish"), count: overview?.byStatus.approved }] : []),
           { id: "puzzles", label: t("rebus.studio.tabPuzzles") },
-          { id: "categories", label: t("rebus.studio.tabCategories") },
+          ...(runsTheGame ? [{ id: "categories", label: t("rebus.studio.tabCategories") }] : []),
           { id: "drawings", label: t("rebus.studio.tabDrawings") },
         ]}
         value={shown}
@@ -79,9 +82,9 @@ export const RebusStudio: React.FC = () => {
       {shown === "create" && <CreatePanel onChanged={() => void refresh()} />}
       {shown === "review" && <ReviewQueue overview={overview} onChanged={() => void refresh()} />}
       {shown === "puzzles" && <PuzzleList onChanged={() => void refresh()} />}
-      {shown === "categories" && <CategoriesPanel />}
+      {shown === "categories" && runsTheGame && <CategoriesPanel />}
       {shown === "drawings" && <DrawingsPanel />}
-      {shown === "publish" && <PublishPanel onChanged={() => void refresh()} />}
+      {shown === "publish" && runsTheGame && <PublishPanel onChanged={() => void refresh()} />}
     </div>
   );
 };

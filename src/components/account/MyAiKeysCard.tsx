@@ -29,6 +29,8 @@ const PROVIDERS: { id: Provider; name: string; where: string }[] = [
 export const MyAiKeysCard: React.FC = () => {
   const [keys, setKeys] = useState<SavedKey[] | null>(null);
   const [available, setAvailable] = useState(true);
+  // Only the Koda owner falls back to Koda's keys; everyone else needs their own.
+  const [shared, setShared] = useState(false);
   const [drafts, setDrafts] = useState<Partial<Record<Provider, string>>>({});
   const [busy, setBusy] = useState<Provider | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -36,9 +38,10 @@ export const MyAiKeysCard: React.FC = () => {
 
   const load = useCallback(async () => {
     try {
-      const reply = await request<{ keys: SavedKey[]; available: boolean }>("/me/ai-keys", { token: await accessToken() });
+      const reply = await request<{ keys: SavedKey[]; available: boolean; shared: boolean }>("/me/ai-keys", { token: await accessToken() });
       setKeys(reply.keys);
       setAvailable(reply.available);
+      setShared(reply.shared);
     } catch (e) {
       setError((e as ApiError).message);
     }
@@ -92,6 +95,7 @@ export const MyAiKeysCard: React.FC = () => {
         <ShieldCheck className="mt-0.5 h-4 w-4 shrink-0 text-emerald-600 dark:text-emerald-400" />
         {translate("settings.aiKeys.privacy")}
       </p>
+      {keys && !shared && keys.length === 0 && <p className={themeSystem.flash("info")}>{translate("settings.aiKeys.required")}</p>}
       {!available && <p className={themeSystem.flash("warning")}>{translate("settings.aiKeys.unavailable")}</p>}
       {error && <p className={themeSystem.flash("error")}>{error}</p>}
       {notice && <p className={themeSystem.flash("success")}>{notice}</p>}
@@ -107,7 +111,7 @@ export const MyAiKeysCard: React.FC = () => {
                     {translate("settings.aiKeys.inUse", { last4: saved.last4 })}
                   </span>
                 ) : (
-                  <span className="text-xs text-muted">{translate("settings.aiKeys.usingKoda")}</span>
+                  <span className="text-xs text-muted">{translate(shared ? "settings.aiKeys.usingKoda" : "settings.aiKeys.noKey")}</span>
                 )}
               </div>
               <div className="flex flex-col gap-2 sm:flex-row">

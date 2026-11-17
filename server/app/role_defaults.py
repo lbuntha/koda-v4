@@ -4,9 +4,16 @@ from app.security.policy import PLATFORM_PERMISSIONS
 
 DEFAULT_PLATFORM_ROLES: list[dict] = [
     {
+        "roleId": "core",
+        "name": "Koda owner",
+        "description": "Everything an Admin does, plus everyone's content and Koda's shared AI keys. Only an owner can make another.",
+        "permissions": sorted(PLATFORM_PERMISSIONS["core"]),
+        "builtIn": True,
+    },
+    {
         "roleId": "admin",
         "name": "Admin",
-        "description": "Full platform administration, users, roles, content, and settings.",
+        "description": "Users, roles, settings and families; makes their own content with their own AI key.",
         "permissions": sorted(PLATFORM_PERMISSIONS["admin"]),
         "builtIn": True,
     },

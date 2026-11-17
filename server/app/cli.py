@@ -33,7 +33,7 @@ async def _create_admin(email: str, password: str) -> None:
     if await users.by_email(db, email):
         print(f"{email} already exists.")
     else:
-        await users.create(db, email, passwords.hash_password(password), platform_role="admin")
+        await users.create(db, email, passwords.hash_password(password), platform_role="core")
         print(f"admin created: {email}")
     await database.close()
 

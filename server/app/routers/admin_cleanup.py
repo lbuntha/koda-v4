@@ -22,6 +22,7 @@ from app.models.common import Model
 from app.repos import cleanup as cleanup_repo
 from app.repos import maintenance as maintenance_repo
 from app.repos import users as users_repo
+from app.security import owner_guard
 
 router = APIRouter(prefix="/admin/cleanup", tags=["admin cleanup"], dependencies=[AUTHENTICATED])
 
@@ -137,8 +138,14 @@ async def delete_users(body: UserIdsIn, db: Db, p: CanClean) -> UsersDeleteOut:
                 error="You cannot delete the account you are using.", code="cannot_delete_self",
             ))
             continue
+        if target.get("platformRole") == owner_guard.OWNER_ROLE and not owner_guard.is_owner(p):
+            results.append(UserResult(
+                id=user_id, email=target["email"], deleted=False,
+                error="Only the Koda owner can delete the owner's account.", code="owner_only",
+            ))
+            continue
         if (
-            target.get("platformRole") == "admin"
+            target.get("platformRole") in owner_guard.ADMIN_ROLES
             and target.get("status", "active") == "active"
             and await users_repo.active_admin_count(db) <= 1
         ):

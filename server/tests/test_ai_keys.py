@@ -46,16 +46,17 @@ async def test_only_the_app_server_reads_a_key_and_only_the_owners(client, db):
     assert (await _resolve(client, ana)).json() == {"value": KEY}
     assert (await _resolve(client, ana, service="wrong")).status_code == 403
     assert (await client.post("/me/ai-keys/openai/resolve", headers=ana)).status_code == 403
-    # Ben's sign-in reads Ben's key, which he has not set: never Ana's.
-    assert (await _resolve(client, ben)).status_code == 404
-    assert (await _resolve(client, ana, provider="gemini")).status_code == 404
+    # Ben's sign-in reads Ben's key, which he has not set: never Ana's, and no fallback.
+    refused = await _resolve(client, ben)
+    assert refused.status_code == 403 and refused.json()["error"]["code"] == "own_key_required"
+    assert (await _resolve(client, ana, provider="gemini")).status_code == 403
 
 
 async def test_a_removed_key_is_gone(client, db):
     ana = await _login(client, db, "ana@example.com", platform_role="creator")
     await client.put("/me/ai-keys/anthropic", json={"key": KEY}, headers=ana)
     assert (await client.delete("/me/ai-keys/anthropic", headers=ana)).status_code == 204
-    assert (await _resolve(client, ana, provider="anthropic")).status_code == 404
+    assert (await _resolve(client, ana, provider="anthropic")).status_code == 403
     assert (await client.get("/me/ai-keys", headers=ana)).json()["keys"] == []
 
 
@@ -89,3 +90,13 @@ def test_production_without_a_secret_cannot_seal(monkeypatch):
     assert key_box.available() is False
     monkeypatch.setattr(settings(), "ai_keys_secret", "a-long-random-secret-for-the-test")
     assert key_box.unseal(key_box.seal("abc")) == "abc"
+
+
+async def test_only_the_koda_owner_falls_back_to_kodas_key(client, db):
+    admin = await _login(client, db, "ops@example.com", platform_role="admin")
+    owner = await _login(client, db, "core@example.com", platform_role="core")
+    assert (await client.get("/me/ai-keys", headers=admin)).json()["shared"] is False
+    assert (await client.get("/me/ai-keys", headers=owner)).json()["shared"] is True
+    # The owner, with no key of their own, is told to use Koda's (404); an admin is refused.
+    assert (await _resolve(client, owner)).status_code == 404
+    assert (await _resolve(client, admin)).json()["error"]["code"] == "own_key_required"

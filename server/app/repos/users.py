@@ -290,7 +290,7 @@ async def verify_email_token(
 
 async def active_admin_count(db: AsyncIOMotorDatabase) -> int:
     return await db.users.count_documents({
-        "platformRole": "admin",
+        "platformRole": {"$in": ["admin", "core"]},
         "$or": [{"status": "active"}, {"status": {"$exists": False}}],
     })
 

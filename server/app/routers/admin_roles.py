@@ -12,7 +12,7 @@ from app.errors import Conflict, NotFound
 from app.models.auth import Principal
 from app.models.common import Model
 from app.repos import devices, platform_roles
-from app.security import policy
+from app.security import owner_guard, policy
 
 router = APIRouter(prefix="/admin/roles", tags=["admin roles"], dependencies=[AUTHENTICATED])
 CanManageRoles = Annotated[Principal, Depends(require("role:manage"))]
@@ -46,6 +46,11 @@ class RolePatchIn(Model):
 
 def _role_id(name: str) -> str:
     return re.sub(r"[^a-z0-9]+", "-", name.lower()).strip("-")[:50]
+
+
+def _owner_checked(p: Principal, permissions: list[str]) -> list[str]:
+    owner_guard.guard_permissions(p, permissions)
+    return permissions
 
 
 def _permissions(values: list[str]) -> list[str]:
@@ -99,7 +104,7 @@ async def create_role(body: RoleCreateIn, db: Db, p: CanManageRoles) -> RoleOut:
             role_id,
             body.name.strip(),
             body.description.strip(),
-            _permissions(body.permissions),
+            _owner_checked(p, _permissions(body.permissions)),
             p.subject_id,
         )
     except DuplicateKeyError as exc:
@@ -124,7 +129,7 @@ async def update_role(role_id: str, body: RolePatchIn, db: Db, p: CanManageRoles
     if "description" in patch:
         patch["description"] = patch["description"].strip()
     if "permissions" in patch:
-        patch["permissions"] = _permissions(patch["permissions"])
+        patch["permissions"] = _owner_checked(p, _permissions(patch["permissions"]))
     row = await platform_roles.update(db, role_id, patch)
     if not row:
         raise NotFound("No such custom platform role.")

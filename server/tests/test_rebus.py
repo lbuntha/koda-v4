@@ -27,7 +27,7 @@ async def admin(client, db):
     from app.repos import users
     from app.security import passwords
 
-    await users.create(db, "ops@example.com", passwords.hash_password("correct horse battery"), platform_role="admin")
+    await users.create(db, "ops@example.com", passwords.hash_password("correct horse battery"), platform_role="core")
     tokens = (await client.post("/auth/login", json={"email": "ops@example.com", "password": "correct horse battery"})).json()
     return {"Authorization": f"Bearer {tokens['accessToken']}"}
 
@@ -90,7 +90,7 @@ async def test_seed_puzzles_created_when_an_admin_already_exists_are_theirs_from
     await db.rebus_puzzles.delete_many({})
     await db.rebus_state.delete_many({})
     boss = await users.create(
-        db, "boss@example.com", passwords.hash_password("correct horse battery"), platform_role="admin", display_name="The Boss"
+        db, "boss@example.com", passwords.hash_password("correct horse battery"), platform_role="core", display_name="The Boss"
     )
     await repo.ensure_seed(db, SEED)
     assert await db.rebus_puzzles.count_documents({"createdBy": boss["_id"], "status": "draft"}) == len(SEED)
@@ -102,9 +102,9 @@ async def test_an_older_admin_with_no_status_field_authors_them_and_a_disabled_o
 
     await db.rebus_puzzles.delete_many({})
     await db.rebus_state.delete_many({})
-    gone = await users.create(db, "gone@example.com", passwords.hash_password("correct horse battery"), platform_role="admin")
+    gone = await users.create(db, "gone@example.com", passwords.hash_password("correct horse battery"), platform_role="core")
     await db.users.update_one({"_id": gone["_id"]}, {"$set": {"status": "disabled"}})
-    old = await users.create(db, "old@example.com", passwords.hash_password("correct horse battery"), platform_role="admin")
+    old = await users.create(db, "old@example.com", passwords.hash_password("correct horse battery"), platform_role="core")
     await db.users.update_one({"_id": old["_id"]}, {"$unset": {"status": ""}})
     await repo.ensure_seed(db, SEED)
     assert (await db.rebus_puzzles.find_one({}))["createdBy"] == old["_id"]

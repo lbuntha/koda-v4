@@ -81,7 +81,8 @@ export function ageFromBirthYear(birthYear: number, year = new Date().getFullYea
  * reveal drafts but still exercises the selected preview age.
  */
 export function viewerForSession(session: Session | null, preview: Viewer): Viewer {
-  const isAdmin = session?.platformRole === "admin";
+  // The Koda owner (`core`) is an admin too.
+  const isAdmin = session?.platformRole === "admin" || session?.platformRole === "core";
   const isDeveloper = isAdmin || session?.platformRole === "developer";
   return {
     age: session?.learnerBirthYear

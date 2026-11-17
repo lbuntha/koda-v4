@@ -76,9 +76,12 @@ PERMISSIONS = {
     "trace:create",
     # Seeing and changing *everyone's* Studio content. Without it, a person who
     # can author (content:write, trace:create) works only on what they made:
-    # their own books, quizzes, Trace items and art. The admin role holds it;
-    # a Content creator does not. Platform-only, like the two above.
+    # their own books, quizzes, Trace items and art. Only the Koda owner role
+    # (`core`) holds it. Platform-only, like the two above.
     "content:all",
+    # Studio AI on Koda's own API keys. Without it, a content maker's Studio AI
+    # runs only on the key they saved in Settings → My AI keys. Koda owner only.
+    "ai:shared",
     "device:list",
     "device:revoke",
     # Platform account lifecycle. Kept separate from family membership roles:
@@ -123,6 +126,7 @@ STAFF_ONLY = {
     # adult in one household.
     "content:write",
     "content:all",
+    "ai:shared",
     "trace:create",
 }
 
@@ -177,7 +181,6 @@ PLATFORM_PERMISSIONS: dict[str, set[str]] = {
         "settings:read",
         "settings:write",
         "content:write",
-        "content:all",
         "trace:create",
         "scoring:write",
         "menu:manage",
@@ -189,13 +192,13 @@ PLATFORM_PERMISSIONS: dict[str, set[str]] = {
         "content:write",
         "trace:create",
     },
-    # Runs the service: account lifecycle, devices, deletion requests — plus the
-    # content a developer manages, because an operator has to be able to fix it.
+    # Runs the service: account lifecycle, devices, deletion requests — and makes
+    # content like a creator: their own, with their own AI key. Seeing everyone's
+    # content and spending Koda's key are the Koda owner's (`core`, below).
     "admin": {
         "settings:read",
         "settings:write",
         "content:write",
-        "content:all",
         "trace:create",
         "scoring:write",
         "system:write",
@@ -213,7 +216,17 @@ PLATFORM_PERMISSIONS: dict[str, set[str]] = {
         "role:manage",
         "menu:manage",
     },
+    # The one person who owns this Koda. Everything an Admin holds, plus the two
+    # rights over everyone's work: seeing and moving all content (`content:all`,
+    # which also releases skills, subjects, wording and Rebus for every family)
+    # and Studio AI on Koda's own keys (`ai:shared`). Only a Koda owner can make
+    # or change another — see `security/owner_guard.py`.
+    "core": set(),
 }
+PLATFORM_PERMISSIONS["core"] = PLATFORM_PERMISSIONS["admin"] | {"content:all", "ai:shared"}
+
+#: Rights only a Koda owner holds, and only a Koda owner can hand out.
+OWNER_ONLY = {"content:all", "ai:shared"}
 
 # Staff never hold these, whatever their platform role says. Reaching a child's
 # record takes a time-boxed grant (P2.5), never a role.

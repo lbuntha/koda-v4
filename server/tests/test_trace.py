@@ -262,7 +262,7 @@ async def test_a_creator_sees_and_changes_only_their_own_work(client, db):
     assert taken.status_code == 403
     assert (await client.delete("/trace/studio/collections/lines", headers=bob)).status_code == 403
 
-    admin = await _login(client, db, "admin@example.com", platform_role="admin")
+    admin = await _login(client, db, "admin@example.com", platform_role="core")
     assert [i["id"] for i in (await client.get("/trace/studio/items", headers=admin)).json()["items"]] == ["line-1"]
 
 
@@ -292,7 +292,7 @@ async def test_a_creators_publish_waits_for_an_admin(client, db, signup_body):
     # Only an admin sees the queue.
     assert (await client.get("/trace/studio/review", headers=ann)).status_code == 403
 
-    admin = await _login(client, db, "admin@example.com", platform_role="admin")
+    admin = await _login(client, db, "admin@example.com", platform_role="core")
     queue = (await client.get("/trace/studio/review", headers=admin)).json()["collections"]
     assert [c["id"] for c in queue] == ["lines"]
     assert queue[0]["pending"]["items"][0]["item"]["title"] == "Line"
@@ -305,7 +305,7 @@ async def test_an_admin_can_send_a_collection_back_with_a_note(client, db):
     ann = await _creator(client, db, "ann@example.com")
     await _ready_collection(client, ann)
     await client.post("/trace/studio/collections/lines/publish", headers=ann)
-    admin = await _login(client, db, "admin@example.com", platform_role="admin")
+    admin = await _login(client, db, "admin@example.com", platform_role="core")
     sent_back = (await client.post("/trace/studio/review/lines/reject", json={"note": "Stroke 1 goes the wrong way"}, headers=admin)).json()
     assert sent_back["reviewState"] == "rejected"
     mine = (await client.get("/trace/studio/collections", headers=ann)).json()["collections"][0]
@@ -367,7 +367,7 @@ async def test_a_parent_reads_a_childs_writing_with_titles_and_the_common_mistak
 
 
 async def test_ai_strokes_are_for_admins_and_paid_creators(client, db):
-    admin = await _login(client, db, "admin@example.com", platform_role="admin")
+    admin = await _login(client, db, "admin@example.com", platform_role="core")
     assert (await client.get("/trace/studio/ai", headers=admin)).json() == {"allowed": True}
     ann = await _creator(client, db, "ann@example.com")
     assert (await client.get("/trace/studio/ai", headers=ann)).json() == {"allowed": False, "reason": "plan_required"}
