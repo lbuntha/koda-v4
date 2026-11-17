@@ -106,8 +106,8 @@ async def test_one_weekly_email_per_parent_covers_every_child(db, family, seeded
     [letter] = outbox
     assert letter["to"] == "parent@example.com"
     assert letter["subject"] == "Your family's week on Koda"
-    assert "• Mia: practised on 2 days — 2 rounds, 20 minutes" in letter["body"]
-    assert "• Leo: practised on 1 day — 1 round, 2 minutes" in letter["body"]
+    assert "• Mia: 2 days · 2 rounds · 20 minutes" in letter["body"]
+    assert "• Leo: 1 day · 1 round · 2 minutes" in letter["body"]
     bodies = {row["body"] for row in await told(db, "learn.weekly_summary")}
     assert "Mia practised 2 days this week — 2 rounds, 20 minutes." in bodies
 
