@@ -283,7 +283,7 @@
     "lessons": [
       {
         "id": "count-all",
-        "title": "Count Them All",
+        "title": "Add by Counting All",
         "concept": "Joining Two Groups by Counting Every One",
         "conceptKey": "count-all",
         "requires": [
@@ -1299,7 +1299,7 @@
       },
       {
         "id": "make-10",
-        "title": "Make Ten",
+        "title": "Add to Make Ten",
         "concept": "Filling a Frame of Ten",
         "conceptKey": "make-ten",
         "requires": [
@@ -1334,7 +1334,7 @@
             "kidTip": "Fill the frame right up. Count only the ones you put in.",
             "audioPrompt": "Make ten! How many more counters does the frame need?",
             "prompts": {
-              "default": "You have {a}. How many more to make {size}?"
+              "default": "{a} + ? = {size}. How many more?"
             }
           }
         },

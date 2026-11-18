@@ -86,7 +86,7 @@ def test_the_server_judges_a_concept_as_the_app_does(case):
 
 
 def test_a_concept_is_named_by_its_lesson():
-    assert mastery.lesson_name("count-all") == "Count Them All"
+    assert mastery.lesson_name("count-all") == "Add by Counting All"
     assert mastery.join_names(["A", "B", "A", "C"]) == "A, B and C"
 
 
@@ -102,7 +102,7 @@ async def test_a_lesson_becoming_secure_is_told_once(db, family, seeded):
     await progress.after_sync(db, family["familyId"], batch(family, "2026-08-16"), before)
 
     [row] = await told(db, "learn.mastered")
-    assert row["title"] == "Mia mastered Count Them All"
+    assert row["title"] == "Mia mastered Add by Counting All"
 
 
 async def test_an_already_secure_lesson_is_not_news(db, family, seeded):
@@ -125,7 +125,7 @@ async def test_several_lessons_on_one_day_are_one_message(db, family, seeded):
     await progress.after_sync(db, family["familyId"], batch(family, "2026-08-16"), before)
 
     [row] = await told(db, "learn.mastered")
-    assert row["title"] == f"Mia mastered Count Them All and {mastery.lesson_name('count-on')}"
+    assert row["title"] == f"Mia mastered Add by Counting All and {mastery.lesson_name('count-on')}"
     marks = await progress_marks.for_days(db, family["familyId"], family["mia"], ["2026-08-16"])
     assert len([m for m in marks if m["kind"] == "mastered"]) == 2
 
@@ -143,9 +143,9 @@ async def test_a_stuck_lesson_is_told_once_a_week_by_push_and_email(db, family, 
 
     [row] = await told(db, "learn.stuck")
     assert row["title"] == "Mia could use a hand"
-    assert "Count Them All is tricky" in row["body"]
+    assert "Add by Counting All is tricky" in row["body"]
     [letter] = outbox
-    assert letter["subject"] == "A tip for Mia's Count Them All"
+    assert letter["subject"] == "A tip for Mia's Add by Counting All"
 
 
 async def test_one_bad_day_is_not_stuck(db, family, seeded, outbox):
@@ -245,7 +245,7 @@ async def test_the_weekly_email_says_what_was_mastered_and_what_is_next(db, fami
     await task_service.weekly_summary(db, at=SUNDAY_EVENING_UTC)
 
     [letter] = outbox
-    assert "mastered Count Them All" in letter["body"]
+    assert "mastered Add by Counting All" in letter["body"]
     assert f"next up: {mastery.lesson_name('count-on')}" in letter["body"]
 
 
