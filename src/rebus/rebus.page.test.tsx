@@ -6,7 +6,14 @@ import { RebusEntry } from "./ui/RebusEntry";
 
 /** Two food puzzles, so the round is short and the puzzle on screen is known. */
 const emptyBank = vi.hoisted(() => ({ on: false, loaded: false }));
-vi.mock("./bankStore", () => ({ refreshBank: vi.fn(async () => undefined) }));
+// The entry card reads what is already on the device: two published food puzzles.
+// One object, as a real store returns, so useSyncExternalStore sees it settle.
+const onDevice = { puzzles: [{ id: "a", category: "food" }, { id: "b", category: "food" }] };
+vi.mock("./bankStore", () => ({
+  refreshBank: vi.fn(async () => undefined),
+  bankSnapshot: () => onDevice,
+  subscribeBank: () => () => undefined,
+}));
 vi.mock("./bank", async () => {
   const { BUILT_IN_CATEGORIES } = await import("./categories");
   const puzzles = SAMPLE_PUZZLES.filter((p) => p.answer === "Hot dog" || p.answer === "Honeymoon");
@@ -258,6 +265,11 @@ describe("the entry card", () => {
     render(<RebusEntry onOpen={open} />);
     fireEvent.click(screen.getByRole("button", { name: /Rebus Rush/ }));
     expect(open).toHaveBeenCalled();
+  });
+
+  it("says how much there is to play, from the puzzles on this device", () => {
+    render(<RebusEntry onOpen={vi.fn()} />);
+    expect(screen.getByText("2 puzzles · 1 topic")).toBeTruthy();
   });
 });
 

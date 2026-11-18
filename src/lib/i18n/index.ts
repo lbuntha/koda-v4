@@ -199,6 +199,17 @@ export function formatNumber(value: number, code = currentLanguage()): string {
   return cached(numberFormats, code, (c) => new Intl.NumberFormat(c)).format(value);
 }
 
+const compactFormats = new Map<string, Intl.NumberFormat>();
+
+/**
+ * Short counts for small spaces: under 1,000 as it is, then `1K`, `1.8K`,
+ * `12.5K` — and the language's own short form (`1.8ពាន់`).
+ */
+export function formatCompact(value: number, code = currentLanguage()): string {
+  if (Math.abs(value) < 1000) return formatNumber(value, code);
+  return cached(compactFormats, code, (c) => new Intl.NumberFormat(c, { notation: "compact", maximumFractionDigits: 1 })).format(value);
+}
+
 /** A date in the language's own words and order — "September 2026", "កញ្ញា 2026". */
 export function formatDate(
   value: Date | string | number,

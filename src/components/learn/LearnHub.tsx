@@ -24,14 +24,17 @@
 import React, { Suspense, lazy, useEffect, useState } from "react";
 import { useT } from "../../lib/i18n";
 import { playSound } from "../../utils/audio";
-import { SidebarIcon, UIPageHeader, UIPageLoader } from "../ui";
+import { BookOpen, Lightbulb, PenLine, type LucideIcon } from "lucide-react";
+import { UIPageHeader, UIPageLoader } from "../ui";
 
 export type LearnCategory = "lessons" | "books" | "trace";
 
-export const LEARN_CATEGORIES: readonly { id: LearnCategory; icon: string }[] = [
-  { id: "lessons", icon: "art:menu-learn" },
-  { id: "books", icon: "art:menu-library" },
-  { id: "trace", icon: "art:menu-trace" },
+// One-colour line icons, like every other tab bar in the app: the colour says
+// which tab is open, and the pictures stay quiet.
+export const LEARN_CATEGORIES: readonly { id: LearnCategory; icon: LucideIcon }[] = [
+  { id: "lessons", icon: Lightbulb },
+  { id: "books", icon: BookOpen },
+  { id: "trace", icon: PenLine },
 ];
 
 /*
@@ -132,9 +135,9 @@ export const LearnSwitcher: React.FC<LearnSwitcherProps> = ({ value, onChange })
       role="tablist"
       aria-label={t("learnHub.categories")}
       onKeyDown={onKeyDown}
-      className="grid grid-cols-3 gap-1 rounded-2xl border-2 border-slate-200 bg-slate-100 p-1 dark:border-slate-800 dark:bg-slate-900"
+      className="grid grid-cols-3 gap-1 rounded-2xl bg-surface-muted p-1"
     >
-      {LEARN_CATEGORIES.map(({ id, icon }) => {
+      {LEARN_CATEGORIES.map(({ id, icon: Icon }) => {
         const selected = id === value;
         return (
           <button
@@ -146,13 +149,13 @@ export const LearnSwitcher: React.FC<LearnSwitcherProps> = ({ value, onChange })
             onClick={() => select(id)}
             onPointerEnter={() => preloadCategory(id)}
             onFocus={() => preloadCategory(id)}
-            className={`flex min-w-0 flex-col items-center justify-center gap-1 rounded-xl px-2 py-2 text-xs font-black transition-colors sm:flex-row sm:gap-2 sm:py-2.5 sm:text-sm ${
+            className={`flex min-h-11 min-w-0 items-center justify-center gap-2 rounded-xl px-2 text-sm font-black transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-400 ${
               selected
-                ? "bg-white text-indigo-700 shadow-sm dark:bg-slate-800 dark:text-indigo-300"
+                ? "bg-surface text-indigo-700 shadow-sm dark:text-indigo-300"
                 : "text-muted hover:text-ink"
             }`}
           >
-            <SidebarIcon name={icon} size={28} className="h-7 w-7 shrink-0" />
+            <Icon className="h-4 w-4 shrink-0" aria-hidden="true" />
             <span className="max-w-full truncate">{t(`learnHub.${id}`)}</span>
           </button>
         );

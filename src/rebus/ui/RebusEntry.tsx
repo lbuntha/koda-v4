@@ -1,35 +1,77 @@
 /**
  * The Rebus Rush card on the Think shelf: the door into the game.
  *
- * Drawn from the same card and badge as every other tile, so it reads as part
- * of the shelf rather than an advertisement for itself.
+ * The featured game, drawn with the same card, badge and button as the rest of
+ * the app so it looks like part of it: the game's own mark, what it is in one
+ * line, how much there is to play, and one Play. The whole card is the control,
+ * so a child who taps anywhere on it gets in.
+ *
+ * The numbers come from the puzzles already on this device. Nothing here asks
+ * the network: opening the game refreshes the list, and a Learn page should
+ * never wait on it.
  */
 
-import React from "react";
-import { Play, Puzzle } from "lucide-react";
-import { useT } from "../../lib/i18n";
+import React, { useMemo, useSyncExternalStore } from "react";
+import { Play } from "lucide-react";
+import { formatCompact, useT } from "../../lib/i18n";
 import { themeSystem } from "../../lib/themeSystem";
 import { UIBadge } from "../../components/ui";
+import { bankSnapshot, subscribeBank } from "../bankStore";
+import { loadResults } from "../resultsStore";
+import { RebusMark } from "./RebusMark";
 
 export const RebusEntry: React.FC<{ onOpen(): void }> = ({ onOpen }) => {
-  const { t } = useT();
+  const { t, language } = useT();
+  const snap = useSyncExternalStore(subscribeBank, bankSnapshot, bankSnapshot);
+
+  const stats = useMemo(() => {
+    const puzzles = snap?.puzzles ?? [];
+    if (!puzzles.length) return [];
+    const results = loadResults();
+    const played = puzzles.reduce((n, p) => n + (results[p.id] ? 1 : 0), 0);
+    const topics = new Set(puzzles.map((p) => p.category)).size;
+    return [
+      t("rebus.entryPuzzles", { count: puzzles.length, shown: formatCompact(puzzles.length, language) }),
+      t("rebus.entryTopics", { count: topics }),
+      ...(played > 0 ? [t("rebus.entryPlayed", { count: played, shown: formatCompact(played, language) })] : []),
+    ];
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [snap, language]);
+
+  const play = (
+    <>
+      <Play className="fill-current" aria-hidden="true" />
+      {t("common.play")}
+    </>
+  );
+
   return (
-    <button type="button" onClick={onOpen} className={themeSystem.card("interactive", "flex w-full items-center gap-3 px-4 py-3 text-left")}>
-      <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-indigo-50 text-indigo-600 dark:bg-indigo-950/60 dark:text-indigo-300">
-        <Puzzle className="h-6 w-6" aria-hidden="true" />
-      </span>
-      <span className="min-w-0 flex-1">
-        <span className="flex items-center gap-2">
-          <span className="text-base font-black text-ink">{t("rebus.entryTitle")}</span>
-          <UIBadge variant="primary">{t("rebus.new")}</UIBadge>
+    <button
+      type="button"
+      onClick={onOpen}
+      aria-label={`${t("rebus.entryTitle")}. ${t("rebus.entryText")}`}
+      className={themeSystem.card("interactive", "group w-full p-4 text-left")}
+    >
+      <span className="flex items-center gap-4">
+        <RebusMark size={56} className="shrink-0 transition-transform group-hover:-rotate-3" />
+        <span className="min-w-0 flex-1">
+          <span className="flex items-center gap-2">
+            <span className="text-lg font-black text-ink">{t("rebus.entryTitle")}</span>
+            <UIBadge variant="primary">{t("rebus.new")}</UIBadge>
+          </span>
+          <span className="mt-0.5 block text-sm text-body">{t("rebus.entryText")}</span>
+          {stats.length > 0 && (
+            <span className="mt-1.5 block text-xs font-semibold text-muted">{stats.join(" · ")}</span>
+          )}
         </span>
-        <span className="block truncate text-sm text-body">{t("rebus.entryText")}</span>
+        {/* Spans, not nested buttons: the whole card is the control. */}
+        <span className="hidden shrink-0 sm:block">
+          <span className={`${themeSystem.button("primary", "md")} pointer-events-none`}>{play}</span>
+        </span>
       </span>
-      {/* A span, not a nested button: the whole row is the control. This is
-          what says "tap to play" before anybody reads the sentence. */}
-      <span className={`${themeSystem.button("primary", "sm")} shrink-0 pointer-events-none`}>
-        <Play className="fill-current" aria-hidden="true" />
-        <span className="hidden sm:inline">{t("common.play")}</span>
+      {/* On a phone, Play takes its own row: the biggest thing to tap. */}
+      <span className="mt-3 block sm:hidden">
+        <span className={`${themeSystem.button("primary", "md")} pointer-events-none w-full`}>{play}</span>
       </span>
     </button>
   );
