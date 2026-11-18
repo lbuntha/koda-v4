@@ -5,6 +5,7 @@ import { HOME } from "./home";
 import { LEARN } from "./learn";
 import { LIVING } from "./living";
 import { MATH_ART } from "./maths";
+import { PLACES } from "./places";
 import { MORE_THINGS } from "./things";
 
-export const MORE: Record<string, string> = { ...BODY, ...MORE_THINGS, ...HOME, ...LIVING, ...LEARN, ...MATH_ART };
+export const MORE: Record<string, string> = { ...BODY, ...MORE_THINGS, ...HOME, ...LIVING, ...LEARN, ...MATH_ART, ...PLACES };

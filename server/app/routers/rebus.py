@@ -89,7 +89,9 @@ class Checks:
         categories: frozenset[str] | None = None,
     ):
         self.icons = icons
-        self.index = index
+        # Grouped once here: checking a page of puzzles against 2,000+ others
+        # otherwise works out every answer key again for each one (seconds).
+        self.index = repo.by_answer(index)
         self.photos = photos
         self.categories = categories
 

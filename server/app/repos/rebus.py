@@ -214,7 +214,7 @@ async def duplicate_index(db: AsyncIOMotorDatabase) -> list[dict[str, Any]]:
     return await db.rebus_puzzles.find({"status": {"$in": ["draft", "approved", "published"]}}, keep).to_list(length=20000)
 
 
-def duplicate_in(index: list[dict[str, Any]], row: dict[str, Any]) -> bool:
+def duplicate_in(index: list[dict[str, Any]] | dict[str, list[dict[str, Any]]], row: dict[str, Any]) -> bool:
     """Whether another puzzle already has this answer.
 
     A puzzle in play (approved or published) always counts. Among drafts the
@@ -223,20 +223,33 @@ def duplicate_in(index: list[dict[str, Any]], row: dict[str, Any]) -> bool:
 
     Pure, over an index read once: a page of 100 puzzles asks the database one
     question, not a hundred, which on a database across the network is the
-    difference between a second and over a minute.
+    difference between a second and over a minute. Pass the index grouped by
+    answer (`by_answer`) when checking many puzzles: each one then looks only at
+    the few that share its answer, instead of working out every key again.
     """
     from app.rebus_verify import answer_key
 
     key = answer_key(row)
+    same = index.get(key, []) if isinstance(index, dict) else [o for o in index if answer_key(o) == key]
     mine = (row.get("createdAt"), row.get("id", ""))
-    for other in index:
-        if other["id"] == row.get("id") or answer_key(other) != key:
+    for other in same:
+        if other["id"] == row.get("id"):
             continue
         if other["status"] in ("approved", "published"):
             return True
         if (other.get("createdAt"), other["id"]) < mine:
             return True
     return False
+
+
+def by_answer(index: list[dict[str, Any]]) -> dict[str, list[dict[str, Any]]]:
+    """The index grouped by answer key, each key worked out once."""
+    from app.rebus_verify import answer_key
+
+    groups: dict[str, list[dict[str, Any]]] = {}
+    for other in index:
+        groups.setdefault(answer_key(other), []).append(other)
+    return groups
 
 
 async def is_duplicate(db: AsyncIOMotorDatabase, row: dict[str, Any]) -> bool:

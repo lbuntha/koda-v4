@@ -31861,6 +31861,501 @@
   }
  },
  {
+  "id": "countries-new-zealand",
+  "category": "countries",
+  "ages": [
+   8,
+   15
+  ],
+  "difficulty": 2,
+  "trick": "sound-alike",
+  "pieces": [
+   {
+    "kind": "word",
+    "text": "NEW"
+   },
+   {
+    "kind": "op",
+    "op": "+"
+   },
+   {
+    "kind": "icon",
+    "id": "rebus-seal",
+    "name": "seal"
+   },
+   {
+    "kind": "op",
+    "op": "+"
+   },
+   {
+    "kind": "icon",
+    "id": "rebus-land",
+    "name": "land"
+   }
+  ],
+  "answer": "New Zealand",
+  "accepts": [],
+  "explanation": "new + seal + land sounds like New Zealand.",
+  "source": "official"
+ },
+ {
+  "id": "countries-india",
+  "category": "countries",
+  "ages": [
+   8,
+   15
+  ],
+  "difficulty": 2,
+  "trick": "sound-alike",
+  "pieces": [
+   {
+    "kind": "word",
+    "text": "IN"
+   },
+   {
+    "kind": "op",
+    "op": "+"
+   },
+   {
+    "kind": "icon",
+    "id": "rebus-deer",
+    "name": "deer"
+   },
+   {
+    "kind": "op",
+    "op": "+"
+   },
+   {
+    "kind": "word",
+    "text": "A"
+   }
+  ],
+  "answer": "India",
+  "accepts": [],
+  "explanation": "in + deer + a sounds like India.",
+  "source": "official"
+ },
+ {
+  "id": "countries-jamaica",
+  "category": "countries",
+  "ages": [
+   8,
+   15
+  ],
+  "difficulty": 2,
+  "trick": "sound-alike",
+  "pieces": [
+   {
+    "kind": "icon",
+    "id": "rebus-jam",
+    "name": "jam"
+   },
+   {
+    "kind": "op",
+    "op": "+"
+   },
+   {
+    "kind": "word",
+    "text": "MAKE"
+   },
+   {
+    "kind": "op",
+    "op": "+"
+   },
+   {
+    "kind": "word",
+    "text": "A"
+   }
+  ],
+  "answer": "Jamaica",
+  "accepts": [],
+  "explanation": "jam + make + a sounds like Jamaica.",
+  "source": "official"
+ },
+ {
+  "id": "countries-iraq",
+  "category": "countries",
+  "ages": [
+   8,
+   15
+  ],
+  "difficulty": 2,
+  "trick": "sound-alike",
+  "pieces": [
+   {
+    "kind": "icon",
+    "id": "rebus-eye",
+    "name": "eye"
+   },
+   {
+    "kind": "op",
+    "op": "+"
+   },
+   {
+    "kind": "icon",
+    "id": "rebus-stone",
+    "name": "rock"
+   }
+  ],
+  "answer": "Iraq",
+  "accepts": [],
+  "explanation": "eye + rock sounds like Iraq.",
+  "source": "official"
+ },
+ {
+  "id": "countries-sweden",
+  "category": "countries",
+  "ages": [
+   8,
+   15
+  ],
+  "difficulty": 2,
+  "trick": "sound-alike",
+  "pieces": [
+   {
+    "kind": "icon",
+    "id": "rebus-candy",
+    "name": "sweet"
+   },
+   {
+    "kind": "op",
+    "op": "+"
+   },
+   {
+    "kind": "word",
+    "text": "DEN"
+   }
+  ],
+  "answer": "Sweden",
+  "accepts": [],
+  "explanation": "sweet + den sounds like Sweden.",
+  "source": "official"
+ },
+ {
+  "id": "countries-bahrain",
+  "category": "countries",
+  "ages": [
+   11,
+   18
+  ],
+  "difficulty": 3,
+  "trick": "sound-alike",
+  "pieces": [
+   {
+    "kind": "icon",
+    "id": "rebus-sheep",
+    "name": "baa"
+   },
+   {
+    "kind": "op",
+    "op": "+"
+   },
+   {
+    "kind": "icon",
+    "id": "rebus-rain",
+    "name": "rain"
+   }
+  ],
+  "answer": "Bahrain",
+  "accepts": [],
+  "explanation": "A sheep says baa: baa + rain sounds like Bahrain.",
+  "source": "official"
+ },
+ {
+  "id": "countries-seychelles",
+  "category": "countries",
+  "ages": [
+   11,
+   18
+  ],
+  "difficulty": 3,
+  "trick": "sound-alike",
+  "pieces": [
+   {
+    "kind": "word",
+    "text": "SAY"
+   },
+   {
+    "kind": "op",
+    "op": "+"
+   },
+   {
+    "kind": "icon",
+    "id": "rebus-shell",
+    "name": "shells"
+   }
+  ],
+  "answer": "Seychelles",
+  "accepts": [],
+  "explanation": "say + shells sounds like Seychelles.",
+  "source": "official"
+ },
+ {
+  "id": "countries-morocco",
+  "category": "countries",
+  "ages": [
+   11,
+   18
+  ],
+  "difficulty": 3,
+  "trick": "sound-alike",
+  "pieces": [
+   {
+    "kind": "word",
+    "text": "MO"
+   },
+   {
+    "kind": "op",
+    "op": "+"
+   },
+   {
+    "kind": "icon",
+    "id": "rebus-stone",
+    "name": "rock"
+   },
+   {
+    "kind": "op",
+    "op": "+"
+   },
+   {
+    "kind": "word",
+    "text": "O"
+   }
+  ],
+  "answer": "Morocco",
+  "accepts": [],
+  "explanation": "mo + rock + o sounds like Morocco.",
+  "source": "official"
+ },
+ {
+  "id": "countries-andorra",
+  "category": "countries",
+  "ages": [
+   11,
+   18
+  ],
+  "difficulty": 3,
+  "trick": "sound-alike",
+  "pieces": [
+   {
+    "kind": "word",
+    "text": "AND"
+   },
+   {
+    "kind": "op",
+    "op": "+"
+   },
+   {
+    "kind": "icon",
+    "id": "rebus-door",
+    "name": "door"
+   },
+   {
+    "kind": "op",
+    "op": "+"
+   },
+   {
+    "kind": "word",
+    "text": "A"
+   }
+  ],
+  "answer": "Andorra",
+  "accepts": [],
+  "explanation": "and + door + a sounds like Andorra.",
+  "source": "official"
+ },
+ {
+  "id": "countries-pakistan",
+  "category": "countries",
+  "ages": [
+   11,
+   18
+  ],
+  "difficulty": 3,
+  "trick": "sound-alike",
+  "pieces": [
+   {
+    "kind": "icon",
+    "id": "rebus-backpack",
+    "name": "pack"
+   },
+   {
+    "kind": "op",
+    "op": "+"
+   },
+   {
+    "kind": "word",
+    "text": "IS"
+   },
+   {
+    "kind": "op",
+    "op": "+"
+   },
+   {
+    "kind": "word",
+    "text": "TAN"
+   }
+  ],
+  "answer": "Pakistan",
+  "accepts": [],
+  "explanation": "pack + is + tan sounds like Pakistan.",
+  "source": "official"
+ },
+ {
+  "id": "countries-ukraine",
+  "category": "countries",
+  "ages": [
+   8,
+   15
+  ],
+  "difficulty": 2,
+  "trick": "sound-alike",
+  "pieces": [
+   {
+    "kind": "word",
+    "text": "U"
+   },
+   {
+    "kind": "op",
+    "op": "+"
+   },
+   {
+    "kind": "icon",
+    "id": "rebus-crane",
+    "name": "crane"
+   }
+  ],
+  "answer": "Ukraine",
+  "accepts": [],
+  "explanation": "U + crane (the tall bird) sounds like Ukraine.",
+  "source": "official"
+ },
+ {
+  "id": "countries-denmark",
+  "category": "countries",
+  "ages": [
+   8,
+   15
+  ],
+  "difficulty": 2,
+  "trick": "sound-alike",
+  "pieces": [
+   {
+    "kind": "word",
+    "text": "DEN"
+   },
+   {
+    "kind": "op",
+    "op": "+"
+   },
+   {
+    "kind": "icon",
+    "id": "rebus-tick",
+    "name": "mark"
+   }
+  ],
+  "answer": "Denmark",
+  "accepts": [],
+  "explanation": "den + mark (a tick is a mark) = Denmark.",
+  "source": "official"
+ },
+ {
+  "id": "countries-tonga",
+  "category": "countries",
+  "ages": [
+   8,
+   15
+  ],
+  "difficulty": 2,
+  "trick": "sound-alike",
+  "pieces": [
+   {
+    "kind": "icon",
+    "id": "rebus-tongue",
+    "name": "tongue"
+   },
+   {
+    "kind": "op",
+    "op": "+"
+   },
+   {
+    "kind": "word",
+    "text": "A"
+   }
+  ],
+  "answer": "Tonga",
+  "accepts": [],
+  "explanation": "tongue + a sounds like Tonga.",
+  "source": "official"
+ },
+ {
+  "id": "countries-austria",
+  "category": "countries",
+  "ages": [
+   11,
+   18
+  ],
+  "difficulty": 3,
+  "trick": "sound-alike",
+  "pieces": [
+   {
+    "kind": "word",
+    "text": "OS"
+   },
+   {
+    "kind": "op",
+    "op": "+"
+   },
+   {
+    "kind": "icon",
+    "id": "rebus-tree",
+    "name": "tree"
+   },
+   {
+    "kind": "op",
+    "op": "+"
+   },
+   {
+    "kind": "word",
+    "text": "A"
+   }
+  ],
+  "answer": "Austria",
+  "accepts": [],
+  "explanation": "os + tree + a sounds like Austria.",
+  "source": "official"
+ },
+ {
+  "id": "countries-guinea",
+  "category": "countries",
+  "ages": [
+   11,
+   18
+  ],
+  "difficulty": 3,
+  "trick": "add-remove",
+  "pieces": [
+   {
+    "kind": "icon",
+    "id": "rebus-guinea-pig",
+    "name": "guinea pig"
+   },
+   {
+    "kind": "op",
+    "op": "+"
+   },
+   {
+    "kind": "word",
+    "text": "PIG",
+    "style": "crossed"
+   }
+  ],
+  "answer": "Guinea",
+  "accepts": [],
+  "explanation": "A guinea pig with the pig taken away leaves Guinea.",
+  "source": "official"
+ },
+ {
   "id": "khmer-sun",
   "category": "science",
   "ages": [
