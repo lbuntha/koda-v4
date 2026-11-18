@@ -6,6 +6,7 @@ import { useT } from "../../lib/i18n";
 import { themeSystem } from "../../lib/themeSystem";
 import { playSound } from "../../utils/audio";
 import { LanguageSwitch } from "../account/SignInScreen";
+import { KodaShowcase } from "./KodaShowcase";
 
 /**
  * Icons in the sidebar's own style — flat, theme colours, one highlight —
@@ -153,6 +154,9 @@ export const LandingPage: React.FC<{ onStart: () => void; onSignIn: () => void }
       </section>
 
       <main className="mx-auto w-full max-w-5xl flex-1 space-y-12 px-4 py-12 sm:px-6 lg:space-y-16 lg:py-16">
+        {/* SEE IT WORK — six moments on a phone, playing by themselves. */}
+        <KodaShowcase />
+
         {/* KHMER PATH — four steps a parent can picture. */}
         <section>
           <SectionTitle>{t("landing.path.title")}</SectionTitle>
