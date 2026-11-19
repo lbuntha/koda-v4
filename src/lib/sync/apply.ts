@@ -139,8 +139,12 @@ export function applyDoc(doc: SyncDoc): boolean {
 
   if (spec.shape === "whole") {
     // Single-document stores: the body *is* the stored value.
+    // A kind that only grows merges instead, so an older server copy cannot
+    // erase local work. When this device then holds more than the server, the
+    // nudge below has the owning store re-save it, and that save goes up as an
+    // ordinary edit against the revision remembered here.
     if (doc.deleted) localStorage.removeItem(target);
-    else writeJson(target, doc.body);
+    else writeJson(target, spec.merge ? spec.merge(stored, doc.body) : doc.body);
   } else if (spec.shape === "map") {
     const [skillId, lessonId] = doc.key.split("/");
     const map = { ...(stored as Record<string, Record<string, unknown>>) };

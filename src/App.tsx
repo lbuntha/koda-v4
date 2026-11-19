@@ -22,6 +22,7 @@ import { levelFromXp } from "./lib/level";
 import { publishLearnerFigures } from "./lib/profileStats";
 import { Billing } from "./lib/billing";
 import { ApiError, accessToken, request } from "./lib/sync";
+import { bestStars } from "./lib/sync/kinds";
 import { refreshDeploymentRules } from "./lib/deploymentRules";
 import { BadgeAPI, earnedBadges } from "./lib/badges";
 import { LearnPage } from "./components/LearnPage";
@@ -585,7 +586,14 @@ export default function App() {
       setCompletedGameLevels(loadCompletedLevels());
     };
     adopt();
-    return subscribeLearnerRecord(adopt);
+    /* The same learner's record changing underneath: merged, not replaced. A
+       pull can land between a round finishing and that result being written
+       down, and replacing would drop the lesson just finished. Switching
+       learner (above) still replaces, so one child never inherits another's. */
+    return subscribeLearnerRecord(() => {
+      setUserProgress(loadProgress());
+      setCompletedGameLevels((held) => bestStars(held, loadCompletedLevels()) as Record<number, number>);
+    });
   }, [signedInLearner]);
 
   /*

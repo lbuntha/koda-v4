@@ -169,6 +169,29 @@ describe("applying a pulled document", () => {
   });
 });
 
+describe("completed levels, which only grow", () => {
+  it("keeps the better star count from each side instead of taking the older server copy", async () => {
+    const { applyChanges } = await import("./apply");
+    const { storageKeyFor } = await import("./kinds");
+    const key = storageKeyFor("levels", "l_1")!;
+    // This device finished 484 and improved 483; the server has not seen either.
+    localStorage.setItem(key, JSON.stringify({ 482: 3, 483: 3, 484: 2 }));
+    applyChanges([doc({ kind: "levels", key: "l_1", body: { 482: 1, 483: 1, 490: 3 } })], 44);
+
+    expect(JSON.parse(localStorage.getItem(key) ?? "{}")).toEqual({ 482: 3, 483: 3, 484: 2, 490: 3 });
+  });
+
+  it("still clears them when the document is deleted, as a reset does", async () => {
+    const { applyChanges } = await import("./apply");
+    const { storageKeyFor } = await import("./kinds");
+    const key = storageKeyFor("levels", "l_1")!;
+    localStorage.setItem(key, JSON.stringify({ 482: 3 }));
+    applyChanges([doc({ kind: "levels", key: "l_1", body: {}, deleted: true })], 45);
+
+    expect(localStorage.getItem(key)).toBeNull();
+  });
+});
+
 describe("recording an edit", () => {
   it("queues one mutation carrying the revision it was made against", async () => {
     signIn();

@@ -6,6 +6,7 @@ import { withoutPracticeLabel } from "../skills/kit/practice";
 import courseJson from "./course.json";
 import { withLessonEdits } from "../lib/lessonContent";
 import { ChildSettingsAPI, type StartingPoint } from "../lib/childSettings";
+import { currentLanguage } from "../lib/i18n";
 
 /**
  * The course — what is taught, in what order.
@@ -153,6 +154,31 @@ const currentStartingPoint = (viewer?: Viewer): number | null =>
  * only lessons whose skill is present and visible. Empty units are dropped.
  */
 export function getCourseUnits(viewer: Viewer = getViewer()): CourseUnit[] {
+  const key = `${currentLanguage()}|${JSON.stringify(viewer)}`;
+  let units = built.get(key);
+  if (!units) {
+    units = buildCourseUnits(viewer);
+    if (built.size === 0) queueMicrotask(() => built.clear());
+    built.set(key, units);
+  }
+  return units.slice();
+}
+
+/**
+ * Courses already built during the current task, by language and viewer.
+ *
+ * Building one resolves and translates every lesson — about 25 ms on a laptop,
+ * several times that on a phone — and the gates ask for it per lesson:
+ * `isUnlocked` rebuilt it once for `satisfiedConcepts` and again for an
+ * age-based starting point, so the Learn page's pass over ~500 lessons took
+ * seconds and froze the app on every start. One render is one synchronous task,
+ * so the course is built once for it and dropped as soon as the task ends: a
+ * lesson edit, a skill switched off or a new language is picked up on the very
+ * next render, exactly as before.
+ */
+const built = new Map<string, CourseUnit[]>();
+
+function buildCourseUnits(viewer: Viewer): CourseUnit[] {
   let level = 0;
   return config
     .map((unit) => ({

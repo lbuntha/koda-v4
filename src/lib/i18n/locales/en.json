@@ -1539,7 +1539,8 @@
     },
     "gettingReady": "Getting the game ready…",
     "couldNotLoad": "This game isn't downloaded yet. Connect to the internet once, then try again.",
-    "tryAgain": "Try again"
+    "tryAgain": "Try again",
+    "startOver": "Start over"
   },
   "praise": {
     "practiceComplete": {

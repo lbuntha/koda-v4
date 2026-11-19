@@ -53,9 +53,40 @@ export interface KindSpec {
    * `list`  — an array of entries carrying their own `id`.
    */
   shape: "whole" | "map" | "list";
+  /**
+   * How a pulled `whole` body joins what this device already holds, for a
+   * record that only ever grows. Without one, the pulled body replaces the
+   * local value — right for a setting, where the newest choice wins, and wrong
+   * for earned work, where an older server copy would erase what this device
+   * has not uploaded yet.
+   */
+  merge?: (local: Record<string, unknown>, pulled: Record<string, unknown>) => Record<string, unknown>;
   /** Nudges the store to re-read after a pulled change lands. */
   notify: () => void;
 }
+
+/**
+ * Stars per level, best of both copies.
+ *
+ * Stars are only ever earned — `App` already keeps the best ever when a level
+ * is replayed — so a level either side has seen keeps its higher count. This is
+ * what stops a sync conflict, or a pull that crosses an upload, from wiping
+ * lessons a child has finished. (Deleting the whole document, as a reset does,
+ * still clears it: that path never reaches here.)
+ */
+export const bestStars = (
+  local: Record<string, unknown>,
+  pulled: Record<string, unknown>,
+): Record<string, unknown> => {
+  const merged: Record<string, unknown> = { ...pulled };
+  for (const [level, stars] of Object.entries(local)) {
+    const mine = Number(stars);
+    if (!Number.isFinite(mine)) continue;
+    const theirs = Number(merged[level]);
+    if (!Number.isFinite(theirs) || mine > theirs) merged[level] = mine;
+  }
+  return merged;
+};
 
 /** The `storage` event only fires in *other* tabs, so this one is nudged by hand. */
 export const nudgeKey = (key: string): void => {
@@ -103,6 +134,7 @@ export const SYNC_KINDS: Record<DocKind, KindSpec> = {
     storageKey: "koda_completed_levels_v1",
     scope: "learner",
     shape: "whole",
+    merge: bestStars,
     notify: nudge("koda_completed_levels_v1"),
   },
   // How many rounds a day this learner is aiming for. A learner document a

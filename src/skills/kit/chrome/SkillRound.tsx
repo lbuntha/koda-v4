@@ -345,7 +345,7 @@ export const SkillRound: React.FC<SkillRoundProps> = ({
                 onClick={onStartOver}
                 className="min-h-11 rounded-2xl px-4 py-2 text-sm font-semibold text-muted underline decoration-line underline-offset-4 hover:text-ink focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500"
               >
-                Start over
+                {t("round.startOver")}
               </button>
             </div>
           )}
