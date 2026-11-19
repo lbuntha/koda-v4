@@ -19,7 +19,7 @@ async def developer(client, db):
     from app.security import passwords
 
     await users.create(db, "dev@example.com", passwords.hash_password("correct horse battery"),
-                       platform_role="developer")
+                       platform_role="core")
     pair = (await client.post("/auth/login", json={"email": "dev@example.com", "password": "correct horse battery"})).json()
     return {"Authorization": f"Bearer {pair['accessToken']}"}
 

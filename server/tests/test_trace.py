@@ -105,7 +105,7 @@ async def test_a_parent_can_play_but_not_make(client, db, signup_body):
 
 
 async def test_a_creator_publishes_a_collection_everyone_can_download(client, db, signup_body):
-    dev = await _login(client, db, "dev@example.com", platform_role="developer")
+    dev = await _login(client, db, "dev@example.com", platform_role="core")
     saved = await client.put("/trace/studio/items/line-1", json={"item": LINE, "plan": PLAN, "tests": PASSED}, headers=dev)
     assert saved.status_code == 200
     assert saved.json()["item"]["id"] == "line-1"
@@ -127,7 +127,7 @@ async def test_a_creator_publishes_a_collection_everyone_can_download(client, db
 
 
 async def test_publish_refuses_an_untested_item_and_says_which(client, db):
-    dev = await _login(client, db, "dev@example.com", platform_role="developer")
+    dev = await _login(client, db, "dev@example.com", platform_role="core")
     await client.put("/trace/studio/items/line-1", json={"item": LINE, "plan": PLAN, "tests": {}}, headers=dev)
     await client.put("/trace/studio/collections/lines", json={"ages": [6, 8], "title": "Lines", "itemIds": ["line-1"]}, headers=dev)
     refused = await client.post("/trace/studio/collections/lines/publish", headers=dev)
@@ -138,7 +138,7 @@ async def test_publish_refuses_an_untested_item_and_says_which(client, db):
 
 
 async def test_republishing_makes_a_new_revision_and_unpublish_takes_it_off_the_shelf(client, db):
-    dev = await _login(client, db, "dev@example.com", platform_role="developer")
+    dev = await _login(client, db, "dev@example.com", platform_role="core")
     await client.put("/trace/studio/items/line-1", json={"item": LINE, "plan": PLAN, "tests": PASSED}, headers=dev)
     await client.put("/trace/studio/collections/lines", json={"ages": [6, 8], "title": "Lines", "itemIds": ["line-1"]}, headers=dev)
     await client.post("/trace/studio/collections/lines/publish", headers=dev)
@@ -149,7 +149,7 @@ async def test_republishing_makes_a_new_revision_and_unpublish_takes_it_off_the_
 
 
 async def test_ids_and_duplicates_are_refused(client, db):
-    dev = await _login(client, db, "dev@example.com", platform_role="developer")
+    dev = await _login(client, db, "dev@example.com", platform_role="core")
     assert (await client.put("/trace/studio/items/Bad_Id", json={"item": LINE, "plan": PLAN}, headers=dev)).status_code == 422
     dup = await client.put("/trace/studio/collections/c", json={"ages": [6, 8], "title": "C", "itemIds": ["a", "a"]}, headers=dev)
     assert dup.status_code == 422
@@ -174,7 +174,7 @@ async def test_a_learner_reports_an_item_and_a_creator_resolves_it(client, db, s
     assert (await client.post("/trace/reports", json={"itemId": "line-1", "reason": "nope"}, headers=parent)).status_code == 422
     assert (await client.get("/trace/studio/reports", headers=parent)).status_code == 403
 
-    dev = await _login(client, db, "dev@example.com", platform_role="developer")
+    dev = await _login(client, db, "dev@example.com", platform_role="core")
     reports = (await client.get("/trace/studio/reports", headers=dev)).json()["reports"]
     assert [(r["itemId"], r["reason"], r["note"]) for r in reports] == [("line-1", "strokes_wrong", "goes up")]
     assert "reportedBy" not in reports[0]
@@ -183,7 +183,7 @@ async def test_a_learner_reports_an_item_and_a_creator_resolves_it(client, db, s
 
 
 async def test_the_chosen_cover_is_the_shelf_cover(client, db):
-    dev = await _login(client, db, "dev@example.com", platform_role="developer")
+    dev = await _login(client, db, "dev@example.com", platform_role="core")
     second = {**copy.deepcopy(LINE), "title": "Second"}
     await client.put("/trace/studio/items/line-1", json={"item": LINE, "plan": PLAN, "tests": PASSED}, headers=dev)
     await client.put("/trace/studio/items/line-2", json={"item": second, "plan": PLAN, "tests": PASSED}, headers=dev)
@@ -207,7 +207,7 @@ async def test_the_chosen_cover_is_the_shelf_cover(client, db):
 
 
 async def test_a_cover_picture_is_saved_and_published(client, db):
-    dev = await _login(client, db, "dev@example.com", platform_role="developer")
+    dev = await _login(client, db, "dev@example.com", platform_role="core")
     await client.put("/trace/studio/items/line-1", json={"item": LINE, "plan": PLAN, "tests": PASSED}, headers=dev)
     photo = "photo-" + "a" * 64
     url = "/trace/studio/collections/lines"
@@ -223,7 +223,7 @@ async def test_a_cover_picture_is_saved_and_published(client, db):
 
 
 async def test_a_collections_xp_per_step_is_saved_and_published(client, db):
-    dev = await _login(client, db, "dev@example.com", platform_role="developer")
+    dev = await _login(client, db, "dev@example.com", platform_role="core")
     await client.put("/trace/studio/items/line-1", json={"item": LINE, "plan": PLAN, "tests": PASSED}, headers=dev)
     url = "/trace/studio/collections/lines"
     saved = await client.put(url, json={"ages": [6, 8], "title": "Lines", "itemIds": ["line-1"], "xpPerStep": 35}, headers=dev)
@@ -275,7 +275,7 @@ async def test_a_creator_has_limits_and_an_admin_does_not(client, db, monkeypatc
     # Saving the same item again is not a new one.
     assert (await client.put("/trace/studio/items/a", json={"item": LINE, "plan": PLAN}, headers=ann)).status_code == 200
     assert (await client.put("/trace/studio/items/b", json={"item": LINE, "plan": PLAN}, headers=ann)).status_code == 429
-    dev = await _login(client, db, "dev@example.com", platform_role="developer")
+    dev = await _login(client, db, "dev@example.com", platform_role="core")
     for i in ("c", "d"):
         assert (await client.put(f"/trace/studio/items/{i}", json={"item": LINE, "plan": PLAN}, headers=dev)).status_code == 200
 
@@ -328,7 +328,7 @@ def test_trace_progress_merges_item_by_item():
 
 
 async def test_a_parent_reads_a_childs_writing_with_titles_and_the_common_mistake(client, db, signup_body):
-    dev = await _login(client, db, "dev@example.com", platform_role="developer")
+    dev = await _login(client, db, "dev@example.com", platform_role="core")
     await _ready_collection(client, dev)
     await client.post("/trace/studio/collections/lines/publish", headers=dev)
 
@@ -410,7 +410,7 @@ async def test_a_creator_uploads_a_cover_photo_without_being_a_library_author(cl
 
 
 async def test_a_collection_says_who_it_is_for_before_it_is_published(client, db):
-    dev = await _login(client, db, "dev@example.com", platform_role="developer")
+    dev = await _login(client, db, "dev@example.com", platform_role="core")
     await client.put("/trace/studio/items/line-1", json={"item": LINE, "plan": PLAN, "tests": PASSED}, headers=dev)
     url = "/trace/studio/collections/lines"
 
@@ -432,7 +432,7 @@ async def test_a_collection_says_who_it_is_for_before_it_is_published(client, db
 
 
 async def test_a_collection_s_topics_come_from_the_shared_list_and_are_published(client, db):
-    dev = await _login(client, db, "dev@example.com", platform_role="developer")
+    dev = await _login(client, db, "dev@example.com", platform_role="core")
     await client.put("/trace/studio/items/line-1", json={"item": LINE, "plan": PLAN, "tests": PASSED}, headers=dev)
     url = "/trace/studio/collections/lines"
 
