@@ -1,0 +1,61 @@
+{
+  "title": "Dot Connect",
+  "board": "Puzzle board",
+  "keys": "Arrow keys move. Enter on a dot starts a line; Enter again stops.",
+  "cell": {
+    "empty": "Row {row}, column {col}: empty",
+    "dot": "Row {row}, column {col}: dot {letter}",
+    "line": "Row {row}, column {col}: line {letter}",
+    "wall": "Row {row}, column {col}: wall",
+    "bridge": "Row {row}, column {col}: bridge"
+  },
+  "status": {
+    "join": "{joined} of {total} pairs joined.",
+    "fill": "{joined} of {total} pairs joined. {filled} of {open} squares filled.",
+    "steps": "{letter}: {used} of {steps} steps"
+  },
+  "prompt": {
+    "join": "Join each pair of matching letters.",
+    "fill": "Join each pair and fill every square.",
+    "walls": "Join each pair and fill every square. Go round the walls.",
+    "steps": "Join each pair and fill every square. {letter} takes exactly {steps} steps.",
+    "bridge": "Join each pair and fill every square. Lines go straight over the bridge."
+  },
+  "refuse": {
+    "wall": "That square is a wall.",
+    "dot": "A line can only end on its own letter.",
+    "straight": "On a bridge, a line goes straight over.",
+    "edge": "There is no room on the other side of that bridge."
+  },
+  "nudge": {
+    "gaps": "Every pair is joined, but some squares are still empty.",
+    "steps": "{letter} took {used} steps. It needs exactly {steps}."
+  },
+  "hint": {
+    "kidTip": "Find a dot with only one way out. Its first step is forced.",
+    "gaps": "Some squares are still empty. Stretch a line through them.",
+    "forced": "Dot {letter} has only one way to go.",
+    "next": "Work on {letter} next.",
+    "steps": "{letter} must take exactly {steps} steps. Count the squares as you go.",
+    "bridge": "Use the bridge both ways: one line across and one line down.",
+    "draw": "Draw {letter} from its dot: {moves}."
+  },
+  "dir": {
+    "right": "{n} right",
+    "left": "{n} left",
+    "up": "{n} up",
+    "down": "{n} down",
+    "more": "and on from there"
+  },
+  "solved": {
+    "title": "Solved!",
+    "join": "Every pair is joined.",
+    "fill": "Every pair is joined and every square is filled."
+  },
+  "wrong": {
+    "title": "Nearly",
+    "gaps": "Every pair is joined, but some squares are empty. Fill them too.",
+    "steps": "{letter} took {used} steps. It needs exactly {steps}."
+  },
+  "undo": "Undo"
+}

@@ -1,0 +1,39 @@
+{
+  "subjects": [],
+  "templates": [],
+  "prompts": [
+    "Join each pair of matching letters.",
+    "Join each pair and fill every square.",
+    "Join each pair and fill every square. Go round the walls.",
+    "Join each pair and fill every square. Lines go straight over the bridge."
+  ],
+  "phrases": [],
+  "groups": {
+    "correct": {
+      "voices": [
+        "Kore",
+        "Puck",
+        "Zephyr"
+      ],
+      "phrases": [
+        "Every pair is joined!",
+        "The whole board is full.",
+        "That was a good plan.",
+        "Nicely joined!",
+        "Solved!"
+      ]
+    },
+    "incorrect": {
+      "voices": [
+        "Kore",
+        "Zephyr",
+        "Puck"
+      ],
+      "phrases": [
+        "Nearly. Look for the empty squares.",
+        "Nearly. Count the steps again.",
+        "Have another go."
+      ]
+    }
+  }
+}

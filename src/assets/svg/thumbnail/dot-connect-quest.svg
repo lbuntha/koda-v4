@@ -1,0 +1,42 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="100%" height="100%" viewBox="0 0 400 200">
+  <defs>
+    <linearGradient id="dcGround" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#1E1B4B"/>
+      <stop offset="100%" stop-color="#0C1B33"/>
+    </linearGradient>
+    <radialGradient id="dcGlow" cx="50%" cy="50%" r="60%">
+      <stop offset="0%" stop-color="#F472B6" stop-opacity="0.35"/>
+      <stop offset="100%" stop-color="#F472B6" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+
+  <rect width="400" height="200" rx="18" fill="url(#dcGround)"/>
+  <ellipse cx="200" cy="100" rx="160" ry="90" fill="url(#dcGlow)"/>
+
+  <!-- A 6×3 board, solved: three pairs, every square filled. Letters ride the
+       dots because colour alone never names a pair in this skill. -->
+  <g transform="translate(92 28)">
+    <g fill="#FFFFFF" fill-opacity="0.08">
+      <rect x="0" y="0" width="32" height="32" rx="7"/><rect x="36" y="0" width="32" height="32" rx="7"/><rect x="72" y="0" width="32" height="32" rx="7"/><rect x="108" y="0" width="32" height="32" rx="7"/><rect x="144" y="0" width="32" height="32" rx="7"/><rect x="180" y="0" width="32" height="32" rx="7"/>
+      <rect x="0" y="36" width="32" height="32" rx="7"/><rect x="36" y="36" width="32" height="32" rx="7"/><rect x="72" y="36" width="32" height="32" rx="7"/><rect x="108" y="36" width="32" height="32" rx="7"/><rect x="144" y="36" width="32" height="32" rx="7"/><rect x="180" y="36" width="32" height="32" rx="7"/>
+      <rect x="0" y="72" width="32" height="32" rx="7"/><rect x="36" y="72" width="32" height="32" rx="7"/><rect x="72" y="72" width="32" height="32" rx="7"/><rect x="108" y="72" width="32" height="32" rx="7"/><rect x="144" y="72" width="32" height="32" rx="7"/><rect x="180" y="72" width="32" height="32" rx="7"/>
+      <rect x="0" y="108" width="32" height="32" rx="7"/><rect x="36" y="108" width="32" height="32" rx="7"/><rect x="72" y="108" width="32" height="32" rx="7"/><rect x="108" y="108" width="32" height="32" rx="7"/><rect x="144" y="108" width="32" height="32" rx="7"/><rect x="180" y="108" width="32" height="32" rx="7"/>
+    </g>
+    <g fill="none" stroke-width="11" stroke-linecap="round" stroke-linejoin="round">
+      <!-- A: along the top and down the right -->
+      <polyline points="16,16 196,16 196,124" stroke="#FB7185"/>
+      <!-- B: a hook through the middle -->
+      <polyline points="16,52 160,52 160,124 124,124" stroke="#38BDF8"/>
+      <!-- C: snakes through the bottom-left corner -->
+      <polyline points="124,88 88,88 88,124 52,124 52,88 16,88 16,124" stroke="#34D399"/>
+    </g>
+    <g font-family="system-ui, sans-serif" font-size="14" font-weight="800" fill="#FFFFFF" text-anchor="middle">
+      <circle cx="16" cy="16" r="12" fill="#FB7185"/><text x="16" y="21">A</text>
+      <circle cx="196" cy="124" r="12" fill="#FB7185"/><text x="196" y="129">A</text>
+      <circle cx="16" cy="52" r="12" fill="#38BDF8"/><text x="16" y="57">B</text>
+      <circle cx="124" cy="124" r="12" fill="#38BDF8"/><text x="124" y="129">B</text>
+      <circle cx="124" cy="88" r="12" fill="#34D399"/><text x="124" y="93">C</text>
+      <circle cx="16" cy="124" r="12" fill="#34D399"/><text x="16" y="129">C</text>
+    </g>
+  </g>
+</svg>

@@ -1515,6 +1515,76 @@
         "cross-math/practice-share-two-five",
         "cross-math/practice-big-grid"
       ]
+    },
+    {
+      "id": "u116",
+      "unitNumber": 116,
+      "title": "Unit 116: Dot Connect — Joining",
+      "description": "Join matching dots with lines that never cross, then fill the board",
+      "icon": "🔵",
+      "lessons": [
+        "dot-connect/one-pair",
+        "dot-connect/two-pairs",
+        "dot-connect/go-around",
+        "dot-connect/fill-every-square"
+      ]
+    },
+    {
+      "id": "u117",
+      "unitNumber": 117,
+      "title": "Unit 117: Practice — Dot Connect: Joining",
+      "description": "Independent practice joining and filling small boards",
+      "icon": "🔁",
+      "lessons": [
+        "dot-connect/practice-joining"
+      ]
+    },
+    {
+      "id": "u118",
+      "unitNumber": 118,
+      "title": "Unit 118: Dot Connect — Planning",
+      "description": "Forced moves, edges and the move that traps a colour",
+      "icon": "🧭",
+      "lessons": [
+        "dot-connect/one-way-out",
+        "dot-connect/hug-the-edge",
+        "dot-connect/dont-box-it-in",
+        "dot-connect/five-pairs"
+      ]
+    },
+    {
+      "id": "u119",
+      "unitNumber": 119,
+      "title": "Unit 119: Practice — Dot Connect: Planning",
+      "description": "Independent practice planning bigger boards",
+      "icon": "🔁",
+      "lessons": [
+        "dot-connect/practice-planning"
+      ]
+    },
+    {
+      "id": "u120",
+      "unitNumber": 120,
+      "title": "Unit 120: Dot Connect — Bigger Boards",
+      "description": "Big boards, walls, exact steps and bridges",
+      "icon": "🧩",
+      "lessons": [
+        "dot-connect/big-board",
+        "dot-connect/walls",
+        "dot-connect/exact-steps",
+        "dot-connect/bridges",
+        "dot-connect/on-your-own"
+      ]
+    },
+    {
+      "id": "u121",
+      "unitNumber": 121,
+      "title": "Unit 121: Practice — Dot Connect",
+      "description": "Independent practice on every kind of board",
+      "icon": "🔁",
+      "lessons": [
+        "dot-connect/practice-dot-connect"
+      ]
     }
   ]
 }

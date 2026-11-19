@@ -1,0 +1,719 @@
+{
+  "lessons": [
+    {
+      "id": "one-pair",
+      "title": "One Pair",
+      "concept": "Drawing a Line from Dot to Dot",
+      "conceptKey": "path-joiner",
+      "requires": [],
+      "activity": "dot-connect/connect",
+      "params": {
+        "level": 1,
+        "question": {
+          "spec": "one-pair",
+          "questionsPerRound": 3
+        },
+        "play": {
+          "mode": "dot_connect",
+          "tier": "core",
+          "difficultyColor": "pink",
+          "category": "Joining",
+          "shortDesc": "Join two dots with one line",
+          "targetObjective": "Join the two matching letters with one line.",
+          "stepByStep": [
+            "Put your finger on a dot.",
+            "Slide to the next square: up, down, left or right.",
+            "Stop on the dot with the same letter."
+          ],
+          "kidTip": "Lines go up, down, left or right. Never corner to corner.",
+          "audioPrompt": "Put your finger on a dot and slide to the dot with the same letter."
+        },
+        "guide": {
+          "enabled": true
+        }
+      },
+      "difficulty": "Easy",
+      "iconName": "circleDot",
+      "iconTone": "pink",
+      "pedagogyTip": "The whole skill is the drag. Let them draw wobbly lines; any line that joins counts.",
+      "standards": [],
+      "trajectoryLevel": "path-joiner",
+      "ageBand": [
+        6,
+        8
+      ]
+    },
+    {
+      "id": "two-pairs",
+      "title": "Two Pairs",
+      "concept": "Lines That Never Cross",
+      "conceptKey": "path-joiner",
+      "requires": [],
+      "activity": "dot-connect/connect",
+      "params": {
+        "level": 2,
+        "question": {
+          "spec": "two-pairs",
+          "questionsPerRound": 3
+        },
+        "play": {
+          "mode": "dot_connect",
+          "tier": "core",
+          "difficultyColor": "pink",
+          "category": "Joining",
+          "shortDesc": "Two lines that never cross",
+          "targetObjective": "Join two pairs without the lines crossing.",
+          "stepByStep": [
+            "Join one pair.",
+            "Join the other pair without crossing the first line.",
+            "If a line is in the way, draw round it."
+          ],
+          "kidTip": "Lines can never cross each other.",
+          "audioPrompt": "Join both pairs. The lines must not cross."
+        },
+        "guide": {
+          "enabled": true
+        }
+      },
+      "difficulty": "Easy",
+      "iconName": "circleDot",
+      "iconTone": "pink",
+      "pedagogyTip": "Drawing over a line cuts it. That is not a mistake to correct; it is how they learn the rule.",
+      "standards": [],
+      "trajectoryLevel": "path-joiner",
+      "ageBand": [
+        6,
+        8
+      ]
+    },
+    {
+      "id": "go-around",
+      "title": "Go Around",
+      "concept": "Going Round Another Dot",
+      "conceptKey": "path-joiner",
+      "requires": [],
+      "activity": "dot-connect/connect",
+      "params": {
+        "level": 3,
+        "question": {
+          "spec": "go-around",
+          "questionsPerRound": 3
+        },
+        "play": {
+          "mode": "dot_connect",
+          "tier": "core",
+          "difficultyColor": "pink",
+          "category": "Joining",
+          "shortDesc": "Bend round a dot in the way",
+          "targetObjective": "Bend a line round a dot that is in its way.",
+          "stepByStep": [
+            "Find the pair whose straight path is blocked.",
+            "Draw round the dot in the way.",
+            "Then join the other pairs."
+          ],
+          "kidTip": "If a dot is in the way, go round it.",
+          "audioPrompt": "Some dots are in the way. Bend your line round them."
+        },
+        "guide": {
+          "enabled": true
+        }
+      },
+      "difficulty": "Easy",
+      "iconName": "footprints",
+      "iconTone": "pink",
+      "pedagogyTip": "The shortest line is not always possible. A detour is still a good line.",
+      "standards": [],
+      "trajectoryLevel": "path-joiner",
+      "ageBand": [
+        6,
+        8
+      ]
+    },
+    {
+      "id": "fill-every-square",
+      "title": "Fill Every Square",
+      "concept": "Covering the Whole Board",
+      "conceptKey": "board-filler",
+      "requires": [
+        "path-joiner"
+      ],
+      "activity": "dot-connect/connect",
+      "params": {
+        "level": 4,
+        "question": {
+          "spec": "fill-every-square",
+          "questionsPerRound": 3
+        },
+        "play": {
+          "mode": "dot_connect",
+          "tier": "core",
+          "difficultyColor": "emerald",
+          "category": "Filling",
+          "shortDesc": "No square left empty",
+          "targetObjective": "Join every pair and leave no square empty.",
+          "stepByStep": [
+            "Join the pairs.",
+            "Look for empty squares.",
+            "Make a line longer so it runs through them."
+          ],
+          "kidTip": "Now every square must be filled. Make a line take the long way round.",
+          "audioPrompt": "Join every pair, and fill every square on the board."
+        },
+        "guide": {
+          "enabled": true
+        }
+      },
+      "difficulty": "Medium",
+      "iconName": "layers",
+      "iconTone": "emerald",
+      "pedagogyTip": "The new rule changes the puzzle: a short line can now be wrong. Point at the empty squares, not at the line.",
+      "standards": [],
+      "trajectoryLevel": "board-filler",
+      "ageBand": [
+        6,
+        8
+      ]
+    },
+    {
+      "id": "practice-joining",
+      "title": "Practice: Joining",
+      "concept": "Practice Without Help",
+      "conceptKey": "board-filler",
+      "requires": [],
+      "activity": "dot-connect/connect",
+      "params": {
+        "level": 5,
+        "question": {
+          "specs": [
+            "two-pairs",
+            "go-around",
+            "fill-every-square"
+          ],
+          "questionsPerRound": 5,
+          "practice": true
+        },
+        "play": {
+          "mode": "dot_connect",
+          "tier": "core",
+          "difficultyColor": "emerald",
+          "category": "Joining",
+          "shortDesc": "Five boards, no hints",
+          "targetObjective": "Solve five boards without help.",
+          "stepByStep": [
+            "Join each pair.",
+            "Check for empty squares.",
+            "Fill them, then you are done."
+          ],
+          "kidTip": "No hints here. Take your time.",
+          "audioPrompt": ""
+        }
+      },
+      "difficulty": "Practice",
+      "iconName": "star",
+      "iconTone": "emerald",
+      "pedagogyTip": "Practice mixes the boards from lessons 2 to 4.",
+      "standards": [],
+      "trajectoryLevel": "board-filler",
+      "ageBand": [
+        6,
+        8
+      ]
+    },
+    {
+      "id": "one-way-out",
+      "title": "One Way Out",
+      "concept": "Starting from Forced Moves",
+      "conceptKey": "forced-mover",
+      "requires": [
+        "board-filler"
+      ],
+      "activity": "dot-connect/connect",
+      "params": {
+        "level": 6,
+        "question": {
+          "spec": "one-way-out",
+          "questionsPerRound": 3
+        },
+        "play": {
+          "mode": "dot_connect",
+          "tier": "core",
+          "difficultyColor": "indigo",
+          "category": "Planning",
+          "shortDesc": "Begin with the forced move",
+          "targetObjective": "Start from a dot that has only one way to go.",
+          "stepByStep": [
+            "Look at each dot.",
+            "Find one that can only go one way.",
+            "Draw that step first, then look again."
+          ],
+          "kidTip": "A dot in a corner, or next to a wall of other dots, has only one way out.",
+          "audioPrompt": "Find a dot with only one way out. Start there."
+        },
+        "guide": {
+          "enabled": true
+        }
+      },
+      "difficulty": "Medium",
+      "iconName": "search",
+      "iconTone": "indigo",
+      "pedagogyTip": "This is the core strategy: never guess while a forced move exists.",
+      "standards": [],
+      "trajectoryLevel": "forced-mover",
+      "ageBand": [
+        7,
+        10
+      ]
+    },
+    {
+      "id": "hug-the-edge",
+      "title": "Hug the Edge",
+      "concept": "Running Lines Along the Edge",
+      "conceptKey": "edge-router",
+      "requires": [
+        "forced-mover"
+      ],
+      "activity": "dot-connect/connect",
+      "params": {
+        "level": 7,
+        "question": {
+          "spec": "hug-the-edge",
+          "questionsPerRound": 3
+        },
+        "play": {
+          "mode": "dot_connect",
+          "tier": "core",
+          "difficultyColor": "indigo",
+          "category": "Planning",
+          "shortDesc": "Lines that follow the edge",
+          "targetObjective": "Use the edge of the board to route a line.",
+          "stepByStep": [
+            "Look at the dots near the edge.",
+            "A line along the edge leaves the middle free.",
+            "Fill the middle last."
+          ],
+          "kidTip": "Lines along the edge often have nowhere else to go.",
+          "audioPrompt": "Some lines run along the edge of the board. Find them."
+        },
+        "guide": {
+          "enabled": true
+        }
+      },
+      "difficulty": "Medium",
+      "iconName": "waves",
+      "iconTone": "indigo",
+      "pedagogyTip": "Edges and corners are where choices run out first, so they are where to look.",
+      "standards": [],
+      "trajectoryLevel": "edge-router",
+      "ageBand": [
+        7,
+        10
+      ]
+    },
+    {
+      "id": "dont-box-it-in",
+      "title": "Don't Box It In",
+      "concept": "Spotting a Move That Traps a Colour",
+      "conceptKey": "trap-spotter",
+      "requires": [
+        "edge-router"
+      ],
+      "activity": "dot-connect/connect",
+      "params": {
+        "level": 8,
+        "question": {
+          "spec": "dont-box-it-in",
+          "questionsPerRound": 3
+        },
+        "play": {
+          "mode": "dot_connect",
+          "tier": "core",
+          "difficultyColor": "purple",
+          "category": "Planning",
+          "shortDesc": "The tempting move that traps",
+          "targetObjective": "Spot the move that would trap another colour.",
+          "stepByStep": [
+            "Before you draw, look where the line will go.",
+            "Check every other colour can still reach its twin.",
+            "If a colour gets shut in, take the line back."
+          ],
+          "kidTip": "The shortest line can shut another colour in. Look before you draw.",
+          "audioPrompt": "Careful! A short line here can trap another colour. Check before you draw."
+        },
+        "guide": {
+          "enabled": true
+        }
+      },
+      "difficulty": "Hard",
+      "iconName": "scale",
+      "iconTone": "purple",
+      "pedagogyTip": "Each board has a move that heads straight for the twin and makes the board impossible. Undo is the tool here.",
+      "standards": [],
+      "trajectoryLevel": "trap-spotter",
+      "ageBand": [
+        7,
+        10
+      ]
+    },
+    {
+      "id": "five-pairs",
+      "title": "Five Pairs",
+      "concept": "Planning the Whole Board",
+      "conceptKey": "board-planner",
+      "requires": [
+        "trap-spotter"
+      ],
+      "activity": "dot-connect/connect",
+      "params": {
+        "level": 9,
+        "question": {
+          "spec": "five-pairs",
+          "questionsPerRound": 3
+        },
+        "play": {
+          "mode": "dot_connect",
+          "tier": "core",
+          "difficultyColor": "purple",
+          "category": "Planning",
+          "shortDesc": "A bigger board to plan",
+          "targetObjective": "Plan five lines on a bigger board.",
+          "stepByStep": [
+            "Do the forced moves first.",
+            "Then the edges.",
+            "Then fill the middle."
+          ],
+          "kidTip": "Forced moves first, then edges, then the middle.",
+          "audioPrompt": "Five pairs on a bigger board. Start with the forced moves."
+        },
+        "guide": {
+          "enabled": true
+        }
+      },
+      "difficulty": "Hard",
+      "iconName": "boxes",
+      "iconTone": "purple",
+      "pedagogyTip": "Everything so far, together. Encourage the order: forced, edge, middle.",
+      "standards": [],
+      "trajectoryLevel": "board-planner",
+      "ageBand": [
+        7,
+        10
+      ]
+    },
+    {
+      "id": "practice-planning",
+      "title": "Practice: Planning",
+      "concept": "Practice Without Help",
+      "conceptKey": "board-planner",
+      "requires": [],
+      "activity": "dot-connect/connect",
+      "params": {
+        "level": 10,
+        "question": {
+          "specs": [
+            "one-way-out",
+            "hug-the-edge",
+            "dont-box-it-in",
+            "five-pairs"
+          ],
+          "questionsPerRound": 5,
+          "practice": true
+        },
+        "play": {
+          "mode": "dot_connect",
+          "tier": "core",
+          "difficultyColor": "emerald",
+          "category": "Planning",
+          "shortDesc": "Five boards, no hints",
+          "targetObjective": "Solve five boards without help.",
+          "stepByStep": [
+            "Find the forced moves.",
+            "Use the edges.",
+            "Fill the middle last."
+          ],
+          "kidTip": "No hints here. Take your time.",
+          "audioPrompt": ""
+        }
+      },
+      "difficulty": "Practice",
+      "iconName": "star",
+      "iconTone": "emerald",
+      "pedagogyTip": "Practice mixes the boards from lessons 6 to 9.",
+      "standards": [],
+      "trajectoryLevel": "board-planner",
+      "ageBand": [
+        7,
+        10
+      ]
+    },
+    {
+      "id": "big-board",
+      "title": "Big Board",
+      "concept": "Solving a Large Board",
+      "conceptKey": "big-board-solver",
+      "requires": [
+        "board-planner"
+      ],
+      "activity": "dot-connect/connect",
+      "params": {
+        "level": 11,
+        "question": {
+          "spec": "big-board",
+          "questionsPerRound": 3
+        },
+        "play": {
+          "mode": "dot_connect",
+          "tier": "core",
+          "difficultyColor": "cyan",
+          "category": "Bigger Boards",
+          "shortDesc": "Seven by seven, six pairs",
+          "targetObjective": "Solve a seven by seven board.",
+          "stepByStep": [
+            "Scan the whole board first.",
+            "Do every forced move you can find.",
+            "Work inward from the edges."
+          ],
+          "kidTip": "Big boards are many small puzzles. Solve one corner at a time.",
+          "audioPrompt": "A big board with six pairs. Solve one corner at a time."
+        },
+        "guide": {
+          "enabled": true
+        }
+      },
+      "difficulty": "Hard",
+      "iconName": "rocket",
+      "iconTone": "cyan",
+      "pedagogyTip": "Bigger is not different, only longer. Praise steady progress, not speed.",
+      "standards": [],
+      "trajectoryLevel": "big-board-solver",
+      "ageBand": [
+        8,
+        12
+      ]
+    },
+    {
+      "id": "walls",
+      "title": "Walls",
+      "concept": "Routing Round Walls",
+      "conceptKey": "wall-router",
+      "requires": [
+        "big-board-solver"
+      ],
+      "activity": "dot-connect/connect",
+      "params": {
+        "level": 12,
+        "question": {
+          "spec": "walls",
+          "questionsPerRound": 3
+        },
+        "play": {
+          "mode": "dot_connect",
+          "tier": "core",
+          "difficultyColor": "cyan",
+          "category": "Bigger Boards",
+          "shortDesc": "Lines go round the walls",
+          "targetObjective": "Join and fill a board with walls on it.",
+          "stepByStep": [
+            "Walls are not squares to fill.",
+            "Lines go round them.",
+            "Squares next to walls often have only one way out."
+          ],
+          "kidTip": "Walls make forced moves. Look at the squares beside them.",
+          "audioPrompt": "This board has walls. Lines go round them, and you fill every other square."
+        },
+        "guide": {
+          "enabled": true
+        }
+      },
+      "difficulty": "Hard",
+      "iconName": "layers",
+      "iconTone": "cyan",
+      "pedagogyTip": "A wall removes choices, which usually makes the board easier to reason about, not harder.",
+      "standards": [],
+      "trajectoryLevel": "wall-router",
+      "ageBand": [
+        8,
+        12
+      ]
+    },
+    {
+      "id": "exact-steps",
+      "title": "Exact Steps",
+      "concept": "Counting the Length of a Route",
+      "conceptKey": "step-counter",
+      "requires": [
+        "wall-router"
+      ],
+      "activity": "dot-connect/connect",
+      "params": {
+        "level": 13,
+        "question": {
+          "spec": "exact-steps",
+          "questionsPerRound": 3
+        },
+        "play": {
+          "mode": "dot_connect",
+          "tier": "core",
+          "difficultyColor": "cyan",
+          "category": "Bigger Boards",
+          "shortDesc": "A line of exact length",
+          "targetObjective": "Join one pair in an exact number of steps.",
+          "stepByStep": [
+            "Find the dot with a number on it.",
+            "Its line must take exactly that many steps.",
+            "Count the squares as you draw."
+          ],
+          "kidTip": "The number on the dot is how many steps its line takes.",
+          "audioPrompt": "One dot has a number. Its line must take exactly that many steps."
+        },
+        "guide": {
+          "enabled": true
+        }
+      },
+      "difficulty": "Hard",
+      "iconName": "footprints",
+      "iconTone": "cyan",
+      "pedagogyTip": "Without the number this board has more than one answer; the count is what makes it solvable. A step is one square moved.",
+      "standards": [],
+      "trajectoryLevel": "step-counter",
+      "ageBand": [
+        8,
+        12
+      ]
+    },
+    {
+      "id": "bridges",
+      "title": "Bridges",
+      "concept": "Crossing on a Bridge",
+      "conceptKey": "bridge-crosser",
+      "requires": [
+        "step-counter"
+      ],
+      "activity": "dot-connect/connect",
+      "params": {
+        "level": 14,
+        "question": {
+          "spec": "bridges",
+          "questionsPerRound": 3
+        },
+        "play": {
+          "mode": "dot_connect",
+          "tier": "core",
+          "difficultyColor": "purple",
+          "category": "Bigger Boards",
+          "shortDesc": "Two lines cross on a bridge",
+          "targetObjective": "Use a bridge so two lines can cross.",
+          "stepByStep": [
+            "Find the bridge square.",
+            "One line goes straight across it.",
+            "Another line goes straight down it."
+          ],
+          "kidTip": "On the bridge, lines go straight over. Use it both ways.",
+          "audioPrompt": "This board has a bridge. Two lines cross there, one across and one down."
+        },
+        "guide": {
+          "enabled": true
+        }
+      },
+      "difficulty": "Hard",
+      "iconName": "zap",
+      "iconTone": "purple",
+      "pedagogyTip": "The bridge is the one exception to never crossing. Both ways must be used for the board to be full.",
+      "standards": [],
+      "trajectoryLevel": "bridge-crosser",
+      "ageBand": [
+        8,
+        12
+      ]
+    },
+    {
+      "id": "on-your-own",
+      "title": "On Your Own",
+      "concept": "Solving Without Help",
+      "conceptKey": "independent-solver",
+      "requires": [
+        "bridge-crosser"
+      ],
+      "activity": "dot-connect/connect",
+      "params": {
+        "level": 15,
+        "question": {
+          "spec": "on-your-own",
+          "questionsPerRound": 3,
+          "noHints": true
+        },
+        "play": {
+          "mode": "dot_connect",
+          "tier": "core",
+          "difficultyColor": "purple",
+          "category": "Bigger Boards",
+          "shortDesc": "Seven pairs, no hints",
+          "targetObjective": "Solve big boards with no hints.",
+          "stepByStep": [
+            "Forced moves first.",
+            "Then the edges.",
+            "Then the middle."
+          ],
+          "kidTip": "No hints on this one. You know how.",
+          "audioPrompt": "Seven pairs, and no hints. You know how to do this."
+        }
+      },
+      "difficulty": "Expert",
+      "iconName": "crown",
+      "iconTone": "purple",
+      "pedagogyTip": "Hints are off by design. It is a teaching lesson, so mistakes still count as learning.",
+      "standards": [],
+      "trajectoryLevel": "independent-solver",
+      "ageBand": [
+        8,
+        12
+      ]
+    },
+    {
+      "id": "practice-dot-connect",
+      "title": "Practice: Dot Connect",
+      "concept": "Practice Without Help",
+      "conceptKey": "independent-solver",
+      "requires": [],
+      "activity": "dot-connect/connect",
+      "params": {
+        "level": 16,
+        "question": {
+          "specs": [
+            "big-board",
+            "walls",
+            "exact-steps",
+            "bridges",
+            "on-your-own"
+          ],
+          "questionsPerRound": 5,
+          "practice": true
+        },
+        "play": {
+          "mode": "dot_connect",
+          "tier": "core",
+          "difficultyColor": "emerald",
+          "category": "Bigger Boards",
+          "shortDesc": "Five mixed boards, no hints",
+          "targetObjective": "Solve five mixed boards without help.",
+          "stepByStep": [
+            "Read the board: walls, bridges, numbers.",
+            "Forced moves first.",
+            "Fill every square."
+          ],
+          "kidTip": "No hints here. Take your time.",
+          "audioPrompt": ""
+        }
+      },
+      "difficulty": "Practice",
+      "iconName": "star",
+      "iconTone": "emerald",
+      "pedagogyTip": "Practice mixes big boards, walls, exact steps, bridges and seven-pair boards.",
+      "standards": [],
+      "trajectoryLevel": "independent-solver",
+      "ageBand": [
+        8,
+        12
+      ]
+    }
+  ]
+}
