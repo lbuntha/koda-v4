@@ -31894,9 +31894,15 @@
    }
   ],
   "answer": "New Zealand",
-  "accepts": [],
+  "accepts": [
+   "នូវែលសេឡង់",
+   "ប្រទេសនូវែលសេឡង់"
+  ],
   "explanation": "new + seal + land sounds like New Zealand.",
-  "source": "official"
+  "source": "official",
+  "km": {
+   "explanation": "“new” + “seal” + “land” ប្រកាសលឿនៗ ស្តាប់ទៅដូច New Zealand។ នេះជាប្រទេសនូវែលសេឡង់។"
+  }
  },
  {
   "id": "countries-india",
@@ -31931,9 +31937,15 @@
    }
   ],
   "answer": "India",
-  "accepts": [],
+  "accepts": [
+   "ឥណ្ឌា",
+   "ប្រទេសឥណ្ឌា"
+  ],
   "explanation": "in + deer + a sounds like India.",
-  "source": "official"
+  "source": "official",
+  "km": {
+   "explanation": "“in” + “deer” + “a” ប្រកាសលឿនៗ ស្តាប់ទៅដូច India។ នេះជាប្រទេសឥណ្ឌា។"
+  }
  },
  {
   "id": "countries-jamaica",
@@ -31968,9 +31980,15 @@
    }
   ],
   "answer": "Jamaica",
-  "accepts": [],
+  "accepts": [
+   "ហ្សាម៉ាអ៊ីក",
+   "ប្រទេសហ្សាម៉ាអ៊ីក"
+  ],
   "explanation": "jam + make + a sounds like Jamaica.",
-  "source": "official"
+  "source": "official",
+  "km": {
+   "explanation": "“jam” + “make” + “a” ប្រកាសលឿនៗ ស្តាប់ទៅដូច Jamaica។ នេះជាប្រទេសហ្សាម៉ាអ៊ីក។"
+  }
  },
  {
   "id": "countries-iraq",
@@ -31998,9 +32016,15 @@
    }
   ],
   "answer": "Iraq",
-  "accepts": [],
+  "accepts": [
+   "អ៊ីរ៉ាក់",
+   "ប្រទេសអ៊ីរ៉ាក់"
+  ],
   "explanation": "eye + rock sounds like Iraq.",
-  "source": "official"
+  "source": "official",
+  "km": {
+   "explanation": "“eye” + “rock” ប្រកាសលឿនៗ ស្តាប់ទៅដូច Iraq។ នេះជាប្រទេសអ៊ីរ៉ាក់។"
+  }
  },
  {
   "id": "countries-sweden",
@@ -32027,9 +32051,15 @@
    }
   ],
   "answer": "Sweden",
-  "accepts": [],
+  "accepts": [
+   "ស៊ុយអែត",
+   "ប្រទេសស៊ុយអែត"
+  ],
   "explanation": "sweet + den sounds like Sweden.",
-  "source": "official"
+  "source": "official",
+  "km": {
+   "explanation": "“sweet” (ស្ករគ្រាប់) + “den” ប្រកាសលឿនៗ ស្តាប់ទៅដូច Sweden។ នេះជាប្រទេសស៊ុយអែត។"
+  }
  },
  {
   "id": "countries-bahrain",
@@ -32057,9 +32087,15 @@
    }
   ],
   "answer": "Bahrain",
-  "accepts": [],
+  "accepts": [
+   "បារ៉ែន",
+   "ប្រទេសបារ៉ែន"
+  ],
   "explanation": "A sheep says baa: baa + rain sounds like Bahrain.",
-  "source": "official"
+  "source": "official",
+  "km": {
+   "explanation": "ចៀមស្រែក “baa” + “rain” (ភ្លៀង) ប្រកាសលឿនៗ ស្តាប់ទៅដូច Bahrain។ នេះជាប្រទេសបារ៉ែន។"
+  }
  },
  {
   "id": "countries-seychelles",
@@ -32086,9 +32122,15 @@
    }
   ],
   "answer": "Seychelles",
-  "accepts": [],
+  "accepts": [
+   "សីស្ហែល",
+   "ប្រទេសសីស្ហែល"
+  ],
   "explanation": "say + shells sounds like Seychelles.",
-  "source": "official"
+  "source": "official",
+  "km": {
+   "explanation": "“say” + “shells” (សំបកខ្យង) ប្រកាសលឿនៗ ស្តាប់ទៅដូច Seychelles។ នេះជាប្រទេសសីស្ហែល។"
+  }
  },
  {
   "id": "countries-morocco",
@@ -32123,9 +32165,15 @@
    }
   ],
   "answer": "Morocco",
-  "accepts": [],
+  "accepts": [
+   "ម៉ារ៉ុក",
+   "ប្រទេសម៉ារ៉ុក"
+  ],
   "explanation": "mo + rock + o sounds like Morocco.",
-  "source": "official"
+  "source": "official",
+  "km": {
+   "explanation": "“mo” + “rock” + “o” ប្រកាសលឿនៗ ស្តាប់ទៅដូច Morocco។ នេះជាប្រទេសម៉ារ៉ុក។"
+  }
  },
  {
   "id": "countries-andorra",
@@ -32160,9 +32208,15 @@
    }
   ],
   "answer": "Andorra",
-  "accepts": [],
+  "accepts": [
+   "អង់ដូរ៉ា",
+   "ប្រទេសអង់ដូរ៉ា"
+  ],
   "explanation": "and + door + a sounds like Andorra.",
-  "source": "official"
+  "source": "official",
+  "km": {
+   "explanation": "“and” + “door” (ទ្វារ) + “a” ប្រកាសលឿនៗ ស្តាប់ទៅដូច Andorra។ នេះជាប្រទេសអង់ដូរ៉ា។"
+  }
  },
  {
   "id": "countries-pakistan",
@@ -32197,9 +32251,15 @@
    }
   ],
   "answer": "Pakistan",
-  "accepts": [],
+  "accepts": [
+   "ប៉ាគីស្ថាន",
+   "ប្រទេសប៉ាគីស្ថាន"
+  ],
   "explanation": "pack + is + tan sounds like Pakistan.",
-  "source": "official"
+  "source": "official",
+  "km": {
+   "explanation": "“pack” + “is” + “tan” ប្រកាសលឿនៗ ស្តាប់ទៅដូច Pakistan។ នេះជាប្រទេសប៉ាគីស្ថាន។"
+  }
  },
  {
   "id": "countries-ukraine",
@@ -32226,9 +32286,15 @@
    }
   ],
   "answer": "Ukraine",
-  "accepts": [],
+  "accepts": [
+   "អ៊ុយក្រែន",
+   "ប្រទេសអ៊ុយក្រែន"
+  ],
   "explanation": "U + crane (the tall bird) sounds like Ukraine.",
-  "source": "official"
+  "source": "official",
+  "km": {
+   "explanation": "“U” + “crane” (សត្វក្រៀល) ប្រកាសលឿនៗ ស្តាប់ទៅដូច Ukraine។ នេះជាប្រទេសអ៊ុយក្រែន។"
+  }
  },
  {
   "id": "countries-denmark",
@@ -32255,9 +32321,15 @@
    }
   ],
   "answer": "Denmark",
-  "accepts": [],
+  "accepts": [
+   "ដាណឺម៉ាក",
+   "ប្រទេសដាណឺម៉ាក"
+  ],
   "explanation": "den + mark (a tick is a mark) = Denmark.",
-  "source": "official"
+  "source": "official",
+  "km": {
+   "explanation": "“den” + “mark” (សញ្ញាធីក) = Denmark។ នេះជាប្រទេសដាណឺម៉ាក។"
+  }
  },
  {
   "id": "countries-tonga",
@@ -32284,9 +32356,15 @@
    }
   ],
   "answer": "Tonga",
-  "accepts": [],
+  "accepts": [
+   "តុងហ្គា",
+   "ប្រទេសតុងហ្គា"
+  ],
   "explanation": "tongue + a sounds like Tonga.",
-  "source": "official"
+  "source": "official",
+  "km": {
+   "explanation": "“tongue” (អណ្តាត) + “a” ប្រកាសលឿនៗ ស្តាប់ទៅដូច Tonga។ នេះជាប្រទេសតុងហ្គា។"
+  }
  },
  {
   "id": "countries-austria",
@@ -32321,9 +32399,15 @@
    }
   ],
   "answer": "Austria",
-  "accepts": [],
+  "accepts": [
+   "អូទ្រីស",
+   "ប្រទេសអូទ្រីស"
+  ],
   "explanation": "os + tree + a sounds like Austria.",
-  "source": "official"
+  "source": "official",
+  "km": {
+   "explanation": "“os” + “tree” (ដើមឈើ) + “a” ប្រកាសលឿនៗ ស្តាប់ទៅដូច Austria។ នេះជាប្រទេសអូទ្រីស។"
+  }
  },
  {
   "id": "countries-guinea",
@@ -32351,9 +32435,15 @@
    }
   ],
   "answer": "Guinea",
-  "accepts": [],
+  "accepts": [
+   "ហ្គីណេ",
+   "ប្រទេសហ្គីណេ"
+  ],
   "explanation": "A guinea pig with the pig taken away leaves Guinea.",
-  "source": "official"
+  "source": "official",
+  "km": {
+   "explanation": "“guinea pig” ដក “pig” (ជ្រូក) ចេញ នៅសល់ Guinea។ នេះជាប្រទេសហ្គីណេ។"
+  }
  },
  {
   "id": "khmer-sun",
