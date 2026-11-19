@@ -78,14 +78,15 @@ jobs:
         working-directory: server
         run: ruff check app tests
 
-      # Every test gets its own throwaway database (tests/conftest.py), so
-      # they can run on all the runner's cores at once.
+      # One at a time (~12 min). In parallel (`-n auto`) the runner's single
+      # MongoDB service gave out partway and 551 tests errored on a refused
+      # connection, in a run that took two hours.
       - name: Test API
         working-directory: server
         env:
           MONGODB_URI: mongodb://127.0.0.1:27017
           JWT_SECRET: ci-only-secret-at-least-32-characters
-        run: pytest -q -n auto
+        run: pytest -q
 
   # Built alongside the tests rather than after them, with layers cached
   # between runs. Pushed under the commit's tag only: `latest` moves in the
