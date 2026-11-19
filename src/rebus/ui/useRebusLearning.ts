@@ -6,6 +6,7 @@
  * each hint, each ending. The round is paid once, when the summary is reached.
  */
 
+import { ActivityDone } from "../../lib/streak";
 import { useEffect, useRef, useState } from "react";
 import { ScoringAPI } from "../../lib/scoring";
 import type { AgeRange } from "../../lib/ages";
@@ -74,6 +75,7 @@ export const useRebusLearning = ({ state }: RebusRound, { category, ages, replay
       const reward = isReplay.current ? { ...paid, xp: 0 } : paid;
       rec.complete(reward.stars, reward.xp);
       if (reward.xp > 0) award.current?.(reward.xp);
+      ActivityDone.announce();
       setEarned(reward);
     }
 

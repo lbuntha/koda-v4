@@ -11,6 +11,7 @@
  * checked and scored are the same cells.
  */
 
+import { ActivityDone } from "../../lib/streak";
 import { useCallback, useEffect, useMemo, useRef, useState, useSyncExternalStore } from "react";
 import { ArrowLeft, ArrowRight, Brush, Check, Download, Eraser, Images, Lightbulb, Maximize2, MoreHorizontal, PaintBucket, Palette, Plus, RotateCcw, ShieldCheck, Star, Undo2, Volume2 } from "lucide-react";
 import { useT } from "../../lib/i18n";
@@ -775,6 +776,8 @@ export function ColorPlayer({ item, onExit, onAwardXp, sandbox = false, source, 
         xp = stepXp("learned", score.stars, xpPerStep, ScoringAPI.current());
         if (xp > 0) onAwardXp?.(xp);
       }
+      // A colour step after tracing was already counted when the tracing ended.
+      if (!afterTrace) ActivityDone.announce();
       TraceProgress.set(item.id, {
         ...prev,
         ...(afterTrace

@@ -301,3 +301,18 @@ describe("a run counted by the week", () => {
     expect(observeStreak(learner(), rule, new Date()).cadence).toBe("daily");
   });
 });
+
+describe("a finished book, trace or Rebus round", () => {
+  it("is told to every listener once, and not after it stops listening", async () => {
+    const { ActivityDone } = await import("./streak");
+    let heard = 0;
+    const stop = ActivityDone.subscribe(() => {
+      heard += 1;
+    });
+    ActivityDone.announce();
+    expect(heard).toBe(1);
+    stop();
+    ActivityDone.announce();
+    expect(heard).toBe(1);
+  });
+});

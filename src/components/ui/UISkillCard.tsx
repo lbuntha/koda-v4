@@ -146,9 +146,11 @@ export const UISkillCard: React.FC<UISkillCardProps> = ({
             <p className="mt-0.5 truncate text-[13px] leading-snug text-muted">{tagline}</p>
           )}
 
-          {/* The bar once there is progress, as the poster does — an empty bar
-              and "0/15" on a skill nobody has started reads as a score. */}
-          {completedLessons > 0 ? (
+          {/* A skill the learner has added always shows how far they are, from
+              0 — "which of my skills have I finished?" has to be answerable
+              from the list. One they have not added counts its lessons instead,
+              because an empty bar there would read as a score. */}
+          {registered ? (
             <div className="mt-1.5 flex items-center gap-2">
               <UIProgressBar value={percent} max={100} size="sm" className="flex-1" />
               <span className="shrink-0 text-[11px] font-bold text-muted tabular-nums">
@@ -310,18 +312,19 @@ export const UISkillCard: React.FC<UISkillCardProps> = ({
           {tagline && <p className="mt-1 line-clamp-2 text-[13px] leading-snug text-muted">{tagline}</p>}
         </button>
 
-        {/* The bar only once there is progress; before that, a full bar of nothing is noise. */}
-        {completedLessons > 0 && <UIProgressBar value={percent} max={100} size="sm" label={t("skillCard.progress", { title })} />}
+        {/* Every added skill carries its bar, from 0, so a learner can see at a
+            glance where each of their skills stands. Not on one they have not added. */}
+        {registered && <UIProgressBar value={percent} max={100} size="sm" label={t("skillCard.progress", { title })} />}
 
         <div className="mt-auto flex min-h-10 items-center justify-between gap-3">
-          {/* The lesson count only until progress gives it — at poster width a third clause truncates the ages away. */}
+          {/* Progress on an added skill; the lesson count and ages on one still to add. */}
           <span
             className={`min-w-0 truncate text-sm font-semibold tabular-nums ${complete ? "text-emerald-700 dark:text-emerald-400" : "text-muted"}`}
           >
-            {completedLessons > 0
+            {registered
               ? complete
                 ? t("skillCard.done")
-                : t("skillCard.xOfY", { done: completedLessons, total: lessonCount })
+                : t("skillCard.xOfYDone", { done: completedLessons, total: lessonCount })
               : `${t("skillCard.lessons", { count: lessonCount })}${ages ? ` · ${t("skillCard.ages", { from: ages[0], to: ages[1] })}` : ""}`}
           </span>
           {registered ? (

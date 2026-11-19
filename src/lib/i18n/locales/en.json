@@ -356,7 +356,8 @@
     },
     "ages": "ages {from}–{to}",
     "agesBadge": "Ages {from}–{to}",
-    "progress": "{title} progress"
+    "progress": "{title} progress",
+    "xOfYDone": "{done} of {total} done"
   },
   "learn": {
     "allSkills": "All skills",
@@ -1495,7 +1496,8 @@
     "everySkill": "That's every skill for you right now.",
     "noMatch": "No matching skills",
     "noMatchHint": "Try another search or subject.",
-    "showMore": "Show more skills"
+    "showMore": "Show more skills",
+    "yourSkills": "Your skills"
   },
   "round": {
     "voiceOff": "Turn Koda’s voice off",

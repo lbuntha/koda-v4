@@ -16,7 +16,7 @@ import {
   saveProgress,
   subscribeLearnerRecord,
 } from "./lib/learnerProgress";
-import { recordPractice, useStreak } from "./lib/streak";
+import { ActivityDone, recordPractice, useStreak } from "./lib/streak";
 import { studyGateNow, useSessionClock, useStudyGate } from "./lib/sessionTime";
 import { levelFromXp } from "./lib/level";
 import { publishLearnerFigures } from "./lib/profileStats";
@@ -564,6 +564,10 @@ export default function App() {
   useEffect(() => {
     saveCompletedLevels(completedGameLevels);
   }, [completedGameLevels]);
+
+  /* A finished book, trace, drawing or Rebus round counts towards the streak
+     and today's goal, once, the same as a finished lesson. */
+  useEffect(() => ActivityDone.subscribe(() => setUserProgress((prev) => recordPractice(prev))), []);
 
   /*
    * Whose record is on screen follows who is signed in.

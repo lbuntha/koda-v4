@@ -129,7 +129,38 @@ export const SkillCatalogPage: React.FC<SkillCatalogPageProps> = ({
    */
   const browse = learnOrder(unfiltered ? visible.filter((skill) => skill.id !== resume?.id) : visible);
   const shownAbove = new Set(showResume && resume ? [resume.id] : []);
-  const visiblePage = browse.slice(0, visibleLimit);
+  /*
+   * The learner's own skills, as their own group.
+   *
+   * Added and not-added skills used to share one shelf, so "how am I doing in
+   * the skills I chose?" meant hunting for the cards without an Add button.
+   * Each of these carries its progress from 0. Only unfiltered and not for an
+   * admin, who has every skill and nothing to separate.
+   */
+  const mine = unfiltered && !viewer.showAllSkills ? browse.filter((skill) => registeredIds.has(skill.id)) : [];
+  const rest = mine.length ? browse.filter((skill) => !registeredIds.has(skill.id)) : browse;
+  const visiblePage = rest.slice(0, visibleLimit);
+  const card = (skill: (typeof skills)[number]) => (
+    <UISkillCard
+      key={skill.id}
+      size={compact ? "sm" : "md"}
+      title={skill.name}
+      tagline={skill.tagline}
+      thumbnail={skill.thumbnail}
+      fallbackIconName={skill.iconName}
+      category={skill.category}
+      subjectName={skill.subjectName}
+      ages={skill.ages}
+      lessonCount={skill.lessonCount}
+      completedLessons={skill.completedLessons}
+      progressPercent={skill.progressPercent}
+      status={skill.status}
+      registered={viewer.showAllSkills || registeredIds.has(skill.id)}
+      registering={registeringId === skill.id}
+      onOpen={() => open(skill.id)}
+      onRegister={() => void add(skill.id)}
+    />
+  );
 
   const open = (skillId: string) => {
     playSound("pop");
@@ -340,6 +371,13 @@ export const SkillCatalogPage: React.FC<SkillCatalogPageProps> = ({
         />
       )}
 
+      {mine.length > 0 && (
+        <section>
+          <h2 className="mb-3 font-black text-lg text-ink">{t("catalog.yourSkills")}</h2>
+          <div className={compact ? ROW_LIST : CARD_GRID}>{mine.map(card)}</div>
+        </section>
+      )}
+
       <section>
         <div className="mb-3 flex items-end justify-between gap-3">
           <div>
@@ -348,7 +386,7 @@ export const SkillCatalogPage: React.FC<SkillCatalogPageProps> = ({
                 ? t("catalog.searchResults")
                 : category !== "all"
                   ? [...categories, { id: UNFILED, name: t("catalog.unfiled") }].find((c) => c.id === category)?.name
-                  : shownAbove.size || firstDay
+                  : shownAbove.size || firstDay || mine.length
                     ? t("catalog.moreSkills")
                     : t("catalog.forYou")}
             </h2>
@@ -361,29 +399,9 @@ export const SkillCatalogPage: React.FC<SkillCatalogPageProps> = ({
             </span>
           )}
         </div>
-        {browse.length ? (
+        {rest.length ? (
           <div className={compact ? ROW_LIST : CARD_GRID}>
-            {visiblePage.map((skill) => (
-              <UISkillCard
-                key={skill.id}
-                size={compact ? "sm" : "md"}
-                title={skill.name}
-                tagline={skill.tagline}
-                thumbnail={skill.thumbnail}
-                fallbackIconName={skill.iconName}
-                category={skill.category}
-                subjectName={skill.subjectName}
-                ages={skill.ages}
-                lessonCount={skill.lessonCount}
-                completedLessons={skill.completedLessons}
-                progressPercent={skill.progressPercent}
-                status={skill.status}
-                registered={viewer.showAllSkills || registeredIds.has(skill.id)}
-                registering={registeringId === skill.id}
-                onOpen={() => open(skill.id)}
-                onRegister={() => void add(skill.id)}
-              />
-            ))}
+            {visiblePage.map(card)}
           </div>
         ) : unfiltered ? (
           /* Everything this learner has is already on screen above. Saying "no
@@ -409,7 +427,7 @@ export const SkillCatalogPage: React.FC<SkillCatalogPageProps> = ({
             </UIButton>
           </div>
         )}
-        {browse.length > visiblePage.length && (
+        {rest.length > visiblePage.length && (
           <div className="mt-4 flex justify-center">
             <UIButton
               type="button"

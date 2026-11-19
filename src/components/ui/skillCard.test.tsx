@@ -65,14 +65,22 @@ describe("a skill as a poster", () => {
   it("states progress once, not as a count and a percentage", () => {
     render(<UISkillCard size="md" {...base} completedLessons={1} />);
 
-    expect(screen.getByText("1 of 56")).toBeTruthy();
+    expect(screen.getByText("1 of 56 done")).toBeTruthy();
     expect(screen.queryByText("2%")).toBeNull();
   });
 
-  it("counts the lessons instead when none of them are done", () => {
+  it("shows an added skill's progress from 0, so every skill the learner has says where it stands", () => {
     render(<UISkillCard size="md" {...base} completedLessons={0} />);
+
+    expect(screen.getByText("0 of 56 done")).toBeTruthy();
+    expect(screen.getByRole("progressbar")).toBeTruthy();
+  });
+
+  it("counts the lessons instead on a skill the learner has not added", () => {
+    render(<UISkillCard size="md" {...base} completedLessons={0} registered={false} onRegister={() => {}} />);
 
     expect(screen.getByText(/56 lessons/)).toBeTruthy();
     expect(screen.queryByText(/of 56/)).toBeNull();
+    expect(screen.queryByRole("progressbar")).toBeNull();
   });
 });

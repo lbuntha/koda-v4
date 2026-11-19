@@ -8,6 +8,7 @@
  * See docs/TRACE_STUDIO_BUILD_PLAN.md §3.
  */
 
+import { ActivityDone } from "../../lib/streak";
 import { useCallback, useEffect, useMemo, useRef, useState, useSyncExternalStore } from "react";
 import { ArrowLeft, ArrowRight, Check, CircleDot, Eraser, Eye, Flag, Ghost, Grid3x3, Hash, ListOrdered, MoveRight, Palette, RotateCcw, Route, SlidersHorizontal, Sparkles, Undo2, ChevronDown, Volume2 } from "lucide-react";
 import { useT } from "../../lib/i18n";
@@ -372,6 +373,8 @@ export function TracePlayer({ item, onExit, onAwardXp, ageBand = "B", plan: plan
       if (xp > 0) onAwardXp?.(xp);
     }
     const ends = !sandbox && result !== null && (event === "canDo" || event === "learned" || event === "rechecked");
+    // Counted here, once, even when a colour step follows: the item is learned now.
+    if (ends) ActivityDone.announce();
     // The end screen brings its own fanfare.
     if (ends && needsColoring(item, TraceProgress.get(item.id))) {
       // Not finished yet: the colour step comes first, and its own end screen closes the item.

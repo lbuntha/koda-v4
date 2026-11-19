@@ -12,6 +12,7 @@
  * unanswered puzzle, not a mistake, so it never counts against the child.
  */
 
+import { ActivityDone } from "../../lib/streak";
 import { useEffect, useRef, useState } from "react";
 import { ScoringAPI } from "../../lib/scoring";
 import type { PuzzleOutcome } from "../engine";
@@ -95,6 +96,7 @@ export const useGroupLearning = (room: RoomView | null, { settings, onAwardXp }:
     });
     recorder.complete(reward.stars, xp);
     if (xp > 0) award.current?.(xp);
+    ActivityDone.announce();
     setEarned({ ...reward, xp, replay });
   }, [room, settings.xpPerRound]);
 

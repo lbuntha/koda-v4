@@ -339,7 +339,8 @@
     "lessons": "{count} មេរៀន",
     "ages": "អាយុ {from}–{to} ឆ្នាំ",
     "agesBadge": "អាយុ {from}–{to} ឆ្នាំ",
-    "progress": "វឌ្ឍនភាព {title}"
+    "progress": "វឌ្ឍនភាព {title}",
+    "xOfYDone": "បានរៀនចប់ {done} ក្នុងចំណោម {total}"
   },
   "learn": {
     "allSkills": "ជំនាញទាំងអស់",
@@ -1414,7 +1415,8 @@
     "everySkill": "នេះគឺជាជំនាញទាំងអស់សម្រាប់អ្នកពេលនេះ។",
     "noMatch": "គ្មានជំនាញត្រូវគ្នាទេ",
     "noMatchHint": "សាកល្បងស្វែងរក ឬមុខវិជ្ជាផ្សេង។",
-    "showMore": "បង្ហាញជំនាញបន្ថែម"
+    "showMore": "បង្ហាញជំនាញបន្ថែម",
+    "yourSkills": "ជំនាញរបស់ខ្ញុំ"
   },
   "round": {
     "voiceOff": "បិទសំឡេងរបស់ Koda",

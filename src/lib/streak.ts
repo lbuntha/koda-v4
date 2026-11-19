@@ -337,3 +337,32 @@ export const useStreak = (progress: UserProgress): StreakView & { config: Streak
   const cadence = ChildSettingsAPI.current().goalCadence;
   return { ...observeStreak(progress, config, new Date(), cadence), config };
 };
+
+/* ------------------------------------------------------------------ *
+ * Finished activities outside the skill lessons
+ * ------------------------------------------------------------------ */
+
+const activityListeners = new Set<() => void>();
+
+/**
+ * A finished book, trace, drawing or Rebus round — told to whoever keeps the
+ * learner's record.
+ *
+ * These are learning too, and a child who reads every day was watching their
+ * flame sit at 0 because only skill lessons ever reached `recordPractice`. Each
+ * one is announced once, when it *finishes* — not per trace step or per puzzle —
+ * so it counts as one round towards the day exactly as a lesson does. A signal
+ * rather than a prop: the places that finish are five components deep in three
+ * different modules, and none of them owns the record.
+ */
+export const ActivityDone = {
+  announce(): void {
+    for (const cb of activityListeners) cb();
+  },
+  subscribe(cb: () => void): () => void {
+    activityListeners.add(cb);
+    return () => {
+      activityListeners.delete(cb);
+    };
+  },
+};

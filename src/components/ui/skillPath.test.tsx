@@ -105,3 +105,22 @@ describe("a padlock that explains itself", () => {
     expect(screen.getByRole("button", { name: "Edges and Corners (Free) (locked)" })).toBeTruthy();
   });
 });
+
+describe("a finished lesson", () => {
+  it("says it is done in words, not only with a tick on its icon", () => {
+    render(
+      <UISkillPath
+        onSelect={vi.fn()}
+        items={[
+          { id: "a", title: "Count Them All", state: "completed", stars: 2 },
+          { id: "b", title: "Dice Dots", state: "completed" },
+          { id: "c", title: "Count On", state: "available" },
+        ]}
+      />,
+    );
+
+    expect(screen.getAllByText("Done")).toHaveLength(2);
+    expect(screen.getByRole("button", { name: "Count Them All (Done)" })).toBeTruthy();
+    expect(screen.getByRole("button", { name: "Count On" })).toBeTruthy();
+  });
+});

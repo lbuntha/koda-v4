@@ -1,4 +1,5 @@
 import type React from "react";
+import { ActivityDone } from "../lib/streak";
 import { memo, useCallback, useDeferredValue, useEffect, useMemo, useRef, useState, useSyncExternalStore, type ReactNode } from "react";
 import { createPortal } from "react-dom";
 import { LANG_KEY, readLang } from "./lang";
@@ -162,6 +163,7 @@ export function LibraryPage({ onAwardXp, onReaderChange, onBookChange, embedded 
             const firstTry = tally(result, quiz).reduce((n, part) => n + part.firstTry, 0);
             LibraryProgress.set(book.id, { stage: "done", rev: book.rev, firstTry, total: quiz.length, stars: r.stars });
             if (r.xp > 0) onAwardXp?.(r.xp);
+            ActivityDone.announce();
             setOutcomes(result);
             setEarned({ stars: r.stars, xp: r.xp });
             go("results");

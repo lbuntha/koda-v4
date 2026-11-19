@@ -112,6 +112,7 @@ export const UISkillPath: React.FC<UISkillPathProps> = ({
             title={item.title}
             aria-label={[
               item.title,
+              completed && `(${t("skillCard.done")})`,
               tierLabel && `(${tierLabel})`,
               locked
                 ? `(${item.note ? t("path.lockedNote", { note: item.note }) : t("path.locked")})`
@@ -162,13 +163,21 @@ export const UISkillPath: React.FC<UISkillPathProps> = ({
                 </span>
               ) : item.note ? (
                 <span className="mt-0.5 block text-xs text-muted">{item.note}</span>
-              ) : completed && stars > 0 ? (
-                <span
-                  aria-hidden="true"
-                  className="mt-0.5 block text-xs leading-none tracking-wider text-indigo-500 dark:text-indigo-400"
-                >
-                  {"★".repeat(stars)}
-                  <span className="text-slate-300 dark:text-slate-600">{"★".repeat(3 - stars)}</span>
+              ) : completed ? (
+                /* Said in words as well as drawn: a small tick on the icon was
+                   the only thing telling a finished lesson from an open one,
+                   and learners could not tell which ones they had done. */
+                <span className="mt-0.5 flex items-center gap-1.5 text-xs leading-none">
+                  <span className="inline-flex items-center gap-0.5 font-bold text-emerald-700 dark:text-emerald-400">
+                    <Check className="h-3 w-3" strokeWidth={3} aria-hidden="true" />
+                    {t("skillCard.done")}
+                  </span>
+                  {stars > 0 && (
+                    <span aria-hidden="true" className="tracking-wider text-indigo-500 dark:text-indigo-400">
+                      {"★".repeat(stars)}
+                      <span className="text-slate-300 dark:text-slate-600">{"★".repeat(3 - stars)}</span>
+                    </span>
+                  )}
                 </span>
               ) : null}
             </span>
