@@ -5806,5 +5806,26 @@
     "contactNote": "To ask a question, get a copy of your family's information, or delete your account, email us at",
     "privacy": "Privacy Policy",
     "terms": "Terms of Use"
+  },
+  "whatsNew": {
+    "title": "New on Koda",
+    "dismiss": "Hide what's new",
+    "rebus": "{count} new Rebus puzzles",
+    "alsoNew": "Also new",
+    "kind": {
+      "skill": "New skill",
+      "book": "New book",
+      "rebus": "New puzzles"
+    },
+    "action": {
+      "skill": "Try it",
+      "book": "Read it",
+      "rebus": "Play"
+    },
+    "open": {
+      "skill": "Open the new skill {name}",
+      "book": "Read the new book {name}",
+      "rebus": "Play {name}"
+    }
   }
 }

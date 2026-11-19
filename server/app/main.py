@@ -65,6 +65,7 @@ from app.routers import (
     trace,
     translations,
     voice_notes,
+    whats_new,
 )
 from app.settings import Settings, settings
 from app.skill_defaults import load_defaults as load_skill_defaults
@@ -333,6 +334,7 @@ def create_app() -> FastAPI:
         trace.router,
         translations.router,
         voice_notes.router,
+        whats_new.router,
     ):
         app.include_router(router, prefix=API_PREFIX)
 

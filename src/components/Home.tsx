@@ -26,6 +26,7 @@ import type { UserProgress } from "../types";
 import { playSound } from "../utils/audio";
 import { UIButton, UILessonCard, UIRewardProgress, UISkillCard, UISubjectLessonCard, UIArtIcon } from "./ui";
 import { WelcomeBack } from "./WelcomeBack";
+import { WhatsNew } from "./WhatsNew";
 import { DailyGoalBanner } from "./DailyGoalBanner";
 import { ChildrenOverview } from "./account/ChildrenOverview";
 import { SvgAsset } from "../assets/svg";
@@ -49,6 +50,8 @@ interface HomeProps {
   onOpenBook?(bookId: string): void;
   /** Today's Write pick: open this collection in Learn. */
   onOpenCollection?(collectionId: string): void;
+  /** A "New on Koda" Rebus release: open the game. */
+  onOpenRebus?(): void;
 }
 
 /** A Read or Write pick's reason, in the Today band's colours and words. */
@@ -381,6 +384,7 @@ export const Home: React.FC<HomeProps> = ({
   onAddChild,
   onOpenBook,
   onOpenCollection,
+  onOpenRebus,
 }) => {
   const session = useSession();
   const { can } = usePermissions();
@@ -675,6 +679,15 @@ export const Home: React.FC<HomeProps> = ({
                 only exists on a day with practice in it. */}
             <DailyGoalBanner userProgress={userProgress} />
             <WelcomeBack userProgress={userProgress} />
+            <WhatsNew
+              who={session?.learnerId ?? session?.userId ?? null}
+              age={viewer.age}
+              allAges={viewer.showAllSkills}
+              skills={byId}
+              onOpenSkill={onOpenSkill}
+              onOpenBook={onOpenBook}
+              onOpenRebus={onOpenRebus}
+            />
             <section>
               <h1 className="font-mono font-black uppercase tracking-widest text-xs text-indigo-600">
                 {t("home.today")}

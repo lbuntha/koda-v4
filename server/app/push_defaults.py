@@ -246,11 +246,12 @@ DEFAULT_KINDS: list[dict[str, Any]] = [
             "subject": "New on Koda: {skill}",
             "body": "{skill} has just been published. Open Koda to try it:\n{app_link}",
             "settingId": "email.skillPublished",
-            # Off: one push per skill is news; an email per skill is a newsletter
-            # nobody asked for. A parent can still ask.
-            "default": False,
+            # On: the owner wants every family told by email when a skill, a
+            # book or a Rebus release goes live (2026-11-20). A parent who
+            # switched it off keeps it off — this is only the default.
+            "default": True,
         },
-        "label": "New skill published",
+        "label": "New skills, books and puzzles",
         "settingId": "push.skillPublished",
         # On, unlike the reminders. A family cannot ask for a subject nobody has
         # told them exists, and one notification per published skill is not a

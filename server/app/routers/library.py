@@ -17,7 +17,7 @@ import binascii
 import re
 from typing import Annotated, Any, Literal
 
-from fastapi import APIRouter, Depends, Query, Response
+from fastapi import APIRouter, BackgroundTasks, Depends, Query, Response
 from pydantic import Field
 
 from app import audio_store
@@ -31,6 +31,7 @@ from app.models.common import Model
 from app.repos import library as library_repo
 from app.repos.rebus import names as rebus_names
 from app.security import ownership, principal_can
+from app.services import tasks as task_service
 from app.topics import clean_topics
 
 router = APIRouter(prefix="/library", tags=["library"], dependencies=[AUTHENTICATED])
@@ -424,7 +425,7 @@ async def save_draft(book_id: str, body: DraftWrite, db: Db, p: CanWrite) -> Boo
 
 
 @router.post("/drafts/{book_id}/publish")
-async def publish(book_id: str, db: Db, p: CanWrite) -> BookOut:
+async def publish(book_id: str, db: Db, p: CanWrite, tasks: BackgroundTasks) -> BookOut:
     book_id = _id(book_id)
     row = await _mine(db, p, book_id)
     if not row.get("draft"):
@@ -441,7 +442,10 @@ async def publish(book_id: str, db: Db, p: CanWrite) -> BookOut:
         raise AppError(422, "missing_audio", "A recording this book points at was not uploaded. Record it again or remove it.")
     if await library_repo.missing_images(db, photo_ids_of(row["draft"])):
         raise AppError(422, "missing_photo", "A photo this book shows was not uploaded. Upload it again or choose another picture.")
-    return _out(await library_repo.publish(db, book_id, row["draft"], p.subject_id))
+    published = _out(await library_repo.publish(db, book_id, row["draft"], p.subject_id))
+    # After the response: tell every family, as a published skill does.
+    tasks.add_task(task_service.announce_new_skills, db)
+    return published
 
 
 @router.post("/drafts/{book_id}/unpublish")

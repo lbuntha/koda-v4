@@ -260,3 +260,36 @@ async def test_a_deployment_with_nothing_new_says_so(db, family, seeded):
 
     assert report["announcements"] == 0
     assert "nothing has been published" in report["skipped"]
+
+
+# --- books and Rebus releases ride the same job -------------------------------
+
+
+async def test_a_published_book_and_a_rebus_release_are_announced_once(db, family, seeded):
+    published = datetime(2026, 8, 18, 6, 0, tzinfo=UTC)
+    await db.library_books.insert_one(
+        {"id": "market", "deletedAt": None, "publishedAt": published, "published": {"title": "The Market"}}
+    )
+    await db.rebus_releases.insert_many([
+        {"number": 4, "at": published, "puzzleIds": ["a", "b"], "rolledBack": False},
+        {"number": 3, "at": published, "puzzleIds": ["c"], "rolledBack": True},
+    ])
+
+    first = await task_service.skill_announcements(db, at=MORNING_UTC)
+    # A republished book is the same news, not a second piece of it.
+    await db.library_books.update_one({"id": "market"}, {"$set": {"publishedAt": MORNING_UTC}})
+    second = await task_service.skill_announcements(db, at=MORNING_UTC + timedelta(hours=1))
+
+    assert first["announcements"] == 2
+    assert second["announcements"] == 0
+    bodies = sorted(row["body"] for row in await told(db))
+    assert len(bodies) == 2
+    assert any("The Market" in body for body in bodies)
+    assert any("Rebus Rush (+2)" in body for body in bodies)
+
+
+def test_new_content_is_emailed_unless_a_parent_turned_it_off():
+    from app.services import email_notify
+
+    assert email_notify.wanted_by("learn.skill_published", None)
+    assert not email_notify.wanted_by("learn.skill_published", {"learn.skill_published": False})

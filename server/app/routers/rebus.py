@@ -19,7 +19,7 @@ from __future__ import annotations
 
 from typing import Annotated, Any
 
-from fastapi import APIRouter, Depends, Query
+from fastapi import APIRouter, BackgroundTasks, Depends, Query
 
 from app import rebus_choice, rebus_math
 from app.deps import AUTHENTICATED, CurrentPrincipal, Db, require
@@ -32,6 +32,7 @@ from app.repos import rebus as repo
 from app.repos import rebus_categories as categories_repo
 from app.routers.library import AudioSaved, ImageWrite, store_image
 from app.security import ownership, principal_can
+from app.services import tasks as task_service
 
 router = APIRouter(prefix="/rebus", tags=["rebus"], dependencies=[AUTHENTICATED])
 
@@ -348,11 +349,13 @@ async def studio_delete(puzzle_id: str, db: Db, p: CanWrite) -> None:
 
 
 @router.post("/studio/publish")
-async def studio_publish(body: PublishIn, db: Db, p: CanRun) -> dict[str, Any]:
+async def studio_publish(body: PublishIn, db: Db, p: CanRun, tasks: BackgroundTasks) -> dict[str, Any]:
     """Make every approved puzzle live, as one release that can be taken back."""
     release = await repo.publish_approved(db, by=p.subject_id, note=body.note)
     if not release:
         raise AppError(409, "nothing_approved", "Approve some puzzles first.")
+    # After the response: tell every family, as a published skill does.
+    tasks.add_task(task_service.announce_new_skills, db)
     return {**_out(release), "version": await repo.version(db)}
 
 

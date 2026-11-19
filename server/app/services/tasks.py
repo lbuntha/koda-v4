@@ -424,27 +424,46 @@ ANNOUNCE_WINDOW = timedelta(days=2)
 
 
 async def _recently_published(db: AsyncIOMotorDatabase, since: datetime) -> list[dict[str, Any]]:
-    """Skills published inside the window, oldest first.
+    """Everything published inside the window — skills, books, Rebus releases — oldest first.
+
+    Each comes back as `{"key", "name", "at"}`. `key` is what the claim ledger
+    remembers: a skill's bare id (the key every earlier run used, so nothing
+    already announced is announced again), `book:<id>` and `rebus:<release>`.
+    A book is announced once, however often it is edited and republished, and
+    a Rebus release is one piece of news however many puzzles are in it.
 
     Oldest first so that a deployment releasing three at once announces them in
     the order they were published rather than in whatever order Mongo returns —
     a family reading three notifications should read them as a sequence.
 
     **`since` goes in as a datetime, not as its ISO text.** `publishedAt` is
-    written by `repos.skills` as `now()` and stored as a BSON date, and Mongo
-    compares across types by type order rather than by value: a date is never
-    `$gte` a string, whatever the two of them say. Passing `since.isoformat()`
-    here did not narrow the window, it emptied it — every run reported "nothing
-    has been published recently" and no family was ever told about a new skill.
+    written as `now()` and stored as a BSON date, and Mongo compares across
+    types by type order rather than by value: a date is never `$gte` a string,
+    whatever the two of them say. Passing `since.isoformat()` here did not
+    narrow the window, it emptied it — every run reported "nothing has been
+    published recently" and no family was ever told about a new skill.
     """
-    rows = db.skill_registry.find(
-        {
-            "status": "published",
-            "deletedAt": None,
-            "publishedAt": {"$gte": since},
-        }
-    ).sort("publishedAt", 1)
-    return [row async for row in rows]
+    items: list[dict[str, Any]] = []
+    async for row in db.skill_registry.find(
+        {"status": "published", "deletedAt": None, "isEnabled": {"$ne": False}, "publishedAt": {"$gte": since}}
+    ):
+        if row.get("id"):
+            items.append({"key": row["id"], "name": row.get("title") or row["id"], "at": row["publishedAt"]})
+    async for row in db.library_books.find(
+        {"deletedAt": None, "published": {"$ne": None}, "publishedAt": {"$gte": since}},
+        {"id": 1, "publishedAt": 1, "published.title": 1},
+    ):
+        title = (row.get("published") or {}).get("title")
+        if row.get("id") and title:
+            items.append({"key": f"book:{row['id']}", "name": title, "at": row["publishedAt"]})
+    async for row in db.rebus_releases.find({"rolledBack": False, "at": {"$gte": since}}):
+        count = len(row.get("puzzleIds") or [])
+        if count:
+            # Language-neutral on purpose: the name sits inside both the
+            # English and the Khmer sentence.
+            items.append({"key": f"rebus:{row['number']}", "name": f"Rebus Rush (+{count})", "at": row["at"]})
+    items.sort(key=lambda item: item["at"])
+    return items
 
 
 async def skill_announcements(
@@ -455,7 +474,7 @@ async def skill_announcements(
     limit: int = FAMILY_PAGE,
     preview: bool = False,
 ) -> dict[str, Any]:
-    """Tell every family when a skill is published. Once per skill, per family.
+    """Tell every family when a skill, a book or a Rebus release is published. Once each, per family.
 
     **A job rather than the publish that causes it.** Announcing to every family
     on the deployment is exactly the shape §7 refuses to do inside a request:
@@ -539,11 +558,9 @@ async def skill_announcements(
         if not preview and not awake:
             continue
 
-        for skill in published:
-            skill_id = skill.get("id")
-            name = skill.get("title") or skill_id
-            if not skill_id:
-                continue
+        for item in published:
+            skill_id = item["key"]
+            name = item["name"]
 
             already = await push_runs.was_claimed(
                 db, kind=SKILL_PUBLISHED, recipient_id=family_id, date_key=skill_id

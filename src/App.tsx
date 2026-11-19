@@ -1010,6 +1010,12 @@ export default function App() {
                 setLearnTarget({ collectionId });
                 setActiveTab("game");
               }}
+              onOpenRebus={() => {
+                setInRound(false);
+                setLearnCategory("lessons");
+                setRebusOpen(true);
+                setActiveTab("game");
+              }}
             />
           )}
 

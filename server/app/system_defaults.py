@@ -327,8 +327,8 @@ DEFAULT_SETTINGS: list[dict] = [
         "group": "Notifications",
         "label": "New skill published",
         "description": (
-            "Tells every family when a skill is published, once per skill. "
-            "Off announces nothing, however many skills are released."
+            "Tells every family when a skill, a book or a Rebus release is published, once each. "
+            "Off announces nothing, however much is released."
         ),
         "type": "bool",
         "value": True,
@@ -485,7 +485,7 @@ DEFAULT_SETTINGS: list[dict] = [
         "settingId": "email.skillPublished",
         "group": "Notifications",
         "label": "New skill emails",
-        "description": "Allows an email when a skill is published. Every family starts with it off.",
+        "description": "Allows an email when a skill, a book or a Rebus release is published. Every family starts with it on.",
         "type": "bool",
         "value": True,
         "order": 95,
