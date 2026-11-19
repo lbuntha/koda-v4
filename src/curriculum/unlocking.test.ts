@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 
 import {
+  isPracticeLesson,
   blockedFrom,
   getCourseLessons,
   isUnlocked,
@@ -190,21 +191,32 @@ describe("unlockedBy", () => {
     expect(unlockedBy(scattered, {}, viewer, null)?.id).toBe("count-in-a-row");
   });
 
-  it("walks past a prerequisite that is itself locked", () => {
-    /* `touching-tiles` needs `counter`, which is taught by a lesson that needs
-       `corresponder`. Answering "Counting Scattered Objects" would have moved
-       the padlock rather than explained it. */
-    const touching = bySlug("touching-tiles");
-    const opens = unlockedBy(touching, {}, viewer, null);
-
-    expect(opens?.id).toBe("count-in-a-row");
-    expect(isUnlocked(opens!, {}, viewer, null)).toBe(true);
-  });
-
-  it("crosses into another skill, because that is where the wall usually is", () => {
+  it("never sends a learner to another skill to open this one", () => {
+    /* `touching-tiles` cites `counter`, taught in counting. That used to lock
+       all of Colour Sweeper behind Counting; a concept from another skill is
+       now guidance, not a padlock. */
     const touching = bySlug("touching-tiles");
     expect(touching.skillId).toBe("color-sweeper");
-    expect(unlockedBy(touching, {}, viewer, null)?.skillId).toBe("counting");
+    expect(touching.requires).toContain("counter");
+    expect(isUnlocked(touching, {}, viewer, null)).toBe(true);
+    expect(unlockedBy(touching, {}, viewer, null)).toBeUndefined();
+  });
+
+  it("opens the first lesson of every skill from a standing start", () => {
+    const skills = [...new Set(lessons.map((l) => l.skillId))];
+    expect(skills.length).toBeGreaterThan(5);
+    for (const skillId of skills) {
+      const first = lessons.find((l) => l.skillId === skillId && !isPracticeLesson(l));
+      if (!first) continue;
+      expect(isUnlocked(first, {}, viewer, null), `${skillId}/${first.id} is locked`).toBe(true);
+    }
+  });
+
+  it("still opens a skill's own lessons in order", () => {
+    const sweeper = lessons.filter((l) => l.skillId === "color-sweeper" && !isPracticeLesson(l));
+    const later = sweeper.find((l) => !isUnlocked(l, {}, viewer, null));
+    expect(later, "every Colour Sweeper lesson opened at once").toBeDefined();
+    expect(unlockedBy(later!, {}, viewer, null)?.skillId).toBe("color-sweeper");
   });
 
   it("stops pointing anywhere once the prerequisite is done", () => {
@@ -238,9 +250,9 @@ describe("blockedFrom", () => {
   const sweeper = lessons.filter((l) => l.skillId === "color-sweeper");
   const counting = lessons.filter((l) => l.skillId === "counting");
 
-  it("names the way in when none of the path has opened", () => {
+  it("has nothing to block a skill whose first lesson cites another skill", () => {
     expect(sweeper.length).toBeGreaterThan(0);
-    expect(blockedFrom(sweeper, {}, viewer, null)?.id).toBe("count-in-a-row");
+    expect(blockedFrom(sweeper, {}, viewer, null)).toBeUndefined();
   });
 
   it("says nothing when the learner has somewhere to go", () => {

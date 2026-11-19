@@ -320,10 +320,36 @@ export function isUnlocked(
   // as finished, so a child who was started at Unit 3 can go back to Unit 1 —
   // and the report still says, truthfully, that they have not done it.
   if (startingPoint !== null && lesson.levelNumber <= startingPoint) return true;
-  if (!lesson.requires?.length) return true;
+  const gates = gatingKeys(lesson, viewer);
+  if (!gates.length) return true;
 
   const satisfied = satisfiedConcepts(completed, viewer, startingPoint);
-  return lesson.requires.every((key) => satisfied.has(key));
+  return gates.every((key) => satisfied.has(key));
+}
+
+/**
+ * The prerequisites that actually lock a lesson: the ones its own skill teaches.
+ *
+ * One rule for every skill, so each one can be opened and started from its
+ * first lesson. `requires` still names concepts from other skills — Cross Math
+ * builds on `counter`, Multiplication on `count-on` — and those stay in the
+ * data as the curriculum's statement of what helps, for recommendations and
+ * reports. They no longer lock anything. Gating on them sent a learner who
+ * opened Cross Math, Addition, Multiplication or Colour Sweeper straight to
+ * Counting instead, and made every new skill inherit a wall from whichever
+ * skill its first lesson happened to cite.
+ *
+ * Inside a skill nothing changes: lessons still open in the order their own
+ * `requires` describe.
+ */
+export function gatingKeys(lesson: ResolvedLesson, viewer?: Viewer): string[] {
+  if (!lesson.requires?.length) return [];
+  const own = new Set(
+    getSkillLessons(lesson.skillId, viewer)
+      .map((l) => l.conceptKey)
+      .filter((key): key is string => Boolean(key)),
+  );
+  return lesson.requires.filter((key) => own.has(key));
 }
 
 /**
@@ -374,7 +400,7 @@ export function unlockedBy(
     const asked = new Set<string>();
 
     const walk = (target: ResolvedLesson): ResolvedLesson | undefined => {
-      for (const key of target.requires ?? []) {
+      for (const key of gatingKeys(target, viewer)) {
         if (satisfied.has(key) || asked.has(key)) continue;
         asked.add(key);
 
