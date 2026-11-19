@@ -1407,6 +1407,114 @@
         "fractions/practice-story",
         "fractions/practice-strategy"
       ]
+    },
+    {
+      "id": "u108",
+      "unitNumber": 108,
+      "title": "Unit 108: Cross Math — First Grids",
+      "description": "Cross math grids that add within 20",
+      "icon": "➕",
+      "lessons": [
+        "cross-math/first-grid",
+        "cross-math/three-gaps",
+        "cross-math/up-to-fifteen",
+        "cross-math/up-to-twenty",
+        "cross-math/four-gaps"
+      ]
+    },
+    {
+      "id": "u109",
+      "unitNumber": 109,
+      "title": "Unit 109: Cross Math — Take Away",
+      "description": "Cross math grids that add and take away",
+      "icon": "➖",
+      "lessons": [
+        "cross-math/take-away-grid",
+        "cross-math/plus-and-minus",
+        "cross-math/mixed-three-gaps",
+        "cross-math/up-to-thirty",
+        "cross-math/four-gaps-mixed"
+      ]
+    },
+    {
+      "id": "u110",
+      "unitNumber": 110,
+      "title": "Unit 110: Cross Math — Missing Signs",
+      "description": "Choosing the sign that makes a line true",
+      "icon": "❓",
+      "lessons": [
+        "cross-math/one-sign",
+        "cross-math/two-signs",
+        "cross-math/three-signs",
+        "cross-math/signs-and-numbers",
+        "cross-math/signs-mix"
+      ]
+    },
+    {
+      "id": "u111",
+      "unitNumber": 111,
+      "title": "Unit 111: Cross Math — Times Grids",
+      "description": "Cross math grids with the times tables",
+      "icon": "✖️",
+      "lessons": [
+        "cross-math/times-two-five",
+        "cross-math/times-up-to-five",
+        "cross-math/times-up-to-ten",
+        "cross-math/times-and-minus",
+        "cross-math/times-mix"
+      ]
+    },
+    {
+      "id": "u112",
+      "unitNumber": 112,
+      "title": "Unit 112: Cross Math — Sharing",
+      "description": "Cross math grids that divide, then use all four signs",
+      "icon": "➗",
+      "lessons": [
+        "cross-math/share-two-five",
+        "cross-math/share-up-to-ten",
+        "cross-math/times-and-share",
+        "cross-math/all-four",
+        "cross-math/four-sign-hunt"
+      ]
+    },
+    {
+      "id": "u113",
+      "unitNumber": 113,
+      "title": "Unit 113: Cross Math — Big Grids",
+      "description": "Bigger grids with three numbers in every line",
+      "icon": "🧩",
+      "lessons": [
+        "cross-math/big-grid",
+        "cross-math/big-times",
+        "cross-math/big-all-four",
+        "cross-math/six-gaps",
+        "cross-math/eight-gaps"
+      ]
+    },
+    {
+      "id": "u114",
+      "unitNumber": 114,
+      "title": "Unit 114: Practice — Cross Math: Small Grids",
+      "description": "Independent practice on small cross math grids",
+      "icon": "🔁",
+      "lessons": [
+        "cross-math/practice-first-grid",
+        "cross-math/practice-take-away-grid",
+        "cross-math/practice-one-sign"
+      ]
+    },
+    {
+      "id": "u115",
+      "unitNumber": 115,
+      "title": "Unit 115: Practice — Cross Math: Times, Sharing and Big Grids",
+      "description": "Independent practice on the harder grids",
+      "icon": "🔁",
+      "lessons": [
+        "cross-math/practice-times-two-five",
+        "cross-math/practice-share-two-five",
+        "cross-math/practice-big-grid"
+      ]
     }
   ]
 }

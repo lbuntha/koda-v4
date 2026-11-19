@@ -5,7 +5,7 @@ describe("skills load in two halves", () => {
   it("describes every skill before any game is loaded", () => {
     expect(SKILLS.map((skill) => skill.manifest.id)).toEqual([
       "counting", "addition", "subtraction", "multiplication", "division",
-      "fractions", "observation", "bottle-sort", "color-sweeper",
+      "fractions", "observation", "bottle-sort", "color-sweeper", "cross-math",
     ]);
     for (const skill of SKILLS) expect(skill.lessons.length, skill.manifest.id).toBeGreaterThan(0);
   });

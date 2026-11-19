@@ -1,0 +1,64 @@
+{
+  "id": "cross-math",
+  "name": "Cross Math",
+  "version": "0.1.0",
+  "description": "Number grids where every row and every column is a sum. Place the missing numbers, then the missing signs, from adding within 10 to all four operations.",
+  "category": "core",
+  "author": "Koda Math Lab",
+  "iconName": "Grid3x3",
+  "tagline": "Every line must be true.",
+  "thumbnail": "cross-math-quest",
+  "status": "draft",
+  "audience": {
+    "ages": [6, 12],
+    "category": "operations"
+  },
+  "topics": ["numbers", "addition", "subtraction", "multiplication", "division", "logic"],
+  "teaches": [
+    "cross-math-adder",
+    "cross-math-subtractor",
+    "cross-math-sign-finder",
+    "cross-math-multiplier",
+    "cross-math-divider",
+    "cross-math-big-grid"
+  ],
+  "requires": ["counter"],
+  "features": [
+    {
+      "id": "audio_speech",
+      "name": "Spoken voice",
+      "description": "Reads the lesson prompt aloud and speaks hints. Turn off for a silent lesson.",
+      "isEnabled": true,
+      "tag": "Audio"
+    },
+    {
+      "id": "sound_chimes",
+      "name": "Sound chimes",
+      "description": "Plays a short sound when a tile is placed and when the grid is checked.",
+      "isEnabled": true,
+      "tag": "Audio"
+    },
+    {
+      "id": "haptic_feedback",
+      "name": "Haptic vibration",
+      "description": "Adds a small vibration when the grid is checked.",
+      "isEnabled": true,
+      "tag": "Haptic"
+    }
+  ],
+  "settings": {
+    "speechRate": 0.95
+  },
+  "settingsSchema": [
+    {
+      "key": "speechRate",
+      "label": "Speech rate",
+      "help": "How fast Koda reads the prompt aloud.",
+      "type": "number",
+      "min": 0.5,
+      "max": 2,
+      "step": 0.05,
+      "unit": "x"
+    }
+  ]
+}

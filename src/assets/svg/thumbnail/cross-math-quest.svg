@@ -1,0 +1,55 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="100%" height="100%" viewBox="0 0 400 200">
+  <defs>
+    <linearGradient id="cmGround" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#2B2163"/>
+      <stop offset="100%" stop-color="#140F33"/>
+    </linearGradient>
+    <radialGradient id="cmGlow" cx="62%" cy="45%" r="55%">
+      <stop offset="0%" stop-color="#8B7BFF" stop-opacity="0.45"/>
+      <stop offset="100%" stop-color="#8B7BFF" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+  <rect width="400" height="200" fill="url(#cmGround)"/>
+  <rect width="400" height="200" fill="url(#cmGlow)"/>
+  <rect x="160" y="14" width="30" height="30" rx="8" fill="#F4F1FF"/>
+  <text x="175.0" y="35.5" text-anchor="middle" font-family="Arial, sans-serif" font-weight="900" font-size="17" fill="#241B5C">3</text>
+  <text x="205.0" y="35.0" text-anchor="middle" font-family="Arial, sans-serif" font-weight="900" font-size="18" fill="#B9AEFF">+</text>
+  <rect x="220" y="14" width="30" height="30" rx="8" fill="#F4F1FF"/>
+  <text x="235.0" y="35.5" text-anchor="middle" font-family="Arial, sans-serif" font-weight="900" font-size="17" fill="#241B5C">2</text>
+  <text x="265.0" y="35.0" text-anchor="middle" font-family="Arial, sans-serif" font-weight="900" font-size="18" fill="#B9AEFF">=</text>
+  <rect x="280" y="14" width="30" height="30" rx="8" fill="#C9BEFF"/>
+  <text x="295.0" y="35.5" text-anchor="middle" font-family="Arial, sans-serif" font-weight="900" font-size="17" fill="#241B5C">5</text>
+  <text x="175.0" y="65.0" text-anchor="middle" font-family="Arial, sans-serif" font-weight="900" font-size="18" fill="#B9AEFF">+</text>
+  <text x="235.0" y="65.0" text-anchor="middle" font-family="Arial, sans-serif" font-weight="900" font-size="18" fill="#B9AEFF">+</text>
+  <text x="295.0" y="65.0" text-anchor="middle" font-family="Arial, sans-serif" font-weight="900" font-size="18" fill="#B9AEFF">+</text>
+  <rect x="160" y="74" width="30" height="30" rx="8" fill="#F4F1FF"/>
+  <text x="175.0" y="95.5" text-anchor="middle" font-family="Arial, sans-serif" font-weight="900" font-size="17" fill="#241B5C">1</text>
+  <text x="205.0" y="95.0" text-anchor="middle" font-family="Arial, sans-serif" font-weight="900" font-size="18" fill="#B9AEFF">+</text>
+  <rect x="220" y="74" width="30" height="30" rx="8" fill="#1E1848" stroke="#34D399" stroke-width="2.5" stroke-dasharray="5 3"/>
+  <text x="235.0" y="96.0" text-anchor="middle" font-family="Arial, sans-serif" font-weight="900" font-size="19" fill="#34D399">?</text>
+  <text x="265.0" y="95.0" text-anchor="middle" font-family="Arial, sans-serif" font-weight="900" font-size="18" fill="#B9AEFF">=</text>
+  <rect x="280" y="74" width="30" height="30" rx="8" fill="#C9BEFF"/>
+  <text x="295.0" y="95.5" text-anchor="middle" font-family="Arial, sans-serif" font-weight="900" font-size="17" fill="#241B5C">6</text>
+  <text x="175.0" y="125.0" text-anchor="middle" font-family="Arial, sans-serif" font-weight="900" font-size="18" fill="#B9AEFF">=</text>
+  <text x="235.0" y="125.0" text-anchor="middle" font-family="Arial, sans-serif" font-weight="900" font-size="18" fill="#B9AEFF">=</text>
+  <text x="295.0" y="125.0" text-anchor="middle" font-family="Arial, sans-serif" font-weight="900" font-size="18" fill="#B9AEFF">=</text>
+  <rect x="160" y="134" width="30" height="30" rx="8" fill="#C9BEFF"/>
+  <text x="175.0" y="155.5" text-anchor="middle" font-family="Arial, sans-serif" font-weight="900" font-size="17" fill="#241B5C">4</text>
+  <text x="205.0" y="155.0" text-anchor="middle" font-family="Arial, sans-serif" font-weight="900" font-size="18" fill="#B9AEFF">+</text>
+  <rect x="220" y="134" width="30" height="30" rx="8" fill="#C9BEFF"/>
+  <text x="235.0" y="155.5" text-anchor="middle" font-family="Arial, sans-serif" font-weight="900" font-size="17" fill="#241B5C">7</text>
+  <text x="265.0" y="155.0" text-anchor="middle" font-family="Arial, sans-serif" font-weight="900" font-size="18" fill="#B9AEFF">=</text>
+  <rect x="280" y="134" width="30" height="30" rx="8" fill="#C9BEFF"/>
+  <text x="295.0" y="155.5" text-anchor="middle" font-family="Arial, sans-serif" font-weight="900" font-size="15" fill="#241B5C">11</text>
+  <rect x="56" y="150" width="36" height="34" rx="9" fill="#F4F1FF"/>
+  <rect x="56" y="178" width="36" height="6" rx="3" fill="#C9BEFF"/>
+  <text x="74" y="172" text-anchor="middle" font-family="Arial, sans-serif" font-weight="900" font-size="18" fill="#241B5C">5</text>
+  <rect x="100" y="150" width="36" height="34" rx="9" fill="#F4F1FF"/>
+  <rect x="100" y="178" width="36" height="6" rx="3" fill="#C9BEFF"/>
+  <text x="118" y="172" text-anchor="middle" font-family="Arial, sans-serif" font-weight="900" font-size="18" fill="#241B5C">3</text>
+  <circle cx="48" cy="48" r="6" fill="#F472B6" opacity="0.8"/>
+  <circle cx="92" cy="82" r="4" fill="#34D399" opacity="0.8"/>
+  <circle cx="352" cy="40" r="5" fill="#22D3EE" opacity="0.8"/>
+  <circle cx="370" cy="150" r="4" fill="#F472B6" opacity="0.8"/>
+  <circle cx="60" cy="118" r="3" fill="#22D3EE" opacity="0.8"/>
+</svg>

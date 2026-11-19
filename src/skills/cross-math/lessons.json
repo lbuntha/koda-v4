@@ -1,0 +1,1709 @@
+{
+  "lessons": [
+    {
+      "id": "first-grid",
+      "title": "Your First Grid",
+      "concept": "Two Sums That Share a Number",
+      "conceptKey": "cross-math-adder",
+      "requires": [
+        "counter"
+      ],
+      "activity": "cross-math/grid",
+      "params": {
+        "level": 1,
+        "question": {
+          "ops": [
+            "+"
+          ],
+          "max": 10,
+          "blanks": 2,
+          "questionsPerRound": 5
+        },
+        "play": {
+          "targetObjective": "Fill two empty boxes so every row and every column adds up.",
+          "stepByStep": [
+            "Read a row from left to right, like a sum.",
+            "Read a column from top to bottom.",
+            "Put a tile in a box and check both lines it sits in."
+          ],
+          "kidTip": "Each box belongs to a row and a column. The number must work for both.",
+          "audioPrompt": "Put the tiles in the empty boxes so every sum is true."
+        }
+      },
+      "difficulty": "Easy",
+      "icon": "➕",
+      "iconName": "sparkles",
+      "iconTone": "emerald",
+      "pedagogyTip": "The first grid is about the shape, not the arithmetic: sums within 10, so the new idea — one number belongs to two sums — is the only thing being learned.",
+      "standards": [
+        "CCSS.1.OA.C.6",
+        "CCSS.1.OA.D.8"
+      ],
+      "trajectoryLevel": "cross-math-solver",
+      "ageBand": [
+        6,
+        7
+      ]
+    },
+    {
+      "id": "three-gaps",
+      "title": "Three Empty Boxes",
+      "concept": "More Than One Gap",
+      "conceptKey": "cross-math-adder",
+      "requires": [
+        "cross-math-adder"
+      ],
+      "activity": "cross-math/grid",
+      "params": {
+        "level": 2,
+        "question": {
+          "ops": [
+            "+"
+          ],
+          "max": 10,
+          "blanks": 3,
+          "questionsPerRound": 5
+        },
+        "play": {
+          "targetObjective": "Fill three empty boxes so every line adds up.",
+          "stepByStep": [
+            "Find a line with only one empty box.",
+            "Work out that box first.",
+            "Use what you found to finish the others."
+          ],
+          "kidTip": "A line with one gap is the easiest place to start.",
+          "audioPrompt": "Three boxes are empty. Fill them so every sum is true."
+        }
+      },
+      "difficulty": "Easy",
+      "icon": "➕",
+      "iconName": "star",
+      "iconTone": "emerald",
+      "pedagogyTip": "Three gaps means some line has two, so the child must choose an order. Starting from a one-gap line is the strategy every later lesson relies on.",
+      "standards": [
+        "CCSS.1.OA.C.6",
+        "CCSS.1.OA.D.8"
+      ],
+      "trajectoryLevel": "cross-math-solver",
+      "ageBand": [
+        6,
+        7
+      ]
+    },
+    {
+      "id": "up-to-fifteen",
+      "title": "Sums up to 15",
+      "concept": "Adding Past Ten",
+      "conceptKey": "cross-math-adder",
+      "requires": [
+        "cross-math-adder"
+      ],
+      "activity": "cross-math/grid",
+      "params": {
+        "level": 3,
+        "question": {
+          "ops": [
+            "+"
+          ],
+          "max": 15,
+          "blanks": 3,
+          "questionsPerRound": 5
+        },
+        "play": {
+          "targetObjective": "Fill the boxes in grids with sums up to 15.",
+          "stepByStep": [
+            "Find a line with one empty box.",
+            "Count on from the bigger number.",
+            "Check the other line that box sits in."
+          ],
+          "kidTip": "To find a missing part, count on from the part you know to the total.",
+          "audioPrompt": "These sums go up to fifteen. Fill the empty boxes."
+        }
+      },
+      "difficulty": "Easy",
+      "icon": "➕",
+      "iconName": "gem",
+      "iconTone": "emerald",
+      "pedagogyTip": "Totals now cross ten. A missing addend is a subtraction in disguise; counting on from the known part is the bridge.",
+      "standards": [
+        "CCSS.1.OA.C.6",
+        "CCSS.1.OA.D.8"
+      ],
+      "trajectoryLevel": "cross-math-solver",
+      "ageBand": [
+        6,
+        7
+      ]
+    },
+    {
+      "id": "up-to-twenty",
+      "title": "Sums up to 20",
+      "concept": "Adding Within 20",
+      "conceptKey": "cross-math-adder",
+      "requires": [
+        "cross-math-adder"
+      ],
+      "activity": "cross-math/grid",
+      "params": {
+        "level": 4,
+        "question": {
+          "ops": [
+            "+"
+          ],
+          "max": 20,
+          "blanks": 3,
+          "questionsPerRound": 5
+        },
+        "play": {
+          "targetObjective": "Fill the boxes in grids with sums up to 20.",
+          "stepByStep": [
+            "Start with the line that has one gap.",
+            "Find the missing number.",
+            "Check its row and its column."
+          ],
+          "kidTip": "Make ten first: 8 + 7 is 8 + 2 + 5.",
+          "audioPrompt": "These sums go up to twenty. Fill the empty boxes."
+        }
+      },
+      "difficulty": "Medium",
+      "icon": "➕",
+      "iconName": "zap",
+      "iconTone": "emerald",
+      "pedagogyTip": "Within 20 is the first-grade fluency target, practised here in a format that asks for a missing part as often as a total.",
+      "standards": [
+        "CCSS.1.OA.C.6",
+        "CCSS.1.OA.D.8"
+      ],
+      "trajectoryLevel": "cross-math-solver",
+      "ageBand": [
+        6,
+        7
+      ]
+    },
+    {
+      "id": "four-gaps",
+      "title": "Four Empty Boxes",
+      "concept": "Planning the Order",
+      "conceptKey": "cross-math-adder",
+      "requires": [
+        "cross-math-adder"
+      ],
+      "activity": "cross-math/grid",
+      "params": {
+        "level": 5,
+        "question": {
+          "ops": [
+            "+"
+          ],
+          "max": 20,
+          "blanks": 4,
+          "questionsPerRound": 5
+        },
+        "play": {
+          "targetObjective": "Fill four empty boxes so every line adds up.",
+          "stepByStep": [
+            "Look for a line with one gap.",
+            "After you fill it, look again: a new line may have one gap now.",
+            "Keep going until every box is full."
+          ],
+          "kidTip": "Each box you fill can open up the next line.",
+          "audioPrompt": "Four boxes are empty. Fill them so every sum is true."
+        }
+      },
+      "difficulty": "Medium",
+      "icon": "➕",
+      "iconName": "crown",
+      "iconTone": "emerald",
+      "pedagogyTip": "With four gaps, the one-gap line changes as the child works. Noticing that the board has changed is the planning skill.",
+      "standards": [
+        "CCSS.1.OA.C.6",
+        "CCSS.1.OA.D.8"
+      ],
+      "trajectoryLevel": "cross-math-solver",
+      "ageBand": [
+        6,
+        7
+      ]
+    },
+    {
+      "id": "take-away-grid",
+      "title": "Take-Away Grid",
+      "concept": "Every Line Subtracts",
+      "conceptKey": "cross-math-subtractor",
+      "requires": [
+        "cross-math-adder"
+      ],
+      "activity": "cross-math/grid",
+      "params": {
+        "level": 6,
+        "question": {
+          "ops": [
+            "-"
+          ],
+          "max": 10,
+          "blanks": 2,
+          "allowZero": true,
+          "questionsPerRound": 5
+        },
+        "play": {
+          "targetObjective": "Fill the boxes in a grid where every line takes away.",
+          "stepByStep": [
+            "Read each row: the first number, take away the second.",
+            "Read each column the same way, top to bottom.",
+            "Put a tile in and check both lines."
+          ],
+          "kidTip": "Take away means the answer is smaller than the first number.",
+          "audioPrompt": "Every line takes away. Fill the empty boxes."
+        }
+      },
+      "difficulty": "Easy",
+      "icon": "➖",
+      "iconName": "circleDot",
+      "iconTone": "cyan",
+      "pedagogyTip": "All-minus grids are always consistent at the corner, so the child meets subtraction in the grid without mixed signs. Zero can now be an answer.",
+      "standards": [
+        "CCSS.1.OA.C.6",
+        "CCSS.1.OA.D.8"
+      ],
+      "trajectoryLevel": "cross-math-solver",
+      "ageBand": [
+        6,
+        8
+      ]
+    },
+    {
+      "id": "plus-and-minus",
+      "title": "Plus and Minus",
+      "concept": "Mixing the Two Signs",
+      "conceptKey": "cross-math-subtractor",
+      "requires": [
+        "cross-math-subtractor"
+      ],
+      "activity": "cross-math/grid",
+      "params": {
+        "level": 7,
+        "question": {
+          "ops": [
+            "+",
+            "-"
+          ],
+          "mustUse": [
+            "+",
+            "-"
+          ],
+          "max": 20,
+          "blanks": 2,
+          "allowZero": true,
+          "questionsPerRound": 5
+        },
+        "play": {
+          "targetObjective": "Fill the boxes when some lines add and some take away.",
+          "stepByStep": [
+            "Look at the sign in each line before you start.",
+            "Add on a plus line, take away on a minus line.",
+            "Check both lines for each box."
+          ],
+          "kidTip": "Read the sign first. It tells you whether the answer gets bigger or smaller.",
+          "audioPrompt": "Some lines add and some take away. Fill the empty boxes."
+        }
+      },
+      "difficulty": "Easy",
+      "icon": "➖",
+      "iconName": "layers",
+      "iconTone": "cyan",
+      "pedagogyTip": "Mixed signs force the child to read each line's sign rather than assume one operation for the whole board.",
+      "standards": [
+        "CCSS.1.OA.C.6",
+        "CCSS.1.OA.D.8"
+      ],
+      "trajectoryLevel": "cross-math-solver",
+      "ageBand": [
+        6,
+        8
+      ]
+    },
+    {
+      "id": "mixed-three-gaps",
+      "title": "Three Gaps, Two Signs",
+      "concept": "Choosing Where to Start",
+      "conceptKey": "cross-math-subtractor",
+      "requires": [
+        "cross-math-subtractor"
+      ],
+      "activity": "cross-math/grid",
+      "params": {
+        "level": 8,
+        "question": {
+          "ops": [
+            "+",
+            "-"
+          ],
+          "mustUse": [
+            "+",
+            "-"
+          ],
+          "max": 20,
+          "blanks": 3,
+          "allowZero": true,
+          "questionsPerRound": 5
+        },
+        "play": {
+          "targetObjective": "Fill three empty boxes in grids with plus and minus.",
+          "stepByStep": [
+            "Find the line with one gap.",
+            "Read its sign.",
+            "Fill that box, then look for the next one-gap line."
+          ],
+          "kidTip": "If the gap is the first number of a take-away, add the other two.",
+          "audioPrompt": "Three boxes are empty. Some lines add and some take away."
+        }
+      },
+      "difficulty": "Medium",
+      "icon": "➖",
+      "iconName": "rocket",
+      "iconTone": "cyan",
+      "pedagogyTip": "A gap in the first place of a subtraction (? − 3 = 4) needs the inverse operation; this is the lesson where that case starts to appear regularly.",
+      "standards": [
+        "CCSS.1.OA.C.6",
+        "CCSS.1.OA.D.8"
+      ],
+      "trajectoryLevel": "cross-math-solver",
+      "ageBand": [
+        6,
+        8
+      ]
+    },
+    {
+      "id": "up-to-thirty",
+      "title": "Up to 30",
+      "concept": "Bigger Numbers",
+      "conceptKey": "cross-math-subtractor",
+      "requires": [
+        "cross-math-subtractor"
+      ],
+      "activity": "cross-math/grid",
+      "params": {
+        "level": 9,
+        "question": {
+          "ops": [
+            "+",
+            "-"
+          ],
+          "mustUse": [
+            "+",
+            "-"
+          ],
+          "max": 30,
+          "blanks": 3,
+          "allowZero": true,
+          "questionsPerRound": 5
+        },
+        "play": {
+          "targetObjective": "Fill the boxes in grids with numbers up to 30.",
+          "stepByStep": [
+            "Start with the line that has one gap.",
+            "Use tens and ones to add or take away.",
+            "Check the row and the column."
+          ],
+          "kidTip": "Split a number into tens and ones: 24 is 20 and 4.",
+          "audioPrompt": "These numbers go up to thirty. Fill the empty boxes."
+        }
+      },
+      "difficulty": "Medium",
+      "icon": "➖",
+      "iconName": "waves",
+      "iconTone": "cyan",
+      "pedagogyTip": "Numbers up to 30 bring in two-digit addition and subtraction without regrouping pressure.",
+      "standards": [
+        "CCSS.1.OA.C.6",
+        "CCSS.1.OA.D.8"
+      ],
+      "trajectoryLevel": "cross-math-solver",
+      "ageBand": [
+        6,
+        8
+      ]
+    },
+    {
+      "id": "four-gaps-mixed",
+      "title": "Four Gaps, Two Signs",
+      "concept": "Plan, Then Fill",
+      "conceptKey": "cross-math-subtractor",
+      "requires": [
+        "cross-math-subtractor"
+      ],
+      "activity": "cross-math/grid",
+      "params": {
+        "level": 10,
+        "question": {
+          "ops": [
+            "+",
+            "-"
+          ],
+          "mustUse": [
+            "+",
+            "-"
+          ],
+          "max": 30,
+          "blanks": 4,
+          "allowZero": true,
+          "questionsPerRound": 5
+        },
+        "play": {
+          "targetObjective": "Fill four empty boxes in grids with plus and minus.",
+          "stepByStep": [
+            "Find a line with one gap and fill it.",
+            "Look again for the next one-gap line.",
+            "Check every line at the end."
+          ],
+          "kidTip": "When you are stuck, try a tile and check both of its lines.",
+          "audioPrompt": "Four boxes are empty. Plan where to start."
+        }
+      },
+      "difficulty": "Hard",
+      "icon": "➖",
+      "iconName": "scale",
+      "iconTone": "cyan",
+      "pedagogyTip": "The unit's capstone: two signs, four gaps, numbers to 30. A child who finishes this can plan a sequence of inverse operations.",
+      "standards": [
+        "CCSS.1.OA.C.6",
+        "CCSS.1.OA.D.8"
+      ],
+      "trajectoryLevel": "cross-math-solver",
+      "ageBand": [
+        6,
+        8
+      ]
+    },
+    {
+      "id": "one-sign",
+      "title": "Find the Sign",
+      "concept": "Plus or Minus?",
+      "conceptKey": "cross-math-sign-finder",
+      "requires": [
+        "cross-math-subtractor"
+      ],
+      "activity": "cross-math/grid",
+      "params": {
+        "level": 11,
+        "question": {
+          "ops": [
+            "+",
+            "-"
+          ],
+          "max": 20,
+          "blanks": 0,
+          "signs": 1,
+          "questionsPerRound": 5
+        },
+        "play": {
+          "targetObjective": "Choose plus or minus so the line is true.",
+          "stepByStep": [
+            "Look at the line with the empty sign box.",
+            "Is the answer bigger or smaller than the first number?",
+            "Bigger means plus. Smaller means minus."
+          ],
+          "kidTip": "If the answer is bigger than the first number, the sign is plus.",
+          "audioPrompt": "Choose plus or minus for the empty box."
+        }
+      },
+      "difficulty": "Easy",
+      "icon": "❓",
+      "iconName": "dice",
+      "iconTone": "purple",
+      "pedagogyTip": "All the numbers are shown, so the task is purely about the relation between them. Comparing the result with the first number decides the sign.",
+      "standards": [
+        "CCSS.1.OA.C.6"
+      ],
+      "trajectoryLevel": "cross-math-solver",
+      "ageBand": [
+        7,
+        8
+      ]
+    },
+    {
+      "id": "two-signs",
+      "title": "Two Signs",
+      "concept": "Two Lines to Fix",
+      "conceptKey": "cross-math-sign-finder",
+      "requires": [
+        "cross-math-sign-finder"
+      ],
+      "activity": "cross-math/grid",
+      "params": {
+        "level": 12,
+        "question": {
+          "ops": [
+            "+",
+            "-"
+          ],
+          "max": 20,
+          "blanks": 0,
+          "signs": 2,
+          "questionsPerRound": 5
+        },
+        "play": {
+          "targetObjective": "Choose a sign for two empty boxes.",
+          "stepByStep": [
+            "Take one empty sign at a time.",
+            "Compare the answer with the first number.",
+            "Check every line at the end."
+          ],
+          "kidTip": "Bigger answer: plus. Smaller answer: minus.",
+          "audioPrompt": "Two signs are missing. Choose plus or minus for each."
+        }
+      },
+      "difficulty": "Easy",
+      "icon": "❓",
+      "iconName": "search",
+      "iconTone": "purple",
+      "pedagogyTip": "Two missing signs, each on its own line, practise the same comparison twice per board.",
+      "standards": [
+        "CCSS.1.OA.C.6"
+      ],
+      "trajectoryLevel": "cross-math-solver",
+      "ageBand": [
+        7,
+        8
+      ]
+    },
+    {
+      "id": "three-signs",
+      "title": "Three Signs",
+      "concept": "Signs Across the Grid",
+      "conceptKey": "cross-math-sign-finder",
+      "requires": [
+        "cross-math-sign-finder"
+      ],
+      "activity": "cross-math/grid",
+      "params": {
+        "level": 13,
+        "question": {
+          "ops": [
+            "+",
+            "-"
+          ],
+          "max": 20,
+          "blanks": 0,
+          "signs": 3,
+          "questionsPerRound": 5
+        },
+        "play": {
+          "targetObjective": "Choose a sign for three empty boxes.",
+          "stepByStep": [
+            "Find each line with an empty sign.",
+            "Decide plus or minus for each one.",
+            "Check every row and column."
+          ],
+          "kidTip": "Try plus, check the line, and if it is wrong, change it to minus.",
+          "audioPrompt": "Three signs are missing. Make every line true."
+        }
+      },
+      "difficulty": "Medium",
+      "icon": "❓",
+      "iconName": "sparkles",
+      "iconTone": "purple",
+      "pedagogyTip": "Three missing signs on a board of shared numbers. Try-and-check is a legitimate strategy and the hint says so.",
+      "standards": [
+        "CCSS.1.OA.C.6"
+      ],
+      "trajectoryLevel": "cross-math-solver",
+      "ageBand": [
+        7,
+        8
+      ]
+    },
+    {
+      "id": "signs-and-numbers",
+      "title": "Signs and Numbers",
+      "concept": "Both Kinds of Gap",
+      "conceptKey": "cross-math-sign-finder",
+      "requires": [
+        "cross-math-sign-finder"
+      ],
+      "activity": "cross-math/grid",
+      "params": {
+        "level": 14,
+        "question": {
+          "ops": [
+            "+",
+            "-"
+          ],
+          "max": 20,
+          "blanks": 1,
+          "signs": 2,
+          "questionsPerRound": 5
+        },
+        "play": {
+          "targetObjective": "Fill a missing number and choose two missing signs.",
+          "stepByStep": [
+            "Find the signs on lines where every number is shown.",
+            "Then work out the missing number.",
+            "Check every line."
+          ],
+          "kidTip": "Do the signs on full lines first. Then the number is easier.",
+          "audioPrompt": "Some boxes need a number and some need a sign. Fill them all."
+        }
+      },
+      "difficulty": "Medium",
+      "icon": "❓",
+      "iconName": "star",
+      "iconTone": "purple",
+      "pedagogyTip": "Mixing both gap types asks the child to choose which kind of reasoning comes first; signs on complete lines are always decidable, so they make a good start.",
+      "standards": [
+        "CCSS.1.OA.C.6"
+      ],
+      "trajectoryLevel": "cross-math-solver",
+      "ageBand": [
+        7,
+        8
+      ]
+    },
+    {
+      "id": "signs-mix",
+      "title": "Signs Mix",
+      "concept": "Up to 30, Signs and Numbers",
+      "conceptKey": "cross-math-sign-finder",
+      "requires": [
+        "cross-math-sign-finder"
+      ],
+      "activity": "cross-math/grid",
+      "params": {
+        "level": 15,
+        "question": {
+          "ops": [
+            "+",
+            "-"
+          ],
+          "max": 30,
+          "blanks": 2,
+          "signs": 2,
+          "questionsPerRound": 5
+        },
+        "play": {
+          "targetObjective": "Fill two numbers and two signs in grids up to 30.",
+          "stepByStep": [
+            "Fix the signs on full lines.",
+            "Find a line with one gap left.",
+            "Fill it, then the rest."
+          ],
+          "kidTip": "A sign tells you which way to go. A number tells you how far.",
+          "audioPrompt": "Fill the missing numbers and signs so every line is true."
+        }
+      },
+      "difficulty": "Hard",
+      "icon": "❓",
+      "iconName": "gem",
+      "iconTone": "purple",
+      "pedagogyTip": "The capstone of the plus-and-minus units: both gap types with bigger numbers.",
+      "standards": [
+        "CCSS.1.OA.C.6"
+      ],
+      "trajectoryLevel": "cross-math-solver",
+      "ageBand": [
+        7,
+        8
+      ]
+    },
+    {
+      "id": "times-two-five",
+      "title": "Times 2 and 5",
+      "concept": "Multiplying in the Grid",
+      "conceptKey": "cross-math-multiplier",
+      "requires": [
+        "cross-math-subtractor"
+      ],
+      "activity": "cross-math/grid",
+      "params": {
+        "level": 16,
+        "question": {
+          "ops": [
+            "+",
+            "*"
+          ],
+          "mustUse": [
+            "*"
+          ],
+          "factors": [
+            2,
+            5
+          ],
+          "max": 50,
+          "blanks": 2,
+          "questionsPerRound": 5
+        },
+        "play": {
+          "targetObjective": "Fill the boxes in grids that use times 2 and times 5.",
+          "stepByStep": [
+            "Find the line with the times sign.",
+            "Count in twos or fives.",
+            "Check the other line the box sits in."
+          ],
+          "kidTip": "Times 2 is double. Times 5 counts in fives: 5, 10, 15, 20.",
+          "audioPrompt": "Some lines use times. Fill the empty boxes."
+        }
+      },
+      "difficulty": "Easy",
+      "icon": "✖️",
+      "iconName": "zap",
+      "iconTone": "indigo",
+      "pedagogyTip": "The 2 and 5 tables are the easiest to skip-count, so multiplication enters the grid without a recall burden.",
+      "standards": [
+        "CCSS.3.OA.C.7",
+        "CCSS.3.OA.A.4"
+      ],
+      "trajectoryLevel": "cross-math-solver",
+      "ageBand": [
+        8,
+        9
+      ]
+    },
+    {
+      "id": "times-up-to-five",
+      "title": "Times up to 5",
+      "concept": "Tables 2 to 5",
+      "conceptKey": "cross-math-multiplier",
+      "requires": [
+        "cross-math-multiplier"
+      ],
+      "activity": "cross-math/grid",
+      "params": {
+        "level": 17,
+        "question": {
+          "ops": [
+            "+",
+            "*"
+          ],
+          "mustUse": [
+            "*"
+          ],
+          "factors": [
+            2,
+            3,
+            4,
+            5
+          ],
+          "max": 50,
+          "blanks": 3,
+          "questionsPerRound": 5
+        },
+        "play": {
+          "targetObjective": "Fill the boxes in grids with the 2, 3, 4 and 5 times tables.",
+          "stepByStep": [
+            "Find a line with one gap.",
+            "If it says times, think of the table.",
+            "Check the row and the column."
+          ],
+          "kidTip": "If you know 4 × 3, you know 3 × 4 too.",
+          "audioPrompt": "These grids use the times tables up to five."
+        }
+      },
+      "difficulty": "Medium",
+      "icon": "✖️",
+      "iconName": "crown",
+      "iconTone": "indigo",
+      "pedagogyTip": "Tables 2–5. Commutativity is worth naming in the tip because the grid shows both orders on crossing lines.",
+      "standards": [
+        "CCSS.3.OA.C.7",
+        "CCSS.3.OA.A.4"
+      ],
+      "trajectoryLevel": "cross-math-solver",
+      "ageBand": [
+        8,
+        9
+      ]
+    },
+    {
+      "id": "times-up-to-ten",
+      "title": "Times up to 10",
+      "concept": "All the Tables",
+      "conceptKey": "cross-math-multiplier",
+      "requires": [
+        "cross-math-multiplier"
+      ],
+      "activity": "cross-math/grid",
+      "params": {
+        "level": 18,
+        "question": {
+          "ops": [
+            "+",
+            "*"
+          ],
+          "mustUse": [
+            "*"
+          ],
+          "max": 100,
+          "blanks": 3,
+          "questionsPerRound": 5
+        },
+        "play": {
+          "targetObjective": "Fill the boxes in grids with every times table up to 10.",
+          "stepByStep": [
+            "Find a line with one gap.",
+            "For a missing factor, ask: what times this makes that?",
+            "Check both lines."
+          ],
+          "kidTip": "A missing factor: 6 × ? = 42. Count in sixes to 42.",
+          "audioPrompt": "These grids use every times table up to ten."
+        }
+      },
+      "difficulty": "Medium",
+      "icon": "✖️",
+      "iconName": "circleDot",
+      "iconTone": "indigo",
+      "pedagogyTip": "A missing factor is division thinking before division is named; the next unit makes it explicit.",
+      "standards": [
+        "CCSS.3.OA.C.7",
+        "CCSS.3.OA.A.4"
+      ],
+      "trajectoryLevel": "cross-math-solver",
+      "ageBand": [
+        8,
+        9
+      ]
+    },
+    {
+      "id": "times-and-minus",
+      "title": "Times and Minus",
+      "concept": "Two Operations",
+      "conceptKey": "cross-math-multiplier",
+      "requires": [
+        "cross-math-multiplier"
+      ],
+      "activity": "cross-math/grid",
+      "params": {
+        "level": 19,
+        "question": {
+          "ops": [
+            "-",
+            "*"
+          ],
+          "mustUse": [
+            "-",
+            "*"
+          ],
+          "max": 100,
+          "blanks": 3,
+          "questionsPerRound": 5
+        },
+        "play": {
+          "targetObjective": "Fill the boxes in grids that mix times and take away.",
+          "stepByStep": [
+            "Read the sign on each line.",
+            "Multiply on a times line, take away on a minus line.",
+            "Check every line."
+          ],
+          "kidTip": "Read the sign first, every time.",
+          "audioPrompt": "Some lines multiply and some take away. Fill the empty boxes."
+        }
+      },
+      "difficulty": "Medium",
+      "icon": "✖️",
+      "iconName": "layers",
+      "iconTone": "indigo",
+      "pedagogyTip": "Mixing × with − (not +) prevents the child from treating every non-× line as addition.",
+      "standards": [
+        "CCSS.3.OA.C.7",
+        "CCSS.3.OA.A.4"
+      ],
+      "trajectoryLevel": "cross-math-solver",
+      "ageBand": [
+        8,
+        9
+      ]
+    },
+    {
+      "id": "times-mix",
+      "title": "Times Mix",
+      "concept": "Three Signs Together",
+      "conceptKey": "cross-math-multiplier",
+      "requires": [
+        "cross-math-multiplier"
+      ],
+      "activity": "cross-math/grid",
+      "params": {
+        "level": 20,
+        "question": {
+          "ops": [
+            "+",
+            "-",
+            "*"
+          ],
+          "mustUse": [
+            "*"
+          ],
+          "max": 100,
+          "blanks": 4,
+          "questionsPerRound": 5
+        },
+        "play": {
+          "targetObjective": "Fill four boxes in grids with plus, minus and times.",
+          "stepByStep": [
+            "Find a line with one gap.",
+            "Use its sign to find the box.",
+            "Look again for the next one-gap line."
+          ],
+          "kidTip": "Fill a box, then see which line has only one gap now.",
+          "audioPrompt": "Plus, minus and times. Fill all four boxes."
+        }
+      },
+      "difficulty": "Hard",
+      "icon": "✖️",
+      "iconName": "rocket",
+      "iconTone": "indigo",
+      "pedagogyTip": "The unit's capstone: three operations and four gaps.",
+      "standards": [
+        "CCSS.3.OA.C.7",
+        "CCSS.3.OA.A.4"
+      ],
+      "trajectoryLevel": "cross-math-solver",
+      "ageBand": [
+        8,
+        9
+      ]
+    },
+    {
+      "id": "share-two-five",
+      "title": "Share by 2 and 5",
+      "concept": "Dividing in the Grid",
+      "conceptKey": "cross-math-divider",
+      "requires": [
+        "cross-math-multiplier"
+      ],
+      "activity": "cross-math/grid",
+      "params": {
+        "level": 21,
+        "question": {
+          "ops": [
+            "+",
+            "/"
+          ],
+          "mustUse": [
+            "/"
+          ],
+          "factors": [
+            2,
+            5
+          ],
+          "max": 50,
+          "blanks": 2,
+          "questionsPerRound": 5
+        },
+        "play": {
+          "targetObjective": "Fill the boxes in grids that divide by 2 and 5.",
+          "stepByStep": [
+            "Find the line with the divide sign.",
+            "Ask: how many twos, or fives, make that number?",
+            "Check both lines."
+          ],
+          "kidTip": "20 ÷ 5 asks how many fives make 20.",
+          "audioPrompt": "Some lines divide. Fill the empty boxes."
+        }
+      },
+      "difficulty": "Easy",
+      "icon": "➗",
+      "iconName": "waves",
+      "iconTone": "pink",
+      "pedagogyTip": "Division by 2 and 5 always comes out whole here, and links back to the skip counting used for multiplication.",
+      "standards": [
+        "CCSS.3.OA.C.7",
+        "CCSS.3.OA.A.4"
+      ],
+      "trajectoryLevel": "cross-math-solver",
+      "ageBand": [
+        9,
+        10
+      ]
+    },
+    {
+      "id": "share-up-to-ten",
+      "title": "Share up to 10",
+      "concept": "Dividing by Any Table",
+      "conceptKey": "cross-math-divider",
+      "requires": [
+        "cross-math-divider"
+      ],
+      "activity": "cross-math/grid",
+      "params": {
+        "level": 22,
+        "question": {
+          "ops": [
+            "+",
+            "-",
+            "/"
+          ],
+          "mustUse": [
+            "/"
+          ],
+          "max": 100,
+          "blanks": 3,
+          "questionsPerRound": 5
+        },
+        "play": {
+          "targetObjective": "Fill the boxes in grids that divide by numbers up to 10.",
+          "stepByStep": [
+            "Find a line with one gap.",
+            "Use a times fact you know: 7 × 6 = 42, so 42 ÷ 7 = 6.",
+            "Check both lines."
+          ],
+          "kidTip": "Every divide fact is a times fact turned around.",
+          "audioPrompt": "These grids divide by numbers up to ten."
+        }
+      },
+      "difficulty": "Medium",
+      "icon": "➗",
+      "iconName": "scale",
+      "iconTone": "pink",
+      "pedagogyTip": "Division as the inverse of multiplication: every hint and tip states the related fact.",
+      "standards": [
+        "CCSS.3.OA.C.7",
+        "CCSS.3.OA.A.4"
+      ],
+      "trajectoryLevel": "cross-math-solver",
+      "ageBand": [
+        9,
+        10
+      ]
+    },
+    {
+      "id": "times-and-share",
+      "title": "Times and Share",
+      "concept": "Multiply and Divide",
+      "conceptKey": "cross-math-divider",
+      "requires": [
+        "cross-math-divider"
+      ],
+      "activity": "cross-math/grid",
+      "params": {
+        "level": 23,
+        "question": {
+          "ops": [
+            "*",
+            "/"
+          ],
+          "mustUse": [
+            "*",
+            "/"
+          ],
+          "max": 100,
+          "blanks": 3,
+          "questionsPerRound": 5
+        },
+        "play": {
+          "targetObjective": "Fill the boxes in grids that multiply and divide.",
+          "stepByStep": [
+            "Read the sign on each line.",
+            "Use one times fact for both directions.",
+            "Check every line."
+          ],
+          "kidTip": "If 4 × 8 = 32, then 32 ÷ 8 = 4 and 32 ÷ 4 = 8.",
+          "audioPrompt": "Some lines multiply and some divide. Fill the empty boxes."
+        }
+      },
+      "difficulty": "Medium",
+      "icon": "➗",
+      "iconName": "dice",
+      "iconTone": "pink",
+      "pedagogyTip": "A board of only × and ÷ makes the fact family visible across crossing lines.",
+      "standards": [
+        "CCSS.3.OA.C.7",
+        "CCSS.3.OA.A.4"
+      ],
+      "trajectoryLevel": "cross-math-solver",
+      "ageBand": [
+        9,
+        10
+      ]
+    },
+    {
+      "id": "all-four",
+      "title": "All Four Signs",
+      "concept": "Plus, Minus, Times, Divide",
+      "conceptKey": "cross-math-divider",
+      "requires": [
+        "cross-math-divider"
+      ],
+      "activity": "cross-math/grid",
+      "params": {
+        "level": 24,
+        "question": {
+          "ops": [
+            "+",
+            "-",
+            "*",
+            "/"
+          ],
+          "mustUse": [
+            "*",
+            "/"
+          ],
+          "max": 100,
+          "blanks": 4,
+          "questionsPerRound": 5
+        },
+        "play": {
+          "targetObjective": "Fill four boxes in grids that use all four signs.",
+          "stepByStep": [
+            "Find a line with one gap.",
+            "Read its sign and use the right fact.",
+            "Keep going until every line is true."
+          ],
+          "kidTip": "Read the sign, then pick the fact that undoes it.",
+          "audioPrompt": "All four signs are here. Fill the empty boxes."
+        }
+      },
+      "difficulty": "Hard",
+      "icon": "➗",
+      "iconName": "search",
+      "iconTone": "pink",
+      "pedagogyTip": "All four operations on one board; choosing the inverse for each sign is the skill.",
+      "standards": [
+        "CCSS.3.OA.C.7",
+        "CCSS.3.OA.A.4"
+      ],
+      "trajectoryLevel": "cross-math-solver",
+      "ageBand": [
+        9,
+        10
+      ]
+    },
+    {
+      "id": "four-sign-hunt",
+      "title": "Four-Sign Hunt",
+      "concept": "Choose From All Four",
+      "conceptKey": "cross-math-divider",
+      "requires": [
+        "cross-math-divider"
+      ],
+      "activity": "cross-math/grid",
+      "params": {
+        "level": 25,
+        "question": {
+          "ops": [
+            "+",
+            "-",
+            "*",
+            "/"
+          ],
+          "max": 100,
+          "blanks": 0,
+          "signs": 3,
+          "questionsPerRound": 5
+        },
+        "play": {
+          "targetObjective": "Choose plus, minus, times or divide for three empty boxes.",
+          "stepByStep": [
+            "Compare the answer with the numbers on the line.",
+            "Much bigger often means times. Much smaller often means divide.",
+            "Try a sign and check the line."
+          ],
+          "kidTip": "Ask how the answer got from the first number: a little or a lot?",
+          "audioPrompt": "Three signs are missing. Choose from all four."
+        }
+      },
+      "difficulty": "Hard",
+      "icon": "➗",
+      "iconName": "sparkles",
+      "iconTone": "pink",
+      "pedagogyTip": "Missing signs from all four operations. Estimating size (a little bigger, a lot bigger) narrows the choice before computing.",
+      "standards": [
+        "CCSS.3.OA.C.7",
+        "CCSS.3.OA.A.4"
+      ],
+      "trajectoryLevel": "cross-math-solver",
+      "ageBand": [
+        9,
+        10
+      ]
+    },
+    {
+      "id": "big-grid",
+      "title": "Big Grid",
+      "concept": "Three Numbers in a Line",
+      "conceptKey": "cross-math-big-grid",
+      "requires": [
+        "cross-math-divider"
+      ],
+      "activity": "cross-math/grid",
+      "params": {
+        "level": 26,
+        "question": {
+          "size": 3,
+          "ops": [
+            "+",
+            "-"
+          ],
+          "mustUse": [
+            "+",
+            "-"
+          ],
+          "max": 30,
+          "blanks": 4,
+          "questionsPerRound": 5
+        },
+        "play": {
+          "targetObjective": "Fill the boxes in a bigger grid where each line has three numbers.",
+          "stepByStep": [
+            "Each row and column now has three numbers before the equals sign.",
+            "Find a line with one gap.",
+            "Work it out and check the line that crosses it."
+          ],
+          "kidTip": "With three numbers, add or take away one step at a time.",
+          "audioPrompt": "This grid is bigger. Each line has three numbers. Fill the empty boxes."
+        }
+      },
+      "difficulty": "Medium",
+      "icon": "🧩",
+      "iconName": "star",
+      "iconTone": "purple",
+      "pedagogyTip": "Three operands per line. Every generated line gives the same answer left to right as with the order of operations, so no reading of the line is taught wrongly.",
+      "standards": [
+        "CCSS.3.OA.C.7"
+      ],
+      "trajectoryLevel": "cross-math-solver",
+      "ageBand": [
+        10,
+        12
+      ]
+    },
+    {
+      "id": "big-times",
+      "title": "Big Grid With Times",
+      "concept": "Times in a Long Line",
+      "conceptKey": "cross-math-big-grid",
+      "requires": [
+        "cross-math-big-grid"
+      ],
+      "activity": "cross-math/grid",
+      "params": {
+        "level": 27,
+        "question": {
+          "size": 3,
+          "ops": [
+            "+",
+            "-",
+            "*"
+          ],
+          "mustUse": [
+            "*"
+          ],
+          "max": 60,
+          "blanks": 5,
+          "questionsPerRound": 5
+        },
+        "play": {
+          "targetObjective": "Fill five boxes in big grids with plus, minus and times.",
+          "stepByStep": [
+            "Find a line with one gap.",
+            "Do times before plus and minus.",
+            "Check the crossing line."
+          ],
+          "kidTip": "Times comes first in a line: 2 × 3 + 4 is 6 + 4.",
+          "audioPrompt": "A big grid with times. Fill all five boxes."
+        }
+      },
+      "difficulty": "Medium",
+      "icon": "🧩",
+      "iconName": "gem",
+      "iconTone": "purple",
+      "pedagogyTip": "Times within a three-number line. The generator only builds lines where left-to-right and order of operations agree, so the tip can state the real rule.",
+      "standards": [
+        "CCSS.3.OA.C.7"
+      ],
+      "trajectoryLevel": "cross-math-solver",
+      "ageBand": [
+        10,
+        12
+      ]
+    },
+    {
+      "id": "big-all-four",
+      "title": "Big Grid, All Signs",
+      "concept": "All Four in a Long Line",
+      "conceptKey": "cross-math-big-grid",
+      "requires": [
+        "cross-math-big-grid"
+      ],
+      "activity": "cross-math/grid",
+      "params": {
+        "level": 28,
+        "question": {
+          "size": 3,
+          "ops": [
+            "+",
+            "-",
+            "*",
+            "/"
+          ],
+          "mustUse": [
+            "*",
+            "/"
+          ],
+          "max": 100,
+          "blanks": 5,
+          "questionsPerRound": 5
+        },
+        "play": {
+          "targetObjective": "Fill five boxes in big grids with all four signs.",
+          "stepByStep": [
+            "Find a line with one gap.",
+            "Do times and divide before plus and minus.",
+            "Check the crossing line."
+          ],
+          "kidTip": "Times and divide first, then plus and minus.",
+          "audioPrompt": "A big grid with all four signs. Fill the empty boxes."
+        }
+      },
+      "difficulty": "Hard",
+      "icon": "🧩",
+      "iconName": "zap",
+      "iconTone": "purple",
+      "pedagogyTip": "All four operations in three-number lines.",
+      "standards": [
+        "CCSS.3.OA.C.7"
+      ],
+      "trajectoryLevel": "cross-math-solver",
+      "ageBand": [
+        10,
+        12
+      ]
+    },
+    {
+      "id": "six-gaps",
+      "title": "Six Gaps",
+      "concept": "Planning a Big Grid",
+      "conceptKey": "cross-math-big-grid",
+      "requires": [
+        "cross-math-big-grid"
+      ],
+      "activity": "cross-math/grid",
+      "params": {
+        "level": 29,
+        "question": {
+          "size": 3,
+          "ops": [
+            "+",
+            "-",
+            "*",
+            "/"
+          ],
+          "max": 100,
+          "blanks": 6,
+          "questionsPerRound": 5
+        },
+        "play": {
+          "targetObjective": "Fill six empty boxes in a big grid.",
+          "stepByStep": [
+            "Find every line with one gap.",
+            "Fill those first.",
+            "Look again: filling a box can leave another line with one gap."
+          ],
+          "kidTip": "Each box you fill can open up the next line.",
+          "audioPrompt": "Six boxes are empty. Plan where to start."
+        }
+      },
+      "difficulty": "Hard",
+      "icon": "🧩",
+      "iconName": "crown",
+      "iconTone": "purple",
+      "pedagogyTip": "Six gaps on a big board: the planning load rises while the arithmetic stays the same.",
+      "standards": [
+        "CCSS.3.OA.C.7"
+      ],
+      "trajectoryLevel": "cross-math-solver",
+      "ageBand": [
+        10,
+        12
+      ]
+    },
+    {
+      "id": "eight-gaps",
+      "title": "Eight Gaps",
+      "concept": "The Master Grid",
+      "conceptKey": "cross-math-big-grid",
+      "requires": [
+        "cross-math-big-grid"
+      ],
+      "activity": "cross-math/grid",
+      "params": {
+        "level": 30,
+        "question": {
+          "size": 3,
+          "ops": [
+            "+",
+            "-",
+            "*",
+            "/"
+          ],
+          "mustUse": [
+            "*"
+          ],
+          "max": 100,
+          "blanks": 8,
+          "questionsPerRound": 5
+        },
+        "play": {
+          "targetObjective": "Fill eight empty boxes in a big grid.",
+          "stepByStep": [
+            "Start from a line with one gap.",
+            "Keep looking for the next one.",
+            "When no line has one gap, try a tile and check it."
+          ],
+          "kidTip": "When you are stuck, try a tile in a short line and check it.",
+          "audioPrompt": "Eight boxes are empty. This is the master grid."
+        }
+      },
+      "difficulty": "Hard",
+      "icon": "🧩",
+      "iconName": "circleDot",
+      "iconTone": "purple",
+      "pedagogyTip": "The final lesson: eight gaps, all four operations. Sometimes no line has a single gap and the child has to test a tile.",
+      "standards": [
+        "CCSS.3.OA.C.7"
+      ],
+      "trajectoryLevel": "cross-math-solver",
+      "ageBand": [
+        10,
+        12
+      ]
+    },
+    {
+      "id": "practice-first-grid",
+      "title": "Practice: First Grids",
+      "concept": "Practice Without Help",
+      "conceptKey": "cross-math-adder",
+      "requires": [
+        "cross-math-adder"
+      ],
+      "activity": "cross-math/grid",
+      "params": {
+        "level": 31,
+        "question": {
+          "ops": [
+            "+"
+          ],
+          "max": 20,
+          "blanks": 4,
+          "questionsPerRound": 6,
+          "practice": true
+        }
+      },
+      "difficulty": "Medium",
+      "icon": "🔁",
+      "iconName": "dice",
+      "iconTone": "emerald",
+      "pedagogyTip": "Practice without hints or a spoken prompt, at the level of the unit's last lesson.",
+      "standards": [
+        "CCSS.1.OA.C.6",
+        "CCSS.1.OA.D.8"
+      ],
+      "trajectoryLevel": "cross-math-solver",
+      "ageBand": [
+        6,
+        7
+      ]
+    },
+    {
+      "id": "practice-take-away-grid",
+      "title": "Practice: Take Away",
+      "concept": "Practice Without Help",
+      "conceptKey": "cross-math-subtractor",
+      "requires": [
+        "cross-math-subtractor"
+      ],
+      "activity": "cross-math/grid",
+      "params": {
+        "level": 32,
+        "question": {
+          "ops": [
+            "+",
+            "-"
+          ],
+          "mustUse": [
+            "+",
+            "-"
+          ],
+          "max": 30,
+          "blanks": 4,
+          "allowZero": true,
+          "questionsPerRound": 6,
+          "practice": true
+        }
+      },
+      "difficulty": "Hard",
+      "icon": "🔁",
+      "iconName": "dice",
+      "iconTone": "cyan",
+      "pedagogyTip": "Practice without hints or a spoken prompt, at the level of the unit's last lesson.",
+      "standards": [
+        "CCSS.1.OA.C.6",
+        "CCSS.1.OA.D.8"
+      ],
+      "trajectoryLevel": "cross-math-solver",
+      "ageBand": [
+        6,
+        8
+      ]
+    },
+    {
+      "id": "practice-one-sign",
+      "title": "Practice: Missing Signs",
+      "concept": "Practice Without Help",
+      "conceptKey": "cross-math-sign-finder",
+      "requires": [
+        "cross-math-sign-finder"
+      ],
+      "activity": "cross-math/grid",
+      "params": {
+        "level": 33,
+        "question": {
+          "ops": [
+            "+",
+            "-"
+          ],
+          "max": 30,
+          "blanks": 2,
+          "signs": 2,
+          "questionsPerRound": 6,
+          "practice": true
+        }
+      },
+      "difficulty": "Hard",
+      "icon": "🔁",
+      "iconName": "dice",
+      "iconTone": "purple",
+      "pedagogyTip": "Practice without hints or a spoken prompt, at the level of the unit's last lesson.",
+      "standards": [
+        "CCSS.1.OA.C.6"
+      ],
+      "trajectoryLevel": "cross-math-solver",
+      "ageBand": [
+        7,
+        8
+      ]
+    },
+    {
+      "id": "practice-times-two-five",
+      "title": "Practice: Times Grids",
+      "concept": "Practice Without Help",
+      "conceptKey": "cross-math-multiplier",
+      "requires": [
+        "cross-math-multiplier"
+      ],
+      "activity": "cross-math/grid",
+      "params": {
+        "level": 34,
+        "question": {
+          "ops": [
+            "+",
+            "-",
+            "*"
+          ],
+          "mustUse": [
+            "*"
+          ],
+          "max": 100,
+          "blanks": 4,
+          "questionsPerRound": 6,
+          "practice": true
+        }
+      },
+      "difficulty": "Hard",
+      "icon": "🔁",
+      "iconName": "dice",
+      "iconTone": "indigo",
+      "pedagogyTip": "Practice without hints or a spoken prompt, at the level of the unit's last lesson.",
+      "standards": [
+        "CCSS.3.OA.C.7",
+        "CCSS.3.OA.A.4"
+      ],
+      "trajectoryLevel": "cross-math-solver",
+      "ageBand": [
+        8,
+        9
+      ]
+    },
+    {
+      "id": "practice-share-two-five",
+      "title": "Practice: Sharing",
+      "concept": "Practice Without Help",
+      "conceptKey": "cross-math-divider",
+      "requires": [
+        "cross-math-divider"
+      ],
+      "activity": "cross-math/grid",
+      "params": {
+        "level": 35,
+        "question": {
+          "ops": [
+            "+",
+            "-",
+            "*",
+            "/"
+          ],
+          "max": 100,
+          "blanks": 0,
+          "signs": 3,
+          "questionsPerRound": 6,
+          "practice": true
+        }
+      },
+      "difficulty": "Hard",
+      "icon": "🔁",
+      "iconName": "dice",
+      "iconTone": "pink",
+      "pedagogyTip": "Practice without hints or a spoken prompt, at the level of the unit's last lesson.",
+      "standards": [
+        "CCSS.3.OA.C.7",
+        "CCSS.3.OA.A.4"
+      ],
+      "trajectoryLevel": "cross-math-solver",
+      "ageBand": [
+        9,
+        10
+      ]
+    },
+    {
+      "id": "practice-big-grid",
+      "title": "Practice: Big Grids",
+      "concept": "Practice Without Help",
+      "conceptKey": "cross-math-big-grid",
+      "requires": [
+        "cross-math-big-grid"
+      ],
+      "activity": "cross-math/grid",
+      "params": {
+        "level": 36,
+        "question": {
+          "size": 3,
+          "ops": [
+            "+",
+            "-",
+            "*",
+            "/"
+          ],
+          "mustUse": [
+            "*"
+          ],
+          "max": 100,
+          "blanks": 8,
+          "questionsPerRound": 6,
+          "practice": true
+        }
+      },
+      "difficulty": "Hard",
+      "icon": "🔁",
+      "iconName": "dice",
+      "iconTone": "purple",
+      "pedagogyTip": "Practice without hints or a spoken prompt, at the level of the unit's last lesson.",
+      "standards": [
+        "CCSS.3.OA.C.7"
+      ],
+      "trajectoryLevel": "cross-math-solver",
+      "ageBand": [
+        10,
+        12
+      ]
+    }
+  ]
+}

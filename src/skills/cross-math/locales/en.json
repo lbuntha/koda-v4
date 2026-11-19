@@ -1,0 +1,57 @@
+{
+  "title": "Cross Math",
+  "prompt": {
+    "numbers": "Put the tiles in the empty boxes so every row and column is true.",
+    "signs": "Choose a sign for each empty box so every row and column is true.",
+    "both": "Fill the empty boxes with numbers and signs so every row and column is true."
+  },
+  "line": {
+    "row": "Row {n}",
+    "col": "Column {n}"
+  },
+  "sign": {
+    "+": "plus",
+    "-": "minus",
+    "*": "times",
+    "/": "divided by"
+  },
+  "grid": "Cross math grid",
+  "cell": {
+    "number": "Row {row}, column {col}",
+    "sign": "Sign {k} in {line}"
+  },
+  "slot": {
+    "empty": "{where}, empty",
+    "filled": "{where}, {value}. Tap to take it back"
+  },
+  "bank": {
+    "numbers": "Number tiles",
+    "signs": "Signs",
+    "tile": "Tile {value}",
+    "tileAt": "Tile {value}, number {k}",
+    "signTile": "Sign {name}"
+  },
+  "check": "Check",
+  "toFill": {
+    "one": "{count} box to fill",
+    "other": "{count} boxes to fill"
+  },
+  "right": {
+    "title": "Every line is true!",
+    "message": "Every row and every column works."
+  },
+  "wrong": {
+    "title": "Not yet",
+    "message": {
+      "one": "{count} box is not right. It is marked. Tap it to take it back.",
+      "other": "{count} boxes are not right. They are marked. Tap one to take it back."
+    }
+  },
+  "hint": {
+    "oneGap": "{line} has only one empty box. Start there.",
+    "findLine": "Look for a row or column with only one empty box.",
+    "tryOne": "Try a tile in {line}, then check that the line is true.",
+    "workedNumber": "{line} says {equation}. Which number makes it true?",
+    "workedSign": "{line} says {equation}. Try each sign in the box until it is true."
+  }
+}

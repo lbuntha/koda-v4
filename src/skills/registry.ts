@@ -13,7 +13,7 @@ import "./kit/i18n";
  */
 const SKILL_IDS = [
   "counting", "addition", "subtraction", "multiplication", "division",
-  "fractions", "observation", "bottle-sort", "color-sweeper",
+  "fractions", "observation", "bottle-sort", "color-sweeper", "cross-math",
 ] as const;
 
 /*
