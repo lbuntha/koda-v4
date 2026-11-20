@@ -5826,6 +5826,14 @@
       "skill": "Open the new skill {name}",
       "book": "Read the new book {name}",
       "rebus": "Play {name}"
+    },
+    "today": "Today",
+    "yesterday": "Yesterday",
+    "daysAgo": "{count} days ago",
+    "about": {
+      "skill": "A new skill to practise.",
+      "book": "A new book on your shelf.",
+      "rebus": "Fresh puzzles to solve."
     }
   }
 }

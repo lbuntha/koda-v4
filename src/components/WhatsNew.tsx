@@ -1,13 +1,16 @@
 import React, { useMemo, useState } from "react";
-import { BookOpen, Lightbulb, Play, Puzzle, X } from "lucide-react";
+import { BookOpen, ChevronRight, Lightbulb, Puzzle, Sparkles, X } from "lucide-react";
 import { useT } from "../lib/i18n";
 import { closeItems, closedKeys, fitsAge, itemKey, showing, useWhatsNew, type NewItem } from "../lib/whatsNew";
 import type { SkillCatalogEntry } from "../lib/skillCatalog";
-import { themeSystem } from "../lib/themeSystem";
 import { SvgAsset } from "../assets/svg";
 import { UIButton, UISkillThumbnail } from "./ui";
 
 const ICON = { skill: Lightbulb, book: BookOpen, rebus: Puzzle } as const;
+const DAY = 24 * 60 * 60 * 1000;
+
+/** Rows under the lead item; more than this and the card stops being news. */
+const MORE_SHOWN = 3;
 
 interface WhatsNewProps {
   /** Whose "closed" list this is: the learner, or the signed-in adult. */
@@ -23,15 +26,17 @@ interface WhatsNewProps {
 }
 
 /**
- * "New on Koda" — a hero card on Home for a skill, a book or a Rebus release
- * an admin published in the last few days.
+ * "New on Koda" — a card on Home for a skill, a book or a Rebus release an
+ * admin published in the last few days.
+ *
+ * Drawn as a plain surface card, like the rest of Home, so it reads as part of
+ * the page rather than an advert over it: the newest item leads with its art,
+ * name, one line about it and a single button; anything else new is a short
+ * list of rows underneath.
  *
  * It stays up for those days whether or not the learner has opened the new
- * thing, so a child who taps past it on Monday still finds it on Tuesday. The
- * close button hides what is on it for this learner; anything published after
- * that brings the card back.
- *
- * The newest item is the hero; the others are a row of chips under it.
+ * thing. The close button hides what is on it for this learner; anything
+ * published after that brings the card back.
  */
 export const WhatsNew: React.FC<WhatsNewProps> = ({ who, age, allAges = false, skills, onOpenSkill, onOpenBook, onOpenRebus }) => {
   const { t } = useT();
@@ -50,8 +55,8 @@ export const WhatsNew: React.FC<WhatsNewProps> = ({ who, age, allAges = false, s
 
   if (!who || fresh.length === 0) return null;
 
-  const [hero, ...others] = fresh;
-  const entry = hero.kind === "skill" ? skills.get(hero.id) : undefined;
+  const [lead, ...others] = fresh;
+  const entry = lead.kind === "skill" ? skills.get(lead.id) : undefined;
 
   const name = (item: NewItem) =>
     item.kind === "rebus"
@@ -59,6 +64,15 @@ export const WhatsNew: React.FC<WhatsNewProps> = ({ who, age, allAges = false, s
       : item.kind === "skill"
         ? skills.get(item.id)?.name ?? item.title
         : item.title;
+
+  const when = (item: NewItem) => {
+    const days = Math.floor((Date.now() - item.publishedAt) / DAY);
+    return days <= 0 ? t("whatsNew.today") : days === 1 ? t("whatsNew.yesterday") : t("whatsNew.daysAgo", { count: days });
+  };
+
+  /** One line under the name: the skill's own tagline, else what kind of thing it is. */
+  const about = (item: NewItem) =>
+    (item.kind === "skill" && skills.get(item.id)?.tagline) || t(`whatsNew.about.${item.kind}`);
 
   const open = (item: NewItem) => {
     if (item.kind === "skill") onOpenSkill(item.id);
@@ -71,78 +85,84 @@ export const WhatsNew: React.FC<WhatsNewProps> = ({ who, age, allAges = false, s
     setClosedAt(Date.now());
   };
 
-  const HeroIcon = ICON[hero.kind];
+  const LeadIcon = ICON[lead.kind];
+  const glyph = <LeadIcon className="h-8 w-8 text-indigo-600 dark:text-indigo-300" aria-hidden="true" />;
   const art = entry ? (
-    <UISkillThumbnail thumbnail={entry.thumbnail} fallbackIconName={entry.iconName} category={entry.category} size="lg" fill />
-  ) : hero.kind === "book" && hero.picture ? (
-    <SvgAsset id={hero.picture} size="100%" fallback={<HeroIcon className="h-12 w-12 text-indigo-600" aria-hidden="true" />} />
+    <UISkillThumbnail thumbnail={entry.thumbnail} fallbackIconName={entry.iconName} category={entry.category} size="lg" fill cover />
+  ) : lead.kind === "book" && lead.picture ? (
+    <SvgAsset id={lead.picture} size="100%" fallback={<span className="grid h-full w-full place-items-center">{glyph}</span>} />
   ) : (
-    <span className="grid h-full w-full place-items-center bg-white/90">
-      <HeroIcon className="h-12 w-12 text-indigo-600" aria-hidden="true" />
-    </span>
+    <span className="grid h-full w-full place-items-center">{glyph}</span>
   );
 
   return (
-    <section
-      aria-label={t("whatsNew.title")}
-      className={`relative isolate overflow-hidden rounded-3xl ${themeSystem.heroGradient} text-white`}
-    >
-      <button
-        type="button"
-        onClick={close}
-        aria-label={t("whatsNew.dismiss")}
-        className="absolute right-3 top-3 z-20 grid h-9 w-9 place-items-center rounded-full bg-white/20 text-white hover:bg-white/30 focus:outline-none focus-visible:ring-2 focus-visible:ring-white"
-      >
-        <X className="h-4 w-4" aria-hidden="true" />
-      </button>
-
-      <div className="flex items-center gap-4 p-5 pr-14 sm:gap-6 sm:p-6 sm:pr-16">
-        <span
-          aria-hidden="true"
-          className="block h-24 w-24 shrink-0 overflow-hidden rounded-3xl bg-white shadow-lg ring-4 ring-white/50 sm:h-32 sm:w-32"
+    <section aria-label={t("whatsNew.title")} className="overflow-hidden rounded-2xl border-2 border-line bg-surface">
+      <header className="flex items-center justify-between gap-3 px-4 pt-3 sm:px-5">
+        <h2 className="inline-flex items-center gap-1.5 font-mono text-xs font-black uppercase tracking-widest text-indigo-600 dark:text-indigo-300">
+          <Sparkles className="h-3.5 w-3.5" aria-hidden="true" />
+          {t("whatsNew.title")}
+        </h2>
+        <button
+          type="button"
+          onClick={close}
+          aria-label={t("whatsNew.dismiss")}
+          className="-mr-1.5 grid h-8 w-8 place-items-center rounded-full text-muted transition hover:bg-surface-muted hover:text-ink focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500"
         >
-          {art}
-        </span>
-        <div className="flex min-w-0 flex-col gap-1.5">
-          <span className="inline-flex w-fit items-center gap-1 rounded-full bg-white/25 px-2.5 py-0.5 text-[11px] font-black uppercase tracking-widest">
-            {t(`whatsNew.kind.${hero.kind}`)}
+          <X className="h-4 w-4" aria-hidden="true" />
+        </button>
+      </header>
+
+      <div className="flex flex-col gap-4 px-4 pb-4 pt-2 sm:flex-row sm:items-center sm:px-5 sm:pb-5">
+        <div className="flex min-w-0 flex-1 items-center gap-4">
+          <span
+            aria-hidden="true"
+            className="block h-20 w-20 shrink-0 overflow-hidden rounded-2xl border border-line bg-indigo-50 dark:bg-indigo-500/10 sm:h-24 sm:w-24"
+          >
+            {art}
           </span>
-          <h2 className="line-clamp-2 text-2xl font-extrabold leading-tight tracking-tight sm:text-3xl">{name(hero)}</h2>
-          {entry?.tagline && <p className="line-clamp-2 text-sm font-medium text-white/90 sm:text-base">{entry.tagline}</p>}
+          <div className="min-w-0">
+            <p className="text-xs font-bold text-muted">
+              <span className="text-indigo-600 dark:text-indigo-300">{t(`whatsNew.kind.${lead.kind}`)}</span>
+              <span aria-hidden="true"> · </span>
+              {when(lead)}
+            </p>
+            <h3 className="mt-0.5 line-clamp-2 text-lg font-extrabold leading-snug text-ink sm:text-xl">{name(lead)}</h3>
+            <p className="mt-0.5 line-clamp-2 text-sm text-muted">{about(lead)}</p>
+          </div>
         </div>
-      </div>
-
-      <div className="flex flex-col gap-3 px-5 pb-5 sm:flex-row sm:items-center sm:px-6 sm:pb-6">
-        <UIButton
-          variant="light"
-          className="w-full sm:w-auto"
-          icon={<Play className="fill-current" aria-hidden="true" />}
-          onClick={() => open(hero)}
-        >
-          {t(`whatsNew.action.${hero.kind}`)}
+        <UIButton variant="primary" className="w-full shrink-0 sm:w-auto" onClick={() => open(lead)}>
+          {t(`whatsNew.action.${lead.kind}`)}
         </UIButton>
-
-        {others.length > 0 && (
-          <ul className="flex min-w-0 flex-wrap gap-2" aria-label={t("whatsNew.alsoNew")}>
-            {others.slice(0, 3).map((item) => {
-              const Icon = ICON[item.kind];
-              return (
-                <li key={itemKey(item)} className="min-w-0">
-                  <button
-                    type="button"
-                    onClick={() => open(item)}
-                    aria-label={t(`whatsNew.open.${item.kind}`, { name: name(item) })}
-                    className="inline-flex max-w-full items-center gap-1.5 rounded-full bg-white/20 px-3 py-1.5 text-sm font-bold text-white hover:bg-white/30 focus:outline-none focus-visible:ring-2 focus-visible:ring-white"
-                  >
-                    <Icon className="h-4 w-4 shrink-0" aria-hidden="true" />
-                    <span className="truncate">{name(item)}</span>
-                  </button>
-                </li>
-              );
-            })}
-          </ul>
-        )}
       </div>
+
+      {others.length > 0 && (
+        <ul className="border-t-2 border-line" aria-label={t("whatsNew.alsoNew")}>
+          {others.slice(0, MORE_SHOWN).map((item) => {
+            const Icon = ICON[item.kind];
+            return (
+              <li key={itemKey(item)} className="border-b border-line last:border-b-0">
+                <button
+                  type="button"
+                  onClick={() => open(item)}
+                  aria-label={t(`whatsNew.open.${item.kind}`, { name: name(item) })}
+                  className="flex w-full items-center gap-3 px-4 py-2.5 text-left transition hover:bg-surface-muted focus:outline-none focus-visible:bg-surface-muted sm:px-5"
+                >
+                  <span className="grid h-8 w-8 shrink-0 place-items-center rounded-xl bg-indigo-50 text-indigo-600 dark:bg-indigo-500/10 dark:text-indigo-300">
+                    <Icon className="h-4 w-4" aria-hidden="true" />
+                  </span>
+                  <span className="min-w-0 flex-1">
+                    <span className="block truncate text-sm font-bold text-ink">{name(item)}</span>
+                    <span className="block text-xs text-muted">
+                      {t(`whatsNew.kind.${item.kind}`)} · {when(item)}
+                    </span>
+                  </span>
+                  <ChevronRight className="h-4 w-4 shrink-0 text-muted" aria-hidden="true" />
+                </button>
+              </li>
+            );
+          })}
+        </ul>
+      )}
     </section>
   );
 };
