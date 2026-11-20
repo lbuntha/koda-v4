@@ -41,6 +41,6 @@ describe("Word Guess", () => {
     fireEvent.click(screen.getByRole("button", { name: /English/ }));
     fireEvent.click(screen.getByRole("button", { name: /Got it/ }));
     for (const key of ["a", "Enter"]) act(() => void fireEvent.keyDown(window, { key }));
-    expect(screen.getByText(/Use all \d letters first/)).toBeTruthy();
+    expect(screen.getByText(/Fill all \d boxes first/)).toBeTruthy();
   });
 });

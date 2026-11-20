@@ -69,7 +69,7 @@ export const TileKeyboard: React.FC<TileKeyboardProps> = ({ lang, easy, states, 
         type="button"
         onClick={() => onTile(tile)}
         aria-label={s ? `${tile}, ${t(`wordGuess.state.${s}`)}` : tile}
-        className={`grid h-12 min-w-[2.6rem] place-items-center rounded-xl border-2 px-1.5 text-xl font-black transition active:scale-95 focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 ${
+        className={`grid h-11 min-w-[2.5rem] place-items-center sm:h-12 rounded-xl border-2 px-1.5 text-xl font-black transition active:scale-95 focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 ${
           s ? `${TILE_TONE[s]} ${s === "absent" ? "opacity-60" : ""}` : "border-line bg-surface text-ink hover:border-indigo-300"
         } ${lang === "en" ? "uppercase" : ""}`}
       >
@@ -84,10 +84,15 @@ export const TileKeyboard: React.FC<TileKeyboardProps> = ({ lang, easy, states, 
     }`;
 
   return (
-    <div className="space-y-3">
-      {/* One row that scrolls sideways on a phone, so the letters keep the room. */}
-      <div className="-mx-1 flex items-center gap-2 overflow-x-auto px-1 pb-1 sm:flex-wrap sm:justify-center" role="group" aria-label={t("wordGuess.keysLabel")}>
-        <button type="button" className={chip(mode === "easy")} aria-pressed={mode === "easy"} onClick={() => onMode("easy")}>
+    <div className="space-y-2 sm:space-y-3">
+      {/* On a phone the Easy / All switch lives in the game's options, to leave the screen to the board;
+          only the Khmer trays stay here, and only while all the letters are showing. */}
+      <div
+        className={`-mx-1 items-center gap-2 overflow-x-auto px-1 pb-1 sm:flex sm:flex-wrap sm:justify-center ${lang === "km" && mode === "all" ? "flex" : "hidden"}`}
+        role="group"
+        aria-label={t("wordGuess.keysLabel")}
+      >
+        <button type="button" className={`${chip(mode === "easy")} hidden sm:inline-flex`} aria-pressed={mode === "easy"} onClick={() => onMode("easy")}>
           {t("wordGuess.easyKeys")}
         </button>
         {lang === "km" ? (
@@ -106,7 +111,7 @@ export const TileKeyboard: React.FC<TileKeyboardProps> = ({ lang, easy, states, 
             </button>
           ))
         ) : (
-          <button type="button" className={chip(mode === "all")} aria-pressed={mode === "all"} onClick={() => onMode("all")}>
+          <button type="button" className={`${chip(mode === "all")} hidden sm:inline-flex`} aria-pressed={mode === "all"} onClick={() => onMode("all")}>
             {t("wordGuess.allKeys")}
           </button>
         )}
@@ -115,7 +120,10 @@ export const TileKeyboard: React.FC<TileKeyboardProps> = ({ lang, easy, states, 
       {mode === "easy" ? (
         <div className="flex flex-wrap justify-center gap-2">{easy.map(key)}</div>
       ) : lang === "km" ? (
-        <div className="flex flex-wrap justify-center gap-1.5">{trays[tray].keys.map(key)}</div>
+        /* A tight 9-column grid on a phone (35 consonants in 4 rows, not 6), so the board stays in view. */
+        <div className="grid grid-cols-9 gap-1 sm:flex sm:flex-wrap sm:justify-center sm:gap-1.5 max-sm:[&>button]:h-10 max-sm:[&>button]:min-w-0 max-sm:[&>button]:px-0 max-sm:[&>button]:text-lg">
+          {trays[tray].keys.map(key)}
+        </div>
       ) : (
         <div className="space-y-1.5">
           {EN_ROWS.map((row) => (
@@ -130,7 +138,7 @@ export const TileKeyboard: React.FC<TileKeyboardProps> = ({ lang, easy, states, 
         <button
           type="button"
           onClick={onDelete}
-          className="flex h-14 items-center justify-center gap-2 rounded-2xl border-2 border-line bg-surface text-base font-black text-ink active:scale-[0.98] focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500"
+          className="flex h-12 items-center justify-center gap-2 rounded-2xl border-2 border-line sm:h-14 bg-surface text-base font-black text-ink active:scale-[0.98] focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500"
         >
           <Delete className="h-5 w-5" aria-hidden /> {t("wordGuess.delete")}
         </button>
@@ -138,7 +146,7 @@ export const TileKeyboard: React.FC<TileKeyboardProps> = ({ lang, easy, states, 
           type="button"
           onClick={onCheck}
           aria-disabled={!canCheck}
-          className={`flex h-14 items-center justify-center gap-2 rounded-2xl text-base font-black text-white active:scale-[0.98] focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 ${
+          className={`flex h-12 items-center justify-center gap-2 rounded-2xl text-base sm:h-14 font-black text-white active:scale-[0.98] focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 ${
             canCheck ? "bg-indigo-600 hover:bg-indigo-700" : "bg-indigo-300 dark:bg-indigo-900"
           }`}
         >

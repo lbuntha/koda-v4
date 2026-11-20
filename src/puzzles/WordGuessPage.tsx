@@ -8,8 +8,8 @@
  * colour that is never the only signal.
  */
 
-import React, { useCallback, useEffect, useMemo, useRef, useState, useSyncExternalStore } from "react";
-import { ArrowLeft, Flame, HelpCircle, Lightbulb, Sparkles } from "lucide-react";
+import React, { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState, useSyncExternalStore } from "react";
+import { ArrowLeft, Flame, HelpCircle, Lightbulb, SlidersHorizontal, Sparkles } from "lucide-react";
 import { useT } from "../lib/i18n";
 import { themeSystem } from "../lib/themeSystem";
 import { playSound } from "../utils/audio";
@@ -82,7 +82,14 @@ export const WordGuessPage: React.FC<WordGuessPageProps> = ({ onExit, onAwardXp,
   const [mode, setMode] = useState<"daily" | "practice">("daily");
   const [practiceId, setPracticeId] = useState<string | null>(null);
   const [helpOpen, setHelpOpen] = useState(!prefs.seenHelp);
+  /* On a phone the choices fold into one line, so the board and keys fit the screen. Always open on a wide screen. */
+  const [optionsOpen, setOptionsOpen] = useState(false);
   const today = puzzleDay();
+
+  // Opened from further down Home or Learn: start at the top, with the clue and the first row in view.
+  useEffect(() => {
+    window.scrollTo?.(0, 0);
+  }, []);
 
   useEffect(() => {
     void refreshDaily();
@@ -132,19 +139,35 @@ export const WordGuessPage: React.FC<WordGuessPageProps> = ({ onExit, onAwardXp,
   return (
     <div className="mx-auto flex w-full max-w-lg flex-col gap-4 pb-6 lg:max-w-4xl">
       <WordTileStyles />
-      <div className="flex items-center justify-between gap-2">
-        <UIButton variant="ghost" size="sm" icon={<ArrowLeft />} onClick={onExit}>
-          {t("wordGuess.back")}
+      <div className="flex items-center gap-2">
+        <UIButton variant="ghost" size="sm" icon={<ArrowLeft />} onClick={onExit} aria-label={t("wordGuess.back")}>
+          <span className="hidden sm:inline">{t("wordGuess.back")}</span>
         </UIButton>
+        <h2 className="min-w-0 flex-1 truncate text-xl font-black text-ink sm:text-2xl">{t("wordGuess.title")}</h2>
         <StreakChip />
+        {/* Phone only: language, length, today or practice and the keys fold away behind one button. */}
+        <button
+          type="button"
+          onClick={() => setOptionsOpen((o) => !o)}
+          aria-expanded={optionsOpen}
+          aria-label={t("wordGuess.options")}
+          className={`inline-flex shrink-0 items-center rounded-full p-2 text-indigo-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 dark:text-indigo-300 sm:hidden ${optionsOpen ? "bg-indigo-100 dark:bg-indigo-950" : "hover:bg-indigo-50"}`}
+        >
+          <SlidersHorizontal className="h-5 w-5" aria-hidden />
+        </button>
+        <button
+          type="button"
+          onClick={() => setHelpOpen((o) => !o)}
+          aria-expanded={helpOpen}
+          aria-label={t("wordGuess.howTitle")}
+          className="inline-flex shrink-0 items-center gap-1.5 rounded-full px-2.5 py-1.5 text-sm font-bold text-indigo-700 hover:bg-indigo-50 dark:text-indigo-300 dark:hover:bg-indigo-950/50 focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500"
+        >
+          <HelpCircle className="h-5 w-5" aria-hidden /> <span className="hidden sm:inline">{t("wordGuess.howTitle")}</span>
+        </button>
       </div>
+      <p className={`${themeSystem.typography("subtitle")} -mt-3 hidden sm:block`}>{t("wordGuess.tagline")}</p>
 
-      <div>
-        <h2 className={themeSystem.typography("h2")}>{t("wordGuess.title")}</h2>
-        <p className={themeSystem.typography("subtitle")}>{t("wordGuess.tagline")}</p>
-      </div>
-
-      <div className="flex flex-wrap items-center gap-2">
+      <div className={`${optionsOpen ? "flex" : "hidden"} flex-wrap items-center gap-2 sm:flex`}>
         <Segmented
           label={t("wordGuess.languageLabel")}
           value={prefs.lang}
@@ -178,14 +201,17 @@ export const WordGuessPage: React.FC<WordGuessPageProps> = ({ onExit, onAwardXp,
           ]}
           onChange={(m) => setMode(m as "daily" | "practice")}
         />
-        <button
-          type="button"
-          onClick={() => setHelpOpen((o) => !o)}
-          aria-expanded={helpOpen}
-          className="ml-auto inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-sm font-bold text-indigo-700 hover:bg-indigo-50 dark:text-indigo-300 dark:hover:bg-indigo-950/50 focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500"
-        >
-          <HelpCircle className="h-4 w-4" aria-hidden /> {t("wordGuess.howTitle")}
-        </button>
+        <div className="sm:hidden">
+          <Segmented
+            label={t("wordGuess.keysLabel")}
+            value={prefs.keys}
+            options={[
+              { id: "easy", label: t("wordGuess.easyKeys") },
+              { id: "all", label: t("wordGuess.allKeys") },
+            ]}
+            onChange={(k) => setPrefs({ keys: k as "easy" | "all" })}
+          />
+        </div>
       </div>
 
       {helpOpen && (
@@ -221,8 +247,15 @@ const StreakChip: React.FC = () => {
   const n = liveStreak(readPlay().streak, puzzleDay());
   if (n === 0) return null;
   return (
-    <span className="inline-flex items-center gap-1.5 rounded-full bg-rose-50 px-3 py-1.5 text-sm font-black text-rose-700 dark:bg-rose-950/60 dark:text-rose-300">
-      <Flame className="h-4 w-4" aria-hidden /> {t("wordGuess.streak", { n: String(n) })}
+    <span
+      title={t("wordGuess.streak", { n: String(n) })}
+      className="inline-flex shrink-0 items-center gap-1 rounded-full bg-rose-50 px-2.5 py-1.5 text-sm font-black text-rose-700 dark:bg-rose-950/60 dark:text-rose-300"
+    >
+      <Flame className="h-4 w-4" aria-hidden />
+      <span className="sm:hidden" aria-label={t("wordGuess.streak", { n: String(n) })}>
+        {n}
+      </span>
+      <span className="hidden sm:inline">{t("wordGuess.streak", { n: String(n) })}</span>
     </span>
   );
 };
@@ -306,6 +339,39 @@ interface GameProps {
 }
 
 /**
+ * The tile size that lets the whole board show at once, with the keys under it
+ * on a phone or beside it on a wide screen: measured from where the board starts
+ * and how tall the keys are, so it still fits when the clue grows a hint line,
+ * the keys switch tray, or the phone turns. Never below 30px (still easy to
+ * read), never above 60px.
+ */
+function useTileSize(board: React.RefObject<HTMLDivElement | null>, keys: React.RefObject<HTMLDivElement | null>, n: number, below: number): number {
+  const [size, setSize] = useState(48);
+  useLayoutEffect(() => {
+    const fit = () => {
+      const vw = window.innerWidth;
+      const wide = vw >= 1024;
+      const byWidth = Math.floor(((wide ? 440 : Math.min(vw, 512)) - 48 - (n - 1) * 6) / n);
+      const top = (board.current?.getBoundingClientRect().top ?? 0) + window.scrollY;
+      const keysHeight = wide ? 0 : (keys.current?.offsetHeight ?? 0);
+      const room = window.innerHeight - top - keysHeight - below - 16;
+      const byHeight = Math.floor((room - (MAX_GUESSES - 1) * 6) / MAX_GUESSES);
+      setSize(Math.max(30, Math.min(60, byWidth, byHeight)));
+    };
+    fit();
+    const watch = typeof ResizeObserver === "undefined" ? null : new ResizeObserver(fit);
+    if (keys.current) watch?.observe(keys.current);
+    if (board.current?.parentElement) watch?.observe(board.current.parentElement.firstElementChild ?? board.current.parentElement);
+    window.addEventListener("resize", fit);
+    return () => {
+      watch?.disconnect();
+      window.removeEventListener("resize", fit);
+    };
+  }, [board, keys, n, below]);
+  return size;
+}
+
+/**
  * The clue in the language on screen, falling back to the other one. A Khmer
  * word's English clue is its meaning, so it reads "It means “cat”".
  */
@@ -328,10 +394,17 @@ const Game: React.FC<GameProps> = ({ puzzle, daily, slot, day, keys, onKeys, onA
   const [note, setNote] = useState("");
   const [shake, setShake] = useState(false);
   /* The row being typed. On a phone the pinned keys cover the bottom of the board, so each new row is scrolled to the middle. */
+  const board = useRef<HTMLDivElement | null>(null);
+  const keysBox = useRef<HTMLDivElement | null>(null);
   const typingRow = useRef<HTMLDivElement | null>(null);
   const rowsPlayed = game.rows.length;
   useEffect(() => {
-    if (rowsPlayed > 0) typingRow.current?.scrollIntoView?.({ behavior: "smooth", block: "center" });
+    const row = typingRow.current;
+    if (rowsPlayed === 0 || !row) return;
+    /* Land the row just above the pinned keys, not under them. */
+    const keysHeight = window.innerWidth < 1024 ? (keysBox.current?.offsetHeight ?? 0) : 0;
+    row.style.scrollMarginBottom = `${keysHeight + 12}px`;
+    row.scrollIntoView?.({ behavior: "smooth", block: "end" });
   }, [rowsPlayed]);
   const [revealRow, setRevealRow] = useState(-1);
   const [xp, setXp] = useState(0);
@@ -342,13 +415,8 @@ const Game: React.FC<GameProps> = ({ puzzle, daily, slot, day, keys, onKeys, onA
 
   const easy = useMemo(() => easyTiles(answer, puzzle.lang, puzzle.id), [answer, puzzle]);
   const states = useMemo(() => keyStates(game.rows), [game.rows]);
-  /* Big enough to tap and read, small enough that six rows and the keys fit a laptop or a phone. */
-  const vw = typeof window === "undefined" ? 400 : window.innerWidth;
-  const height = typeof window === "undefined" ? 800 : window.innerHeight;
-  const wide = vw >= 1024;
-  /* On a wide screen the keys sit beside the board, so the board has the height to itself. */
-  const width = wide ? 440 : Math.min(vw, 512);
-  const size = Math.max(36, Math.min(60, Math.floor((width - 48 - (n - 1) * 6) / n), Math.floor((height - (wide ? 330 : 470)) / 6)));
+  const size = useTileSize(board, keysBox, n, puzzle.lang === "km" ? 40 : 8);
+  const phone = typeof window !== "undefined" && window.innerWidth < 640;
 
   const type = useCallback(
     (tile: string) => {
@@ -431,9 +499,9 @@ const Game: React.FC<GameProps> = ({ puzzle, daily, slot, day, keys, onKeys, onA
   return (
     <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_minmax(0,26rem)] lg:items-start">
       <div className="flex min-w-0 flex-col gap-4">
-        <section className={themeSystem.card("default", "flex items-center gap-3 p-3")} aria-label={t("wordGuess.clue")}>
+        <section className={themeSystem.card("default", "flex items-center gap-3 p-2 sm:p-3")} aria-label={t("wordGuess.clue")}>
           {picture ? (
-            <WordPicture id={picture} label={t("wordGuess.picture")} size={72} />
+            <WordPicture id={picture} label={t("wordGuess.picture")} size={phone ? 56 : 72} />
           ) : (
             <span className="grid h-12 w-12 shrink-0 place-items-center rounded-2xl bg-indigo-50 text-indigo-600 dark:bg-indigo-950/60 dark:text-indigo-300">
               <CategoryIcon category={puzzle.data.category} />
@@ -458,7 +526,11 @@ const Game: React.FC<GameProps> = ({ puzzle, daily, slot, day, keys, onKeys, onA
           )}
         </section>
 
-        <div className="flex flex-col items-center gap-1.5" aria-label={t("wordGuess.board")}>
+        {/* Above the board, where a child is looking: under it, the pinned keys would hide it on a phone. */}
+        <p className="-my-1 min-h-5 text-center text-sm font-bold text-indigo-700 dark:text-indigo-300" aria-live="polite">
+          {note}
+        </p>
+        <div ref={board} className="flex flex-col items-center gap-1.5" aria-label={t("wordGuess.board")}>
           {/* Once the game is over, only the rows played: the result sits right under them. */}
           {Array.from({ length: game.over ? game.rows.length : MAX_GUESSES }, (_, r) => {
             const row = game.rows[r];
@@ -485,13 +557,10 @@ const Game: React.FC<GameProps> = ({ puzzle, daily, slot, day, keys, onKeys, onA
           )}
         </div>
 
-        <p className="min-h-6 text-center text-sm font-bold text-indigo-700 dark:text-indigo-300" aria-live="polite">
-          {note}
-        </p>
       </div>
 
       {/* While playing, the keys stay pinned to the bottom of a phone screen as the board scrolls; on a wide screen they sit beside the board. */}
-      <div className={`flex min-w-0 flex-col gap-3 lg:sticky lg:top-4 lg:bottom-auto ${game.over ? "" : "sticky bottom-0 z-10"}`}>
+      <div ref={keysBox} className={`flex min-w-0 flex-col gap-3 lg:sticky lg:top-4 lg:bottom-auto ${game.over ? "" : "sticky bottom-0 z-10"}`}>
         {game.over ? (
           <WordGuessResult puzzle={puzzle} game={game} daily={daily} day={day} xp={xp} onNext={onNext} />
         ) : (
@@ -511,7 +580,7 @@ const Game: React.FC<GameProps> = ({ puzzle, daily, slot, day, keys, onKeys, onA
         )}
 
         {!game.over && game.rows.length === 0 && (
-          <p className="flex items-center justify-center gap-1.5 text-xs font-semibold text-muted">
+          <p className="hidden items-center justify-center gap-1.5 text-xs font-semibold text-muted sm:flex">
             <Sparkles className="h-3.5 w-3.5" aria-hidden /> {daily ? t("wordGuess.dailyNote") : t("wordGuess.practiceNote")}
           </p>
         )}
