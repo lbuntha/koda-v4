@@ -61,7 +61,7 @@ def out(row: dict[str, Any]) -> dict[str, Any]:
     return {k: v for k, v in row.items() if k != "_id"}
 
 
-def shape(lang: str, word: str, category: str, clue: dict[str, str]) -> dict[str, Any]:
+def shape(lang: str, word: str, category: str, clue: dict[str, str], picture: str = "") -> dict[str, Any]:
     """The stored form of a word: cleaned, with its tiles and level worked out here, never sent in."""
     w = clean_word(word, lang)
     tiles = tiles_of(w, lang)
@@ -69,7 +69,13 @@ def shape(lang: str, word: str, category: str, clue: dict[str, str]) -> dict[str
         "kind": "word-guess",
         "lang": lang,
         "level": len(tiles),
-        "data": {"word": w, "tiles": tiles, "category": category, "clue": {"km": clue.get("km", ""), "en": clue.get("en", "")}},
+        "data": {
+            "word": w,
+            "tiles": tiles,
+            "category": category,
+            "clue": {"km": clue.get("km", ""), "en": clue.get("en", "")},
+            "picture": picture,
+        },
     }
 
 
@@ -87,7 +93,8 @@ async def ensure_seed(db: AsyncIOMotorDatabase, rows: list[dict[str, Any]]) -> i
     Published rather than drafts (unlike Rebus): the daily puzzle has to work on
     the first day, and these words were chosen for it. The owner can retire any.
     """
-    have = {r["id"] async for r in db.daily_puzzles.find({"id": {"$in": [r["id"] for r in rows]}}, {"id": 1})}
+    have = {r["id"]: r async for r in db.daily_puzzles.find({"id": {"$in": [r["id"] for r in rows]}}, {"id": 1, "data": 1, "seeded": 1})}
+    await _fill_blanks(db, rows, have)
     author = await first_admin_id(db) or SYSTEM
     stamp = now()
     fresh = []
@@ -98,7 +105,7 @@ async def ensure_seed(db: AsyncIOMotorDatabase, rows: list[dict[str, Any]]) -> i
         fresh.append(
             {
                 "id": r["id"],
-                **shape(r["lang"], d["word"], d["category"], d.get("clue", {})),
+                **shape(r["lang"], d["word"], d["category"], d.get("clue", {}), d.get("picture", "")),
                 "status": "published",
                 "owner": "koda",
                 "createdBy": author,
@@ -111,6 +118,22 @@ async def ensure_seed(db: AsyncIOMotorDatabase, rows: list[dict[str, Any]]) -> i
     if fresh:
         await db.daily_puzzles.insert_many(fresh)
     return len(fresh)
+
+
+async def _fill_blanks(db: AsyncIOMotorDatabase, rows: list[dict[str, Any]], have: dict[str, dict[str, Any]]) -> None:
+    """Starter words already here gain a Khmer clue or a picture the seed has and they lack. Only blanks: an edit is never undone."""
+    for r in rows:
+        old = have.get(r["id"])
+        if not old or not old.get("seeded"):
+            continue
+        d, od = r["data"], old.get("data", {})
+        sets: dict[str, Any] = {}
+        if d.get("clue", {}).get("km") and not od.get("clue", {}).get("km"):
+            sets["data.clue.km"] = d["clue"]["km"]
+        if d.get("picture") and "picture" not in od:
+            sets["data.picture"] = d["picture"]
+        if sets:
+            await db.daily_puzzles.update_one({"id": r["id"]}, {"$set": sets})
 
 
 async def get(db: AsyncIOMotorDatabase, puzzle_id: str) -> dict[str, Any] | None:

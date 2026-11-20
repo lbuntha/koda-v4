@@ -5950,7 +5950,8 @@
     "dailyNote": "Everyone gets the same word today.",
     "practiceNote": "Practice words do not change your streak.",
     "noWords": "There are no words for this yet. Try another language or length.",
-    "inOneTry": "Solved on the first try"
+    "inOneTry": "Solved on the first try",
+    "picture": "Picture clue"
   },
   "puzzles": {
     "category": {
@@ -5989,12 +5990,12 @@
     "wordHelpEn": "Type the English word, 2 to 6 letters.",
     "tilesCount": "{n} tiles",
     "lettersCount": "{n} letters",
-    "category": "Clue picture",
+    "category": "Topic",
     "meaningEn": "Meaning in English",
     "clueEn": "Clue in English",
-    "clueKm": "Clue in Khmer (optional)",
+    "clueKm": "Clue in Khmer",
     "clueEnExample": "A pet that says meow",
-    "clueHelp": "The child sees the clue picture at the start, and the clue only after pressing Hint.",
+    "clueHelp": "The child sees the topic at the start, and the clue only after pressing Hint. Write the clue in both languages, so it reads in the language on screen.",
     "publish": "Publish",
     "saveLive": "Save changes",
     "sendReview": "Send for review",
@@ -6043,6 +6044,9 @@
     "letKodaPick": "Let Koda pick",
     "chooseFor": "Word for {day}",
     "daysLeft": "{n} days of new words before any word comes back.",
-    "lowDays": "Only {n} days of new words left. Add more words so children don't see repeats."
+    "lowDays": "Only {n} days of new words left. Add more words so children don't see repeats.",
+    "picture": "Picture",
+    "noPicture": "No picture",
+    "pictureHelp": "Young children see this picture from the start, so they can play before they can read. Koda picks one from the meaning; you can change it."
   }
 }

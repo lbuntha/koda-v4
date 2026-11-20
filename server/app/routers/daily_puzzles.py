@@ -134,7 +134,7 @@ async def studio_create(body: WordGuessIn, db: Db, p: CanWrite) -> dict[str, Any
         raise _refuse(["duplicate"])
     doc = {
         "id": await repo.unique_id(db, body.lang),
-        **repo.shape(body.lang, body.word, body.category, clue),
+        **repo.shape(body.lang, body.word, body.category, clue, body.picture),
         "status": "draft",
         "owner": "koda" if ownership.sees_all(p) else "creator",
         "createdBy": p.subject_id,
@@ -152,7 +152,8 @@ async def studio_edit(puzzle_id: str, body: WordGuessPatch, db: Db, p: CanWrite)
     word = body.word if body.word is not None else d["word"]
     category = body.category or d["category"]
     clue = body.clue.model_dump() if body.clue else d["clue"]
-    shaped = repo.shape(row["lang"], word, category, clue)
+    picture = body.picture if body.picture is not None else d.get("picture", "")
+    shaped = repo.shape(row["lang"], word, category, clue, picture)
     if row["status"] == "published":
         # In front of children now: a fix must leave it playable, and the same length on its line.
         codes = await _check(db, row["lang"], word, category, clue, not_id=row["id"])

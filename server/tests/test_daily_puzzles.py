@@ -52,6 +52,18 @@ async def test_the_starter_words_are_live_on_day_one_and_never_seeded_twice(clie
     assert await repo.ensure_seed(db, SEED) == 0
 
 
+async def test_a_reseed_fills_blank_khmer_clues_and_pictures_but_never_undoes_an_edit(db):
+    cat = next(r for r in SEED if r["id"] == "wg-km-002")
+    assert cat["data"]["clue"]["km"] and cat["data"]["picture"] == "rebus-cat"
+    await db.daily_puzzles.update_one({"id": "wg-km-002"}, {"$set": {"data.clue.km": ""}, "$unset": {"data.picture": ""}})
+    await db.daily_puzzles.update_one({"id": "wg-km-003"}, {"$set": {"data.clue.km": "edited", "data.picture": ""}})
+    await repo.ensure_seed(db, SEED)
+    filled = await repo.get(db, "wg-km-002")
+    assert filled["data"]["clue"]["km"] == cat["data"]["clue"]["km"] and filled["data"]["picture"] == "rebus-cat"
+    kept = await repo.get(db, "wg-km-003")
+    assert kept["data"]["clue"]["km"] == "edited" and kept["data"]["picture"] == ""
+
+
 async def test_every_device_gets_the_same_word_and_no_repeats_until_the_line_runs_out(client, family, owner):
     first = (await client.get("/daily-puzzles?days=30", headers=family)).json()["lines"][KM3]
     again = (await client.get("/daily-puzzles?days=30", headers=owner)).json()["lines"][KM3]

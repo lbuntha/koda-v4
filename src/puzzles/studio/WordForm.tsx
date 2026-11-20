@@ -7,6 +7,7 @@ import { messageOf } from "../../rebus/studio/useStudioAction";
 import { PUZZLE_CATEGORIES, type PuzzleCategory, type PuzzleLang } from "../types";
 import { tilesOf, wordProblem } from "../wordGuess";
 import { WordTiles } from "../ui/WordTiles";
+import { PICTURE_NAMES, WordPicture, suggestPicture } from "../ui/WordPicture";
 import { PuzzleStudioAPI, type StudioWord } from "./studioApi";
 
 /**
@@ -28,6 +29,9 @@ export const WordForm: React.FC<{ canRun: boolean; editing?: StudioWord | null; 
   const [category, setCategory] = useState<PuzzleCategory>(editing?.data.category ?? "animal");
   const [clueKm, setClueKm] = useState(editing?.data.clue.km ?? "");
   const [clueEn, setClueEn] = useState(editing?.data.clue.en ?? "");
+  /* The picture follows the word until the author picks one themselves. */
+  const [pictureChoice, setPictureChoice] = useState<string | null>(editing ? (editing.data.picture ?? "") : null);
+  const picture = pictureChoice ?? suggestPicture(lang, word, clueEn);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
   const [saved, setSaved] = useState("");
@@ -40,7 +44,7 @@ export const WordForm: React.FC<{ canRun: boolean; editing?: StudioWord | null; 
     setError("");
     setSaved("");
     try {
-      const body = { word, category, clue: { km: clueKm.trim(), en: clueEn.trim() } };
+      const body = { word, category, clue: { km: clueKm.trim(), en: clueEn.trim() }, picture };
       let row = editing ? await PuzzleStudioAPI.edit(editing.id, body) : await PuzzleStudioAPI.create({ lang, ...body });
       if (then !== "draft" && row.status !== then) row = await PuzzleStudioAPI.status(row.id, then);
       setSaved(t(then === "published" ? "puzzleStudio.savedLive" : then === "review" ? "puzzleStudio.savedReview" : "puzzleStudio.savedDraft", { word: row.data.word }));
@@ -48,6 +52,7 @@ export const WordForm: React.FC<{ canRun: boolean; editing?: StudioWord | null; 
         setWord("");
         setClueKm("");
         setClueEn("");
+        setPictureChoice(null);
       }
       onSaved(row);
     } catch (e) {
@@ -139,6 +144,28 @@ export const WordForm: React.FC<{ canRun: boolean; editing?: StudioWord | null; 
         </div>
       </div>
       <p className="-mt-2 text-xs text-muted">{t("puzzleStudio.clueHelp")}</p>
+
+      <div className="flex flex-wrap items-end gap-3">
+        {picture ? (
+          <WordPicture id={picture} label={picture.replace(/^rebus-/, "")} size={72} />
+        ) : (
+          <span className="grid h-[72px] w-[72px] place-items-center rounded-2xl border-2 border-dashed border-line text-xs font-bold text-muted">{t("puzzleStudio.noPicture")}</span>
+        )}
+        <div className="min-w-[12rem] flex-1">
+          <label className={label} htmlFor="ps-pic">
+            {t("puzzleStudio.picture")}
+          </label>
+          <UISelect id="ps-pic" value={picture} onChange={(e) => setPictureChoice(e.target.value)}>
+            <option value="">{t("puzzleStudio.noPicture")}</option>
+            {PICTURE_NAMES.map((n) => (
+              <option key={n} value={`rebus-${n}`}>
+                {n}
+              </option>
+            ))}
+          </UISelect>
+          <p className="mt-1 text-xs text-muted">{t("puzzleStudio.pictureHelp")}</p>
+        </div>
+      </div>
 
       {error && (
         <p role="alert" className={themeSystem.flash("error")}>

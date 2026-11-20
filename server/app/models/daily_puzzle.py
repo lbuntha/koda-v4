@@ -9,6 +9,7 @@ from pydantic import Field
 from app.models.common import Model
 
 Lang = Literal["km", "en"]
+PICTURE = r"^(rebus-[a-z][a-z-]*)?$"
 Category = Literal["animal", "food", "home", "nature", "body", "travel", "school", "family", "colour", "number", "time", "action"]
 
 
@@ -22,12 +23,15 @@ class WordGuessIn(Model):
     word: str = Field(min_length=1, max_length=40)
     category: Category
     clue: Clue = Field(default_factory=Clue)
+    #: A drawing from the picture library (`rebus-cat`), or "" for none.
+    picture: str = Field(default="", max_length=48, pattern=PICTURE)
 
 
 class WordGuessPatch(Model):
     word: str | None = Field(default=None, min_length=1, max_length=40)
     category: Category | None = None
     clue: Clue | None = None
+    picture: str | None = Field(default=None, max_length=48, pattern=PICTURE)
 
 
 class StatusIn(Model):

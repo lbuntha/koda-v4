@@ -31,6 +31,8 @@ export interface WordGuessData {
   category: PuzzleCategory;
   /** The hint: a meaning or a short clue, in each language. */
   clue: { km: string; en: string };
+  /** A drawing from the picture library (`rebus-cat`), for children who cannot read the clue yet. */
+  picture?: string;
 }
 
 export interface DailyPuzzle {

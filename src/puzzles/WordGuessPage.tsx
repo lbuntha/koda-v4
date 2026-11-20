@@ -23,6 +23,7 @@ import { dailySnapshot, levelsFor, practicePuzzle, refreshDaily, subscribeDaily,
 import { slotKey, type DailyPuzzle, type PuzzleLang } from "./types";
 import { CategoryIcon } from "./ui/categoryIcon";
 import { TileKeyboard, easyTiles } from "./ui/TileKeyboard";
+import { WordPicture } from "./ui/WordPicture";
 import { WordTiles, WordTileStyles } from "./ui/WordTiles";
 import { WordGuessResult } from "./ui/WordGuessResult";
 import { MAX_GUESSES, keyStates, scoreGuess, solved, tileLabel, tilesOf } from "./wordGuess";
@@ -304,8 +305,19 @@ interface GameProps {
   onNext(): void;
 }
 
+/**
+ * The clue in the language on screen, falling back to the other one. A Khmer
+ * word's English clue is its meaning, so it reads "It means “cat”".
+ */
+export function clueLine(puzzle: DailyPuzzle, ui: string, means: (word: string) => string): string {
+  const { km, en } = puzzle.data.clue;
+  if (ui === "km" && km) return km;
+  if (en) return puzzle.lang === "km" ? means(en) : en;
+  return km;
+}
+
 const Game: React.FC<GameProps> = ({ puzzle, daily, slot, day, keys, onKeys, onAwardXp, onNext }) => {
-  const { t } = useT();
+  const { t, language } = useT();
   const answer = useMemo(() => tilesOf(puzzle.data.word, puzzle.lang), [puzzle]);
   const n = answer.length;
   const [game, setGame] = useState<GameRecord>(() => {
@@ -411,25 +423,26 @@ const Game: React.FC<GameProps> = ({ puzzle, daily, slot, day, keys, onKeys, onA
     if (daily) saveDaily(slot, day, next);
   };
 
-  const clue = puzzle.data.clue;
-  /* Khmer words: the meaning in English, else the Khmer clue. English words: the clue sentence. */
-  const meaning = clue.en || clue.km;
+  const clueText = clueLine(puzzle, language, (word) => t("wordGuess.means", { word }));
+  /* Easy tiles (the youngest, by default) show the picture from the start: a child who cannot read
+     the clue yet sees a cat and spells it. With all the letters, the picture is the first hint. */
+  const picture = puzzle.data.picture && (keys === "easy" || game.hints >= 1 || game.over) ? puzzle.data.picture : null;
 
   return (
     <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_minmax(0,26rem)] lg:items-start">
       <div className="flex min-w-0 flex-col gap-4">
         <section className={themeSystem.card("default", "flex items-center gap-3 p-3")} aria-label={t("wordGuess.clue")}>
-          <span className="grid h-12 w-12 shrink-0 place-items-center rounded-2xl bg-indigo-50 text-indigo-600 dark:bg-indigo-950/60 dark:text-indigo-300">
-            <CategoryIcon category={puzzle.data.category} />
-          </span>
+          {picture ? (
+            <WordPicture id={picture} label={t("wordGuess.picture")} size={72} />
+          ) : (
+            <span className="grid h-12 w-12 shrink-0 place-items-center rounded-2xl bg-indigo-50 text-indigo-600 dark:bg-indigo-950/60 dark:text-indigo-300">
+              <CategoryIcon category={puzzle.data.category} />
+            </span>
+          )}
           <div className="min-w-0 flex-1">
             <div className="text-xs font-bold uppercase tracking-wide text-muted">{t("wordGuess.clue")}</div>
             <div className="font-black text-ink">{t(`puzzles.category.${puzzle.data.category}`)}</div>
-            {game.hints >= 1 && meaning ? (
-              <div className="text-sm font-bold text-indigo-700 dark:text-indigo-300">
-                {puzzle.lang === "km" ? t("wordGuess.means", { word: meaning }) : meaning}
-              </div>
-            ) : null}
+            {game.hints >= 1 && clueText ? <div className="text-sm font-bold text-indigo-700 dark:text-indigo-300">{clueText}</div> : null}
             {game.hints >= 2 ? (
               <div className="text-sm font-bold text-indigo-700 dark:text-indigo-300">
                 {t("wordGuess.startsWith", {

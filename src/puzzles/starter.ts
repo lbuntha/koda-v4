@@ -34,6 +34,7 @@ export function parsePuzzle(value: unknown): DailyPuzzle | null {
       word,
       category: d.category as PuzzleCategory,
       clue: { km: typeof d.clue?.km === "string" ? d.clue.km : "", en: typeof d.clue?.en === "string" ? d.clue.en : "" },
+      ...(typeof d.picture === "string" && /^rebus-[a-z][a-z-]*$/.test(d.picture) ? { picture: d.picture } : {}),
     },
   };
 }

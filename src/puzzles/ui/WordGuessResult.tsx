@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { WordPicture } from "./WordPicture";
 import { ArrowRight, Copy, Flame, PartyPopper, Star } from "lucide-react";
 import { useT } from "../../lib/i18n";
 import { themeSystem } from "../../lib/themeSystem";
@@ -35,7 +36,9 @@ export const WordGuessResult: React.FC<{ puzzle: DailyPuzzle; game: GameRecord; 
   const streak = liveStreak(readPlay().streak, day);
   const cheers = ["wordGuess.win1", "wordGuess.win2", "wordGuess.win3", "wordGuess.win4", "wordGuess.win5", "wordGuess.win6"];
   const title = game.won ? t(cheers[Math.min(game.rows.length, MAX_GUESSES) - 1]) : t("wordGuess.lose");
-  const meaning = puzzle.data.clue.en || puzzle.data.clue.km;
+  /* Both languages after the game: the English meaning or clue, then the Khmer one. */
+  const { en, km } = puzzle.data.clue;
+  const lines = [en ? (puzzle.lang === "km" ? t("wordGuess.means", { word: en }) : en) : "", km].filter(Boolean);
 
   const copy = async () => {
     const text = shareText(puzzle, game, day);
@@ -53,11 +56,20 @@ export const WordGuessResult: React.FC<{ puzzle: DailyPuzzle; game: GameRecord; 
         {game.won ? <PartyPopper className="h-7 w-7" aria-hidden /> : <Star className="h-7 w-7" aria-hidden />}
       </div>
       <h3 className="text-2xl font-black text-ink">{title}</h3>
+      {puzzle.data.picture && (
+        <div className="flex justify-center">
+          <WordPicture id={puzzle.data.picture} label={puzzle.data.word} size={96} />
+        </div>
+      )}
 
       <div className="space-y-1">
         <div className="text-sm font-bold text-muted">{t("wordGuess.theWordWas")}</div>
         <div className={`text-4xl font-black text-ink ${puzzle.lang === "en" ? "uppercase tracking-wide" : ""}`}>{puzzle.data.word}</div>
-        {meaning ? <div className="text-sm font-bold text-body">{puzzle.lang === "km" ? t("wordGuess.means", { word: meaning }) : meaning}</div> : null}
+        {lines.map((line) => (
+          <div key={line} className="text-sm font-bold text-body">
+            {line}
+          </div>
+        ))}
         {puzzle.lang === "km" && <div className="text-sm text-muted">{t("wordGuess.spelled", { tiles: tiles.map((x) => tileLabel(x, "km")).join(" + ") })}</div>}
       </div>
 

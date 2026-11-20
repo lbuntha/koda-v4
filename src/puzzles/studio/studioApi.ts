@@ -11,7 +11,7 @@ export interface StudioWord {
   status: PuzzleStatus;
   owner: "koda" | "creator";
   seeded?: boolean;
-  data: { word: string; tiles: string[]; category: PuzzleCategory; clue: { km: string; en: string } };
+  data: { word: string; tiles: string[]; category: PuzzleCategory; clue: { km: string; en: string }; picture?: string };
   issues: string[];
   createdByName?: string;
   updatedAt?: string;
@@ -43,6 +43,8 @@ export interface WordIn {
   word: string;
   category: PuzzleCategory;
   clue: { km: string; en: string };
+  /** `rebus-cat`, or "" for none. */
+  picture: string;
 }
 
 const call = async <T>(path: string, options: { method?: "GET" | "POST" | "PATCH" | "PUT" | "DELETE"; body?: unknown } = {}): Promise<T> =>

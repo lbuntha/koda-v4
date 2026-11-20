@@ -1,4 +1,5 @@
 import React, { useCallback, useEffect, useState } from "react";
+import { WordPicture } from "../ui/WordPicture";
 import { Archive, Pencil, RotateCcw, Rocket, Send, Trash2, Undo2 } from "lucide-react";
 import { useT } from "../../lib/i18n";
 import { themeSystem } from "../../lib/themeSystem";
@@ -106,9 +107,13 @@ export const WordList: React.FC<{ canRun: boolean; initialStatus?: PuzzleStatus 
                 </li>
               ) : (
                 <li key={w.id} className={themeSystem.card("default", "flex flex-wrap items-center gap-3 p-3")}>
-                  <span className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-indigo-50 text-indigo-600 dark:bg-indigo-950/60 dark:text-indigo-300">
-                    <CategoryIcon category={w.data.category} className="h-5 w-5" />
-                  </span>
+                  {w.data.picture ? (
+                    <WordPicture id={w.data.picture} label={w.data.word} size={44} />
+                  ) : (
+                    <span className="grid h-11 w-11 shrink-0 place-items-center rounded-xl bg-indigo-50 text-indigo-600 dark:bg-indigo-950/60 dark:text-indigo-300">
+                      <CategoryIcon category={w.data.category} className="h-5 w-5" />
+                    </span>
+                  )}
                   <div className="min-w-0 flex-1">
                     <div className="flex flex-wrap items-center gap-2">
                       <span className={`text-xl font-black text-ink ${w.lang === "en" ? "uppercase" : ""}`}>{w.data.word}</span>

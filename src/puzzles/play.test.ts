@@ -73,3 +73,34 @@ describe("the daily words on this device", () => {
     for (let i = 0; i < 20; i++) expect(practicePuzzle(snap, slot, new Set([pick.id]))?.id).not.toBe(pick.id);
   });
 });
+
+describe("the starter words in both languages", () => {
+  it("every word has an English and a Khmer clue, and a Khmer clue never gives the word away", async () => {
+    const { STARTER_PUZZLES } = await import("./starter");
+    for (const p of STARTER_PUZZLES) {
+      expect(p.data.clue.en, p.id).not.toBe("");
+      expect(p.data.clue.km, p.id).not.toBe("");
+      if (p.lang === "km") expect(p.data.clue.km.includes(p.data.word), p.id).toBe(false);
+    }
+  });
+
+  it("every picture is a drawing the app has, and most words have one", async () => {
+    const { STARTER_PUZZLES } = await import("./starter");
+    const { iconArt } = await import("../rebus/icons/library");
+    const withPicture = STARTER_PUZZLES.filter((p) => p.data.picture);
+    for (const p of withPicture) expect(iconArt(p.data.picture!), p.id).not.toBeNull();
+    expect(withPicture.length).toBeGreaterThan(80);
+  });
+
+  it("shows the clue in the language on screen, and a Khmer word's English clue as its meaning", async () => {
+    const { clueLine } = await import("./WordGuessPage");
+    const { STARTER_PUZZLES } = await import("./starter");
+    const cat = STARTER_PUZZLES.find((p) => p.id === "wg-km-002")!;
+    const means = (w: string) => `It means "${w}"`;
+    expect(clueLine(cat, "km", means)).toBe(cat.data.clue.km);
+    expect(clueLine(cat, "en", means)).toBe('It means "cat"');
+    const dog = STARTER_PUZZLES.find((p) => p.id === "wg-en-002")!;
+    expect(clueLine(dog, "en", means)).toBe("A pet that barks");
+    expect(clueLine(dog, "km", means)).toBe(dog.data.clue.km);
+  });
+});

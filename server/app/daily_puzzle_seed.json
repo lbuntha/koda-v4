@@ -12,9 +12,10 @@
    "word": "ផ្ទះ",
    "category": "home",
    "clue": {
-    "km": "",
+    "km": "កន្លែងដែលគ្រួសាររស់នៅ",
     "en": "house"
-   }
+   },
+   "picture": "rebus-house"
   }
  },
  {
@@ -30,9 +31,10 @@
    "word": "ឆ្មា",
    "category": "animal",
    "clue": {
-    "km": "",
+    "km": "សត្វចិញ្ចឹមដែលចាប់កណ្ដុរ",
     "en": "cat"
-   }
+   },
+   "picture": "rebus-cat"
   }
  },
  {
@@ -48,9 +50,10 @@
    "word": "ត្រី",
    "category": "animal",
    "clue": {
-    "km": "",
+    "km": "សត្វដែលហែលក្នុងទឹក",
     "en": "fish"
-   }
+   },
+   "picture": "rebus-fish"
   }
  },
  {
@@ -66,9 +69,10 @@
    "word": "ភ្នំ",
    "category": "nature",
    "clue": {
-    "km": "",
+    "km": "ដីខ្ពស់ៗ ដែលយើងឡើងបាន",
     "en": "mountain"
-   }
+   },
+   "picture": "rebus-mountain"
   }
  },
  {
@@ -84,9 +88,10 @@
    "word": "ទឹក",
    "category": "nature",
    "clue": {
-    "km": "",
+    "km": "អ្វីដែលយើងផឹករៀងរាល់ថ្ងៃ",
     "en": "water"
-   }
+   },
+   "picture": "rebus-water"
   }
  },
  {
@@ -102,9 +107,10 @@
    "word": "ឆ្កែ",
    "category": "animal",
    "clue": {
-    "km": "",
+    "km": "សត្វចិញ្ចឹមដែលព្រុស ហើយយាមផ្ទះ",
     "en": "dog"
-   }
+   },
+   "picture": "rebus-dog"
   }
  },
  {
@@ -120,9 +126,10 @@
    "word": "ផ្កា",
    "category": "nature",
    "clue": {
-    "km": "",
+    "km": "វាមានក្លិនក្រអូប និងពណ៌ស្អាត",
     "en": "flower"
-   }
+   },
+   "picture": "rebus-flower"
   }
  },
  {
@@ -138,9 +145,10 @@
    "word": "បាយ",
    "category": "food",
    "clue": {
-    "km": "",
+    "km": "អាហារដែលយើងញ៉ាំរាល់ថ្ងៃ ធ្វើពីអង្ករ",
     "en": "rice"
-   }
+   },
+   "picture": "rebus-rice"
   }
  },
  {
@@ -156,9 +164,10 @@
    "word": "ចេក",
    "category": "food",
    "clue": {
-    "km": "",
+    "km": "ផ្លែឈើវែងៗ សំបករលោងពេលទុំ ស្វាផ្អែមណាស់",
     "en": "banana"
-   }
+   },
+   "picture": "rebus-banana"
   }
  },
  {
@@ -174,9 +183,10 @@
    "word": "ខ្លា",
    "category": "animal",
    "clue": {
-    "km": "",
+    "km": "សត្វធំក្នុងព្រៃ មានឆ្នូតខ្មៅ",
     "en": "tiger"
-   }
+   },
+   "picture": "rebus-tiger"
   }
  },
  {
@@ -192,9 +202,10 @@
    "word": "ចាន",
    "category": "home",
    "clue": {
-    "km": "",
+    "km": "យើងដាក់បាយលើវា ពេលញ៉ាំ",
     "en": "plate"
-   }
+   },
+   "picture": "rebus-plate"
   }
  },
  {
@@ -210,9 +221,10 @@
    "word": "ទូក",
    "category": "travel",
    "clue": {
-    "km": "",
+    "km": "យានដែលអណ្ដែតលើទឹក",
     "en": "boat"
-   }
+   },
+   "picture": "rebus-boat"
   }
  },
  {
@@ -228,9 +240,10 @@
    "word": "ឡាន",
    "category": "travel",
    "clue": {
-    "km": "",
+    "km": "យានមានកង់បួន ដែលបើកលើផ្លូវ",
     "en": "car"
-   }
+   },
+   "picture": "rebus-car"
   }
  },
  {
@@ -246,9 +259,10 @@
    "word": "កង់",
    "category": "travel",
    "clue": {
-    "km": "",
+    "km": "យានដែលយើងជិះ ហើយធាក់ដោយជើង",
     "en": "bicycle"
-   }
+   },
+   "picture": "rebus-bike"
   }
  },
  {
@@ -264,7 +278,7 @@
    "word": "រៀន",
    "category": "school",
    "clue": {
-    "km": "",
+    "km": "អ្វីដែលសិស្សធ្វើនៅសាលា",
     "en": "learn"
    }
   }
@@ -282,9 +296,10 @@
    "word": "អាន",
    "category": "school",
    "clue": {
-    "km": "",
+    "km": "អ្វីដែលយើងធ្វើជាមួយសៀវភៅ",
     "en": "read"
-   }
+   },
+   "picture": "rebus-book"
   }
  },
  {
@@ -300,9 +315,10 @@
    "word": "ថ្ងៃ",
    "category": "nature",
    "clue": {
-    "km": "",
+    "km": "ពេលដែលមេឃភ្លឺ មុនពេលយប់",
     "en": "sun / day"
-   }
+   },
+   "picture": "rebus-sun"
   }
  },
  {
@@ -318,9 +334,10 @@
    "word": "ដើម",
    "category": "nature",
    "clue": {
-    "km": "",
+    "km": "ផ្នែកធំ និងរឹងរបស់ឈើ ដែលមែកដុះចេញ",
     "en": "tree trunk"
-   }
+   },
+   "picture": "rebus-tree"
   }
  },
  {
@@ -336,9 +353,10 @@
    "word": "ពោត",
    "category": "food",
    "clue": {
-    "km": "",
+    "km": "មានគ្រាប់តូចៗជាជួរ យើងស្ងោរ ឬអាំងញ៉ាំ",
     "en": "corn"
-   }
+   },
+   "picture": "rebus-corn"
   }
  },
  {
@@ -354,9 +372,10 @@
    "word": "ជើង",
    "category": "body",
    "clue": {
-    "km": "",
+    "km": "ផ្នែកនៃខ្លួន ដែលយើងប្រើដើរ",
     "en": "foot"
-   }
+   },
+   "picture": "rebus-foot"
   }
  },
  {
@@ -372,9 +391,10 @@
    "word": "មាន់",
    "category": "animal",
    "clue": {
-    "km": "",
+    "km": "សត្វដែលពងស៊ុត ហើយរងាវពេលព្រឹក",
     "en": "chicken"
-   }
+   },
+   "picture": "rebus-hen"
   }
  },
  {
@@ -390,7 +410,7 @@
    "word": "ក្មេង",
    "category": "family",
    "clue": {
-    "km": "",
+    "km": "មនុស្សតូចៗ ដែលមិនទាន់ធំ",
     "en": "child"
    }
   }
@@ -408,9 +428,10 @@
    "word": "សាលា",
    "category": "school",
    "clue": {
-    "km": "",
+    "km": "កន្លែងដែលសិស្សទៅរៀន",
     "en": "school"
-   }
+   },
+   "picture": "rebus-school"
   }
  },
  {
@@ -426,7 +447,7 @@
    "word": "ម្ដាយ",
    "category": "family",
    "clue": {
-    "km": "",
+    "km": "ស្ត្រីដែលបង្កើត និងថែរក្សាយើង",
     "en": "mother"
    }
   }
@@ -444,7 +465,7 @@
    "word": "ឪពុក",
    "category": "family",
    "clue": {
-    "km": "",
+    "km": "បុរសដែលបង្កើត និងថែរក្សាយើង",
     "en": "father"
    }
   }
@@ -462,7 +483,7 @@
    "word": "ក្របី",
    "category": "animal",
    "clue": {
-    "km": "",
+    "km": "សត្វធំពណ៌ខ្មៅ ដែលចូលចិត្តត្រាំភក់",
     "en": "buffalo"
    }
   }
@@ -480,9 +501,10 @@
    "word": "ដំរី",
    "category": "animal",
    "clue": {
-    "km": "",
+    "km": "សត្វធំបំផុត មានប្រមោយវែង",
     "en": "elephant"
-   }
+   },
+   "picture": "rebus-elephant"
   }
  },
  {
@@ -498,9 +520,10 @@
    "word": "ភ្លៀង",
    "category": "nature",
    "clue": {
-    "km": "",
+    "km": "ទឹកដែលធ្លាក់ពីពពក",
     "en": "rain"
-   }
+   },
+   "picture": "rebus-rain"
   }
  },
  {
@@ -516,9 +539,10 @@
    "word": "ខ្យល់",
    "category": "nature",
    "clue": {
-    "km": "",
+    "km": "អ្វីដែលបក់ ហើយយើងមើលមិនឃើញ",
     "en": "wind"
-   }
+   },
+   "picture": "rebus-wind"
   }
  },
  {
@@ -534,9 +558,10 @@
    "word": "ផ្លូវ",
    "category": "travel",
    "clue": {
-    "km": "",
+    "km": "កន្លែងដែលឡាន និងម៉ូតូបើកលើវា",
     "en": "road"
-   }
+   },
+   "picture": "rebus-road"
   }
  },
  {
@@ -552,9 +577,10 @@
    "word": "ក្រូច",
    "category": "food",
    "clue": {
-    "km": "",
+    "km": "ផ្លែឈើជូរៗ ដែលយើងច្របាច់យកទឹក",
     "en": "orange"
-   }
+   },
+   "picture": "rebus-orange"
   }
  },
  {
@@ -570,7 +596,7 @@
    "word": "ស្វាយ",
    "category": "food",
    "clue": {
-    "km": "",
+    "km": "ផ្លែឈើផ្អែមពេលទុំ ដុះច្រើននៅកម្ពុជា",
     "en": "mango"
    }
   }
@@ -588,9 +614,10 @@
    "word": "ផ្កាយ",
    "category": "nature",
    "clue": {
-    "km": "",
+    "km": "ពន្លឺតូចៗ ដែលភ្លឺលើមេឃពេលយប់",
     "en": "star"
-   }
+   },
+   "picture": "rebus-star"
   }
  },
  {
@@ -606,9 +633,10 @@
    "word": "ស្លឹក",
    "category": "nature",
    "clue": {
-    "km": "",
+    "km": "ផ្នែកពណ៌បៃតងរបស់ដើមឈើ",
     "en": "leaf"
-   }
+   },
+   "picture": "rebus-leaf"
   }
  },
  {
@@ -624,9 +652,10 @@
    "word": "ក្អែក",
    "category": "animal",
    "clue": {
-    "km": "",
+    "km": "បក្សីពណ៌ខ្មៅ ដែលយំខ្លាំងៗ",
     "en": "crow"
-   }
+   },
+   "picture": "rebus-crow"
   }
  },
  {
@@ -642,7 +671,7 @@
    "word": "ត្រប់",
    "category": "food",
    "clue": {
-    "km": "",
+    "km": "បន្លែពណ៌ស្វាយ ដែលយើងអាំង ឬឆា",
     "en": "eggplant"
    }
   }
@@ -660,9 +689,10 @@
    "word": "ភ្នែក",
    "category": "body",
    "clue": {
-    "km": "",
+    "km": "ផ្នែកនៃមុខ ដែលយើងប្រើមើល",
     "en": "eye"
-   }
+   },
+   "picture": "rebus-eye"
   }
  },
  {
@@ -678,9 +708,10 @@
    "word": "ច្រមុះ",
    "category": "body",
    "clue": {
-    "km": "",
+    "km": "ផ្នែកនៃមុខ ដែលយើងប្រើហិត",
     "en": "nose"
-   }
+   },
+   "picture": "rebus-nose"
   }
  },
  {
@@ -696,9 +727,10 @@
    "word": "ក្បាល",
    "category": "body",
    "clue": {
-    "km": "",
+    "km": "ផ្នែកខាងលើនៃខ្លួន ដែលមានសក់",
     "en": "head"
-   }
+   },
+   "picture": "rebus-head"
   }
  },
  {
@@ -714,9 +746,10 @@
    "word": "cat",
    "category": "animal",
    "clue": {
-    "km": "",
+    "km": "សត្វចិញ្ចឹមដែលយំ មៀវៗ",
     "en": "A pet that says meow"
-   }
+   },
+   "picture": "rebus-cat"
   }
  },
  {
@@ -732,9 +765,10 @@
    "word": "dog",
    "category": "animal",
    "clue": {
-    "km": "",
+    "km": "សត្វចិញ្ចឹមដែលព្រុស",
     "en": "A pet that barks"
-   }
+   },
+   "picture": "rebus-dog"
   }
  },
  {
@@ -750,9 +784,10 @@
    "word": "sun",
    "category": "nature",
    "clue": {
-    "km": "",
+    "km": "វាភ្លឺលើមេឃពេលថ្ងៃ",
     "en": "It shines in the day sky"
-   }
+   },
+   "picture": "rebus-sun"
   }
  },
  {
@@ -768,9 +803,10 @@
    "word": "hat",
    "category": "home",
    "clue": {
-    "km": "",
+    "km": "យើងពាក់វានៅលើក្បាល",
     "en": "You wear it on your head"
-   }
+   },
+   "picture": "rebus-hat"
   }
  },
  {
@@ -786,9 +822,10 @@
    "word": "bus",
    "category": "travel",
    "clue": {
-    "km": "",
+    "km": "ឡានធំ សម្រាប់មនុស្សច្រើននាក់",
     "en": "A big car for many people"
-   }
+   },
+   "picture": "rebus-bus"
   }
  },
  {
@@ -804,9 +841,10 @@
    "word": "cup",
    "category": "home",
    "clue": {
-    "km": "",
+    "km": "យើងផឹកទឹកពីវា",
     "en": "You drink from it"
-   }
+   },
+   "picture": "rebus-cup"
   }
  },
  {
@@ -822,9 +860,10 @@
    "word": "pig",
    "category": "animal",
    "clue": {
-    "km": "",
+    "km": "សត្វពណ៌ផ្កាឈូក នៅកសិដ្ឋាន",
     "en": "A pink farm animal"
-   }
+   },
+   "picture": "rebus-pig"
   }
  },
  {
@@ -840,9 +879,10 @@
    "word": "egg",
    "category": "food",
    "clue": {
-    "km": "",
+    "km": "មេមាន់ពងវា",
     "en": "A hen lays it"
-   }
+   },
+   "picture": "rebus-egg"
   }
  },
  {
@@ -858,9 +898,10 @@
    "word": "bed",
    "category": "home",
    "clue": {
-    "km": "",
+    "km": "យើងគេងលើវា",
     "en": "You sleep in it"
-   }
+   },
+   "picture": "rebus-bed"
   }
  },
  {
@@ -876,9 +917,10 @@
    "word": "fox",
    "category": "animal",
    "clue": {
-    "km": "",
+    "km": "សត្វព្រៃដ៏ឆ្លាត មានកន្ទុយក្រាស់",
     "en": "A clever wild animal with a bushy tail"
-   }
+   },
+   "picture": "rebus-fox"
   }
  },
  {
@@ -894,9 +936,10 @@
    "word": "cow",
    "category": "animal",
    "clue": {
-    "km": "",
+    "km": "សត្វនៅកសិដ្ឋាន ដែលឱ្យទឹកដោះ",
     "en": "A farm animal that gives milk"
-   }
+   },
+   "picture": "rebus-cow"
   }
  },
  {
@@ -912,9 +955,10 @@
    "word": "box",
    "category": "home",
    "clue": {
-    "km": "",
+    "km": "យើងអាចដាក់របស់ចូលក្នុងវា",
     "en": "You can put things inside it"
-   }
+   },
+   "picture": "rebus-box"
   }
  },
  {
@@ -930,7 +974,7 @@
    "word": "pen",
    "category": "school",
    "clue": {
-    "km": "",
+    "km": "យើងសរសេរជាមួយវា",
     "en": "You write with it"
    }
   }
@@ -948,9 +992,10 @@
    "word": "ant",
    "category": "animal",
    "clue": {
-    "km": "",
+    "km": "សត្វល្អិតតូចៗ ដែលខំធ្វើការ",
     "en": "A tiny insect that works hard"
-   }
+   },
+   "picture": "rebus-ant"
   }
  },
  {
@@ -966,9 +1011,10 @@
    "word": "bee",
    "category": "animal",
    "clue": {
-    "km": "",
+    "km": "វាធ្វើទឹកឃ្មុំ",
     "en": "It makes honey"
-   }
+   },
+   "picture": "rebus-bee"
   }
  },
  {
@@ -984,9 +1030,10 @@
    "word": "owl",
    "category": "animal",
    "clue": {
-    "km": "",
+    "km": "បក្សីដែលភ្ញាក់ពេលយប់",
     "en": "A bird that is awake at night"
-   }
+   },
+   "picture": "rebus-owl"
   }
  },
  {
@@ -1002,9 +1049,10 @@
    "word": "net",
    "category": "home",
    "clue": {
-    "km": "",
+    "km": "ប្រើសម្រាប់ចាប់ត្រី",
     "en": "Used to catch fish"
-   }
+   },
+   "picture": "rebus-net"
   }
  },
  {
@@ -1020,9 +1068,10 @@
    "word": "map",
    "category": "school",
    "clue": {
-    "km": "",
+    "km": "វាបង្ហាញផ្លូវដល់យើង",
     "en": "It shows you the way"
-   }
+   },
+   "picture": "rebus-map"
   }
  },
  {
@@ -1038,9 +1087,10 @@
    "word": "jam",
    "category": "food",
    "clue": {
-    "km": "",
+    "km": "ផ្លែឈើផ្អែម សម្រាប់លាបលើនំប៉័ង",
     "en": "Sweet fruit you spread on bread"
-   }
+   },
+   "picture": "rebus-jam"
   }
  },
  {
@@ -1056,9 +1106,10 @@
    "word": "fish",
    "category": "animal",
    "clue": {
-    "km": "",
+    "km": "វាហែលក្នុងទឹក",
     "en": "It swims in water"
-   }
+   },
+   "picture": "rebus-fish"
   }
  },
  {
@@ -1074,9 +1125,10 @@
    "word": "frog",
    "category": "animal",
    "clue": {
-    "km": "",
+    "km": "វាលោត ហើយរស់នៅក្បែរទឹក",
     "en": "It jumps and says ribbit"
-   }
+   },
+   "picture": "rebus-frog"
   }
  },
  {
@@ -1092,9 +1144,10 @@
    "word": "milk",
    "category": "food",
    "clue": {
-    "km": "",
+    "km": "ភេសជ្ជៈពណ៌ស ពីគោ",
     "en": "A white drink from cows"
-   }
+   },
+   "picture": "rebus-milk"
   }
  },
  {
@@ -1110,9 +1163,10 @@
    "word": "bird",
    "category": "animal",
    "clue": {
-    "km": "",
+    "km": "វាមានស្លាប ហើយច្រៀង",
     "en": "It has wings and sings"
-   }
+   },
+   "picture": "rebus-bird"
   }
  },
  {
@@ -1128,9 +1182,10 @@
    "word": "cake",
    "category": "food",
    "clue": {
-    "km": "",
+    "km": "យើងញ៉ាំវានៅថ្ងៃខួបកំណើត",
     "en": "You eat it on your birthday"
-   }
+   },
+   "picture": "rebus-cake"
   }
  },
  {
@@ -1146,9 +1201,10 @@
    "word": "tree",
    "category": "nature",
    "clue": {
-    "km": "",
+    "km": "វាមានស្លឹក និងមែក",
     "en": "It has leaves and branches"
-   }
+   },
+   "picture": "rebus-tree"
   }
  },
  {
@@ -1164,9 +1220,10 @@
    "word": "star",
    "category": "nature",
    "clue": {
-    "km": "",
+    "km": "វាភ្លឺភ្លឹបភ្លែតៗពេលយប់",
     "en": "It twinkles at night"
-   }
+   },
+   "picture": "rebus-star"
   }
  },
  {
@@ -1182,9 +1239,10 @@
    "word": "ball",
    "category": "school",
    "clue": {
-    "km": "",
+    "km": "យើងទាត់ ឬបោះវា",
     "en": "You kick it or throw it"
-   }
+   },
+   "picture": "rebus-ball"
   }
  },
  {
@@ -1200,9 +1258,10 @@
    "word": "rain",
    "category": "nature",
    "clue": {
-    "km": "",
+    "km": "ទឹកដែលធ្លាក់ពីពពក",
     "en": "Water falling from the clouds"
-   }
+   },
+   "picture": "rebus-rain"
   }
  },
  {
@@ -1218,9 +1277,10 @@
    "word": "duck",
    "category": "animal",
    "clue": {
-    "km": "",
+    "km": "វាហែលទឹក ហើយយំ ក្វាក់ៗ",
     "en": "It swims and says quack"
-   }
+   },
+   "picture": "rebus-duck"
   }
  },
  {
@@ -1236,9 +1296,10 @@
    "word": "book",
    "category": "school",
    "clue": {
-    "km": "",
+    "km": "យើងអានវា",
     "en": "You read it"
-   }
+   },
+   "picture": "rebus-book"
   }
  },
  {
@@ -1254,9 +1315,10 @@
    "word": "moon",
    "category": "nature",
    "clue": {
-    "km": "",
+    "km": "វាភ្លឺលើមេឃពេលយប់",
     "en": "It shines at night"
-   }
+   },
+   "picture": "rebus-moon"
   }
  },
  {
@@ -1272,9 +1334,10 @@
    "word": "ship",
    "category": "travel",
    "clue": {
-    "km": "",
+    "km": "ទូកធំណាស់",
     "en": "A very big boat"
-   }
+   },
+   "picture": "rebus-ship"
   }
  },
  {
@@ -1290,9 +1353,10 @@
    "word": "lion",
    "category": "animal",
    "clue": {
-    "km": "",
+    "km": "ស្ដេចនៃសត្វ",
     "en": "The king of the animals"
-   }
+   },
+   "picture": "rebus-lion"
   }
  },
  {
@@ -1308,9 +1372,10 @@
    "word": "kite",
    "category": "nature",
    "clue": {
-    "km": "",
+    "km": "វាហោះលើមេឃ ជាប់នឹងខ្សែវែង",
     "en": "It flies on a long string"
-   }
+   },
+   "picture": "rebus-kite"
   }
  },
  {
@@ -1326,9 +1391,10 @@
    "word": "bell",
    "category": "school",
    "clue": {
-    "km": "",
+    "km": "វារោទ៍ ដើម្បីចាប់ផ្ដើមម៉ោងរៀន",
     "en": "It rings to start the class"
-   }
+   },
+   "picture": "rebus-bell"
   }
  },
  {
@@ -1344,9 +1410,10 @@
    "word": "sock",
    "category": "home",
    "clue": {
-    "km": "",
+    "km": "យើងពាក់វា នៅក្នុងស្បែកជើង",
     "en": "You wear it inside your shoe"
-   }
+   },
+   "picture": "rebus-sock"
   }
  },
  {
@@ -1362,9 +1429,10 @@
    "word": "hand",
    "category": "body",
    "clue": {
-    "km": "",
+    "km": "វាមានម្រាមប្រាំ",
     "en": "It has five fingers"
-   }
+   },
+   "picture": "rebus-hand"
   }
  },
  {
@@ -1380,7 +1448,7 @@
    "word": "nest",
    "category": "nature",
    "clue": {
-    "km": "",
+    "km": "ផ្ទះរបស់បក្សី",
     "en": "A bird's home"
    }
   }
@@ -1398,9 +1466,10 @@
    "word": "apple",
    "category": "food",
    "clue": {
-    "km": "",
+    "km": "ផ្លែឈើពណ៌ក្រហម ឬបៃតង",
     "en": "A red or green fruit"
-   }
+   },
+   "picture": "rebus-apple"
   }
  },
  {
@@ -1416,9 +1485,10 @@
    "word": "horse",
    "category": "animal",
    "clue": {
-    "km": "",
+    "km": "សត្វដែលយើងអាចជិះបាន",
     "en": "An animal you can ride"
-   }
+   },
+   "picture": "rebus-horse"
   }
  },
  {
@@ -1434,9 +1504,10 @@
    "word": "chair",
    "category": "home",
    "clue": {
-    "km": "",
+    "km": "យើងអង្គុយលើវា",
     "en": "You sit on it"
-   }
+   },
+   "picture": "rebus-chair"
   }
  },
  {
@@ -1452,9 +1523,10 @@
    "word": "water",
    "category": "nature",
    "clue": {
-    "km": "",
+    "km": "យើងផឹកវារៀងរាល់ថ្ងៃ",
     "en": "You drink it every day"
-   }
+   },
+   "picture": "rebus-water"
   }
  },
  {
@@ -1470,9 +1542,10 @@
    "word": "house",
    "category": "home",
    "clue": {
-    "km": "",
+    "km": "កន្លែងដែលគ្រួសាររស់នៅ",
     "en": "A home for a family"
-   }
+   },
+   "picture": "rebus-house"
   }
  },
  {
@@ -1488,7 +1561,7 @@
    "word": "mango",
    "category": "food",
    "clue": {
-    "km": "",
+    "km": "ផ្លែឈើផ្អែម ដែលដុះនៅកម្ពុជា",
     "en": "A sweet fruit that grows in Cambodia"
    }
   }
@@ -1506,9 +1579,10 @@
    "word": "tiger",
    "category": "animal",
    "clue": {
-    "km": "",
+    "km": "ឆ្មាធំ មានឆ្នូត",
     "en": "A big cat with stripes"
-   }
+   },
+   "picture": "rebus-tiger"
   }
  },
  {
@@ -1524,9 +1598,10 @@
    "word": "plant",
    "category": "nature",
    "clue": {
-    "km": "",
+    "km": "វាដុះនៅក្នុងដី",
     "en": "It grows in soil"
-   }
+   },
+   "picture": "rebus-plant"
   }
  },
  {
@@ -1542,9 +1617,10 @@
    "word": "bread",
    "category": "food",
    "clue": {
-    "km": "",
+    "km": "នំដុត ធ្វើពីម្សៅ",
     "en": "Baked food made from flour"
-   }
+   },
+   "picture": "rebus-bread"
   }
  },
  {
@@ -1560,7 +1636,7 @@
    "word": "smile",
    "category": "body",
    "clue": {
-    "km": "",
+    "km": "អ្វីដែលមុខយើងធ្វើ ពេលសប្បាយ",
     "en": "What your face does when you are happy"
    }
   }
@@ -1578,9 +1654,10 @@
    "word": "cloud",
    "category": "nature",
    "clue": {
-    "km": "",
+    "km": "ពណ៌ស និងទន់ៗ នៅលើមេឃ",
     "en": "White and fluffy in the sky"
-   }
+   },
+   "picture": "rebus-cloud"
   }
  },
  {
@@ -1596,9 +1673,10 @@
    "word": "green",
    "category": "nature",
    "clue": {
-    "km": "",
+    "km": "ពណ៌នៃស្លឹកឈើ",
     "en": "The colour of leaves"
-   }
+   },
+   "picture": "rebus-green"
   }
  },
  {
@@ -1614,9 +1692,10 @@
    "word": "train",
    "category": "travel",
    "clue": {
-    "km": "",
+    "km": "វារត់លើផ្លូវដែក",
     "en": "It runs on tracks"
-   }
+   },
+   "picture": "rebus-train"
   }
  },
  {
@@ -1632,9 +1711,10 @@
    "word": "sheep",
    "category": "animal",
    "clue": {
-    "km": "",
+    "km": "សត្វនៅកសិដ្ឋាន មានរោមទន់",
     "en": "A farm animal with soft wool"
-   }
+   },
+   "picture": "rebus-sheep"
   }
  },
  {
@@ -1650,9 +1730,10 @@
    "word": "snake",
    "category": "animal",
    "clue": {
-    "km": "",
+    "km": "សត្វវែង គ្មានជើង",
     "en": "A long animal with no legs"
-   }
+   },
+   "picture": "rebus-snake"
   }
  },
  {
@@ -1668,9 +1749,10 @@
    "word": "table",
    "category": "home",
    "clue": {
-    "km": "",
+    "km": "យើងញ៉ាំអាហារនៅលើវា",
     "en": "You eat your meals at it"
-   }
+   },
+   "picture": "rebus-table"
   }
  },
  {
@@ -1686,9 +1768,10 @@
    "word": "clock",
    "category": "home",
    "clue": {
-    "km": "",
+    "km": "វាប្រាប់ម៉ោង",
     "en": "It tells the time"
-   }
+   },
+   "picture": "rebus-clock"
   }
  },
  {
@@ -1704,9 +1787,10 @@
    "word": "zebra",
    "category": "animal",
    "clue": {
-    "km": "",
+    "km": "សត្វដូចសេះ មានឆ្នូតខ្មៅ និងស",
     "en": "A horse with black and white stripes"
-   }
+   },
+   "picture": "rebus-zebra"
   }
  },
  {
@@ -1722,9 +1806,10 @@
    "word": "light",
    "category": "home",
    "clue": {
-    "km": "",
+    "km": "វាជួយឱ្យយើងមើលឃើញពេលងងឹត",
     "en": "It helps you see in the dark"
-   }
+   },
+   "picture": "rebus-light"
   }
  },
  {
@@ -1740,9 +1825,10 @@
    "word": "earth",
    "category": "nature",
    "clue": {
-    "km": "",
+    "km": "ភពដែលយើងរស់នៅ",
     "en": "The planet we live on"
-   }
+   },
+   "picture": "rebus-earth"
   }
  }
 ]
