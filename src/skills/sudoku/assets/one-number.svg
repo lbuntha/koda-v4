@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+  <title>Only One Number</title>
+  <rect x="8" y="8" width="84" height="84" rx="14" fill="#F4F2FF" stroke="#3B2F8F" stroke-width="4"/>
+  <rect x="26" y="26" width="48" height="48" rx="10" fill="#C9F2E2" stroke="#10B981" stroke-width="4"/>
+  <text x="50" y="63" text-anchor="middle" font-family="Arial, sans-serif" font-weight="900" font-size="34" fill="#10B981">7</text>
+  <path d="M12 14 L24 26 M24 14 L12 26" stroke="#E11D74" stroke-width="4" stroke-linecap="round"/>
+  <path d="M76 14 L88 26 M88 14 L76 26" stroke="#E11D74" stroke-width="4" stroke-linecap="round"/>
+  <path d="M12 78 L24 90 M24 78 L12 90" stroke="#E11D74" stroke-width="4" stroke-linecap="round"/>
+  <path d="M76 78 L88 90 M88 78 L76 90" stroke="#E11D74" stroke-width="4" stroke-linecap="round"/>
+</svg>

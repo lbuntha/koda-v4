@@ -1585,6 +1585,144 @@
       "lessons": [
         "dot-connect/practice-dot-connect"
       ]
+    },
+    {
+      "id": "u122",
+      "unitNumber": 122,
+      "title": "Unit 122: Sudoku — Picture Sudoku",
+      "description": "Four pictures, each once in every row, column and box.",
+      "icon": "sudoku-pictures",
+      "lessons": [
+        "sudoku/first-picture-sudoku",
+        "sudoku/one-picture-missing",
+        "sudoku/picture-boxes",
+        "sudoku/picture-rows-and-boxes",
+        "sudoku/picture-sudoku-star"
+      ]
+    },
+    {
+      "id": "u123",
+      "unitNumber": 123,
+      "title": "Unit 123: Sudoku — Last Empty Cell",
+      "description": "Fill the row, column or box with one cell left, then whole 4×4 and 6×6 grids.",
+      "icon": "sudoku-last-cell",
+      "lessons": [
+        "sudoku/spot-last-cell",
+        "sudoku/number-sudoku-4",
+        "sudoku/full-4x4",
+        "sudoku/spot-last-cell-6",
+        "sudoku/first-6x6"
+      ]
+    },
+    {
+      "id": "u124",
+      "unitNumber": 124,
+      "title": "Unit 124: Sudoku — Scanning",
+      "description": "Follow a number's rows and columns into a box to find its one place.",
+      "icon": "sudoku-scan-box",
+      "lessons": [
+        "sudoku/spot-scan-6",
+        "sudoku/scan-6x6",
+        "sudoku/spot-scan-9",
+        "sudoku/first-9x9",
+        "sudoku/scan-9x9"
+      ]
+    },
+    {
+      "id": "u125",
+      "unitNumber": 125,
+      "title": "Unit 125: Sudoku — Rows and Columns",
+      "description": "Scan along a row or column to find where a number must go.",
+      "icon": "sudoku-scan-line",
+      "lessons": [
+        "sudoku/spot-line",
+        "sudoku/line-puzzle",
+        "sudoku/spot-line-fast",
+        "sudoku/line-puzzle-hard",
+        "sudoku/spot-scan-mix"
+      ]
+    },
+    {
+      "id": "u126",
+      "unitNumber": 126,
+      "title": "Unit 126: Sudoku — Only One Number",
+      "description": "Find the cell where every number but one is used.",
+      "icon": "sudoku-one-number",
+      "lessons": [
+        "sudoku/spot-naked-single",
+        "sudoku/naked-single-puzzle",
+        "sudoku/spot-naked-single-fast",
+        "sudoku/naked-single-hard",
+        "sudoku/singles-speed-run"
+      ]
+    },
+    {
+      "id": "u127",
+      "unitNumber": 127,
+      "title": "Unit 127: Sudoku — Notes and Pointing",
+      "description": "Use notes: a number's notes in a box point along a line, or a line claims a box.",
+      "icon": "sudoku-pointing",
+      "lessons": [
+        "sudoku/spot-pointing",
+        "sudoku/pointing-puzzle",
+        "sudoku/spot-claiming",
+        "sudoku/claiming-puzzle",
+        "sudoku/spot-boxes-and-lines"
+      ]
+    },
+    {
+      "id": "u128",
+      "unitNumber": 128,
+      "title": "Unit 128: Sudoku — Pairs",
+      "description": "Two cells, two numbers: naked and hidden pairs clear notes.",
+      "icon": "sudoku-pairs",
+      "lessons": [
+        "sudoku/spot-naked-pair",
+        "sudoku/naked-pair-puzzle",
+        "sudoku/spot-hidden-pair",
+        "sudoku/hidden-pair-puzzle",
+        "sudoku/spot-pairs"
+      ]
+    },
+    {
+      "id": "u129",
+      "unitNumber": 129,
+      "title": "Unit 129: Sudoku — X-Wing",
+      "description": "Four corners of a square clear a number from two whole lines.",
+      "icon": "sudoku-x-wing",
+      "lessons": [
+        "sudoku/spot-x-wing",
+        "sudoku/x-wing-puzzle",
+        "sudoku/expert-speed-run",
+        "sudoku/expert-puzzle",
+        "sudoku/sudoku-master"
+      ]
+    },
+    {
+      "id": "u130",
+      "unitNumber": 130,
+      "title": "Unit 130: Practice — Sudoku: Pictures, Last Cell, Scanning and Lines",
+      "description": "Timed practice without hints, to get faster at every technique.",
+      "icon": "kit-repeat",
+      "lessons": [
+        "sudoku/practice-picture-sudoku",
+        "sudoku/practice-last-cell",
+        "sudoku/practice-scanning",
+        "sudoku/practice-rows-and-columns"
+      ]
+    },
+    {
+      "id": "u131",
+      "unitNumber": 131,
+      "title": "Unit 131: Practice — Sudoku: Singles, Pointing, Pairs and X-Wing",
+      "description": "Timed practice without hints, to get faster at every technique.",
+      "icon": "kit-repeat",
+      "lessons": [
+        "sudoku/practice-only-one-number",
+        "sudoku/practice-pointing",
+        "sudoku/practice-pairs",
+        "sudoku/practice-x-wing"
+      ]
     }
   ]
 }

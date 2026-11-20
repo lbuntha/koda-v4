@@ -27326,5 +27326,2126 @@
         ]
       }
     ]
+  },
+  {
+    "id": "sudoku",
+    "name": "Sudoku",
+    "version": "0.1.0",
+    "description": "Sudoku taught one solving technique at a time, from picture grids for five-year-olds to X-Wings. Full puzzles that need each technique, and timed drills to spot it fast.",
+    "category": "core",
+    "author": "Koda Math Lab",
+    "iconName": "Grid3x3",
+    "tagline": "Every row, column and box, once.",
+    "thumbnail": "sudoku-quest",
+    "status": "draft",
+    "audience": {
+      "ages": [
+        5,
+        16
+      ],
+      "category": "logic-and-planning"
+    },
+    "topics": [
+      "logic",
+      "sudoku",
+      "patterns",
+      "reasoning"
+    ],
+    "teaches": [
+      "sudoku-picture-solver",
+      "sudoku-full-house",
+      "sudoku-scanner",
+      "sudoku-line-scanner",
+      "sudoku-single-finder",
+      "sudoku-pointer",
+      "sudoku-pair-finder",
+      "sudoku-x-wing"
+    ],
+    "requires": [],
+    "features": [
+      {
+        "id": "audio_speech",
+        "name": "Spoken voice",
+        "description": "Reads the lesson prompt aloud. Turn off for a silent lesson.",
+        "isEnabled": true,
+        "tag": "Audio"
+      },
+      {
+        "id": "sound_chimes",
+        "name": "Sound chimes",
+        "description": "Plays a short sound when a number is placed, and when a puzzle is solved or a move is found.",
+        "isEnabled": true,
+        "tag": "Audio"
+      },
+      {
+        "id": "haptic_feedback",
+        "name": "Haptic vibration",
+        "description": "Adds a small vibration when a puzzle is solved or a move is found.",
+        "isEnabled": true,
+        "tag": "Haptic"
+      }
+    ],
+    "settings": {
+      "speechRate": 0.95
+    },
+    "settingsSchema": [
+      {
+        "key": "speechRate",
+        "label": "Speech rate",
+        "help": "How fast Koda reads the prompt aloud.",
+        "type": "number",
+        "min": 0.5,
+        "max": 2,
+        "step": 0.05,
+        "unit": "x"
+      }
+    ],
+    "lessons": [
+      {
+        "id": "first-picture-sudoku",
+        "title": "Your First Picture Sudoku",
+        "concept": "One of Each Picture",
+        "conceptKey": "sudoku-picture-solver",
+        "requires": [],
+        "activity": "sudoku/game",
+        "params": {
+          "level": 1,
+          "question": {
+            "size": 4,
+            "technique": "full-house",
+            "blanks": 3,
+            "pictures": true,
+            "questionsPerRound": 5
+          },
+          "play": {
+            "targetObjective": "Fill the 4×4 grid so every row, column and box has each picture once.",
+            "stepByStep": [
+              "Count the empty cells in each row, column and box.",
+              "Stop at one with a single empty cell.",
+              "Say which number is missing, and put it in."
+            ],
+            "kidTip": "Find the row, column or box with just one empty cell. The missing number goes there.",
+            "audioPrompt": "Put each picture once in every row, column and box."
+          }
+        },
+        "difficulty": "Easy",
+        "icon": "sudoku-pictures",
+        "iconName": "star",
+        "iconTone": "pink",
+        "pedagogyTip": "Every puzzle needs full house and nothing harder, so the technique is practised, not luck.",
+        "standards": [
+          "CCSS.MP1",
+          "CCSS.MP7"
+        ],
+        "trajectoryLevel": "sudoku-solver",
+        "ageBand": [
+          5,
+          7
+        ]
+      },
+      {
+        "id": "one-picture-missing",
+        "title": "One Picture Missing",
+        "concept": "Find the Missing Picture",
+        "conceptKey": "sudoku-picture-solver",
+        "requires": [
+          "sudoku-picture-solver"
+        ],
+        "activity": "sudoku/game",
+        "params": {
+          "level": 2,
+          "question": {
+            "size": 4,
+            "technique": "full-house",
+            "blanks": 5,
+            "pictures": true,
+            "questionsPerRound": 5
+          },
+          "play": {
+            "targetObjective": "Fill the 4×4 grid so every row, column and box has each picture once.",
+            "stepByStep": [
+              "Count the empty cells in each row, column and box.",
+              "Stop at one with a single empty cell.",
+              "Say which number is missing, and put it in."
+            ],
+            "kidTip": "Find the row, column or box with just one empty cell. The missing number goes there.",
+            "audioPrompt": "Put each picture once in every row, column and box."
+          }
+        },
+        "difficulty": "Easy",
+        "icon": "sudoku-pictures",
+        "iconName": "star",
+        "iconTone": "pink",
+        "pedagogyTip": "Every puzzle needs full house and nothing harder, so the technique is practised, not luck.",
+        "standards": [
+          "CCSS.MP1",
+          "CCSS.MP7"
+        ],
+        "trajectoryLevel": "sudoku-solver",
+        "ageBand": [
+          5,
+          7
+        ]
+      },
+      {
+        "id": "picture-boxes",
+        "title": "Look at the Box",
+        "concept": "Each Box Has Every Picture",
+        "conceptKey": "sudoku-picture-solver",
+        "requires": [
+          "sudoku-picture-solver"
+        ],
+        "activity": "sudoku/game",
+        "params": {
+          "level": 3,
+          "question": {
+            "size": 4,
+            "technique": "hidden-single-box",
+            "blanks": 7,
+            "pictures": true,
+            "questionsPerRound": 5
+          },
+          "play": {
+            "targetObjective": "Fill the 4×4 grid so every row, column and box has each picture once.",
+            "stepByStep": [
+              "Choose a number that appears often.",
+              "Look at a box that does not have it yet.",
+              "Follow the rows and columns that already have it. One cell is left."
+            ],
+            "kidTip": "Pick a number. Follow its rows and columns into a box. The one cell they do not cross is where it goes.",
+            "audioPrompt": "Put each picture once in every row, column and box."
+          }
+        },
+        "difficulty": "Easy",
+        "icon": "sudoku-pictures",
+        "iconName": "star",
+        "iconTone": "pink",
+        "pedagogyTip": "Every puzzle needs hidden single box and nothing harder, so the technique is practised, not luck.",
+        "standards": [
+          "CCSS.MP1",
+          "CCSS.MP7"
+        ],
+        "trajectoryLevel": "sudoku-solver",
+        "ageBand": [
+          5,
+          7
+        ]
+      },
+      {
+        "id": "picture-rows-and-boxes",
+        "title": "Rows, Columns and Boxes",
+        "concept": "Three Rules at Once",
+        "conceptKey": "sudoku-picture-solver",
+        "requires": [
+          "sudoku-picture-solver"
+        ],
+        "activity": "sudoku/game",
+        "params": {
+          "level": 4,
+          "question": {
+            "size": 4,
+            "technique": "hidden-single-box",
+            "blanks": 9,
+            "pictures": true,
+            "questionsPerRound": 4
+          },
+          "play": {
+            "targetObjective": "Fill the 4×4 grid so every row, column and box has each picture once.",
+            "stepByStep": [
+              "Choose a number that appears often.",
+              "Look at a box that does not have it yet.",
+              "Follow the rows and columns that already have it. One cell is left."
+            ],
+            "kidTip": "Pick a number. Follow its rows and columns into a box. The one cell they do not cross is where it goes.",
+            "audioPrompt": "Put each picture once in every row, column and box."
+          }
+        },
+        "difficulty": "Medium",
+        "icon": "sudoku-pictures",
+        "iconName": "star",
+        "iconTone": "pink",
+        "pedagogyTip": "Every puzzle needs hidden single box and nothing harder, so the technique is practised, not luck.",
+        "standards": [
+          "CCSS.MP1",
+          "CCSS.MP7"
+        ],
+        "trajectoryLevel": "sudoku-solver",
+        "ageBand": [
+          5,
+          7
+        ]
+      },
+      {
+        "id": "picture-sudoku-star",
+        "title": "Picture Sudoku Star",
+        "concept": "A Nearly Empty Grid",
+        "conceptKey": "sudoku-picture-solver",
+        "requires": [
+          "sudoku-picture-solver"
+        ],
+        "activity": "sudoku/game",
+        "params": {
+          "level": 5,
+          "question": {
+            "size": 4,
+            "technique": "hidden-single-box",
+            "blanks": 11,
+            "pictures": true,
+            "questionsPerRound": 4
+          },
+          "play": {
+            "targetObjective": "Fill the 4×4 grid so every row, column and box has each picture once.",
+            "stepByStep": [
+              "Choose a number that appears often.",
+              "Look at a box that does not have it yet.",
+              "Follow the rows and columns that already have it. One cell is left."
+            ],
+            "kidTip": "Pick a number. Follow its rows and columns into a box. The one cell they do not cross is where it goes.",
+            "audioPrompt": "Put each picture once in every row, column and box."
+          }
+        },
+        "difficulty": "Medium",
+        "icon": "sudoku-pictures",
+        "iconName": "star",
+        "iconTone": "pink",
+        "pedagogyTip": "Every puzzle needs hidden single box and nothing harder, so the technique is practised, not luck.",
+        "standards": [
+          "CCSS.MP1",
+          "CCSS.MP7"
+        ],
+        "trajectoryLevel": "sudoku-solver",
+        "ageBand": [
+          5,
+          7
+        ]
+      },
+      {
+        "id": "spot-last-cell",
+        "title": "Find the Last Empty Cell",
+        "concept": "Last Empty Cell",
+        "conceptKey": "sudoku-full-house",
+        "requires": [
+          "sudoku-picture-solver"
+        ],
+        "activity": "sudoku/spot",
+        "params": {
+          "level": 6,
+          "question": {
+            "size": 4,
+            "technique": "full-house",
+            "questionsPerRound": 6
+          },
+          "play": {
+            "targetObjective": "Use Last Empty Cell to find the next number, as fast as you can.",
+            "stepByStep": [
+              "Count the empty cells in each row, column and box.",
+              "Stop at one with a single empty cell.",
+              "Say which number is missing, and put it in."
+            ],
+            "kidTip": "Find the row, column or box with just one empty cell. The missing number goes there.",
+            "audioPrompt": "Find the move. Tap the cell as fast as you can."
+          }
+        },
+        "difficulty": "Easy",
+        "icon": "kit-timer",
+        "iconName": "zap",
+        "iconTone": "cyan",
+        "pedagogyTip": "A speed drill: the board stops where full house is the next step, so finding it fast is the whole task.",
+        "standards": [
+          "CCSS.MP1",
+          "CCSS.MP7"
+        ],
+        "trajectoryLevel": "sudoku-solver",
+        "ageBand": [
+          6,
+          8
+        ]
+      },
+      {
+        "id": "number-sudoku-4",
+        "title": "Number Sudoku",
+        "concept": "Numbers 1 to 4",
+        "conceptKey": "sudoku-full-house",
+        "requires": [
+          "sudoku-full-house"
+        ],
+        "activity": "sudoku/game",
+        "params": {
+          "level": 7,
+          "question": {
+            "size": 4,
+            "technique": "full-house",
+            "blanks": 8,
+            "questionsPerRound": 4
+          },
+          "play": {
+            "targetObjective": "Fill the 4×4 grid so every row, column and box has each number once.",
+            "stepByStep": [
+              "Count the empty cells in each row, column and box.",
+              "Stop at one with a single empty cell.",
+              "Say which number is missing, and put it in."
+            ],
+            "kidTip": "Find the row, column or box with just one empty cell. The missing number goes there.",
+            "audioPrompt": "Use the numbers 1 to 4 once in every row, column and box."
+          }
+        },
+        "difficulty": "Easy",
+        "icon": "sudoku-last-cell",
+        "iconName": "search",
+        "iconTone": "cyan",
+        "pedagogyTip": "Every puzzle needs full house and nothing harder, so the technique is practised, not luck.",
+        "standards": [
+          "CCSS.MP1",
+          "CCSS.MP7"
+        ],
+        "trajectoryLevel": "sudoku-solver",
+        "ageBand": [
+          6,
+          8
+        ]
+      },
+      {
+        "id": "full-4x4",
+        "title": "A Full 4×4 Puzzle",
+        "concept": "Fill the Whole Grid",
+        "conceptKey": "sudoku-full-house",
+        "requires": [
+          "sudoku-full-house"
+        ],
+        "activity": "sudoku/game",
+        "params": {
+          "level": 8,
+          "question": {
+            "size": 4,
+            "technique": "hidden-single-box",
+            "blanks": 11,
+            "questionsPerRound": 4
+          },
+          "play": {
+            "targetObjective": "Fill the 4×4 grid so every row, column and box has each number once.",
+            "stepByStep": [
+              "Choose a number that appears often.",
+              "Look at a box that does not have it yet.",
+              "Follow the rows and columns that already have it. One cell is left."
+            ],
+            "kidTip": "Pick a number. Follow its rows and columns into a box. The one cell they do not cross is where it goes.",
+            "audioPrompt": "Use the numbers 1 to 4 once in every row, column and box."
+          }
+        },
+        "difficulty": "Medium",
+        "icon": "sudoku-last-cell",
+        "iconName": "search",
+        "iconTone": "cyan",
+        "pedagogyTip": "Every puzzle needs hidden single box and nothing harder, so the technique is practised, not luck.",
+        "standards": [
+          "CCSS.MP1",
+          "CCSS.MP7"
+        ],
+        "trajectoryLevel": "sudoku-solver",
+        "ageBand": [
+          6,
+          8
+        ]
+      },
+      {
+        "id": "spot-last-cell-6",
+        "title": "Last Cell on a 6×6",
+        "concept": "Last Empty Cell in Bigger Boxes",
+        "conceptKey": "sudoku-full-house",
+        "requires": [
+          "sudoku-full-house"
+        ],
+        "activity": "sudoku/spot",
+        "params": {
+          "level": 9,
+          "question": {
+            "size": 6,
+            "technique": "full-house",
+            "questionsPerRound": 6
+          },
+          "play": {
+            "targetObjective": "Use Last Empty Cell in Bigger Boxes to find the next number, as fast as you can.",
+            "stepByStep": [
+              "Count the empty cells in each row, column and box.",
+              "Stop at one with a single empty cell.",
+              "Say which number is missing, and put it in."
+            ],
+            "kidTip": "Find the row, column or box with just one empty cell. The missing number goes there.",
+            "audioPrompt": "Find the move. Tap the cell as fast as you can."
+          }
+        },
+        "difficulty": "Medium",
+        "icon": "kit-timer",
+        "iconName": "zap",
+        "iconTone": "cyan",
+        "pedagogyTip": "A speed drill: the board stops where full house is the next step, so finding it fast is the whole task.",
+        "standards": [
+          "CCSS.MP1",
+          "CCSS.MP7"
+        ],
+        "trajectoryLevel": "sudoku-solver",
+        "ageBand": [
+          6,
+          8
+        ]
+      },
+      {
+        "id": "first-6x6",
+        "title": "Your First 6×6",
+        "concept": "Boxes of Two Rows and Three Columns",
+        "conceptKey": "sudoku-full-house",
+        "requires": [
+          "sudoku-full-house"
+        ],
+        "activity": "sudoku/game",
+        "params": {
+          "level": 10,
+          "question": {
+            "size": 6,
+            "technique": "full-house",
+            "blanks": 12,
+            "questionsPerRound": 2
+          },
+          "play": {
+            "targetObjective": "Fill the 6×6 grid so every row, column and box has each number once.",
+            "stepByStep": [
+              "Count the empty cells in each row, column and box.",
+              "Stop at one with a single empty cell.",
+              "Say which number is missing, and put it in."
+            ],
+            "kidTip": "Find the row, column or box with just one empty cell. The missing number goes there.",
+            "audioPrompt": "Use the numbers 1 to 6 once in every row, column and box."
+          }
+        },
+        "difficulty": "Medium",
+        "icon": "sudoku-last-cell",
+        "iconName": "search",
+        "iconTone": "cyan",
+        "pedagogyTip": "Every puzzle needs full house and nothing harder, so the technique is practised, not luck.",
+        "standards": [
+          "CCSS.MP1",
+          "CCSS.MP7"
+        ],
+        "trajectoryLevel": "sudoku-solver",
+        "ageBand": [
+          6,
+          8
+        ]
+      },
+      {
+        "id": "spot-scan-6",
+        "title": "Scan a Box",
+        "concept": "Scanning a Box",
+        "conceptKey": "sudoku-scanner",
+        "requires": [
+          "sudoku-full-house"
+        ],
+        "activity": "sudoku/spot",
+        "params": {
+          "level": 11,
+          "question": {
+            "size": 6,
+            "technique": "hidden-single-box",
+            "questionsPerRound": 6
+          },
+          "play": {
+            "targetObjective": "Use Scanning a Box to find the next number, as fast as you can.",
+            "stepByStep": [
+              "Choose a number that appears often.",
+              "Look at a box that does not have it yet.",
+              "Follow the rows and columns that already have it. One cell is left."
+            ],
+            "kidTip": "Pick a number. Follow its rows and columns into a box. The one cell they do not cross is where it goes.",
+            "audioPrompt": "Find the move. Tap the cell as fast as you can."
+          }
+        },
+        "difficulty": "Easy",
+        "icon": "kit-timer",
+        "iconName": "zap",
+        "iconTone": "indigo",
+        "pedagogyTip": "A speed drill: the board stops where hidden single box is the next step, so finding it fast is the whole task.",
+        "standards": [
+          "CCSS.MP1",
+          "CCSS.MP3",
+          "CCSS.MP7"
+        ],
+        "trajectoryLevel": "sudoku-solver",
+        "ageBand": [
+          7,
+          9
+        ]
+      },
+      {
+        "id": "scan-6x6",
+        "title": "Scanning Puzzles",
+        "concept": "Solve by Scanning",
+        "conceptKey": "sudoku-scanner",
+        "requires": [
+          "sudoku-scanner"
+        ],
+        "activity": "sudoku/game",
+        "params": {
+          "level": 12,
+          "question": {
+            "size": 6,
+            "technique": "hidden-single-box",
+            "blanks": 18,
+            "questionsPerRound": 2
+          },
+          "play": {
+            "targetObjective": "Fill the 6×6 grid so every row, column and box has each number once.",
+            "stepByStep": [
+              "Choose a number that appears often.",
+              "Look at a box that does not have it yet.",
+              "Follow the rows and columns that already have it. One cell is left."
+            ],
+            "kidTip": "Pick a number. Follow its rows and columns into a box. The one cell they do not cross is where it goes.",
+            "audioPrompt": "Use the numbers 1 to 6 once in every row, column and box."
+          }
+        },
+        "difficulty": "Medium",
+        "icon": "sudoku-scan-box",
+        "iconName": "search",
+        "iconTone": "indigo",
+        "pedagogyTip": "Every puzzle needs hidden single box and nothing harder, so the technique is practised, not luck.",
+        "standards": [
+          "CCSS.MP1",
+          "CCSS.MP3",
+          "CCSS.MP7"
+        ],
+        "trajectoryLevel": "sudoku-solver",
+        "ageBand": [
+          7,
+          9
+        ]
+      },
+      {
+        "id": "spot-scan-9",
+        "title": "Scan the Big Grid",
+        "concept": "Scanning a 9×9 Box",
+        "conceptKey": "sudoku-scanner",
+        "requires": [
+          "sudoku-scanner"
+        ],
+        "activity": "sudoku/spot",
+        "params": {
+          "level": 13,
+          "question": {
+            "size": 9,
+            "technique": "hidden-single-box",
+            "questionsPerRound": 6
+          },
+          "play": {
+            "targetObjective": "Use Scanning a 9×9 Box to find the next number, as fast as you can.",
+            "stepByStep": [
+              "Choose a number that appears often.",
+              "Look at a box that does not have it yet.",
+              "Follow the rows and columns that already have it. One cell is left."
+            ],
+            "kidTip": "Pick a number. Follow its rows and columns into a box. The one cell they do not cross is where it goes.",
+            "audioPrompt": "Find the move. Tap the cell as fast as you can."
+          }
+        },
+        "difficulty": "Medium",
+        "icon": "kit-timer",
+        "iconName": "zap",
+        "iconTone": "indigo",
+        "pedagogyTip": "A speed drill: the board stops where hidden single box is the next step, so finding it fast is the whole task.",
+        "standards": [
+          "CCSS.MP1",
+          "CCSS.MP3",
+          "CCSS.MP7"
+        ],
+        "trajectoryLevel": "sudoku-solver",
+        "ageBand": [
+          7,
+          9
+        ]
+      },
+      {
+        "id": "first-9x9",
+        "title": "Your First 9×9",
+        "concept": "A Full-Size Sudoku",
+        "conceptKey": "sudoku-scanner",
+        "requires": [
+          "sudoku-scanner"
+        ],
+        "activity": "sudoku/game",
+        "params": {
+          "level": 14,
+          "question": {
+            "size": 9,
+            "technique": "hidden-single-box",
+            "blanks": 35,
+            "questionsPerRound": 1
+          },
+          "play": {
+            "targetObjective": "Fill the 9×9 grid so every row, column and box has each number once.",
+            "stepByStep": [
+              "Choose a number that appears often.",
+              "Look at a box that does not have it yet.",
+              "Follow the rows and columns that already have it. One cell is left."
+            ],
+            "kidTip": "Pick a number. Follow its rows and columns into a box. The one cell they do not cross is where it goes.",
+            "audioPrompt": "Use the numbers 1 to 9 once in every row, column and box."
+          }
+        },
+        "difficulty": "Medium",
+        "icon": "sudoku-scan-box",
+        "iconName": "search",
+        "iconTone": "indigo",
+        "pedagogyTip": "Every puzzle needs hidden single box and nothing harder, so the technique is practised, not luck.",
+        "standards": [
+          "CCSS.MP1",
+          "CCSS.MP3",
+          "CCSS.MP7"
+        ],
+        "trajectoryLevel": "sudoku-solver",
+        "ageBand": [
+          7,
+          9
+        ]
+      },
+      {
+        "id": "scan-9x9",
+        "title": "Scanning Master",
+        "concept": "Fewer Numbers Given",
+        "conceptKey": "sudoku-scanner",
+        "requires": [
+          "sudoku-scanner"
+        ],
+        "activity": "sudoku/game",
+        "params": {
+          "level": 15,
+          "question": {
+            "size": 9,
+            "technique": "hidden-single-box",
+            "blanks": 45,
+            "questionsPerRound": 1
+          },
+          "play": {
+            "targetObjective": "Fill the 9×9 grid so every row, column and box has each number once.",
+            "stepByStep": [
+              "Choose a number that appears often.",
+              "Look at a box that does not have it yet.",
+              "Follow the rows and columns that already have it. One cell is left."
+            ],
+            "kidTip": "Pick a number. Follow its rows and columns into a box. The one cell they do not cross is where it goes.",
+            "audioPrompt": "Use the numbers 1 to 9 once in every row, column and box."
+          }
+        },
+        "difficulty": "Hard",
+        "icon": "sudoku-scan-box",
+        "iconName": "search",
+        "iconTone": "indigo",
+        "pedagogyTip": "Every puzzle needs hidden single box and nothing harder, so the technique is practised, not luck.",
+        "standards": [
+          "CCSS.MP1",
+          "CCSS.MP3",
+          "CCSS.MP7"
+        ],
+        "trajectoryLevel": "sudoku-solver",
+        "ageBand": [
+          7,
+          9
+        ]
+      },
+      {
+        "id": "spot-line",
+        "title": "Scan a Line",
+        "concept": "Scanning a Row or Column",
+        "conceptKey": "sudoku-line-scanner",
+        "requires": [
+          "sudoku-scanner"
+        ],
+        "activity": "sudoku/spot",
+        "params": {
+          "level": 16,
+          "question": {
+            "size": 9,
+            "technique": "hidden-single-line",
+            "questionsPerRound": 6
+          },
+          "play": {
+            "targetObjective": "Use Scanning a Row or Column to find the next number, as fast as you can.",
+            "stepByStep": [
+              "Choose a row or column.",
+              "For one missing number, cross out cells that see it.",
+              "If only one cell is left, that is its place."
+            ],
+            "kidTip": "Pick a number and a row. Cross out every cell that sees that number. If one cell is left, that is its place.",
+            "audioPrompt": "Find the move. Tap the cell as fast as you can."
+          }
+        },
+        "difficulty": "Medium",
+        "icon": "kit-timer",
+        "iconName": "zap",
+        "iconTone": "emerald",
+        "pedagogyTip": "A speed drill: the board stops where hidden single line is the next step, so finding it fast is the whole task.",
+        "standards": [
+          "CCSS.MP1",
+          "CCSS.MP3",
+          "CCSS.MP7"
+        ],
+        "trajectoryLevel": "sudoku-solver",
+        "ageBand": [
+          8,
+          10
+        ]
+      },
+      {
+        "id": "line-puzzle",
+        "title": "Line Scanning Puzzle",
+        "concept": "Solve with Lines",
+        "conceptKey": "sudoku-line-scanner",
+        "requires": [
+          "sudoku-line-scanner"
+        ],
+        "activity": "sudoku/game",
+        "params": {
+          "level": 17,
+          "question": {
+            "size": 9,
+            "technique": "hidden-single-line",
+            "blanks": 48,
+            "questionsPerRound": 1
+          },
+          "play": {
+            "targetObjective": "Fill the 9×9 grid so every row, column and box has each number once.",
+            "stepByStep": [
+              "Choose a row or column.",
+              "For one missing number, cross out cells that see it.",
+              "If only one cell is left, that is its place."
+            ],
+            "kidTip": "Pick a number and a row. Cross out every cell that sees that number. If one cell is left, that is its place.",
+            "audioPrompt": "Use the numbers 1 to 9 once in every row, column and box."
+          }
+        },
+        "difficulty": "Medium",
+        "icon": "sudoku-scan-line",
+        "iconName": "layers",
+        "iconTone": "emerald",
+        "pedagogyTip": "Every puzzle needs hidden single line and nothing harder, so the technique is practised, not luck.",
+        "standards": [
+          "CCSS.MP1",
+          "CCSS.MP3",
+          "CCSS.MP7"
+        ],
+        "trajectoryLevel": "sudoku-solver",
+        "ageBand": [
+          8,
+          10
+        ]
+      },
+      {
+        "id": "spot-line-fast",
+        "title": "Faster Line Scanning",
+        "concept": "Scanning at Speed",
+        "conceptKey": "sudoku-line-scanner",
+        "requires": [
+          "sudoku-line-scanner"
+        ],
+        "activity": "sudoku/spot",
+        "params": {
+          "level": 18,
+          "question": {
+            "size": 9,
+            "technique": "hidden-single-line",
+            "questionsPerRound": 8
+          },
+          "play": {
+            "targetObjective": "Use Scanning at Speed to find the next number, as fast as you can.",
+            "stepByStep": [
+              "Choose a row or column.",
+              "For one missing number, cross out cells that see it.",
+              "If only one cell is left, that is its place."
+            ],
+            "kidTip": "Pick a number and a row. Cross out every cell that sees that number. If one cell is left, that is its place.",
+            "audioPrompt": "Find the move. Tap the cell as fast as you can."
+          }
+        },
+        "difficulty": "Medium",
+        "icon": "kit-timer",
+        "iconName": "zap",
+        "iconTone": "emerald",
+        "pedagogyTip": "A speed drill: the board stops where hidden single line is the next step, so finding it fast is the whole task.",
+        "standards": [
+          "CCSS.MP1",
+          "CCSS.MP3",
+          "CCSS.MP7"
+        ],
+        "trajectoryLevel": "sudoku-solver",
+        "ageBand": [
+          8,
+          10
+        ]
+      },
+      {
+        "id": "line-puzzle-hard",
+        "title": "Every Way You Can Scan",
+        "concept": "A Harder Line Puzzle",
+        "conceptKey": "sudoku-line-scanner",
+        "requires": [
+          "sudoku-line-scanner"
+        ],
+        "activity": "sudoku/game",
+        "params": {
+          "level": 19,
+          "question": {
+            "size": 9,
+            "technique": "hidden-single-line",
+            "questionsPerRound": 1
+          },
+          "play": {
+            "targetObjective": "Fill the 9×9 grid so every row, column and box has each number once.",
+            "stepByStep": [
+              "Choose a row or column.",
+              "For one missing number, cross out cells that see it.",
+              "If only one cell is left, that is its place."
+            ],
+            "kidTip": "Pick a number and a row. Cross out every cell that sees that number. If one cell is left, that is its place.",
+            "audioPrompt": "Use the numbers 1 to 9 once in every row, column and box."
+          }
+        },
+        "difficulty": "Hard",
+        "icon": "sudoku-scan-line",
+        "iconName": "layers",
+        "iconTone": "emerald",
+        "pedagogyTip": "Every puzzle needs hidden single line and nothing harder, so the technique is practised, not luck.",
+        "standards": [
+          "CCSS.MP1",
+          "CCSS.MP3",
+          "CCSS.MP7"
+        ],
+        "trajectoryLevel": "sudoku-solver",
+        "ageBand": [
+          8,
+          10
+        ]
+      },
+      {
+        "id": "spot-scan-mix",
+        "title": "Scan Every Way",
+        "concept": "Boxes and Lines Mixed",
+        "conceptKey": "sudoku-line-scanner",
+        "requires": [
+          "sudoku-line-scanner"
+        ],
+        "activity": "sudoku/spot",
+        "params": {
+          "level": 20,
+          "question": {
+            "size": 9,
+            "mix": [
+              "hidden-single-box",
+              "hidden-single-line"
+            ],
+            "questionsPerRound": 8
+          },
+          "play": {
+            "targetObjective": "Mixed techniques: find the next number each time, as fast as you can.",
+            "stepByStep": [
+              "Choose a row or column.",
+              "For one missing number, cross out cells that see it.",
+              "If only one cell is left, that is its place."
+            ],
+            "kidTip": "Pick a number and a row. Cross out every cell that sees that number. If one cell is left, that is its place.",
+            "audioPrompt": "Find the move. Tap the cell as fast as you can."
+          }
+        },
+        "difficulty": "Hard",
+        "icon": "kit-timer",
+        "iconName": "zap",
+        "iconTone": "emerald",
+        "pedagogyTip": "A speed drill: the board stops where hidden single line is the next step, so finding it fast is the whole task.",
+        "standards": [
+          "CCSS.MP1",
+          "CCSS.MP3",
+          "CCSS.MP7"
+        ],
+        "trajectoryLevel": "sudoku-solver",
+        "ageBand": [
+          8,
+          10
+        ]
+      },
+      {
+        "id": "spot-naked-single",
+        "title": "Only One Number Left",
+        "concept": "Only One Number",
+        "conceptKey": "sudoku-single-finder",
+        "requires": [
+          "sudoku-line-scanner"
+        ],
+        "activity": "sudoku/spot",
+        "params": {
+          "level": 21,
+          "question": {
+            "size": 9,
+            "technique": "naked-single",
+            "questionsPerRound": 6
+          },
+          "play": {
+            "targetObjective": "Use Only One Number to find the next number, as fast as you can.",
+            "stepByStep": [
+              "Look at an empty cell.",
+              "List the numbers already in its row, column and box.",
+              "If only one number is left out, that is the answer."
+            ],
+            "kidTip": "Look at one cell. Cross out every number in its row, column and box. If one number is left, write it.",
+            "audioPrompt": "Find the move. Tap the cell as fast as you can."
+          }
+        },
+        "difficulty": "Medium",
+        "icon": "kit-timer",
+        "iconName": "zap",
+        "iconTone": "purple",
+        "pedagogyTip": "A speed drill: the board stops where naked single is the next step, so finding it fast is the whole task.",
+        "standards": [
+          "CCSS.MP1",
+          "CCSS.MP3",
+          "CCSS.MP7"
+        ],
+        "trajectoryLevel": "sudoku-solver",
+        "ageBand": [
+          9,
+          11
+        ]
+      },
+      {
+        "id": "naked-single-puzzle",
+        "title": "One Number Puzzle",
+        "concept": "Solve with Every Single",
+        "conceptKey": "sudoku-single-finder",
+        "requires": [
+          "sudoku-single-finder"
+        ],
+        "activity": "sudoku/game",
+        "params": {
+          "level": 22,
+          "question": {
+            "size": 9,
+            "technique": "naked-single",
+            "blanks": 50,
+            "notes": "on",
+            "questionsPerRound": 1
+          },
+          "play": {
+            "targetObjective": "Fill the 9×9 grid so every row, column and box has each number once.",
+            "stepByStep": [
+              "Look at an empty cell.",
+              "List the numbers already in its row, column and box.",
+              "If only one number is left out, that is the answer."
+            ],
+            "kidTip": "Look at one cell. Cross out every number in its row, column and box. If one number is left, write it.",
+            "audioPrompt": "Use the numbers 1 to 9 once in every row, column and box."
+          }
+        },
+        "difficulty": "Medium",
+        "icon": "sudoku-one-number",
+        "iconName": "circleDot",
+        "iconTone": "purple",
+        "pedagogyTip": "Every puzzle needs naked single and nothing harder, so the technique is practised, not luck.",
+        "standards": [
+          "CCSS.MP1",
+          "CCSS.MP3",
+          "CCSS.MP7"
+        ],
+        "trajectoryLevel": "sudoku-solver",
+        "ageBand": [
+          9,
+          11
+        ]
+      },
+      {
+        "id": "spot-naked-single-fast",
+        "title": "Find It Faster",
+        "concept": "Only One Number at Speed",
+        "conceptKey": "sudoku-single-finder",
+        "requires": [
+          "sudoku-single-finder"
+        ],
+        "activity": "sudoku/spot",
+        "params": {
+          "level": 23,
+          "question": {
+            "size": 9,
+            "technique": "naked-single",
+            "questionsPerRound": 8
+          },
+          "play": {
+            "targetObjective": "Use Only One Number at Speed to find the next number, as fast as you can.",
+            "stepByStep": [
+              "Look at an empty cell.",
+              "List the numbers already in its row, column and box.",
+              "If only one number is left out, that is the answer."
+            ],
+            "kidTip": "Look at one cell. Cross out every number in its row, column and box. If one number is left, write it.",
+            "audioPrompt": "Find the move. Tap the cell as fast as you can."
+          }
+        },
+        "difficulty": "Hard",
+        "icon": "kit-timer",
+        "iconName": "zap",
+        "iconTone": "purple",
+        "pedagogyTip": "A speed drill: the board stops where naked single is the next step, so finding it fast is the whole task.",
+        "standards": [
+          "CCSS.MP1",
+          "CCSS.MP3",
+          "CCSS.MP7"
+        ],
+        "trajectoryLevel": "sudoku-solver",
+        "ageBand": [
+          9,
+          11
+        ]
+      },
+      {
+        "id": "naked-single-hard",
+        "title": "A Hard Singles Puzzle",
+        "concept": "Every Single, Fewest Clues",
+        "conceptKey": "sudoku-single-finder",
+        "requires": [
+          "sudoku-single-finder"
+        ],
+        "activity": "sudoku/game",
+        "params": {
+          "level": 24,
+          "question": {
+            "size": 9,
+            "technique": "naked-single",
+            "notes": "on",
+            "questionsPerRound": 1
+          },
+          "play": {
+            "targetObjective": "Fill the 9×9 grid so every row, column and box has each number once.",
+            "stepByStep": [
+              "Look at an empty cell.",
+              "List the numbers already in its row, column and box.",
+              "If only one number is left out, that is the answer."
+            ],
+            "kidTip": "Look at one cell. Cross out every number in its row, column and box. If one number is left, write it.",
+            "audioPrompt": "Use the numbers 1 to 9 once in every row, column and box."
+          }
+        },
+        "difficulty": "Hard",
+        "icon": "sudoku-one-number",
+        "iconName": "circleDot",
+        "iconTone": "purple",
+        "pedagogyTip": "Every puzzle needs naked single and nothing harder, so the technique is practised, not luck.",
+        "standards": [
+          "CCSS.MP1",
+          "CCSS.MP3",
+          "CCSS.MP7"
+        ],
+        "trajectoryLevel": "sudoku-solver",
+        "ageBand": [
+          9,
+          11
+        ]
+      },
+      {
+        "id": "singles-speed-run",
+        "title": "Singles Speed Run",
+        "concept": "All Three Singles",
+        "conceptKey": "sudoku-single-finder",
+        "requires": [
+          "sudoku-single-finder"
+        ],
+        "activity": "sudoku/spot",
+        "params": {
+          "level": 25,
+          "question": {
+            "size": 9,
+            "mix": [
+              "hidden-single-box",
+              "hidden-single-line",
+              "naked-single"
+            ],
+            "questionsPerRound": 9
+          },
+          "play": {
+            "targetObjective": "Mixed techniques: find the next number each time, as fast as you can.",
+            "stepByStep": [
+              "Look at an empty cell.",
+              "List the numbers already in its row, column and box.",
+              "If only one number is left out, that is the answer."
+            ],
+            "kidTip": "Look at one cell. Cross out every number in its row, column and box. If one number is left, write it.",
+            "audioPrompt": "Find the move. Tap the cell as fast as you can."
+          }
+        },
+        "difficulty": "Hard",
+        "icon": "kit-timer",
+        "iconName": "zap",
+        "iconTone": "purple",
+        "pedagogyTip": "A speed drill: the board stops where naked single is the next step, so finding it fast is the whole task.",
+        "standards": [
+          "CCSS.MP1",
+          "CCSS.MP3",
+          "CCSS.MP7"
+        ],
+        "trajectoryLevel": "sudoku-solver",
+        "ageBand": [
+          9,
+          11
+        ]
+      },
+      {
+        "id": "spot-pointing",
+        "title": "Pointing",
+        "concept": "Notes in a Box Point Down a Line",
+        "conceptKey": "sudoku-pointer",
+        "requires": [
+          "sudoku-single-finder"
+        ],
+        "activity": "sudoku/spot",
+        "params": {
+          "level": 26,
+          "question": {
+            "size": 9,
+            "technique": "pointing",
+            "questionsPerRound": 6
+          },
+          "play": {
+            "targetObjective": "Use Notes in a Box Point Down a Line to find the next number, as fast as you can.",
+            "stepByStep": [
+              "Turn on notes, or fill them.",
+              "Find a box where one number's notes are all in one row or column.",
+              "Remove that number from the rest of the line."
+            ],
+            "kidTip": "When a box's notes for a number all sit in one row, that number is used up for the rest of the row.",
+            "audioPrompt": "Find the move. Tap the cell as fast as you can."
+          }
+        },
+        "difficulty": "Medium",
+        "icon": "kit-timer",
+        "iconName": "zap",
+        "iconTone": "indigo",
+        "pedagogyTip": "A speed drill: the board stops where pointing is the next step, so finding it fast is the whole task.",
+        "standards": [
+          "CCSS.MP1",
+          "CCSS.MP3",
+          "CCSS.MP7"
+        ],
+        "trajectoryLevel": "sudoku-solver",
+        "ageBand": [
+          10,
+          12
+        ]
+      },
+      {
+        "id": "pointing-puzzle",
+        "title": "Pointing Puzzle",
+        "concept": "Solve with Pointing",
+        "conceptKey": "sudoku-pointer",
+        "requires": [
+          "sudoku-pointer"
+        ],
+        "activity": "sudoku/game",
+        "params": {
+          "level": 27,
+          "question": {
+            "size": 9,
+            "technique": "pointing",
+            "notes": "auto",
+            "questionsPerRound": 1
+          },
+          "play": {
+            "targetObjective": "Fill the 9×9 grid so every row, column and box has each number once.",
+            "stepByStep": [
+              "Turn on notes, or fill them.",
+              "Find a box where one number's notes are all in one row or column.",
+              "Remove that number from the rest of the line."
+            ],
+            "kidTip": "When a box's notes for a number all sit in one row, that number is used up for the rest of the row.",
+            "audioPrompt": "Use the numbers 1 to 9 once in every row, column and box."
+          }
+        },
+        "difficulty": "Hard",
+        "icon": "sudoku-pointing",
+        "iconName": "zap",
+        "iconTone": "indigo",
+        "pedagogyTip": "Every puzzle needs pointing and nothing harder, so the technique is practised, not luck.",
+        "standards": [
+          "CCSS.MP1",
+          "CCSS.MP3",
+          "CCSS.MP7"
+        ],
+        "trajectoryLevel": "sudoku-solver",
+        "ageBand": [
+          10,
+          12
+        ]
+      },
+      {
+        "id": "spot-claiming",
+        "title": "Claiming",
+        "concept": "A Line Claims a Box",
+        "conceptKey": "sudoku-pointer",
+        "requires": [
+          "sudoku-pointer"
+        ],
+        "activity": "sudoku/spot",
+        "params": {
+          "level": 28,
+          "question": {
+            "size": 9,
+            "technique": "claiming",
+            "questionsPerRound": 6
+          },
+          "play": {
+            "targetObjective": "Use A Line Claims a Box to find the next number, as fast as you can.",
+            "stepByStep": [
+              "Turn on notes, or fill them.",
+              "Find a row or column where one number's notes are all in one box.",
+              "Remove that number from the rest of the box."
+            ],
+            "kidTip": "When a row's notes for a number all sit in one box, that number is used up for the rest of the box.",
+            "audioPrompt": "Find the move. Tap the cell as fast as you can."
+          }
+        },
+        "difficulty": "Medium",
+        "icon": "kit-timer",
+        "iconName": "zap",
+        "iconTone": "indigo",
+        "pedagogyTip": "A speed drill: the board stops where claiming is the next step, so finding it fast is the whole task.",
+        "standards": [
+          "CCSS.MP1",
+          "CCSS.MP3",
+          "CCSS.MP7"
+        ],
+        "trajectoryLevel": "sudoku-solver",
+        "ageBand": [
+          10,
+          12
+        ]
+      },
+      {
+        "id": "claiming-puzzle",
+        "title": "Claiming Puzzle",
+        "concept": "Solve with Claiming",
+        "conceptKey": "sudoku-pointer",
+        "requires": [
+          "sudoku-pointer"
+        ],
+        "activity": "sudoku/game",
+        "params": {
+          "level": 29,
+          "question": {
+            "size": 9,
+            "technique": "claiming",
+            "notes": "auto",
+            "questionsPerRound": 1
+          },
+          "play": {
+            "targetObjective": "Fill the 9×9 grid so every row, column and box has each number once.",
+            "stepByStep": [
+              "Turn on notes, or fill them.",
+              "Find a row or column where one number's notes are all in one box.",
+              "Remove that number from the rest of the box."
+            ],
+            "kidTip": "When a row's notes for a number all sit in one box, that number is used up for the rest of the box.",
+            "audioPrompt": "Use the numbers 1 to 9 once in every row, column and box."
+          }
+        },
+        "difficulty": "Hard",
+        "icon": "sudoku-pointing",
+        "iconName": "zap",
+        "iconTone": "indigo",
+        "pedagogyTip": "Every puzzle needs claiming and nothing harder, so the technique is practised, not luck.",
+        "standards": [
+          "CCSS.MP1",
+          "CCSS.MP3",
+          "CCSS.MP7"
+        ],
+        "trajectoryLevel": "sudoku-solver",
+        "ageBand": [
+          10,
+          12
+        ]
+      },
+      {
+        "id": "spot-boxes-and-lines",
+        "title": "Boxes and Lines Speed Run",
+        "concept": "Pointing and Claiming Mixed",
+        "conceptKey": "sudoku-pointer",
+        "requires": [
+          "sudoku-pointer"
+        ],
+        "activity": "sudoku/spot",
+        "params": {
+          "level": 30,
+          "question": {
+            "size": 9,
+            "mix": [
+              "pointing",
+              "claiming"
+            ],
+            "questionsPerRound": 8
+          },
+          "play": {
+            "targetObjective": "Mixed techniques: find the next number each time, as fast as you can.",
+            "stepByStep": [
+              "Turn on notes, or fill them.",
+              "Find a row or column where one number's notes are all in one box.",
+              "Remove that number from the rest of the box."
+            ],
+            "kidTip": "When a row's notes for a number all sit in one box, that number is used up for the rest of the box.",
+            "audioPrompt": "Find the move. Tap the cell as fast as you can."
+          }
+        },
+        "difficulty": "Hard",
+        "icon": "kit-timer",
+        "iconName": "zap",
+        "iconTone": "indigo",
+        "pedagogyTip": "A speed drill: the board stops where claiming is the next step, so finding it fast is the whole task.",
+        "standards": [
+          "CCSS.MP1",
+          "CCSS.MP3",
+          "CCSS.MP7"
+        ],
+        "trajectoryLevel": "sudoku-solver",
+        "ageBand": [
+          10,
+          12
+        ]
+      },
+      {
+        "id": "spot-naked-pair",
+        "title": "Naked Pair",
+        "concept": "Two Cells, Two Numbers",
+        "conceptKey": "sudoku-pair-finder",
+        "requires": [
+          "sudoku-pointer"
+        ],
+        "activity": "sudoku/spot",
+        "params": {
+          "level": 31,
+          "question": {
+            "size": 9,
+            "technique": "naked-pair",
+            "questionsPerRound": 6
+          },
+          "play": {
+            "targetObjective": "Use Two Cells, Two Numbers to find the next number, as fast as you can.",
+            "stepByStep": [
+              "Look for two cells with the same two notes in one house.",
+              "Those two numbers belong to those two cells.",
+              "Remove them from the other cells in the house."
+            ],
+            "kidTip": "Two cells in a house with the same two notes will take those two numbers. Remove them from the other cells.",
+            "audioPrompt": "Find the move. Tap the cell as fast as you can."
+          }
+        },
+        "difficulty": "Hard",
+        "icon": "kit-timer",
+        "iconName": "zap",
+        "iconTone": "cyan",
+        "pedagogyTip": "A speed drill: the board stops where naked pair is the next step, so finding it fast is the whole task.",
+        "standards": [
+          "CCSS.MP1",
+          "CCSS.MP3",
+          "CCSS.MP7"
+        ],
+        "trajectoryLevel": "sudoku-solver",
+        "ageBand": [
+          11,
+          14
+        ]
+      },
+      {
+        "id": "naked-pair-puzzle",
+        "title": "Naked Pair Puzzle",
+        "concept": "Solve with a Naked Pair",
+        "conceptKey": "sudoku-pair-finder",
+        "requires": [
+          "sudoku-pair-finder"
+        ],
+        "activity": "sudoku/game",
+        "params": {
+          "level": 32,
+          "question": {
+            "size": 9,
+            "technique": "naked-pair",
+            "notes": "auto",
+            "questionsPerRound": 1
+          },
+          "play": {
+            "targetObjective": "Fill the 9×9 grid so every row, column and box has each number once.",
+            "stepByStep": [
+              "Look for two cells with the same two notes in one house.",
+              "Those two numbers belong to those two cells.",
+              "Remove them from the other cells in the house."
+            ],
+            "kidTip": "Two cells in a house with the same two notes will take those two numbers. Remove them from the other cells.",
+            "audioPrompt": "Use the numbers 1 to 9 once in every row, column and box."
+          }
+        },
+        "difficulty": "Hard",
+        "icon": "sudoku-pairs",
+        "iconName": "gem",
+        "iconTone": "cyan",
+        "pedagogyTip": "Every puzzle needs naked pair and nothing harder, so the technique is practised, not luck.",
+        "standards": [
+          "CCSS.MP1",
+          "CCSS.MP3",
+          "CCSS.MP7"
+        ],
+        "trajectoryLevel": "sudoku-solver",
+        "ageBand": [
+          11,
+          14
+        ]
+      },
+      {
+        "id": "spot-hidden-pair",
+        "title": "Hidden Pair",
+        "concept": "Two Numbers, Two Cells",
+        "conceptKey": "sudoku-pair-finder",
+        "requires": [
+          "sudoku-pair-finder"
+        ],
+        "activity": "sudoku/spot",
+        "params": {
+          "level": 33,
+          "question": {
+            "size": 9,
+            "technique": "hidden-pair",
+            "questionsPerRound": 6
+          },
+          "play": {
+            "targetObjective": "Use Two Numbers, Two Cells to find the next number, as fast as you can.",
+            "stepByStep": [
+              "In one house, find two numbers with only two places.",
+              "If the places are the same two cells, those cells hold them.",
+              "Remove every other note from the pair."
+            ],
+            "kidTip": "Two numbers that fit only in the same two cells must go there. Clear every other note from those cells.",
+            "audioPrompt": "Find the move. Tap the cell as fast as you can."
+          }
+        },
+        "difficulty": "Hard",
+        "icon": "kit-timer",
+        "iconName": "zap",
+        "iconTone": "cyan",
+        "pedagogyTip": "A speed drill: the board stops where hidden pair is the next step, so finding it fast is the whole task.",
+        "standards": [
+          "CCSS.MP1",
+          "CCSS.MP3",
+          "CCSS.MP7"
+        ],
+        "trajectoryLevel": "sudoku-solver",
+        "ageBand": [
+          11,
+          14
+        ]
+      },
+      {
+        "id": "hidden-pair-puzzle",
+        "title": "Hidden Pair Puzzle",
+        "concept": "Solve with a Hidden Pair",
+        "conceptKey": "sudoku-pair-finder",
+        "requires": [
+          "sudoku-pair-finder"
+        ],
+        "activity": "sudoku/game",
+        "params": {
+          "level": 34,
+          "question": {
+            "size": 9,
+            "technique": "hidden-pair",
+            "notes": "auto",
+            "questionsPerRound": 1
+          },
+          "play": {
+            "targetObjective": "Fill the 9×9 grid so every row, column and box has each number once.",
+            "stepByStep": [
+              "In one house, find two numbers with only two places.",
+              "If the places are the same two cells, those cells hold them.",
+              "Remove every other note from the pair."
+            ],
+            "kidTip": "Two numbers that fit only in the same two cells must go there. Clear every other note from those cells.",
+            "audioPrompt": "Use the numbers 1 to 9 once in every row, column and box."
+          }
+        },
+        "difficulty": "Hard",
+        "icon": "sudoku-pairs",
+        "iconName": "gem",
+        "iconTone": "cyan",
+        "pedagogyTip": "Every puzzle needs hidden pair and nothing harder, so the technique is practised, not luck.",
+        "standards": [
+          "CCSS.MP1",
+          "CCSS.MP3",
+          "CCSS.MP7"
+        ],
+        "trajectoryLevel": "sudoku-solver",
+        "ageBand": [
+          11,
+          14
+        ]
+      },
+      {
+        "id": "spot-pairs",
+        "title": "Pairs Speed Run",
+        "concept": "Naked and Hidden Pairs Mixed",
+        "conceptKey": "sudoku-pair-finder",
+        "requires": [
+          "sudoku-pair-finder"
+        ],
+        "activity": "sudoku/spot",
+        "params": {
+          "level": 35,
+          "question": {
+            "size": 9,
+            "mix": [
+              "naked-pair",
+              "hidden-pair"
+            ],
+            "questionsPerRound": 8
+          },
+          "play": {
+            "targetObjective": "Mixed techniques: find the next number each time, as fast as you can.",
+            "stepByStep": [
+              "In one house, find two numbers with only two places.",
+              "If the places are the same two cells, those cells hold them.",
+              "Remove every other note from the pair."
+            ],
+            "kidTip": "Two numbers that fit only in the same two cells must go there. Clear every other note from those cells.",
+            "audioPrompt": "Find the move. Tap the cell as fast as you can."
+          }
+        },
+        "difficulty": "Hard",
+        "icon": "kit-timer",
+        "iconName": "zap",
+        "iconTone": "cyan",
+        "pedagogyTip": "A speed drill: the board stops where hidden pair is the next step, so finding it fast is the whole task.",
+        "standards": [
+          "CCSS.MP1",
+          "CCSS.MP3",
+          "CCSS.MP7"
+        ],
+        "trajectoryLevel": "sudoku-solver",
+        "ageBand": [
+          11,
+          14
+        ]
+      },
+      {
+        "id": "spot-x-wing",
+        "title": "X-Wing",
+        "concept": "Four Corners of a Square",
+        "conceptKey": "sudoku-x-wing",
+        "requires": [
+          "sudoku-pair-finder"
+        ],
+        "activity": "sudoku/spot",
+        "params": {
+          "level": 36,
+          "question": {
+            "size": 9,
+            "technique": "x-wing",
+            "questionsPerRound": 6
+          },
+          "play": {
+            "targetObjective": "Use Four Corners of a Square to find the next number, as fast as you can.",
+            "stepByStep": [
+              "Choose a number. Find two rows where it has exactly two places.",
+              "Check the places line up in the same two columns.",
+              "Remove the number from the rest of those columns."
+            ],
+            "kidTip": "A number with two places in each of two rows, lined up in the same columns, makes a square. Clear it from the rest of those columns.",
+            "audioPrompt": "Find the move. Tap the cell as fast as you can."
+          }
+        },
+        "difficulty": "Hard",
+        "icon": "kit-timer",
+        "iconName": "zap",
+        "iconTone": "purple",
+        "pedagogyTip": "A speed drill: the board stops where x wing is the next step, so finding it fast is the whole task.",
+        "standards": [
+          "CCSS.MP1",
+          "CCSS.MP3",
+          "CCSS.MP7"
+        ],
+        "trajectoryLevel": "sudoku-solver",
+        "ageBand": [
+          12,
+          16
+        ]
+      },
+      {
+        "id": "x-wing-puzzle",
+        "title": "X-Wing Puzzle",
+        "concept": "Solve with an X-Wing",
+        "conceptKey": "sudoku-x-wing",
+        "requires": [
+          "sudoku-x-wing"
+        ],
+        "activity": "sudoku/game",
+        "params": {
+          "level": 37,
+          "question": {
+            "size": 9,
+            "technique": "x-wing",
+            "notes": "auto",
+            "questionsPerRound": 1
+          },
+          "play": {
+            "targetObjective": "Fill the 9×9 grid so every row, column and box has each number once.",
+            "stepByStep": [
+              "Choose a number. Find two rows where it has exactly two places.",
+              "Check the places line up in the same two columns.",
+              "Remove the number from the rest of those columns."
+            ],
+            "kidTip": "A number with two places in each of two rows, lined up in the same columns, makes a square. Clear it from the rest of those columns.",
+            "audioPrompt": "Use the numbers 1 to 9 once in every row, column and box."
+          }
+        },
+        "difficulty": "Hard",
+        "icon": "sudoku-x-wing",
+        "iconName": "crown",
+        "iconTone": "purple",
+        "pedagogyTip": "Every puzzle needs x wing and nothing harder, so the technique is practised, not luck.",
+        "standards": [
+          "CCSS.MP1",
+          "CCSS.MP3",
+          "CCSS.MP7"
+        ],
+        "trajectoryLevel": "sudoku-solver",
+        "ageBand": [
+          12,
+          16
+        ]
+      },
+      {
+        "id": "expert-speed-run",
+        "title": "Expert Speed Run",
+        "concept": "Every Note Technique",
+        "conceptKey": "sudoku-x-wing",
+        "requires": [
+          "sudoku-x-wing"
+        ],
+        "activity": "sudoku/spot",
+        "params": {
+          "level": 38,
+          "question": {
+            "size": 9,
+            "mix": [
+              "pointing",
+              "claiming",
+              "naked-pair",
+              "hidden-pair",
+              "x-wing"
+            ],
+            "questionsPerRound": 10
+          },
+          "play": {
+            "targetObjective": "Mixed techniques: find the next number each time, as fast as you can.",
+            "stepByStep": [
+              "Choose a number. Find two rows where it has exactly two places.",
+              "Check the places line up in the same two columns.",
+              "Remove the number from the rest of those columns."
+            ],
+            "kidTip": "A number with two places in each of two rows, lined up in the same columns, makes a square. Clear it from the rest of those columns.",
+            "audioPrompt": "Find the move. Tap the cell as fast as you can."
+          }
+        },
+        "difficulty": "Hard",
+        "icon": "kit-timer",
+        "iconName": "zap",
+        "iconTone": "purple",
+        "pedagogyTip": "A speed drill: the board stops where x wing is the next step, so finding it fast is the whole task.",
+        "standards": [
+          "CCSS.MP1",
+          "CCSS.MP3",
+          "CCSS.MP7"
+        ],
+        "trajectoryLevel": "sudoku-solver",
+        "ageBand": [
+          12,
+          16
+        ]
+      },
+      {
+        "id": "expert-puzzle",
+        "title": "Expert Puzzle",
+        "concept": "Use Everything You Know",
+        "conceptKey": "sudoku-x-wing",
+        "requires": [
+          "sudoku-x-wing"
+        ],
+        "activity": "sudoku/game",
+        "params": {
+          "level": 39,
+          "question": {
+            "size": 9,
+            "technique": "x-wing",
+            "notes": "auto",
+            "questionsPerRound": 1
+          },
+          "play": {
+            "targetObjective": "Fill the 9×9 grid so every row, column and box has each number once.",
+            "stepByStep": [
+              "Choose a number. Find two rows where it has exactly two places.",
+              "Check the places line up in the same two columns.",
+              "Remove the number from the rest of those columns."
+            ],
+            "kidTip": "A number with two places in each of two rows, lined up in the same columns, makes a square. Clear it from the rest of those columns.",
+            "audioPrompt": "Use the numbers 1 to 9 once in every row, column and box."
+          }
+        },
+        "difficulty": "Hard",
+        "icon": "sudoku-x-wing",
+        "iconName": "crown",
+        "iconTone": "purple",
+        "pedagogyTip": "Every puzzle needs x wing and nothing harder, so the technique is practised, not luck.",
+        "standards": [
+          "CCSS.MP1",
+          "CCSS.MP3",
+          "CCSS.MP7"
+        ],
+        "trajectoryLevel": "sudoku-solver",
+        "ageBand": [
+          12,
+          16
+        ]
+      },
+      {
+        "id": "sudoku-master",
+        "title": "Sudoku Master",
+        "concept": "A Master's Puzzle",
+        "conceptKey": "sudoku-x-wing",
+        "requires": [
+          "sudoku-x-wing"
+        ],
+        "activity": "sudoku/game",
+        "params": {
+          "level": 40,
+          "question": {
+            "size": 9,
+            "technique": "x-wing",
+            "notes": "auto",
+            "questionsPerRound": 1
+          },
+          "play": {
+            "targetObjective": "Fill the 9×9 grid so every row, column and box has each number once.",
+            "stepByStep": [
+              "Choose a number. Find two rows where it has exactly two places.",
+              "Check the places line up in the same two columns.",
+              "Remove the number from the rest of those columns."
+            ],
+            "kidTip": "A number with two places in each of two rows, lined up in the same columns, makes a square. Clear it from the rest of those columns.",
+            "audioPrompt": "Use the numbers 1 to 9 once in every row, column and box."
+          }
+        },
+        "difficulty": "Hard",
+        "icon": "sudoku-x-wing",
+        "iconName": "crown",
+        "iconTone": "purple",
+        "pedagogyTip": "Every puzzle needs x wing and nothing harder, so the technique is practised, not luck.",
+        "standards": [
+          "CCSS.MP1",
+          "CCSS.MP3",
+          "CCSS.MP7"
+        ],
+        "trajectoryLevel": "sudoku-solver",
+        "ageBand": [
+          12,
+          16
+        ]
+      },
+      {
+        "id": "practice-picture-sudoku",
+        "title": "Practice: Picture Sudoku",
+        "concept": "Practice Without Help",
+        "conceptKey": "sudoku-picture-solver",
+        "requires": [
+          "sudoku-picture-solver"
+        ],
+        "activity": "sudoku/game",
+        "params": {
+          "level": 41,
+          "question": {
+            "size": 4,
+            "technique": "hidden-single-box",
+            "blanks": 10,
+            "pictures": true,
+            "questionsPerRound": 5,
+            "practice": true
+          }
+        },
+        "difficulty": "Medium",
+        "icon": "kit-repeat",
+        "iconName": "dice",
+        "iconTone": "pink",
+        "pedagogyTip": "Practice without hints or a spoken prompt. Times are recorded, so a child can see themselves get faster.",
+        "standards": [
+          "CCSS.MP1",
+          "CCSS.MP7"
+        ],
+        "trajectoryLevel": "sudoku-solver",
+        "ageBand": [
+          5,
+          7
+        ]
+      },
+      {
+        "id": "practice-last-cell",
+        "title": "Practice: Last Empty Cell",
+        "concept": "Practice Without Help",
+        "conceptKey": "sudoku-full-house",
+        "requires": [
+          "sudoku-full-house"
+        ],
+        "activity": "sudoku/spot",
+        "params": {
+          "level": 42,
+          "question": {
+            "size": 6,
+            "technique": "full-house",
+            "questionsPerRound": 8,
+            "practice": true
+          }
+        },
+        "difficulty": "Medium",
+        "icon": "kit-repeat",
+        "iconName": "dice",
+        "iconTone": "cyan",
+        "pedagogyTip": "Practice without hints or a spoken prompt. Times are recorded, so a child can see themselves get faster.",
+        "standards": [
+          "CCSS.MP1",
+          "CCSS.MP7"
+        ],
+        "trajectoryLevel": "sudoku-solver",
+        "ageBand": [
+          6,
+          8
+        ]
+      },
+      {
+        "id": "practice-scanning",
+        "title": "Practice: Scanning",
+        "concept": "Practice Without Help",
+        "conceptKey": "sudoku-scanner",
+        "requires": [
+          "sudoku-scanner"
+        ],
+        "activity": "sudoku/spot",
+        "params": {
+          "level": 43,
+          "question": {
+            "size": 9,
+            "technique": "hidden-single-box",
+            "questionsPerRound": 8,
+            "practice": true
+          }
+        },
+        "difficulty": "Hard",
+        "icon": "kit-repeat",
+        "iconName": "dice",
+        "iconTone": "indigo",
+        "pedagogyTip": "Practice without hints or a spoken prompt. Times are recorded, so a child can see themselves get faster.",
+        "standards": [
+          "CCSS.MP1",
+          "CCSS.MP3",
+          "CCSS.MP7"
+        ],
+        "trajectoryLevel": "sudoku-solver",
+        "ageBand": [
+          7,
+          9
+        ]
+      },
+      {
+        "id": "practice-rows-and-columns",
+        "title": "Practice: Rows and Columns",
+        "concept": "Practice Without Help",
+        "conceptKey": "sudoku-line-scanner",
+        "requires": [
+          "sudoku-line-scanner"
+        ],
+        "activity": "sudoku/spot",
+        "params": {
+          "level": 44,
+          "question": {
+            "size": 9,
+            "mix": [
+              "hidden-single-box",
+              "hidden-single-line"
+            ],
+            "questionsPerRound": 8,
+            "practice": true
+          }
+        },
+        "difficulty": "Hard",
+        "icon": "kit-repeat",
+        "iconName": "dice",
+        "iconTone": "emerald",
+        "pedagogyTip": "Practice without hints or a spoken prompt. Times are recorded, so a child can see themselves get faster.",
+        "standards": [
+          "CCSS.MP1",
+          "CCSS.MP3",
+          "CCSS.MP7"
+        ],
+        "trajectoryLevel": "sudoku-solver",
+        "ageBand": [
+          8,
+          10
+        ]
+      },
+      {
+        "id": "practice-only-one-number",
+        "title": "Practice: Only One Number",
+        "concept": "Practice Without Help",
+        "conceptKey": "sudoku-single-finder",
+        "requires": [
+          "sudoku-single-finder"
+        ],
+        "activity": "sudoku/spot",
+        "params": {
+          "level": 45,
+          "question": {
+            "size": 9,
+            "mix": [
+              "hidden-single-box",
+              "hidden-single-line",
+              "naked-single"
+            ],
+            "questionsPerRound": 9,
+            "practice": true
+          }
+        },
+        "difficulty": "Hard",
+        "icon": "kit-repeat",
+        "iconName": "dice",
+        "iconTone": "purple",
+        "pedagogyTip": "Practice without hints or a spoken prompt. Times are recorded, so a child can see themselves get faster.",
+        "standards": [
+          "CCSS.MP1",
+          "CCSS.MP3",
+          "CCSS.MP7"
+        ],
+        "trajectoryLevel": "sudoku-solver",
+        "ageBand": [
+          9,
+          11
+        ]
+      },
+      {
+        "id": "practice-pointing",
+        "title": "Practice: Notes and Pointing",
+        "concept": "Practice Without Help",
+        "conceptKey": "sudoku-pointer",
+        "requires": [
+          "sudoku-pointer"
+        ],
+        "activity": "sudoku/spot",
+        "params": {
+          "level": 46,
+          "question": {
+            "size": 9,
+            "mix": [
+              "pointing",
+              "claiming"
+            ],
+            "questionsPerRound": 8,
+            "practice": true
+          }
+        },
+        "difficulty": "Hard",
+        "icon": "kit-repeat",
+        "iconName": "dice",
+        "iconTone": "indigo",
+        "pedagogyTip": "Practice without hints or a spoken prompt. Times are recorded, so a child can see themselves get faster.",
+        "standards": [
+          "CCSS.MP1",
+          "CCSS.MP3",
+          "CCSS.MP7"
+        ],
+        "trajectoryLevel": "sudoku-solver",
+        "ageBand": [
+          10,
+          12
+        ]
+      },
+      {
+        "id": "practice-pairs",
+        "title": "Practice: Pairs",
+        "concept": "Practice Without Help",
+        "conceptKey": "sudoku-pair-finder",
+        "requires": [
+          "sudoku-pair-finder"
+        ],
+        "activity": "sudoku/spot",
+        "params": {
+          "level": 47,
+          "question": {
+            "size": 9,
+            "mix": [
+              "naked-pair",
+              "hidden-pair"
+            ],
+            "questionsPerRound": 8,
+            "practice": true
+          }
+        },
+        "difficulty": "Hard",
+        "icon": "kit-repeat",
+        "iconName": "dice",
+        "iconTone": "cyan",
+        "pedagogyTip": "Practice without hints or a spoken prompt. Times are recorded, so a child can see themselves get faster.",
+        "standards": [
+          "CCSS.MP1",
+          "CCSS.MP3",
+          "CCSS.MP7"
+        ],
+        "trajectoryLevel": "sudoku-solver",
+        "ageBand": [
+          11,
+          14
+        ]
+      },
+      {
+        "id": "practice-x-wing",
+        "title": "Practice: X-Wing",
+        "concept": "Practice Without Help",
+        "conceptKey": "sudoku-x-wing",
+        "requires": [
+          "sudoku-x-wing"
+        ],
+        "activity": "sudoku/spot",
+        "params": {
+          "level": 48,
+          "question": {
+            "size": 9,
+            "mix": [
+              "pointing",
+              "claiming",
+              "naked-pair",
+              "hidden-pair",
+              "x-wing"
+            ],
+            "questionsPerRound": 10,
+            "practice": true
+          }
+        },
+        "difficulty": "Hard",
+        "icon": "kit-repeat",
+        "iconName": "dice",
+        "iconTone": "purple",
+        "pedagogyTip": "Practice without hints or a spoken prompt. Times are recorded, so a child can see themselves get faster.",
+        "standards": [
+          "CCSS.MP1",
+          "CCSS.MP3",
+          "CCSS.MP7"
+        ],
+        "trajectoryLevel": "sudoku-solver",
+        "ageBand": [
+          12,
+          16
+        ]
+      }
+    ]
   }
 ]

@@ -363,7 +363,7 @@ export const CrossMath: React.FC<ActivityProps<CrossMathParams>> = ({ params, ko
       prompt={promptFor(question)}
       onExit={() => koda.ui.exit()}
       hints={practising ? [] : crossHints(question, values, copy.kidTip)}
-      iconName="Grid3x3"
+      iconName="boxes"
       iconTone="indigo"
       onStartOver={!locked && remaining < values.length ? startOver : undefined}
       onReadAloud={practising || !speechEnabled ? undefined : () => {

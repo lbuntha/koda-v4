@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+  <title>Last Empty Cell</title>
+  <rect x="8" y="8" width="84" height="84" rx="14" fill="#F4F2FF" stroke="#3B2F8F" stroke-width="4"/>
+  <rect x="13.5" y="32.5" width="16.0" height="16.0" rx="4" fill="#E2DCFF"/>
+  <rect x="32.5" y="32.5" width="16.0" height="16.0" rx="4" fill="#E2DCFF"/>
+  <rect x="51.5" y="32.5" width="16.0" height="16.0" rx="4" fill="#E2DCFF"/>
+  <rect x="70.5" y="32.5" width="16.0" height="16.0" rx="4" fill="#C9F2E2"/>
+  <rect x="30.2" y="12" width="1.6" height="76" fill="#C9C2FF"/>
+  <rect x="12" y="30.2" width="76" height="1.6" fill="#C9C2FF"/>
+  <rect x="48.5" y="12" width="3" height="76" fill="#3B2F8F"/>
+  <rect x="12" y="48.5" width="76" height="3" fill="#3B2F8F"/>
+  <rect x="68.2" y="12" width="1.6" height="76" fill="#C9C2FF"/>
+  <rect x="12" y="68.2" width="76" height="1.6" fill="#C9C2FF"/>
+  <text x="21.5" y="47.5" text-anchor="middle" font-family="Arial, sans-serif" font-weight="900" font-size="15" fill="#3B2F8F">2</text>
+  <text x="40.5" y="47.5" text-anchor="middle" font-family="Arial, sans-serif" font-weight="900" font-size="15" fill="#3B2F8F">4</text>
+  <text x="59.5" y="47.5" text-anchor="middle" font-family="Arial, sans-serif" font-weight="900" font-size="15" fill="#3B2F8F">1</text>
+  <text x="78.5" y="47.5" text-anchor="middle" font-family="Arial, sans-serif" font-weight="900" font-size="15" fill="#10B981">3</text>
+</svg>

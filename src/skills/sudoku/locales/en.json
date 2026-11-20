@@ -1,0 +1,112 @@
+{
+  "title": "Sudoku",
+  "prompt": {
+    "numbers": "Fill the grid so every row, column and box has each number once.",
+    "pictures": "Fill the grid so every row, column and box has each picture once."
+  },
+  "technique": {
+    "full-house": "Last Empty Cell",
+    "hidden-single-box": "Scanning a Box",
+    "hidden-single-line": "Scanning a Line",
+    "naked-single": "Only One Number",
+    "pointing": "Pointing",
+    "claiming": "Claiming",
+    "naked-pair": "Naked Pair",
+    "hidden-pair": "Hidden Pair",
+    "x-wing": "X-Wing"
+  },
+  "spot": {
+    "full-house": "Find a row, column or box with one empty cell, and fill it.",
+    "hidden-single-box": "Where does {d} go? Scan the boxes.",
+    "hidden-single-line": "Where does {d} go? Scan the rows and columns.",
+    "naked-single": "Find a cell that can only be one number, and fill it.",
+    "pointing": "Use Pointing to find a place for {d}.",
+    "claiming": "Use Claiming to find a place for {d}.",
+    "naked-pair": "Use a Naked Pair to find a place for {d}.",
+    "hidden-pair": "Use a Hidden Pair to find a place for {d}.",
+    "x-wing": "Use an X-Wing to find a place for {d}."
+  },
+  "house": {
+    "row": "row {n}",
+    "col": "column {n}",
+    "box": "box {n}"
+  },
+  "lines": {
+    "rows": "rows",
+    "cols": "columns"
+  },
+  "cell": "row {row}, column {col}",
+  "picture": {
+    "circle": "circle",
+    "triangle": "triangle",
+    "square": "square",
+    "star": "star",
+    "heart": "heart",
+    "diamond": "diamond"
+  },
+  "grid": "Sudoku grid",
+  "label": {
+    "empty": "{where}, empty",
+    "given": "{where}, {value}",
+    "filled": "{where}, {value}. Tap to change it",
+    "notes": "{where}, notes {notes}",
+    "wrong": "{where}, {value}, not right"
+  },
+  "pad": "Numbers",
+  "put": "Put {value}",
+  "note": "Note {value}",
+  "clear": "Clear",
+  "notes": "Notes",
+  "fillNotes": "Fill notes",
+  "time": "Time {time}",
+  "toFill": {
+    "one": "{count} cell to fill",
+    "other": "{count} cells to fill"
+  },
+  "right": {
+    "title": "Solved!",
+    "message": "Every row, column and box is complete. Time {time}."
+  },
+  "wrong": {
+    "title": "Not yet",
+    "message": {
+      "one": "{count} cell is not right. It is marked. Tap it to change it.",
+      "other": "{count} cells are not right. They are marked. Tap one to change it."
+    }
+  },
+  "found": {
+    "title": "Found it!",
+    "message": "{technique} in {seconds} seconds."
+  },
+  "miss": {
+    "title": "Not that one",
+    "notSure": "That cell is not certain yet. Look again.",
+    "cannot": "{d} cannot go there. Look again."
+  },
+  "hint": {
+    "where": {
+      "full-house": "Look at {house}. It has only one empty cell.",
+      "hidden-single-box": "Scanning: look at {house}. Where can {d} go?",
+      "hidden-single-line": "Scanning: look along {house}. Where can {d} go?",
+      "naked-single": "Look at {cell}. Which numbers can it still be?",
+      "pointing": "Pointing: in {house}, every place for {d} is in {other}.",
+      "claiming": "Claiming: in {house}, every place for {d} is inside {other}.",
+      "naked-pair": "Naked Pair: two cells in {house} can only be {a} or {b}.",
+      "hidden-pair": "Hidden Pair: in {house}, {a} and {b} fit only in the same two cells.",
+      "x-wing": "X-Wing: in {house} and {other}, {d} fits in only two cells, in the same two {lines}."
+    },
+    "why": {
+      "full-house": "The numbers {have} are already in {house}. The empty cell takes the one that is missing.",
+      "hidden-single-box": "Rows and columns that already have {d} cross {house}. Only one cell in it is still free for {d}.",
+      "hidden-single-line": "Every other empty cell in {house} already sees a {d} in its column, row or box.",
+      "naked-single": "Its row, column and box already hold every number except {d}.",
+      "pointing": "The {d} of {house} must be in {other}, so {d} cannot go anywhere else in {other}. Take those notes out.",
+      "claiming": "The {d} of {house} must be inside {other}, so {d} cannot go anywhere else in {other}. Take those notes out.",
+      "naked-pair": "Those two cells will take {a} and {b}, so no other cell in {house} can. Take those notes out.",
+      "hidden-pair": "Those two cells must be {a} and {b}. Take every other note out of them.",
+      "x-wing": "{d} sits on two corners of the square, one in each line. Take {d} out of the rest of those two {lines}."
+    },
+    "answer": "Put {d} in {cell}.",
+    "answerAfter": "That opens up a number: put {d} in {cell}."
+  }
+}

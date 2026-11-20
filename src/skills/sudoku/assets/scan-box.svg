@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+  <title>Scanning a Box</title>
+  <rect x="8" y="8" width="84" height="84" rx="14" fill="#F4F2FF" stroke="#3B2F8F" stroke-width="4"/>
+  <rect x="38.8" y="38.8" width="22.3" height="22.3" rx="4" fill="#C9F2E2"/>
+  <rect x="35.8" y="12" width="3" height="76" fill="#3B2F8F"/>
+  <rect x="12" y="35.8" width="76" height="3" fill="#3B2F8F"/>
+  <rect x="61.2" y="12" width="3" height="76" fill="#3B2F8F"/>
+  <rect x="12" y="61.2" width="76" height="3" fill="#3B2F8F"/>
+  <path d="M50 4 V38" stroke="#7C4DFF" stroke-width="5" stroke-linecap="round"/>
+  <path d="M4 50 H38" stroke="#0EA5E9" stroke-width="5" stroke-linecap="round"/>
+  <path d="M44 32 L50 40 L56 32" fill="none" stroke="#7C4DFF" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M32 44 L40 50 L32 56" fill="none" stroke="#0EA5E9" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
+  <circle cx="50" cy="50" r="7" fill="#10B981"/>
+</svg>

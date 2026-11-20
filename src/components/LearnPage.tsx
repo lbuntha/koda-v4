@@ -36,6 +36,7 @@ import {
   UIArtIcon,
 } from "./ui";
 import { useT } from "../lib/i18n";
+import type { SvgAssetId } from "../assets/svg";
 
 export interface LearnPageProps {
   skillId: string;
@@ -51,6 +52,15 @@ export interface LearnPageProps {
  * same words twice on two consecutive lines.
  */
 const unitTitle = (title: string): string => title.replace(/^Unit\s*\d+\s*[:.\-\u2013]\s*/i, "");
+
+/**
+ * A lesson's icon on the path. An id from the Art library ("kit-timer",
+ * "sudoku-scan-box") is drawn as that art; anything else — the emoji older
+ * lessons carry — is shown as it is.
+ */
+const ART_ID = /^[a-z0-9]+(-[a-z0-9]+)+$/;
+const lessonIcon = (icon?: string): React.ReactNode =>
+  icon && ART_ID.test(icon) ? <UIArtIcon id={icon as SvgAssetId} className="h-6 w-6" /> : icon;
 
 /** The icon-and-two-lines heading that opens each section of the path. */
 const SectionIntro: React.FC<{
@@ -296,7 +306,7 @@ export const LearnPage: React.FC<LearnPageProps> = ({
       return {
         id: lesson.ref,
         title: opts.practice ? practiceTitle(lesson.title) : lesson.title,
-        icon: lesson.icon,
+        icon: lessonIcon(lesson.icon),
         stars,
         tier: premium ? "premium" : "free",
         note: opens ? t("learn.unlocksAfter", { lesson: opens.title }) : undefined,
