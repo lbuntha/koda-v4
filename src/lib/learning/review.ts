@@ -1,4 +1,6 @@
 import type { AnswerSubmittedEvent, LearningEvent, LessonCompletedEvent } from "./events";
+import { SyncEngine } from "../sync";
+import { storageKeyFor } from "../sync/kinds";
 
 /**
  * What a child should see again, and when.
@@ -61,6 +63,8 @@ export interface Mistake {
   /** Days, after the last slip, with a right first try. */
   rightDays: string[];
   dueDay: string;
+  /** Epoch ms of the last change; two devices' copies are merged by it. */
+  updatedAt?: number;
 }
 
 export interface TopicReview {
@@ -74,6 +78,8 @@ export interface TopicReview {
   step: number;
   lastDay: string;
   dueDay: string;
+  /** Epoch ms of the last change; two devices' copies are merged by it. */
+  updatedAt?: number;
 }
 
 export interface FixedMistake {
@@ -210,9 +216,56 @@ function onCompleted(store: ReviewStore, e: LessonCompletedEvent): ReviewStore {
 /** Fold one learning event into a learner's review store. */
 export function applyEvent(store: ReviewStore, e: LearningEvent): ReviewStore {
   if (!counts(e)) return store;
-  if (e.type === "answer_submitted") return onAnswer(store, e);
-  if (e.type === "lesson_completed") return onCompleted(store, e);
+  const at = Date.parse(e.ts) || 0;
+  if (e.type === "answer_submitted") return stamp(store, onAnswer(store, e), `${e.skillId}/${e.lessonId}`, e.conceptKey, at);
+  if (e.type === "lesson_completed") return stamp(store, onCompleted(store, e), `${e.skillId}/${e.lessonId}`, e.conceptKey, at);
   return store;
+}
+
+/** Marks the entries an event changed, so a merge knows which copy is newer. */
+function stamp(before: ReviewStore, after: ReviewStore, key: string, conceptKey: string, at: number): ReviewStore {
+  if (after === before) return after;
+  const mistakes = after.mistakes[key] && after.mistakes[key] !== before.mistakes[key]
+    ? { ...after.mistakes, [key]: { ...after.mistakes[key], updatedAt: at } }
+    : after.mistakes;
+  const topics = after.topics[conceptKey] && after.topics[conceptKey] !== before.topics[conceptKey]
+    ? { ...after.topics, [conceptKey]: { ...after.topics[conceptKey], updatedAt: at } }
+    : after.topics;
+  return { ...after, mistakes, topics };
+}
+
+/**
+ * Two devices' copies of one child's store, joined.
+ *
+ * Each mistake and topic keeps whichever copy changed last. A mistake one
+ * device has since fixed stays fixed: it is dropped if the joined `fixed` list
+ * holds it from a day on or after its last slip. The server runs the same
+ * rule (`merge_review_progress`); this one is for tests and for the record.
+ */
+export function mergeStores(a: ReviewStore, b: ReviewStore): ReviewStore {
+  const newer = <T extends { updatedAt?: number }>(x: T | undefined, y: T | undefined): T | undefined =>
+    !x ? y : !y ? x : (y.updatedAt ?? 0) >= (x.updatedAt ?? 0) ? y : x;
+  const seen = new Set<string>();
+  const fixed = [...a.fixed, ...b.fixed]
+    .filter((f) => {
+      const id = `${f.key}@${f.day}`;
+      if (seen.has(id)) return false;
+      seen.add(id);
+      return true;
+    })
+    .sort((x, y) => (x.day < y.day ? -1 : x.day > y.day ? 1 : 0))
+    .slice(-MAX_FIXED);
+  const mistakes: Record<string, Mistake> = {};
+  for (const key of new Set([...Object.keys(a.mistakes), ...Object.keys(b.mistakes)])) {
+    const m = newer(a.mistakes[key], b.mistakes[key])!;
+    if (fixed.some((f) => f.key === key && f.day >= m.lastWrongDay)) continue;
+    mistakes[key] = m;
+  }
+  const topics: Record<string, TopicReview> = {};
+  for (const key of new Set([...Object.keys(a.topics), ...Object.keys(b.topics)])) {
+    topics[key] = newer(a.topics[key], b.topics[key])!;
+  }
+  return { version: 1, mistakes, topics, fixed };
 }
 
 /* ---------- what is due ---------- */
@@ -238,8 +291,11 @@ export const fixedSince = (store: ReviewStore, since: string): FixedMistake[] =>
 
 /* ---------- storage ---------- */
 
-const PREFIX = "koda_review_v1:";
-const keyFor = (learnerId: string) => `${PREFIX}${learnerId}`;
+/** `koda_review_v1__<learnerId>`, the key the sync engine writes pulled copies to. */
+const keyFor = (learnerId: string) => storageKeyFor("reviewProgress", learnerId)!;
+/* A function, not a constant: this module is loaded by the learning log, which
+   the sync engine also loads, so nothing from sync may run at import time. */
+const prefix = () => keyFor("");
 
 export function readReview(learnerId: string): ReviewStore {
   try {
@@ -263,6 +319,13 @@ const writeReview = (learnerId: string, store: ReviewStore) => {
     localStorage.setItem(keyFor(learnerId), JSON.stringify(store));
   } catch {
     /* Full or blocked storage: the log still has the facts; review just waits. */
+  }
+  /* Sent like a child's Rebus and Trace records, so a parent's device can
+     show "fixed this week" and a second tablet picks up the same list. */
+  try {
+    SyncEngine.recordDoc("reviewProgress", learnerId, store as unknown as Record<string, unknown>, { learnerId });
+  } catch {
+    /* Offline or signed out: it stays on this device until it can go. */
   }
 };
 
@@ -288,7 +351,7 @@ export function clearAllReview(): void {
     const keys: string[] = [];
     for (let i = 0; i < localStorage.length; i++) {
       const k = localStorage.key(i);
-      if (k?.startsWith(PREFIX)) keys.push(k);
+      if (k?.startsWith(prefix())) keys.push(k);
     }
     keys.forEach((k) => localStorage.removeItem(k));
   } catch {

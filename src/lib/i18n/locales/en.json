@@ -5839,5 +5839,37 @@
       "book": "A new book on your shelf.",
       "rebus": "Fresh puzzles to solve."
     }
+  },
+  "todayPlan": {
+    "title": "Today's plan",
+    "hint": "About 10 minutes. Old topics and mistakes come back a day or more later, so they stick.",
+    "progress": "{done} of {total} done",
+    "start": "Start today",
+    "continue": "Keep going",
+    "allDone": "All done for today. Great work!",
+    "allDoneNote": "Come back tomorrow for a new plan.",
+    "doneLabel": "done",
+    "kind": {
+      "review": "Review",
+      "fix": "Fix a mistake",
+      "new": "New",
+      "continue": "Carry on",
+      "read": "Read",
+      "write": "Write"
+    }
+  },
+  "reviewReport": {
+    "title": "Mistakes",
+    "intro": "Questions {name} got wrong come back a day or more later, until they are right twice on different days.",
+    "fixedWeek": "Fixed this week",
+    "toFix": "Still to fix",
+    "topicsDue": "Topics due",
+    "dueNow": "Due now",
+    "dueOn": "Back on {day}",
+    "misses": "Wrong {n} times",
+    "halfway": "right once since",
+    "example": "Answered {given}; the answer was {expected}.",
+    "noneOpen": "Nothing left to fix. Every mistake so far has been put right.",
+    "more": "And {n} more."
   }
 }

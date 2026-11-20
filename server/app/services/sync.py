@@ -92,6 +92,60 @@ def merge_rebus_play(existing: dict[str, Any], incoming: dict[str, Any]) -> dict
     return {"seen": seen, "results": results}
 
 
+REVIEW_FIXED_CAP = 200
+
+
+def merge_review_progress(existing: dict[str, Any], incoming: dict[str, Any]) -> dict[str, Any]:
+    """Two devices' review records for one child, joined.
+
+    Each mistake and topic keeps the copy with the later `updatedAt` (the
+    incoming one on a tie). `fixed` is the union of both lists. A mistake that
+    either device has fixed since its last slip stays fixed rather than being
+    brought back by the other device's older copy. Mirrors `mergeStores` in
+    `src/lib/learning/review.ts`.
+    """
+
+    def entries(body: dict[str, Any], field: str) -> dict[str, dict[str, Any]]:
+        raw = body.get(field) or {}
+        return {k: v for k, v in raw.items() if isinstance(v, dict)} if isinstance(raw, dict) else {}
+
+    def newer(a: dict[str, Any] | None, b: dict[str, Any] | None) -> dict[str, Any] | None:
+        if a is None:
+            return b
+        if b is None:
+            return a
+        return b if (b.get("updatedAt") or 0) >= (a.get("updatedAt") or 0) else a
+
+    seen: set[str] = set()
+    fixed: list[dict[str, Any]] = []
+    for item in [*(existing.get("fixed") or []), *(incoming.get("fixed") or [])]:
+        if not isinstance(item, dict) or not isinstance(item.get("key"), str) or not isinstance(item.get("day"), str):
+            continue
+        ident = f"{item['key']}@{item['day']}"
+        if ident in seen:
+            continue
+        seen.add(ident)
+        fixed.append(item)
+    fixed.sort(key=lambda f: f["day"])
+    fixed = fixed[-REVIEW_FIXED_CAP:]
+
+    old_m, new_m = entries(existing, "mistakes"), entries(incoming, "mistakes")
+    mistakes: dict[str, Any] = {}
+    for key in {*old_m, *new_m}:
+        chosen = newer(old_m.get(key), new_m.get(key))
+        if chosen is None:
+            continue
+        last_wrong = str(chosen.get("lastWrongDay") or "")
+        if any(f["key"] == key and f["day"] >= last_wrong for f in fixed):
+            continue
+        mistakes[key] = chosen
+
+    old_t, new_t = entries(existing, "topics"), entries(incoming, "topics")
+    topics = {key: newer(old_t.get(key), new_t.get(key)) for key in {*old_t, *new_t}}
+
+    return {"version": 1, "mistakes": mistakes, "topics": topics, "fixed": fixed}
+
+
 def merge_progress(existing: dict[str, Any], incoming: dict[str, Any]) -> dict[str, Any]:
     """Last write wins, except where the later write is not the better answer.
 
@@ -265,6 +319,8 @@ async def _apply_mutation(
             body = merge_trace_progress(existing.get("body") or {}, mutation.body)
         elif mutation.kind == "rebusPlay" and not mutation.deleted:
             body = merge_rebus_play(existing.get("body") or {}, mutation.body)
+        elif mutation.kind == "reviewProgress" and not mutation.deleted:
+            body = merge_review_progress(existing.get("body") or {}, mutation.body)
         else:
             return Conflict(opId=mutation.op_id, doc=_as_sync_doc(existing))
 

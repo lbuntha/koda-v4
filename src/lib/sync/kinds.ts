@@ -22,7 +22,8 @@ export type DocKind =
   | "childSettings"
   | "conceptBaseline"
   | "traceProgress"
-  | "rebusPlay";
+  | "rebusPlay"
+  | "reviewProgress";
 
 export interface KindSpec {
   /**
@@ -228,6 +229,17 @@ export const SYNC_KINDS: Record<DocKind, KindSpec> = {
     scope: "learner",
     shape: "whole",
     notify: nudge("koda_rebus_play_v1"),
+  },
+  /*
+   * Review: one child's mistakes still to fix, when each topic is due again,
+   * and what was fixed (`learning/review.ts`). The server joins two devices'
+   * copies entry by entry, newer wins, and a fixed mistake stays fixed.
+   */
+  reviewProgress: {
+    storageKey: "koda_review_v1",
+    scope: "learner",
+    shape: "whole",
+    notify: nudge("koda_review_v1"),
   },
 };
 

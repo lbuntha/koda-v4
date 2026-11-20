@@ -36,6 +36,9 @@ DOC_KINDS = {
     # Rebus Rush: which puzzles one child has met and how each went. Merged, not
     # refused: two tablets the same child plays on both know different puzzles.
     "rebusPlay",
+    # Review: one child's mistakes still to fix, when each topic is due again,
+    # and what has been fixed. Merged entry by entry, newer wins.
+    "reviewProgress",
 }
 
 #: Kinds that take more than being signed in to write.
@@ -65,7 +68,7 @@ KIND_PERMISSIONS = {
 #: learners in one family — a student and their younger sibling — share a
 #: permission but not a record, and the key is the only thing that distinguishes
 #: them. An adult is unaffected: they have no learner id to be held to.
-LEARNER_OWNED_KINDS = {"goals", "childSettings", "traceProgress", "rebusPlay"}
+LEARNER_OWNED_KINDS = {"goals", "childSettings", "traceProgress", "rebusPlay", "reviewProgress"}
 
 #: Art bodies are markup rather than settings, so they need a ceiling the other
 #: kinds do not. 64 KB is a generous illustration and a firm "that is a mistake"

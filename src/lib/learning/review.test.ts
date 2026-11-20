@@ -7,6 +7,7 @@ import {
   dueTopics,
   emptyStore,
   fixedSince,
+  mergeStores,
   readReview,
   recordForReview,
   REVIEW_LADDER,
@@ -145,7 +146,20 @@ describe("storage", () => {
     recordForReview(answer("2026-11-20", false, { learnerId: "sibling", lessonId: "compare" }));
     expect(Object.keys(readReview("kid").mistakes)).toEqual(["subtraction/take-away"]);
     expect(Object.keys(readReview("sibling").mistakes)).toEqual(["subtraction/compare"]);
-    localStorage.setItem("koda_review_v1:kid", "{not json");
+    localStorage.setItem("koda_review_v1__kid", "{not json");
     expect(readReview("kid")).toEqual(emptyStore());
+  });
+});
+
+describe("two devices", () => {
+  it("keeps the newer copy of each entry and never brings back a fixed mistake", () => {
+    const tablet = fold([answer("2026-11-20", false), answer("2026-11-21", true), answer("2026-11-22", true)]);
+    const phone = fold([answer("2026-11-20", false, { ts: "2026-11-20T01:00:00Z" })]);
+    expect(tablet.mistakes).toEqual({});
+    const merged = mergeStores(phone, tablet);
+    expect(merged.mistakes).toEqual({});
+    expect(merged.fixed).toHaveLength(1);
+    const slippedAgain = fold([answer("2026-11-25", false, { ts: "2026-11-25T03:00:00Z" })], phone);
+    expect(Object.keys(mergeStores(tablet, slippedAgain).mistakes)).toEqual(["subtraction/take-away"]);
   });
 });

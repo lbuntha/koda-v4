@@ -24,6 +24,7 @@ import { ApiError, usePermissions } from "../../lib/sync";
 import type { ConceptMastery, MasteryStatus } from "../../lib/learning/mastery";
 import type { ErrorKind } from "../../lib/learning/events";
 import { SKILLS } from "../../skills/registry";
+import { ReviewReport } from "./ReviewReport";
 import { themeSystem } from "../../lib/themeSystem";
 import { UIAvatar, UIBadge, UIButton, UISectionHeader, UIStatGrid, UIStatTile, UIArtIcon } from "../ui";
 import { NoAccess } from "./NoAccess";
@@ -81,6 +82,13 @@ interface ConceptName {
   lesson: string;
   skill: string;
 }
+
+/** A lesson's title and its skill's name, for the mistakes list. */
+const lessonNameOf = (skillId: string, lessonId: string): ConceptName | null => {
+  const skill = SKILLS.find((s) => s.manifest.id === skillId);
+  const lesson = skill?.lessons.find((l) => l.id === lessonId);
+  return skill && lesson ? { lesson: lesson.title, skill: skill.manifest.name } : null;
+};
 
 const conceptNames = (): Map<string, ConceptName> => {
   const names = new Map<string, ConceptName>();
@@ -846,6 +854,8 @@ export const ChildReportPage: React.FC<ChildReportPageProps> = ({
               </section>
             )}
 
+            {/* Mistakes fixed and still open. Draws nothing until there is one. */}
+            <ReviewReport learnerId={learnerId} learnerName={learnerName} lessonName={lessonNameOf} />
             {/* Koda Trace: what they can write and draw now. Draws nothing until they have tried an item. */}
             <TraceReport learnerId={learnerId} learnerName={learnerName} />
             {/* The pictures they finished colouring. Draws nothing until there is one. */}

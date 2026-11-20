@@ -33,6 +33,11 @@ import { SvgAsset } from "../assets/svg";
 import { useT } from "../lib/i18n";
 import { useTodayPicks } from "./learn/useToday";
 import { StarterPicks } from "./learn/StarterPicks";
+import { TodayPlanCard } from "./learn/TodayPlanCard";
+import { planFor, stepDone, type PlanStep } from "../lib/todayPlan";
+import { readReview } from "../lib/learning/review";
+import { LearningLog, activeLearnerId, localDayOf } from "../lib/learning/learningLog";
+import { ChildSettingsAPI } from "../lib/childSettings";
 import { SidebarIcon } from "./ui";
 import type { PickWhy } from "../lib/today";
 
@@ -402,6 +407,17 @@ export const Home: React.FC<HomeProps> = ({
      the lessons it just bought appear here without reloading. The value is
      unused — `premiumLocked` asks `Billing` itself. */
   useBilling();
+  /* Today's plan ticks itself off from the learning log, and drops its review
+     steps when a parent flips the switch, so both are listened to. */
+  const [, refreshPlan] = React.useReducer((n: number) => n + 1, 0);
+  React.useEffect(() => {
+    const offLog = LearningLog.subscribe(refreshPlan);
+    const offSettings = ChildSettingsAPI.subscribe(refreshPlan);
+    return () => {
+      offLog();
+      offSettings();
+    };
+  }, []);
   const [showAllSubjects, setShowAllSubjects] = React.useState(false);
   const { t } = useT();
   const todayPicks = useTodayPicks();
@@ -644,6 +660,55 @@ export const Home: React.FC<HomeProps> = ({
         ),
       ].filter(Boolean);
 
+  /*
+   * Today's plan: one review due, up to two mistakes, one new lesson, then a
+   * book and some writing (`lib/todayPlan.ts`). The learner's, not a parent's.
+   */
+  const planLearner = activeLearnerId();
+  const startable = (ref: string): boolean => {
+    const lesson = byRef.get(ref);
+    return Boolean(
+      lesson && registeredIds.has(lesson.skillId) && !premiumLocked({ skillId: lesson.skillId, levelNumber: lesson.levelNumber }),
+    );
+  };
+  const plan = isParent
+    ? null
+    : planFor(planLearner, {
+        day: localDayOf(new Date()),
+        now: new Date(),
+        reviewOn: ChildSettingsAPI.current().reviewEnabled,
+        store: readReview(planLearner),
+        canStart: startable,
+        newRef: interrupted
+          ? `${interrupted.lesson.skillId}/${interrupted.lesson.id}`
+          : leadPick?.lesson.ref ?? null,
+        newIsResume: Boolean(interrupted),
+        read: todayPicks.read ? { bookId: todayPicks.read.book.id, title: todayPicks.read.book.title } : null,
+        write: todayPicks.write
+          ? { collectionId: todayPicks.write.collection.id, title: todayPicks.write.collection.title }
+          : null,
+      });
+  const planEvents = plan ? LearningLog.all({ since: plan.createdAt }) : [];
+  const planDone = plan ? plan.steps.map((step) => stepDone(step, plan, planEvents, planLearner)) : [];
+  const startStep = (step: PlanStep) => {
+    if (step.ref) return start(step.ref);
+    playSound("pop");
+    if (step.bookId) onOpenBook?.(step.bookId);
+    else if (step.collectionId) onOpenCollection?.(step.collectionId);
+  };
+  const planCard =
+    plan && plan.steps.length > 0 ? (
+      <TodayPlanCard
+        plan={plan}
+        done={planDone}
+        onStart={startStep}
+        lessonLabel={(ref) => {
+          const lesson = byRef.get(ref);
+          return lesson ? { title: lesson.title, subject: byId.get(lesson.skillId)?.name ?? lesson.skillId } : null;
+        }}
+      />
+    ) : null;
+
   return (
     /* Column 1 is the app shell's sidebar; this is columns 2 and 3. Neither
        band grows with the lesson count — Today is capped, and the subject list
@@ -692,6 +757,8 @@ export const Home: React.FC<HomeProps> = ({
               <h1 className="font-mono font-black uppercase tracking-widest text-xs text-indigo-600">
                 {t("home.today")}
               </h1>
+
+              {planCard}
 
               {today.length || interrupted || categoryCards.length ? (
                 /*
