@@ -5953,7 +5953,12 @@
     "inOneTry": "Solved on the first try",
     "picture": "Picture clue",
     "options": "Options",
-    "practiceXpDone": "You've had today's XP from {n} practice words. Keep playing for fun, or come back tomorrow for more XP!"
+    "practiceXpDone": "You've had today's XP from {n} practice words. Keep playing for fun, or come back tomorrow for more XP!",
+    "topicLabel": "Topic",
+    "allTopics": "All topics",
+    "newInBook": "New word in your word book!",
+    "spelledBefore": "You spelled this one before",
+    "bookCount": "You have spelled {n} of {total} words at this length."
   },
   "puzzles": {
     "category": {
@@ -5968,7 +5973,12 @@
       "colour": "Colour",
       "number": "Number",
       "time": "Time",
-      "action": "Doing words"
+      "action": "Doing words",
+      "clothes": "Clothes",
+      "job": "Jobs",
+      "place": "Places",
+      "sport": "Sport",
+      "feeling": "Feelings"
     }
   },
   "puzzleStudio": {
@@ -6029,7 +6039,6 @@
     },
     "loading": "Loading…",
     "noneFound": "No words match. Try another filter, or add a word.",
-    "shown": "Showing {n} of {total}",
     "noClue": "No clue yet",
     "by": "Added by {name}",
     "edit": "Edit",
@@ -6075,6 +6084,8 @@
     },
     "choosePhoto": "Choose a photo",
     "photoHelp": "A JPEG or PNG from your computer. Koda makes it smaller before sending it, and children's devices keep it for offline play.",
-    "photoFailed": "The photo could not be added. Try again."
+    "photoFailed": "The photo could not be added. Try again.",
+    "allTopics": "All topics",
+    "shownRange": "{from}–{to} of {total} words"
   }
 }

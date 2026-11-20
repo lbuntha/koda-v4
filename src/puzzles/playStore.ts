@@ -43,7 +43,7 @@ export interface PlayStore {
 export const PRACTICE_XP_GAMES = 10;
 
 const KEEP_DAYS = 45;
-const KEEP_WORDS = 500;
+const KEEP_WORDS = 2000;
 
 const keyFor = (learnerId: string) => `koda_word_guess_v1__${learnerId}`;
 const empty = (): PlayStore => ({ daily: {}, streak: { last: null, n: 0, best: 0 }, words: [], recent: [], practiceXp: { day: "", n: 0 } });
@@ -89,6 +89,9 @@ export function saveDaily(slot: string, day: string, game: GameRecord, learnerId
   write(store, learnerId);
   return store;
 }
+
+/** The words this child has spelled: the flag on every word they solved. */
+export const solvedIds = (learnerId = activeLearnerId()): Set<string> => new Set(readPlay(learnerId).words.map((w) => w.id));
 
 /** How many more practice words earn XP today. */
 export function practiceXpLeft(day: string, learnerId = activeLearnerId()): number {

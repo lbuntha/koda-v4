@@ -3,13 +3,15 @@ import { WordPicture } from "../ui/WordPicture";
 import { Archive, Pencil, RotateCcw, Rocket, Send, Trash2, Undo2 } from "lucide-react";
 import { useT } from "../../lib/i18n";
 import { themeSystem } from "../../lib/themeSystem";
-import { UIBadge, UIButton, UISearchInput, UISelect } from "../../components/ui";
+import { UIBadge, UIButton, UIPagination, UISearchInput, UISelect } from "../../components/ui";
 import { useStudioAction } from "../../rebus/studio/useStudioAction";
-import type { PuzzleStatus } from "../types";
+import { PUZZLE_CATEGORIES, type PuzzleStatus } from "../types";
 import { CategoryIcon } from "../ui/categoryIcon";
 import { WordTiles } from "../ui/WordTiles";
 import { WordForm } from "./WordForm";
 import { PuzzleStudioAPI, type StudioWord } from "./studioApi";
+
+const PAGE = 50;
 
 const BADGE: Record<PuzzleStatus, "success" | "primary" | "info" | "neutral"> = {
   published: "success",
@@ -19,22 +21,39 @@ const BADGE: Record<PuzzleStatus, "success" | "primary" | "info" | "neutral"> = 
 };
 
 /** Every word, filterable, each with the one or two actions that fit where it stands. */
-export const WordList: React.FC<{ canRun: boolean; initialStatus?: PuzzleStatus | ""; onChanged(): void }> = ({ canRun, initialStatus = "", onChanged }) => {
+export const WordList: React.FC<{ canRun: boolean; initialStatus?: PuzzleStatus | ""; onChanged(): void }> = ({
+  canRun,
+  initialStatus = "",
+  onChanged,
+}) => {
   const { t } = useT();
   const [lang, setLang] = useState("");
   const [level, setLevel] = useState("");
   const [status, setStatus] = useState<string>(initialStatus);
   const [q, setQ] = useState("");
+  const [category, setCategory] = useState("");
+  const [page, setPage] = useState(1);
   const [rows, setRows] = useState<StudioWord[] | null>(null);
   const [total, setTotal] = useState(0);
   const [editing, setEditing] = useState<string | null>(null);
   const { busy, error, run } = useStudioAction();
 
   const load = useCallback(async () => {
-    const res = await PuzzleStudioAPI.list({ lang, level: level ? Number(level) : undefined, status, q });
+    const res = await PuzzleStudioAPI.list({
+      lang,
+      level: level ? Number(level) : undefined,
+      status,
+      q,
+      category,
+      skip: (page - 1) * PAGE,
+      limit: PAGE,
+    });
     setRows(res.puzzles);
     setTotal(res.total);
-  }, [lang, level, status, q]);
+  }, [lang, level, status, q, category, page]);
+  /* A new filter starts again at page 1. */
+  useEffect(() => setPage(1), [lang, level, status, q, category]);
+  const pages = Math.max(1, Math.ceil(total / PAGE));
 
   useEffect(() => {
     const id = setTimeout(() => void run(load), q ? 250 : 0);
@@ -50,9 +69,14 @@ export const WordList: React.FC<{ canRun: boolean; initialStatus?: PuzzleStatus 
 
   return (
     <div className="space-y-4">
-      <div className="grid items-end gap-2 sm:grid-cols-3 lg:grid-cols-[minmax(0,2fr)_repeat(3,minmax(0,1fr))]">
-        <div className="sm:col-span-3 lg:col-span-1">
-          <UISearchInput label={t("puzzleStudio.search")} placeholder={t("puzzleStudio.search")} value={q} onChange={(e) => setQ(e.target.value)} />
+      <div className="grid items-end gap-2 sm:grid-cols-4 lg:grid-cols-[minmax(0,2fr)_repeat(4,minmax(0,1fr))]">
+        <div className="sm:col-span-4 lg:col-span-1">
+          <UISearchInput
+            label={t("puzzleStudio.search")}
+            placeholder={t("puzzleStudio.search")}
+            value={q}
+            onChange={(e) => setQ(e.target.value)}
+          />
         </div>
         <UISelect aria-label={t("puzzleStudio.language")} value={lang} onChange={(e) => setLang(e.target.value)}>
           <option value="">{t("puzzleStudio.allLanguages")}</option>
@@ -64,6 +88,14 @@ export const WordList: React.FC<{ canRun: boolean; initialStatus?: PuzzleStatus 
           {[2, 3, 4, 5, 6].map((n) => (
             <option key={n} value={n}>
               {t("puzzleStudio.nTiles", { n: String(n) })}
+            </option>
+          ))}
+        </UISelect>
+        <UISelect aria-label={t("puzzleStudio.category")} value={category} onChange={(e) => setCategory(e.target.value)}>
+          <option value="">{t("puzzleStudio.allTopics")}</option>
+          {PUZZLE_CATEGORIES.map((c) => (
+            <option key={c} value={c}>
+              {t(`puzzles.category.${c}`)}
             </option>
           ))}
         </UISelect>
@@ -89,7 +121,16 @@ export const WordList: React.FC<{ canRun: boolean; initialStatus?: PuzzleStatus 
         <p className={themeSystem.card("default", "p-6 text-center text-body")}>{t("puzzleStudio.noneFound")}</p>
       ) : (
         <>
-          <p className="text-sm font-bold text-muted">{t("puzzleStudio.shown", { n: String(rows.length), total: String(total) })}</p>
+          <div className="flex flex-wrap items-center justify-between gap-2">
+            <p className="text-sm font-bold text-muted">
+              {t("puzzleStudio.shownRange", {
+                from: String((page - 1) * PAGE + 1),
+                to: String((page - 1) * PAGE + rows.length),
+                total: String(total),
+              })}
+            </p>
+            <UIPagination page={page} pages={pages} onPage={setPage} disabled={busy} />
+          </div>
           <ul className="space-y-2">
             {rows.map((w) =>
               editing === w.id ? (
@@ -119,12 +160,21 @@ export const WordList: React.FC<{ canRun: boolean; initialStatus?: PuzzleStatus 
                       <span className={`text-xl font-black text-ink ${w.lang === "en" ? "uppercase" : ""}`}>{w.data.word}</span>
                       <UIBadge variant={BADGE[w.status]}>{t(`puzzleStudio.statusName.${w.status}`)}</UIBadge>
                       <span className="text-xs font-bold text-muted">
-                        {w.lang === "km" ? "ខ្មែរ" : "English"} · {t("puzzleStudio.nTiles", { n: String(w.level) })} · {t(`puzzles.category.${w.data.category}`)}
+                        {w.lang === "km" ? "ខ្មែរ" : "English"} · {t("puzzleStudio.nTiles", { n: String(w.level) })} ·{" "}
+                        {t(`puzzles.category.${w.data.category}`)}
                       </span>
                     </div>
-                    <div className="truncate text-sm text-body">{[w.data.clue.en, w.data.clue.km].filter(Boolean).join(" · ") || t("puzzleStudio.noClue")}</div>
-                    {w.createdByName && w.owner === "creator" && <div className="text-xs text-muted">{t("puzzleStudio.by", { name: w.createdByName })}</div>}
-                    {w.issues.length > 0 && <div className="text-xs font-bold text-rose-600 dark:text-rose-400">{w.issues.map((c) => t(`puzzleStudio.problem.${c}`)).join(" ")}</div>}
+                    <div className="truncate text-sm text-body">
+                      {[w.data.clue.en, w.data.clue.km].filter(Boolean).join(" · ") || t("puzzleStudio.noClue")}
+                    </div>
+                    {w.createdByName && w.owner === "creator" && (
+                      <div className="text-xs text-muted">{t("puzzleStudio.by", { name: w.createdByName })}</div>
+                    )}
+                    {w.issues.length > 0 && (
+                      <div className="text-xs font-bold text-rose-600 dark:text-rose-400">
+                        {w.issues.map((c) => t(`puzzleStudio.problem.${c}`)).join(" ")}
+                      </div>
+                    )}
                   </div>
                   <div className="hidden sm:block">
                     <WordTiles tiles={w.data.tiles} lang={w.lang} size={30} />
@@ -136,37 +186,78 @@ export const WordList: React.FC<{ canRun: boolean; initialStatus?: PuzzleStatus 
                       </UIButton>
                     )}
                     {w.status === "draft" && !canRun && (
-                      <UIButton size="sm" variant="outline" icon={<Send />} disabled={busy} onClick={() => void act(() => PuzzleStudioAPI.status(w.id, "review"))}>
+                      <UIButton
+                        size="sm"
+                        variant="outline"
+                        icon={<Send />}
+                        disabled={busy}
+                        onClick={() => void act(() => PuzzleStudioAPI.status(w.id, "review"))}
+                      >
                         {t("puzzleStudio.sendReview")}
                       </UIButton>
                     )}
                     {w.status === "review" && !canRun && (
-                      <UIButton size="sm" variant="ghost" icon={<Undo2 />} disabled={busy} onClick={() => void act(() => PuzzleStudioAPI.status(w.id, "draft"))}>
+                      <UIButton
+                        size="sm"
+                        variant="ghost"
+                        icon={<Undo2 />}
+                        disabled={busy}
+                        onClick={() => void act(() => PuzzleStudioAPI.status(w.id, "draft"))}
+                      >
                         {t("puzzleStudio.backToDraft")}
                       </UIButton>
                     )}
                     {canRun && (w.status === "draft" || w.status === "review") && (
-                      <UIButton size="sm" icon={<Rocket />} disabled={busy || w.issues.length > 0} onClick={() => void act(() => PuzzleStudioAPI.status(w.id, "published"))}>
+                      <UIButton
+                        size="sm"
+                        icon={<Rocket />}
+                        disabled={busy || w.issues.length > 0}
+                        onClick={() => void act(() => PuzzleStudioAPI.status(w.id, "published"))}
+                      >
                         {t("puzzleStudio.publish")}
                       </UIButton>
                     )}
                     {canRun && w.status === "review" && (
-                      <UIButton size="sm" variant="ghost" icon={<Undo2 />} disabled={busy} onClick={() => void act(() => PuzzleStudioAPI.status(w.id, "draft"))}>
+                      <UIButton
+                        size="sm"
+                        variant="ghost"
+                        icon={<Undo2 />}
+                        disabled={busy}
+                        onClick={() => void act(() => PuzzleStudioAPI.status(w.id, "draft"))}
+                      >
                         {t("puzzleStudio.sendBack")}
                       </UIButton>
                     )}
                     {canRun && w.status === "published" && (
-                      <UIButton size="sm" variant="outline" icon={<Archive />} disabled={busy} onClick={() => void act(() => PuzzleStudioAPI.status(w.id, "retired"))}>
+                      <UIButton
+                        size="sm"
+                        variant="outline"
+                        icon={<Archive />}
+                        disabled={busy}
+                        onClick={() => void act(() => PuzzleStudioAPI.status(w.id, "retired"))}
+                      >
                         {t("puzzleStudio.retire")}
                       </UIButton>
                     )}
                     {canRun && w.status === "retired" && (
-                      <UIButton size="sm" variant="outline" icon={<RotateCcw />} disabled={busy} onClick={() => void act(() => PuzzleStudioAPI.status(w.id, "published"))}>
+                      <UIButton
+                        size="sm"
+                        variant="outline"
+                        icon={<RotateCcw />}
+                        disabled={busy}
+                        onClick={() => void act(() => PuzzleStudioAPI.status(w.id, "published"))}
+                      >
                         {t("puzzleStudio.bringBack")}
                       </UIButton>
                     )}
                     {(w.status === "draft" || w.status === "review") && (
-                      <UIButton size="sm" variant="ghost" icon={<Trash2 />} disabled={busy} onClick={() => void act(() => PuzzleStudioAPI.remove(w.id))}>
+                      <UIButton
+                        size="sm"
+                        variant="ghost"
+                        icon={<Trash2 />}
+                        disabled={busy}
+                        onClick={() => void act(() => PuzzleStudioAPI.remove(w.id))}
+                      >
                         {t("puzzleStudio.delete")}
                       </UIButton>
                     )}
@@ -175,6 +266,16 @@ export const WordList: React.FC<{ canRun: boolean; initialStatus?: PuzzleStatus 
               ),
             )}
           </ul>
+          <UIPagination
+            page={page}
+            pages={pages}
+            onPage={(n) => {
+              setPage(n);
+              window.scrollTo({ top: 0, behavior: "smooth" });
+            }}
+            disabled={busy}
+            className="justify-center"
+          />
         </>
       )}
     </div>

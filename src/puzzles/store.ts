@@ -60,7 +60,10 @@ export async function refreshDaily(force = false): Promise<void> {
   try {
     const token = await accessToken();
     if (!token) return;
-    const body = await request<{ lines: DailySnapshot["lines"]; puzzles: unknown[] }>("/daily-puzzles?days=30", { token, timeoutMs: DEADLINE_MS });
+    const body = await request<{ lines: DailySnapshot["lines"]; puzzles: unknown[] }>("/daily-puzzles?days=30", {
+      token,
+      timeoutMs: DEADLINE_MS,
+    });
     const puzzles = (body.puzzles ?? []).map(parsePuzzle).filter((p): p is DailyPuzzle => p !== null);
     if (!puzzles.length) return;
     cached = { lines: body.lines ?? {}, puzzles, fromServer: true };
@@ -106,11 +109,30 @@ export function todaysPuzzle(snap: DailySnapshot, slot: PuzzleSlot, day = puzzle
   return byId || fallbackPick(snap.puzzles, slot, day);
 }
 
-/** A practice word: any live word on the line except the ones to avoid (today's, the last few played). */
-export function practicePuzzle(snap: DailySnapshot, slot: PuzzleSlot, avoid: ReadonlySet<string>, random = Math.random): DailyPuzzle | null {
-  const list = snap.puzzles.filter((p) => p.status === "published" && p.lang === slot.lang && p.level === slot.level && p.kind === slot.kind);
+/** The live words on a line, optionally one topic. */
+export function lineWords(snap: DailySnapshot, slot: PuzzleSlot, topic = ""): DailyPuzzle[] {
+  const list = snap.puzzles.filter(
+    (p) => p.status === "published" && p.lang === slot.lang && p.level === slot.level && p.kind === slot.kind,
+  );
+  const inTopic = topic ? list.filter((p) => p.data.category === topic) : list;
+  return inTopic.length ? inTopic : list;
+}
+
+/**
+ * A practice word: a word the child has not spelled yet first, then any word
+ * except the ones to avoid (today's, the last few played), then any at all.
+ */
+export function practicePuzzle(
+  snap: DailySnapshot,
+  slot: PuzzleSlot,
+  avoid: ReadonlySet<string>,
+  random = Math.random,
+  { topic = "", solved = new Set<string>() }: { topic?: string; solved?: ReadonlySet<string> } = {},
+): DailyPuzzle | null {
+  const list = lineWords(snap, slot, topic);
   const fresh = list.filter((p) => !avoid.has(p.id));
-  const pool = fresh.length ? fresh : list;
+  const unsolved = fresh.filter((p) => !solved.has(p.id));
+  const pool = unsolved.length ? unsolved : fresh.length ? fresh : list;
   return pool.length ? pool[Math.floor(random() * pool.length)] : null;
 }
 

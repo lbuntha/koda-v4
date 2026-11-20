@@ -59,11 +59,14 @@ const qs = (q: Record<string, string | number | undefined>) => {
 
 export const PuzzleStudioAPI = {
   overview: () => call<Overview>("/overview"),
-  list: (q: { lang?: string; level?: number; status?: string; q?: string }) => call<{ puzzles: StudioWord[]; total: number }>(`/puzzles${qs({ ...q, limit: 200 })}`),
+  list: (q: { lang?: string; level?: number; status?: string; q?: string; category?: string; skip?: number; limit?: number }) =>
+    call<{ puzzles: StudioWord[]; total: number }>(`/puzzles${qs({ limit: 50, ...q })}`),
   create: (body: WordIn) => call<StudioWord>("/puzzles", { method: "POST", body }),
   edit: (id: string, body: Partial<Omit<WordIn, "lang">>) => call<StudioWord>(`/puzzles/${id}`, { method: "PATCH", body }),
   status: (id: string, status: PuzzleStatus) => call<StudioWord>(`/puzzles/${id}/status`, { method: "POST", body: { status } }),
   remove: (id: string) => call<void>(`/puzzles/${id}`, { method: "DELETE" }),
-  calendar: (slot: string, days = 28) => call<{ days: CalendarDay[]; today: string; newDaysLeft: number }>(`/calendar${qs({ slot, days })}`),
-  pin: (slot: string, day: string, puzzleId: string | null) => call<{ ok: boolean }>(`/calendar/${slot}/${day}`, { method: "PUT", body: { puzzleId } }),
+  calendar: (slot: string, days = 28) =>
+    call<{ days: CalendarDay[]; today: string; newDaysLeft: number }>(`/calendar${qs({ slot, days })}`),
+  pin: (slot: string, day: string, puzzleId: string | null) =>
+    call<{ ok: boolean }>(`/calendar/${slot}/${day}`, { method: "PUT", body: { puzzleId } }),
 };

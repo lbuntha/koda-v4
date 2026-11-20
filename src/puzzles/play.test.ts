@@ -88,8 +88,10 @@ describe("the starter words in both languages", () => {
     const { STARTER_PUZZLES } = await import("./starter");
     const { iconArt } = await import("../rebus/icons/library");
     const withPicture = STARTER_PUZZLES.filter((p) => p.data.picture);
-    for (const p of withPicture) expect(iconArt(p.data.picture!), p.id).not.toBeNull();
-    expect(withPicture.length).toBeGreaterThan(80);
+    const { SVG_ASSET_IDS } = await import("../assets/svg/ids");
+    const art = new Set<string>(SVG_ASSET_IDS);
+    for (const p of withPicture) expect(iconArt(p.data.picture!) !== null || art.has(p.data.picture!), p.id).toBe(true);
+    expect(withPicture.length).toBeGreaterThan(950);
   });
 
   it("shows the clue in the language on screen, and a Khmer word's English clue as its meaning", async () => {
@@ -126,5 +128,18 @@ describe("practice XP", () => {
     expect(practiceXpLeft("2026-11-20", "kid")).toBe(0);
     expect(practiceXpLeft("2026-11-21", "kid")).toBe(PRACTICE_XP_GAMES);
     expect(practiceXpLeft("2026-11-20", "sibling")).toBe(PRACTICE_XP_GAMES);
+  });
+});
+
+describe("practice picks", () => {
+  it("serves words the child has not spelled first, and keeps to the chosen topic", async () => {
+    const { practicePuzzle } = await import("./store");
+    const { STARTER_PUZZLES } = await import("./starter");
+    const snap = { puzzles: STARTER_PUZZLES, lines: {}, at: 0 } as unknown as Parameters<typeof practicePuzzle>[0];
+    const slot = { kind: "word-guess" as const, lang: "en" as const, level: 3 };
+    const line = STARTER_PUZZLES.filter((p) => p.lang === "en" && p.level === 3);
+    const solved = new Set(line.slice(1).map((p) => p.id));
+    expect(practicePuzzle(snap, slot, new Set(), Math.random, { solved })?.id).toBe(line[0].id);
+    for (let i = 0; i < 20; i++) expect(practicePuzzle(snap, slot, new Set(), Math.random, { topic: "animal" })?.data.category).toBe("animal");
   });
 });

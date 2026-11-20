@@ -182,8 +182,11 @@ async def listing(
     created_by: str | None,
     skip: int,
     limit: int,
+    category: str | None = None,
 ) -> tuple[list[dict[str, Any]], int]:
     flt: dict[str, Any] = {}
+    if category:
+        flt["data.category"] = category
     if lang:
         flt["lang"] = lang
     if level:
@@ -196,7 +199,7 @@ async def listing(
         rx = {"$regex": re.escape(query.strip()), "$options": "i"}
         flt["$or"] = [{"data.word": rx}, {"data.clue.en": rx}, {"data.clue.km": rx}]
     total = await db.daily_puzzles.count_documents(flt)
-    rows = [out(r) async for r in db.daily_puzzles.find(flt).sort([("updatedAt", -1), ("id", 1)]).skip(skip).limit(limit)]
+    rows = [out(r) async for r in db.daily_puzzles.find(flt).sort([("updatedAt", -1), ("id", -1)]).skip(skip).limit(limit)]
     return rows, total
 
 

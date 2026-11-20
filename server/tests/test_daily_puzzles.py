@@ -71,16 +71,17 @@ async def test_every_device_gets_the_same_word_and_no_repeats_until_the_line_run
     assert first == again
     n = sum(1 for s in SEED if s["lang"] == "km" and s["level"] == 3)
     ids = [d["puzzleId"] for d in first]
-    assert len(set(ids[:n])) == n and ids[n] == ids[0]
+    # Every line has more than a month of words: 30 days, 30 different words.
+    assert n > 30 and len(ids) == 30 and len(set(ids)) == 30
 
 
 async def test_a_teacher_drafts_and_asks_for_review_but_only_the_owner_publishes(client, teacher, owner, family):
-    rabbit = {"lang": "km", "word": "ទន្សាយ", "category": "animal", "clue": {"en": "rabbit"}}
+    rabbit = {"lang": "km", "word": "ទន្សោង", "category": "animal", "clue": {"en": "a bird"}}
     made = await client.post(f"{S}/puzzles", json=rabbit, headers=teacher)
     assert made.status_code == 201
     word = made.json()
     assert word["status"] == "draft" and word["level"] == 5 and word["owner"] == "creator"
-    assert word["data"]["tiles"] == ["ទ", "ន", "្ស", "ា", "យ"]
+    assert word["data"]["tiles"] == ["ទ", "ន", "្ស", "ោ", "ង"]
     pid = word["id"]
     assert (await client.post(f"{S}/puzzles/{pid}/status", json={"status": "review"}, headers=teacher)).status_code == 200
     assert (await client.post(f"{S}/puzzles/{pid}/status", json={"status": "published"}, headers=teacher)).status_code == 403
@@ -123,7 +124,7 @@ async def test_a_live_word_keeps_its_length_and_the_line_counts_its_new_days(cli
     line = next(x for x in overview["lines"] if x["slot"] == KM3)
     assert overview["canRun"] and line["byStatus"]["published"] >= 15 and line["newDaysLeft"] == line["byStatus"]["published"]
     live = (await client.get(f"{S}/puzzles?lang=km&level=3&status=published", headers=owner)).json()["puzzles"][0]
-    assert (await client.patch(f"{S}/puzzles/{live['id']}", json={"word": "ក្រពើ"}, headers=owner)).status_code == 409
+    assert (await client.patch(f"{S}/puzzles/{live['id']}", json={"word": "ក្ដោង"}, headers=owner)).status_code == 409
     fixed = await client.patch(f"{S}/puzzles/{live['id']}", json={"clue": {"km": "សត្វ", "en": "a new clue"}}, headers=owner)
     assert fixed.status_code == 200 and fixed.json()["data"]["clue"]["en"] == "a new clue"
     await client.get("/daily-puzzles?days=1", headers=owner)

@@ -117,10 +117,13 @@ async def studio_list(
     level: Annotated[int | None, Query(ge=2, le=6)] = None,
     status: Annotated[str | None, Query(pattern="^(draft|review|published|retired)$")] = None,
     q: Annotated[str | None, Query(max_length=40)] = None,
+    category: Annotated[str | None, Query(pattern="^[a-z]{2,12}$")] = None,
     skip: Annotated[int, Query(ge=0)] = 0,
     limit: Annotated[int, Query(ge=1, le=200)] = 100,
 ) -> dict[str, Any]:
-    rows, total = await repo.listing(db, lang=lang, level=level, status=status, query=q, created_by=_mine_only(p), skip=skip, limit=limit)
+    rows, total = await repo.listing(
+        db, lang=lang, level=level, status=status, query=q, created_by=_mine_only(p), skip=skip, limit=limit, category=category
+    )
     who = await repo.names(db, {r["createdBy"] for r in rows if r.get("createdBy")})
     out = [{**r, "issues": await _issues(db, r), "createdByName": who.get(r.get("createdBy", ""), "")} for r in rows]
     return {"puzzles": out, "total": total}

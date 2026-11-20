@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { WordPicture } from "./WordPicture";
-import { ArrowRight, Copy, Flame, PartyPopper, Star } from "lucide-react";
+import { ArrowRight, BadgeCheck, Copy, Flame, PartyPopper, Star } from "lucide-react";
 import { useT } from "../../lib/i18n";
 import { themeSystem } from "../../lib/themeSystem";
 import { UIButton } from "../../components/ui";
@@ -22,15 +22,17 @@ export function shareText(puzzle: DailyPuzzle, game: GameRecord, day: string): s
   return `Koda Word Guess · ${lang} · ${day}\n${score}${game.hints ? ` · hint ${game.hints}` : ""}\n${grid}`;
 }
 
-export const WordGuessResult: React.FC<{ puzzle: DailyPuzzle; game: GameRecord; daily: boolean; day: string; xp: number; xpCapped?: boolean; onNext(): void }> = ({
-  puzzle,
-  game,
-  daily,
-  day,
-  xp,
-  xpCapped = false,
-  onNext,
-}) => {
+export const WordGuessResult: React.FC<{
+  puzzle: DailyPuzzle;
+  game: GameRecord;
+  daily: boolean;
+  day: string;
+  xp: number;
+  xpCapped?: boolean;
+  /** The child's word book on this line: was this word in it already, and how many words it holds now. */
+  book?: { solvedBefore: boolean; spelled: number; total: number };
+  onNext(): void;
+}> = ({ puzzle, game, daily, day, xp, xpCapped = false, book, onNext }) => {
   const { t } = useT();
   const [copied, setCopied] = useState<"" | "yes" | "show">("");
   const tiles = tilesOf(puzzle.data.word, puzzle.lang);
@@ -52,7 +54,11 @@ export const WordGuessResult: React.FC<{ puzzle: DailyPuzzle; game: GameRecord; 
   };
 
   return (
-    <section ref={(el) => el?.scrollIntoView?.({ behavior: "smooth", block: "nearest" })} className={themeSystem.card("default", "space-y-4 p-5 text-center")} aria-live="polite">
+    <section
+      ref={(el) => el?.scrollIntoView?.({ behavior: "smooth", block: "nearest" })}
+      className={themeSystem.card("default", "space-y-4 p-5 text-center")}
+      aria-live="polite"
+    >
       <div className="mx-auto grid h-14 w-14 place-items-center rounded-full bg-indigo-50 text-indigo-600 dark:bg-indigo-950/60 dark:text-indigo-300">
         {game.won ? <PartyPopper className="h-7 w-7" aria-hidden /> : <Star className="h-7 w-7" aria-hidden />}
       </div>
@@ -71,14 +77,29 @@ export const WordGuessResult: React.FC<{ puzzle: DailyPuzzle; game: GameRecord; 
             {line}
           </div>
         ))}
-        {puzzle.lang === "km" && <div className="text-sm text-muted">{t("wordGuess.spelled", { tiles: tiles.map((x) => tileLabel(x, "km")).join(" + ") })}</div>}
+        {puzzle.lang === "km" && (
+          <div className="text-sm text-muted">{t("wordGuess.spelled", { tiles: tiles.map((x) => tileLabel(x, "km")).join(" + ") })}</div>
+        )}
       </div>
 
       <div className="flex flex-wrap justify-center gap-2 text-sm font-black">
         <span className="rounded-full bg-indigo-50 px-3 py-1.5 text-indigo-700 dark:bg-indigo-950/60 dark:text-indigo-300">
-          {game.won ? (game.rows.length === 1 ? t("wordGuess.inOneTry") : t("wordGuess.inTries", { n: String(game.rows.length) })) : t("wordGuess.notThisTime")}
+          {game.won
+            ? game.rows.length === 1
+              ? t("wordGuess.inOneTry")
+              : t("wordGuess.inTries", { n: String(game.rows.length) })
+            : t("wordGuess.notThisTime")}
         </span>
-        {xp > 0 && <span className="rounded-full bg-emerald-50 px-3 py-1.5 text-emerald-700 dark:bg-emerald-950/60 dark:text-emerald-300">+{xp} XP</span>}
+        {game.won && book && (
+          <span className="inline-flex items-center gap-1 rounded-full bg-emerald-50 px-3 py-1.5 text-emerald-700 dark:bg-emerald-950/60 dark:text-emerald-300">
+            <BadgeCheck className="h-4 w-4" aria-hidden /> {t(book.solvedBefore ? "wordGuess.spelledBefore" : "wordGuess.newInBook")}
+          </span>
+        )}
+        {xp > 0 && (
+          <span className="rounded-full bg-emerald-50 px-3 py-1.5 text-emerald-700 dark:bg-emerald-950/60 dark:text-emerald-300">
+            +{xp} XP
+          </span>
+        )}
         {daily && streak > 0 && (
           <span className="inline-flex items-center gap-1 rounded-full bg-rose-50 px-3 py-1.5 text-rose-700 dark:bg-rose-950/60 dark:text-rose-300">
             <Flame className="h-4 w-4" aria-hidden /> {t("wordGuess.streak", { n: String(streak) })}
@@ -110,7 +131,14 @@ export const WordGuessResult: React.FC<{ puzzle: DailyPuzzle; game: GameRecord; 
         </UIButton>
       </div>
       {copied === "yes" && <p className="text-xs font-semibold text-muted">{t("wordGuess.copied")}</p>}
-      {copied === "show" && <pre className="whitespace-pre-wrap rounded-xl bg-slate-50 p-3 text-left text-xs dark:bg-slate-900/40">{shareText(puzzle, game, day)}</pre>}
+      {copied === "show" && (
+        <pre className="whitespace-pre-wrap rounded-xl bg-slate-50 p-3 text-left text-xs dark:bg-slate-900/40">
+          {shareText(puzzle, game, day)}
+        </pre>
+      )}
+      {book && book.total > 0 && (
+        <p className="text-sm font-bold text-body">{t("wordGuess.bookCount", { n: String(book.spelled), total: String(book.total) })}</p>
+      )}
       {daily && <p className="text-xs font-semibold text-muted">{t("wordGuess.comeBack")}</p>}
       {xpCapped && <p className="text-xs font-semibold text-muted">{t("wordGuess.practiceXpDone", { n: String(PRACTICE_XP_GAMES) })}</p>}
     </section>

@@ -22,7 +22,7 @@ export type PuzzleOwner = { scope: "koda" } | { scope: "creator"; userId: string
 export type PuzzleStatus = "draft" | "review" | "published" | "retired";
 
 /** The words the clue line draws from. Names live in i18n (`puzzles.category.*`). */
-export const PUZZLE_CATEGORIES = ["animal", "food", "home", "nature", "body", "travel", "school", "family", "colour", "number", "time", "action"] as const;
+export const PUZZLE_CATEGORIES = ["animal", "food", "home", "nature", "body", "travel", "school", "family", "colour", "number", "time", "action", "clothes", "job", "place", "sport", "feeling"] as const;
 export type PuzzleCategory = (typeof PUZZLE_CATEGORIES)[number];
 
 export interface WordGuessData {

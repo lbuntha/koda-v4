@@ -5,6 +5,7 @@ import { fitsAge } from "../../lib/ages";
 import { ICON_ART, ICON_IDS } from "../icons/library";
 import { answerKey, validatePuzzle } from "../puzzle";
 import { OFFICIAL_PUZZLES } from "./index";
+import { STARTER_PUZZLES } from "../../puzzles/starter";
 
 /** The categories that have puzzles to play; the rest are marked "Soon". */
 const LIVE = CATEGORIES.filter((c) => OFFICIAL_PUZZLES.some((p) => p.category === c.id));
@@ -54,7 +55,11 @@ describe("the puzzles Koda ships with", () => {
 });
 
 describe("the icon artwork", () => {
-  const used = new Set(OFFICIAL_PUZZLES.flatMap((p) => p.pieces.flatMap((piece) => (piece.kind === "icon" ? [piece.id] : []))));
+  /* A drawing earns its place in a rebus, or as the picture of a Word Guess word. */
+  const used = new Set([
+    ...OFFICIAL_PUZZLES.flatMap((p) => p.pieces.flatMap((piece) => (piece.kind === "icon" ? [piece.id] : []))),
+    ...STARTER_PUZZLES.flatMap((p) => (p.data.picture ? [p.data.picture] : [])),
+  ]);
 
   it("has no drawing that no puzzle uses", () => {
     expect([...ICON_IDS].filter((id) => !used.has(id)).sort()).toEqual([]);

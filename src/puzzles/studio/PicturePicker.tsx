@@ -34,18 +34,19 @@ const PHOTO_SIDE = 480;
  */
 export const GROUP_NAMES: Record<string, string> = {
   animals:
-    "cat dog bull frog fish bird bee horse lion hog monkey sheep fly dragon bug whale turkey worm bear wolf fox deer mouse pig cow goat duck goose hen chick owl crow eagle swan penguin snake turtle crab shark octopus ant spider rabbit elephant giraffe zebra tiger camel parrot seal hawk cricket guinea-pig tick",
-  food:
-    "honey egg cheese butter milk apple berry melon corn bread cake pie peanut pepper salt ham burger tea pumpkin straw bacon chili jam nut dough orange banana lemon grape cherry peach pear plum tomato potato onion bean pea rice soup sugar candy cookie toast pizza coffee carrot",
+    "cat dog bull frog fish bird bee horse lion hog monkey sheep fly dragon bug whale turkey worm bear wolf fox deer mouse pig cow goat duck goose hen chick owl crow eagle swan penguin snake turtle crab shark octopus ant spider rabbit elephant giraffe zebra tiger camel parrot seal hawk cricket guinea-pig tick butterfly crocodile donkey lizard snail panda rhinoceros",
+  food: "honey egg cheese butter milk apple berry melon corn bread cake pie peanut pepper salt ham burger tea pumpkin straw bacon chili jam nut dough orange banana lemon grape cherry peach pear plum tomato potato onion bean pea rice soup sugar candy cookie toast pizza coffee carrot coconut cucumber durian mushroom noodle papaya pineapple watermelon garlic salad mangosteen",
   nature:
-    "sun moon star cloud rain snow wind fire water ice earth tree pine plant flower leaf sea sand stone thunder storm space quake land hail shell weed wood hay volcano mountain river lake island hill cave desert forest sky planet",
-  body: "eye tooth foot hand head nose ear mouth arm leg knee finger thumb heart bone toe hair tongue",
-  home: "house home key clock door window wall chair table bed lamp spoon fork knife plate glass bottle bucket brush comb soap towel mirror ladder hammer saw axe screw chain lock cup pan pot basket pin rug bowl box can ring shelf",
-  clothes: "hat coat sock boot dress belt tie shoe cap crown glove goggles helmet",
-  school: "school book pencil ruler scissors glue crayon eraser calculator desk backpack chalk globe map magnet lens battery bulb telescope microscope gear robot paper note board clip bag",
-  travel: "bus ship plane car truck train boat rocket bike road bridge sailboat wheel",
-  sports: "ball basketball base bat racket net goal medal trophy whistle skate ski skateboard hoop target arrow stopwatch dumbbell flag kite rope cone runner surfboard",
-  colours: "blue green black white",
+    "sun moon star cloud rain snow wind fire water ice earth tree pine plant flower leaf sea sand stone thunder storm space quake land hail shell weed wood hay volcano mountain river lake island hill cave desert forest sky planet rainbow grass seed cactus lotus puddle",
+  body: "eye tooth foot hand head nose ear mouth arm leg knee finger thumb heart bone toe hair tongue face body brain",
+  home: "house home key clock door window wall chair table bed lamp spoon fork knife plate glass bottle bucket brush comb soap towel mirror ladder hammer saw axe screw chain lock cup pan pot basket pin rug bowl box can ring shelf broom candle drum fan kettle phone pillow radio sofa umbrella camera calendar",
+  clothes: "hat coat sock boot dress belt tie shoe cap crown glove goggles helmet shirt pants scarf glasses mask watch button zip",
+  school:
+    "school book pencil ruler scissors glue crayon eraser calculator desk backpack chalk globe map magnet lens battery bulb telescope microscope gear robot paper note board clip bag pen guitar computer",
+  travel: "bus ship plane car truck train boat rocket bike road bridge sailboat wheel motorbike tuktuk cart tunnel",
+  sports:
+    "ball basketball base bat racket net goal medal trophy whistle skate ski skateboard hoop target arrow stopwatch dumbbell flag kite rope cone runner surfboard chess",
+  colours: "blue green black white red pink purple brown grey silver tan colour",
 };
 const GROUPS = [...Object.keys(GROUP_NAMES), "things"];
 const NAMED = new Map<string, string>(Object.entries(GROUP_NAMES).flatMap(([g, names]) => names.split(" ").map((n) => [n, g] as const)));
@@ -127,7 +128,13 @@ const Drawings: React.FC<BrowseProps> = ({ value, onPick, chip }) => {
   );
   return (
     <div className="space-y-2">
-      <UISearchInput size="sm" label={t("puzzleStudio.searchPictures")} placeholder={t("puzzleStudio.searchPictures")} value={query} onChange={(e) => setQuery(e.target.value)} />
+      <UISearchInput
+        size="sm"
+        label={t("puzzleStudio.searchPictures")}
+        placeholder={t("puzzleStudio.searchPictures")}
+        value={query}
+        onChange={(e) => setQuery(e.target.value)}
+      />
       {!q && (
         <div className="flex gap-2 overflow-x-auto pb-1" role="group" aria-label={t("puzzleStudio.pictureGroup")}>
           {GROUPS.map((g) => (
@@ -139,7 +146,15 @@ const Drawings: React.FC<BrowseProps> = ({ value, onPick, chip }) => {
       )}
       <div className={gridClass}>
         {shown.map(({ id, name, markup }) => (
-          <button key={id} type="button" onClick={() => onPick(id)} aria-label={name} aria-pressed={value === id} title={name} className={cellClass(value === id)}>
+          <button
+            key={id}
+            type="button"
+            onClick={() => onPick(id)}
+            aria-label={name}
+            aria-pressed={value === id}
+            title={name}
+            className={cellClass(value === id)}
+          >
             <SvgMarkup markup={markup} raw size="100%" />
           </button>
         ))}
@@ -171,11 +186,23 @@ const ArtLibrary: React.FC<BrowseProps> = ({ value, onPick, chip }) => {
   const shown = entries.filter(([id, c]) => (q ? id.includes(q) : c === current)).slice(0, 240);
   return (
     <div className="space-y-2">
-      <UISearchInput size="sm" label={t("puzzleStudio.searchPictures")} placeholder={t("puzzleStudio.searchPictures")} value={query} onChange={(e) => setQuery(e.target.value)} />
+      <UISearchInput
+        size="sm"
+        label={t("puzzleStudio.searchPictures")}
+        placeholder={t("puzzleStudio.searchPictures")}
+        value={query}
+        onChange={(e) => setQuery(e.target.value)}
+      />
       {!q && collections.length > 0 && (
         <div className="flex gap-2 overflow-x-auto pb-1" role="group" aria-label={t("puzzleStudio.pictureGroup")}>
           {collections.map((c) => (
-            <button key={c} type="button" aria-pressed={current === c} className={`${chip(current === c)} capitalize`} onClick={() => setCollection(c)}>
+            <button
+              key={c}
+              type="button"
+              aria-pressed={current === c}
+              className={`${chip(current === c)} capitalize`}
+              onClick={() => setCollection(c)}
+            >
               {c.replace(/[-_]+/g, " ")}
             </button>
           ))}
@@ -183,7 +210,15 @@ const ArtLibrary: React.FC<BrowseProps> = ({ value, onPick, chip }) => {
       )}
       <div className={gridClass}>
         {shown.map(([id]) => (
-          <button key={id} type="button" onClick={() => onPick(id)} aria-label={id} aria-pressed={value === id} title={id} className={cellClass(value === id)}>
+          <button
+            key={id}
+            type="button"
+            onClick={() => onPick(id)}
+            aria-label={id}
+            aria-pressed={value === id}
+            title={id}
+            className={cellClass(value === id)}
+          >
             <SvgAsset id={id} size="100%" />
           </button>
         ))}
@@ -213,8 +248,22 @@ const FromComputer: React.FC<{ onPick(id: string): void }> = ({ onPick }) => {
   };
   return (
     <div className="space-y-2 rounded-2xl border-2 border-dashed border-line p-4 text-center">
-      <input ref={input} type="file" accept={PHOTO_ACCEPT} className="sr-only" aria-label={t("puzzleStudio.choosePhoto")} onChange={(e) => void add(e.target.files?.[0])} />
-      <UIButton type="button" variant="secondary" icon={<ImagePlus />} isLoading={busy} disabled={busy} onClick={() => input.current?.click()}>
+      <input
+        ref={input}
+        type="file"
+        accept={PHOTO_ACCEPT}
+        className="sr-only"
+        aria-label={t("puzzleStudio.choosePhoto")}
+        onChange={(e) => void add(e.target.files?.[0])}
+      />
+      <UIButton
+        type="button"
+        variant="secondary"
+        icon={<ImagePlus />}
+        isLoading={busy}
+        disabled={busy}
+        onClick={() => input.current?.click()}
+      >
         {t("puzzleStudio.choosePhoto")}
       </UIButton>
       <p className="text-xs text-muted">{t("puzzleStudio.photoHelp")}</p>

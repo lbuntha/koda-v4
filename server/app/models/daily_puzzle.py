@@ -11,7 +11,25 @@ from app.models.common import Model
 Lang = Literal["km", "en"]
 #: A drawing (`rebus-cat`), any Art library id (`kit-sun`), or an uploaded photo (`photo-<sha256>`); "" for none.
 PICTURE = r"^([a-z0-9][a-z0-9-]{0,79})?$"
-Category = Literal["animal", "food", "home", "nature", "body", "travel", "school", "family", "colour", "number", "time", "action"]
+Category = Literal[
+    "animal",
+    "food",
+    "home",
+    "nature",
+    "body",
+    "travel",
+    "school",
+    "family",
+    "colour",
+    "number",
+    "time",
+    "action",
+    "clothes",
+    "job",
+    "place",
+    "sport",
+    "feeling",
+]
 
 
 class Clue(Model):

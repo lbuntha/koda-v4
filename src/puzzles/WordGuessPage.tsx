@@ -15,12 +15,12 @@ import { themeSystem } from "../lib/themeSystem";
 import { playSound } from "../utils/audio";
 import { activeLearnerId } from "../lib/learning/learningLog";
 import { useAudienceViewer } from "../skills/viewer";
-import { UIButton } from "../components/ui";
+import { UIButton, UISelect } from "../components/ui";
 import { puzzleDay } from "./day";
 import { WordGuessRecorder } from "./learning";
-import { dailyKey, liveStreak, practiceXpLeft, readPlay, saveDaily, savePractice, type GameRecord } from "./playStore";
-import { dailySnapshot, levelsFor, practicePuzzle, refreshDaily, subscribeDaily, todaysPuzzle } from "./store";
-import { slotKey, type DailyPuzzle, type PuzzleLang } from "./types";
+import { dailyKey, liveStreak, practiceXpLeft, readPlay, saveDaily, savePractice, solvedIds, type GameRecord } from "./playStore";
+import { dailySnapshot, levelsFor, lineWords, practicePuzzle, refreshDaily, subscribeDaily, todaysPuzzle } from "./store";
+import { slotKey, type DailyPuzzle, type PuzzleCategory, type PuzzleLang } from "./types";
 import { CategoryIcon } from "./ui/categoryIcon";
 import { TileKeyboard, easyTiles } from "./ui/TileKeyboard";
 import { WordPicture } from "./ui/WordPicture";
@@ -35,6 +35,8 @@ interface Prefs {
   level: Record<PuzzleLang, number>;
   keys: "easy" | "all";
   seenHelp: boolean;
+  /** Practice only: one topic, or "" for every topic. */
+  topic: string;
 }
 
 /** Where a child starts: the app's language, and a word length for their age. */
@@ -42,9 +44,11 @@ export function defaultPrefs(language: string, age: number | null): Prefs {
   const a = age ?? 8;
   return {
     lang: language === "km" ? "km" : "en",
-    level: { km: a <= 8 ? 3 : 4, en: a <= 7 ? 3 : a <= 9 ? 4 : 5 },
+    /* Longer words as children grow: 3 at 6–7, 4 at 8–9, 5 at 10–11, 6 from 12 (Khmer 2 tiles for the very youngest). */
+    level: { km: a <= 5 ? 2 : a <= 7 ? 3 : a <= 9 ? 4 : a <= 11 ? 5 : 6, en: a <= 7 ? 3 : a <= 9 ? 4 : a <= 11 ? 5 : 6 },
     keys: a <= 8 ? "easy" : "all",
     seenHelp: false,
+    topic: "",
   };
 }
 
@@ -122,8 +126,10 @@ export const WordGuessPage: React.FC<WordGuessPageProps> = ({ onExit, onAwardXp,
     )
       return;
     const avoid = new Set([...(daily ? [daily.id] : []), ...readPlay().recent]);
-    setPracticeId(practicePuzzle(snap, slot, avoid)?.id ?? null);
-  }, [mode, practiceId, snap, slot, daily]);
+    setPracticeId(practicePuzzle(snap, slot, avoid, Math.random, { topic: prefs.topic, solved: solvedIds() })?.id ?? null);
+  }, [mode, practiceId, snap, slot, daily, prefs.topic]);
+  const topics = useMemo(() => [...new Set(lineWords(snap, slot).map((p) => p.data.category))].sort(), [snap, slot]);
+  const lineIds = useMemo(() => lineWords(snap, slot).map((p) => p.id), [snap, slot]);
 
   if (!puzzle) {
     return (
@@ -201,6 +207,24 @@ export const WordGuessPage: React.FC<WordGuessPageProps> = ({ onExit, onAwardXp,
           ]}
           onChange={(m) => setMode(m as "daily" | "practice")}
         />
+        {mode === "practice" && topics.length > 1 && (
+          <UISelect
+            aria-label={t("wordGuess.topicLabel")}
+            className="w-auto"
+            value={topics.includes(prefs.topic as PuzzleCategory) ? prefs.topic : ""}
+            onChange={(e) => {
+              setPrefs({ topic: e.target.value });
+              setPracticeId(null);
+            }}
+          >
+            <option value="">{t("wordGuess.allTopics")}</option>
+            {topics.map((c) => (
+              <option key={c} value={c}>
+                {t(`puzzles.category.${c}`)}
+              </option>
+            ))}
+          </UISelect>
+        )}
         <div className="sm:hidden">
           <Segmented
             label={t("wordGuess.keysLabel")}
@@ -233,6 +257,7 @@ export const WordGuessPage: React.FC<WordGuessPageProps> = ({ onExit, onAwardXp,
         keys={prefs.keys}
         onKeys={(k) => setPrefs({ keys: k })}
         onAwardXp={onAwardXp}
+        lineIds={lineIds}
         onNext={() => {
           setMode("practice");
           setPracticeId(null);
@@ -336,6 +361,8 @@ interface GameProps {
   onKeys(k: "easy" | "all"): void;
   onAwardXp?(xp: number): void;
   onNext(): void;
+  /** Every live word on this line, to count the child's word book. */
+  lineIds: readonly string[];
 }
 
 /**
@@ -345,7 +372,12 @@ interface GameProps {
  * the keys switch tray, or the phone turns. Never below 30px (still easy to
  * read), never above 60px.
  */
-function useTileSize(board: React.RefObject<HTMLDivElement | null>, keys: React.RefObject<HTMLDivElement | null>, n: number, below: number): number {
+function useTileSize(
+  board: React.RefObject<HTMLDivElement | null>,
+  keys: React.RefObject<HTMLDivElement | null>,
+  n: number,
+  below: number,
+): number {
   const [size, setSize] = useState(48);
   useLayoutEffect(() => {
     const fit = () => {
@@ -382,7 +414,7 @@ export function clueLine(puzzle: DailyPuzzle, ui: string, means: (word: string) 
   return km;
 }
 
-const Game: React.FC<GameProps> = ({ puzzle, daily, slot, day, keys, onKeys, onAwardXp, onNext }) => {
+const Game: React.FC<GameProps> = ({ puzzle, daily, slot, day, keys, onKeys, onAwardXp, onNext, lineIds }) => {
   const { t, language } = useT();
   const answer = useMemo(() => tilesOf(puzzle.data.word, puzzle.lang), [puzzle]);
   const n = answer.length;
@@ -409,6 +441,8 @@ const Game: React.FC<GameProps> = ({ puzzle, daily, slot, day, keys, onKeys, onA
   const [revealRow, setRevealRow] = useState(-1);
   const [xp, setXp] = useState(0);
   const [xpCapped, setXpCapped] = useState(false);
+  /* Was this word already in the child's word book before this game? Read once, before the game can add it. */
+  const [solvedBefore] = useState(() => solvedIds().has(puzzle.id));
   const recorder = useRef<WordGuessRecorder | null>(null);
   if (!recorder.current) recorder.current = new WordGuessRecorder(puzzle, !daily);
 
@@ -540,15 +574,15 @@ const Game: React.FC<GameProps> = ({ puzzle, daily, slot, day, keys, onKeys, onA
             const tiles = Array.from({ length: n }, (_, i) => (row ? row.tiles[i] : typing ? current[i] : undefined));
             return (
               <div key={r} ref={typing ? typingRow : undefined}>
-              <WordTiles
-                tiles={tiles}
-                lang={puzzle.lang}
-                result={row?.result}
-                size={size}
-                reveal={r === revealRow}
-                active={typing}
-                shake={typing && shake}
-              />
+                <WordTiles
+                  tiles={tiles}
+                  lang={puzzle.lang}
+                  result={row?.result}
+                  size={size}
+                  reveal={r === revealRow}
+                  active={typing}
+                  shake={typing && shake}
+                />
               </div>
             );
           })}
@@ -558,13 +592,24 @@ const Game: React.FC<GameProps> = ({ puzzle, daily, slot, day, keys, onKeys, onA
             </div>
           )}
         </div>
-
       </div>
 
       {/* While playing, the keys stay pinned to the bottom of a phone screen as the board scrolls; on a wide screen they sit beside the board. */}
-      <div ref={keysBox} className={`flex min-w-0 flex-col gap-3 lg:sticky lg:top-4 lg:bottom-auto ${game.over ? "" : "sticky bottom-0 z-10"}`}>
+      <div
+        ref={keysBox}
+        className={`flex min-w-0 flex-col gap-3 lg:sticky lg:top-4 lg:bottom-auto ${game.over ? "" : "sticky bottom-0 z-10"}`}
+      >
         {game.over ? (
-          <WordGuessResult puzzle={puzzle} game={game} daily={daily} day={day} xp={xp} xpCapped={xpCapped} onNext={onNext} />
+          <WordGuessResult
+            puzzle={puzzle}
+            game={game}
+            daily={daily}
+            day={day}
+            xp={xp}
+            xpCapped={xpCapped}
+            book={{ solvedBefore, spelled: lineIds.filter((id) => solvedIds().has(id)).length, total: lineIds.length }}
+            onNext={onNext}
+          />
         ) : (
           <div className={themeSystem.card("default", "p-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] shadow-lg sm:p-4 lg:shadow-none")}>
             <TileKeyboard
