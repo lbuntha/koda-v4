@@ -1,0 +1,1748 @@
+[
+ {
+  "id": "wg-km-001",
+  "kind": "word-guess",
+  "lang": "km",
+  "level": 3,
+  "status": "published",
+  "owner": {
+   "scope": "koda"
+  },
+  "data": {
+   "word": "ផ្ទះ",
+   "category": "home",
+   "clue": {
+    "km": "",
+    "en": "house"
+   }
+  }
+ },
+ {
+  "id": "wg-km-002",
+  "kind": "word-guess",
+  "lang": "km",
+  "level": 3,
+  "status": "published",
+  "owner": {
+   "scope": "koda"
+  },
+  "data": {
+   "word": "ឆ្មា",
+   "category": "animal",
+   "clue": {
+    "km": "",
+    "en": "cat"
+   }
+  }
+ },
+ {
+  "id": "wg-km-003",
+  "kind": "word-guess",
+  "lang": "km",
+  "level": 3,
+  "status": "published",
+  "owner": {
+   "scope": "koda"
+  },
+  "data": {
+   "word": "ត្រី",
+   "category": "animal",
+   "clue": {
+    "km": "",
+    "en": "fish"
+   }
+  }
+ },
+ {
+  "id": "wg-km-004",
+  "kind": "word-guess",
+  "lang": "km",
+  "level": 3,
+  "status": "published",
+  "owner": {
+   "scope": "koda"
+  },
+  "data": {
+   "word": "ភ្នំ",
+   "category": "nature",
+   "clue": {
+    "km": "",
+    "en": "mountain"
+   }
+  }
+ },
+ {
+  "id": "wg-km-005",
+  "kind": "word-guess",
+  "lang": "km",
+  "level": 3,
+  "status": "published",
+  "owner": {
+   "scope": "koda"
+  },
+  "data": {
+   "word": "ទឹក",
+   "category": "nature",
+   "clue": {
+    "km": "",
+    "en": "water"
+   }
+  }
+ },
+ {
+  "id": "wg-km-006",
+  "kind": "word-guess",
+  "lang": "km",
+  "level": 3,
+  "status": "published",
+  "owner": {
+   "scope": "koda"
+  },
+  "data": {
+   "word": "ឆ្កែ",
+   "category": "animal",
+   "clue": {
+    "km": "",
+    "en": "dog"
+   }
+  }
+ },
+ {
+  "id": "wg-km-007",
+  "kind": "word-guess",
+  "lang": "km",
+  "level": 3,
+  "status": "published",
+  "owner": {
+   "scope": "koda"
+  },
+  "data": {
+   "word": "ផ្កា",
+   "category": "nature",
+   "clue": {
+    "km": "",
+    "en": "flower"
+   }
+  }
+ },
+ {
+  "id": "wg-km-008",
+  "kind": "word-guess",
+  "lang": "km",
+  "level": 3,
+  "status": "published",
+  "owner": {
+   "scope": "koda"
+  },
+  "data": {
+   "word": "បាយ",
+   "category": "food",
+   "clue": {
+    "km": "",
+    "en": "rice"
+   }
+  }
+ },
+ {
+  "id": "wg-km-009",
+  "kind": "word-guess",
+  "lang": "km",
+  "level": 3,
+  "status": "published",
+  "owner": {
+   "scope": "koda"
+  },
+  "data": {
+   "word": "ចេក",
+   "category": "food",
+   "clue": {
+    "km": "",
+    "en": "banana"
+   }
+  }
+ },
+ {
+  "id": "wg-km-010",
+  "kind": "word-guess",
+  "lang": "km",
+  "level": 3,
+  "status": "published",
+  "owner": {
+   "scope": "koda"
+  },
+  "data": {
+   "word": "ខ្លា",
+   "category": "animal",
+   "clue": {
+    "km": "",
+    "en": "tiger"
+   }
+  }
+ },
+ {
+  "id": "wg-km-011",
+  "kind": "word-guess",
+  "lang": "km",
+  "level": 3,
+  "status": "published",
+  "owner": {
+   "scope": "koda"
+  },
+  "data": {
+   "word": "ចាន",
+   "category": "home",
+   "clue": {
+    "km": "",
+    "en": "plate"
+   }
+  }
+ },
+ {
+  "id": "wg-km-012",
+  "kind": "word-guess",
+  "lang": "km",
+  "level": 3,
+  "status": "published",
+  "owner": {
+   "scope": "koda"
+  },
+  "data": {
+   "word": "ទូក",
+   "category": "travel",
+   "clue": {
+    "km": "",
+    "en": "boat"
+   }
+  }
+ },
+ {
+  "id": "wg-km-013",
+  "kind": "word-guess",
+  "lang": "km",
+  "level": 3,
+  "status": "published",
+  "owner": {
+   "scope": "koda"
+  },
+  "data": {
+   "word": "ឡាន",
+   "category": "travel",
+   "clue": {
+    "km": "",
+    "en": "car"
+   }
+  }
+ },
+ {
+  "id": "wg-km-014",
+  "kind": "word-guess",
+  "lang": "km",
+  "level": 3,
+  "status": "published",
+  "owner": {
+   "scope": "koda"
+  },
+  "data": {
+   "word": "កង់",
+   "category": "travel",
+   "clue": {
+    "km": "",
+    "en": "bicycle"
+   }
+  }
+ },
+ {
+  "id": "wg-km-015",
+  "kind": "word-guess",
+  "lang": "km",
+  "level": 3,
+  "status": "published",
+  "owner": {
+   "scope": "koda"
+  },
+  "data": {
+   "word": "រៀន",
+   "category": "school",
+   "clue": {
+    "km": "",
+    "en": "learn"
+   }
+  }
+ },
+ {
+  "id": "wg-km-016",
+  "kind": "word-guess",
+  "lang": "km",
+  "level": 3,
+  "status": "published",
+  "owner": {
+   "scope": "koda"
+  },
+  "data": {
+   "word": "អាន",
+   "category": "school",
+   "clue": {
+    "km": "",
+    "en": "read"
+   }
+  }
+ },
+ {
+  "id": "wg-km-017",
+  "kind": "word-guess",
+  "lang": "km",
+  "level": 3,
+  "status": "published",
+  "owner": {
+   "scope": "koda"
+  },
+  "data": {
+   "word": "ថ្ងៃ",
+   "category": "nature",
+   "clue": {
+    "km": "",
+    "en": "sun / day"
+   }
+  }
+ },
+ {
+  "id": "wg-km-018",
+  "kind": "word-guess",
+  "lang": "km",
+  "level": 3,
+  "status": "published",
+  "owner": {
+   "scope": "koda"
+  },
+  "data": {
+   "word": "ដើម",
+   "category": "nature",
+   "clue": {
+    "km": "",
+    "en": "tree trunk"
+   }
+  }
+ },
+ {
+  "id": "wg-km-019",
+  "kind": "word-guess",
+  "lang": "km",
+  "level": 3,
+  "status": "published",
+  "owner": {
+   "scope": "koda"
+  },
+  "data": {
+   "word": "ពោត",
+   "category": "food",
+   "clue": {
+    "km": "",
+    "en": "corn"
+   }
+  }
+ },
+ {
+  "id": "wg-km-020",
+  "kind": "word-guess",
+  "lang": "km",
+  "level": 3,
+  "status": "published",
+  "owner": {
+   "scope": "koda"
+  },
+  "data": {
+   "word": "ជើង",
+   "category": "body",
+   "clue": {
+    "km": "",
+    "en": "foot"
+   }
+  }
+ },
+ {
+  "id": "wg-km-021",
+  "kind": "word-guess",
+  "lang": "km",
+  "level": 4,
+  "status": "published",
+  "owner": {
+   "scope": "koda"
+  },
+  "data": {
+   "word": "មាន់",
+   "category": "animal",
+   "clue": {
+    "km": "",
+    "en": "chicken"
+   }
+  }
+ },
+ {
+  "id": "wg-km-022",
+  "kind": "word-guess",
+  "lang": "km",
+  "level": 4,
+  "status": "published",
+  "owner": {
+   "scope": "koda"
+  },
+  "data": {
+   "word": "ក្មេង",
+   "category": "family",
+   "clue": {
+    "km": "",
+    "en": "child"
+   }
+  }
+ },
+ {
+  "id": "wg-km-023",
+  "kind": "word-guess",
+  "lang": "km",
+  "level": 4,
+  "status": "published",
+  "owner": {
+   "scope": "koda"
+  },
+  "data": {
+   "word": "សាលា",
+   "category": "school",
+   "clue": {
+    "km": "",
+    "en": "school"
+   }
+  }
+ },
+ {
+  "id": "wg-km-024",
+  "kind": "word-guess",
+  "lang": "km",
+  "level": 4,
+  "status": "published",
+  "owner": {
+   "scope": "koda"
+  },
+  "data": {
+   "word": "ម្ដាយ",
+   "category": "family",
+   "clue": {
+    "km": "",
+    "en": "mother"
+   }
+  }
+ },
+ {
+  "id": "wg-km-025",
+  "kind": "word-guess",
+  "lang": "km",
+  "level": 4,
+  "status": "published",
+  "owner": {
+   "scope": "koda"
+  },
+  "data": {
+   "word": "ឪពុក",
+   "category": "family",
+   "clue": {
+    "km": "",
+    "en": "father"
+   }
+  }
+ },
+ {
+  "id": "wg-km-026",
+  "kind": "word-guess",
+  "lang": "km",
+  "level": 4,
+  "status": "published",
+  "owner": {
+   "scope": "koda"
+  },
+  "data": {
+   "word": "ក្របី",
+   "category": "animal",
+   "clue": {
+    "km": "",
+    "en": "buffalo"
+   }
+  }
+ },
+ {
+  "id": "wg-km-027",
+  "kind": "word-guess",
+  "lang": "km",
+  "level": 4,
+  "status": "published",
+  "owner": {
+   "scope": "koda"
+  },
+  "data": {
+   "word": "ដំរី",
+   "category": "animal",
+   "clue": {
+    "km": "",
+    "en": "elephant"
+   }
+  }
+ },
+ {
+  "id": "wg-km-028",
+  "kind": "word-guess",
+  "lang": "km",
+  "level": 4,
+  "status": "published",
+  "owner": {
+   "scope": "koda"
+  },
+  "data": {
+   "word": "ភ្លៀង",
+   "category": "nature",
+   "clue": {
+    "km": "",
+    "en": "rain"
+   }
+  }
+ },
+ {
+  "id": "wg-km-029",
+  "kind": "word-guess",
+  "lang": "km",
+  "level": 4,
+  "status": "published",
+  "owner": {
+   "scope": "koda"
+  },
+  "data": {
+   "word": "ខ្យល់",
+   "category": "nature",
+   "clue": {
+    "km": "",
+    "en": "wind"
+   }
+  }
+ },
+ {
+  "id": "wg-km-030",
+  "kind": "word-guess",
+  "lang": "km",
+  "level": 4,
+  "status": "published",
+  "owner": {
+   "scope": "koda"
+  },
+  "data": {
+   "word": "ផ្លូវ",
+   "category": "travel",
+   "clue": {
+    "km": "",
+    "en": "road"
+   }
+  }
+ },
+ {
+  "id": "wg-km-031",
+  "kind": "word-guess",
+  "lang": "km",
+  "level": 4,
+  "status": "published",
+  "owner": {
+   "scope": "koda"
+  },
+  "data": {
+   "word": "ក្រូច",
+   "category": "food",
+   "clue": {
+    "km": "",
+    "en": "orange"
+   }
+  }
+ },
+ {
+  "id": "wg-km-032",
+  "kind": "word-guess",
+  "lang": "km",
+  "level": 4,
+  "status": "published",
+  "owner": {
+   "scope": "koda"
+  },
+  "data": {
+   "word": "ស្វាយ",
+   "category": "food",
+   "clue": {
+    "km": "",
+    "en": "mango"
+   }
+  }
+ },
+ {
+  "id": "wg-km-033",
+  "kind": "word-guess",
+  "lang": "km",
+  "level": 4,
+  "status": "published",
+  "owner": {
+   "scope": "koda"
+  },
+  "data": {
+   "word": "ផ្កាយ",
+   "category": "nature",
+   "clue": {
+    "km": "",
+    "en": "star"
+   }
+  }
+ },
+ {
+  "id": "wg-km-034",
+  "kind": "word-guess",
+  "lang": "km",
+  "level": 4,
+  "status": "published",
+  "owner": {
+   "scope": "koda"
+  },
+  "data": {
+   "word": "ស្លឹក",
+   "category": "nature",
+   "clue": {
+    "km": "",
+    "en": "leaf"
+   }
+  }
+ },
+ {
+  "id": "wg-km-035",
+  "kind": "word-guess",
+  "lang": "km",
+  "level": 4,
+  "status": "published",
+  "owner": {
+   "scope": "koda"
+  },
+  "data": {
+   "word": "ក្អែក",
+   "category": "animal",
+   "clue": {
+    "km": "",
+    "en": "crow"
+   }
+  }
+ },
+ {
+  "id": "wg-km-036",
+  "kind": "word-guess",
+  "lang": "km",
+  "level": 4,
+  "status": "published",
+  "owner": {
+   "scope": "koda"
+  },
+  "data": {
+   "word": "ត្រប់",
+   "category": "food",
+   "clue": {
+    "km": "",
+    "en": "eggplant"
+   }
+  }
+ },
+ {
+  "id": "wg-km-037",
+  "kind": "word-guess",
+  "lang": "km",
+  "level": 4,
+  "status": "published",
+  "owner": {
+   "scope": "koda"
+  },
+  "data": {
+   "word": "ភ្នែក",
+   "category": "body",
+   "clue": {
+    "km": "",
+    "en": "eye"
+   }
+  }
+ },
+ {
+  "id": "wg-km-038",
+  "kind": "word-guess",
+  "lang": "km",
+  "level": 4,
+  "status": "published",
+  "owner": {
+   "scope": "koda"
+  },
+  "data": {
+   "word": "ច្រមុះ",
+   "category": "body",
+   "clue": {
+    "km": "",
+    "en": "nose"
+   }
+  }
+ },
+ {
+  "id": "wg-km-039",
+  "kind": "word-guess",
+  "lang": "km",
+  "level": 4,
+  "status": "published",
+  "owner": {
+   "scope": "koda"
+  },
+  "data": {
+   "word": "ក្បាល",
+   "category": "body",
+   "clue": {
+    "km": "",
+    "en": "head"
+   }
+  }
+ },
+ {
+  "id": "wg-en-001",
+  "kind": "word-guess",
+  "lang": "en",
+  "level": 3,
+  "status": "published",
+  "owner": {
+   "scope": "koda"
+  },
+  "data": {
+   "word": "cat",
+   "category": "animal",
+   "clue": {
+    "km": "",
+    "en": "A pet that says meow"
+   }
+  }
+ },
+ {
+  "id": "wg-en-002",
+  "kind": "word-guess",
+  "lang": "en",
+  "level": 3,
+  "status": "published",
+  "owner": {
+   "scope": "koda"
+  },
+  "data": {
+   "word": "dog",
+   "category": "animal",
+   "clue": {
+    "km": "",
+    "en": "A pet that barks"
+   }
+  }
+ },
+ {
+  "id": "wg-en-003",
+  "kind": "word-guess",
+  "lang": "en",
+  "level": 3,
+  "status": "published",
+  "owner": {
+   "scope": "koda"
+  },
+  "data": {
+   "word": "sun",
+   "category": "nature",
+   "clue": {
+    "km": "",
+    "en": "It shines in the day sky"
+   }
+  }
+ },
+ {
+  "id": "wg-en-004",
+  "kind": "word-guess",
+  "lang": "en",
+  "level": 3,
+  "status": "published",
+  "owner": {
+   "scope": "koda"
+  },
+  "data": {
+   "word": "hat",
+   "category": "home",
+   "clue": {
+    "km": "",
+    "en": "You wear it on your head"
+   }
+  }
+ },
+ {
+  "id": "wg-en-005",
+  "kind": "word-guess",
+  "lang": "en",
+  "level": 3,
+  "status": "published",
+  "owner": {
+   "scope": "koda"
+  },
+  "data": {
+   "word": "bus",
+   "category": "travel",
+   "clue": {
+    "km": "",
+    "en": "A big car for many people"
+   }
+  }
+ },
+ {
+  "id": "wg-en-006",
+  "kind": "word-guess",
+  "lang": "en",
+  "level": 3,
+  "status": "published",
+  "owner": {
+   "scope": "koda"
+  },
+  "data": {
+   "word": "cup",
+   "category": "home",
+   "clue": {
+    "km": "",
+    "en": "You drink from it"
+   }
+  }
+ },
+ {
+  "id": "wg-en-007",
+  "kind": "word-guess",
+  "lang": "en",
+  "level": 3,
+  "status": "published",
+  "owner": {
+   "scope": "koda"
+  },
+  "data": {
+   "word": "pig",
+   "category": "animal",
+   "clue": {
+    "km": "",
+    "en": "A pink farm animal"
+   }
+  }
+ },
+ {
+  "id": "wg-en-008",
+  "kind": "word-guess",
+  "lang": "en",
+  "level": 3,
+  "status": "published",
+  "owner": {
+   "scope": "koda"
+  },
+  "data": {
+   "word": "egg",
+   "category": "food",
+   "clue": {
+    "km": "",
+    "en": "A hen lays it"
+   }
+  }
+ },
+ {
+  "id": "wg-en-009",
+  "kind": "word-guess",
+  "lang": "en",
+  "level": 3,
+  "status": "published",
+  "owner": {
+   "scope": "koda"
+  },
+  "data": {
+   "word": "bed",
+   "category": "home",
+   "clue": {
+    "km": "",
+    "en": "You sleep in it"
+   }
+  }
+ },
+ {
+  "id": "wg-en-010",
+  "kind": "word-guess",
+  "lang": "en",
+  "level": 3,
+  "status": "published",
+  "owner": {
+   "scope": "koda"
+  },
+  "data": {
+   "word": "fox",
+   "category": "animal",
+   "clue": {
+    "km": "",
+    "en": "A clever wild animal with a bushy tail"
+   }
+  }
+ },
+ {
+  "id": "wg-en-011",
+  "kind": "word-guess",
+  "lang": "en",
+  "level": 3,
+  "status": "published",
+  "owner": {
+   "scope": "koda"
+  },
+  "data": {
+   "word": "cow",
+   "category": "animal",
+   "clue": {
+    "km": "",
+    "en": "A farm animal that gives milk"
+   }
+  }
+ },
+ {
+  "id": "wg-en-012",
+  "kind": "word-guess",
+  "lang": "en",
+  "level": 3,
+  "status": "published",
+  "owner": {
+   "scope": "koda"
+  },
+  "data": {
+   "word": "box",
+   "category": "home",
+   "clue": {
+    "km": "",
+    "en": "You can put things inside it"
+   }
+  }
+ },
+ {
+  "id": "wg-en-013",
+  "kind": "word-guess",
+  "lang": "en",
+  "level": 3,
+  "status": "published",
+  "owner": {
+   "scope": "koda"
+  },
+  "data": {
+   "word": "pen",
+   "category": "school",
+   "clue": {
+    "km": "",
+    "en": "You write with it"
+   }
+  }
+ },
+ {
+  "id": "wg-en-014",
+  "kind": "word-guess",
+  "lang": "en",
+  "level": 3,
+  "status": "published",
+  "owner": {
+   "scope": "koda"
+  },
+  "data": {
+   "word": "ant",
+   "category": "animal",
+   "clue": {
+    "km": "",
+    "en": "A tiny insect that works hard"
+   }
+  }
+ },
+ {
+  "id": "wg-en-015",
+  "kind": "word-guess",
+  "lang": "en",
+  "level": 3,
+  "status": "published",
+  "owner": {
+   "scope": "koda"
+  },
+  "data": {
+   "word": "bee",
+   "category": "animal",
+   "clue": {
+    "km": "",
+    "en": "It makes honey"
+   }
+  }
+ },
+ {
+  "id": "wg-en-016",
+  "kind": "word-guess",
+  "lang": "en",
+  "level": 3,
+  "status": "published",
+  "owner": {
+   "scope": "koda"
+  },
+  "data": {
+   "word": "owl",
+   "category": "animal",
+   "clue": {
+    "km": "",
+    "en": "A bird that is awake at night"
+   }
+  }
+ },
+ {
+  "id": "wg-en-017",
+  "kind": "word-guess",
+  "lang": "en",
+  "level": 3,
+  "status": "published",
+  "owner": {
+   "scope": "koda"
+  },
+  "data": {
+   "word": "net",
+   "category": "home",
+   "clue": {
+    "km": "",
+    "en": "Used to catch fish"
+   }
+  }
+ },
+ {
+  "id": "wg-en-018",
+  "kind": "word-guess",
+  "lang": "en",
+  "level": 3,
+  "status": "published",
+  "owner": {
+   "scope": "koda"
+  },
+  "data": {
+   "word": "map",
+   "category": "school",
+   "clue": {
+    "km": "",
+    "en": "It shows you the way"
+   }
+  }
+ },
+ {
+  "id": "wg-en-019",
+  "kind": "word-guess",
+  "lang": "en",
+  "level": 3,
+  "status": "published",
+  "owner": {
+   "scope": "koda"
+  },
+  "data": {
+   "word": "jam",
+   "category": "food",
+   "clue": {
+    "km": "",
+    "en": "Sweet fruit you spread on bread"
+   }
+  }
+ },
+ {
+  "id": "wg-en-020",
+  "kind": "word-guess",
+  "lang": "en",
+  "level": 4,
+  "status": "published",
+  "owner": {
+   "scope": "koda"
+  },
+  "data": {
+   "word": "fish",
+   "category": "animal",
+   "clue": {
+    "km": "",
+    "en": "It swims in water"
+   }
+  }
+ },
+ {
+  "id": "wg-en-021",
+  "kind": "word-guess",
+  "lang": "en",
+  "level": 4,
+  "status": "published",
+  "owner": {
+   "scope": "koda"
+  },
+  "data": {
+   "word": "frog",
+   "category": "animal",
+   "clue": {
+    "km": "",
+    "en": "It jumps and says ribbit"
+   }
+  }
+ },
+ {
+  "id": "wg-en-022",
+  "kind": "word-guess",
+  "lang": "en",
+  "level": 4,
+  "status": "published",
+  "owner": {
+   "scope": "koda"
+  },
+  "data": {
+   "word": "milk",
+   "category": "food",
+   "clue": {
+    "km": "",
+    "en": "A white drink from cows"
+   }
+  }
+ },
+ {
+  "id": "wg-en-023",
+  "kind": "word-guess",
+  "lang": "en",
+  "level": 4,
+  "status": "published",
+  "owner": {
+   "scope": "koda"
+  },
+  "data": {
+   "word": "bird",
+   "category": "animal",
+   "clue": {
+    "km": "",
+    "en": "It has wings and sings"
+   }
+  }
+ },
+ {
+  "id": "wg-en-024",
+  "kind": "word-guess",
+  "lang": "en",
+  "level": 4,
+  "status": "published",
+  "owner": {
+   "scope": "koda"
+  },
+  "data": {
+   "word": "cake",
+   "category": "food",
+   "clue": {
+    "km": "",
+    "en": "You eat it on your birthday"
+   }
+  }
+ },
+ {
+  "id": "wg-en-025",
+  "kind": "word-guess",
+  "lang": "en",
+  "level": 4,
+  "status": "published",
+  "owner": {
+   "scope": "koda"
+  },
+  "data": {
+   "word": "tree",
+   "category": "nature",
+   "clue": {
+    "km": "",
+    "en": "It has leaves and branches"
+   }
+  }
+ },
+ {
+  "id": "wg-en-026",
+  "kind": "word-guess",
+  "lang": "en",
+  "level": 4,
+  "status": "published",
+  "owner": {
+   "scope": "koda"
+  },
+  "data": {
+   "word": "star",
+   "category": "nature",
+   "clue": {
+    "km": "",
+    "en": "It twinkles at night"
+   }
+  }
+ },
+ {
+  "id": "wg-en-027",
+  "kind": "word-guess",
+  "lang": "en",
+  "level": 4,
+  "status": "published",
+  "owner": {
+   "scope": "koda"
+  },
+  "data": {
+   "word": "ball",
+   "category": "school",
+   "clue": {
+    "km": "",
+    "en": "You kick it or throw it"
+   }
+  }
+ },
+ {
+  "id": "wg-en-028",
+  "kind": "word-guess",
+  "lang": "en",
+  "level": 4,
+  "status": "published",
+  "owner": {
+   "scope": "koda"
+  },
+  "data": {
+   "word": "rain",
+   "category": "nature",
+   "clue": {
+    "km": "",
+    "en": "Water falling from the clouds"
+   }
+  }
+ },
+ {
+  "id": "wg-en-029",
+  "kind": "word-guess",
+  "lang": "en",
+  "level": 4,
+  "status": "published",
+  "owner": {
+   "scope": "koda"
+  },
+  "data": {
+   "word": "duck",
+   "category": "animal",
+   "clue": {
+    "km": "",
+    "en": "It swims and says quack"
+   }
+  }
+ },
+ {
+  "id": "wg-en-030",
+  "kind": "word-guess",
+  "lang": "en",
+  "level": 4,
+  "status": "published",
+  "owner": {
+   "scope": "koda"
+  },
+  "data": {
+   "word": "book",
+   "category": "school",
+   "clue": {
+    "km": "",
+    "en": "You read it"
+   }
+  }
+ },
+ {
+  "id": "wg-en-031",
+  "kind": "word-guess",
+  "lang": "en",
+  "level": 4,
+  "status": "published",
+  "owner": {
+   "scope": "koda"
+  },
+  "data": {
+   "word": "moon",
+   "category": "nature",
+   "clue": {
+    "km": "",
+    "en": "It shines at night"
+   }
+  }
+ },
+ {
+  "id": "wg-en-032",
+  "kind": "word-guess",
+  "lang": "en",
+  "level": 4,
+  "status": "published",
+  "owner": {
+   "scope": "koda"
+  },
+  "data": {
+   "word": "ship",
+   "category": "travel",
+   "clue": {
+    "km": "",
+    "en": "A very big boat"
+   }
+  }
+ },
+ {
+  "id": "wg-en-033",
+  "kind": "word-guess",
+  "lang": "en",
+  "level": 4,
+  "status": "published",
+  "owner": {
+   "scope": "koda"
+  },
+  "data": {
+   "word": "lion",
+   "category": "animal",
+   "clue": {
+    "km": "",
+    "en": "The king of the animals"
+   }
+  }
+ },
+ {
+  "id": "wg-en-034",
+  "kind": "word-guess",
+  "lang": "en",
+  "level": 4,
+  "status": "published",
+  "owner": {
+   "scope": "koda"
+  },
+  "data": {
+   "word": "kite",
+   "category": "nature",
+   "clue": {
+    "km": "",
+    "en": "It flies on a long string"
+   }
+  }
+ },
+ {
+  "id": "wg-en-035",
+  "kind": "word-guess",
+  "lang": "en",
+  "level": 4,
+  "status": "published",
+  "owner": {
+   "scope": "koda"
+  },
+  "data": {
+   "word": "bell",
+   "category": "school",
+   "clue": {
+    "km": "",
+    "en": "It rings to start the class"
+   }
+  }
+ },
+ {
+  "id": "wg-en-036",
+  "kind": "word-guess",
+  "lang": "en",
+  "level": 4,
+  "status": "published",
+  "owner": {
+   "scope": "koda"
+  },
+  "data": {
+   "word": "sock",
+   "category": "home",
+   "clue": {
+    "km": "",
+    "en": "You wear it inside your shoe"
+   }
+  }
+ },
+ {
+  "id": "wg-en-037",
+  "kind": "word-guess",
+  "lang": "en",
+  "level": 4,
+  "status": "published",
+  "owner": {
+   "scope": "koda"
+  },
+  "data": {
+   "word": "hand",
+   "category": "body",
+   "clue": {
+    "km": "",
+    "en": "It has five fingers"
+   }
+  }
+ },
+ {
+  "id": "wg-en-038",
+  "kind": "word-guess",
+  "lang": "en",
+  "level": 4,
+  "status": "published",
+  "owner": {
+   "scope": "koda"
+  },
+  "data": {
+   "word": "nest",
+   "category": "nature",
+   "clue": {
+    "km": "",
+    "en": "A bird's home"
+   }
+  }
+ },
+ {
+  "id": "wg-en-039",
+  "kind": "word-guess",
+  "lang": "en",
+  "level": 5,
+  "status": "published",
+  "owner": {
+   "scope": "koda"
+  },
+  "data": {
+   "word": "apple",
+   "category": "food",
+   "clue": {
+    "km": "",
+    "en": "A red or green fruit"
+   }
+  }
+ },
+ {
+  "id": "wg-en-040",
+  "kind": "word-guess",
+  "lang": "en",
+  "level": 5,
+  "status": "published",
+  "owner": {
+   "scope": "koda"
+  },
+  "data": {
+   "word": "horse",
+   "category": "animal",
+   "clue": {
+    "km": "",
+    "en": "An animal you can ride"
+   }
+  }
+ },
+ {
+  "id": "wg-en-041",
+  "kind": "word-guess",
+  "lang": "en",
+  "level": 5,
+  "status": "published",
+  "owner": {
+   "scope": "koda"
+  },
+  "data": {
+   "word": "chair",
+   "category": "home",
+   "clue": {
+    "km": "",
+    "en": "You sit on it"
+   }
+  }
+ },
+ {
+  "id": "wg-en-042",
+  "kind": "word-guess",
+  "lang": "en",
+  "level": 5,
+  "status": "published",
+  "owner": {
+   "scope": "koda"
+  },
+  "data": {
+   "word": "water",
+   "category": "nature",
+   "clue": {
+    "km": "",
+    "en": "You drink it every day"
+   }
+  }
+ },
+ {
+  "id": "wg-en-043",
+  "kind": "word-guess",
+  "lang": "en",
+  "level": 5,
+  "status": "published",
+  "owner": {
+   "scope": "koda"
+  },
+  "data": {
+   "word": "house",
+   "category": "home",
+   "clue": {
+    "km": "",
+    "en": "A home for a family"
+   }
+  }
+ },
+ {
+  "id": "wg-en-044",
+  "kind": "word-guess",
+  "lang": "en",
+  "level": 5,
+  "status": "published",
+  "owner": {
+   "scope": "koda"
+  },
+  "data": {
+   "word": "mango",
+   "category": "food",
+   "clue": {
+    "km": "",
+    "en": "A sweet fruit that grows in Cambodia"
+   }
+  }
+ },
+ {
+  "id": "wg-en-045",
+  "kind": "word-guess",
+  "lang": "en",
+  "level": 5,
+  "status": "published",
+  "owner": {
+   "scope": "koda"
+  },
+  "data": {
+   "word": "tiger",
+   "category": "animal",
+   "clue": {
+    "km": "",
+    "en": "A big cat with stripes"
+   }
+  }
+ },
+ {
+  "id": "wg-en-046",
+  "kind": "word-guess",
+  "lang": "en",
+  "level": 5,
+  "status": "published",
+  "owner": {
+   "scope": "koda"
+  },
+  "data": {
+   "word": "plant",
+   "category": "nature",
+   "clue": {
+    "km": "",
+    "en": "It grows in soil"
+   }
+  }
+ },
+ {
+  "id": "wg-en-047",
+  "kind": "word-guess",
+  "lang": "en",
+  "level": 5,
+  "status": "published",
+  "owner": {
+   "scope": "koda"
+  },
+  "data": {
+   "word": "bread",
+   "category": "food",
+   "clue": {
+    "km": "",
+    "en": "Baked food made from flour"
+   }
+  }
+ },
+ {
+  "id": "wg-en-048",
+  "kind": "word-guess",
+  "lang": "en",
+  "level": 5,
+  "status": "published",
+  "owner": {
+   "scope": "koda"
+  },
+  "data": {
+   "word": "smile",
+   "category": "body",
+   "clue": {
+    "km": "",
+    "en": "What your face does when you are happy"
+   }
+  }
+ },
+ {
+  "id": "wg-en-049",
+  "kind": "word-guess",
+  "lang": "en",
+  "level": 5,
+  "status": "published",
+  "owner": {
+   "scope": "koda"
+  },
+  "data": {
+   "word": "cloud",
+   "category": "nature",
+   "clue": {
+    "km": "",
+    "en": "White and fluffy in the sky"
+   }
+  }
+ },
+ {
+  "id": "wg-en-050",
+  "kind": "word-guess",
+  "lang": "en",
+  "level": 5,
+  "status": "published",
+  "owner": {
+   "scope": "koda"
+  },
+  "data": {
+   "word": "green",
+   "category": "nature",
+   "clue": {
+    "km": "",
+    "en": "The colour of leaves"
+   }
+  }
+ },
+ {
+  "id": "wg-en-051",
+  "kind": "word-guess",
+  "lang": "en",
+  "level": 5,
+  "status": "published",
+  "owner": {
+   "scope": "koda"
+  },
+  "data": {
+   "word": "train",
+   "category": "travel",
+   "clue": {
+    "km": "",
+    "en": "It runs on tracks"
+   }
+  }
+ },
+ {
+  "id": "wg-en-052",
+  "kind": "word-guess",
+  "lang": "en",
+  "level": 5,
+  "status": "published",
+  "owner": {
+   "scope": "koda"
+  },
+  "data": {
+   "word": "sheep",
+   "category": "animal",
+   "clue": {
+    "km": "",
+    "en": "A farm animal with soft wool"
+   }
+  }
+ },
+ {
+  "id": "wg-en-053",
+  "kind": "word-guess",
+  "lang": "en",
+  "level": 5,
+  "status": "published",
+  "owner": {
+   "scope": "koda"
+  },
+  "data": {
+   "word": "snake",
+   "category": "animal",
+   "clue": {
+    "km": "",
+    "en": "A long animal with no legs"
+   }
+  }
+ },
+ {
+  "id": "wg-en-054",
+  "kind": "word-guess",
+  "lang": "en",
+  "level": 5,
+  "status": "published",
+  "owner": {
+   "scope": "koda"
+  },
+  "data": {
+   "word": "table",
+   "category": "home",
+   "clue": {
+    "km": "",
+    "en": "You eat your meals at it"
+   }
+  }
+ },
+ {
+  "id": "wg-en-055",
+  "kind": "word-guess",
+  "lang": "en",
+  "level": 5,
+  "status": "published",
+  "owner": {
+   "scope": "koda"
+  },
+  "data": {
+   "word": "clock",
+   "category": "home",
+   "clue": {
+    "km": "",
+    "en": "It tells the time"
+   }
+  }
+ },
+ {
+  "id": "wg-en-056",
+  "kind": "word-guess",
+  "lang": "en",
+  "level": 5,
+  "status": "published",
+  "owner": {
+   "scope": "koda"
+  },
+  "data": {
+   "word": "zebra",
+   "category": "animal",
+   "clue": {
+    "km": "",
+    "en": "A horse with black and white stripes"
+   }
+  }
+ },
+ {
+  "id": "wg-en-057",
+  "kind": "word-guess",
+  "lang": "en",
+  "level": 5,
+  "status": "published",
+  "owner": {
+   "scope": "koda"
+  },
+  "data": {
+   "word": "light",
+   "category": "home",
+   "clue": {
+    "km": "",
+    "en": "It helps you see in the dark"
+   }
+  }
+ },
+ {
+  "id": "wg-en-058",
+  "kind": "word-guess",
+  "lang": "en",
+  "level": 5,
+  "status": "published",
+  "owner": {
+   "scope": "koda"
+  },
+  "data": {
+   "word": "earth",
+   "category": "nature",
+   "clue": {
+    "km": "",
+    "en": "The planet we live on"
+   }
+  }
+ }
+]

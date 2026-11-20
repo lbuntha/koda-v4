@@ -22,6 +22,7 @@ from app.middleware.requests import RequestContextMiddleware
 from app.persona_defaults import DEFAULT_PERSONAS
 from app.plan_defaults import DEFAULT_PLANS
 from app.repos import art as art_repo
+from app.repos import daily_puzzles as daily_puzzles_repo
 from app.repos import defaults as defaults_repo
 from app.repos import menu as menu_repo
 from app.repos import personas as personas_repo
@@ -40,6 +41,7 @@ from app.routers import (
     art,
     auth,
     billing,
+    daily_puzzles,
     defaults,
     devices,
     email_links,
@@ -221,6 +223,13 @@ async def _prepare(db) -> None:
     if rebus_new:
         log.info("seeded %s Rebus Rush puzzles", rebus_new)
 
+    # The starter daily-puzzle words, published once so the daily puzzle works
+    # on day one. Create-if-absent: the Puzzle Studio's edits survive a restart.
+    starter = json.loads((Path(__file__).parent / "daily_puzzle_seed.json").read_text())
+    daily_new = await daily_puzzles_repo.ensure_seed(db, starter)
+    if daily_new:
+        log.info("seeded %s daily puzzles", daily_new)
+
     roles = sum(await _each(DEFAULT_PLATFORM_ROLES, lambda role: platform_roles_repo.seed_default(db, role)))
     if roles:
         log.info("seeded %s platform roles", roles)
@@ -323,6 +332,7 @@ def create_app() -> FastAPI:
         personas.router,
         profile.router,
         push.router,
+        daily_puzzles.router,
         rebus.router,
         rebus_images.router,
         rebus_rooms.router,

@@ -193,6 +193,14 @@ INDEXES: dict[str, list[IndexModel]] = {
         IndexModel([("id", ASCENDING)], unique=True, name="rebus_puzzle_id_unique"),
         IndexModel([("status", ASCENDING), ("category", ASCENDING)], name="rebus_puzzle_by_status"),
     ],
+    # Daily puzzles: every word in any state, and which word each line has each day.
+    "daily_puzzles": [
+        IndexModel([("id", ASCENDING)], unique=True, name="daily_puzzle_id_unique"),
+        IndexModel([("lang", ASCENDING), ("level", ASCENDING), ("status", ASCENDING)], name="daily_puzzle_by_line"),
+    ],
+    "daily_puzzle_calendar": [
+        IndexModel([("slot", ASCENDING), ("day", ASCENDING)], name="daily_puzzle_calendar_by_line"),
+    ],
     # Group rooms live for hours, not days: Mongo removes a room once its time is up.
     "rebus_rooms": [
         IndexModel([("expiresAt", ASCENDING)], expireAfterSeconds=0, name="rebus_room_expiry"),
