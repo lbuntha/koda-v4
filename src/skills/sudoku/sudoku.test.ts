@@ -6,6 +6,7 @@ import { SVG_ASSET_IDS } from "../../assets/svg/ids";
 import course from "../../curriculum/course.json";
 import en from "./locales/en.json";
 import km from "./locales/km.json";
+import voice from "./voice.json";
 
 describeSkillContract(skill);
 describeActivitySmoke(skill);
@@ -82,5 +83,23 @@ describe("Sudoku words", () => {
 
   it("has a Khmer line for every English one", () => {
     expect(keys(en).filter((k) => !keys(km).includes(k))).toEqual([]);
+  });
+});
+
+describe("Sudoku voice script", () => {
+  /* A clip plays only when its words match what is said exactly, so the
+     script is checked against the English the activities speak. */
+  const spoken = new Set([
+    ...voice.prompts,
+    ...voice.templates.flatMap((t) => t.values.map((v) => t.text.replace("{value}", String(v)))),
+  ]);
+
+  it("covers both puzzle prompts and every drill prompt, for every number", () => {
+    expect(spoken.has(en.prompt.numbers)).toBe(true);
+    expect(spoken.has(en.prompt.pictures)).toBe(true);
+    for (const [technique, line] of Object.entries(en.spot)) {
+      const lines = line.includes("{d}") ? [1, 2, 3, 4, 5, 6, 7, 8, 9].map((d) => line.replace("{d}", String(d))) : [line];
+      for (const text of lines) expect(spoken.has(text), `${technique}: ${text}`).toBe(true);
+    }
   });
 });

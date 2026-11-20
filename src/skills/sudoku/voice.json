@@ -1,10 +1,117 @@
 {
   "_comment": [
-    "Sudoku speaks its lesson prompts and nothing of its own: reactions come from the",
-    "common pack, and drill prompts name a random number, so they use live speech."
+    "What Sudoku says aloud, for `npm run voice:record -- --skill sudoku --provider openai`.",
+    "Lesson intros are picked up from lessons.json. `prompts` are the two puzzle prompts and the",
+    "drills that name no number; each `templates` entry is a drill prompt, recorded once per number.",
+    "Must match locales/en.json word for word, or the clip is never found and live speech is used.",
+    "Reactions (right, wrong) come from the common pack."
   ],
   "subjects": [],
-  "templates": [],
-  "prompts": [],
+  "templates": [
+    {
+      "text": "Where does {value} go? Scan the boxes.",
+      "values": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9
+      ]
+    },
+    {
+      "text": "Where does {value} go? Scan the rows and columns.",
+      "values": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9
+      ]
+    },
+    {
+      "text": "Use Pointing to find a place for {value}.",
+      "values": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9
+      ]
+    },
+    {
+      "text": "Use Claiming to find a place for {value}.",
+      "values": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9
+      ]
+    },
+    {
+      "text": "Use a Naked Pair to find a place for {value}.",
+      "values": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9
+      ]
+    },
+    {
+      "text": "Use a Hidden Pair to find a place for {value}.",
+      "values": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9
+      ]
+    },
+    {
+      "text": "Use an X-Wing to find a place for {value}.",
+      "values": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9
+      ]
+    }
+  ],
+  "prompts": [
+    "Fill the grid so every row, column and box has each number once.",
+    "Fill the grid so every row, column and box has each picture once.",
+    "Find a row, column or box with one empty cell, and fill it.",
+    "Find a cell that can only be one number, and fill it."
+  ],
   "phrases": []
 }
