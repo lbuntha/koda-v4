@@ -7,7 +7,8 @@ import { messageOf } from "../../rebus/studio/useStudioAction";
 import { PUZZLE_CATEGORIES, type PuzzleCategory, type PuzzleLang } from "../types";
 import { tilesOf, wordProblem } from "../wordGuess";
 import { WordTiles } from "../ui/WordTiles";
-import { PICTURE_NAMES, WordPicture, suggestPicture } from "../ui/WordPicture";
+import { suggestPicture } from "../ui/WordPicture";
+import { PicturePicker } from "./PicturePicker";
 import { PuzzleStudioAPI, type StudioWord } from "./studioApi";
 
 /**
@@ -145,27 +146,7 @@ export const WordForm: React.FC<{ canRun: boolean; editing?: StudioWord | null; 
       </div>
       <p className="-mt-2 text-xs text-muted">{t("puzzleStudio.clueHelp")}</p>
 
-      <div className="flex flex-wrap items-end gap-3">
-        {picture ? (
-          <WordPicture id={picture} label={picture.replace(/^rebus-/, "")} size={72} />
-        ) : (
-          <span className="grid h-[72px] w-[72px] place-items-center rounded-2xl border-2 border-dashed border-line text-xs font-bold text-muted">{t("puzzleStudio.noPicture")}</span>
-        )}
-        <div className="min-w-[12rem] flex-1">
-          <label className={label} htmlFor="ps-pic">
-            {t("puzzleStudio.picture")}
-          </label>
-          <UISelect id="ps-pic" value={picture} onChange={(e) => setPictureChoice(e.target.value)}>
-            <option value="">{t("puzzleStudio.noPicture")}</option>
-            {PICTURE_NAMES.map((n) => (
-              <option key={n} value={`rebus-${n}`}>
-                {n}
-              </option>
-            ))}
-          </UISelect>
-          <p className="mt-1 text-xs text-muted">{t("puzzleStudio.pictureHelp")}</p>
-        </div>
-      </div>
+      <PicturePicker value={picture} onChange={setPictureChoice} />
 
       {error && (
         <p role="alert" className={themeSystem.flash("error")}>

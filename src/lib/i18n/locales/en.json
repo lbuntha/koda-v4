@@ -6047,6 +6047,32 @@
     "lowDays": "Only {n} days of new words left. Add more words so children don't see repeats.",
     "picture": "Picture",
     "noPicture": "No picture",
-    "pictureHelp": "Young children see this picture from the start, so they can play before they can read. Koda picks one from the meaning; you can change it."
+    "pictureHelp": "Young children see this picture from the start, so they can play before they can read. Koda picks one from the meaning; you can change it.",
+    "removePicture": "Remove picture",
+    "pictureFrom": "Where the picture comes from",
+    "source": {
+      "drawings": "Koda drawings",
+      "art": "Art library",
+      "computer": "From my computer"
+    },
+    "searchPictures": "Search pictures",
+    "pictureGroup": "Picture group",
+    "noPictures": "No pictures here. Try another group or search.",
+    "group": {
+      "animals": "Animals",
+      "food": "Food",
+      "nature": "Nature",
+      "home": "At home",
+      "body": "Body",
+      "school": "School",
+      "things": "Things",
+      "sports": "Sports",
+      "clothes": "Clothes",
+      "travel": "Getting around",
+      "colours": "Colours"
+    },
+    "choosePhoto": "Choose a photo",
+    "photoHelp": "A JPEG or PNG from your computer. Koda makes it smaller before sending it, and children's devices keep it for offline play.",
+    "photoFailed": "The photo could not be added. Try again."
   }
 }

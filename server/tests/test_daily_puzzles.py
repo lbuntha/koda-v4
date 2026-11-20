@@ -1,5 +1,6 @@
 """Daily puzzles: the starter words, the Studio's rules, and the calendar every device follows."""
 
+import base64
 import json
 from pathlib import Path
 
@@ -128,3 +129,21 @@ async def test_a_live_word_keeps_its_length_and_the_line_counts_its_new_days(cli
     await client.get("/daily-puzzles?days=1", headers=owner)
     line = next(x for x in (await client.get(f"{S}/overview", headers=owner)).json()["lines"] if x["slot"] == KM3)
     assert line["newDaysLeft"] == line["byStatus"]["published"] - 1
+
+
+async def test_a_word_can_have_a_drawing_an_art_picture_or_an_uploaded_photo_that_children_can_load(client, owner, family):
+    png = base64.b64encode(b"\x89PNG\r\n\x1a\n" + b"\x00" * 64).decode()
+    up = await client.post("/daily-puzzles/studio/images", json={"mime": "image/png", "data": png}, headers=owner)
+    assert up.status_code == 200, up.text
+    photo = "photo-" + up.json()["id"]
+    for picture in (photo, "rebus-horse", "kit-sun"):
+        body = {"lang": "en", "word": "zzq" + picture[-1], "category": "animal", "picture": picture}
+        made = await client.post("/daily-puzzles/studio/puzzles", json=body, headers=owner)
+        assert made.status_code == 201, made.text
+        assert made.json()["data"]["picture"] == picture
+    bad_body = {"lang": "en", "word": "zzx", "category": "animal", "picture": "../etc"}
+    bad = await client.post("/daily-puzzles/studio/puzzles", json=bad_body, headers=owner)
+    assert bad.status_code == 422
+    seen = await client.get(f"/library/images/{up.json()['id']}", headers=family)
+    assert seen.status_code == 200 and seen.headers["content-type"] == "image/png"
+    assert (await client.post("/daily-puzzles/studio/images", json={"mime": "image/png", "data": png}, headers=family)).status_code == 403

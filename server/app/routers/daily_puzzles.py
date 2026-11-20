@@ -20,6 +20,7 @@ from app.errors import AppError, Forbidden, NotFound
 from app.models.auth import Principal
 from app.models.daily_puzzle import CalendarIn, StatusIn, WordGuessIn, WordGuessPatch
 from app.repos import daily_puzzles as repo
+from app.routers.library import AudioSaved, ImageWrite, store_image
 from app.security import ownership, principal_can
 
 router = APIRouter(prefix="/daily-puzzles", tags=["daily-puzzles"], dependencies=[AUTHENTICATED])
@@ -123,6 +124,13 @@ async def studio_list(
     who = await repo.names(db, {r["createdBy"] for r in rows if r.get("createdBy")})
     out = [{**r, "issues": await _issues(db, r), "createdByName": who.get(r.get("createdBy", ""), "")} for r in rows]
     return {"puzzles": out, "total": total}
+
+
+@router.post("/studio/images")
+async def upload_image(body: ImageWrite, db: Db, p: CanWrite) -> AudioSaved:
+    """A photo from the author's computer for a word's picture. Kept with the library's photos, so children see it
+    through `/library/images/{id}`, which every signed-in player can read."""
+    return await store_image(body, db, p.subject_id)
 
 
 @router.post("/studio/puzzles", status_code=201)

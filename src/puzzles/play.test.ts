@@ -104,3 +104,14 @@ describe("the starter words in both languages", () => {
     expect(clueLine(dog, "km", means)).toBe(dog.data.clue.km);
   });
 });
+
+describe("the Studio's picture groups", () => {
+  it("names only drawings that exist, and keeps maths drawings out", async () => {
+    const { GROUP_NAMES, groupOf } = await import("./studio/PicturePicker");
+    const { ICON_ART } = await import("../rebus/icons/library");
+    for (const [group, names] of Object.entries(GROUP_NAMES)) for (const n of names.split(" ")) expect(ICON_ART[n], `${group}: ${n}`).toBeDefined();
+    expect(groupOf("cat")).toBe("animals");
+    expect(groupOf("banana")).toBe("food");
+    expect(groupOf("clock-3-00")).toBeNull();
+  });
+});

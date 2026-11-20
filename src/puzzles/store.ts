@@ -9,6 +9,7 @@
  */
 
 import { accessToken, request } from "../lib/sync";
+import { isPhoto, photoUrl } from "../library/photos";
 import { puzzleDay } from "./day";
 import { fallbackPick } from "./fallback";
 import { STARTER_PUZZLES, parsePuzzle } from "./starter";
@@ -69,9 +70,27 @@ export async function refreshDaily(force = false): Promise<void> {
       /* still good for this visit */
     }
     listeners.forEach((fn) => fn());
+    void keepPhotos(cached);
   } catch {
     /* offline: keep what we have */
   }
+}
+
+/** Fetch the uploaded photos of the days ahead into the device's cache, a few at a time, quietly. */
+async function keepPhotos(snap: DailySnapshot): Promise<void> {
+  const ahead = new Set(Object.values(snap.lines).flatMap((days) => days.map((d) => d.puzzleId)));
+  const keys = [...new Set(snap.puzzles.filter((p) => ahead.has(p.id) && isPhoto(p.data.picture)).map((p) => p.data.picture as string))];
+  let next = 0;
+  const worker = async () => {
+    while (next < keys.length) {
+      try {
+        await photoUrl(keys[next++], "library/images");
+      } catch {
+        /* the next refresh tries again */
+      }
+    }
+  };
+  await Promise.all(Array.from({ length: Math.min(3, keys.length) }, worker));
 }
 
 /** The levels that have live words, per language: what the level picker offers. */
