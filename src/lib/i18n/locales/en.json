@@ -1724,6 +1724,10 @@
       "hint": "Turn their own photos into colouring pictures. The photo is sent to Google's AI to redraw and isn't kept — only the drawing is saved.",
       "notInPlan": "Part of the AI plan."
     },
+    "review": {
+      "title": "Review mistakes",
+      "hint": "Brings back tricky questions and old topics a few days later, so they stick. A mistake is fixed after two right answers on different days."
+    },
     "cadence": {
       "hint": "Count streaks by days or weeks.",
       "aria": "Whether the streak counts days or weeks",

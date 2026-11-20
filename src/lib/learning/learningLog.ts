@@ -1,3 +1,4 @@
+import { clearAllReview, recordForReview } from "./review";
 import {
   LEARNING_SCHEMA_VERSION,
   type LearningEvent,
@@ -590,6 +591,9 @@ export const LearningLog = {
 
     writeJson(EVENTS_KEY, events);
     writeJson(PROFILE_KEY, profile);
+    // Mistakes and review dates outlive the ring, so they are folded in as
+    // each event lands. Never throws.
+    recordForReview(event);
     notify();
 
     if (sink) {
@@ -644,6 +648,7 @@ export const LearningLog = {
     profile = { schemaVersion: LEARNING_SCHEMA_VERSION, concepts: {}, skills: {} };
     writeJson(EVENTS_KEY, events);
     writeJson(PROFILE_KEY, profile);
+    clearAllReview();
     notify();
   },
 

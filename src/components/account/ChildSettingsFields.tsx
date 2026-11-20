@@ -452,6 +452,22 @@ export const ChildSettingsFields: React.FC<ChildSettingsFieldsProps> = ({
       </Row>
 
       <Row
+        icon={<UIArtIcon id="kit-repeat" className="h-6 w-6" />}
+        tint="text-emerald-500"
+        title={t("childSettings.review.title")}
+        hint={t("childSettings.review.hint")}
+      >
+        <UIToggle
+          checked={value.reviewEnabled}
+          onChange={() => {
+            playSound("pop");
+            onChange({ reviewEnabled: !value.reviewEnabled });
+          }}
+          label={t("childSettings.review.title")}
+        />
+      </Row>
+
+      <Row
         stacked
         icon={<UIArtIcon id="streak" className="h-6 w-6" />}
         tint="text-orange-500"

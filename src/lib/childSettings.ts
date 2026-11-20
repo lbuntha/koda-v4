@@ -151,6 +151,16 @@ export type ChildSettings = {
    * so an operator may retire a character without stranding anybody.
    */
   personaId: string | null;
+  /**
+   * Whether Today's plan brings back mistakes and topics due for review.
+   *
+   * On by default — the parent asked for it to be — so this breaks the "every
+   * default is today's behaviour" rule above on purpose. Only what is
+   * *offered* changes: mistakes and review dates are recorded either way
+   * (`learning/review.ts`), from facts the learning log already keeps, so
+   * switching it back on picks up where it left off.
+   */
+  reviewEnabled: boolean;
 };
 
 export const CHILD_SETTINGS_DEFAULTS: ChildSettings = {
@@ -161,6 +171,7 @@ export const CHILD_SETTINGS_DEFAULTS: ChildSettings = {
   goalCadence: "daily",
   startingPoint: "age",
   personaId: null,
+  reviewEnabled: true,
 };
 
 /** Below this a cap is not a limit, it is a locked door. */
@@ -237,6 +248,8 @@ const sanitise = (raw: Partial<ChildSettings> | null): ChildSettings => ({
   // the roster has loaded, and an id nobody recognises already falls back to
   // the default teacher when it is looked up.
   personaId: typeof raw?.personaId === "string" && raw.personaId ? raw.personaId : null,
+  // On unless a grown-up said no, like `aiHelpEnabled`.
+  reviewEnabled: raw?.reviewEnabled !== false,
 });
 
 /**

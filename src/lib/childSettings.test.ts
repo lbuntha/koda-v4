@@ -47,6 +47,7 @@ describe("a child nobody has configured", () => {
       // No teacher chosen. Resolved to the deployment's default when it is
       // looked up, so a family that never opens this screen still gets one.
       personaId: null,
+      reviewEnabled: true,
     });
   });
 
@@ -69,6 +70,7 @@ describe("setting one thing", () => {
       goalCadence: "daily",
       startingPoint: "age",
       personaId: null,
+      reviewEnabled: true,
     });
   });
 
@@ -86,6 +88,7 @@ describe("setting one thing", () => {
         goalCadence: "weekly",
         startingPoint: "age",
         personaId: null,
+        reviewEnabled: true,
       },
       { learnerId: "l_mia" },
     );
@@ -161,6 +164,7 @@ describe("a document that arrived damaged", () => {
       goalCadence: "daily",
       startingPoint: "age",
       personaId: null,
+      reviewEnabled: true,
     });
   });
 });
