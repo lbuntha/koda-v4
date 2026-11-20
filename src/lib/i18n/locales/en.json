@@ -5952,7 +5952,8 @@
     "noWords": "There are no words for this yet. Try another language or length.",
     "inOneTry": "Solved on the first try",
     "picture": "Picture clue",
-    "options": "Options"
+    "options": "Options",
+    "practiceXpDone": "You've had today's XP from {n} practice words. Keep playing for fun, or come back tomorrow for more XP!"
   },
   "puzzles": {
     "category": {

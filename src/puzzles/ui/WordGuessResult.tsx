@@ -4,7 +4,7 @@ import { ArrowRight, Copy, Flame, PartyPopper, Star } from "lucide-react";
 import { useT } from "../../lib/i18n";
 import { themeSystem } from "../../lib/themeSystem";
 import { UIButton } from "../../components/ui";
-import { liveStreak, readPlay, type GameRecord } from "../playStore";
+import { PRACTICE_XP_GAMES, liveStreak, readPlay, type GameRecord } from "../playStore";
 import type { DailyPuzzle } from "../types";
 import { MAX_GUESSES, tileLabel, tilesOf } from "../wordGuess";
 
@@ -22,12 +22,13 @@ export function shareText(puzzle: DailyPuzzle, game: GameRecord, day: string): s
   return `Koda Word Guess · ${lang} · ${day}\n${score}${game.hints ? ` · hint ${game.hints}` : ""}\n${grid}`;
 }
 
-export const WordGuessResult: React.FC<{ puzzle: DailyPuzzle; game: GameRecord; daily: boolean; day: string; xp: number; onNext(): void }> = ({
+export const WordGuessResult: React.FC<{ puzzle: DailyPuzzle; game: GameRecord; daily: boolean; day: string; xp: number; xpCapped?: boolean; onNext(): void }> = ({
   puzzle,
   game,
   daily,
   day,
   xp,
+  xpCapped = false,
   onNext,
 }) => {
   const { t } = useT();
@@ -111,6 +112,7 @@ export const WordGuessResult: React.FC<{ puzzle: DailyPuzzle; game: GameRecord; 
       {copied === "yes" && <p className="text-xs font-semibold text-muted">{t("wordGuess.copied")}</p>}
       {copied === "show" && <pre className="whitespace-pre-wrap rounded-xl bg-slate-50 p-3 text-left text-xs dark:bg-slate-900/40">{shareText(puzzle, game, day)}</pre>}
       {daily && <p className="text-xs font-semibold text-muted">{t("wordGuess.comeBack")}</p>}
+      {xpCapped && <p className="text-xs font-semibold text-muted">{t("wordGuess.practiceXpDone", { n: String(PRACTICE_XP_GAMES) })}</p>}
     </section>
   );
 };

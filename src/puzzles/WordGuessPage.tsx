@@ -18,7 +18,7 @@ import { useAudienceViewer } from "../skills/viewer";
 import { UIButton } from "../components/ui";
 import { puzzleDay } from "./day";
 import { WordGuessRecorder } from "./learning";
-import { dailyKey, liveStreak, readPlay, saveDaily, savePractice, type GameRecord } from "./playStore";
+import { dailyKey, liveStreak, practiceXpLeft, readPlay, saveDaily, savePractice, type GameRecord } from "./playStore";
 import { dailySnapshot, levelsFor, practicePuzzle, refreshDaily, subscribeDaily, todaysPuzzle } from "./store";
 import { slotKey, type DailyPuzzle, type PuzzleLang } from "./types";
 import { CategoryIcon } from "./ui/categoryIcon";
@@ -408,6 +408,7 @@ const Game: React.FC<GameProps> = ({ puzzle, daily, slot, day, keys, onKeys, onA
   }, [rowsPlayed]);
   const [revealRow, setRevealRow] = useState(-1);
   const [xp, setXp] = useState(0);
+  const [xpCapped, setXpCapped] = useState(false);
   const recorder = useRef<WordGuessRecorder | null>(null);
   if (!recorder.current) recorder.current = new WordGuessRecorder(puzzle, !daily);
 
@@ -456,7 +457,8 @@ const Game: React.FC<GameProps> = ({ puzzle, daily, slot, day, keys, onKeys, onA
     setTimeout(() => setRevealRow(-1), 120 * n + 500);
     if (daily) saveDaily(slot, day, next);
     if (over) {
-      const earned = xpFor(won, rows.length, daily);
+      const earned = daily || practiceXpLeft(day) > 0 ? xpFor(won, rows.length, daily) : 0;
+      setXpCapped(!daily && earned === 0);
       setXp(earned);
       onAwardXp?.(earned);
       recorder.current?.finish(won, rows.length, earned);
@@ -562,7 +564,7 @@ const Game: React.FC<GameProps> = ({ puzzle, daily, slot, day, keys, onKeys, onA
       {/* While playing, the keys stay pinned to the bottom of a phone screen as the board scrolls; on a wide screen they sit beside the board. */}
       <div ref={keysBox} className={`flex min-w-0 flex-col gap-3 lg:sticky lg:top-4 lg:bottom-auto ${game.over ? "" : "sticky bottom-0 z-10"}`}>
         {game.over ? (
-          <WordGuessResult puzzle={puzzle} game={game} daily={daily} day={day} xp={xp} onNext={onNext} />
+          <WordGuessResult puzzle={puzzle} game={game} daily={daily} day={day} xp={xp} xpCapped={xpCapped} onNext={onNext} />
         ) : (
           <div className={themeSystem.card("default", "p-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] shadow-lg sm:p-4 lg:shadow-none")}>
             <TileKeyboard

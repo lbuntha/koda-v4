@@ -35,13 +35,18 @@ export interface PlayStore {
   words: Array<{ id: string; day: string }>;
   /** Practice words played lately, so practice does not repeat them. */
   recent: string[];
+  /** Practice games that earned XP today: only the first PRACTICE_XP_GAMES a day do. */
+  practiceXp: { day: string; n: number };
 }
+
+/** Practice is unlimited, its XP is not: the first 10 practice words a day earn it, so XP still means learning. */
+export const PRACTICE_XP_GAMES = 10;
 
 const KEEP_DAYS = 45;
 const KEEP_WORDS = 500;
 
 const keyFor = (learnerId: string) => `koda_word_guess_v1__${learnerId}`;
-const empty = (): PlayStore => ({ daily: {}, streak: { last: null, n: 0, best: 0 }, words: [], recent: [] });
+const empty = (): PlayStore => ({ daily: {}, streak: { last: null, n: 0, best: 0 }, words: [], recent: [], practiceXp: { day: "", n: 0 } });
 
 export function readPlay(learnerId = activeLearnerId()): PlayStore {
   try {
@@ -53,6 +58,7 @@ export function readPlay(learnerId = activeLearnerId()): PlayStore {
       streak: { last: s.streak?.last ?? null, n: s.streak?.n ?? 0, best: s.streak?.best ?? 0 },
       words: Array.isArray(s.words) ? s.words : [],
       recent: Array.isArray(s.recent) ? s.recent : [],
+      practiceXp: { day: typeof s.practiceXp?.day === "string" ? s.practiceXp.day : "", n: Number(s.practiceXp?.n) || 0 },
     };
   } catch {
     return empty();
@@ -84,9 +90,16 @@ export function saveDaily(slot: string, day: string, game: GameRecord, learnerId
   return store;
 }
 
-/** A practice game ended: remember the word so practice moves on, and book it if solved. */
+/** How many more practice words earn XP today. */
+export function practiceXpLeft(day: string, learnerId = activeLearnerId()): number {
+  const p = readPlay(learnerId).practiceXp;
+  return Math.max(0, PRACTICE_XP_GAMES - (p.day === day ? p.n : 0));
+}
+
+/** A practice game ended: remember the word so practice moves on, book it if solved, and count it towards today's XP games. */
 export function savePractice(game: GameRecord, day: string, learnerId = activeLearnerId()): PlayStore {
   const store = readPlay(learnerId);
+  store.practiceXp = { day, n: (store.practiceXp.day === day ? store.practiceXp.n : 0) + 1 };
   store.recent = [game.puzzleId, ...store.recent.filter((id) => id !== game.puzzleId)].slice(0, 20);
   if (game.won && !store.words.some((w) => w.id === game.puzzleId)) store.words = [{ id: game.puzzleId, day }, ...store.words].slice(0, KEEP_WORDS);
   write(store, learnerId);

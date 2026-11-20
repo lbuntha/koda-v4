@@ -115,3 +115,16 @@ describe("the Studio's picture groups", () => {
     expect(groupOf("clock-3-00")).toBeNull();
   });
 });
+
+describe("practice XP", () => {
+  beforeEach(() => localStorage.clear());
+
+  it("only the first 10 practice words a day earn XP, and a new day starts again", async () => {
+    const { PRACTICE_XP_GAMES, practiceXpLeft } = await import("./playStore");
+    expect(practiceXpLeft("2026-11-20", "kid")).toBe(PRACTICE_XP_GAMES);
+    for (let i = 0; i < PRACTICE_XP_GAMES; i++) savePractice(won(`wg-en-${i}`), "2026-11-20", "kid");
+    expect(practiceXpLeft("2026-11-20", "kid")).toBe(0);
+    expect(practiceXpLeft("2026-11-21", "kid")).toBe(PRACTICE_XP_GAMES);
+    expect(practiceXpLeft("2026-11-20", "sibling")).toBe(PRACTICE_XP_GAMES);
+  });
+});
