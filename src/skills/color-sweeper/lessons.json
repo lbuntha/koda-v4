@@ -280,7 +280,8 @@
           "audioPrompt": "This clue says zero. Colour the tiles it touches."
         },
         "guide": {
-          "enabled": true
+          "enabled": true,
+          "startMs": 15000
         }
       },
       "difficulty": "Easy",
@@ -326,7 +327,8 @@
           "audioPrompt": "This zero is in a corner. Which tiles does it actually touch?"
         },
         "guide": {
-          "enabled": true
+          "enabled": true,
+          "startMs": 15000
         }
       },
       "difficulty": "Easy",
@@ -372,7 +374,8 @@
           "audioPrompt": "This clue counts every tile it touches. What colour are they?"
         },
         "guide": {
-          "enabled": true
+          "enabled": true,
+          "startMs": 15000
         }
       },
       "difficulty": "Easy",
@@ -420,7 +423,8 @@
           "audioPrompt": "Count what this clue already has. Does it need any more?"
         },
         "guide": {
-          "enabled": true
+          "enabled": true,
+          "startMs": 15000
         }
       },
       "difficulty": "Medium",
@@ -467,7 +471,8 @@
           "audioPrompt": "This clue still needs one more. Which tile is it?"
         },
         "guide": {
-          "enabled": true
+          "enabled": true,
+          "startMs": 15000
         }
       },
       "difficulty": "Medium",
@@ -514,7 +519,8 @@
           "audioPrompt": "How many does this clue still need, and how many spaces are left?"
         },
         "guide": {
-          "enabled": true
+          "enabled": true,
+          "startMs": 15000
         }
       },
       "difficulty": "Medium",
@@ -556,7 +562,8 @@
           "audioPrompt": "Start with the clue you can already use, then look again."
         },
         "guide": {
-          "enabled": true
+          "enabled": true,
+          "startMs": 15000
         }
       },
       "difficulty": "Medium",
@@ -599,7 +606,8 @@
           "audioPrompt": "These two clues share some tiles. Colour only what they can settle."
         },
         "guide": {
-          "enabled": true
+          "enabled": true,
+          "startMs": 15000
         }
       },
       "difficulty": "Medium",
@@ -641,7 +649,8 @@
           "audioPrompt": "Compare the two clues first, then use what you find to finish."
         },
         "guide": {
-          "enabled": true
+          "enabled": true,
+          "startMs": 15000
         }
       },
       "difficulty": "Medium",
@@ -688,7 +697,8 @@
           "audioPrompt": "Three clues in a row. Work out what each one still needs."
         },
         "guide": {
-          "enabled": true
+          "enabled": true,
+          "startMs": 15000
         }
       },
       "difficulty": "Hard",
@@ -735,7 +745,8 @@
           "audioPrompt": "Four clues this time. Start at one end."
         },
         "guide": {
-          "enabled": true
+          "enabled": true,
+          "startMs": 15000
         }
       },
       "difficulty": "Hard",
@@ -780,7 +791,8 @@
           "audioPrompt": "One clue counts orange and one counts navy. Say them both in the same colour first."
         },
         "guide": {
-          "enabled": true
+          "enabled": true,
+          "startMs": 15000
         }
       },
       "difficulty": "Hard",
@@ -822,7 +834,8 @@
           "audioPrompt": "The strip at the top counts the whole board. How many are already there?"
         },
         "guide": {
-          "enabled": true
+          "enabled": true,
+          "startMs": 15000
         }
       },
       "difficulty": "Medium",
@@ -864,7 +877,8 @@
           "audioPrompt": "This clue counts along one row. Which tiles are in it?"
         },
         "guide": {
-          "enabled": true
+          "enabled": true,
+          "startMs": 15000
         }
       },
       "difficulty": "Medium",
@@ -906,7 +920,8 @@
           "audioPrompt": "The outlined tiles are the ones this clue counts."
         },
         "guide": {
-          "enabled": true
+          "enabled": true,
+          "startMs": 15000
         }
       },
       "difficulty": "Medium",
@@ -948,7 +963,8 @@
           "audioPrompt": "These tiles sit side by side. Where can the block start?"
         },
         "guide": {
-          "enabled": true
+          "enabled": true,
+          "startMs": 15000
         }
       },
       "difficulty": "Hard",
@@ -990,7 +1006,8 @@
           "audioPrompt": "These do not all touch. Which arrangement does that rule out?"
         },
         "guide": {
-          "enabled": true
+          "enabled": true,
+          "startMs": 15000
         }
       },
       "difficulty": "Hard",
@@ -1032,7 +1049,8 @@
           "audioPrompt": "Three colours this time. One clue is not enough."
         },
         "guide": {
-          "enabled": true
+          "enabled": true,
+          "startMs": 15000
         }
       },
       "difficulty": "Medium",
@@ -1076,7 +1094,8 @@
           "audioPrompt": "These clues count different colours. Find the one nobody mentioned."
         },
         "guide": {
-          "enabled": true
+          "enabled": true,
+          "startMs": 15000
         }
       },
       "difficulty": "Hard",
@@ -1119,7 +1138,8 @@
           "audioPrompt": "Three totals, one for each colour. Take them one at a time."
         },
         "guide": {
-          "enabled": true
+          "enabled": true,
+          "startMs": 15000
         }
       },
       "difficulty": "Hard",
@@ -1163,7 +1183,8 @@
           "audioPrompt": "This board mixes clue kinds. Which one can help first?"
         },
         "guide": {
-          "enabled": true
+          "enabled": true,
+          "startMs": 15000
         }
       },
       "difficulty": "Hard",

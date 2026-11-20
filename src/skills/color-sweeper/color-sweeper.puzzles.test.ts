@@ -3,7 +3,7 @@ import { answerKey, boardKey, neighbors, positionKind, selectionKey, validateBoa
 import { deduce, type ProofStep } from "./internal/deduction";
 import { enumerateSolutions, isSolution } from "./internal/validation";
 import { generatePuzzle, type PuzzleSpec } from "./internal/puzzles";
-import { PALETTE } from "./internal/palette";
+import { PALETTE, PALETTE_THEME, SHADES } from "./internal/palette";
 import { boardLayout, motionPolicy } from "./internal/layout";
 
 /** Authored independently from the generator, using the worked examples in the plan. */
@@ -218,10 +218,22 @@ describe("layout, color identities and motion foundations", () => {
   it("has distinct permanent symbols and readable clue text on every apparatus color", () => {
     expect(new Set(Object.values(PALETTE).map(c => c.symbol)).size).toBe(3);
     expect(new Set(Object.values(PALETTE).map(c => c.letter)).size).toBe(3);
-    for (const color of Object.values(PALETTE)) {
-      const a = luminance(color.fill), b = luminance(color.ink);
-      expect((Math.max(a, b) + 0.05) / (Math.min(a, b) + 0.05)).toBeGreaterThanOrEqual(4.5);
+    for (const [theme, shades] of Object.entries(SHADES)) {
+      for (const [name, color] of Object.entries(shades)) {
+        const a = luminance(color.fill), b = luminance(color.ink);
+        expect((Math.max(a, b) + 0.05) / (Math.min(a, b) + 0.05), `${theme} ${name}`).toBeGreaterThanOrEqual(4.5);
+        const prefix = theme === "dark" ? "dark:" : "";
+        expect(PALETTE_THEME).toContain(`${prefix}[--cs-${name}:${color.fill}]`);
+        expect(PALETTE_THEME).toContain(`${prefix}[--cs-${name}-ink:${color.ink}]`);
+      }
     }
+  });
+
+  it("keeps navy apart from the page in dark mode", () => {
+    /* The dark page is about #0f172a. Light navy sat almost on it. */
+    const page = luminance("#0f172a");
+    const navy = luminance(SHADES.dark.navy.fill);
+    expect((navy + 0.05) / (page + 0.05)).toBeGreaterThanOrEqual(3);
   });
   it("removes instructional motion in practice and all movement under reduced motion", () => {
     expect(motionPolicy(false, false)).toEqual({ animateInput: true, animateHint: true, staticHintAvailable: true, blockInputUntilAnimationEnds: false });

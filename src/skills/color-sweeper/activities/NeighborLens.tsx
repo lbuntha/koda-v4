@@ -355,7 +355,7 @@ export const NeighborLens: React.FC<ActivityProps<LensParams>> = ({ params, koda
       hints={hints}
       guide={practising ? undefined : guide}
       guideMethod={sweeperGuideMethod(params)}
-      iconName="grid-3x3"
+      iconName="circleDot"
       iconTone="purple"
       tagLabels={tagLabelsFrom(koda)}
       nudge={nudge.message ?? null}
@@ -371,6 +371,7 @@ export const NeighborLens: React.FC<ActivityProps<LensParams>> = ({ params, koda
           guideTarget={guide.target >= 0 ? guide.target : undefined}
           availableWidth={question.board.size === 4 ? 380 : 320}
           selected={question.mode === "select_neighbors" ? picked : []}
+          plain={question.mode === "select_neighbors"}
           onTap={question.mode === "select_neighbors" ? toggle : undefined}
           locked={Boolean(round.feedback)}
           showBadges={badgesEnabled}

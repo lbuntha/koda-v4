@@ -3,7 +3,7 @@ import { motion } from "motion/react";
 import { SPRING, useMotionOK } from "../../kit";
 import { counted, governed, neighbors, scopeOf, type Assignment, type Board, type Clue, type Color } from "./board";
 import { BOARD_LAYOUT, MOTION_PLAN, boardLayout } from "./layout";
-import { PALETTE } from "./palette";
+import { PALETTE, PALETTE_THEME } from "./palette";
 import { colourTitle, colourWord, tw, whereTitle } from "./i18n";
 import { useT } from "../../../lib/i18n";
 
@@ -61,6 +61,14 @@ export interface BoardGridProps {
   availableWidth?: number;
   /** Announced before the grid, e.g. "Board with one clue". */
   label?: string;
+  /**
+   * Draws every tile the same plain colour, with no letters or symbols.
+   *
+   * For questions that are only about position — which tiles touch the
+   * outlined one. Orange and navy there were noise a child had to look past,
+   * with "O" and "N" in the corners that nothing had explained yet.
+   */
+  plain?: boolean;
 }
 
 /** What a clue drawn beside the board says it counts over. */
@@ -115,6 +123,7 @@ export const BoardGrid: React.FC<BoardGridProps> = ({
   showBadges = false,
   availableWidth = 320,
   label,
+  plain = false,
 }) => {
   useT();
   const motionOK = useMotionOK();
@@ -133,7 +142,7 @@ export const BoardGrid: React.FC<BoardGridProps> = ({
 
   return (
     <div
-      className={layout.scrollInside ? "max-w-full overflow-x-auto min-w-0 -mx-2 px-2" : "min-w-0"}
+      className={`${PALETTE_THEME} ${layout.scrollInside ? "max-w-full overflow-x-auto min-w-0 -mx-2 px-2" : "min-w-0"}`}
       role="group"
       aria-label={tw("grid.aria", { heading, extra: target === undefined ? "" : tw("grid.touches", { count: String(around.length) }) })}
     >
@@ -201,7 +210,7 @@ export const BoardGrid: React.FC<BoardGridProps> = ({
           const isTarget = cell === target;
           const isGuideTarget = cell === guideTarget;
           const badge = mode === "select" ? chosen.get(cell) : undefined;
-          const paint = color ? PALETTE[color] : undefined;
+          const paint = color && !plain ? PALETTE[color] : undefined;
           /* A fixed tile is the puzzle's evidence and never takes a colour. */
           const editable = mode === "select" || board.givens[cell] === null;
           const painted = mode === "paint" && board.givens[cell] === null && color !== null;
@@ -233,7 +242,13 @@ export const BoardGrid: React.FC<BoardGridProps> = ({
               className={[
                 "relative grid place-items-center rounded-xl border-2 font-black tabular-nums",
                 "focus:outline-none focus-visible:ring-2 focus-visible:ring-sky-500 focus-visible:ring-offset-2 focus-visible:ring-offset-surface",
-                paint ? "" : "border-dashed border-ink/25 bg-surface",
+                plain
+                  ? isTarget
+                    ? "border-ink bg-ink text-surface"
+                    : badge !== undefined
+                      ? "bg-violet-500/25 text-ink"
+                      : "border-ink/20 bg-surface-muted text-ink"
+                  : paint ? "" : "border-dashed border-ink/25 bg-surface",
                 isTarget ? "ring-4 ring-ink ring-offset-2 ring-offset-surface" : "",
                 isGuideTarget ? "outline outline-4 outline-offset-4 outline-sky-400" : "",
                 /*
@@ -295,7 +310,11 @@ export const BoardGrid: React.FC<BoardGridProps> = ({
                 >
                   {paint.symbol}
                 </span>
-              ) : paint ? null : (
+              ) : paint ? null : plain ? (
+                /* The tile the question is about carries a mark of its own, so
+                   it is found by shape as well as by its dark fill. */
+                isTarget ? <span aria-hidden style={{ fontSize: Math.round(layout.tile * 0.45) }}>◎</span> : null
+              ) : (
                 <span aria-hidden className="text-ink/40">?</span>
               )}
               {paint ? (

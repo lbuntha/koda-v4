@@ -88,7 +88,10 @@ describe("Color Sweeper Smart Guide behavior", () => {
         params: lesson.params as Record<string, unknown>,
         level: 1,
       });
-      act(() => vi.advanceTimersByTime(GUIDE_DEFAULTS.startMs + 100));
+      /* A lesson may give the child longer than the default — the board
+         lessons do, so the "How to play" card can be read first. */
+      const startMs = (lesson.params as { guide?: { startMs?: number } }).guide?.startMs ?? GUIDE_DEFAULTS.startMs;
+      act(() => vi.advanceTimersByTime(startMs + 100));
       expect(automatic.text()).toContain("Koda is helping");
       expect(automatic.koda.only("learning.supportUsed").some((call) => call.args[0] === "walkthrough")).toBe(true);
       automatic.unmount();

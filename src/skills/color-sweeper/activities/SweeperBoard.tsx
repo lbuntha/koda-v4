@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useMemo, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type { ActivityProps, PrintedQuestion } from "../../types";
 import { SkillRound, composeHints, isPractice, modeAt, playCopy, useSkillRound, type RoundQuestion } from "../../kit";
 import { scopeOf, type Assignment, type Board, type Color } from "../internal/board";
@@ -6,7 +6,8 @@ import { isSolution } from "../internal/validation";
 import { deduce } from "../internal/deduction";
 import { clueName } from "../internal/reasons";
 import { BoardGrid, tileLabel } from "../internal/BoardGrid";
-import { PALETTE } from "../internal/palette";
+import { PALETTE, PALETTE_THEME } from "../internal/palette";
+import { RuleCard } from "../internal/RuleCard";
 import { colourTitle, colourWord, tw, whereLower } from "../internal/i18n";
 import { useT } from "../../../lib/i18n";
 import { BOARD_MODES, generatePuzzle, type BoardMode, type PatternKind } from "../internal/puzzles";
@@ -301,12 +302,20 @@ export const SweeperBoard: React.FC<ActivityProps<SweeperParams>> = ({ params, k
   );
   const [history, setHistory] = useState<Assignment[]>([]);
   const [brush, setBrush] = useState<Brush>(() => question?.board.palette[0] ?? "orange");
+  /* Open for the first board of a round. On a phone the card pushes the board
+     down, so from the second board on it folds to a "How to play" button. */
+  const [ruleOpen, setRuleOpen] = useState(true);
+  /* By id, not by count: StrictMode runs the effect twice on mount, and a
+     counter folded the card on the very first board. */
+  const firstBoard = useRef<string | null>(null);
 
   useEffect(() => {
     if (!question) return;
     setHistory([]);
     setBrush(question.board.palette[0]);
     clearNudge();
+    firstBoard.current ??= question.id;
+    if (question.id !== firstBoard.current) setRuleOpen(false);
   }, [question, clearNudge]);
 
   const assignment: Assignment = question
@@ -458,6 +467,12 @@ export const SweeperBoard: React.FC<ActivityProps<SweeperParams>> = ({ params, k
       }}
     >
       <div className="flex flex-col items-center gap-4">
+        <RuleCard
+          board={board}
+          lessonLine={practising ? undefined : copy.audioPrompt}
+          open={ruleOpen}
+          onToggle={() => setRuleOpen((o) => !o)}
+        />
         <BoardGrid
           board={board}
           mode="paint"
@@ -469,7 +484,7 @@ export const SweeperBoard: React.FC<ActivityProps<SweeperParams>> = ({ params, k
           label={tw("grid.toColour")}
         />
 
-        <div className="flex flex-wrap items-center justify-center gap-2">
+        <div className={`flex flex-wrap items-center justify-center gap-2 ${PALETTE_THEME}`}>
           {board.palette.map((c) => brushButton(c, colourTitle(c), PALETTE[c].symbol))}
           {brushButton("erase", tw("board.erase"), "⌫")}
         </div>

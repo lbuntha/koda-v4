@@ -209,5 +209,15 @@
     "wColor": "{name} is about how many tiles are {colour} somewhere on the board.",
     "wDiag": "{name} counts only the tiles beside it, not the corners.",
     "wNear": "{name} counts the tiles nearest to it."
+  },
+  "rule": {
+    "title": "How to play",
+    "show": "How to play",
+    "hide": "Hide",
+    "text": "A number counts the tiles touching it, corners too, that are the same colour as its own tile.",
+    "example": "This 2 touches two {colour} tiles.",
+    "other": "A small mark beside a number means it counts that colour instead.",
+    "chips": "A clue above the board counts the row, column or area it names.",
+    "lesson": "This lesson"
   }
 }
