@@ -112,12 +112,15 @@ export const addDays = (day: string, n: number): string => {
 
 /* ---------- the rules ---------- */
 
+/* Games where a wrong try is how you play, not a slip to fix later. */
+const NOT_REVIEWED = new Set(["koda-word-guess"]);
+
 /**
  * Admin previews and a skill without a lesson are not a child's practice.
  * Neither is anything with no concept: the store is keyed by it.
  */
 const counts = (e: LearningEvent): boolean =>
-  e.entry !== "preview" && Boolean(e.lessonId) && Boolean(e.conceptKey) && Boolean(e.localDay);
+  e.entry !== "preview" && !NOT_REVIEWED.has(e.skillId) && Boolean(e.lessonId) && Boolean(e.conceptKey) && Boolean(e.localDay);
 
 const keyOf = (e: LearningEvent): string => `${e.skillId}/${e.lessonId}`;
 

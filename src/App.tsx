@@ -108,6 +108,8 @@ import {
   NotificationsPage,
   RebusPage,
   RebusStudio,
+  PuzzleStudio,
+  WordGuessPage,
   RolesPage,
   SkillManagerPage,
   SubjectsPage,
@@ -128,6 +130,8 @@ export default function App() {
   const [traceDeep, setTraceDeep] = useState(false);
   /** Rebus Rush is open on the Think shelf, and whether a round is being played in it. */
   const [rebusOpen, setRebusOpen] = useState(false);
+  /* Word Guess sits on the same Think shelf as Rebus and opens the same way. */
+  const [wordGuessOpen, setWordGuessOpen] = useState(false);
   const [rebusDeep, setRebusDeep] = useState(false);
   // An invitation link to a Rebus Rush room: a guest sees the join screen before sign-in, a signed-in player is taken to it.
   const [roomCode, setRoomCode] = useState<string | null>(roomCodeFromUrl);
@@ -277,6 +281,8 @@ export default function App() {
     void listSvgAssets().catch(() => undefined);
     // The published Rebus Rush puzzles, kept on the device so the game plays offline. Its own small chunk.
     void import("./rebus/bankStore").then((m) => m.refreshBank()).catch(() => undefined);
+    // The next 30 days of Word Guess, kept on the device so the daily word plays offline.
+    void import("./puzzles/store").then((m) => m.refreshDaily()).catch(() => undefined);
     // What this family's plan covers. Read here, beside the switchboard, so a
     // screen never has to fetch it before it can decide what to draw.
     void Billing.refresh();
@@ -302,6 +308,7 @@ export default function App() {
     | "assets"
     | "library-studio"
     | "rebus-studio"
+    | "puzzle-studio"
     | "trace-studio"
     | "users"
     | "roles"
@@ -379,6 +386,7 @@ export default function App() {
     if (activeTab === "assets" && !canEditArt) setActiveTab("home");
     if (activeTab === "library-studio" && !canEditArt) setActiveTab("home");
     if (activeTab === "rebus-studio" && !canEditArt) setActiveTab("home");
+    if (activeTab === "puzzle-studio" && !canEditArt) setActiveTab("home");
     if (activeTab === "translations" && !canRunContent) setActiveTab("home");
     if (activeTab === "subjects" && !canRunContent) setActiveTab("home");
     if (activeTab === "trace-studio" && !canTrace) setActiveTab("home");
@@ -846,7 +854,7 @@ export default function App() {
       // Only a running round wants the full width; the picker is a normal page.
       contained={!inLesson}
       hideMobileChrome={inBooks && libraryReaderOpen}
-      hideMobileTabBar={(inBooks && libraryBookOpen) || tracePlayingHere || (activeTab === "game" && !inRound && learnCategory === "lessons" && rebusOpen && rebusDeep && !outsideHours && !dayDone)}
+      hideMobileTabBar={(inBooks && libraryBookOpen) || tracePlayingHere || (activeTab === "game" && !inRound && learnCategory === "lessons" && ((rebusOpen && rebusDeep) || wordGuessOpen) && !outsideHours && !dayDone)}
       /* Two shells, each hiding itself at the width that is not its own — the
          rail from `rail:` up, the toolbar and tab bar below it. A round stands
          both of them down: what a rail shows a five-year-old counting crowns is
@@ -904,8 +912,8 @@ export default function App() {
               pending={switchingCategory}
               immersed={
                 learnCategory === "lessons"
-                  ? rebusOpen && !outsideHours && !dayDone
-                    ? rebusDeep
+                  ? (rebusOpen || wordGuessOpen) && !outsideHours && !dayDone
+                    ? rebusOpen ? rebusDeep : true
                     : Boolean(selectedLearnSkillId) && !outsideHours && !dayDone
                   : learnCategory === "books"
                     ? libraryBookOpen
@@ -943,6 +951,11 @@ export default function App() {
                 /* Stands in for the picker rather than sitting beside it: a path a
                    child can still tap is a path they will keep tapping. */
                 <DayDoneScreen cap={sessionCap} onGoHome={() => setActiveTab("home")} />
+              ) : wordGuessOpen ? (
+                <WordGuessPage
+                  onAwardXp={(earnedXp) => setUserProgress((prev) => ({ ...prev, xp: prev.xp + earnedXp }))}
+                  onExit={() => setWordGuessOpen(false)}
+                />
               ) : rebusOpen ? (
                 <RebusPage
                   joinCode={roomCode}
@@ -969,6 +982,7 @@ export default function App() {
                   onSelectSkill={setSelectedLearnSkillId}
                   onStartLesson={startLesson}
                   onOpenRebus={() => setRebusOpen(true)}
+                  onOpenWordGuess={() => setWordGuessOpen(true)}
                 />
               )}
             </LearnHub>
@@ -1016,6 +1030,13 @@ export default function App() {
                 setRebusOpen(true);
                 setActiveTab("game");
               }}
+              onOpenWordGuess={() => {
+                setInRound(false);
+                setLearnCategory("lessons");
+                setRebusOpen(false);
+                setWordGuessOpen(true);
+                setActiveTab("game");
+              }}
             />
           )}
 
@@ -1058,6 +1079,13 @@ export default function App() {
           {activeTab === "rebus-studio" && canEditArt && (
             <Deferred label="Loading Rebus Studio">
               <RebusStudio />
+            </Deferred>
+          )}
+
+          {/* TAB: PUZZLE STUDIO — add, review and schedule the daily Word Guess words (content:write) */}
+          {activeTab === "puzzle-studio" && canEditArt && (
+            <Deferred label="Loading Puzzle Studio">
+              <PuzzleStudio />
             </Deferred>
           )}
 

@@ -13,6 +13,8 @@ export type TabId =
   | "library-studio"
   // Where Rebus Rush puzzles are reviewed, written and published. content:write, like Art.
   | "rebus-studio"
+  // Where the daily Word Guess words are added, reviewed and scheduled. content:write, like Rebus Studio.
+  | "puzzle-studio"
   // Where trace items are made: strokes, steps, tests. content:write, like Library Studio.
   | "trace-studio"
   | "profile"

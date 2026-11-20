@@ -16,7 +16,7 @@ import { dueMistakes, dueTopics, type ReviewStore } from "./learning/review";
  * step done from anywhere in the app — the path, a subject page — ticks here.
  */
 
-export type PlanStepKind = "review" | "fix" | "new" | "continue" | "read" | "write";
+export type PlanStepKind = "review" | "fix" | "new" | "continue" | "read" | "write" | "puzzle";
 
 export interface PlanStep {
   kind: PlanStepKind;
@@ -58,7 +58,12 @@ export interface PlanInput {
   write?: { collectionId: string; title: string } | null;
   /** Whole days since the child last finished a lesson; null if never. */
   daysAway?: number | null;
+  /** End the day with the daily Word Guess. */
+  puzzle?: boolean;
 }
+
+/** Word Guess, as its learning-log skill id (`src/puzzles/learning.ts`). */
+const WORD_GUESS = "koda-word-guess";
 
 export function buildPlan(input: PlanInput): TodayPlan {
   const steps: PlanStep[] = [];
@@ -87,6 +92,8 @@ export function buildPlan(input: PlanInput): TodayPlan {
   if (input.newRef) addLesson(input.newIsResume ? "continue" : "new", input.newRef);
   if (input.read) steps.push({ kind: "read", bookId: input.read.bookId, title: input.read.title });
   if (input.write) steps.push({ kind: "write", collectionId: input.write.collectionId, title: input.write.title });
+  /* Last on purpose: the fun one is the reward for the rest. */
+  if (input.puzzle) steps.push({ kind: "puzzle" });
 
   return {
     day: input.day,
@@ -104,6 +111,8 @@ export function stepDone(step: PlanStep, plan: TodayPlan, events: readonly Learn
     switch (step.kind) {
       case "read":
         return e.type === "reading_finished" && Boolean(step.bookId) && e.lessonId.startsWith(`${step.bookId}@`);
+      case "puzzle":
+        return e.type === "lesson_completed" && e.skillId === WORD_GUESS;
       case "write":
         /* A trace item's completion does not say which collection it came
            from, so any finished writing counts — which is what the step asks. */
@@ -137,7 +146,20 @@ const readPlan = (learnerId: string): TodayPlan | null => {
  */
 export function planFor(learnerId: string, input: PlanInput): TodayPlan {
   const stored = readPlan(learnerId);
-  if (stored && stored.day === input.day && stored.reviewOn === input.reviewOn && stored.steps.length) return stored;
+  if (stored && stored.day === input.day && stored.reviewOn === input.reviewOn && stored.steps.length) {
+    /* A plan made before the puzzle step existed (or before the game was on)
+       gains it at the end, keeping its start time so the ticks it has stay. */
+    if (input.puzzle && !stored.steps.some((s) => s.kind === "puzzle")) {
+      const grown = { ...stored, steps: [...stored.steps, { kind: "puzzle" as const }] };
+      try {
+        localStorage.setItem(keyFor(learnerId), JSON.stringify(grown));
+      } catch {
+        /* fine for this visit */
+      }
+      return grown;
+    }
+    return stored;
+  }
   const plan = buildPlan(input);
   if (plan.steps.length) {
     try {

@@ -21,6 +21,7 @@ const KIND_TONE: Record<PlanStepKind, string> = {
   continue: "bg-violet-100 text-violet-700 dark:bg-violet-950 dark:text-violet-300",
   read: "bg-emerald-100 text-emerald-700 dark:bg-emerald-950 dark:text-emerald-300",
   write: "bg-indigo-100 text-indigo-700 dark:bg-indigo-950 dark:text-indigo-300",
+  puzzle: "bg-pink-100 text-pink-700 dark:bg-pink-950 dark:text-pink-300",
 };
 
 export interface TodayPlanCardProps {
@@ -68,6 +69,7 @@ export const TodayPlanCard: React.FC<TodayPlanCardProps> = ({ plan, done, lesson
 
   const labelOf = (step: PlanStep): { title: string; subject: string } => {
     if (step.ref) return lessonLabel(step.ref) ?? { title: step.ref, subject: "" };
+    if (step.kind === "puzzle") return { title: t("wordGuess.title"), subject: t("todayPlan.puzzleSubject") };
     return { title: step.title ?? "", subject: t(step.kind === "read" ? "learnHub.books" : "learnHub.trace") };
   };
 
@@ -111,7 +113,7 @@ export const TodayPlanCard: React.FC<TodayPlanCardProps> = ({ plan, done, lesson
           const { title, subject } = labelOf(step);
           const isNext = i === next;
           return (
-            <li key={`${step.kind}-${step.ref ?? step.bookId ?? step.collectionId}`}>
+            <li key={`${step.kind}-${step.ref ?? step.bookId ?? step.collectionId ?? ""}`}>
               <button
                 type="button"
                 onClick={() => onStart(step)}

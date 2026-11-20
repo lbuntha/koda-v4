@@ -40,6 +40,8 @@ export const SkillManagerPage = lazy(() =>
 export const LegalPage = lazy(() => import("./components/legal/LegalPage").then((m) => ({ default: m.LegalPage })));
 export const GuestRoomScreen = lazy(() => import("./rebus/group/GuestRoomScreen").then((m) => ({ default: m.GuestRoomScreen })));
 export const RebusPage = lazy(() => import("./rebus/RebusPage").then((m) => ({ default: m.RebusPage })));
+export const WordGuessPage = lazy(() => import("./puzzles/WordGuessPage").then((m) => ({ default: m.WordGuessPage })));
+export const PuzzleStudio = lazy(() => import("./puzzles/studio/PuzzleStudio").then((m) => ({ default: m.PuzzleStudio })));
 export const RebusStudio = lazy(() => import("./rebus/studio/RebusStudio").then((m) => ({ default: m.RebusStudio })));
 export const TraceStudio = lazy(() => import("./trace/studio/TraceStudio").then((m) => ({ default: m.TraceStudio })));
 export const LibraryStudio = lazy(() => import("./library/studio/LibraryStudio").then((m) => ({ default: m.LibraryStudio })));

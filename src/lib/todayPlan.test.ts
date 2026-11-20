@@ -100,6 +100,20 @@ describe("one plan per day", () => {
     expect(tomorrow.steps[0].ref).toBe("addition/something-else");
   });
 
+  it("adds the puzzle step last, ticks it on any Word Guess game, and grows a plan made before it", () => {
+    const plain = planFor("kid", input());
+    expect(plain.steps.some((s) => s.kind === "puzzle")).toBe(false);
+    const grown = planFor("kid", input({ puzzle: true }));
+    expect(grown.steps.at(-1)).toEqual({ kind: "puzzle" });
+    expect(grown.createdAt).toBe(plain.createdAt);
+    expect(grown.steps.slice(0, -1)).toEqual(plain.steps);
+    const puzzle = grown.steps.at(-1)!;
+    const done = { id: "e", ts: "2026-11-20T03:00:00Z", sessionId: "s", learnerId: "kid", seq: 1, tzOffsetMinutes: 420, localDay: "2026-11-20", activityId: "a", conceptKey: "c", type: "lesson_completed", skillId: "koda-word-guess", lessonId: "word-guess:en:4" } as LearningEvent;
+    expect(stepDone(puzzle, grown, [done], "kid")).toBe(true);
+    expect(stepDone(puzzle, grown, [{ ...done, skillId: "koda-rebus" }], "kid")).toBe(false);
+    expect(buildPlan(input({ puzzle: true })).steps.map((s) => s.kind)).toEqual(["review", "fix", "fix", "new", "read", "write", "puzzle"]);
+  });
+
   it("does not keep an empty plan", () => {
     planFor("kid", input({ reviewOn: false, newRef: null, read: null, write: null }));
     expect(planFor("kid", input({ reviewOn: false })).steps.length).toBe(3);

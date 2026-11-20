@@ -13,6 +13,7 @@ import { subjectForSkill, useSubjects } from "../lib/subjects";
 import { refreshSystem } from "../lib/sync/system";
 import { useT } from "../lib/i18n";
 import { RebusEntry } from "../rebus/ui/RebusEntry";
+import { WordGuessEntry } from "../puzzles/ui/WordGuessEntry";
 import { useSystem } from "../lib/sync/useSystem";
 import { StarterPicks } from "./learn/StarterPicks";
 
@@ -24,6 +25,8 @@ export interface SkillCatalogPageProps {
   onStartLesson?(levelNumber: number): void;
   /** Opens Rebus Rush, the picture-puzzle game that sits on this shelf. */
   onOpenRebus?(): void;
+  /** Opens Word Guess, the daily word puzzle beside it. */
+  onOpenWordGuess?(): void;
   /** Shown inside Learn, which carries the page's title: keep only the admin badge. */
   embedded?: boolean;
 }
@@ -58,6 +61,7 @@ export const SkillCatalogPage: React.FC<SkillCatalogPageProps> = ({
   onSelectSkill,
   onStartLesson,
   onOpenRebus,
+  onOpenWordGuess,
   embedded = false,
 }) => {
   const { skills, viewer } = useSkillCatalog(completedLevels);
@@ -278,6 +282,7 @@ export const SkillCatalogPage: React.FC<SkillCatalogPageProps> = ({
         />
       )}
 
+      {onOpenWordGuess && <WordGuessEntry onOpen={onOpenWordGuess} />}
       {onOpenRebus && system.allows("rebus.enabled") && <RebusEntry onOpen={onOpenRebus} />}
 
       {showSearch && (

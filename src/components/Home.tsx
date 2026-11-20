@@ -57,6 +57,8 @@ interface HomeProps {
   onOpenCollection?(collectionId: string): void;
   /** A "New on Koda" Rebus release: open the game. */
   onOpenRebus?(): void;
+  /** Today's plan's last step: the daily Word Guess. */
+  onOpenWordGuess?(): void;
 }
 
 /** A Read or Write pick's reason, in the Today band's colours and words. */
@@ -390,6 +392,7 @@ export const Home: React.FC<HomeProps> = ({
   onOpenBook,
   onOpenCollection,
   onOpenRebus,
+  onOpenWordGuess,
 }) => {
   const session = useSession();
   const { can } = usePermissions();
@@ -701,13 +704,15 @@ export const Home: React.FC<HomeProps> = ({
         write: todayPicks.write
           ? { collectionId: todayPicks.write.collection.id, title: todayPicks.write.collection.title }
           : null,
+        puzzle: Boolean(onOpenWordGuess),
       });
   const planEvents = plan ? LearningLog.all({ since: plan.createdAt }) : [];
   const planDone = plan ? plan.steps.map((step) => stepDone(step, plan, planEvents, planLearner)) : [];
   const startStep = (step: PlanStep) => {
     if (step.ref) return start(step.ref);
     playSound("pop");
-    if (step.bookId) onOpenBook?.(step.bookId);
+    if (step.kind === "puzzle") onOpenWordGuess?.();
+    else if (step.bookId) onOpenBook?.(step.bookId);
     else if (step.collectionId) onOpenCollection?.(step.collectionId);
   };
   const planCard =

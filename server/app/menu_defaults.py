@@ -51,6 +51,10 @@ DEFAULT_MENU: list[dict] = [
     # and the Library Studio.
     {"itemId": "rebus-studio", "label": "Rebus Studio", "icon": "art:menu-library-studio",
      "requires": "content:write", "order": 44},
+    # Where the daily Word Guess words are added, reviewed and scheduled. Same gate
+    # as Rebus Studio: a Content creator (a teacher) drafts, the owner publishes.
+    {"itemId": "puzzle-studio", "label": "Puzzle Studio", "icon": "art:menu-library-studio",
+     "requires": "content:write", "order": 44},
     {"itemId": "users", "label": "Users", "icon": "art:menu-users", "badge": "Manage",
      "requires": "user:manage", "order": 45},
     {"itemId": "roles", "label": "Roles", "icon": "art:menu-roles", "badge": "Access",
@@ -104,6 +108,7 @@ LEGACY_ICONS: dict[str, str] = {
     "assets": "shapes",
     "library-studio": "pen",
     "rebus-studio": "pen",
+    "puzzle-studio": "pen",
     "trace-studio": "pencil",
     "users": "users",
     "roles": "shield",
