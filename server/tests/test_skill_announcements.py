@@ -293,3 +293,41 @@ def test_new_content_is_emailed_unless_a_parent_turned_it_off():
 
     assert email_notify.wanted_by("learn.skill_published", None)
     assert not email_notify.wanted_by("learn.skill_published", {"learn.skill_published": False})
+
+
+# --- only families with a child the item is for -------------------------------
+
+
+async def add_child(db, family_id: str, birth_year: int | None):
+    from app.repos import learners as learners_repo
+
+    await learners_repo.create(db, family_id, "Kid", birth_year)
+
+
+async def test_an_age_ranged_skill_skips_a_family_whose_children_are_outside_it(db, family, seeded):
+    await add_child(db, family["familyId"], 2026 - 6)
+    await db.skill_registry.insert_one(
+        {"id": "algebra", "title": "Algebra", "status": "published", "deletedAt": None,
+         "publishedAt": datetime(2026, 8, 18, 6, 0, tzinfo=UTC), "audience": {"ages": [10, 14]}}
+    )
+    await db.library_books.insert_one(
+        {"id": "market", "deletedAt": None, "publishedAt": datetime(2026, 8, 18, 6, 0, tzinfo=UTC),
+         "published": {"title": "The Market", "ages": [5, 7]}}
+    )
+
+    report = await task_service.skill_announcements(db, at=MORNING_UTC)
+
+    assert report["announcements"] == 1
+    assert ["The Market" in row["body"] for row in await told(db)] == [True]
+    # Not claimed, so a matching child added later still hears about it.
+    await add_child(db, family["familyId"], 2026 - 12)
+    later = await task_service.skill_announcements(db, at=MORNING_UTC + timedelta(hours=1))
+    assert later["announcements"] == 1
+
+
+def test_who_an_age_range_reaches():
+    assert task_service._for_family(None, [])
+    assert task_service._for_family([5, 7], [6])
+    assert task_service._for_family([5, 7], [12, None])
+    assert not task_service._for_family([5, 7], [12])
+    assert not task_service._for_family([5, 7], [])

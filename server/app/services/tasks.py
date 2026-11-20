@@ -448,22 +448,53 @@ async def _recently_published(db: AsyncIOMotorDatabase, since: datetime) -> list
         {"status": "published", "deletedAt": None, "isEnabled": {"$ne": False}, "publishedAt": {"$gte": since}}
     ):
         if row.get("id"):
-            items.append({"key": row["id"], "name": row.get("title") or row["id"], "at": row["publishedAt"]})
+            items.append(
+                {
+                    "key": row["id"],
+                    "name": row.get("title") or row["id"],
+                    "at": row["publishedAt"],
+                    "ages": (row.get("audience") or {}).get("ages"),
+                }
+            )
     async for row in db.library_books.find(
         {"deletedAt": None, "published": {"$ne": None}, "publishedAt": {"$gte": since}},
-        {"id": 1, "publishedAt": 1, "published.title": 1},
+        {"id": 1, "publishedAt": 1, "published.title": 1, "published.ages": 1},
     ):
-        title = (row.get("published") or {}).get("title")
-        if row.get("id") and title:
-            items.append({"key": f"book:{row['id']}", "name": title, "at": row["publishedAt"]})
+        book = row.get("published") or {}
+        if row.get("id") and book.get("title"):
+            items.append(
+                {"key": f"book:{row['id']}", "name": book["title"], "at": row["publishedAt"], "ages": book.get("ages")}
+            )
     async for row in db.rebus_releases.find({"rolledBack": False, "at": {"$gte": since}}):
         count = len(row.get("puzzleIds") or [])
         if count:
             # Language-neutral on purpose: the name sits inside both the
             # English and the Khmer sentence.
-            items.append({"key": f"rebus:{row['number']}", "name": f"Rebus Rush (+{count})", "at": row["at"]})
+            # No ages: a release spans every grade the game has.
+            items.append(
+                {"key": f"rebus:{row['number']}", "name": f"Rebus Rush (+{count})", "at": row["at"], "ages": None}
+            )
     items.sort(key=lambda item: item["at"])
     return items
+
+
+def _for_family(ages: Any, children: list[int | None]) -> bool:
+    """Whether a family has a child this item is for.
+
+    No age range on the item means everyone. A child with no birth year could
+    be any age, so they count as a match rather than never hearing about
+    anything. A family with no children is told only about items for everyone.
+    """
+    if not (isinstance(ages, list) and len(ages) == 2):
+        return True
+    return any(age is None or ages[0] <= age <= ages[1] for age in children)
+
+
+async def _children_ages(db: AsyncIOMotorDatabase, family_id: str, year: int) -> list[int | None]:
+    return [
+        year - int(row["birthYear"]) if row.get("birthYear") else None
+        for row in await learners_repo.for_family(db, family_id)
+    ]
 
 
 async def skill_announcements(
@@ -558,9 +589,12 @@ async def skill_announcements(
         if not preview and not awake:
             continue
 
+        children = await _children_ages(db, family_id, at.year)
         for item in published:
             skill_id = item["key"]
             name = item["name"]
+            if not _for_family(item["ages"], children):
+                continue
 
             already = await push_runs.was_claimed(
                 db, kind=SKILL_PUBLISHED, recipient_id=family_id, date_key=skill_id
