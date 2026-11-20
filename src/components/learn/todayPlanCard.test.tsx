@@ -1,6 +1,6 @@
 import { fireEvent, render, screen } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
-import { TodayPlanCard } from "./TodayPlanCard";
+import { TodayPlanCard, planMessage } from "./TodayPlanCard";
 import type { TodayPlan } from "../../lib/todayPlan";
 
 const plan: TodayPlan = {
@@ -32,5 +32,24 @@ describe("Today's plan card", () => {
     rerender(<TodayPlanCard plan={plan} done={[true, true, true]} lessonLabel={label} onStart={() => {}} />);
     expect(screen.queryByRole("button", { name: /Start today|Keep going/ })).toBeNull();
     expect(screen.getByText(/All done for today/)).toBeTruthy();
+  });
+
+  it("welcomes a child back after a break", () => {
+    render(<TodayPlanCard plan={{ ...plan, welcomeBack: true }} done={[false, false, false]} lessonLabel={label} onStart={() => {}} />);
+    expect(screen.getByText(/Welcome back!/)).toBeTruthy();
+  });
+
+  it("picks one cheer line: welcome back, then mistakes waiting, then the streak", () => {
+    const daily = { count: 4, cadence: "daily" as const };
+    expect(planMessage({ ...plan, welcomeBack: true }, [false, false, false], daily)?.key).toBe("todayPlan.welcomeBack");
+    expect(planMessage(plan, [false, false, false], daily)).toEqual({ key: "todayPlan.cheer.oneMistake" });
+    expect(planMessage(plan, [false, true, false], daily)).toEqual({ key: "todayPlan.cheer.streak", values: { n: "4" } });
+    expect(planMessage(plan, [false, true, false], { count: 4, cadence: "weekly" })).toBeNull();
+    expect(planMessage(plan, [true, true, true], daily)).toEqual({ key: "todayPlan.cheer.doneStreak", values: { n: "4" } });
+  });
+
+  it("shows the line on the card", () => {
+    render(<TodayPlanCard plan={plan} done={[true, false, false]} lessonLabel={label} onStart={() => {}} streak={{ count: 3, cadence: "daily" }} />);
+    expect(screen.getByText("1 mistake is waiting to be fixed. You can do it!")).toBeTruthy();
   });
 });

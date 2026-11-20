@@ -34,10 +34,14 @@ export interface TodayPlan {
   createdAt: string;
   /** Whether review steps were allowed when it was built. */
   reviewOn: boolean;
+  /** Back after a break: the card says hello and the plan starts gently. */
+  welcomeBack?: boolean;
   steps: PlanStep[];
 }
 
 export const MAX_FIX_STEPS = 2;
+/** Days away after which the plan welcomes a child back and eases in. */
+export const WELCOME_BACK_DAYS = 3;
 
 export interface PlanInput {
   day: string;
@@ -52,11 +56,14 @@ export interface PlanInput {
   newIsResume?: boolean;
   read?: { bookId: string; title: string } | null;
   write?: { collectionId: string; title: string } | null;
+  /** Whole days since the child last finished a lesson; null if never. */
+  daysAway?: number | null;
 }
 
 export function buildPlan(input: PlanInput): TodayPlan {
   const steps: PlanStep[] = [];
   const used = new Set<string>();
+  const welcomeBack = (input.daysAway ?? 0) >= WELCOME_BACK_DAYS;
   const addLesson = (kind: PlanStepKind, ref: string) => {
     if (used.has(ref) || !input.canStart(ref)) return false;
     used.add(ref);
@@ -68,9 +75,12 @@ export function buildPlan(input: PlanInput): TodayPlan {
     for (const topic of dueTopics(input.store, input.day)) {
       if (addLesson("review", `${topic.skillId}/${topic.lessonId}`)) break;
     }
+    /* After a break, one mistake rather than two: the first day back should
+       feel like a warm-up, not a bill. The rest wait for the next days. */
+    const maxFixes = welcomeBack ? 1 : MAX_FIX_STEPS;
     let fixes = 0;
     for (const mistake of dueMistakes(input.store, input.day)) {
-      if (fixes >= MAX_FIX_STEPS) break;
+      if (fixes >= maxFixes) break;
       if (addLesson("fix", mistake.key)) fixes += 1;
     }
   }
@@ -78,7 +88,13 @@ export function buildPlan(input: PlanInput): TodayPlan {
   if (input.read) steps.push({ kind: "read", bookId: input.read.bookId, title: input.read.title });
   if (input.write) steps.push({ kind: "write", collectionId: input.write.collectionId, title: input.write.title });
 
-  return { day: input.day, createdAt: input.now.toISOString(), reviewOn: input.reviewOn, steps };
+  return {
+    day: input.day,
+    createdAt: input.now.toISOString(),
+    reviewOn: input.reviewOn,
+    ...(welcomeBack ? { welcomeBack: true } : {}),
+    steps,
+  };
 }
 
 /** Whether the log shows this step done since the plan was made. */

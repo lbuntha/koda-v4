@@ -5856,6 +5856,13 @@
       "continue": "Carry on",
       "read": "Read",
       "write": "Write"
+    },
+    "welcomeBack": "Welcome back! We'll start with an easy one.",
+    "cheer": {
+      "oneMistake": "1 mistake is waiting to be fixed. You can do it!",
+      "mistakes": "{n} mistakes are waiting to be fixed. You can do it!",
+      "streak": "{n} days in a row! Keep it going today.",
+      "doneStreak": "That's {n} days in a row. See you tomorrow!"
     }
   },
   "reviewReport": {

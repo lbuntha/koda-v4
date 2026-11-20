@@ -410,6 +410,7 @@ export const Home: React.FC<HomeProps> = ({
   /* Today's plan ticks itself off from the learning log, and drops its review
      steps when a parent flips the switch, so both are listened to. */
   const [, refreshPlan] = React.useReducer((n: number) => n + 1, 0);
+  const planStreak = useStreak(userProgress);
   React.useEffect(() => {
     const offLog = LearningLog.subscribe(refreshPlan);
     const offSettings = ChildSettingsAPI.subscribe(refreshPlan);
@@ -665,6 +666,18 @@ export const Home: React.FC<HomeProps> = ({
    * book and some writing (`lib/todayPlan.ts`). The learner's, not a parent's.
    */
   const planLearner = activeLearnerId();
+  /** Whole days since this learner last finished something; null if never. */
+  const daysSinceLastLesson = (learner: string): number | null => {
+    const today = localDayOf(new Date());
+    let last: string | null = null;
+    for (const e of LearningLog.all()) {
+      if (e.learnerId === learner && e.type === "lesson_completed" && e.entry !== "preview" && e.localDay < today) {
+        if (!last || e.localDay > last) last = e.localDay;
+      }
+    }
+    if (!last) return null;
+    return Math.round((Date.parse(`${today}T00:00:00Z`) - Date.parse(`${last}T00:00:00Z`)) / 86_400_000);
+  };
   const startable = (ref: string): boolean => {
     const lesson = byRef.get(ref);
     return Boolean(
@@ -683,6 +696,7 @@ export const Home: React.FC<HomeProps> = ({
           ? `${interrupted.lesson.skillId}/${interrupted.lesson.id}`
           : leadPick?.lesson.ref ?? null,
         newIsResume: Boolean(interrupted),
+        daysAway: daysSinceLastLesson(planLearner),
         read: todayPicks.read ? { bookId: todayPicks.read.book.id, title: todayPicks.read.book.title } : null,
         write: todayPicks.write
           ? { collectionId: todayPicks.write.collection.id, title: todayPicks.write.collection.title }
@@ -702,6 +716,7 @@ export const Home: React.FC<HomeProps> = ({
         plan={plan}
         done={planDone}
         onStart={startStep}
+        streak={{ count: planStreak.days, cadence: planStreak.cadence }}
         lessonLabel={(ref) => {
           const lesson = byRef.get(ref);
           return lesson ? { title: lesson.title, subject: byId.get(lesson.skillId)?.name ?? lesson.skillId } : null;

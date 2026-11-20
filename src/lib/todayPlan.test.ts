@@ -45,6 +45,16 @@ describe("building today's plan", () => {
     expect(buildPlan(input({ newIsResume: true })).steps.find((s) => s.ref === "addition/next-thing")?.kind).toBe("continue");
   });
 
+  it("after three days away, says welcome back and gives one mistake, not two", () => {
+    const back = buildPlan(input({ daysAway: 4 }));
+    expect(back.welcomeBack).toBe(true);
+    expect(back.steps.filter((s) => s.kind === "fix")).toHaveLength(1);
+    expect(back.steps[0].kind).toBe("review");
+    const usual = buildPlan(input({ daysAway: 1 }));
+    expect(usual.welcomeBack).toBeUndefined();
+    expect(usual.steps.filter((s) => s.kind === "fix")).toHaveLength(2);
+  });
+
   it("leaves out review and mistakes when the switch is off", () => {
     expect(buildPlan(input({ reviewOn: false })).steps.map((s) => s.kind)).toEqual(["new", "read", "write"]);
   });

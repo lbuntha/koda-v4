@@ -30,14 +30,41 @@ export interface TodayPlanCardProps {
   /** A lesson step's title and subject, in the language on screen. */
   lessonLabel(ref: string): { title: string; subject: string } | null;
   onStart(step: PlanStep): void;
+  /** The run so far, for the cheer line. Weeks are left out: "3 days" must not mean three weeks. */
+  streak?: { count: number; cadence: "daily" | "weekly" };
 }
 
-export const TodayPlanCard: React.FC<TodayPlanCardProps> = ({ plan, done, lessonLabel, onStart }) => {
+/**
+ * The one friendly line at the top of the card.
+ *
+ * One, chosen by what matters most today, because three messages are read as
+ * none: back after a break first (be welcoming), then mistakes waiting (the
+ * point of the plan), then the streak (keep coming back). Never a scolding —
+ * mistakes are "waiting to be fixed", not "you got wrong".
+ */
+export function planMessage(
+  plan: TodayPlan,
+  done: boolean[],
+  streak: TodayPlanCardProps["streak"],
+): { key: string; values?: Record<string, string> } | null {
+  const allDone = done.length > 0 && done.every(Boolean);
+  const days = streak?.cadence === "daily" ? streak.count : 0;
+  if (allDone) return days >= 2 ? { key: "todayPlan.cheer.doneStreak", values: { n: String(days) } } : null;
+  if (plan.welcomeBack) return { key: "todayPlan.welcomeBack" };
+  const fixesLeft = plan.steps.filter((s, i) => s.kind === "fix" && !done[i]).length;
+  if (fixesLeft === 1) return { key: "todayPlan.cheer.oneMistake" };
+  if (fixesLeft > 1) return { key: "todayPlan.cheer.mistakes", values: { n: String(fixesLeft) } };
+  if (days >= 2) return { key: "todayPlan.cheer.streak", values: { n: String(days) } };
+  return null;
+}
+
+export const TodayPlanCard: React.FC<TodayPlanCardProps> = ({ plan, done, lessonLabel, onStart, streak }) => {
   const { t } = useT();
   const total = plan.steps.length;
   const finished = done.filter(Boolean).length;
   const next = plan.steps.findIndex((_, i) => !done[i]);
   const allDone = next === -1;
+  const message = planMessage(plan, done, streak);
 
   const labelOf = (step: PlanStep): { title: string; subject: string } => {
     if (step.ref) return lessonLabel(step.ref) ?? { title: step.ref, subject: "" };
@@ -53,6 +80,9 @@ export const TodayPlanCard: React.FC<TodayPlanCardProps> = ({ plan, done, lesson
         <div className="min-w-0">
           <h2 className="text-lg font-black text-ink">{t("todayPlan.title")}</h2>
           <p className="text-sm text-muted">{allDone ? t("todayPlan.allDoneNote") : t("todayPlan.hint")}</p>
+          {message ? (
+            <p className="mt-1 text-sm font-bold text-violet-700 dark:text-violet-300">{t(message.key, message.values)}</p>
+          ) : null}
         </div>
         <span className="shrink-0 font-mono text-sm font-black text-ink tabular-nums">
           {t("todayPlan.progress", { done: String(finished), total: String(total) })}
