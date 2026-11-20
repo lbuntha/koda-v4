@@ -13,7 +13,7 @@
     "ages": [5, 16],
     "category": "logic-and-planning"
   },
-  "topics": ["logic", "sudoku", "patterns", "reasoning"],
+  "topics": ["logic", "patterns", "numbers", "shapes"],
   "teaches": [
     "sudoku-picture-solver",
     "sudoku-full-house",

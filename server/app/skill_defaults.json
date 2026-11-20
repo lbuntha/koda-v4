@@ -27368,9 +27368,9 @@
     },
     "topics": [
       "logic",
-      "sudoku",
       "patterns",
-      "reasoning"
+      "numbers",
+      "shapes"
     ],
     "teaches": [
       "sudoku-picture-solver",
