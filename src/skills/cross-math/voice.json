@@ -1,10 +1,14 @@
 {
   "_comment": [
-    "Cross Math speaks its lesson prompts (the audience starts at six) and nothing of its own:",
-    "reactions come from the common pack, and the engine never refuses a move."
+    "Cross Math's read-aloud prompts. Lesson intros are picked up from lessons.json;",
+    "reactions come from the common pack. Must match locales/en.json word for word."
   ],
   "subjects": [],
   "templates": [],
-  "prompts": [],
+  "prompts": [
+    "Put the tiles in the empty boxes so every row and column is true.",
+    "Choose a sign for each empty box so every row and column is true.",
+    "Fill the empty boxes with numbers and signs so every row and column is true."
+  ],
   "phrases": []
 }
