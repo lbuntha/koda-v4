@@ -234,7 +234,10 @@ DEFAULT_KINDS: list[dict[str, Any]] = [
         # The name and nothing else. A tagline is the skill's marketing copy,
         # and the honest thing a notification can say about a new subject is
         # that it exists and where to find it.
-        "body": "{skill} has just been published — open Koda to try it.",
+        # "Just published: …" rather than "… has been published", so the one
+        # sentence reads right for a skill, a book title and "140 new Rebus
+        # puzzles" alike.
+        "body": "Just published: {skill}. Open Koda to try it.",
         #: What a sender may substitute. Anything else an operator types is
         #: left visible rather than guessed at, so a typo shows up in the
         #: preview instead of on somebody's lock screen.
@@ -244,7 +247,9 @@ DEFAULT_KINDS: list[dict[str, Any]] = [
         "class": "courtesy",
         "email": {
             "subject": "New on Koda: {skill}",
-            "body": "{skill} has just been published. Open Koda to try it:\n{app_link}",
+            # "Open Koda: <link>" on its own line is drawn as a button saying
+            # "Open Koda"; a bare link would be labelled with the address.
+            "body": "Just published on Koda: {skill}.\n\nOpen Koda: {app_link}",
             "settingId": "email.skillPublished",
             # On: the owner wants every family told by email when a skill, a
             # book or a Rebus release goes live (2026-11-20). A parent who

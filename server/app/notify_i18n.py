@@ -43,6 +43,7 @@ PHRASES: dict[str, Any] = {
     "somebody": "Somebody",
     "there": "there",
     "yourFamily": "your family",
+    "rebusRelease": {"one": "{count} new Rebus puzzle", "other": "{count} new Rebus puzzles"},
     "approved": "approved",
     "summaryLine": "• {learner}: {practice} · {rounds} · {time}",
     "digestLine": "• {learner}: {rounds}, {time}",

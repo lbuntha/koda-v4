@@ -152,9 +152,15 @@ def kind_label(kind: str, language: str = notify_i18n.BASE) -> str:
     return notify_i18n.kind_text(language, kind).get("label") or BY_KIND[kind]["label"]
 
 
+#: Titles a display name may start with. "Hi Mr.," greets nobody, so the
+#: greeting uses the first word after them.
+TITLES = {"mr", "mrs", "ms", "miss", "mx", "dr", "lok", "neak", "លោក", "លោកស្រី", "អ្នក", "អ្នកនាង", "កញ្ញា"}
+
+
 def first_name(user: dict[str, Any], language: str = notify_i18n.BASE) -> str:
-    name = (user.get("displayName") or "").strip()
-    return name.split()[0] if name else notify_i18n.phrase(language, "there")
+    words = (user.get("displayName") or "").split()
+    named = [w for w in words if w.rstrip(".").lower() not in TITLES]
+    return named[0] if named else notify_i18n.phrase(language, "there")
 
 
 async def compose(

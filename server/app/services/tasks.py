@@ -468,11 +468,11 @@ async def _recently_published(db: AsyncIOMotorDatabase, since: datetime) -> list
     async for row in db.rebus_releases.find({"rolledBack": False, "at": {"$gte": since}}):
         count = len(row.get("puzzleIds") or [])
         if count:
-            # Language-neutral on purpose: the name sits inside both the
-            # English and the Khmer sentence.
-            # No ages: a release spans every grade the game has.
+            # No ages: a release spans every grade the game has. No name
+            # either: "140 new Rebus puzzles" is worded in each family's
+            # language when it is sent.
             items.append(
-                {"key": f"rebus:{row['number']}", "name": f"Rebus Rush (+{count})", "at": row["at"], "ages": None}
+                {"key": f"rebus:{row['number']}", "name": None, "count": count, "at": row["at"], "ages": None}
             )
     items.sort(key=lambda item: item["at"])
     return items
@@ -590,9 +590,10 @@ async def skill_announcements(
             continue
 
         children = await _children_ages(db, family_id, at.year)
+        language = await notify_i18n.language_of_family(db, family_id)
         for item in published:
             skill_id = item["key"]
-            name = item["name"]
+            name = item["name"] or notify_i18n.phrase(language, "rebusRelease", count=item["count"])
             if not _for_family(item["ages"], children):
                 continue
 

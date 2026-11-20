@@ -16,6 +16,7 @@
     "somebody": "នរណាម្នាក់",
     "there": "លោកអ្នក",
     "yourFamily": "គ្រួសាររបស់អ្នក",
+    "rebusRelease": "ល្បែងផ្គុំរូប Rebus ថ្មី {count}",
     "approved": "ត្រូវបានយល់ព្រម",
     "summaryLine": "• {learner}៖ {practice} · {rounds} · {time}",
     "digestLine": "• {learner}៖ {rounds}, {time}",
@@ -77,10 +78,10 @@
     "learn.skill_published": {
       "label": "ជំនាញ សៀវភៅ និងល្បែងផ្គុំរូបថ្មី",
       "title": "ថ្មីនៅលើ Koda",
-      "body": "{skill} ទើបតែត្រូវបានផ្សព្វផ្សាយ — បើក Koda ដើម្បីសាកល្បង។",
+      "body": "ទើបផ្សព្វផ្សាយ៖ {skill}។ បើក Koda ដើម្បីសាកល្បង។",
       "email": {
         "subject": "ថ្មីនៅលើ Koda៖ {skill}",
-        "body": "{skill} ទើបតែត្រូវបានផ្សព្វផ្សាយ។ បើក Koda ដើម្បីសាកល្បង៖\n{app_link}"
+        "body": "ទើបផ្សព្វផ្សាយនៅលើ Koda៖ {skill}។\n\nបើក Koda៖ {app_link}"
       }
     },
     "learn.practice_reminder": {

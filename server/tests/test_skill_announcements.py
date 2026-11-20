@@ -285,7 +285,7 @@ async def test_a_published_book_and_a_rebus_release_are_announced_once(db, famil
     bodies = sorted(row["body"] for row in await told(db))
     assert len(bodies) == 2
     assert any("The Market" in body for body in bodies)
-    assert any("Rebus Rush (+2)" in body for body in bodies)
+    assert any("2 new Rebus puzzles" in body for body in bodies)
 
 
 def test_new_content_is_emailed_unless_a_parent_turned_it_off():
@@ -331,3 +331,11 @@ def test_who_an_age_range_reaches():
     assert task_service._for_family([5, 7], [12, None])
     assert not task_service._for_family([5, 7], [12])
     assert not task_service._for_family([5, 7], [])
+
+
+def test_the_greeting_skips_a_title():
+    from app.services.email_notify import first_name
+
+    assert first_name({"displayName": "Mr. លី"}) == "លី"
+    assert first_name({"displayName": "Dara Sok"}) == "Dara"
+    assert first_name({"displayName": "Mrs."}) == "there"
