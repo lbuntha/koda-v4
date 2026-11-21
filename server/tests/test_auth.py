@@ -316,6 +316,20 @@ async def test_account_can_edit_its_own_name_and_avatar_in_one_call(client, db, 
     assert row["avatarSeed"] == "a_profile_choice_1"
 
 
+async def test_an_account_saves_its_country_as_a_two_letter_code(client, signup_body):
+    tokens = (await client.post("/auth/signup", json=signup_body())).json()
+    auth = {"Authorization": f"Bearer {tokens['accessToken']}"}
+
+    assert (await client.get("/auth/me", headers=auth)).json()["country"] is None
+    saved = await client.patch("/auth/me", headers=auth, json={"country": "KH"})
+    assert saved.status_code == 200, saved.text
+    assert saved.json()["country"] == "KH"
+    assert (await client.get("/auth/me", headers=auth)).json()["country"] == "KH"
+    # A name, or lower case, is not a code.
+    assert (await client.patch("/auth/me", headers=auth, json={"country": "Cambodia"})).status_code == 422
+    assert (await client.patch("/auth/me", headers=auth, json={"country": "kh"})).status_code == 422
+
+
 async def test_a_childs_profile_edit_lands_on_their_learner_row(client, db, signup_body):
     from app.repos import learners
 

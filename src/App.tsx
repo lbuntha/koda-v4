@@ -85,6 +85,7 @@ import { refreshNotificationToken } from "./lib/push";
 import { onNotificationClick } from "./lib/push/landing";
 import { DayDoneScreen } from "./components/DayDoneScreen";
 import { ParentSetup, setupSeenKey } from "./components/onboarding/ParentSetup";
+import { AboutYou, shouldAskAboutYou } from "./components/onboarding/AboutYou";
 import { AvatarPickerModal } from "./components/account/AvatarPickerModal";
 import { KodaAsleepScreen } from "./components/KodaAsleepScreen";
 import { LiveVoiceCoachModal } from "./components/LiveVoiceCoachModal";
@@ -194,6 +195,13 @@ export default function App() {
    * the first thing a child does in Koda is theirs to decide. Closing it
    * keeps the avatar the family gave them.
    */
+  /* Asked once after sign-up: birth year (someone learning on their own) and country. Before anything else. */
+  const [ageOpen, setAgeOpen] = useState(false);
+  const askAge = shouldAskAboutYou(session);
+  useEffect(() => {
+    if (askAge) setAgeOpen(true);
+  }, [askAge]);
+
   const avatarKey = session?.learnerId ? `koda.avatarPicked.${session.learnerId}` : null;
   const [avatarOpen, setAvatarOpen] = useState(false);
   useEffect(() => {
@@ -1234,9 +1242,11 @@ export default function App() {
       <UpgradePrompt onOpenPlan={() => setActiveTab("settings")} />
 
       {/* Asks an adult without notifications to set them up; Set up opens the switch. */}
-      {setupOpen && <ParentSetup onClose={() => setSetupOpen(false)} />}
+      {setupOpen && !ageOpen && <ParentSetup onClose={() => setSetupOpen(false)} />}
 
-      {avatarOpen && !setupOpen && (
+      {ageOpen && <AboutYou onClose={() => setAgeOpen(false)} />}
+
+      {avatarOpen && !setupOpen && !ageOpen && (
         <AvatarPickerModal
           isOpen
           currentSeed={session?.avatarSeed}

@@ -772,6 +772,7 @@ async def me(p: CurrentPrincipal, db: Db) -> MeOut:
         learnerId=p.learner_id,
         learnerName=learner["displayName"] if learner else None,
         learnerBirthYear=learner.get("birthYear") if learner else None,
+        country=user.get("country") if user else None,
         permissions=(
             p.permissions
             if p.permissions is not None
@@ -857,6 +858,11 @@ async def update_my_profile(body: ProfileIn, p: CurrentPrincipal, db: Db) -> MeO
         patch["displayName"] = body.display_name.strip()
     if body.avatar_seed is not None:
         patch["avatarSeed"] = body.avatar_seed.strip()
+
+    # Country belongs to the person who signs in, not to a learner row.
+    if body.country is not None:
+        if p.kind != "user" or not await users.update_account(db, p.subject_id, {"country": body.country}):
+            raise NotFound("No account is available to edit.")
 
     if patch:
         row = None

@@ -72,6 +72,20 @@ describe("ParentSetup", () => {
     expect(localStorage.getItem("koda.parentSetup.seen.u1")).toBe("1");
   });
 
+  it("takes a birth year, which picks the grade and is stored as given", async () => {
+    render(<ParentSetup onClose={vi.fn()} />);
+    const year = new Date().getFullYear() - 9;
+    fireEvent.change(screen.getByLabelText("Child's name"), { target: { value: "Dara" } });
+    fireEvent.change(screen.getByLabelText(/What year was Dara born/), { target: { value: String(year) } });
+    // Nine years old: Grade 4 is chosen for them, and can still be changed.
+    expect(screen.getByRole("button", { name: "Grade 4" }).getAttribute("aria-pressed")).toBe("true");
+    request.mockResolvedValueOnce({ id: "l1", displayName: "Dara" });
+    fireEvent.click(screen.getByRole("button", { name: "Continue" }));
+    await waitFor(() =>
+      expect(request).toHaveBeenCalledWith("/learners", expect.objectContaining({ body: { displayName: "Dara", birthYear: year } })),
+    );
+  });
+
   it("gives a code and a QR for the child's own device", async () => {
     render(<ParentSetup onClose={vi.fn()} />);
     await addDaraInGrade1();

@@ -169,6 +169,8 @@ class MeOut(Model):
     # The views this person may switch between: "family", "admin", or both.
     # Two entries is what puts "Switch to admin" / "Back to family" in the menu.
     views: list[str] = Field(default_factory=list)
+    # ISO 3166 two-letter code the person chose, e.g. "KH". None until asked.
+    country: str | None = None
 
 
 class ProfileIn(Model):
@@ -178,6 +180,7 @@ class ProfileIn(Model):
                                      alias="displayName")
     avatar_seed: str | None = Field(default=None, min_length=8, max_length=100,
                                     alias="avatarSeed")
+    country: str | None = Field(default=None, pattern=r"^[A-Z]{2}$")
 
 
 class AvatarIn(Model):

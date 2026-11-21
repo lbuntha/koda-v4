@@ -5653,7 +5653,11 @@
       "namePlaceholder": "e.g. Dara",
       "grade": "What grade are they in?",
       "gradeFor": "What grade is {name} in?",
-      "gradeWhy": "So we can pick lessons at the right level."
+      "gradeWhy": "So we can pick lessons at the right level.",
+      "year": "What year was your child born?",
+      "yearFor": "What year was {name} born?",
+      "yearWhy": "We use it to suggest the grade. You can change the grade below.",
+      "yearPick": "Choose a year"
     },
     "where": {
       "title": "Where will {name} learn?",
@@ -6127,5 +6131,19 @@
       "hint1": "1 hint",
       "solvedShort": "solved"
     }
+  },
+  "aboutYou": {
+    "title": "A little about you",
+    "bodyLearner": "So Koda picks lessons and games that fit you. You can change this later in Settings.",
+    "bodyParent": "Which country are you in? It helps Koda fit your family.",
+    "year": "Year you were born",
+    "yearPick": "Choose a year",
+    "country": "Country",
+    "countrySearch": "Search for a country",
+    "noCountry": "No country by that name.",
+    "save": "Continue",
+    "later": "Not now",
+    "failed": "That didn't save. Try again.",
+    "offline": "You're offline. Connect to the internet, then try again."
   }
 }

@@ -60,6 +60,8 @@ export interface Session {
   learnerId?: string;
   learnerName?: string;
   learnerBirthYear?: number;
+  /** ISO two-letter country the person chose; absent until asked. */
+  country?: string;
   avatarSeed?: string;
   /** ISO timestamp this account first existed. Drawn as "Joined August 2026". */
   joinedAt?: string;
@@ -99,6 +101,7 @@ interface MeOut {
   learnerId: string | null;
   learnerName: string | null;
   learnerBirthYear: number | null;
+  country?: string | null;
   permissions?: string[];
   joinedAt?: string | null;
   views?: string[];
@@ -434,6 +437,7 @@ function mergeProfile(session: Session, me: MeOut): Session {
     learnerId: me.learnerId ?? session.learnerId,
     learnerName: me.learnerName ?? session.learnerName,
     learnerBirthYear: me.learnerBirthYear ?? session.learnerBirthYear,
+    country: me.country ?? session.country,
     avatarSeed: me.avatarSeed ?? session.avatarSeed,
     role: me.role,
     platformRole: me.platformRole,
@@ -769,7 +773,7 @@ export const SessionAPI = {
    * session is replaced with the server's answer rather than a local guess at
    * what the write did.
    */
-  async updateProfile(patch: { displayName?: string; avatarSeed?: string }): Promise<Session> {
+  async updateProfile(patch: { displayName?: string; avatarSeed?: string; country?: string }): Promise<Session> {
     const token = await accessToken();
     if (!current || !token) throw new ApiError(401, "unauthorized", "Sign in to continue.");
     const me = await request<MeOut>("/auth/me", { method: "PATCH", token, body: patch });

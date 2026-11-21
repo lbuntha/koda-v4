@@ -1,7 +1,7 @@
 /**
  * Parent setup: from a new account to a child playing, in three short steps.
  *
- *   1  Add your child      name + grade (grade is required: it picks the lessons)
+ *   1  Add your child      name, birth year (suggests the grade) + grade (required: it picks the lessons)
  *   2  Where will they learn?
  *        On this phone   → a parent PIN (skippable), then the child opens here
  *        Their own device → a QR code, the typed code, Share and Copy
@@ -68,6 +68,10 @@ const emailIsOn = (prefs: NotificationPreferences) =>
 /** Grade → age, by the rule the Studio uses: Grade 1 is six, Pre-K is five. */
 const ageForGrade = (grade: number) => (grade === 0 ? 5 : grade + 5);
 
+/** Birth years a parent can pick (ages 3 to 19), and the grade each suggests: six is Grade 1, under six Pre-K. */
+const CHILD_YEARS: readonly number[] = Array.from({ length: 17 }, (_, i) => new Date().getFullYear() - 3 - i);
+const gradeForYear = (year: number) => Math.min(12, Math.max(0, new Date().getFullYear() - year - 5));
+
 /** The flag that stops the wizard opening by itself a second time. */
 export const setupSeenKey = (userId: string) => `koda.parentSetup.seen.${userId}`;
 
@@ -86,6 +90,8 @@ export const ParentSetup: React.FC<{ onClose(): void }> = ({ onClose }) => {
   const [step, setStep] = useState<Step>("child");
   const [name, setName] = useState("");
   const [grade, setGrade] = useState<number | null>(null);
+  /** Optional: a birth year is more exact than a grade, and picking one suggests the grade. */
+  const [birthYear, setBirthYear] = useState("");
   const [child, setChild] = useState<CreatedChild | null>(null);
   const [where, setWhere] = useState<Where | null>(null);
   const [code, setCode] = useState<JoinCode | null>(null);
@@ -133,7 +139,7 @@ export const ParentSetup: React.FC<{ onClose(): void }> = ({ onClose }) => {
       const created = await request<{ id: string; displayName: string }>("/learners", {
         method: "POST",
         token: await accessToken(),
-        body: { displayName: name.trim(), birthYear: new Date().getFullYear() - ageForGrade(grade) },
+        body: { displayName: name.trim(), birthYear: birthYear ? Number(birthYear) : new Date().getFullYear() - ageForGrade(grade) },
       });
       setChild({ id: created.id, name: created.displayName });
       await Billing.refresh().catch(() => undefined);
@@ -209,6 +215,7 @@ export const ParentSetup: React.FC<{ onClose(): void }> = ({ onClose }) => {
   const addAnother = () => {
     setName("");
     setGrade(null);
+    setBirthYear("");
     setChild(null);
     setWhere(null);
     setCode(null);
@@ -319,6 +326,28 @@ export const ParentSetup: React.FC<{ onClose(): void }> = ({ onClose }) => {
                 onChange={(event) => setName(event.target.value)}
                 onKeyDown={(event) => event.key === "Enter" && void createChild()}
               />
+            </label>
+
+            <label className="mt-6 block">
+              <span className="text-sm font-bold text-ink">
+                {name.trim() ? t("setup.child.yearFor", { name: name.trim() }) : t("setup.child.year")}
+              </span>
+              <span className="mt-0.5 block text-xs text-muted">{t("setup.child.yearWhy")}</span>
+              <select
+                className={`${themeSystem.field("lg", "w-full")} mt-2`}
+                value={birthYear}
+                onChange={(event) => {
+                  setBirthYear(event.target.value);
+                  if (event.target.value) setGrade(gradeForYear(Number(event.target.value)));
+                }}
+              >
+                <option value="">{t("setup.child.yearPick")}</option>
+                {CHILD_YEARS.map((y) => (
+                  <option key={y} value={y}>
+                    {y}
+                  </option>
+                ))}
+              </select>
             </label>
 
             <fieldset className="mt-6">
