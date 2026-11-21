@@ -1,0 +1,3232 @@
+[
+  {
+    "id": "school-bag",
+    "title": "តើមានអ្វីក្នុងកាបូប?",
+    "en": "What Is in the Bag?",
+    "stage": 1,
+    "icon": "🎒",
+    "wash": "#e9ddff",
+    "context": "A Cambodian home before the walk to school.",
+    "why": "An inviting guessing game repeats one sentence pattern and connects reading to objects children use every day.",
+    "focus": "Recognise repeated questions; name school objects.",
+    "link": "Companion to the existing school text, km-g1-102. Select object words only after checking the child’s taught letters.",
+    "words": [
+      "កាបូប",
+      "ប៊ិច",
+      "សៀវភៅ",
+      "បន្ទាត់"
+    ],
+    "cast": "Dara, a Cambodian boy aged six with short black hair, a white short-sleeved school shirt, navy shorts and a purple school bag. Grandma wears a plain indigo blouse and a checked krama over one shoulder.",
+    "cover": "Dara and Grandma sit on a woven mat beside a purple open school bag. A pen, exercise book and ruler peek out. A wooden Cambodian home and sandals by the door establish an everyday morning.",
+    "pages": [
+      [
+        "ព្រឹកនេះ ដារាត្រូវទៅសាលា។ គាត់រកកាបូបរបស់គាត់មិនឃើញ។",
+        "🎒",
+        "Dara looks around the family veranda for his purple school bag; Grandma waits by a woven mat."
+      ],
+      [
+        "យាយឃើញកាបូបនៅក្រោមតុ។ ដារាយកវាមកដាក់លើកន្ទេល។",
+        "👵",
+        "Grandma points beneath a low wooden table; Dara retrieves his purple bag."
+      ],
+      [
+        "យាយសួរថា៖ «តើមានអ្វីក្នុងកាបូប?» ដារាបើកកាបូប ហើយយកប៊ិចមួយចេញ។",
+        "🖊️",
+        "Dara opens the bag and displays one blue pen to Grandma."
+      ],
+      [
+        "យាយសួរថា៖ «តើមានអ្វីទៀត?» ដារាយកសៀវភៅមួយចេញ។",
+        "📓",
+        "Dara lays an exercise book beside the pen on the mat."
+      ],
+      [
+        "យាយសួរម្ដងទៀតថា៖ «តើមានអ្វីទៀត?» ដារាយកបន្ទាត់មួយចេញ។",
+        "📏",
+        "Dara places a ruler beside the pen and exercise book, making three clear objects."
+      ],
+      [
+        "ដារាចង់គូររូប តែរកខ្មៅដៃមិនឃើញ។ គាត់ទុកខ្មៅដៃនៅលើតុកាលពីម្សិលមិញ។",
+        "✏️",
+        "Dara checks the empty pencil pocket; his yellow pencil is visible on the table behind him."
+      ],
+      [
+        "ដារាយកខ្មៅដៃមកដាក់ក្នុងកាបូប។ យាយថា៖ «ឥឡូវកូនមានរបស់គ្រប់ហើយ!»",
+        "🎒",
+        "Dara places his yellow pencil into the same purple bag while Grandma smiles."
+      ],
+      [
+        "ដារាដាក់ប៊ិច សៀវភៅ និងបន្ទាត់ចូលក្នុងកាបូប។ គាត់បិទកាបូប។",
+        "🤲",
+        "Dara carefully packs all four school items and closes the bag."
+      ],
+      [
+        "ល្ងាចនោះ ដារារៀបកាបូបមុនចូលគេង។ គាត់រាប់របស់ទាំងបួន ដើម្បីកុំឱ្យភ្លេច។",
+        "🌙",
+        "At dusk Dara checks the bag on the mat, placing four items in a neat row."
+      ],
+      [
+        "ព្រឹកបន្ទាប់ ដារាយកកាបូបបានភ្លាម។ គាត់ញញឹមថា៖ «ខ្ញុំរៀបចំរួចហើយ!»",
+        "🏫",
+        "Dara leaves for school calmly with his purple bag; Grandma waves from the doorway."
+      ]
+    ],
+    "quiz": [
+      [
+        "តើយាយឃើញកាបូបនៅឯណា?",
+        "នៅក្រោមតុ។"
+      ],
+      [
+        "តើដារាភ្លេចដាក់អ្វីក្នុងកាបូប?",
+        "ខ្មៅដៃ។"
+      ],
+      [
+        "តើដារាទុកខ្មៅដៃនៅឯណា?",
+        "នៅលើតុ។"
+      ],
+      [
+        "ហេតុអ្វីបានជាដារារៀបកាបូបមុនចូលគេង?",
+        "ដើម្បីកុំឱ្យភ្លេចរបស់ ហើយអាចយកទៅសាលាបានភ្លាម។"
+      ],
+      [
+        "តើអ្នកចង់រៀបចំអ្វីទុកមុនទៅសាលា?",
+        "សំណួរបើកចំហ៖ កុមារអាចប្រាប់អំពីកាបូប សៀវភៅ ឬសម្លៀកបំពាក់របស់ខ្លួន។"
+      ]
+    ],
+    "meaning": "ការរៀបចំទុកជាមុន ជួយឱ្យយើងធ្វើអ្វីបានដោយខ្លួនឯង។",
+    "origin": {
+      "kind": "original",
+      "title": "Original Koda story",
+      "note": "Written in Khmer for this collection; familiar picture-book structures, not a translation of a modern English book."
+    },
+    "number": 1,
+    "readingMode": "Shared reading first; independent reading after teacher vocabulary review.",
+    "reviewStatus": "Draft: Khmer teacher review, approved word segmentation, illustration review and Library Studio validation pending.",
+    "characterReferences": [
+      "Dara: Cambodian boy, age 6, short straight black hair, warm medium-brown skin, curious rounded face.",
+      "Grandma: Cambodian older woman, grey-black hair in a low bun, expressive kind face; use the book-specific blouse and krama."
+    ]
+  },
+  {
+    "id": "little-cat",
+    "title": "ឆ្មាតូចនៅឯណា?",
+    "en": "Where Is the Little Cat?",
+    "stage": 1,
+    "icon": "🐈",
+    "wash": "#ffe4d1",
+    "context": "A family home with a shaded veranda and woven mat.",
+    "why": "A search gives children a reason to reread and distinguish location words through pictures.",
+    "focus": "Follow a search in order, recognise the cat’s sound, and see how Sophea gives Mimi space to drink.",
+    "link": "An illustrated Grade 1 draft in Studio with picture vocabulary, spelling, matching, reading notes and opposites. Review the Khmer word breaks before publishing.",
+    "words": [
+      "ឆ្មា",
+      "ចាន",
+      "ខ្នើយ"
+    ],
+    "cast": "Sophea, a Cambodian girl aged six with two short black pigtails, a mint shirt and navy shorts. Mimi, a ginger tabby kitten with a white chin and paws.",
+    "cover": "Sophea looks beneath a low wooden table while Mimi peeks out from behind a lavender cushion. A woven mat and turquoise water bowl sit on the family veranda.",
+    "pages": [
+      [
+        "សុភាចាក់ទឹកចូលចានតូចមួយ។ នាងចង់ឱ្យឆ្មាផឹកទឹក។",
+        "💧",
+        "Sophea pours fresh water into Mimi’s turquoise bowl."
+      ],
+      [
+        "សុភាហៅថា៖ «មីមី មកផឹកទឹក!» មីមីមិនមកទេ។",
+        "🐈",
+        "Sophea calls Mimi from the veranda."
+      ],
+      [
+        "សុភាអោនមើលក្រោមតុ។ ក្រោមតុមានតែស្បែកជើងប៉ា។",
+        "👡",
+        "Only Father’s sandals are under the table."
+      ],
+      [
+        "នាងមើលក្រោមកៅអី។ ក្រោមកៅអីគ្មានឆ្មាទេ។",
+        "🪑",
+        "Sophea checks the empty space under a chair."
+      ],
+      [
+        "សុភាឈប់ ហើយស្ដាប់។ នាងឮសំឡេង៖ «មៀវ! មៀវ!»",
+        "👂",
+        "Sophea stops and listens for a meow."
+      ],
+      [
+        "មីមីនៅក្រោយខ្នើយ! វាយំថា៖ «មៀវ!»",
+        "🐈",
+        "Mimi peeks from behind the lavender cushion."
+      ],
+      [
+        "សុភាដាក់ចានទឹកក្បែរកន្ទេល។ នាងអង្គុយរង់ចាំ។",
+        "🥣",
+        "Sophea sets down the bowl and gives Mimi space."
+      ],
+      [
+        "មីមីដើរចេញមកផឹកទឹក។ សុភាអង្គុយស្ងៀម ទុកឱ្យវាផឹកតាមស្រួល។",
+        "💧",
+        "Mimi drinks while Sophea sits quietly nearby."
+      ]
+    ],
+    "quiz": [
+      [
+        "តើសុភាចាក់អ្វីចូលក្នុងចាន?",
+        "ទឹក។"
+      ],
+      [
+        "តើមានអ្វីនៅក្រោមតុ?",
+        "ស្បែកជើងប៉ា។"
+      ],
+      [
+        "បន្ទាប់ពីមើលក្រោមតុ តើសុភាមើលនៅឯណា?",
+        "ក្រោមកៅអី។"
+      ],
+      [
+        "តើសុភាឮសំឡេងអ្វី?",
+        "«មៀវ! មៀវ!»"
+      ],
+      [
+        "តើសុភាធ្វើអ្វីពេលមីមីផឹកទឹក?",
+        "អង្គុយស្ងៀម។"
+      ]
+    ],
+    "meaning": "ពេលថែសត្វ យើងផ្ដល់ទឹកស្អាត ហើយទុកឱ្យវាផឹកតាមស្រួល។",
+    "origin": {
+      "kind": "original",
+      "title": "Original Koda story",
+      "note": "Written in Khmer for this collection; familiar picture-book structures, not a translation of a modern English book."
+    },
+    "number": 2,
+    "readingMode": "Shared reading first; independent reading after teacher vocabulary review.",
+    "reviewStatus": "Draft: Khmer teacher review, approved word segmentation, illustration review and Library Studio validation pending.",
+    "characterReferences": [
+      "Sophea: Cambodian girl, age 6, two short black pigtails, warm medium-brown skin, lively rounded face.",
+      "Father: Cambodian adult man, short black hair, warm medium-brown skin; use book-specific clothing."
+    ]
+  },
+  {
+    "id": "one-more-banana",
+    "title": "ចេកមួយផ្លែទៀត",
+    "en": "One More Banana",
+    "stage": 1,
+    "icon": "🍌",
+    "wash": "#fff0b8",
+    "context": "Grandma’s fruit basket at a Cambodian neighbourhood market.",
+    "why": "A growing basket joins Khmer number words to visible quantities and a repeated action.",
+    "focus": "Count one to five; follow a cumulative sequence.",
+    "link": "Choose a point in the Khmer sequence where ចេក, យាយ and ផ្លែ can be supported; ផ្ល links to km-g1-084. Pair with number practice.",
+    "words": [
+      "ចេក",
+      "មួយ",
+      "ពីរ",
+      "ប្រាំ"
+    ],
+    "cast": "Dara in a yellow T-shirt and navy shorts; Grandma in an indigo blouse with a checked krama; a round shallow bamboo basket.",
+    "cover": "Dara counts exactly five loose bananas in Grandma’s bamboo basket at a shaded Cambodian fruit stall. Keep all five bananas separate and countable.",
+    "pages": [
+      [
+        "យាយចង់ទិញចេកសម្រាប់អាហារសម្រន់។ ដារាសុំជួយកាន់កន្ត្រកទៅផ្សារ។",
+        "🧺",
+        "Grandma and Dara approach a Cambodian fruit stall with an empty bamboo basket."
+      ],
+      [
+        "យាយដាក់ចេកមួយផ្លែក្នុងកន្ត្រក។ ដារារាប់ថា៖ «មួយ!»",
+        "🍌",
+        "Exactly one separate banana lies in the basket; Dara points to it."
+      ],
+      [
+        "ដារាដាក់ចេកមួយផ្លែទៀត។ ឥឡូវមានចេកពីរផ្លែ។",
+        "🍌",
+        "Dara adds one banana to make exactly two visible bananas."
+      ],
+      [
+        "យាយដាក់ចេកមួយផ្លែទៀត។ ដារារាប់ម្ដងទៀតថា៖ «មួយ ពីរ បី!»",
+        "🧺",
+        "Top view of exactly three separate bananas, with Dara’s finger indicating each in turn."
+      ],
+      [
+        "ដារាដាក់ចេកពីរផ្លែទៀត។ គាត់ថា៖ «ប្រាំផ្លែហើយ យាយ!»",
+        "🍌",
+        "Dara adds two bananas to the previous three, making exactly five."
+      ],
+      [
+        "ពេលយាយលើកកន្ត្រក ចេកមួយផ្លែធ្លាក់លើកន្ទេល។ ដារាមិនទាន់ឃើញវាទេ។",
+        "👀",
+        "One banana has fallen onto the vendor’s clean mat; exactly four remain in the basket."
+      ],
+      [
+        "យាយថា៖ «យើងរាប់ម្ដងទៀត»។ ដារារាប់បានតែបួនផ្លែ។",
+        "🔎",
+        "Dara counts the four bananas in the basket; the fifth remains on the mat."
+      ],
+      [
+        "គាត់មើលជុំវិញ ហើយរកចេកមួយផ្លែនោះឃើញ។ ឥឡូវក្នុងកន្ត្រកមានចេកប្រាំផ្លែវិញ។",
+        "🧺",
+        "Dara returns the fallen banana to the basket, restoring exactly five."
+      ],
+      [
+        "នៅផ្ទះ ពួកគេលាងចេក រួចបកសំបក។ យាយចែកឱ្យដារា សុភា និងមាលាម្នាក់មួយផ្លែ។",
+        "🏡",
+        "At home Grandma distributes one peeled banana to each of the three children; two unpeeled bananas remain."
+      ],
+      [
+        "នៅសល់ចេកពីរផ្លែសម្រាប់យាយនិងតា។ ដារាថា៖ «រាប់គ្រប់ ចែកក៏គ្រប់!»",
+        "💛",
+        "Grandma and Grandpa each receive one of the remaining two bananas; all five people have one."
+      ]
+    ],
+    "quiz": [
+      [
+        "តើក្នុងកន្ត្រកមានចេកប៉ុន្មានផ្លែមុនមួយផ្លែធ្លាក់?",
+        "ប្រាំផ្លែ។"
+      ],
+      [
+        "តើចេកមួយផ្លែធ្លាក់នៅឯណា?",
+        "លើកន្ទេលនៅផ្សារ។"
+      ],
+      [
+        "តើនៅសល់ចេកប៉ុន្មានផ្លែសម្រាប់យាយនិងតា?",
+        "ពីរផ្លែ។"
+      ],
+      [
+        "ហេតុអ្វីបានជាយាយសុំឱ្យរាប់ម្ដងទៀត?",
+        "ដើម្បីមើលថាចេកនៅគ្រប់ឬអត់។"
+      ],
+      [
+        "បើមានផ្លែឈើសម្រាប់មិត្ត តើអ្នកអាចជួយចែកដូចម្ដេច?",
+        "សំណួរបើកចំហ៖ រាប់មនុស្សនិងផ្លែឈើ រួចចែកដោយយុត្តិធម៌។"
+      ]
+    ],
+    "meaning": "ការរាប់ម្ដងទៀត និងការចែករំលែក អាចធ្វើឱ្យរឿងតូចមួយមានន័យ។",
+    "origin": {
+      "kind": "original",
+      "title": "Original Koda story",
+      "note": "Written in Khmer for this collection; familiar picture-book structures, not a translation of a modern English book."
+    },
+    "number": 3,
+    "readingMode": "Shared reading first; independent reading after teacher vocabulary review.",
+    "reviewStatus": "Draft: Khmer teacher review, approved word segmentation, illustration review and Library Studio validation pending.",
+    "characterReferences": [
+      "Dara: Cambodian boy, age 6, short straight black hair, warm medium-brown skin, curious rounded face.",
+      "Grandma: Cambodian older woman, grey-black hair in a low bun, expressive kind face; use the book-specific blouse and krama.",
+      "Grandpa: Cambodian older man, short grey hair, warm medium-brown skin, gentle lined face; use book-specific clothing."
+    ]
+  },
+  {
+    "id": "red-shirt",
+    "title": "អាវក្រហមរបស់ដារា",
+    "en": "Dara’s Red Shirt",
+    "stage": 1,
+    "icon": "👕",
+    "wash": "#ffdce3",
+    "context": "Laundry drying beside a Cambodian family home.",
+    "why": "A concrete search introduces descriptive words while pictures let children compare colours.",
+    "focus": "Identify colour words and eliminate alternatives.",
+    "link": "ក្រហម includes ក្រ, introduced in the project at km-g1-067; review all other story patterns before assigning independent reading.",
+    "words": [
+      "អាវ",
+      "ក្រហម",
+      "ខៀវ",
+      "ស"
+    ],
+    "cast": "Dara in a pale grey undershirt and navy shorts; his father in a blue shirt; one small red shirt, one white shirt and one blue shirt.",
+    "cover": "Dara and his father stand beside a laundry basket beneath the house eaves. A red shirt hangs on a low clothesline behind them, with a white and a blue shirt nearby.",
+    "pages": [
+      [
+        "ថ្ងៃនេះ ដារាចង់ពាក់អាវក្រហម។ គាត់នឹងទៅលេងផ្ទះយាយជាមួយប៉ា។",
+        "👕",
+        "Dara in his grey undershirt looks for his red shirt before visiting Grandma with Father."
+      ],
+      [
+        "ដារាបើកកន្ត្រកខោអាវ។ គាត់ឃើញអាវសមួយនៅខាងលើ។",
+        "🧺",
+        "Dara opens a laundry basket and sees one white shirt on top."
+      ],
+      [
+        "«នេះមិនមែនអាវក្រហមទេ»។ គាត់បត់អាវសដាក់វិញ។",
+        "⚪",
+        "Dara folds the white shirt neatly and puts it back into the basket."
+      ],
+      [
+        "លើកៅអីមានអាវខៀវមួយ។ ដារាលើកវាមើល ហើយដាក់វិញ។",
+        "🔵",
+        "Dara inspects one blue shirt on a wooden chair."
+      ],
+      [
+        "«អាវក្រហមនៅឯណា?» គាត់សួរប៉ា។ ប៉ាសួរថា៖ «កូនទុកវានៅឯណាកាលពីម្សិលមិញ?»",
+        "💬",
+        "Father sits near Dara and asks calmly while Dara thinks."
+      ],
+      [
+        "ដារានឹកឃើញថា អាវមានប្រឡាក់ដី។ គាត់បានដាក់វាជាមួយខោអាវត្រូវបោក។",
+        "💭",
+        "A small memory vignette shows yesterday’s red shirt with a muddy patch in the wash basket."
+      ],
+      [
+        "ប៉ាចង្អុលទៅខ្សែហាលខោអាវ។ អាវក្រហមស្អាតកំពុងហាលនៅទីនោះ។",
+        "☀️",
+        "Father points to the clean red shirt on a low clothesline beneath the eaves."
+      ],
+      [
+        "ប៉ាប៉ះអាវ ហើយថា៖ «ស្ងួតហើយ!» ដារាជួយដោះអាវពីខ្សែហាល។",
+        "🤲",
+        "Father checks the shirt and helps Dara take it down safely."
+      ],
+      [
+        "ដារាពាក់អាវក្រហម ហើយបត់អាវផ្សេងទុក។ គាត់មិនទុកខោអាវរាយប៉ាយទៀតទេ។",
+        "😊",
+        "Wearing the red shirt, Dara places the folded white and blue shirts neatly in the basket."
+      ],
+      [
+        "ពេលទៅដល់ផ្ទះយាយ ដារាប្រាប់រឿងរកអាវ។ គាត់ថា៖ «លើកក្រោយ ខ្ញុំនឹងចាំកន្លែងទុករបស់ខ្ញុំ!»",
+        "🏡",
+        "Dara in the same red shirt talks to Grandma while Father smiles nearby."
+      ]
+    ],
+    "quiz": [
+      [
+        "តើដារាចង់ពាក់អាវពណ៌អ្វី?",
+        "ពណ៌ក្រហម។"
+      ],
+      [
+        "តើដារាដាក់អាវក្រហមជាមួយខោអាវត្រូវបោកព្រោះអ្វី?",
+        "ព្រោះវាប្រឡាក់ដី។"
+      ],
+      [
+        "តើអាវក្រហមស្អាតនៅឯណា?",
+        "លើខ្សែហាលខោអាវ។"
+      ],
+      [
+        "តើដារាធ្វើអ្វីជាមួយអាវផ្សេងៗ?",
+        "បត់ហើយទុកឱ្យមានរបៀប។"
+      ],
+      [
+        "តើអ្នកអាចថែសម្លៀកបំពាក់របស់អ្នកដូចម្ដេច?",
+        "សំណួរបើកចំហ៖ បត់ទុក ដាក់ខោអាវប្រឡាក់ក្នុងកន្ត្រក ឬចាំកន្លែងទុក។"
+      ]
+    ],
+    "meaning": "យើងអាចរៀនថែរបស់ខ្លួន ហើយកែរឿងដែលភ្លេចបាន។",
+    "origin": {
+      "kind": "original",
+      "title": "Original Koda story",
+      "note": "Written in Khmer for this collection; familiar picture-book structures, not a translation of a modern English book."
+    },
+    "number": 4,
+    "readingMode": "Shared reading first; independent reading after teacher vocabulary review.",
+    "reviewStatus": "Draft: Khmer teacher review, approved word segmentation, illustration review and Library Studio validation pending.",
+    "characterReferences": [
+      "Dara: Cambodian boy, age 6, short straight black hair, warm medium-brown skin, curious rounded face.",
+      "Grandma: Cambodian older woman, grey-black hair in a low bun, expressive kind face; use the book-specific blouse and krama.",
+      "Father: Cambodian adult man, short black hair, warm medium-brown skin; use book-specific clothing."
+    ]
+  },
+  {
+    "id": "i-can-help",
+    "title": "ខ្ញុំអាចជួយបាន",
+    "en": "I Can Help",
+    "stage": 1,
+    "icon": "🧹",
+    "wash": "#d7eee3",
+    "context": "A Cambodian family shares small jobs before a meal.",
+    "why": "The same useful phrase accompanies manageable tasks; boys and girls both contribute to home life.",
+    "focus": "Recognise action words and a repeated refrain.",
+    "link": "ខ្ញុំ contains ខ្ញ, linked to km-g1-068; ក្រោម and other words need a separate teacher vocabulary check.",
+    "words": [
+      "ជួយ",
+      "តុ",
+      "ទឹក",
+      "បាយ"
+    ],
+    "cast": "Sophea in a mint shirt and navy skirt; Dara in a yellow T-shirt and navy shorts; Mother in a rose blouse; Father in a blue shirt.",
+    "cover": "Sophea wipes a low table while Dara sets two cups nearby; both parents prepare a family meal in the background. No sharp tools or hot pots in children’s reach.",
+    "pages": [
+      [
+        "ល្ងាចនេះ ម៉ែកំពុងរៀបចំបាយ។ ប៉ាកំពុងបោសមុខផ្ទះ។",
+        "🍚",
+        "Mother prepares a meal safely inside while Father sweeps the veranda."
+      ],
+      [
+        "សុភាឃើញតុមានធូលី។ នាងថា៖ «ខ្ញុំអាចជួយបាន!»",
+        "🙋",
+        "Sophea notices a dusty low table and offers to help."
+      ],
+      [
+        "ម៉ែឱ្យក្រណាត់ស្អាតមួយ។ សុភាជូតតុយឺតៗ រហូតដល់ស្អាត។",
+        "🧽",
+        "Sophea wipes the low table with a clean damp cloth."
+      ],
+      [
+        "ដារាចង់ជួយដែរ។ គាត់យកកែវដែលមិនងាយបែកមកដាក់លើតុ។",
+        "🥛",
+        "Dara places two unbreakable cups on the clean table."
+      ],
+      [
+        "គាត់ចាក់ទឹក តែទឹកហៀរបន្តិច។ ដារាឈប់ ហើយហៅប៉ាមកជួយ។",
+        "💧",
+        "A little water spills beside a cup; Dara stops pouring and asks Father for help."
+      ],
+      [
+        "ប៉ាថា៖ «មិនអីទេ យើងជូតបាន»។ ពួកគេជូតទឹកជាមួយគ្នា។",
+        "🤲",
+        "Father and Dara calmly wipe the small spill together."
+      ],
+      [
+        "លើកនេះ ដារាចាក់ទឹកយឺតជាងមុន។ គាត់ដាក់ដបទឹកចុះដោយប្រុងប្រយ័ត្ន។",
+        "🥛",
+        "Dara carefully pours a small amount into a cup with Father beside him."
+      ],
+      [
+        "សុភាជួយរៀបស្លាបព្រា។ ដារាជួយយកកន្ទេលមកក្រាល។",
+        "🥄",
+        "Sophea arranges spoons while Dara unrolls the family mat."
+      ],
+      [
+        "ម៉ែនិងប៉ាថា៖ «អរគុណកូនទាំងពីរ!» គ្រួសារអង្គុយញ៉ាំបាយជុំគ្នា។",
+        "💛",
+        "All four sit together around the prepared meal at the low table."
+      ],
+      [
+        "ដារាថា៖ «ថ្ងៃស្អែក ខ្ញុំចង់ជួយទៀត»។ សុភាថា៖ «ពេលពិបាក យើងជួយគ្នា!»",
+        "🤝",
+        "The two children smile at each other as the family finishes the meal."
+      ]
+    ],
+    "quiz": [
+      [
+        "តើសុភាជួយធ្វើអ្វី?",
+        "ជូតតុ និងរៀបស្លាបព្រា។"
+      ],
+      [
+        "តើមានអ្វីកើតឡើងពេលដារាចាក់ទឹក?",
+        "ទឹកហៀរបន្តិច។"
+      ],
+      [
+        "តើដារាធ្វើអ្វីពេលទឹកហៀរ?",
+        "គាត់ឈប់ ហើយសុំប៉ាជួយ។"
+      ],
+      [
+        "តើដារាផ្លាស់ប្ដូរអ្វីពេលចាក់ទឹកម្ដងទៀត?",
+        "គាត់ចាក់ទឹកយឺតជាងមុន។"
+      ],
+      [
+        "តើការងារតូចមួយណាដែលអ្នកចង់ជួយនៅផ្ទះ?",
+        "សំណួរបើកចំហ៖ ឱ្យកុមារជ្រើសរើសការងារដែលសមនឹងអាយុរបស់ខ្លួន។"
+      ]
+    ],
+    "meaning": "មនុស្សគ្រប់គ្នាអាចជួយបាន ហើយការសុំជំនួយក៏ជារឿងល្អ។",
+    "origin": {
+      "kind": "original",
+      "title": "Original Koda story",
+      "note": "Written in Khmer for this collection; familiar picture-book structures, not a translation of a modern English book."
+    },
+    "number": 5,
+    "readingMode": "Shared reading first; independent reading after teacher vocabulary review.",
+    "reviewStatus": "Draft: Khmer teacher review, approved word segmentation, illustration review and Library Studio validation pending.",
+    "characterReferences": [
+      "Dara: Cambodian boy, age 6, short straight black hair, warm medium-brown skin, curious rounded face.",
+      "Sophea: Cambodian girl, age 6, two short black pigtails, warm medium-brown skin, lively rounded face.",
+      "Mother: Cambodian adult woman, black hair tied back, warm medium-brown skin; use book-specific clothing.",
+      "Father: Cambodian adult man, short black hair, warm medium-brown skin; use book-specific clothing."
+    ]
+  },
+  {
+    "id": "malas-first-day",
+    "title": "ថ្ងៃដំបូងរបស់មាលា",
+    "en": "Mala’s First Day",
+    "stage": 2,
+    "icon": "🏫",
+    "wash": "#dae8ff",
+    "context": "The first morning at a Cambodian primary school.",
+    "why": "A small emotional story gives children language for uncertainty, welcome and friendship.",
+    "focus": "Identify feelings; describe how a problem changes.",
+    "link": "Complements school and teacher texts km-g1-101 and km-g1-102; suitable for shared reading until the story’s clusters have been taught.",
+    "words": [
+      "សាលា",
+      "គ្រូ",
+      "មិត្ត",
+      "លេង"
+    ],
+    "cast": "Mala, a Cambodian girl aged six with a short black bob, white school blouse, navy skirt and a green school bag; Sophea in the same school colours; teacher Srey Mom in a pale blue blouse and dark skirt.",
+    "cover": "Mala stands at a Cambodian primary classroom doorway holding a green bag; Sophea offers a friendly wave and teacher Srey Mom welcomes her. A shaded courtyard is visible beyond.",
+    "pages": [
+      [
+        "មាលាមកសាលាថ្មីជាមួយម៉ែ។ នាងកាន់កាបូបបៃតងជាប់ដៃ។",
+        "🏫",
+        "Mala and Mother arrive at a Cambodian primary school; Mala holds her green bag close."
+      ],
+      [
+        "ក្នុងថ្នាក់មានកុមារជាច្រើន។ មាលាមិនទាន់ស្គាល់អ្នកណាម្នាក់ទេ។",
+        "🎒",
+        "Mala stands quietly at the classroom doorway, looking at unfamiliar classmates."
+      ],
+      [
+        "ម៉ែចាប់ដៃនាងថ្នមៗ។ អ្នកគ្រូមកស្វាគមន៍ ហើយប្រាប់ឈ្មោះរបស់គាត់។",
+        "👩‍🏫",
+        "Mother reassures Mala as teacher Srey Mom introduces herself at the doorway."
+      ],
+      [
+        "សុភាឃើញមាលាឈរម្នាក់ឯង។ នាងរើកាបូបរបស់ខ្លួនចេញពីកន្លែងអង្គុយទំនេរ។",
+        "👋",
+        "Sophea moves her bag from an empty seat to make room for Mala."
+      ],
+      [
+        "«មកអង្គុយជាមួយខ្ញុំ!» សុភាហៅ។ មាលាអង្គុយ ហើយប្រាប់ឈ្មោះរបស់នាង។",
+        "🤝",
+        "Mala sits beside Sophea at a shared wooden desk; they greet each other."
+      ],
+      [
+        "អ្នកគ្រូឱ្យកុមារគូររូបដែលខ្លួនចូលចិត្ត។ មាលាគូរផ្កាមួយ ហើយសុភាគូរមេអំបៅ។",
+        "🌸",
+        "Mala draws a flower while Sophea draws a butterfly on separate sheets."
+      ],
+      [
+        "សុភាមើលរូបមាលា ហើយថា៖ «ផ្កានេះស្អាត!» មាលាញញឹម ហើយសួរអំពីមេអំបៅ។",
+        "🦋",
+        "The girls admire each other’s drawings and begin a conversation."
+      ],
+      [
+        "ពេលចេញលេង ពួកគេលេងបោះបាល់។ មាលាបោះខុស តែសុភាយកបាល់មកលេងបន្ត។",
+        "🏐",
+        "Mala’s gentle throw goes wide; Sophea retrieves the ball with a friendly smile."
+      ],
+      [
+        "ពេលម៉ែមកទទួល មាលារត់ទៅប្រាប់។ «ថ្ងៃនេះ ខ្ញុំមានមិត្តថ្មីម្នាក់!»",
+        "😊",
+        "Mala tells Mother about Sophea outside the school gate."
+      ],
+      [
+        "ថ្ងៃបន្ទាប់ មាលាឃើញក្មេងថ្មីឈរជិតទ្វារ។ នាងញញឹមថា៖ «មកអង្គុយជាមួយយើង!»",
+        "💛",
+        "Mala and Sophea welcome another new child to a shared desk."
+      ]
+    ],
+    "quiz": [
+      [
+        "តើមាលាមកសាលាជាមួយអ្នកណា?",
+        "ម៉ែ។"
+      ],
+      [
+        "តើសុភាធ្វើអ្វីដើម្បីឱ្យមាលាមានកន្លែងអង្គុយ?",
+        "នាងរើកាបូបចេញពីកន្លែងអង្គុយទំនេរ។"
+      ],
+      [
+        "តើមាលាគូររូបអ្វី?",
+        "ផ្កាមួយ។"
+      ],
+      [
+        "តើថ្ងៃបន្ទាប់មាលាស្វាគមន៍អ្នកណា?",
+        "ក្មេងថ្មីម្នាក់។"
+      ],
+      [
+        "បើមានមិត្តថ្មីនៅថ្នាក់ តើអ្នកអាចធ្វើអ្វីឱ្យគេមានអារម្មណ៍ល្អ?",
+        "សំណួរបើកចំហ៖ ស្វាគមន៍ អញ្ជើញអង្គុយ ឬអញ្ជើញលេងជាមួយ។"
+      ]
+    ],
+    "meaning": "មិត្តភាពអាចចាប់ផ្ដើមពីពាក្យស្វាគមន៍ និងការអញ្ជើញតូចមួយ។",
+    "origin": {
+      "kind": "original",
+      "title": "Original Koda story",
+      "note": "Written in Khmer for this collection; familiar picture-book structures, not a translation of a modern English book."
+    },
+    "number": 6,
+    "readingMode": "Shared reading first; independent reading after teacher vocabulary review.",
+    "reviewStatus": "Draft: Khmer teacher review, approved word segmentation, illustration review and Library Studio validation pending.",
+    "characterReferences": [
+      "Sophea: Cambodian girl, age 6, two short black pigtails, warm medium-brown skin, lively rounded face.",
+      "Mala: Cambodian girl, age 6, short straight black bob, warm medium-brown skin, thoughtful rounded face.",
+      "Mother: Cambodian adult woman, black hair tied back, warm medium-brown skin; use book-specific clothing.",
+      "Teacher Srey Mom: Cambodian adult woman, black hair tied back, warm medium-brown skin, pale blue blouse and dark skirt."
+    ]
+  },
+  {
+    "id": "missing-pencil",
+    "title": "ខ្មៅដៃដែលបាត់",
+    "en": "The Missing Pencil",
+    "stage": 2,
+    "icon": "✏️",
+    "wash": "#fbe6c7",
+    "context": "Two classmates drawing in a Cambodian primary classroom.",
+    "why": "A solvable mystery rewards attention to story details and models asking kindly before making assumptions.",
+    "focus": "Follow clues; answer questions with story evidence.",
+    "link": "ខ្ម in ខ្មៅ links to km-g1-069; useful after children can read the selected classroom vocabulary.",
+    "words": [
+      "ខ្មៅដៃ",
+      "តុ",
+      "កៅអី",
+      "រក"
+    ],
+    "cast": "Dara in white shirt and navy shorts; Sophea in white blouse and navy skirt; one recognisable yellow pencil and simple wooden school desks.",
+    "cover": "Dara and Sophea search beside their wooden desk. One yellow pencil is partly visible beneath Dara’s chair. Keep the scene curious and friendly, without anyone looking accused.",
+    "pages": [
+      [
+        "ដារានិងសុភាគូររូបនៅតុជាមួយគ្នា។ ដារាប្រើខ្មៅដៃពណ៌លឿងរបស់គាត់។",
+        "✏️",
+        "Dara draws beside Sophea at their school desk using one yellow pencil."
+      ],
+      [
+        "ពេលអ្នកគ្រូហៅ ដារាដាក់ខ្មៅដៃលើតុ។ គាត់ទៅយកក្រដាសមួយសន្លឹក។",
+        "📄",
+        "Dara leaves the yellow pencil near the desk edge and walks toward the teacher’s paper pile."
+      ],
+      [
+        "ខ្មៅដៃរមៀលពីតុ។ វាធ្លាក់នៅក្រោមកៅអីរបស់ដារា។",
+        "🪑",
+        "Show the pencil rolling from the desk and landing below Dara’s chair."
+      ],
+      [
+        "ដារាត្រឡប់មកវិញ ហើយរកខ្មៅដៃមិនឃើញ។ គាត់មើលខ្មៅដៃក្នុងដៃសុភា។",
+        "👀",
+        "Dara notices Sophea holding her own distinct blue pencil."
+      ],
+      [
+        "គាត់ចង់និយាយ តែឈប់គិតបន្តិច។ ខ្មៅដៃសុភាមានពណ៌ខៀវ មិនមែនពណ៌លឿងទេ។",
+        "💭",
+        "Close view contrasts Sophea’s blue pencil with Dara thinking about his missing yellow one."
+      ],
+      [
+        "ដារាសួរថា៖ «សុភា ឃើញខ្មៅដៃខ្ញុំទេ?» សុភាថា៖ «ខ្ញុំអាចជួយរកបាន»។",
+        "💬",
+        "Dara asks calmly and Sophea offers to help, with no accusing gestures."
+      ],
+      [
+        "ពួកគេមើលក្រោមសៀវភៅ។ រួចពួកគេអោនមើលក្រោមតុ។",
+        "🔎",
+        "The children check beneath books and then look under the desk."
+      ],
+      [
+        "សុភាឃើញខ្មៅដៃនៅក្រោមកៅអី។ នាងចង្អុល ហើយដារាលើកវាមកវិញ។",
+        "✏️",
+        "Sophea points to the yellow pencil under Dara’s chair; Dara retrieves it."
+      ],
+      [
+        "ដារាអរគុណសុភា។ គាត់ដាក់ខ្មៅដៃក្នុងប្រអប់ ពេលមិនប្រើ។",
+        "📦",
+        "Dara thanks Sophea and places the pencil into a simple pencil box."
+      ],
+      [
+        "អ្នកគ្រូសួរថា៖ «រកឃើញហើយឬ?» ដារាថា៖ «ឃើញហើយ យើងបានជួយគ្នារក!»",
+        "🤝",
+        "Teacher smiles as the two children return to drawing with their own pencils."
+      ]
+    ],
+    "quiz": [
+      [
+        "តើខ្មៅដៃដារាមានពណ៌អ្វី?",
+        "ពណ៌លឿង។"
+      ],
+      [
+        "តើខ្មៅដៃសុភាមានពណ៌អ្វី?",
+        "ពណ៌ខៀវ។"
+      ],
+      [
+        "តើខ្មៅដៃដារាបាត់ទៅណា?",
+        "វារមៀលធ្លាក់ក្រោមកៅអី។"
+      ],
+      [
+        "ហេតុអ្វីបានជាដារាដាក់ខ្មៅដៃក្នុងប្រអប់?",
+        "ដើម្បីទុកវាឱ្យមានរបៀប និងកុំឱ្យរមៀលធ្លាក់ទៀត។"
+      ],
+      [
+        "ពេលរករបស់មិនឃើញ តើគួរសួរមិត្តដូចម្ដេច?",
+        "សំណួរបើកចំហ៖ សួរដោយសុភាព ដោយមិនចោទប្រកាន់។"
+      ]
+    ],
+    "meaning": "ការសួរដោយសុភាព និងការមើលភស្តុតាង ជួយយើងយល់រឿងបានច្បាស់។",
+    "origin": {
+      "kind": "original",
+      "title": "Original Koda story",
+      "note": "Written in Khmer for this collection; familiar picture-book structures, not a translation of a modern English book."
+    },
+    "number": 7,
+    "readingMode": "Shared reading first; independent reading after teacher vocabulary review.",
+    "reviewStatus": "Draft: Khmer teacher review, approved word segmentation, illustration review and Library Studio validation pending.",
+    "characterReferences": [
+      "Dara: Cambodian boy, age 6, short straight black hair, warm medium-brown skin, curious rounded face.",
+      "Sophea: Cambodian girl, age 6, two short black pigtails, warm medium-brown skin, lively rounded face.",
+      "Teacher Srey Mom: Cambodian adult woman, black hair tied back, warm medium-brown skin, pale blue blouse and dark skirt."
+    ]
+  },
+  {
+    "id": "two-cakes",
+    "title": "នំពីរដុំ",
+    "en": "Two Cakes",
+    "stage": 2,
+    "icon": "🍰",
+    "wash": "#f9dfe9",
+    "context": "Sharing steamed pumpkin cake during school break.",
+    "why": "A familiar snack gives a concrete situation for counting, noticing another person and making a kind choice.",
+    "focus": "Retell a choice and its result; compare quantities.",
+    "link": "នំ connects to the family text km-g1-039; នំល្ពៅ adds ល្ព (km-g1-090), so offer teacher support where needed.",
+    "words": [
+      "នំ",
+      "ពីរ",
+      "មួយ",
+      "ចែក"
+    ],
+    "cast": "Sophea and Mala in white school blouses and navy skirts; a reusable food box containing exactly two orange pieces of steamed pumpkin cake.",
+    "cover": "Sophea offers Mala one of two orange pieces of steamed pumpkin cake, sitting together on a shaded school bench. Show both pieces clearly, with no candles or Western birthday cake.",
+    "pages": [
+      [
+        "សុភាយកនំល្ពៅពីរដុំមកសាលា។ ម៉ែដាក់វាក្នុងប្រអប់តូចមួយ។",
+        "🍰",
+        "Mother packs exactly two orange pieces of steamed pumpkin cake into Sophea’s reusable box."
+      ],
+      [
+        "ពេលចេញលេង សុភាលាងដៃ។ នាងអង្គុយក្រោមម្លប់ឈើជាមួយមាលា។",
+        "🧼",
+        "The girls wash their hands and sit on a shaded school bench."
+      ],
+      [
+        "សុភាបើកប្រអប់ ហើយឃើញនំពីរដុំ។ នាងចង់ញ៉ាំមួយ ហើយទុកមួយសម្រាប់ពេលក្រោយ។",
+        "🥡",
+        "Sophea considers the two cake pieces in her open box."
+      ],
+      [
+        "មាលានិយាយថា នាងភ្លេចប្រអប់នំនៅផ្ទះ។ នាងកំពុងរង់ចាំអាហារថ្ងៃត្រង់។",
+        "💬",
+        "Mala explains calmly; portray her without shame or exaggerated sadness."
+      ],
+      [
+        "សុភាមើលនំ រួចមើលមិត្ត។ នាងសួរថា៖ «តើអ្នកចង់ញ៉ាំនំល្ពៅទេ?»",
+        "🤲",
+        "Sophea offers one piece with an open hand, letting Mala choose."
+      ],
+      [
+        "មាលាថា៖ «ចង់ អរគុណ!» សុភាដាក់នំមួយដុំឱ្យនាង។",
+        "🍰",
+        "Mala accepts one piece; exactly one remains for Sophea."
+      ],
+      [
+        "ឥឡូវម្នាក់ៗមាននំមួយដុំ។ ពួកគេញ៉ាំយឺតៗ ហើយនិយាយពីរូបដែលបានគូរ។",
+        "😊",
+        "Each girl holds one piece and talks about their classroom drawings."
+      ],
+      [
+        "សុភាមិនមាននំសល់សម្រាប់ពេលក្រោយទេ។ តែនាងសប្បាយចិត្តដែលបានញ៉ាំជាមួយមិត្ត។",
+        "💛",
+        "The empty two-compartment box rests beside the girls as they chat."
+      ],
+      [
+        "ថ្ងៃបន្ទាប់ មាលាចាំយកប្រអប់របស់នាង។ ក្នុងនោះមានចេកពីរផ្លែ។",
+        "🍌",
+        "Mala arrives with her own reusable box containing exactly two bananas."
+      ],
+      [
+        "មាលាសួរថា៖ «ថ្ងៃនេះ យើងញ៉ាំជាមួយគ្នាទៀតទេ?» សុភាញញឹម ហើយអង្គុយក្បែរនាង។",
+        "👭",
+        "The two girls sit together again, sharing conversation and a relaxed snack."
+      ]
+    ],
+    "quiz": [
+      [
+        "តើសុភាមាននំអ្វី?",
+        "នំល្ពៅពីរដុំ។"
+      ],
+      [
+        "ហេតុអ្វីបានជាមាលាមិនមាននំនៅថ្ងៃនោះ?",
+        "នាងភ្លេចប្រអប់នំនៅផ្ទះ។"
+      ],
+      [
+        "តើសុភាសួរមាលាមុនចែកនំឬទេ?",
+        "សួរ។ នាងសួរថាមាលាចង់ញ៉ាំនំល្ពៅឬទេ។"
+      ],
+      [
+        "តើថ្ងៃបន្ទាប់មាលាយកអ្វីមក?",
+        "ចេកពីរផ្លែ។"
+      ],
+      [
+        "តើអ្នកអាចបង្ហាញការយកចិត្តទុកដាក់ចំពោះមិត្តតាមរបៀបណាទៀត?",
+        "សំណួរបើកចំហ៖ អញ្ជើញលេង ស្ដាប់ ឬជួយមិត្តពេលត្រូវការ។"
+      ]
+    ],
+    "meaning": "ការចែករំលែកកើតពីការយកចិត្តទុកដាក់ មិនមែនពីការបង្ខំ។",
+    "origin": {
+      "kind": "original",
+      "title": "Original Koda story",
+      "note": "Written in Khmer for this collection; familiar picture-book structures, not a translation of a modern English book."
+    },
+    "number": 8,
+    "readingMode": "Shared reading first; independent reading after teacher vocabulary review.",
+    "reviewStatus": "Draft: Khmer teacher review, approved word segmentation, illustration review and Library Studio validation pending.",
+    "characterReferences": [
+      "Sophea: Cambodian girl, age 6, two short black pigtails, warm medium-brown skin, lively rounded face.",
+      "Mala: Cambodian girl, age 6, short straight black bob, warm medium-brown skin, thoughtful rounded face.",
+      "Mother: Cambodian adult woman, black hair tied back, warm medium-brown skin; use book-specific clothing."
+    ]
+  },
+  {
+    "id": "market-with-grandma",
+    "title": "ទៅផ្សារជាមួយយាយ",
+    "en": "At the Market with Grandma",
+    "stage": 2,
+    "icon": "🧺",
+    "wash": "#def0d6",
+    "context": "A Cambodian morning market with vegetables and fruit.",
+    "why": "Children practise remembering a short list and checking a task in an everyday local setting.",
+    "focus": "Recall three items; distinguish items from distractions.",
+    "link": "Develops the market theme already present in starter-market-km.json. Final clusters in ផ្សារ, ស្វាយ and ត្រកួន need teacher review.",
+    "words": [
+      "ផ្សារ",
+      "ត្រី",
+      "ស្វាយ",
+      "កន្ត្រក"
+    ],
+    "cast": "Dara in a yellow T-shirt and navy shorts; Grandma in her indigo blouse and checked krama; a woman vendor in a plain green blouse; one bamboo basket.",
+    "cover": "Grandma and Dara stand at a Cambodian market stall with distinct baskets of mangoes and water spinach, and fish displayed separately on ice. Dara holds their bamboo shopping basket.",
+    "pages": [
+      [
+        "ព្រឹកថ្ងៃសៅរ៍ យាយរៀបចំទៅផ្សារ។ ដារាសុំទៅជាមួយ ដើម្បីជួយទិញម្ហូប។",
+        "🧺",
+        "Grandma and Dara prepare a bamboo basket for a Saturday morning market visit."
+      ],
+      [
+        "យាយថា៖ «យើងត្រូវការត្រី ត្រកួន និងស្វាយ»។ ដារាគូររូបតូចបីលើក្រដាស។",
+        "📄",
+        "Dara makes a picture list of fish, water spinach and mangoes, without AI-generated lettering."
+      ],
+      [
+        "នៅផ្សារ មានសំឡេងមនុស្សនិយាយ និងកន្ត្រកផ្លែឈើ។ ដារាកាន់ដៃយាយពេលដើរកាត់មនុស្ស។",
+        "🤝",
+        "The pair walk together through a lively but uncrowded Cambodian market aisle."
+      ],
+      [
+        "យាយទិញត្រីមួយនៅតូបត្រី។ ដារាមើលបញ្ជី ហើយចង្អុលរូបត្រី។",
+        "🐟",
+        "Grandma receives one fish in separate packaging; Dara checks the fish drawing."
+      ],
+      [
+        "ពួកគេទិញត្រកួនមួយបាច់។ យាយដាក់វាក្នុងកន្ត្រកដោយឡែកពីត្រី។",
+        "🥬",
+        "One tied bunch of water spinach goes into the basket apart from the wrapped fish."
+      ],
+      [
+        "ដារាឃើញចេកទុំ ហើយឈប់មើល។ គាត់ស្ទើរតែភ្លេចថាត្រូវទិញផ្លែអ្វីទៀត។",
+        "🍌",
+        "Dara is distracted by a banana display while holding his picture list."
+      ],
+      [
+        "យាយសួរថា៖ «ក្នុងបញ្ជីនៅសល់អ្វី?» ដារាមើលក្រដាស ហើយថា៖ «ស្វាយ!»",
+        "📋",
+        "Dara points to the one unchecked mango drawing on his list."
+      ],
+      [
+        "នៅតូបបន្ទាប់ មានស្វាយទុំ។ ដារាសុំអ្នកលក់ជួយជ្រើសផ្លែដែលមិនជាំ។",
+        "🥭",
+        "A friendly vendor helps Dara and Grandma choose undamaged ripe mangoes."
+      ],
+      [
+        "មុនត្រឡប់ ពួកគេពិនិត្យបញ្ជីម្ដងទៀត។ ត្រី ត្រកួន និងស្វាយមានគ្រប់ហើយ។",
+        "🧺",
+        "Show the three purchased item types clearly, matching the three-item picture list."
+      ],
+      [
+        "ដារាជួយរៀបម្ហូបនៅផ្ទះជាមួយយាយ។ គាត់ថា៖ «រូបតូចៗជួយខ្ញុំចាំបាន!»",
+        "🏡",
+        "At home Dara lays out the mangoes while Grandma handles the other ingredients."
+      ]
+    ],
+    "quiz": [
+      [
+        "តើពួកគេចង់ទិញរបស់អ្វីខ្លះ?",
+        "ត្រី ត្រកួន និងស្វាយ។"
+      ],
+      [
+        "តើដារាធ្វើអ្វីដើម្បីជួយចាំ?",
+        "គូររូបតូចបីលើក្រដាស។"
+      ],
+      [
+        "តើផ្លែអ្វីធ្វើឱ្យដារាឈប់មើល?",
+        "ចេកទុំ។"
+      ],
+      [
+        "ហេតុអ្វីបានជាពួកគេពិនិត្យបញ្ជីមុនត្រឡប់?",
+        "ដើម្បីប្រាកដថាទិញបានគ្រប់។"
+      ],
+      [
+        "បើអ្នកទៅផ្សារ តើអ្នកចង់ដាក់អ្វីក្នុងបញ្ជី?",
+        "សំណួរបើកចំហ៖ ឱ្យកុមារប្រាប់ ឬគូររបស់បីមុខ។"
+      ]
+    ],
+    "meaning": "ការស្ដាប់ និងការពិនិត្យបញ្ជី ជួយយើងទទួលខុសត្រូវចំពោះការងារ។",
+    "origin": {
+      "kind": "original",
+      "title": "Original Koda story",
+      "note": "Written in Khmer for this collection; familiar picture-book structures, not a translation of a modern English book."
+    },
+    "number": 9,
+    "readingMode": "Shared reading first; independent reading after teacher vocabulary review.",
+    "reviewStatus": "Draft: Khmer teacher review, approved word segmentation, illustration review and Library Studio validation pending.",
+    "characterReferences": [
+      "Dara: Cambodian boy, age 6, short straight black hair, warm medium-brown skin, curious rounded face.",
+      "Grandma: Cambodian older woman, grey-black hair in a low bun, expressive kind face; use the book-specific blouse and krama."
+    ]
+  },
+  {
+    "id": "little-seed",
+    "title": "គ្រាប់ពូជតូចមួយ",
+    "en": "A Little Seed",
+    "stage": 2,
+    "icon": "🌱",
+    "wash": "#d8edcf",
+    "context": "Growing mung beans in a reused pot beside a Cambodian home.",
+    "why": "A visible change over several days supports sequencing and the idea that care and patience matter.",
+    "focus": "Order events; notice what changes over time.",
+    "link": "Connects nature vocabulary with the project’s consonant-cluster lessons; គ្រ in គ្រាប់ links to km-g1-070. Read aloud before assigning independently if needed.",
+    "words": [
+      "ដី",
+      "ទឹក",
+      "ស្លឹក",
+      "ដុះ"
+    ],
+    "cast": "Mala in a peach shirt and dark shorts; Grandpa with short grey hair, a white cotton shirt and a checked krama; a reused blue planting pot with drainage holes.",
+    "cover": "Mala and Grandpa look closely at a tiny mung-bean shoot in a reused blue pot by a sunny veranda. Show soil, two small leaves and a modest home garden.",
+    "pages": [
+      [
+        "តាឱ្យមាលាគ្រាប់សណ្ដែកមួយ។ មាលាសួរថា៖ «វាអាចក្លាយជាដើមបានមែនទេ?»",
+        "🫘",
+        "Grandpa places one mung bean in Mala’s palm beside the home garden."
+      ],
+      [
+        "តាជួយរកផើងដែលមានរន្ធបង្ហូរទឹក។ មាលាដាក់ដីក្នុងផើង ហើយធ្វើរន្ធតូចមួយ។",
+        "🪴",
+        "Grandpa shows the drainage holes in the reused blue pot; Mala adds soil."
+      ],
+      [
+        "នាងដាក់គ្រាប់សណ្ដែកក្នុងដី ហើយលុបថ្នមៗ។ នាងស្រោចទឹកបន្តិចឱ្យដីសើម។",
+        "💧",
+        "Mala plants one bean shallowly, covers it and adds a small amount of water."
+      ],
+      [
+        "មាលាដាក់ផើងនៅកន្លែងមានពន្លឺ។ នាងឈរមើលយូរ តែគ្មានអ្វីលេចឡើងទេ។",
+        "☀️",
+        "The pot sits in gentle daylight; Mala waits beside it expectantly."
+      ],
+      [
+        "ថ្ងៃបន្ទាប់ មាលារត់ទៅមើលផើង។ ដីនៅស្ងាត់ ហើយនាងចង់ជីកមើលគ្រាប់។",
+        "👀",
+        "Mala looks at the unchanged surface and reaches hesitantly toward it."
+      ],
+      [
+        "តាថា៖ «យើងទុកវាឱ្យដុះសិន»។ មាលាដកដៃ ហើយរង់ចាំ។",
+        "🤲",
+        "Grandpa gently explains; Mala leaves the soil undisturbed."
+      ],
+      [
+        "រាល់ថ្ងៃ នាងពិនិត្យមើលដី។ ពេលដីចាប់ផ្ដើមស្ងួត នាងស្រោចទឹកបន្តិច។",
+        "🪴",
+        "Show Mala checking the soil carefully before watering, not flooding it."
+      ],
+      [
+        "ប៉ុន្មានថ្ងៃក្រោយ ពន្លកតូចមួយលេចចេញ។ មាលាហៅតាមកមើលទាំងសប្បាយចិត្ត។",
+        "🌱",
+        "A small shoot emerges from the blue pot; Mala calls Grandpa over."
+      ],
+      [
+        "មិនយូរប៉ុន្មាន ស្លឹកបៃតងពីរបើកឡើង។ មាលាគូររូបដើមតូចដាក់ក្នុងសៀវភៅ។",
+        "🌿",
+        "The bean seedling has exactly two leaves; Mala draws it in her notebook."
+      ],
+      [
+        "នាងប្រាប់តាថា៖ «វាមិនដុះភ្លាមទេ តែវាកំពុងដុះ»។ តាញញឹម ហើយពួកគេថែវាបន្ត។",
+        "💛",
+        "Mala and Grandpa admire the healthy young seedling beside her drawing."
+      ]
+    ],
+    "quiz": [
+      [
+        "តើតាឱ្យមាលាគ្រាប់អ្វី?",
+        "គ្រាប់សណ្ដែក។"
+      ],
+      [
+        "ហេតុអ្វីបានជាផើងមានរន្ធនៅបាត?",
+        "ដើម្បីឱ្យទឹកហូរចេញបាន។"
+      ],
+      [
+        "តើមាលាចង់ធ្វើអ្វីពេលមិនឃើញពន្លក?",
+        "ចង់ជីកមើលគ្រាប់។"
+      ],
+      [
+        "តើមាលាធ្វើអ្វីពេលដីចាប់ផ្ដើមស្ងួត?",
+        "ស្រោចទឹកបន្តិច។"
+      ],
+      [
+        "តើអ្នកធ្លាប់រង់ចាំអ្វីដែលត្រូវការពេលដែរឬទេ?",
+        "សំណួរបើកចំហ៖ ឱ្យកុមារភ្ជាប់រឿងទៅបទពិសោធន៍របស់ខ្លួន។"
+      ]
+    ],
+    "meaning": "ការរីកលូតលាស់ត្រូវការពេល និងការថែទាំជាប្រចាំ។",
+    "origin": {
+      "kind": "original",
+      "title": "Original Koda story",
+      "note": "Written in Khmer for this collection; familiar picture-book structures, not a translation of a modern English book."
+    },
+    "number": 10,
+    "readingMode": "Shared reading first; independent reading after teacher vocabulary review.",
+    "reviewStatus": "Draft: Khmer teacher review, approved word segmentation, illustration review and Library Studio validation pending.",
+    "characterReferences": [
+      "Mala: Cambodian girl, age 6, short straight black bob, warm medium-brown skin, thoughtful rounded face.",
+      "Grandpa: Cambodian older man, short grey hair, warm medium-brown skin, gentle lined face; use book-specific clothing."
+    ]
+  },
+  {
+    "id": "rain-is-here",
+    "title": "ភ្លៀងមកហើយ!",
+    "en": "Here Comes the Rain!",
+    "stage": 3,
+    "icon": "🌧️",
+    "wash": "#dce9f6",
+    "context": "A rainy-season afternoon beside Cambodian rice fields.",
+    "why": "A local seasonal scene connects observation, weather changes and why growing rice needs water.",
+    "focus": "Sequence weather events; connect a cause with a result.",
+    "link": "ភ្ល in ភ្លៀង links to km-g1-086; ស្រែ to the ស្រ pattern at km-g1-091. Intended for later Grade 1 or shared reading.",
+    "words": [
+      "ភ្លៀង",
+      "ពពក",
+      "ទឹក",
+      "ស្រែ"
+    ],
+    "cast": "Dara in a yellow shirt and navy shorts; Grandpa in a white shirt and checked krama; a shaded veranda overlooking a small rice field.",
+    "cover": "Dara and Grandpa watch seasonal rain from safely under the veranda roof. Beyond them, fresh green rice plants stand in a shallow field; clouds are soft rather than frightening.",
+    "pages": [
+      [
+        "រសៀលមួយ ដារាមើលទៅវាលស្រែក្បែរផ្ទះតា។ គាត់ឃើញស្រូវតូចៗជាជួរ។",
+        "🌾",
+        "Dara and Grandpa look across a modest rice field near their Cambodian home."
+      ],
+      [
+        "ពពកខ្មៅមកដល់លើមេឃ។ ខ្យល់បក់ស្លឹកឈើ ហើយអាកាសត្រជាក់ចុះ។",
+        "☁️",
+        "Soft dark clouds gather and leaves move in a breeze above the field."
+      ],
+      [
+        "ដារាចង់ឈរមើលទៀត។ តាហៅគាត់ចូលសម្រាកក្រោមដំបូលផ្ទះ។",
+        "🏡",
+        "Grandpa invites Dara into the covered veranda before the rain begins."
+      ],
+      [
+        "មិនយូរប៉ុន្មាន ភ្លៀងធ្លាក់ចុះ។ ទឹកភ្លៀងលោតលើដី និងស្លឹកស្រូវ។",
+        "🌧️",
+        "Rain falls on rice leaves while both people remain under the roof."
+      ],
+      [
+        "ដារាសួរថា៖ «ហេតុអ្វីបានជាតាសប្បាយចិត្ត?» តាចង្អុលទៅទឹកដែលចូលក្នុងស្រែ។",
+        "💬",
+        "Dara asks Grandpa a question as shallow water collects in the field."
+      ],
+      [
+        "«ស្រូវត្រូវការទឹកដើម្បីដុះ» តាឆ្លើយ។ «យើងត្រូវមើលទឹកឱ្យសមល្មមផង»។",
+        "💧",
+        "Grandpa points to a modest, appropriate water level around the rice plants."
+      ],
+      [
+        "ដារាគិតដល់បាយក្នុងចានរបស់គាត់។ គាត់សួរថា៖ «បាយយើងមកពីស្រូវនេះឬ?»",
+        "🍚",
+        "A small thought vignette connects rice plants to Dara’s bowl of cooked rice."
+      ],
+      [
+        "តាថា៖ «បាទ ស្រូវឱ្យគ្រាប់ ហើយយើងយកទៅកិនបានអង្ករ»។ ដារាស្ដាប់ ហើយមើលវាលស្រែម្ដងទៀត។",
+        "🌾",
+        "Grandpa shows rice grains and milled rice in separate small bowls as they talk under the veranda."
+      ],
+      [
+        "ពេលភ្លៀងរាំង ខ្យល់មានក្លិនដីសើម។ ពួកគេមើលស្រែពីផ្លូវស្ងួតក្បែរផ្ទះ។",
+        "🌤️",
+        "After the rain they stand together on a dry path, observing the field at a safe distance."
+      ],
+      [
+        "ពេលញ៉ាំបាយ ដារានឹកដល់ភ្លៀងនិងអ្នកធ្វើស្រែ។ គាត់ថា៖ «បាយមួយចានមានការថែទាំច្រើនណាស់!»",
+        "💛",
+        "At the family meal Dara looks thoughtfully at his bowl while Grandpa smiles."
+      ]
+    ],
+    "quiz": [
+      [
+        "តើតាហៅដារាទៅណាមុនភ្លៀង?",
+        "ចូលក្រោមដំបូលផ្ទះ។"
+      ],
+      [
+        "តើស្រូវត្រូវការអ្វីដើម្បីដុះ?",
+        "ទឹក។"
+      ],
+      [
+        "តើយកស្រូវទៅកិនបានអ្វី?",
+        "អង្ករ។"
+      ],
+      [
+        "ហេតុអ្វីបានជាដារានឹកដល់អ្នកធ្វើស្រែពេលញ៉ាំបាយ?",
+        "គាត់បានយល់ថាបាយមកពីស្រូវដែលត្រូវការទឹកនិងការថែទាំ។"
+      ],
+      [
+        "តើមានអាហារអ្វីទៀតដែលអ្នកចង់ដឹងថាមកពីណា?",
+        "សំណួរបើកចំហ៖ លើកទឹកចិត្តឱ្យកុមារសួរអំពីអាហារដែលខ្លួនស្គាល់។"
+      ]
+    ],
+    "meaning": "ការមើលនិងសួរ ជួយយើងយល់ថាធម្មជាតិភ្ជាប់នឹងជីវិតមនុស្ស។",
+    "origin": {
+      "kind": "original",
+      "title": "Original Koda story",
+      "note": "Written in Khmer for this collection; familiar picture-book structures, not a translation of a modern English book."
+    },
+    "number": 11,
+    "readingMode": "Shared reading first; independent reading after teacher vocabulary review.",
+    "reviewStatus": "Draft: Khmer teacher review, approved word segmentation, illustration review and Library Studio validation pending.",
+    "characterReferences": [
+      "Dara: Cambodian boy, age 6, short straight black hair, warm medium-brown skin, curious rounded face.",
+      "Grandpa: Cambodian older man, short grey hair, warm medium-brown skin, gentle lined face; use book-specific clothing."
+    ]
+  },
+  {
+    "id": "where-rubbish-goes",
+    "title": "សំរាមទៅណា?",
+    "en": "Where Does the Rubbish Go?",
+    "stage": 3,
+    "icon": "🗑️",
+    "wash": "#d8eee7",
+    "context": "Caring for a shared Cambodian school courtyard.",
+    "why": "A problem children can recognise links reading to asking for adult help and caring for a shared place.",
+    "focus": "Explain a problem, an action and the result.",
+    "link": "ស្រ/ស្អ and other clusters connect broadly to km-g1-091–092. This is a comprehension story, not a waste-sorting curriculum.",
+    "words": [
+      "សំរាម",
+      "ធុង",
+      "គ្រូ",
+      "ស្អាត"
+    ],
+    "cast": "Sophea and Dara in white-and-navy school uniforms; teacher Srey Mom in a pale blue blouse and dark skirt; a broom, dustpan and lidded rubbish bin.",
+    "cover": "Two children point out paper litter in their school courtyard while teacher Srey Mom brings a broom and dustpan. A lidded bin stands near a tree, away from a water channel.",
+    "pages": [
+      [
+        "ពេលចេញលេង សុភានិងដារាយកបាល់ទៅទីធ្លា។ ពួកគេចង់លេងក្រោមម្លប់ឈើ។",
+        "🏐",
+        "The two children carry a ball toward a shaded school courtyard."
+      ],
+      [
+        "លើដីមានក្រដាសនិងថង់ទទេ។ បាល់របស់ពួកគេរមៀលទៅក្បែរសំរាម។",
+        "📄",
+        "A few clean paper scraps and an empty bag lie near the ball, without sharp or hazardous waste."
+      ],
+      [
+        "ដារាចង់យកដៃប្រមូលភ្លាម។ សុភាថា៖ «យើងសុំអ្នកគ្រូជួយសិន»។",
+        "🙋",
+        "Sophea suggests asking the teacher; Dara pauses before handling the litter."
+      ],
+      [
+        "អ្នកគ្រូយកអំបោស និងប្រដាប់កើបសំរាមមក។ គាត់ពិនិត្យមើលកន្លែងនោះមុនចាប់ផ្ដើម។",
+        "🧹",
+        "Teacher Srey Mom checks the litter and brings a broom and dustpan."
+      ],
+      [
+        "ដារាជួយកាន់ដងប្រដាប់កើប។ អ្នកគ្រូបោសក្រដាសចូលដោយប្រុងប្រយ័ត្ន។",
+        "🤲",
+        "Dara holds the dustpan handle while the teacher sweeps the paper into it."
+      ],
+      [
+        "អ្នកគ្រូដាក់សំរាមក្នុងធុង ហើយបិទគម្រប។ សុភាយកបាល់ទៅដាក់ឱ្យឆ្ងាយពីធុង។",
+        "🗑️",
+        "Teacher empties the dustpan into a lidded bin while Sophea moves the ball aside."
+      ],
+      [
+        "ពួកគេលាងដៃនឹងទឹកនិងសាប៊ូ។ ឥឡូវទីធ្លាស្អាត ហើយអាចលេងបាន។",
+        "🧼",
+        "The teacher and children wash hands with soap at the school tap."
+      ],
+      [
+        "ថ្ងៃបន្ទាប់ សុភាឃើញមិត្តកាន់ថង់នំទទេ។ នាងចង្អុលធុងសំរាមឱ្យមិត្តមើល។",
+        "💬",
+        "Sophea kindly points out the nearby bin to a classmate holding an empty snack wrapper."
+      ],
+      [
+        "មិត្តដាក់ថង់ចូលធុង។ ដារាថា៖ «យើងមិនចាំបាច់រង់ចាំឱ្យទីធ្លាកខ្វក់ទេ»។",
+        "🗑️",
+        "The classmate puts the wrapper directly into the bin; Dara smiles."
+      ],
+      [
+        "ពួកគេចាប់ផ្ដើមលេងបោះបាល់។ កន្លែងតូចរបស់ពួកគេស្អាត ព្រោះមនុស្សជាច្រើនជួយថែ។",
+        "💚",
+        "Several children enjoy the clean courtyard together beneath the shade tree."
+      ]
+    ],
+    "quiz": [
+      [
+        "តើអ្វីនៅលើដីក្នុងទីធ្លា?",
+        "ក្រដាស និងថង់ទទេ។"
+      ],
+      [
+        "តើសុភាសុំអ្នកណាជួយ?",
+        "អ្នកគ្រូ។"
+      ],
+      [
+        "តើពួកគេធ្វើអ្វីបន្ទាប់ពីសម្អាត?",
+        "លាងដៃនឹងទឹកនិងសាប៊ូ។"
+      ],
+      [
+        "តើការដាក់ថង់ចូលធុងភ្លាមជួយអ្វី?",
+        "ជួយកុំឱ្យសំរាមនៅលើដី និងរក្សាទីធ្លាស្អាត។"
+      ],
+      [
+        "តើអ្នកអាចជួយថែកន្លែងរួមមួយណា?",
+        "សំណួរបើកចំហ៖ ថ្នាក់រៀន ទីធ្លា ផ្ទះ ឬកន្លែងលេង។"
+      ]
+    ],
+    "meaning": "កន្លែងរួមស្អាតបាន ពេលយើងជួយគ្នា និងផ្លាស់ប្ដូរទម្លាប់។",
+    "origin": {
+      "kind": "original",
+      "title": "Original Koda story",
+      "note": "Written in Khmer for this collection; familiar picture-book structures, not a translation of a modern English book."
+    },
+    "number": 12,
+    "readingMode": "Shared reading first; independent reading after teacher vocabulary review.",
+    "reviewStatus": "Draft: Khmer teacher review, approved word segmentation, illustration review and Library Studio validation pending.",
+    "characterReferences": [
+      "Dara: Cambodian boy, age 6, short straight black hair, warm medium-brown skin, curious rounded face.",
+      "Sophea: Cambodian girl, age 6, two short black pigtails, warm medium-brown skin, lively rounded face.",
+      "Teacher Srey Mom: Cambodian adult woman, black hair tied back, warm medium-brown skin, pale blue blouse and dark skirt."
+    ]
+  },
+  {
+    "id": "our-paper-boat",
+    "title": "ទូកក្រដាសរបស់យើង",
+    "en": "Our Paper Boat",
+    "stage": 3,
+    "icon": "⛵",
+    "wash": "#dce7ff",
+    "context": "Inspired by boat-race pictures during Cambodia’s Water Festival; tested in a basin at home.",
+    "why": "Connects a Cambodian celebration to a small making activity, with a clear try–observe–improve sequence.",
+    "focus": "Retell steps; explain why a second attempt changes.",
+    "link": "ក្រដាស includes ក្រ (km-g1-067); បណ្ដែត and other stacked forms require later reading support. Match words individually before Studio import.",
+    "words": [
+      "ទូក",
+      "ក្រដាស",
+      "ទឹក",
+      "បត់"
+    ],
+    "cast": "Dara in a yellow shirt; Sophea in a mint shirt; Grandma in an indigo blouse; a paper boat and a shallow blue basin on the veranda.",
+    "cover": "Dara and Sophea float a little paper boat in a shallow blue basin on the veranda. Grandma sits nearby with an unlettered picture of a Cambodian longboat race; make the real festival boat visibly different from the toy.",
+    "pages": [
+      [
+        "ជិតដល់បុណ្យអុំទូក យាយបង្ហាញរូបទូកប្រណាំង។ ដារានិងសុភាមើលអ្នកអុំអង្គុយជាជួរ។",
+        "🚣",
+        "Grandma shows a picture of a Cambodian Water Festival longboat race, with rowers seated in a clear line."
+      ],
+      [
+        "សុភាថា៖ «ទូកវែងណាស់!» ដារាថា៖ «យើងធ្វើទូកតូចមួយបានទេ?»",
+        "💬",
+        "The two children compare the longboat picture with a blank paper sheet."
+      ],
+      [
+        "យាយយកក្រដាសស្អាតមួយសន្លឹក។ គាត់បត់យឺតៗឱ្យកុមារមើល។",
+        "📄",
+        "Grandma demonstrates folding at a low table on the veranda."
+      ],
+      [
+        "ដារានិងសុភាបត់តាមម្ដងមួយជំហាន។ ពេលមិនយល់ ពួកគេសុំយាយបង្ហាញម្ដងទៀត។",
+        "🤲",
+        "Both children copy one fold while Grandma shows her hands clearly."
+      ],
+      [
+        "ពួកគេបានទូកក្រដាសមួយ។ សុភាដាក់ទឹកក្នុងអាងតូច ដោយមានយាយនៅក្បែរ។",
+        "⛵",
+        "A finished paper boat sits beside a shallow blue basin with Grandma supervising."
+      ],
+      [
+        "ដារាដាក់ទូកក្នុងទឹក។ ទូកផ្អៀង ហើយគាត់ខកចិត្តបន្តិច។",
+        "💧",
+        "The first boat tilts in the basin; Dara looks disappointed but calm."
+      ],
+      [
+        "យាយសួរថា៖ «តើយើងសង្កេតឃើញអ្វី?» សុភាឃើញថាបាតទូកម្ខាងខ្ពស់ជាងម្ខាង។",
+        "🔎",
+        "Sophea points to the uneven base of the first paper boat."
+      ],
+      [
+        "ពួកគេបត់ទូកថ្មី ហើយធ្វើបាតឱ្យស្មើ។ ដារាចុចផ្នត់ថ្នមៗ មិនប្រញាប់ដូចមុន។",
+        "📄",
+        "The children carefully flatten a new boat’s base on the table."
+      ],
+      [
+        "លើកនេះ ទូកអណ្ដែតត្រង់លើទឹក។ សុភានិងដារាទះដៃតិចៗដោយរីករាយ។",
+        "😊",
+        "The second boat floats upright in the shallow basin; the children celebrate."
+      ],
+      [
+        "យាយថា៖ «យើងបានរៀនពីទូកទីមួយ»។ ដារាញញឹមថា៖ «វាជួយឱ្យយើងធ្វើទូកទីពីរបានល្អ!»",
+        "💛",
+        "Show both attempts side by side: the tilted first boat on the table and the improved second boat floating."
+      ]
+    ],
+    "quiz": [
+      [
+        "តើរូបទូកប្រណាំងភ្ជាប់នឹងបុណ្យអ្វី?",
+        "បុណ្យអុំទូក។"
+      ],
+      [
+        "តើកុមារសាកទូកនៅឯណា?",
+        "ក្នុងអាងទឹកតូច។"
+      ],
+      [
+        "ហេតុអ្វីបានជាទូកទីមួយផ្អៀង?",
+        "ព្រោះបាតទូកមិនស្មើ។"
+      ],
+      [
+        "តើពួកគេផ្លាស់ប្ដូរអ្វីពេលធ្វើទូកទីពីរ?",
+        "បត់យឺតៗ និងធ្វើបាតឱ្យស្មើ។"
+      ],
+      [
+        "តើអ្នកធ្លាប់សាកម្ដងទៀតបន្ទាប់ពីធ្វើមិនបានដែរឬទេ?",
+        "សំណួរបើកចំហ៖ ឱ្យកុមារប្រាប់ពីការសាកល្បងរបស់ខ្លួន។"
+      ]
+    ],
+    "meaning": "ពេលលើកដំបូងមិនសម្រេច យើងអាចមើលមូលហេតុ ហើយសាកម្ដងទៀត។",
+    "origin": {
+      "kind": "original",
+      "title": "Original Koda story",
+      "note": "Written in Khmer for this collection; familiar picture-book structures, not a translation of a modern English book."
+    },
+    "number": 13,
+    "readingMode": "Shared reading first; independent reading after teacher vocabulary review.",
+    "reviewStatus": "Draft: Khmer teacher review, approved word segmentation, illustration review and Library Studio validation pending.",
+    "characterReferences": [
+      "Dara: Cambodian boy, age 6, short straight black hair, warm medium-brown skin, curious rounded face.",
+      "Sophea: Cambodian girl, age 6, two short black pigtails, warm medium-brown skin, lively rounded face.",
+      "Grandma: Cambodian older woman, grey-black hair in a low bun, expressive kind face; use the book-specific blouse and krama."
+    ]
+  },
+  {
+    "id": "night-sounds",
+    "title": "សំឡេងពេលយប់",
+    "en": "Sounds at Night",
+    "stage": 3,
+    "icon": "🌙",
+    "wash": "#deddf7",
+    "context": "A Cambodian family listens to geckos and frogs after rain.",
+    "why": "A reassuring listening story encourages curiosity, careful observation and connecting sounds to their sources.",
+    "focus": "Match a description to an animal; compare two sounds.",
+    "link": "កង្កែប includes stacked ង្ក (km-g1-093); share aloud earlier, assign independent reading only after a vocabulary check.",
+    "words": [
+      "យប់",
+      "តុកកែ",
+      "កង្កែប",
+      "ភ្លៀង"
+    ],
+    "cast": "Mala in peach pyjamas; her mother in a rose blouse; a gecko high on the wall and frogs near a garden pond seen from the veranda.",
+    "cover": "Mala and her mother sit together on a softly lit Cambodian veranda after rain. A small gecko stays high on the wall and a frog rests beside a garden pond. Calm deep blue tones, no frightening shadows.",
+    "pages": [
+      [
+        "ក្រោយភ្លៀង មាលាអង្គុយជិតម៉ែលើរានផ្ទះ។ មេឃងងឹត តែចង្កៀងបំភ្លឺកន្លែងអង្គុយ។",
+        "🌙",
+        "Mala and Mother sit on their softly lit veranda after rain; the garden beyond is dark but calm."
+      ],
+      [
+        "មាលាឮសំឡេងខ្លាំងមួយ។ «តុកកែ! តុកកែ!» សំឡេងនោះមកពីខាងលើ។",
+        "👂",
+        "Mala looks up curiously as a sound comes from high on the wall."
+      ],
+      [
+        "នាងចាប់ដៃម៉ែ ហើយសួរថា៖ «សំឡេងអ្វី?» ម៉ែថា៖ «យើងមើលជាមួយគ្នា»។",
+        "🤝",
+        "Mother reassures Mala by holding her hand and looking toward the wall."
+      ],
+      [
+        "ម៉ែចង្អុលទៅតុកកែមួយលើជញ្ជាំង។ វានៅខ្ពស់ ហើយមាលាមើលពីចម្ងាយ។",
+        "🦎",
+        "A recognisable tokay gecko clings high on the wall; no one touches it."
+      ],
+      [
+        "មាលាស្ដាប់វាម្ដងទៀត។ ឥឡូវនាងស្គាល់ថាសំឡេងនោះមកពីណា។",
+        "😊",
+        "Mala listens calmly and smiles as she spots the gecko herself."
+      ],
+      [
+        "ពីសួនមានសំឡេងមួយទៀត។ សំឡេងនេះមិនដូចសំឡេងតុកកែទេ។",
+        "🌿",
+        "Both characters turn toward the damp garden, where a different sound comes from near the ground."
+      ],
+      [
+        "ម៉ែថា៖ «កង្កែបកំពុងយំក្រោយភ្លៀង»។ មាលាឃើញកង្កែបមួយក្បែរអាងទឹកក្នុងសួន។",
+        "🐸",
+        "From the veranda they see a frog beside a small garden pond."
+      ],
+      [
+        "ពួកគេអង្គុយស្ងាត់មួយភ្លែត។ មាលាបែងចែកសំឡេងលើជញ្ជាំង និងសំឡេងក្នុងសួន។",
+        "👂",
+        "Mala listens with Mother; gecko high on the wall and frog low in the garden are both visible."
+      ],
+      [
+        "មុនចូលគេង នាងគូររូបសត្វទាំងពីរ។ នាងប្រាប់ប៉ាថា៖ «ខ្ញុំស្គាល់សំឡេងពួកវាហើយ!»",
+        "✏️",
+        "Mala shows Father a simple drawing of the gecko and frog indoors."
+      ],
+      [
+        "យប់បន្ទាប់ មាលាឮសំឡេងដដែល។ នាងញញឹម ហើយប្រាប់ម៉ែថា៖ «មិត្តក្នុងសួនកំពុងយំទៀតហើយ!»",
+        "🌙",
+        "Mala smiles beside Mother on the veranda, now relaxed and curious about the familiar night sounds."
+      ]
+    ],
+    "quiz": [
+      [
+        "តើមាលាអង្គុយជិតអ្នកណា?",
+        "ម៉ែ។"
+      ],
+      [
+        "តើតុកកែនៅឯណា?",
+        "លើជញ្ជាំង។"
+      ],
+      [
+        "តើសត្វអ្វីយំក្នុងសួនក្រោយភ្លៀង?",
+        "កង្កែប។"
+      ],
+      [
+        "តើអ្វីជួយឱ្យមាលាស្គាល់សំឡេងទាំងពីរ?",
+        "នាងសួរម៉ែ ស្ដាប់ និងមើលសត្វជាមួយគ្នា។"
+      ],
+      [
+        "តើអ្នកស្គាល់សំឡេងអ្វីខ្លះនៅជិតផ្ទះ?",
+        "សំណួរបើកចំហ៖ ឱ្យកុមាររៀបរាប់សំឡេងដែលខ្លួនស្គាល់។"
+      ]
+    ],
+    "meaning": "ពេលមិនស្គាល់អ្វីមួយ យើងអាចសួរ ស្ដាប់ និងសង្កេតជាមួយអ្នកដែលទុកចិត្ត។",
+    "origin": {
+      "kind": "original",
+      "title": "Original Koda story",
+      "note": "Written in Khmer for this collection; familiar picture-book structures, not a translation of a modern English book."
+    },
+    "number": 14,
+    "readingMode": "Shared reading first; independent reading after teacher vocabulary review.",
+    "reviewStatus": "Draft: Khmer teacher review, approved word segmentation, illustration review and Library Studio validation pending.",
+    "characterReferences": [
+      "Mala: Cambodian girl, age 6, short straight black bob, warm medium-brown skin, thoughtful rounded face.",
+      "Mother: Cambodian adult woman, black hair tied back, warm medium-brown skin; use book-specific clothing.",
+      "Father: Cambodian adult man, short black hair, warm medium-brown skin; use book-specific clothing."
+    ]
+  },
+  {
+    "id": "the-book-we-made",
+    "title": "សៀវភៅដែលយើងធ្វើ",
+    "en": "The Book We Made",
+    "stage": 3,
+    "icon": "📖",
+    "wash": "#eadfff",
+    "context": "A Cambodian classroom makes a Khmer book about places children know.",
+    "why": "A final making story gives children a model for becoming Khmer authors, using their own experiences.",
+    "focus": "Sequence a shared project; connect pictures with sentences.",
+    "link": "A companion to km-g1-101–102 and an end-of-collection retelling activity. Children can dictate sentences before writing them independently.",
+    "words": [
+      "គូរ",
+      "សរសេរ",
+      "សៀវភៅ",
+      "អាន"
+    ],
+    "cast": "Dara, Sophea and Mala in white-and-navy school uniforms; teacher Srey Mom in a pale blue blouse and dark skirt; cream paper bound with purple yarn.",
+    "cover": "Three Cambodian children proudly hold a handmade book bound with purple yarn in their classroom. Small drawings show a home, a neighbourhood market and a rice field. Leave title lettering to the HTML overlay.",
+    "pages": [
+      [
+        "អ្នកគ្រូដាក់ក្រដាសស្អាតលើតុ។ គាត់ថា៖ «ថ្ងៃនេះ យើងធ្វើសៀវភៅរបស់យើង!»",
+        "📄",
+        "Teacher Srey Mom sets blank cream paper and purple yarn on the classroom table."
+      ],
+      [
+        "ដារាសួរថា៖ «យើងត្រូវសរសេរអំពីអ្វី?» អ្នកគ្រូថា៖ «អំពីកន្លែងដែលកូនស្គាល់»។",
+        "💬",
+        "Dara asks the teacher a question; classmates think about familiar places."
+      ],
+      [
+        "ដារាគូរផ្ទះដែលមានរានឈើ។ គាត់ចង់ប្រាប់ថានៅទីនោះ គ្រួសារញ៉ាំបាយជុំគ្នា។",
+        "🏡",
+        "Dara draws his family veranda and shared meal, leaving room below for typeset text."
+      ],
+      [
+        "សុភាគូរផ្សារជិតផ្ទះ។ នាងគូរកន្ត្រកស្វាយ និងអ្នកលក់ដែលញញឹម។",
+        "🥭",
+        "Sophea draws a friendly neighbourhood fruit stall with mango baskets."
+      ],
+      [
+        "មាលាគូរវាលស្រែរបស់តា។ នាងគូរភ្លៀងតូចៗ និងស្រូវបៃតង។",
+        "🌾",
+        "Mala draws Grandpa’s green rice field with gentle rain."
+      ],
+      [
+        "ម្នាក់ៗប្រាប់រឿងអំពីរូបរបស់ខ្លួន។ អ្នកគ្រូជួយសរសេរពាក្យដែលពួកគេមិនទាន់ចេះ។",
+        "✏️",
+        "Children dictate and write short Khmer sentences with the teacher’s help; no generated pseudo-text."
+      ],
+      [
+        "ពួកគេអានឃ្លាឱ្យគ្នាស្ដាប់។ សុភាសុំបន្ថែមរូបយាយនៅក្នុងទំព័រផ្សារ។",
+        "👵",
+        "The group reviews Sophea’s market page and adds Grandma to the drawing."
+      ],
+      [
+        "អ្នកគ្រូជួយចងទំព័រដោយខ្សែពណ៌ស្វាយ។ ពួកគេដាក់ឈ្មោះសៀវភៅថា «ភូមិយើង»។",
+        "📖",
+        "Teacher binds the illustrated sheets with purple yarn; keep a clear cover title area."
+      ],
+      [
+        "ពេលអានចប់ ដារាថា៖ «រឿងយើងក៏អាចនៅក្នុងសៀវភៅបាន!» មាលាបើកទំព័រស្រែបង្ហាញមិត្ត។",
+        "💜",
+        "The children proudly read their own handmade book together."
+      ],
+      [
+        "ពួកគេទុកសៀវភៅលើធ្នើក្នុងថ្នាក់។ ថ្ងៃស្អែក មិត្តផ្សេងអាចមកអានរឿងរបស់ពួកគេ។",
+        "📚",
+        "The handmade book sits on an accessible classroom shelf as another child reaches to read it."
+      ]
+    ],
+    "quiz": [
+      [
+        "តើអ្នកគ្រូឱ្យកុមារធ្វើអ្វី?",
+        "ធ្វើសៀវភៅរបស់ខ្លួន។"
+      ],
+      [
+        "តើមាលាគូររូបអ្វី?",
+        "វាលស្រែរបស់តា។"
+      ],
+      [
+        "តើអ្នកគ្រូជួយនៅពេលកុមារមិនទាន់ចេះសរសេរពាក្យខ្លះដូចម្ដេច?",
+        "ជួយសរសេរពាក្យទាំងនោះ។"
+      ],
+      [
+        "ហេតុអ្វីបានជាពួកគេទុកសៀវភៅលើធ្នើក្នុងថ្នាក់?",
+        "ដើម្បីឱ្យមិត្តផ្សេងអាចមកអានបាន។"
+      ],
+      [
+        "បើអ្នកធ្វើសៀវភៅ តើអ្នកចង់ប្រាប់រឿងអំពីអ្វី?",
+        "សំណួរបើកចំហ៖ ឱ្យកុមារជ្រើសរើសរឿងពីជីវិតរបស់ខ្លួន។"
+      ]
+    ],
+    "meaning": "រឿងរបស់កុមារម្នាក់ៗមានតម្លៃ ហើយយើងអាចបង្កើតអ្វីមួយជាមួយគ្នា។",
+    "origin": {
+      "kind": "original",
+      "title": "Original Koda story",
+      "note": "Written in Khmer for this collection; familiar picture-book structures, not a translation of a modern English book."
+    },
+    "number": 15,
+    "readingMode": "Shared reading first; independent reading after teacher vocabulary review.",
+    "reviewStatus": "Draft: Khmer teacher review, approved word segmentation, illustration review and Library Studio validation pending.",
+    "characterReferences": [
+      "Dara: Cambodian boy, age 6, short straight black hair, warm medium-brown skin, curious rounded face.",
+      "Sophea: Cambodian girl, age 6, two short black pigtails, warm medium-brown skin, lively rounded face.",
+      "Mala: Cambodian girl, age 6, short straight black bob, warm medium-brown skin, thoughtful rounded face.",
+      "Grandma: Cambodian older woman, grey-black hair in a low bun, expressive kind face; use the book-specific blouse and krama.",
+      "Grandpa: Cambodian older man, short grey hair, warm medium-brown skin, gentle lined face; use book-specific clothing.",
+      "Teacher Srey Mom: Cambodian adult woman, black hair tied back, warm medium-brown skin, pale blue blouse and dark skirt."
+    ]
+  },
+  {
+    "id": "red-umbrella",
+    "title": "ឆ័ត្រក្រហមមួយ",
+    "en": "One Red Umbrella",
+    "stage": 2,
+    "icon": "☂️",
+    "wash": "#f9dce4",
+    "context": "A rainy walk from a Cambodian primary school to its covered waiting area.",
+    "why": "Shows that generosity works best when children notice the problem and make a practical plan.",
+    "focus": "Identify a need; explain a cooperative solution.",
+    "words": [
+      "ឆ័ត្រ",
+      "ភ្លៀង",
+      "មិត្ត",
+      "រង់ចាំ"
+    ],
+    "cast": "Sophea in a white school blouse and navy skirt, carrying one red umbrella; Mala in the same school colours with a green bag; Mother in a rose blouse.",
+    "cover": "Sophea and Mala share one bright red umbrella on the short path to a covered school waiting area, where Mother is waiting. Show gentle rain, puddles and a secure courtyard.",
+    "meaning": "ការចែករំលែកមានន័យ ពេលយើងគិតពីតម្រូវការរបស់គ្នា។",
+    "pages": [
+      [
+        "ពេលចេញពីរៀន ភ្លៀងចាប់ផ្ដើមធ្លាក់។ សុភាបើកឆ័ត្រក្រហមរបស់នាង។",
+        "☂️",
+        "Sophea opens one red umbrella beneath the classroom eaves as rain starts."
+      ],
+      [
+        "មាលាឈរជិតទ្វារ ហើយមើលមេឃ។ ឆ័ត្ររបស់នាងនៅផ្ទះ។",
+        "🌧️",
+        "Mala waits in the dry doorway with her green bag, watching the rain."
+      ],
+      [
+        "សុភាឃើញមិត្តមិនទាន់ចេញ។ នាងសួរថា៖ «តើអ្នករង់ចាំអ្នកណា?»",
+        "💬",
+        "Sophea turns back and asks Mala a kind question."
+      ],
+      [
+        "មាលាថា៖ «ម៉ែខ្ញុំរង់ចាំនៅកន្លែងមានដំបូល»។ កន្លែងនោះនៅចុងផ្លូវក្នុងទីធ្លាសាលា។",
+        "🏫",
+        "Show Mother at a nearby covered waiting area inside the school courtyard."
+      ],
+      [
+        "សុភាថា៖ «យើងអាចប្រើឆ័ត្រជាមួយគ្នា»។ នាងលើកឆ័ត្រឱ្យខ្ពស់បន្តិច។",
+        "☂️",
+        "Sophea invites Mala under the same umbrella."
+      ],
+      [
+        "ដំបូង ពួកគេដើរមិនស្មើគ្នា។ ស្មាមាលាត្រូវទឹកភ្លៀងបន្តិច។",
+        "💧",
+        "The girls step at different speeds and one shoulder extends beyond the umbrella."
+      ],
+      [
+        "ពួកគេឈប់ក្រោមដំបូលក្បែរនោះ។ សុភាថា៖ «យើងដើរយឺតៗ ជំហានតូចៗដូចគ្នា»។",
+        "🤝",
+        "The girls pause under an intermediate awning and agree on a slower pace."
+      ],
+      [
+        "ពេលដើរបន្ត ពួកគេនៅជិតគ្នា។ ឆ័ត្រក្រហមបាំងភ្លៀងបានទាំងពីរ។",
+        "☂️",
+        "They walk together in small matching steps, comfortably under one umbrella."
+      ],
+      [
+        "ម៉ែមាលាឃើញពួកគេ ហើយញញឹម។ គាត់អរគុណសុភាដែលជួយមិត្ត។",
+        "👩",
+        "Mother welcomes both girls at the covered waiting area."
+      ],
+      [
+        "សុភាបិទឆ័ត្រ ហើយរង់ចាំម៉ែរបស់ខ្លួននៅទីនោះ។ ឆ័ត្រមានតែមួយ តែមិត្តទាំងពីរបានទៅដល់ជាមួយគ្នា។",
+        "💛",
+        "Both girls wait safely with Mala’s mother; the closed red umbrella rests beside Sophea."
+      ]
+    ],
+    "quiz": [
+      [
+        "តើឆ័ត្រសុភាមានពណ៌អ្វី?",
+        "ពណ៌ក្រហម។"
+      ],
+      [
+        "តើមាលាទុកឆ័ត្រនៅឯណា?",
+        "នៅផ្ទះ។"
+      ],
+      [
+        "ហេតុអ្វីបានជាពួកគេឈប់ក្រោមដំបូលម្ដងទៀត?",
+        "ពួកគេដើរមិនស្មើគ្នា ហើយចង់រៀបចំរបៀបដើរឱ្យល្អជាងមុន។"
+      ],
+      [
+        "តើពួកគេធ្វើអ្វីដើម្បីឱ្យឆ័ត្របាំងបានទាំងពីរ?",
+        "ដើរយឺតៗ ជំហានតូចៗ និងនៅជិតគ្នា។"
+      ],
+      [
+        "តើអ្នកអាចចែករំលែករបស់អ្វីមួយដោយគិតពីមិត្តដូចម្ដេច?",
+        "សំណួរបើកចំហ៖ ឱ្យកុមារផ្ដល់ឧទាហរណ៍ពីបទពិសោធន៍របស់ខ្លួន។"
+      ]
+    ],
+    "link": "Map the final story vocabulary to docs/khmer-g1-lessons-map.md before independent reading. This longer draft is intended for shared reading first; topic familiarity is not a measure of decoding difficulty.",
+    "origin": {
+      "kind": "original",
+      "title": "Original Koda story",
+      "note": "An original Khmer story using a familiar picture-book story arc; not translated from a modern English title."
+    },
+    "number": 16,
+    "readingMode": "Shared reading first; independent reading after teacher vocabulary review.",
+    "reviewStatus": "Draft: Khmer teacher review, approved word segmentation, illustration review and Library Studio validation pending.",
+    "characterReferences": [
+      "Sophea: Cambodian girl, age 6, two short black pigtails, warm medium-brown skin, lively rounded face.",
+      "Mala: Cambodian girl, age 6, short straight black bob, warm medium-brown skin, thoughtful rounded face.",
+      "Mother: Cambodian adult woman, black hair tied back, warm medium-brown skin; use book-specific clothing."
+    ]
+  },
+  {
+    "id": "found-riel",
+    "title": "លុយដែលរកឃើញ",
+    "en": "The Money We Found",
+    "stage": 2,
+    "icon": "👛",
+    "wash": "#fff0c9",
+    "context": "A purchase at a Cambodian neighbourhood shop using riel.",
+    "why": "A concrete choice lets honesty develop through action, uncertainty and relief rather than a lecture.",
+    "focus": "Follow a character’s decision; identify ownership.",
+    "words": [
+      "លុយ",
+      "រៀល",
+      "រក",
+      "ម្ចាស់"
+    ],
+    "cast": "Dara in a yellow shirt and navy shorts; Grandma in an indigo blouse and checked krama; a woman shopkeeper in a green blouse; a schoolboy with a blue bag.",
+    "cover": "Dara holds a small found banknote beside Grandma at a Cambodian shop counter; a worried boy checks his pocket nearby. Use no readable currency details or brand logos.",
+    "meaning": "រកឃើញរបស់មួយ មិនមានន័យថាវាជារបស់យើងទេ។",
+    "pages": [
+      [
+        "យាយនាំដារាទៅទិញសៀវភៅសរសេរ។ នៅមុខហាង ដារាឃើញក្រដាសលុយមួយលើដី។",
+        "👛",
+        "Dara and Grandma arrive at a small stationery shop; a banknote lies on the ground."
+      ],
+      [
+        "គាត់លើកវាឡើង ហើយប្រាប់យាយ។ វាជាលុយមួយពាន់រៀល។",
+        "💵",
+        "Dara shows the found note to Grandma; avoid detailed banknote lettering."
+      ],
+      [
+        "ក្នុងហាងមានខ្មៅដៃពណ៌ស្អាតៗ។ ដារាគិតថាលុយនេះប្រហែលទិញបានមួយ។",
+        "✏️",
+        "Dara glances at coloured pencils while holding the note, looking thoughtful."
+      ],
+      [
+        "តែគាត់មិនដឹងថាលុយជារបស់អ្នកណា។ គាត់ថា៖ «ម្ចាស់វាប្រហែលកំពុងរក»។",
+        "💭",
+        "Dara looks from the note to people nearby, considering its owner."
+      ],
+      [
+        "យាយនិងដារាប្រាប់អ្នកលក់។ ពួកគេរង់ចាំនៅក្បែរតុ ដោយមិនប្រកាសចំនួនលុយ។",
+        "🏪",
+        "Dara and Grandma tell the shopkeeper privately and wait beside the counter."
+      ],
+      [
+        "បន្តិចក្រោយ ក្មេងប្រុសម្នាក់ដើរមកវិញ។ គាត់មើលដី ហើយស្ទាបហោប៉ៅទាំងបារម្ភ។",
+        "👀",
+        "A boy with a blue school bag searches the ground and checks his empty pocket."
+      ],
+      [
+        "អ្នកលក់សួរថា៖ «តើកូនបាត់អ្វី?» ក្មេងប្រាប់ថាបាត់លុយមួយពាន់រៀលនៅមុខហាង។",
+        "💬",
+        "The shopkeeper asks the boy what he lost, with Grandma and Dara listening."
+      ],
+      [
+        "អ្នកលក់និងយាយជួយពិនិត្យរឿងដែលគាត់ប្រាប់។ រួចដារាប្រគល់លុយឱ្យគាត់វិញ។",
+        "🤲",
+        "With adults’ help Dara returns the banknote to the boy."
+      ],
+      [
+        "ក្មេងប្រុសអរគុណ ហើយទៅទិញសៀវភៅ។ មុខដែលបារម្ភរបស់គាត់ប្រែជាញញឹម។",
+        "😊",
+        "The relieved boy buys an exercise book and thanks Dara."
+      ],
+      [
+        "ដារាមិនបានខ្មៅដៃថ្មីពីលុយនោះទេ។ តែគាត់សប្បាយចិត្តដែលមិត្តមិនបាត់លុយទៀត។",
+        "💛",
+        "Dara and Grandma leave the shop together; Dara looks content without a reward."
+      ]
+    ],
+    "quiz": [
+      [
+        "តើដារារកឃើញលុយនៅឯណា?",
+        "នៅមុខហាង។"
+      ],
+      [
+        "តើលុយនោះមានចំនួនប៉ុន្មាន?",
+        "មួយពាន់រៀល។"
+      ],
+      [
+        "តើដារានិងយាយប្រាប់អ្នកណា?",
+        "អ្នកលក់។"
+      ],
+      [
+        "ហេតុអ្វីបានជាដារាមិនយកលុយទៅទិញខ្មៅដៃ?",
+        "ព្រោះវាមិនមែនជាលុយរបស់គាត់ ហើយម្ចាស់វាកំពុងរក។"
+      ],
+      [
+        "បើអ្នករកឃើញរបស់នៅសាលា តើអ្នកអាចសុំអ្នកណាជួយរកម្ចាស់?",
+        "សំណួរបើកចំហ៖ អ្នកគ្រូ ឬមនុស្សពេញវ័យដែលទុកចិត្ត។"
+      ]
+    ],
+    "link": "Map the final story vocabulary to docs/khmer-g1-lessons-map.md before independent reading. This longer draft is intended for shared reading first; topic familiarity is not a measure of decoding difficulty.",
+    "origin": {
+      "kind": "original",
+      "title": "Original Koda story",
+      "note": "An original Khmer story using a familiar picture-book story arc; not translated from a modern English title."
+    },
+    "number": 17,
+    "readingMode": "Shared reading first; independent reading after teacher vocabulary review.",
+    "reviewStatus": "Draft: Khmer teacher review, approved word segmentation, illustration review and Library Studio validation pending.",
+    "characterReferences": [
+      "Dara: Cambodian boy, age 6, short straight black hair, warm medium-brown skin, curious rounded face.",
+      "Grandma: Cambodian older woman, grey-black hair in a low bun, expressive kind face; use the book-specific blouse and krama."
+    ]
+  },
+  {
+    "id": "grandmas-krama",
+    "title": "ក្រមារបស់យាយ",
+    "en": "Grandma’s Krama",
+    "stage": 2,
+    "icon": "🧣",
+    "wash": "#e9dff6",
+    "context": "Everyday uses of a Khmer krama and a family memory of weaving.",
+    "why": "Links a familiar textile to care, family knowledge and noticing how things are made.",
+    "focus": "Describe uses; connect an object to a memory.",
+    "words": [
+      "ក្រមា",
+      "យាយ",
+      "ត្បាញ",
+      "ថែ"
+    ],
+    "cast": "Mala in a peach shirt and dark shorts; Grandma in an indigo blouse; one red-and-white checked krama with a visibly loose edge thread.",
+    "cover": "Mala and Grandma examine a red-and-white checked krama on a woven mat. A family photograph of Grandma at a loom sits in the background, with a clear contemporary Cambodian home setting.",
+    "meaning": "របស់ដែលយើងប្រើរាល់ថ្ងៃ អាចផ្ទុកទាំងការងារ និងអនុស្សាវរីយ៍។",
+    "pages": [
+      [
+        "មាលាឃើញក្រមាយាយហាលនៅរានផ្ទះ។ វាមានក្រឡាពណ៌ក្រហមនិងស។",
+        "🧣",
+        "A red-and-white checked krama dries on the veranda rail as Mala notices it."
+      ],
+      [
+        "នាងសួរថា៖ «ហេតុអ្វីយាយចូលចិត្តក្រមានេះ?» យាយអង្គុយ ហើយហៅមាលាមកជិត។",
+        "👵",
+        "Grandma invites Mala to sit beside her on a woven mat."
+      ],
+      [
+        "យាយថា៖ «ពេលក្ដៅ យាយយកវាជូតញើស»។ គាត់បង្ហាញរបៀបបត់ក្រមាតូចៗ។",
+        "☀️",
+        "Grandma folds the krama and dabs her forehead after gardening."
+      ],
+      [
+        "«ពេលទៅផ្សារ យាយពាក់វាលើស្មា»។ មាលាឃើញក្រមានេះជាមួយយាយជាញឹកញាប់។",
+        "🧺",
+        "Grandma wears the same krama over her shoulder beside a market basket."
+      ],
+      [
+        "យាយយករូបថតចាស់មួយមកមើល។ ក្នុងរូប យាយកំពុងត្បាញនៅកី។",
+        "🖼️",
+        "They look at a family photograph showing younger Grandma weaving on a loom."
+      ],
+      [
+        "«យាយបានត្បាញក្រមានេះដោយខ្លួនឯង»។ មាលាប៉ះក្រឡាក្រមាថ្នមៗ ហើយស្ដាប់។",
+        "🤲",
+        "Grandma and Mala feel the woven cloth texture together."
+      ],
+      [
+        "នៅគែមក្រមាមានអំបោះរលុងមួយ។ មាលាចង់ទាញ តែយាយសុំឱ្យនាងឈប់សិន។",
+        "🧵",
+        "A loose edge thread is visible; Mala pauses before pulling it."
+      ],
+      [
+        "យាយយកម្ជុលមកជួសជុលដោយខ្លួនឯង។ មាលាអង្គុយមើល ហើយជួយកាន់ក្រមាឱ្យស្មើ។",
+        "🪡",
+        "Grandma handles the needle safely while Mala holds a distant edge of the cloth flat."
+      ],
+      [
+        "ពេលរួច មាលាជួយបត់ក្រមាទុក។ នាងថា៖ «ក្រមានេះមានរឿងរបស់យាយ!»",
+        "💛",
+        "The repaired krama lies folded in Mala’s hands beside smiling Grandma."
+      ],
+      [
+        "ថ្ងៃក្រោយ មាលាគូររូបយាយពាក់ក្រមា។ នាងទុករូបនោះជាមួយរូបថតកីត្បាញ។",
+        "✏️",
+        "Mala places her drawing beside the family weaving photograph on a shelf."
+      ]
+    ],
+    "quiz": [
+      [
+        "តើក្រមាមានពណ៌អ្វីខ្លះ?",
+        "ក្រហម និងស។"
+      ],
+      [
+        "តើយាយប្រើក្រមាធ្វើអ្វីពេលក្ដៅ?",
+        "ជូតញើស។"
+      ],
+      [
+        "តើអ្នកណាបានត្បាញក្រមានេះ?",
+        "យាយ។"
+      ],
+      [
+        "ហេតុអ្វីបានជាយាយសុំមាលាកុំទាញអំបោះរលុង?",
+        "ដើម្បីកុំឱ្យក្រមាខូចបន្ថែម ហើយអាចជួសជុលបាន។"
+      ],
+      [
+        "តើក្នុងគ្រួសារអ្នកមានរបស់អ្វីដែលមានរឿងពិសេស?",
+        "សំណួរបើកចំហ៖ ឱ្យកុមារសួរគ្រួសារអំពីរបស់ប្រើប្រាស់មួយ។"
+      ]
+    ],
+    "link": "Map the final story vocabulary to docs/khmer-g1-lessons-map.md before independent reading. This longer draft is intended for shared reading first; topic familiarity is not a measure of decoding difficulty.",
+    "origin": {
+      "kind": "original",
+      "title": "Original Koda story",
+      "note": "An original Khmer story using a familiar picture-book story arc; not translated from a modern English title."
+    },
+    "number": 18,
+    "readingMode": "Shared reading first; independent reading after teacher vocabulary review.",
+    "reviewStatus": "Draft: Khmer teacher review, approved word segmentation, illustration review and Library Studio validation pending.",
+    "characterReferences": [
+      "Mala: Cambodian girl, age 6, short straight black bob, warm medium-brown skin, thoughtful rounded face.",
+      "Grandma: Cambodian older woman, grey-black hair in a low bun, expressive kind face; use the book-specific blouse and krama."
+    ]
+  },
+  {
+    "id": "dragonfly-garden",
+    "title": "មិត្តតូចក្នុងសួន",
+    "en": "A Little Friend in the Garden",
+    "stage": 2,
+    "icon": "🦋",
+    "wash": "#e0efd1",
+    "context": "Watching a dragonfly in a Cambodian home garden.",
+    "why": "A child changes from wanting to keep an insect to choosing to observe it freely.",
+    "focus": "Compare two choices; describe a living thing.",
+    "words": [
+      "សួន",
+      "កន្ទុំរុយ",
+      "ស្លាប",
+      "មើល"
+    ],
+    "cast": "Sophea in a mint shirt and navy skirt; Grandpa in a white cotton shirt and checked krama; one red dragonfly with four clear wings.",
+    "cover": "Sophea draws a red dragonfly perched on a thin garden twig while Grandpa watches nearby. Show four transparent wings and space around the insect; no jar or capture pose.",
+    "meaning": "យើងអាចស្រឡាញ់ធម្មជាតិ ដោយមិនចាំបាច់យកវាមកទុកជារបស់ខ្លួន។",
+    "pages": [
+      [
+        "សុភាទៅមើលសួនជាមួយតា។ នាងឃើញកន្ទុំរុយក្រហមឈរលើមែកតូច។",
+        "🌿",
+        "Sophea and Grandpa notice one red dragonfly perched on a fine garden twig."
+      ],
+      [
+        "ស្លាបវាភ្លឺថ្លាក្រោមពន្លឺថ្ងៃ។ សុភាឈប់មើលដោយភ្ញាក់ផ្អើល។",
+        "🦋",
+        "Close view of the dragonfly’s four transparent wings in gentle sunlight."
+      ],
+      [
+        "នាងថា៖ «ខ្ញុំចង់យកវាទៅបង្ហាញមាលា»។ នាងស្ទុះដៃទៅជិត តែវាហើរចេញ។",
+        "👀",
+        "Sophea reaches toward the twig and the dragonfly flies away naturally."
+      ],
+      [
+        "សុភាខកចិត្ត ហើយឈរមើលតាម។ តាសួរថា៖ «តើវាចង់ហើរទៅណា?»",
+        "💬",
+        "Grandpa speaks gently as Sophea watches the dragonfly circle the garden."
+      ],
+      [
+        "«ប្រហែលវាចង់ទៅរកអាហារ» សុភាឆ្លើយ។ នាងគិតថាប្រអប់តូចមិនដូចសួនធំទេ។",
+        "💭",
+        "A thought comparison shows open garden space and an empty small box, without trapping the insect."
+      ],
+      [
+        "តាថា៖ «យើងអាចមើលវានៅទីនេះ»។ គាត់យកសៀវភៅគូររូបមកឱ្យនាង។",
+        "📓",
+        "Grandpa offers Sophea a sketchbook and pencil."
+      ],
+      [
+        "សុភាអង្គុយស្ងាត់នៅចម្ងាយ។ មិនយូរប៉ុន្មាន កន្ទុំរុយមកឈរលើមែកម្ដងទៀត។",
+        "🌿",
+        "Sophea observes quietly as the same red dragonfly returns to the twig."
+      ],
+      [
+        "នាងគូរដងខ្លួន និងស្លាបបួន។ ពេលមិនច្បាស់ នាងមើលម្ដងទៀត។",
+        "✏️",
+        "Sophea carefully draws the body and exactly four wings from observation."
+      ],
+      [
+        "ល្ងាចនោះ នាងយករូបទៅបង្ហាញមាលា។ នាងប្រាប់ថា៖ «វានៅក្នុងសួនរបស់វា»។",
+        "🖼️",
+        "Sophea shows Mala her dragonfly drawing rather than a captured insect."
+      ],
+      [
+        "ថ្ងៃបន្ទាប់ ពួកគេទៅមើលសួនជាមួយតា។ លើកនេះ ពួកគេយកខ្មៅដៃ មិនយកប្រអប់ទេ។",
+        "💚",
+        "Both girls bring sketchbooks into the garden with Grandpa; the dragonfly remains free."
+      ]
+    ],
+    "quiz": [
+      [
+        "តើសុភាឃើញសត្វអ្វី?",
+        "កន្ទុំរុយក្រហម។"
+      ],
+      [
+        "តើវាឈរនៅលើអ្វី?",
+        "មែកតូច។"
+      ],
+      [
+        "តើសុភាគូរស្លាបប៉ុន្មាន?",
+        "បួន។"
+      ],
+      [
+        "ហេតុអ្វីបានជាសុភាយករូបទៅបង្ហាញមាលាជំនួសសត្វ?",
+        "នាងចង់ទុកឱ្យកន្ទុំរុយរស់និងហើរដោយសេរីក្នុងសួន។"
+      ],
+      [
+        "តើអ្នកអាចស្វែងយល់ពីសត្វតូចដោយមិនចាប់វាតាមរបៀបណា?",
+        "សំណួរបើកចំហ៖ មើលពីចម្ងាយ គូររូប ឬសួរមនុស្សពេញវ័យ។"
+      ]
+    ],
+    "link": "Map the final story vocabulary to docs/khmer-g1-lessons-map.md before independent reading. This longer draft is intended for shared reading first; topic familiarity is not a measure of decoding difficulty.",
+    "origin": {
+      "kind": "original",
+      "title": "Original Koda story",
+      "note": "An original Khmer story using a familiar picture-book story arc; not translated from a modern English title."
+    },
+    "number": 19,
+    "readingMode": "Shared reading first; independent reading after teacher vocabulary review.",
+    "reviewStatus": "Draft: Khmer teacher review, approved word segmentation, illustration review and Library Studio validation pending.",
+    "characterReferences": [
+      "Sophea: Cambodian girl, age 6, two short black pigtails, warm medium-brown skin, lively rounded face.",
+      "Mala: Cambodian girl, age 6, short straight black bob, warm medium-brown skin, thoughtful rounded face.",
+      "Grandpa: Cambodian older man, short grey hair, warm medium-brown skin, gentle lined face; use book-specific clothing."
+    ]
+  },
+  {
+    "id": "kite-we-fixed",
+    "title": "ខ្លែងដែលយើងជួសជុល",
+    "en": "The Kite We Fixed",
+    "stage": 3,
+    "icon": "🪁",
+    "wash": "#dcecff",
+    "context": "A family afternoon before Khmer New Year, flying a simple kite in a clear field.",
+    "why": "A repair story shows how complementary skills help friends make something work.",
+    "focus": "Explain a repair; recognise each helper’s contribution.",
+    "words": [
+      "ខ្លែង",
+      "ខ្យល់",
+      "ជួសជុល",
+      "សាក"
+    ],
+    "cast": "Dara in a yellow shirt, Mala in a peach shirt; Father in a blue shirt; one red-and-purple paper kite with a long tail.",
+    "cover": "Dara and Mala hold their repaired red-and-purple kite while Father holds a simple spool in a wide clear field. No power lines, roads, temple roofs or trees in the flight area.",
+    "meaning": "ជំនាញខុសគ្នារបស់យើង អាចជួយឱ្យការងារតែមួយសម្រេចបាន។",
+    "pages": [
+      [
+        "ជិតចូលឆ្នាំខ្មែរ ដារារកខ្លែងចាស់របស់គាត់ឃើញ។ គាត់ចង់យកវាទៅបង្ហោះជាមួយមាលា។",
+        "🪁",
+        "Dara finds his red-and-purple paper kite on a shelf as the family prepares for Khmer New Year."
+      ],
+      [
+        "ខ្លែងមានរហែកតូចមួយ ហើយកន្ទុយខ្លីពេក។ មាលាថា៖ «យើងអាចជួសជុលសិន»។",
+        "🔎",
+        "The children examine a small tear and short tail at a low worktable."
+      ],
+      [
+        "ពួកគេសុំប៉ាជួយមើលគ្រោងខ្លែង។ ប៉ាថា គ្រោងនៅល្អ តែត្រូវបិទកន្លែងរហែក។",
+        "👨",
+        "Father checks the kite frame and shows the small paper tear."
+      ],
+      [
+        "មាលាជ្រើសក្រដាសពណ៌ស្វាយមួយ។ ដារាបិទវាលើកន្លែងរហែកដោយប្រុងប្រយ័ត្ន។",
+        "🟣",
+        "Mala chooses a purple patch and Dara glues it onto the kite’s red panel."
+      ],
+      [
+        "ពួកគេបន្ថែមកន្ទុយពីក្រដាសស្រាល។ ប៉ាជួយចងខ្សែឱ្យមាំ។",
+        "🧵",
+        "The children attach a longer light paper tail while Father secures the flying line."
+      ],
+      [
+        "ពួកគេទៅវាលទំនេរជាមួយប៉ា។ កន្លែងនោះឆ្ងាយពីផ្លូវ និងខ្សែភ្លើង។",
+        "🌾",
+        "A wide clear field, with Father supervising and no roads or power lines nearby."
+      ],
+      [
+        "ដារាកាន់ខ្លែង ហើយមាលាកាន់ខ្សែ។ ពួកគេរង់ចាំខ្យល់បក់ មិនរត់ប្រញាប់ទេ។",
+        "🍃",
+        "Dara holds the kite upright while Mala holds the spool; all wait for a breeze."
+      ],
+      [
+        "ពេលខ្យល់មក ដារាលែងខ្លែងថ្នមៗ។ មាលាបន្ធូរខ្សែតាមដែលប៉ាបង្ហាញ។",
+        "🪁",
+        "The kite begins to rise as Dara releases it and Mala lets out line with Father guiding."
+      ],
+      [
+        "ខ្លែងហោះឡើង ហើយកន្ទុយវារាំក្នុងខ្យល់។ កន្លែងបិទពណ៌ស្វាយមើលឃើញច្បាស់ពីក្រោម។",
+        "☀️",
+        "The repaired kite flies steadily, with the purple patch clearly visible."
+      ],
+      [
+        "មាលាថា៖ «រហែកតូចនោះក្លាយជាពណ៌ថ្មី!» ដារាឆ្លើយថា៖ «ខ្លែងនេះមានស្នាដៃយើងទាំងពីរ»។",
+        "💜",
+        "The two children admire the kite together while Father holds the spool safely."
+      ]
+    ],
+    "quiz": [
+      [
+        "តើខ្លែងមានបញ្ហាអ្វីខ្លះ?",
+        "មានរហែកតូចមួយ ហើយកន្ទុយខ្លីពេក។"
+      ],
+      [
+        "តើមាលាជ្រើសក្រដាសពណ៌អ្វីសម្រាប់បិទ?",
+        "ពណ៌ស្វាយ។"
+      ],
+      [
+        "តើអ្នកណាជួយចងខ្សែ?",
+        "ប៉ា។"
+      ],
+      [
+        "តើពួកគេជ្រើសកន្លែងបង្ហោះខ្លែងបែបណា?",
+        "វាលទំនេរឆ្ងាយពីផ្លូវនិងខ្សែភ្លើង។"
+      ],
+      [
+        "តើមិត្តដែលមានជំនាញខុសគ្នាអាចជួយគ្នាធ្វើអ្វី?",
+        "សំណួរបើកចំហ៖ ឱ្យកុមារគិតពីគម្រោងដែលអាចធ្វើជាមួយមិត្ត។"
+      ]
+    ],
+    "link": "Map the final story vocabulary to docs/khmer-g1-lessons-map.md before independent reading. This longer draft is intended for shared reading first; topic familiarity is not a measure of decoding difficulty.",
+    "origin": {
+      "kind": "original",
+      "title": "Original Koda story",
+      "note": "An original Khmer story using a familiar picture-book story arc; not translated from a modern English title."
+    },
+    "number": 20,
+    "readingMode": "Shared reading first; independent reading after teacher vocabulary review.",
+    "reviewStatus": "Draft: Khmer teacher review, approved word segmentation, illustration review and Library Studio validation pending.",
+    "characterReferences": [
+      "Dara: Cambodian boy, age 6, short straight black hair, warm medium-brown skin, curious rounded face.",
+      "Mala: Cambodian girl, age 6, short straight black bob, warm medium-brown skin, thoughtful rounded face.",
+      "Father: Cambodian adult man, short black hair, warm medium-brown skin; use book-specific clothing."
+    ]
+  },
+  {
+    "id": "num-ansom-family",
+    "title": "នំអន្សមរបស់គ្រួសារយើង",
+    "en": "Our Family’s Num Ansom",
+    "stage": 3,
+    "icon": "🍃",
+    "wash": "#e4edcf",
+    "context": "One family’s preparation of num ansom chek for a Khmer New Year visit.",
+    "why": "Food preparation becomes a story about patience, family knowledge and bringing something made together.",
+    "focus": "Sequence preparation steps; recognise different family roles.",
+    "words": [
+      "នំអន្សម",
+      "ចេក",
+      "ស្លឹក",
+      "រុំ"
+    ],
+    "cast": "Sophea in a mint shirt, Dara in a yellow shirt; Grandma in an indigo blouse; Father in a blue shirt; banana leaves, sticky rice and ripe bananas on a clean mat.",
+    "cover": "Grandma shows two children how to wrap num ansom chek in green banana leaves on a clean low table. Father works separately near the cooking area; children have no contact with hot equipment.",
+    "meaning": "ពេលយើងធ្វើអ្វីជាមួយគ្នា យើងបានទាំងរៀន និងចែករំលែកក្ដីស្រឡាញ់។",
+    "pages": [
+      [
+        "ជិតចូលឆ្នាំខ្មែរ គ្រួសារសុភារៀបចំទៅសួរសុខទុក្ខសាច់ញាតិ។ យាយចង់យកនំអន្សមចេកទៅជាមួយ។",
+        "🏡",
+        "The family prepares for a Khmer New Year visit; Grandma lays out banana leaves at home."
+      ],
+      [
+        "សុភានិងដារាសុំជួយ។ យាយឱ្យពួកគេលាងដៃ ហើយអង្គុយជិតតុ។",
+        "🧼",
+        "Children wash hands before joining Grandma at a clean low preparation table."
+      ],
+      [
+        "លើតុមានស្លឹកចេក អង្ករដំណើប និងចេកទុំ។ យាយប្រាប់ឈ្មោះរបស់ម្ដងមួយៗ។",
+        "🍌",
+        "Clearly show the three separate ingredients: banana leaves, prepared sticky rice and ripe bananas."
+      ],
+      [
+        "ដារាជួយជូតស្លឹកដែលលាងស្អាតរួច។ សុភាជួយរៀបចេកលើចាន។",
+        "🍃",
+        "Dara dries washed banana leaves with a clean cloth while Sophea arranges bananas."
+      ],
+      [
+        "យាយដាក់អង្ករលើស្លឹក ហើយដាក់ចេកនៅកណ្ដាល។ គាត់រុំយឺតៗឱ្យកុមារមើល។",
+        "🤲",
+        "Grandma demonstrates wrapping sticky rice around a banana in a banana leaf."
+      ],
+      [
+        "សុភាសាករុំមួយ តែអង្ករលេចចេញតាមគែម។ នាងឈប់ ហើយសុំយាយបង្ហាញម្ដងទៀត។",
+        "👀",
+        "Sophea’s first wrap is loose; Grandma offers calm guidance."
+      ],
+      [
+        "យាយជួយបត់គែមឱ្យជិត។ ដារាជួយកាន់ស្លឹក ខណៈយាយចងខ្សែ។",
+        "🧵",
+        "Grandma ties the leaf parcel while Dara holds a safe distant edge steady."
+      ],
+      [
+        "ប៉ាយកនំទៅចម្អិននៅកន្លែងផ្ទះបាយ។ កុមារនៅតុ ហើយជួយសម្អាតស្លឹកដែលនៅសល់។",
+        "🍲",
+        "Father handles all cooking equipment away from the children, who tidy the preparation table."
+      ],
+      [
+        "ពេលនំឆ្អិននិងត្រជាក់ល្មម យាយបើកមួយឱ្យមើល។ ក្លិនស្លឹកចេកនិងចេកទុំធ្វើឱ្យពួកគេញញឹម។",
+        "💚",
+        "Grandma opens one cooled num ansom chek parcel to reveal rice around banana."
+      ],
+      [
+        "ពេលទៅសួរសុខទុក្ខសាច់ញាតិ សុភាកាន់កន្ត្រកនំ។ នាងថា៖ «នំនេះ យើងជួយគ្នាធ្វើ!»",
+        "🧺",
+        "The family arrives for a visit carrying a basket of wrapped cakes, without ceremonial stereotypes."
+      ]
+    ],
+    "quiz": [
+      [
+        "តើគ្រួសារចង់ធ្វើនំអ្វី?",
+        "នំអន្សមចេក។"
+      ],
+      [
+        "តើមានរបស់បីមុខអ្វីនៅលើតុ?",
+        "ស្លឹកចេក អង្ករដំណើប និងចេកទុំ។"
+      ],
+      [
+        "តើសុភាធ្វើអ្វីពេលរុំនំមិនជិត?",
+        "ឈប់ ហើយសុំយាយបង្ហាញម្ដងទៀត។"
+      ],
+      [
+        "តើអ្នកណាយកនំទៅចម្អិន?",
+        "ប៉ា។"
+      ],
+      [
+        "តើគ្រួសារអ្នកធ្លាប់ធ្វើម្ហូបអ្វីជាមួយគ្នា?",
+        "សំណួរបើកចំហ៖ ទទួលយករបៀបនិងប្រពៃណីខុសៗគ្នារបស់គ្រួសារ។"
+      ]
+    ],
+    "link": "Map the final story vocabulary to docs/khmer-g1-lessons-map.md before independent reading. This longer draft is intended for shared reading first; topic familiarity is not a measure of decoding difficulty.",
+    "origin": {
+      "kind": "original",
+      "title": "Original Koda story",
+      "note": "An original Khmer story using a familiar picture-book story arc; not translated from a modern English title."
+    },
+    "number": 21,
+    "readingMode": "Shared reading first; independent reading after teacher vocabulary review.",
+    "reviewStatus": "Draft: Khmer teacher review, approved word segmentation, illustration review and Library Studio validation pending.",
+    "characterReferences": [
+      "Dara: Cambodian boy, age 6, short straight black hair, warm medium-brown skin, curious rounded face.",
+      "Sophea: Cambodian girl, age 6, two short black pigtails, warm medium-brown skin, lively rounded face.",
+      "Grandma: Cambodian older woman, grey-black hair in a low bun, expressive kind face; use the book-specific blouse and krama.",
+      "Father: Cambodian adult man, short black hair, warm medium-brown skin; use book-specific clothing."
+    ]
+  },
+  {
+    "id": "little-water-drop",
+    "title": "ទឹកមួយដំណក់ក៏មានតម្លៃ",
+    "en": "Every Drop Matters",
+    "stage": 2,
+    "icon": "💧",
+    "wash": "#dceff6",
+    "context": "A leaking outdoor tap at a Cambodian family home.",
+    "why": "Shows noticing a small problem, asking for help and choosing a useful new habit.",
+    "focus": "Explain cause and effect; name a practical change.",
+    "words": [
+      "ទឹក",
+      "ក្បាលរ៉ូប៊ីណេ",
+      "បិទ",
+      "ដំណក់"
+    ],
+    "cast": "Mala in a peach shirt; Father in a blue shirt; an outdoor tap above a basin and nearby potted plants.",
+    "cover": "Mala catches a drip in a small bowl while Father examines an outdoor tap. Green plants nearby connect water care with everyday home life; no exaggerated drought imagery.",
+    "meaning": "រឿងតូចដែលយើងមើលឃើញ អាចជាការចាប់ផ្ដើមនៃការថែទាំរបស់រួម។",
+    "pages": [
+      [
+        "មាលាលាងដៃនៅក្បាលរ៉ូប៊ីណេមុខផ្ទះ។ នាងបិទវា ហើយដើរទៅលេង។",
+        "🧼",
+        "Mala washes her hands at the outdoor tap above a basin."
+      ],
+      [
+        "ពេលឆ្លងកាត់ម្ដងទៀត នាងឮសំឡេងទឹកធ្លាក់។ ដំណក់តូចៗនៅតែធ្លាក់ចូលអាង។",
+        "💧",
+        "Water drips slowly from the tap after Mala has walked away."
+      ],
+      [
+        "មាលាសាកបិទថ្នមៗម្ដងទៀត។ តែទឹកនៅតែស្រក់ ហើយនាងមិនបង្ខំមួលទេ។",
+        "👀",
+        "Mala gently checks the handle without forcing it; the drip continues."
+      ],
+      [
+        "នាងហៅប៉ាមកមើល។ ប៉ាថា៖ «មានផ្នែកខាងក្នុងខូច ត្រូវជួសជុល»។",
+        "👨",
+        "Father examines the leaking tap while Mala stands beside him."
+      ],
+      [
+        "ពេលប៉ារៀបចំឧបករណ៍ មាលាយកចានមកត្រងទឹក។ នាងមើលដំណក់តូចៗប្រមូលជាមួយគ្នា។",
+        "🥣",
+        "Mala places a bowl under the drip while Father prepares tools away from her."
+      ],
+      [
+        "ប៉ាជួសជុលក្បាលរ៉ូប៊ីណេ។ ពេលបិទម្ដងទៀត ទឹកឈប់ស្រក់។",
+        "🔧",
+        "Father completes the repair; the closed tap no longer drips."
+      ],
+      [
+        "មាលាលើកចានទឹកដែលត្រងបាន។ នាងសុំយកវាទៅស្រោចដើមផ្កា។",
+        "🪴",
+        "Mala carries the small bowl of collected clean water toward a potted plant."
+      ],
+      [
+        "ប៉ាថា៖ «ដំណក់តូចៗក៏ប្រមូលបានច្រើន»។ មាលាស្រោចផ្កាថ្នមៗ។",
+        "🌸",
+        "Mala waters the plant gently using the collected water."
+      ],
+      [
+        "ចាប់ពីថ្ងៃនោះ នាងពិនិត្យមើលក្រោយបិទទឹក។ ពេលឃើញអ្វីខូច នាងប្រាប់មនុស្សពេញវ័យ។",
+        "💧",
+        "Mala glances back to check that the tap is fully off after washing."
+      ],
+      [
+        "នាងគូររូបដំណក់ទឹកសម្រាប់បិទជិតក្បាលរ៉ូប៊ីណេ។ រូបតូចនោះជួយឱ្យគ្រួសារនឹកឃើញថាត្រូវថែទឹក។",
+        "✏️",
+        "A simple child-drawn water-drop symbol sits near the repaired tap, with no invented lettering."
+      ]
+    ],
+    "quiz": [
+      [
+        "តើមាលាឮសំឡេងអ្វី?",
+        "ទឹកស្រក់ចូលអាង។"
+      ],
+      [
+        "តើនាងសុំអ្នកណាជួយ?",
+        "ប៉ា។"
+      ],
+      [
+        "តើនាងយកចានមកធ្វើអ្វី?",
+        "ត្រងទឹកដែលស្រក់។"
+      ],
+      [
+        "តើមាលាយកទឹកដែលត្រងបានទៅធ្វើអ្វី?",
+        "ស្រោចដើមផ្កា។"
+      ],
+      [
+        "តើអ្នកអាចធ្វើអ្វីដើម្បីថែទឹកនៅផ្ទះ?",
+        "សំណួរបើកចំហ៖ បិទទឹកក្រោយប្រើ និងប្រាប់មនុស្សពេញវ័យពេលឃើញលេចទឹក។"
+      ]
+    ],
+    "link": "Map the final story vocabulary to docs/khmer-g1-lessons-map.md before independent reading. This longer draft is intended for shared reading first; topic familiarity is not a measure of decoding difficulty.",
+    "origin": {
+      "kind": "original",
+      "title": "Original Koda story",
+      "note": "An original Khmer story using a familiar picture-book story arc; not translated from a modern English title."
+    },
+    "number": 22,
+    "readingMode": "Shared reading first; independent reading after teacher vocabulary review.",
+    "reviewStatus": "Draft: Khmer teacher review, approved word segmentation, illustration review and Library Studio validation pending.",
+    "characterReferences": [
+      "Mala: Cambodian girl, age 6, short straight black bob, warm medium-brown skin, thoughtful rounded face.",
+      "Father: Cambodian adult man, short black hair, warm medium-brown skin; use book-specific clothing."
+    ]
+  },
+  {
+    "id": "everyone-can-play",
+    "title": "យើងលេងជាមួយគ្នា",
+    "en": "Everyone Can Play",
+    "stage": 2,
+    "icon": "🎨",
+    "wash": "#f3e0f5",
+    "context": "Children change a schoolyard activity so a classmate using crutches can join.",
+    "why": "Models inclusion through asking what a friend wants, then adapting the activity together.",
+    "focus": "Identify exclusion; propose a shared solution.",
+    "words": [
+      "លេង",
+      "មិត្ត",
+      "គូរ",
+      "ជាមួយ"
+    ],
+    "cast": "Dara, Sophea and Mala in white-and-navy uniforms; Vichea, a Cambodian boy aged six in the same uniform using correctly fitted forearm crutches; teacher Srey Mom nearby.",
+    "cover": "Four classmates draw a colourful imaginary village together around an accessible low table in the school courtyard. Vichea’s crutches rest within reach beside his chair; show him contributing confidently.",
+    "meaning": "មិត្តភាពរីកធំឡើង ពេលយើងរៀបចំកន្លែងឱ្យមនុស្សគ្រប់គ្នាចូលរួម។",
+    "pages": [
+      [
+        "ពេលចេញលេង ដារានិងមិត្តរត់លេងចាប់គ្នា។ វិជ្ជាអង្គុយនៅក្បែរតុ ហើយមើលពួកគេ។",
+        "🏫",
+        "Children play tag while Vichea sits near a low courtyard table with his crutches within reach."
+      ],
+      [
+        "ថ្ងៃនេះ វិជ្ជាប្រើឈើច្រត់ដើម្បីដើរ។ គាត់មិនអាចរត់លេងដូចមិត្តបានទេ។",
+        "👦",
+        "Vichea moves carefully with forearm crutches; portray him naturally and confidently."
+      ],
+      [
+        "សុភាសង្កេតឃើញថាគាត់នៅម្នាក់ឯង។ នាងមកសួរថា៖ «អ្នកចង់លេងអ្វីជាមួយយើង?»",
+        "💬",
+        "Sophea asks Vichea directly what he would enjoy doing."
+      ],
+      [
+        "វិជ្ជាថា៖ «ខ្ញុំចង់គូរភូមិមួយធំ!» គាត់សុំក្រដាស និងខ្មៅដៃពណ៌។",
+        "🎨",
+        "Vichea proposes drawing a big village and gestures toward paper and coloured pencils."
+      ],
+      [
+        "ដារានិងមាលាមកចូលរួម។ ពួកគេសុំអ្នកគ្រូជួយយកតុដែលអង្គុយបានស្រួល។",
+        "🤝",
+        "Teacher helps arrange an accessible low table where all four children can sit together."
+      ],
+      [
+        "វិជ្ជាគូរផ្លូវវែងមួយកាត់ក្រដាស។ ដារាគូរផ្ទះនៅសងខាងផ្លូវ។",
+        "🏡",
+        "Vichea draws the main road and Dara adds houses on a large shared sheet."
+      ],
+      [
+        "សុភាបន្ថែមផ្សារ ហើយមាលាគូរស្រែ។ ពួកគេសួរគ្នាមុនគូរជិតរូបរបស់មិត្ត។",
+        "🌾",
+        "Sophea adds a market while Mala draws rice fields, leaving room for each other."
+      ],
+      [
+        "វិជ្ជាថា៖ «នៅខ្វះកន្លែងលេងមួយ!» ពួកគេគូរទីធ្លាដែលមានផ្លូវចូលទូលាយ។",
+        "🛝",
+        "Vichea points to a blank space and the group draws a play area with a wide clear entrance."
+      ],
+      [
+        "ពេលកណ្ដឹងបន្លឺឡើង គ្រប់គ្នាចង់មើលរូបម្ដងទៀត។ វិជ្ជាជាអ្នកប្រាប់រឿងអំពីភូមិនោះ។",
+        "🖼️",
+        "Vichea confidently tells the story of their shared village drawing to classmates."
+      ],
+      [
+        "ដារាថា៖ «ថ្ងៃស្អែក យើងគិតល្បែងថ្មីទៀត!» សុភាញញឹម ព្រោះថ្ងៃនេះគ្មានមិត្តណាត្រូវលេងម្នាក់ឯង។",
+        "💜",
+        "The four children leave the table together, with an unblocked path for Vichea and his crutches."
+      ]
+    ],
+    "quiz": [
+      [
+        "តើមិត្តផ្សេងកំពុងលេងអ្វីពីដំបូង?",
+        "រត់លេងចាប់គ្នា។"
+      ],
+      [
+        "តើសុភាសួរវិជ្ជាថាអ្វី?",
+        "អ្នកចង់លេងអ្វីជាមួយយើង?"
+      ],
+      [
+        "តើវិជ្ជាចង់គូរអ្វី?",
+        "ភូមិមួយធំ។"
+      ],
+      [
+        "តើពួកគេធ្វើអ្វីឱ្យគ្រប់គ្នាចូលរួមបាន?",
+        "ជ្រើសសកម្មភាពគូររូបជាមួយគ្នា និងរៀបចំតុដែលអង្គុយបានស្រួល។"
+      ],
+      [
+        "បើមិត្តចូលលេងមិនបាន តើអ្នកអាចសួរគេអ្វីមុនគេ?",
+        "សំណួរបើកចំហ៖ សួរថាគេចង់លេងអ្វី ឬត្រូវការជំនួយបែបណា។"
+      ]
+    ],
+    "link": "Map the final story vocabulary to docs/khmer-g1-lessons-map.md before independent reading. This longer draft is intended for shared reading first; topic familiarity is not a measure of decoding difficulty.",
+    "origin": {
+      "kind": "original",
+      "title": "Original Koda story",
+      "note": "An original Khmer story using a familiar picture-book story arc; not translated from a modern English title."
+    },
+    "number": 23,
+    "readingMode": "Shared reading first; independent reading after teacher vocabulary review.",
+    "reviewStatus": "Draft: Khmer teacher review, approved word segmentation, illustration review and Library Studio validation pending.",
+    "characterReferences": [
+      "Dara: Cambodian boy, age 6, short straight black hair, warm medium-brown skin, curious rounded face.",
+      "Sophea: Cambodian girl, age 6, two short black pigtails, warm medium-brown skin, lively rounded face.",
+      "Mala: Cambodian girl, age 6, short straight black bob, warm medium-brown skin, thoughtful rounded face.",
+      "Vichea: Cambodian boy, age 6, short black hair, warm medium-brown skin; correctly fitted forearm crutches when specified, active and self-directed.",
+      "Teacher Srey Mom: Cambodian adult woman, black hair tied back, warm medium-brown skin, pale blue blouse and dark skirt."
+    ]
+  },
+  {
+    "id": "old-basket-new-home",
+    "title": "កន្ត្រកចាស់ ផ្ទះផ្កាថ្មី",
+    "en": "An Old Basket, a New Flower Home",
+    "stage": 2,
+    "icon": "🌼",
+    "wash": "#f9e9ce",
+    "context": "Giving a worn bamboo basket a new use in a Cambodian home garden.",
+    "why": "Turns a small disappointment into a practical reuse project, with adult help for repairs.",
+    "focus": "Compare old and new uses; explain a design choice.",
+    "words": [
+      "កន្ត្រក",
+      "ចាស់",
+      "ថ្មី",
+      "ផ្កា"
+    ],
+    "cast": "Mala in a peach shirt; Grandpa in a white shirt and checked krama; one old round bamboo basket with a loose handle; a small marigold plant.",
+    "cover": "Mala and Grandpa stand beside an old bamboo basket now holding a healthy potted marigold on the ground. The repaired loose handle remains visible, showing the same familiar object has a new purpose.",
+    "meaning": "របស់មួយដែលលែងសមនឹងការងារចាស់ អាចមានប្រយោជន៍ក្នុងការងារថ្មី។",
+    "pages": [
+      [
+        "តាយកកន្ត្រកចាស់មកមើល។ ដៃកាន់វារលុង ហើយមិនអាចដាក់របស់ធ្ងន់បានទៀត។",
+        "🧺",
+        "Grandpa examines an old bamboo basket with one loose handle."
+      ],
+      [
+        "មាលានឹកដល់ពេលធ្លាប់កាន់វាទៅផ្សារ។ នាងសួរថា៖ «តើយើងត្រូវបោះវាចោលឬ?»",
+        "💭",
+        "Mala remembers market trips with the same basket and looks concerned."
+      ],
+      [
+        "តាថា៖ «យើងពិនិត្យមើលសិន»។ គាត់មើលបាតកន្ត្រក ហើយឃើញថាវានៅមាំ។",
+        "🔎",
+        "Grandpa checks the basket’s intact base and sides carefully."
+      ],
+      [
+        "ក្បែររានមានផើងផ្កាតូចមួយ។ មាលាសាកដាក់ផើងក្នុងកន្ត្រក ហើយវាល្មម។",
+        "🪴",
+        "Mala places a small potted marigold inside the basket; the fit is comfortable."
+      ],
+      [
+        "នាងថា៖ «យើងដាក់វានៅលើដី មិនចាំបាច់កាន់ដៃវាទេ»។ តាញញឹម ហើយយល់ព្រម។",
+        "💬",
+        "Mala points to a stable place on the ground beside the veranda."
+      ],
+      [
+        "តាជួយជួសជុលចុងឫស្សីដែលលេច។ មាលាជូតកន្ត្រកដោយក្រណាត់សើម។",
+        "🧽",
+        "Grandpa handles any rough bamboo edges while Mala cleans a safe section of the basket."
+      ],
+      [
+        "ពួកគេដាក់ផើងក្នុងកន្ត្រកមួយម្ដងទៀត។ តាបង្ហាញថាទឹកអាចហូរចេញពីផើងបាន។",
+        "💧",
+        "Show the plant in its own draining pot inside the basket, with drainage not blocked."
+      ],
+      [
+        "មាលាដាក់វានៅកន្លែងមានពន្លឺសមល្មម។ នាងមិនលើកកន្ត្រកតាមដៃរលុងនោះទេ។",
+        "☀️",
+        "The basket rests securely on the ground in gentle daylight; its loose handle is unused."
+      ],
+      [
+        "ប៉ុន្មានថ្ងៃក្រោយ ផ្កាលឿងបើកមួយ។ កន្ត្រកចាស់មើលទៅដូចផ្ទះផ្កាតូច។",
+        "🌼",
+        "One yellow marigold bloom opens in the potted plant inside the basket."
+      ],
+      [
+        "មាលាហៅយាយមកមើល។ នាងថា៖ «វាលែងដឹកម្ហូប តែវាអាចទុកផ្កាឱ្យយើងមើល!»",
+        "💛",
+        "Mala shows Grandma the reused basket planter beside the veranda."
+      ]
+    ],
+    "quiz": [
+      [
+        "តើកន្ត្រកមានបញ្ហាអ្វី?",
+        "ដៃកាន់រលុង។"
+      ],
+      [
+        "តើផ្នែកណារបស់កន្ត្រកនៅមាំ?",
+        "បាត និងដងខ្លួនកន្ត្រក។"
+      ],
+      [
+        "តើមាលាដាក់អ្វីក្នុងកន្ត្រក?",
+        "ផើងផ្កាតូចមួយ។"
+      ],
+      [
+        "ហេតុអ្វីបានជាពួកគេដាក់កន្ត្រកនៅលើដី?",
+        "ដើម្បីមិនចាំបាច់ប្រើដៃកាន់ដែលរលុង។"
+      ],
+      [
+        "តើរបស់ចាស់មួយណាអាចមានការប្រើថ្មីនៅផ្ទះអ្នក?",
+        "សំណួរបើកចំហ៖ ពិភាក្សាជាមួយមនុស្សពេញវ័យមុនប្រើរបស់ខូច។"
+      ]
+    ],
+    "link": "Map the final story vocabulary to docs/khmer-g1-lessons-map.md before independent reading. This longer draft is intended for shared reading first; topic familiarity is not a measure of decoding difficulty.",
+    "origin": {
+      "kind": "original",
+      "title": "Original Koda story",
+      "note": "An original Khmer story using a familiar picture-book story arc; not translated from a modern English title."
+    },
+    "number": 24,
+    "readingMode": "Shared reading first; independent reading after teacher vocabulary review.",
+    "reviewStatus": "Draft: Khmer teacher review, approved word segmentation, illustration review and Library Studio validation pending.",
+    "characterReferences": [
+      "Mala: Cambodian girl, age 6, short straight black bob, warm medium-brown skin, thoughtful rounded face.",
+      "Grandma: Cambodian older woman, grey-black hair in a low bun, expressive kind face; use the book-specific blouse and krama.",
+      "Grandpa: Cambodian older man, short grey hair, warm medium-brown skin, gentle lined face; use book-specific clothing."
+    ]
+  },
+  {
+    "id": "blue-paint-dot",
+    "title": "ស្នាមពណ៌ខៀវមួយ",
+    "en": "One Blue Paint Mark",
+    "stage": 2,
+    "icon": "🎨",
+    "wash": "#e0e7fc",
+    "context": "A Cambodian classroom art activity about a familiar village.",
+    "why": "A child learns to pause, ask for ideas and choose how to respond to a mistake.",
+    "focus": "Describe feelings; explain a creative revision.",
+    "words": [
+      "ពណ៌",
+      "រូប",
+      "ខៀវ",
+      "សាក"
+    ],
+    "cast": "Mala in white school blouse and navy skirt; Sophea in the same uniform; teacher Srey Mom; one drawing of a Cambodian home with a large accidental blue paint mark.",
+    "cover": "Mala transforms an accidental blue mark into a small pond beside her drawn home. Sophea and the teacher admire the picture; use large clear paint shapes with no text.",
+    "meaning": "កំហុសមួយអាចជាឱកាសសាកគំនិតថ្មី ពេលយើងមិនបោះបង់ភ្លាម។",
+    "pages": [
+      [
+        "អ្នកគ្រូឱ្យមាលាគូរភូមិដែលនាងចូលចិត្ត។ មាលាគូរផ្ទះ និងដើមឈើដោយយកចិត្តទុកដាក់។",
+        "🏡",
+        "Mala carefully paints a Cambodian home and tree on a large sheet in class."
+      ],
+      [
+        "នាងយកជក់ទៅជ្រលក់ពណ៌ខៀវ។ ដៃនាងប៉ះកែវទឹក ហើយជក់ធ្លាក់លើក្រដាស។",
+        "🖌️",
+        "Mala accidentally drops a blue-loaded brush onto the drawing after brushing the water cup."
+      ],
+      [
+        "មានស្នាមខៀវធំមួយក្បែរផ្ទះ។ មាលាមើលវា ហើយភ្នែកនាងស្រពោន។",
+        "🔵",
+        "One broad blue mark sits beside the drawn house; Mala looks disappointed."
+      ],
+      [
+        "នាងចង់យកក្រដាសបោះចោល។ សុភាសួរថា៖ «យើងមើលវាបន្តិចបានទេ?»",
+        "💬",
+        "Sophea invites Mala to pause before discarding the page."
+      ],
+      [
+        "អ្នកគ្រូមកស្ដាប់ ហើយមិនគូរជំនួសនាងទេ។ គាត់សួរថា៖ «ស្នាមនេះធ្វើឱ្យកូននឹកដល់អ្វី?»",
+        "👩‍🏫",
+        "The teacher asks an open question while leaving Mala in control of her picture."
+      ],
+      [
+        "មាលាគិតដល់អាងទឹកក្បែរផ្ទះតា។ ស្នាមខៀវមានរាងដូចទឹកតូចមួយ។",
+        "💭",
+        "A thought vignette shows Grandpa’s garden pond beside the blue shape on the page."
+      ],
+      [
+        "នាងសាកគូរដីជុំវិញស្នាមខៀវ។ រួចនាងបន្ថែមផ្កា និងកង្កែបមួយ។",
+        "🐸",
+        "Mala adds a pond edge, flowers and a small frog around the accidental mark."
+      ],
+      [
+        "ឥឡូវស្នាមខៀវក្លាយជាអាងទឹកក្នុងរូប។ មាលាញញឹម ហើយបន្ថែមផ្លូវទៅផ្ទះ។",
+        "🎨",
+        "The finished picture shows a coherent village home with a pond and path."
+      ],
+      [
+        "ពេលបង្ហាញមិត្ត នាងប្រាប់ទាំងរឿងជក់ធ្លាក់។ មិត្តមើលរូប ហើយសួរអំពីកង្កែប។",
+        "🖼️",
+        "Mala confidently shows classmates both the picture and how the blue mark changed."
+      ],
+      [
+        "មាលាមិនចង់ធ្វើខុសទេ តែនាងលែងខ្លាចសាកគំនិតថ្មី។ នាងទុករូបនោះជារូបដែលមានរឿងពិសេស។",
+        "💙",
+        "Mala places the drawing in her folder proudly, with the blue pond prominent."
+      ]
+    ],
+    "quiz": [
+      [
+        "តើមាលាគូរអ្វីពីដំបូង?",
+        "ផ្ទះ និងដើមឈើក្នុងភូមិ។"
+      ],
+      [
+        "តើស្នាមពណ៌មានពណ៌អ្វី?",
+        "ពណ៌ខៀវ។"
+      ],
+      [
+        "តើអ្នកគ្រូសួរអ្វីអំពីស្នាមនោះ?",
+        "ស្នាមនេះធ្វើឱ្យកូននឹកដល់អ្វី?"
+      ],
+      [
+        "តើមាលាប្រែក្លាយស្នាមខៀវទៅជាអ្វី?",
+        "អាងទឹកក្នុងរូប។"
+      ],
+      [
+        "ពេលធ្វើអ្វីខុស តើអ្នកអាចធ្វើអ្វីមុនបោះបង់?",
+        "សំណួរបើកចំហ៖ ឈប់គិត សុំយោបល់ ឬសាកវិធីថ្មី។"
+      ]
+    ],
+    "link": "Map the final story vocabulary to docs/khmer-g1-lessons-map.md before independent reading. This longer draft is intended for shared reading first; topic familiarity is not a measure of decoding difficulty.",
+    "origin": {
+      "kind": "original",
+      "title": "Original Koda story",
+      "note": "An original Khmer story using a familiar picture-book story arc; not translated from a modern English title."
+    },
+    "number": 25,
+    "readingMode": "Shared reading first; independent reading after teacher vocabulary review.",
+    "reviewStatus": "Draft: Khmer teacher review, approved word segmentation, illustration review and Library Studio validation pending.",
+    "characterReferences": [
+      "Sophea: Cambodian girl, age 6, two short black pigtails, warm medium-brown skin, lively rounded face.",
+      "Mala: Cambodian girl, age 6, short straight black bob, warm medium-brown skin, thoughtful rounded face.",
+      "Grandpa: Cambodian older man, short grey hair, warm medium-brown skin, gentle lined face; use book-specific clothing.",
+      "Teacher Srey Mom: Cambodian adult woman, black hair tied back, warm medium-brown skin, pale blue blouse and dark skirt."
+    ]
+  },
+  {
+    "id": "buffalo-little-mouse",
+    "title": "ក្របីនិងកណ្ដុរតូច",
+    "en": "The Buffalo and the Little Mouse",
+    "stage": 3,
+    "icon": "🐃",
+    "wash": "#e0ead2",
+    "context": "An explicitly fictional animal fable beside a Cambodian rice field.",
+    "why": "Keeps the kindness-and-reciprocity arc of The Lion and the Mouse, with a familiar buffalo and a gentler predicament.",
+    "focus": "Compare characters’ abilities; explain how kindness is returned.",
+    "words": [
+      "ក្របី",
+      "កណ្ដុរ",
+      "ជួយ",
+      "អរគុណ"
+    ],
+    "cast": "A large gentle dark-grey water buffalo with curved horns; one small warm-brown mouse with round ears; a rice-field path and shade tree.",
+    "cover": "A tiny brown mouse and a calm water buffalo look at each other under a shade tree beside a Cambodian rice field. A loose piece of discarded rope lies harmlessly nearby; no net, hunter or injury.",
+    "meaning": "តូចឬធំ ម្នាក់ៗអាចមានសមត្ថភាពជួយអ្នកដទៃ។",
+    "pages": [
+      [
+        "នៅក្បែរវាលស្រែ មានក្របីធំមួយកំពុងសម្រាក។ កណ្ដុរតូចរត់មករកគ្រាប់ស្រូវលើដី។",
+        "🐃",
+        "A calm water buffalo rests beside a rice-field path while a mouse searches for fallen grains."
+      ],
+      [
+        "កណ្ដុររត់ប៉ះជើងក្របីដោយចៃដន្យ។ វាភ័យ ហើយឈប់ស្ងៀម។",
+        "🐭",
+        "The little mouse accidentally brushes the buffalo’s foot and freezes."
+      ],
+      [
+        "ក្របីបើកភ្នែក តែមិនដេញវាទេ។ វាថា៖ «កុំភ័យ អ្នកអាចទៅបាន»។",
+        "💬",
+        "The buffalo looks down gently and leaves the mouse a clear path away."
+      ],
+      [
+        "កណ្ដុរអរគុណ ហើយថា៖ «ថ្ងៃណាមួយ ខ្ញុំប្រហែលជួយអ្នកបាន»។ ក្របីញញឹម ព្រោះមិត្តថ្មីតូចណាស់។",
+        "💛",
+        "The mouse thanks the buffalo; emphasise their difference in size without mockery."
+      ],
+      [
+        "ប៉ុន្មានថ្ងៃក្រោយ ក្របីដើរតាមផ្លូវស្រែ។ ជើងវាជាប់ក្នុងរង្វង់ខ្សែចាស់ដែលគេចោល។",
+        "🧵",
+        "A loose discarded rope loop catches around the buffalo’s lower leg; no wound or fear imagery."
+      ],
+      [
+        "ក្របីព្យាយាមដកជើង តែខ្សែរឹតឡើង។ វាឈប់ ហើយហៅសុំជំនួយ។",
+        "🐃",
+        "The buffalo stops pulling and calls for help calmly beside the path."
+      ],
+      [
+        "កណ្ដុរឮសំឡេង ហើយរត់មក។ វាថា៖ «ឈរស្ងៀមសិន ខ្ញុំនឹងមើលខ្សែ»។",
+        "🐭",
+        "The mouse arrives and examines the rope while the buffalo remains still."
+      ],
+      [
+        "កណ្ដុរខាំខ្សែត្រង់កន្លែងតូចមួយម្ដងៗ។ មិនយូរប៉ុន្មាន ខ្សែដាច់ ហើយជើងក្របីរួច។",
+        "🧵",
+        "The mouse gnaws one strand at a time until the loose rope parts; show no injury."
+      ],
+      [
+        "ក្របីថា៖ «អរគុណ មិត្តតូច!» កណ្ដុរឆ្លើយថា៖ «ធ្មេញតូចរបស់ខ្ញុំធ្វើការងារនេះបាន»។",
+        "🤝",
+        "The freed buffalo lowers its head appreciatively toward the mouse."
+      ],
+      [
+        "ចាប់ពីថ្ងៃនោះ ពួកគេសួរសុខទុក្ខគ្នាជានិច្ច។ ក្របីមិនមើលមិត្តតាមទំហំទៀតទេ។",
+        "🌾",
+        "Buffalo and mouse greet each other peacefully beside the rice field."
+      ]
+    ],
+    "quiz": [
+      [
+        "តើក្របីធ្វើអ្វីពេលកណ្ដុររត់ប៉ះជើង?",
+        "វាមិនដេញកណ្ដុរ ហើយប្រាប់ឱ្យទៅបាន។"
+      ],
+      [
+        "តើជើងក្របីជាប់អ្វី?",
+        "រង្វង់ខ្សែចាស់។"
+      ],
+      [
+        "តើកណ្ដុរជួយយ៉ាងដូចម្ដេច?",
+        "ខាំខ្សែរហូតដាច់។"
+      ],
+      [
+        "តើសមត្ថភាពអ្វីរបស់កណ្ដុរជួយក្របីបាន?",
+        "ធ្មេញតូចរបស់វាអាចខាំខ្សែ។"
+      ],
+      [
+        "តើអ្នកអាចជួយមនុស្សធំតាមរបៀបតូចមួយណា?",
+        "សំណួរបើកចំហ៖ ឱ្យកុមារគិតពីជំនាញផ្ទាល់ខ្លួន។"
+      ]
+    ],
+    "link": "Map the final story vocabulary to docs/khmer-g1-lessons-map.md before independent reading. This longer draft is intended for shared reading first; topic familiarity is not a measure of decoding difficulty.",
+    "origin": {
+      "kind": "adaptation",
+      "title": "The Lion and the Mouse",
+      "author": "Aesop; traditional fable",
+      "url": "https://read.gov/aesop/007.html",
+      "referenceEdition": "The Aesop for Children (1919), Library of Congress digital presentation",
+      "note": "A new Khmer retelling of the underlying public-domain fable, not a translation of a modern commercial picture book. The lion becomes a water buffalo; a hunter’s net becomes discarded rope. The Cambodian rice-field setting and dialogue are newly written. Talking animals signal a fable, not wildlife facts."
+    },
+    "number": 26,
+    "readingMode": "Shared reading first; independent reading after teacher vocabulary review.",
+    "reviewStatus": "Draft: Khmer teacher review, approved word segmentation, illustration review and Library Studio validation pending.",
+    "characterReferences": []
+  },
+  {
+    "id": "crow-clay-jug",
+    "title": "ក្អែកនិងក្អមទឹក",
+    "en": "The Crow and the Clay Jug",
+    "stage": 3,
+    "icon": "🐦‍⬛",
+    "wash": "#f1e5cf",
+    "context": "A talking-animal fable set in a Cambodian village garden during dry weather.",
+    "why": "A clear obstacle and incremental solution support prediction, observation and perseverance.",
+    "focus": "Explain a step-by-step solution; predict water movement.",
+    "words": [
+      "ក្អែក",
+      "ក្អម",
+      "ទឹក",
+      "គ្រួស"
+    ],
+    "cast": "One glossy black crow with a plain black beak; a tall terracotta clay jug with a narrow opening; smooth small pebbles beside a Cambodian garden fence.",
+    "cover": "A black crow drops one smooth pebble into a tall terracotta jug beside a shaded village garden. A clear side cutaway shows water and pebbles for understanding, while the real jug remains opaque in other scenes.",
+    "meaning": "គំនិតតូចមួយ និងការធ្វើបន្តិចម្ដងៗ អាចដោះស្រាយបញ្ហាបាន។",
+    "pages": [
+      [
+        "ថ្ងៃមួយ អាកាសក្ដៅ ហើយក្អែកមួយស្រេកទឹក។ វាហោះរកទឹកជុំវិញសួនក្នុងភូមិ។",
+        "☀️",
+        "A black crow searches a Cambodian village garden on a warm dry day."
+      ],
+      [
+        "ក្បែររបងមានក្អមដីមួយ។ ក្អែកចុះមក ហើយមើលឃើញទឹកនៅបាត។",
+        "🏺",
+        "The crow perches near a tall terracotta jug with a little water inside."
+      ],
+      [
+        "វាឱនក្បាលចូលតាមមាត់ក្អម។ តែចំពុះវាមិនដល់ទឹកទេ។",
+        "🐦‍⬛",
+        "The jug’s narrow opening and low water level keep the crow’s beak from reaching the water."
+      ],
+      [
+        "ក្អែកសាករុញក្អម តែវាធ្ងន់ពេក។ វាឈប់ ហើយមើលជុំវិញ។",
+        "👀",
+        "The crow considers the heavy stable jug after an unsuccessful gentle push."
+      ],
+      [
+        "នៅលើដីមានគ្រួសតូចៗជាច្រើន។ ក្អែកយកមួយមកទម្លាក់ក្នុងក្អម។",
+        "🪨",
+        "The crow picks up one smooth pebble beside the jug."
+      ],
+      [
+        "គ្រួសធ្លាក់ដល់បាត ហើយទឹកឡើងបន្តិច។ ក្អែកមើលឃើញ ហើយយកគ្រួសមួយទៀត។",
+        "💧",
+        "Use a clear explanatory cutaway to show one pebble below the water and a slightly higher water level."
+      ],
+      [
+        "វាទម្លាក់គ្រួសម្ដងមួយៗ។ ទឹកក៏ឡើងខ្ពស់បន្តិចម្ដងៗ។",
+        "🏺",
+        "A sequence of three small cutaway views shows accumulating pebbles and steadily rising water."
+      ],
+      [
+        "ក្អែកនៅតែស្រេក តែវាមិនឈប់ធ្វើទេ។ វាមើលទឹកក្រោយទម្លាក់គ្រួសម្ដងៗ។",
+        "🐦‍⬛",
+        "The crow checks the jug between pebble drops, looking focused rather than frantic."
+      ],
+      [
+        "នៅទីបំផុត ទឹកឡើងជិតមាត់ក្អម។ ក្អែកអាចឱនចំពុះចុះផឹកបាន។",
+        "💧",
+        "The crow drinks from the raised water surface near the jug opening."
+      ],
+      [
+        "វាសម្រាកលើរបង ហើយមើលក្អម។ គ្រួសតូចៗបានជួយធ្វើការងារធំមួយ។",
+        "🌿",
+        "The satisfied crow rests on the garden fence beside the jug and remaining pebbles."
+      ]
+    ],
+    "quiz": [
+      [
+        "តើក្អែកកំពុងរកអ្វី?",
+        "ទឹកផឹក។"
+      ],
+      [
+        "ហេតុអ្វីបានជាវាផឹកមិនបានពីដំបូង?",
+        "ទឹកនៅទាប ហើយចំពុះវាមិនដល់។"
+      ],
+      [
+        "តើវាទម្លាក់អ្វីក្នុងក្អម?",
+        "គ្រួសតូចៗ។"
+      ],
+      [
+        "តើមានអ្វីកើតឡើងពេលគ្រួសចូលក្នុងក្អមកាន់តែច្រើន?",
+        "ទឹកឡើងខ្ពស់បន្តិចម្ដងៗ។"
+      ],
+      [
+        "តើការងារអ្វីមួយដែលអ្នកអាចធ្វើបន្តិចម្ដងៗ?",
+        "សំណួរបើកចំហ៖ រៀបសៀវភៅ រៀនអាន ឬធ្វើរូបមួយ។"
+      ]
+    ],
+    "link": "Map the final story vocabulary to docs/khmer-g1-lessons-map.md before independent reading. This longer draft is intended for shared reading first; topic familiarity is not a measure of decoding difficulty.",
+    "origin": {
+      "kind": "adaptation",
+      "title": "The Crow and the Pitcher",
+      "author": "Aesop; traditional fable",
+      "url": "https://read.gov/aesop/012.html",
+      "referenceEdition": "The Aesop for Children (1919), Library of Congress digital presentation",
+      "note": "A new Khmer retelling of the underlying public-domain fable, not a translation of a modern commercial picture book. The vessel becomes a Cambodian earthenware jug in a village garden. New Khmer narration and observation steps make the cause and effect explicit."
+    },
+    "number": 27,
+    "readingMode": "Shared reading first; independent reading after teacher vocabulary review.",
+    "reviewStatus": "Draft: Khmer teacher review, approved word segmentation, illustration review and Library Studio validation pending.",
+    "characterReferences": []
+  },
+  {
+    "id": "tortoise-rabbit-race",
+    "title": "អណ្ដើកនិងទន្សាយ",
+    "en": "The Tortoise and the Rabbit",
+    "stage": 3,
+    "icon": "🐢",
+    "wash": "#e5edcf",
+    "context": "A fictional animal race along a dry path beside a Cambodian village pond.",
+    "why": "Presents steady effort and respect without equating speed or winning with a child’s worth.",
+    "focus": "Compare plans; explain an outcome.",
+    "words": [
+      "អណ្ដើក",
+      "ទន្សាយ",
+      "យឺត",
+      "បន្ត"
+    ],
+    "cast": "One olive-green tortoise with an ochre patterned shell; one warm-brown rabbit with long ears; a dry village path between a mango tree and a pond-side shade tree.",
+    "cover": "A tortoise moves steadily along a village path while a rabbit dozes in the shade behind it. Keep the finish tree visible ahead, with a calm Cambodian pond and no racing costumes.",
+    "meaning": "ការខិតខំជាបន្តបន្ទាប់ មានតម្លៃជាងការអួតពីសមត្ថភាព។",
+    "pages": [
+      [
+        "ទន្សាយចូលចិត្តរត់លឿនតាមផ្លូវក្បែរស្រះ។ ថ្ងៃមួយ វាឃើញអណ្ដើកដើរយឺតៗ។",
+        "🐇",
+        "A brown rabbit runs along a dry pond-side path as an olive tortoise walks steadily."
+      ],
+      [
+        "ទន្សាយសើចថា៖ «បើដើរប៉ុណ្ណឹង តើពេលណាទើបដល់?» អណ្ដើកឆ្លើយថា៖ «ខ្ញុំនៅតែទៅមុខ»។",
+        "💬",
+        "The rabbit boasts while the tortoise answers calmly on the path."
+      ],
+      [
+        "ពួកគេព្រមប្រណាំងពីដើមស្វាយទៅដើមឈើមួយទៀត។ សត្វស្លាបជួយមើលចំណុចចាប់ផ្ដើមនិងចំណុចបញ្ចប់។",
+        "🌳",
+        "Establish a clear dry route from a mango tree to a second shade tree, with a bird acting as observer."
+      ],
+      [
+        "ពេលចាប់ផ្ដើម ទន្សាយរត់ទៅមុខយ៉ាងលឿន។ អណ្ដើកដើរតាមជំហានតូចៗរបស់វា។",
+        "🐢",
+        "Rabbit races ahead while the tortoise begins a steady walk."
+      ],
+      [
+        "ទន្សាយមើលក្រោយ ហើយមិនឃើញអណ្ដើកជិតខ្លួន។ វាគិតថាមានពេលសម្រាកច្រើន។",
+        "👀",
+        "The rabbit looks back from a shady spot and sees the tortoise far behind."
+      ],
+      [
+        "វាដេកក្រោមម្លប់ ហើយគេងលក់។ អណ្ដើកនៅតែដើរ មិនប្រញាប់ និងមិនឈប់។",
+        "💤",
+        "Rabbit sleeps under a tree as the tortoise continues along the same path."
+      ],
+      [
+        "អណ្ដើកឆ្លងកាត់ទន្សាយដែលកំពុងគេង។ វាមើលផ្លូវខាងមុខ ហើយបន្តដើរ។",
+        "🐢",
+        "Tortoise quietly passes the sleeping rabbit without mocking or waking it."
+      ],
+      [
+        "ពេលទន្សាយភ្ញាក់ អណ្ដើកជិតដល់ដើមឈើចុងផ្លូវ។ ទន្សាយរត់តាម តែមិនទាន់។",
+        "🐇",
+        "Rabbit wakes and hurries while tortoise approaches the clearly established finish tree."
+      ],
+      [
+        "អណ្ដើកទៅដល់មុន ហើយឈប់សម្រាក។ ទន្សាយសុំទោសដែលបានសើចចំអក។",
+        "🤝",
+        "Rabbit apologises beside the finish tree; tortoise rests calmly."
+      ],
+      [
+        "អណ្ដើកថា៖ «យើងមានល្បឿនខុសគ្នា តែយើងអាចគោរពគ្នា»។ ពួកគេដើរត្រឡប់ជាមួយគ្នា។",
+        "💚",
+        "The two animals return along the pond-side path together at a comfortable pace."
+      ]
+    ],
+    "quiz": [
+      [
+        "តើអ្នកណារត់លឿនពីដំបូង?",
+        "ទន្សាយ។"
+      ],
+      [
+        "តើទន្សាយធ្វើអ្វីពេលគិតថាខ្លួននៅមុខឆ្ងាយ?",
+        "ដេកសម្រាក ហើយគេងលក់។"
+      ],
+      [
+        "តើអណ្ដើកធ្វើអ្វីពេលទន្សាយគេង?",
+        "បន្តដើរ។"
+      ],
+      [
+        "ហេតុអ្វីបានជាអណ្ដើកទៅដល់មុន?",
+        "វាបន្តដើរជានិច្ច ខណៈទន្សាយឈប់គេង។"
+      ],
+      [
+        "តើយើងអាចគោរពមិត្តដែលធ្វើអ្វីយឺតជាងយើងដូចម្ដេច?",
+        "សំណួរបើកចំហ៖ មិនសើចចំអក រង់ចាំ និងផ្ដល់ការលើកទឹកចិត្ត។"
+      ]
+    ],
+    "link": "Map the final story vocabulary to docs/khmer-g1-lessons-map.md before independent reading. This longer draft is intended for shared reading first; topic familiarity is not a measure of decoding difficulty.",
+    "origin": {
+      "kind": "adaptation",
+      "title": "The Hare and the Tortoise",
+      "author": "Aesop; traditional fable",
+      "url": "https://read.gov/aesop/025.html",
+      "referenceEdition": "The Aesop for Children (1919), Library of Congress digital presentation",
+      "note": "A new Khmer retelling of the underlying public-domain fable, not a translation of a modern commercial picture book. The race follows a dry Cambodian village path. New Khmer dialogue adds an apology and mutual respect; the story does not claim slower is always better."
+    },
+    "number": 28,
+    "readingMode": "Shared reading first; independent reading after teacher vocabulary review.",
+    "reviewStatus": "Draft: Khmer teacher review, approved word segmentation, illustration review and Library Studio validation pending.",
+    "characterReferences": []
+  },
+  {
+    "id": "bamboo-bundle",
+    "title": "បាច់ឫស្សីរបស់តា",
+    "en": "Grandpa’s Bundle of Bamboo",
+    "stage": 3,
+    "icon": "🎋",
+    "wash": "#e6ead2",
+    "context": "Grandpa uses small bamboo strips to help three children understand cooperation.",
+    "why": "Adapts a familiar demonstration into a practical classroom-age teamwork story.",
+    "focus": "Compare one with many; apply an idea to a real task.",
+    "words": [
+      "ឫស្សី",
+      "បាច់",
+      "ជួយ",
+      "រួម"
+    ],
+    "cast": "Grandpa in a white shirt and checked krama; Dara in yellow, Sophea in mint, Mala in peach; smooth thin bamboo strips, one small tied bundle and a basket of leaves.",
+    "cover": "Grandpa holds a tied bundle of smooth thin bamboo strips while three children watch on the veranda. A single bent strip lies beside the bundle. Keep all ends smooth and the demonstration gentle.",
+    "meaning": "ធ្វើការរួមគ្នា មានន័យថាស្ដាប់គ្នា និងចែកការងារឱ្យសម។",
+    "pages": [
+      [
+        "តាសុំដារា សុភា និងមាលាជួយរៀបសួន។ ពួកគេចង់ធ្វើការតាមគំនិតរបស់ខ្លួនម្នាក់ៗ។",
+        "🌿",
+        "Grandpa asks the three children to help tidy the garden; they point toward different plans."
+      ],
+      [
+        "ដារាចង់ប្រមូលស្លឹកមុន តែសុភាចង់រៀបផើង។ មាលាឈររង់ចាំ ព្រោះមិនដឹងត្រូវជួយអ្នកណា។",
+        "💬",
+        "Dara points to leaves, Sophea to pots, and Mala waits uncertainly between them."
+      ],
+      [
+        "តាហៅពួកគេមកអង្គុយជិត។ គាត់យកបន្ទះឫស្សីតូចរលោងមួយមកបង្ហាញ។",
+        "🎋",
+        "Grandpa shows one smooth thin bamboo strip while the children sit safely nearby."
+      ],
+      [
+        "គាត់ពត់បន្ទះតូចនោះ ហើយវាបាក់ងាយ។ កុមារមើលឃើញថាបន្ទះតែមួយមិនមាំទេ។",
+        "👀",
+        "Grandpa gently bends one thin strip himself; children observe without handling broken ends."
+      ],
+      [
+        "រួចគាត់បង្ហាញបន្ទះជាច្រើនចងជាបាច់។ ពេលគាត់សាកពត់ បាច់នោះមិនបាក់ងាយទេ។",
+        "🎋",
+        "Grandpa compares the intact tied bundle with the single strip, without using forceful poses."
+      ],
+      [
+        "តាថា៖ «ពេលនៅរួមគ្នា វាមាំជាងមុន»។ សុភាសួរថា៖ «តើយើងអាចធ្វើការជាបាច់ដែរឬ?»",
+        "💭",
+        "Sophea makes the connection as Grandpa holds the bamboo bundle."
+      ],
+      [
+        "ពួកគេគិតគ្នាអំពីការងារក្នុងសួន។ ដារាប្រមូលស្លឹក សុភាកាន់កន្ត្រក ហើយមាលាជួយរៀបផើងតូច។",
+        "🧺",
+        "Each child takes an agreed task: leaves, basket and light small pots."
+      ],
+      [
+        "ពេលកន្ត្រកពេញ ដារានិងសុភាលើកជាមួយគ្នា។ មាលាបើកផ្លូវឱ្យពួកគេដើរស្រួល។",
+        "🤝",
+        "Two children carry a light leaf basket together while Mala clears their path."
+      ],
+      [
+        "ការងាររួចមុនដែលពួកគេគិត។ ម្នាក់ៗបានជួយ ហើយគ្មាននរណាត្រូវឈររង់ចាំទេ។",
+        "🌼",
+        "The tidy garden shows everyone’s contribution; Grandpa and children admire it."
+      ],
+      [
+        "ដារាថា៖ «យើងមិនចាំបាច់ធ្វើដូចគ្នាទាំងអស់ទេ»។ សុភាបន្ថែមថា៖ «តែយើងត្រូវស្ដាប់ ហើយជួយគ្នា!»",
+        "💛",
+        "The children sit with Grandpa beside the bamboo bundle, relaxed after working together."
+      ]
+    ],
+    "quiz": [
+      [
+        "តើកុមារមានបញ្ហាអ្វីពីដំបូង?",
+        "ពួកគេចង់ធ្វើតាមគំនិតរៀងខ្លួន ហើយមិនបានរៀបចំការងាររួម។"
+      ],
+      [
+        "តើតាបង្ហាញរបស់អ្វី?",
+        "បន្ទះឫស្សីមួយ និងបាច់ឫស្សី។"
+      ],
+      [
+        "តើមួយណាមិនបាក់ងាយ?",
+        "បាច់ឫស្សីដែលចងរួមគ្នា។"
+      ],
+      [
+        "តើមាលាជួយធ្វើអ្វីក្នុងសួន?",
+        "រៀបផើងតូច និងជួយបើកផ្លូវពេលមិត្តលើកកន្ត្រក។"
+      ],
+      [
+        "តើក្រុមមិត្តអាចចែកការងារអ្វីមួយដូចម្ដេច?",
+        "សំណួរបើកចំហ៖ ស្ដាប់គំនិតគ្នា ហើយចែកតួនាទីតាមសមត្ថភាព។"
+      ]
+    ],
+    "link": "Map the final story vocabulary to docs/khmer-g1-lessons-map.md before independent reading. This longer draft is intended for shared reading first; topic familiarity is not a measure of decoding difficulty.",
+    "origin": {
+      "kind": "adaptation",
+      "title": "The Bundle of Sticks",
+      "author": "Aesop; traditional fable",
+      "url": "https://read.gov/aesop/040.html",
+      "referenceEdition": "The Aesop for Children (1919), Library of Congress digital presentation",
+      "note": "A new Khmer retelling of the underlying public-domain fable, not a translation of a modern commercial picture book. A father and quarrelling sons become Grandpa and three children. Smooth bamboo strips replace sticks; a shared garden task makes cooperation concrete without threats about enemies."
+    },
+    "number": 29,
+    "readingMode": "Shared reading first; independent reading after teacher vocabulary review.",
+    "reviewStatus": "Draft: Khmer teacher review, approved word segmentation, illustration review and Library Studio validation pending.",
+    "characterReferences": [
+      "Dara: Cambodian boy, age 6, short straight black hair, warm medium-brown skin, curious rounded face.",
+      "Sophea: Cambodian girl, age 6, two short black pigtails, warm medium-brown skin, lively rounded face.",
+      "Mala: Cambodian girl, age 6, short straight black bob, warm medium-brown skin, thoughtful rounded face.",
+      "Grandpa: Cambodian older man, short grey hair, warm medium-brown skin, gentle lined face; use book-specific clothing."
+    ]
+  },
+  {
+    "id": "wind-sun-krama",
+    "title": "ខ្យល់ ព្រះអាទិត្យ និងក្រមា",
+    "en": "The Wind, the Sun and the Krama",
+    "stage": 3,
+    "icon": "☀️",
+    "wash": "#ffe9b8",
+    "context": "A clearly fictional sky fable above a Cambodian village path, with a krama replacing a cloak.",
+    "why": "A gentle ending invites children to compare pressure with warmth and respectful requests.",
+    "focus": "Compare approaches; explain why a response changes.",
+    "words": [
+      "ខ្យល់",
+      "ព្រះអាទិត្យ",
+      "ក្រមា",
+      "ថ្នម"
+    ],
+    "cast": "Personified friendly wind shown as pale blue flowing curves; a warm golden sun; an older Cambodian farmer in a light cotton shirt, dark trousers and red-and-white checked krama.",
+    "cover": "An older farmer walks along a village path wearing a red-and-white checked krama. Friendly wind curls on one side and a warm sun on the other; show the krama clearly with no winter coat or European landscape.",
+    "meaning": "ការធ្វើថ្នមៗ និងការយល់ចិត្ត អាចមានប្រសិទ្ធភាពជាងការបង្ខំ។",
+    "pages": [
+      [
+        "លើមេឃ ខ្យល់និងព្រះអាទិត្យកំពុងជជែកគ្នា។ ខ្យល់ថា៖ «ខ្ញុំខ្លាំងជាង!»",
+        "☁️",
+        "Friendly personified wind and sun talk above a Cambodian village path; clearly a fable."
+      ],
+      [
+        "នៅខាងក្រោម មានបុរសម្នាក់ដើរទៅផ្ទះ។ គាត់ពាក់ក្រមាលើស្មា ព្រោះព្រឹកនោះត្រជាក់បន្តិច។",
+        "🧣",
+        "An older farmer walks home with a red-and-white krama wrapped over his shoulders."
+      ],
+      [
+        "ខ្យល់ថា៖ «យើងមើលថាអ្នកណាធ្វើឱ្យគាត់ដោះក្រមាបាន»។ ព្រះអាទិត្យយល់ព្រមឱ្យខ្យល់សាកមុន។",
+        "💬",
+        "Wind gestures toward the farmer’s krama while the sun waits behind a soft cloud."
+      ],
+      [
+        "ខ្យល់បក់ខ្លាំង ហើយចុងក្រមាប៉ើងឡើង។ បុរសចាប់ក្រមា ហើយរុំឱ្យជិតខ្លួន។",
+        "🍃",
+        "Wind lifts the krama ends; the farmer holds the cloth closer around his shoulders."
+      ],
+      [
+        "ខ្យល់បក់ខ្លាំងជាងមុន។ បុរសកាន់ក្រមាកាន់តែជាប់ ហើយឈប់ក្បែររបង។",
+        "🧣",
+        "The farmer shelters beside a fence, still holding the krama firmly."
+      ],
+      [
+        "ខ្យល់អស់កម្លាំង ហើយឈប់បក់។ វាឆ្ងល់ថាហេតុអ្វីបុរសមិនដោះក្រមា។",
+        "💭",
+        "The wind softens and pauses; the farmer relaxes after the gusts stop."
+      ],
+      [
+        "ព្រះអាទិត្យចេញពីពពក ហើយបញ្ចេញពន្លឺថ្នមៗ។ ផ្លូវក៏កក់ក្ដៅឡើងបន្តិចម្ដងៗ។",
+        "☀️",
+        "Gentle sunlight warms the village path gradually; no extreme heat or distress."
+      ],
+      [
+        "បុរសបន្ធូរក្រមា រួចដោះវាពីស្មា។ គាត់បត់វា ហើយអង្គុយសម្រាកក្រោមម្លប់ឈើ។",
+        "🌳",
+        "The comfortable farmer removes and folds the krama, resting in tree shade."
+      ],
+      [
+        "ខ្យល់ឃើញ ហើយថា៖ «ខ្ញុំរុញខ្លាំង តែគាត់កាន់ជាប់»។ ព្រះអាទិត្យឆ្លើយថា៖ «ពេលគាត់មានអារម្មណ៍ស្រួល គាត់ជ្រើសរើសដោះដោយខ្លួនឯង»។",
+        "💛",
+        "Wind and sun observe the relaxed farmer; show a thoughtful, friendly conversation."
+      ],
+      [
+        "ចាប់ពីថ្ងៃនោះ ខ្យល់បក់ថ្នមជាងមុនពេលឆ្លងកាត់ភូមិ។ ព្រះអាទិត្យនិងខ្យល់នៅតែមានកម្លាំង តែរៀនប្រើវាដោយយកចិត្តទុកដាក់។",
+        "🌤️",
+        "Gentle breeze and warm sunlight share a calm village scene; farmer continues home with folded krama."
+      ]
+    ],
+    "quiz": [
+      [
+        "តើបុរសពាក់អ្វីលើស្មា?",
+        "ក្រមា។"
+      ],
+      [
+        "តើគាត់ធ្វើអ្វីពេលខ្យល់បក់ខ្លាំង?",
+        "ចាប់ក្រមា ហើយរុំឱ្យជិតខ្លួន។"
+      ],
+      [
+        "តើគាត់ដោះក្រមាពេលណា?",
+        "ពេលអាកាសកក់ក្ដៅ ហើយគាត់មានអារម្មណ៍ស្រួល។"
+      ],
+      [
+        "តើវិធីរបស់ខ្យល់និងព្រះអាទិត្យខុសគ្នាយ៉ាងណា?",
+        "ខ្យល់បក់បង្ខំ តែព្រះអាទិត្យផ្ដល់កម្ដៅថ្នមៗ។"
+      ],
+      [
+        "តើពេលសុំអ្វីពីមិត្ត យើងអាចនិយាយដោយថ្នមៗដូចម្ដេច?",
+        "សំណួរបើកចំហ៖ សុំដោយសុភាព ស្ដាប់ចម្លើយ និងមិនបង្ខំ។"
+      ]
+    ],
+    "link": "Map the final story vocabulary to docs/khmer-g1-lessons-map.md before independent reading. This longer draft is intended for shared reading first; topic familiarity is not a measure of decoding difficulty.",
+    "origin": {
+      "kind": "adaptation",
+      "title": "The North Wind and the Sun",
+      "author": "Aesop; traditional fable",
+      "url": "https://read.gov/aesop/143.html",
+      "referenceEdition": "The Aesop for Children (1919), Library of Congress digital presentation",
+      "note": "A new Khmer retelling of the underlying public-domain fable, not a translation of a modern commercial picture book. A traveller’s cloak becomes a Khmer krama on a village path. New Khmer narration keeps the gentle-persuasion theme; speaking weather is fiction, not a science explanation."
+    },
+    "number": 30,
+    "readingMode": "Shared reading first; independent reading after teacher vocabulary review.",
+    "reviewStatus": "Draft: Khmer teacher review, approved word segmentation, illustration review and Library Studio validation pending.",
+    "characterReferences": []
+  }
+]

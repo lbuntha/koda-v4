@@ -1,0 +1,412 @@
+{
+  "id": "km-g1-story-little-cat",
+  "rev": 0,
+  "language": "km",
+  "band": "A",
+  "ages": [
+    6,
+    7
+  ],
+  "category": "Animals",
+  "title": "ឆ្មាតូចនៅឯណា?",
+  "topics": [
+    "reading",
+    "animals",
+    "family"
+  ],
+  "picture": "photo-3c943c0230c3e7b9ff47b543f8b0809cae420afac648fab0c2fe64e5399276c7",
+  "sentences": [
+    {
+      "id": "p1s1",
+      "words": [
+        "សុភា",
+        "ចាក់",
+        "ទឹក",
+        "ចូល",
+        "ចាន",
+        "តូច",
+        "មួយ។"
+      ],
+      "text": "សុភាចាក់ទឹកចូលចានតូចមួយ។",
+      "pageBreak": true,
+      "picture": "photo-9747f9b6e7db1fd7dc8e73b541831118d984eeb75321e0d08d28fb303cea5d61"
+    },
+    {
+      "id": "p1s2",
+      "words": [
+        "នាង",
+        "ចង់",
+        "ឱ្យ",
+        "ឆ្មា",
+        "ផឹក",
+        "ទឹក។"
+      ],
+      "text": "នាងចង់ឱ្យឆ្មាផឹកទឹក។",
+      "pageBreak": false
+    },
+    {
+      "id": "p2s1",
+      "words": [
+        "សុភា",
+        "ហៅ",
+        "ថា៖ ",
+        "«មីមី ",
+        "មក",
+        "ផឹក",
+        "ទឹក!» "
+      ],
+      "text": "សុភាហៅថា៖ «មីមី មកផឹកទឹក!» ",
+      "pageBreak": true,
+      "picture": "photo-c4d910ffcb0684dd87342029cf91cad2a721c35b28bd1099f03d7bc7c3ae38fa"
+    },
+    {
+      "id": "p2s2",
+      "words": [
+        "មីមី",
+        "មិន",
+        "មក",
+        "ទេ។"
+      ],
+      "text": "មីមីមិនមកទេ។",
+      "pageBreak": false
+    },
+    {
+      "id": "p3s1",
+      "words": [
+        "សុភា",
+        "អោន",
+        "មើល",
+        "ក្រោម",
+        "តុ។"
+      ],
+      "text": "សុភាអោនមើលក្រោមតុ។",
+      "pageBreak": true,
+      "picture": "photo-7ee1242a3458091392f2e726a3027881cf27244b000bbf491b3afc8426fec478"
+    },
+    {
+      "id": "p3s2",
+      "words": [
+        "ក្រោម",
+        "តុ",
+        "មាន",
+        "តែ",
+        "ស្បែកជើង",
+        "ប៉ា។"
+      ],
+      "text": "ក្រោមតុមានតែស្បែកជើងប៉ា។",
+      "pageBreak": false
+    },
+    {
+      "id": "p4s1",
+      "words": [
+        "នាង",
+        "មើល",
+        "ក្រោម",
+        "កៅអី។"
+      ],
+      "text": "នាងមើលក្រោមកៅអី។",
+      "pageBreak": true,
+      "picture": "photo-d1d5535f2a73a38e08df05a4ee5f2cc0873ea041a4144e3380a1eadb98058f29"
+    },
+    {
+      "id": "p4s2",
+      "words": [
+        "ក្រោម",
+        "កៅអី",
+        "គ្មាន",
+        "ឆ្មា",
+        "ទេ។"
+      ],
+      "text": "ក្រោមកៅអីគ្មានឆ្មាទេ។",
+      "pageBreak": false
+    },
+    {
+      "id": "p5s1",
+      "words": [
+        "សុភា",
+        "ឈប់ ",
+        "ហើយ",
+        "ស្ដាប់។"
+      ],
+      "text": "សុភាឈប់ ហើយស្ដាប់។",
+      "pageBreak": true,
+      "picture": "photo-cea9bd37f66cfbbf5a01b8ffde528b54854e7f5e203d399db983ff7f996be919",
+      "pageDesign": {
+        "heading": "ស្ដាប់សំឡេង"
+      }
+    },
+    {
+      "id": "p5s2",
+      "words": [
+        "នាង",
+        "ឮ",
+        "សំឡេង៖ ",
+        "«មៀវ! ",
+        "មៀវ!»"
+      ],
+      "text": "នាងឮសំឡេង៖ «មៀវ! មៀវ!»",
+      "pageBreak": false
+    },
+    {
+      "id": "p6s1",
+      "words": [
+        "មីមី",
+        "នៅ",
+        "ក្រោយ",
+        "ខ្នើយ! "
+      ],
+      "text": "មីមីនៅក្រោយខ្នើយ! ",
+      "pageBreak": true,
+      "picture": "photo-036da91014918135179befb24ee349db1f80c0847518706439972489ab65906e"
+    },
+    {
+      "id": "p6s2",
+      "words": [
+        "វា",
+        "យំ",
+        "ថា៖ ",
+        "«មៀវ!»"
+      ],
+      "text": "វាយំថា៖ «មៀវ!»",
+      "pageBreak": false
+    },
+    {
+      "id": "p7s1",
+      "words": [
+        "សុភា",
+        "ដាក់",
+        "ចាន",
+        "ទឹក",
+        "ក្បែរ",
+        "កន្ទេល។"
+      ],
+      "text": "សុភាដាក់ចានទឹកក្បែរកន្ទេល។",
+      "pageBreak": true,
+      "picture": "photo-df1bb00280418a1caac84cad70b481f826ceae26dbbd589ebbb403afda1703ab",
+      "pageDesign": {
+        "heading": "ទឹកសម្រាប់មីមី",
+        "layout": "steps"
+      }
+    },
+    {
+      "id": "p7s2",
+      "words": [
+        "នាង",
+        "អង្គុយ",
+        "រង់ចាំ។"
+      ],
+      "text": "នាងអង្គុយរង់ចាំ។",
+      "pageBreak": false
+    },
+    {
+      "id": "p8s1",
+      "words": [
+        "មីមី",
+        "ដើរ",
+        "ចេញ",
+        "មក",
+        "ផឹក",
+        "ទឹក។"
+      ],
+      "text": "មីមីដើរចេញមកផឹកទឹក។",
+      "pageBreak": true,
+      "picture": "photo-788c9df741fc638742daf3a5d3c14a85f70f28852ed2b807bb316bcd66095fdb"
+    },
+    {
+      "id": "p8s2",
+      "words": [
+        "សុភា",
+        "អង្គុយ",
+        "ស្ងៀម ",
+        "ទុក",
+        "ឱ្យ",
+        "វា",
+        "ផឹក",
+        "តាម",
+        "ស្រួល។"
+      ],
+      "text": "សុភាអង្គុយស្ងៀម ទុកឱ្យវាផឹកតាមស្រួល។",
+      "pageBreak": false
+    }
+  ],
+  "questions": [
+    {
+      "id": "q-water",
+      "kind": "comprehension",
+      "prompt": "តើសុភាចាក់អ្វីចូលក្នុងចាន?",
+      "options": [
+        "បាយ។",
+        "ទឹក។",
+        "ទឹកដោះគោ។"
+      ],
+      "answer": 1,
+      "evidence": "p1s1"
+    },
+    {
+      "id": "q-sandals",
+      "kind": "comprehension",
+      "prompt": "តើមានអ្វីនៅក្រោមតុ?",
+      "options": [
+        "ចានទឹករបស់មីមី។",
+        "ខ្នើយតូចមួយ។",
+        "ស្បែកជើងប៉ា។"
+      ],
+      "answer": 2,
+      "evidence": "p3s2"
+    },
+    {
+      "id": "q-chair",
+      "kind": "comprehension",
+      "prompt": "បន្ទាប់ពីមើលក្រោមតុ តើសុភាមើលនៅឯណា?",
+      "options": [
+        "ក្រោមកៅអី។",
+        "លើកន្ទេល។",
+        "ក្រោយខ្នើយ។"
+      ],
+      "answer": 0,
+      "evidence": "p4s1"
+    },
+    {
+      "id": "q-meow",
+      "kind": "comprehension",
+      "prompt": "តើសុភាឮសំឡេងអ្វី?",
+      "options": [
+        "«មក! មក!»",
+        "«មៀវ! មៀវ!»",
+        "«ផឹកទឹក!»"
+      ],
+      "answer": 1,
+      "evidence": "p5s2"
+    },
+    {
+      "id": "q-gentle",
+      "kind": "comprehension",
+      "prompt": "តើសុភាធ្វើអ្វីពេលមីមីផឹកទឹក?",
+      "options": [
+        "ដើរចេញទៅក្រៅ។",
+        "ហៅប៉ាឱ្យមកមើល។",
+        "អង្គុយស្ងៀម។"
+      ],
+      "answer": 2,
+      "evidence": "p8s2"
+    },
+    {
+      "id": "word-cat",
+      "kind": "vocab",
+      "word": "ឆ្មា",
+      "prompt": "តើរូបណាជាឆ្មា?",
+      "options": [
+        "photo-a4902436dcf16c28480a1a72da0b9acaa92d69a7a7a30ba16f44f1c02d2c2c18",
+        "photo-69b52fa149d0fc27829567b8d375ec7c6108d07b1dab48746a71dfd3735974f9",
+        "photo-81efc8a8f1edfea189910ee034e7791984a70a9120a552b30fbb27923cb10c95"
+      ],
+      "answer": 2
+    },
+    {
+      "id": "word-bowl",
+      "kind": "vocab",
+      "word": "ចាន",
+      "prompt": "តើរូបណាជាចាន?",
+      "options": [
+        "photo-69b52fa149d0fc27829567b8d375ec7c6108d07b1dab48746a71dfd3735974f9",
+        "photo-81efc8a8f1edfea189910ee034e7791984a70a9120a552b30fbb27923cb10c95",
+        "photo-a4902436dcf16c28480a1a72da0b9acaa92d69a7a7a30ba16f44f1c02d2c2c18"
+      ],
+      "answer": 0
+    },
+    {
+      "id": "word-cushion",
+      "kind": "vocab",
+      "word": "ខ្នើយ",
+      "prompt": "តើរូបណាជាខ្នើយ?",
+      "options": [
+        "photo-81efc8a8f1edfea189910ee034e7791984a70a9120a552b30fbb27923cb10c95",
+        "photo-a4902436dcf16c28480a1a72da0b9acaa92d69a7a7a30ba16f44f1c02d2c2c18",
+        "photo-69b52fa149d0fc27829567b8d375ec7c6108d07b1dab48746a71dfd3735974f9"
+      ],
+      "answer": 1
+    },
+    {
+      "id": "spell-water",
+      "kind": "spell",
+      "word": "ទឹក",
+      "sentence": "p1s1"
+    },
+    {
+      "id": "spell-table",
+      "kind": "spell",
+      "word": "តុ",
+      "sentence": "p3s1"
+    },
+    {
+      "id": "spell-meow",
+      "kind": "spell",
+      "word": "មៀវ",
+      "sentence": "p6s2"
+    },
+    {
+      "id": "match-clues",
+      "kind": "match",
+      "prompt": "អានតម្រុយ រួចភ្ជាប់ទៅនឹងពាក្យ។",
+      "pairs": [
+        {
+          "left": "ដាក់ទឹកឱ្យមីមីផឹក",
+          "right": "ចាន",
+          "evidence": "p1s1"
+        },
+        {
+          "left": "ប្រើសម្រាប់កើយក្បាល",
+          "right": "ខ្នើយ",
+          "evidence": "p6s1"
+        },
+        {
+          "left": "សត្វដែលយំថា «មៀវ!»",
+          "right": "ឆ្មា",
+          "evidence": "p1s2"
+        }
+      ]
+    }
+  ],
+  "pictures": {
+    "ឆ្មា": "photo-81efc8a8f1edfea189910ee034e7791984a70a9120a552b30fbb27923cb10c95",
+    "ចាន": "photo-69b52fa149d0fc27829567b8d375ec7c6108d07b1dab48746a71dfd3735974f9",
+    "ខ្នើយ": "photo-a4902436dcf16c28480a1a72da0b9acaa92d69a7a7a30ba16f44f1c02d2c2c18"
+  },
+  "confirmedPictures": {
+    "ឆ្មា": "photo-81efc8a8f1edfea189910ee034e7791984a70a9120a552b30fbb27923cb10c95",
+    "ចាន": "photo-69b52fa149d0fc27829567b8d375ec7c6108d07b1dab48746a71dfd3735974f9",
+    "ខ្នើយ": "photo-a4902436dcf16c28480a1a72da0b9acaa92d69a7a7a30ba16f44f1c02d2c2c18"
+  },
+  "questionCounts": {
+    "understand": 5,
+    "words": 3,
+    "spell": 3,
+    "match": 1
+  },
+  "wordNotes": {
+    "មីមី": {
+      "reading": "មី មី"
+    },
+    "កៅអី": {
+      "reading": "កៅ អី"
+    },
+    "សំឡេង": {
+      "reading": "សំ ឡេង"
+    },
+    "ក្រោម": {
+      "opposite": "លើ"
+    },
+    "ចេញ": {
+      "opposite": "ចូល"
+    },
+    "តូច": {
+      "opposite": "ធំ"
+    }
+  },
+  "notesInQuiz": {
+    "reading": true,
+    "opposite": true
+  },
+  "learningTakeaway": "ពេលថែសត្វ យើងផ្ដល់ទឹកស្អាត ហើយទុកឱ្យវាផឹកតាមស្រួល។",
+  "provenance": "Original Khmer story for Koda. The cover, eight page illustrations and three vocabulary cards were made with Codex’s built-in image generation. Khmer word breaks are proposed for review."
+}

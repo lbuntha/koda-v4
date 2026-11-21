@@ -1,0 +1,530 @@
+{
+  "id": "km-g1-story-school-bag",
+  "rev": 0,
+  "title": "តើមានអ្វីក្នុងកាបូប?",
+  "language": "km",
+  "band": "A",
+  "ages": [
+    6,
+    7
+  ],
+  "category": "Everyday",
+  "topics": [
+    "reading",
+    "school",
+    "family"
+  ],
+  "questionCounts": {
+    "understand": 5,
+    "words": 3,
+    "spell": 3,
+    "match": 1
+  },
+  "picture": "photo-adc0eb9dd7db32fd09c294505ed8353d886ca4f0836d9c6a6aa1e5fa674b071b",
+  "sentences": [
+    {
+      "id": "p1s1",
+      "text": "ព្រឹកនេះដារាត្រូវទៅសាលា។",
+      "words": [
+        "ព្រឹក",
+        "នេះ",
+        "ដារា",
+        "ត្រូវ",
+        "ទៅ",
+        "សាលា។"
+      ],
+      "pageBreak": true,
+      "picture": "photo-6b486fee178ed3ad9fdc9b9ca0750403ba6051035e1bdb85a44a30977525d3bd",
+      "pictureAt": "top",
+      "textSize": "normal",
+      "textAlign": "left"
+    },
+    {
+      "id": "p1s2",
+      "text": "គាត់រកកាបូបរបស់គាត់មិនឃើញ។",
+      "words": [
+        "គាត់",
+        "រក",
+        "កាបូប",
+        "របស់",
+        "គាត់",
+        "មិន",
+        "ឃើញ។"
+      ],
+      "pageBreak": false
+    },
+    {
+      "id": "p2s1",
+      "text": "យាយឃើញកាបូបនៅក្រោមតុ។",
+      "words": [
+        "យាយ",
+        "ឃើញ",
+        "កាបូប",
+        "នៅ",
+        "ក្រោម",
+        "តុ។"
+      ],
+      "pageBreak": true,
+      "picture": "photo-b933c36c53775e431d8ab26f504d6e47366479faf68951544b310b26732ad695",
+      "pictureAt": "top",
+      "textSize": "normal",
+      "textAlign": "left"
+    },
+    {
+      "id": "p2s2",
+      "text": "ដារាយកវាមកដាក់លើកន្ទេល។",
+      "words": [
+        "ដារា",
+        "យក",
+        "វា",
+        "មក",
+        "ដាក់",
+        "លើ",
+        "កន្ទេល។"
+      ],
+      "pageBreak": false
+    },
+    {
+      "id": "p3s1",
+      "text": "យាយសួរថា៖«តើមានអ្វីក្នុងកាបូប?»",
+      "words": [
+        "យាយ",
+        "សួរ",
+        "ថា៖«",
+        "តើ",
+        "មាន",
+        "អ្វី",
+        "ក្នុង",
+        "កាបូប?»"
+      ],
+      "pageBreak": true,
+      "picture": "photo-035d5149a8e386f008169bbd386068b3c55dacc9a620a8aeb6fcbd132a3cd188",
+      "pictureAt": "top",
+      "textSize": "normal",
+      "textAlign": "left"
+    },
+    {
+      "id": "p3s2",
+      "text": "ដារាបើកកាបូបហើយយកប៊ិចមួយចេញ។",
+      "words": [
+        "ដារា",
+        "បើក",
+        "កាបូប",
+        "ហើយ",
+        "យក",
+        "ប៊ិច",
+        "មួយ",
+        "ចេញ។"
+      ],
+      "pageBreak": false
+    },
+    {
+      "id": "p4s1",
+      "text": "យាយសួរថា៖ «តើមានអ្វីទៀត?» ",
+      "words": [
+        "យាយ",
+        "សួរ",
+        "ថា៖ ",
+        "«តើ",
+        "មាន",
+        "អ្វី",
+        "ទៀត?» "
+      ],
+      "pageBreak": true,
+      "picture": "photo-c700d9e0d056454dfb7f4e785ab2af06622275c376be08b98dcdbafc3afc1fcb",
+      "pictureAt": "top",
+      "textSize": "normal",
+      "textAlign": "left"
+    },
+    {
+      "id": "p4s3",
+      "text": "ដារាយកសៀវភៅមួយចេញ។",
+      "words": [
+        "ដារា",
+        "យក",
+        "សៀវភៅ",
+        "មួយ",
+        "ចេញ។"
+      ],
+      "pageBreak": false
+    },
+    {
+      "id": "p5s1",
+      "text": "យាយសួរម្ដងទៀតថា៖ «តើមានអ្វីទៀត?» ",
+      "words": [
+        "យាយ",
+        "សួរ",
+        "ម្ដង",
+        "ទៀត",
+        "ថា៖ ",
+        "«តើ",
+        "មាន",
+        "អ្វី",
+        "ទៀត?» "
+      ],
+      "pageBreak": true,
+      "picture": "photo-b653202413c4561724450d073ecd46de6c18254be8ecfcb85d28dbf22859f325",
+      "pictureAt": "top",
+      "textSize": "normal",
+      "textAlign": "left"
+    },
+    {
+      "id": "p5s3",
+      "text": "ដារាយកបន្ទាត់មួយចេញ។",
+      "words": [
+        "ដារា",
+        "យក",
+        "បន្ទាត់",
+        "មួយ",
+        "ចេញ។"
+      ],
+      "pageBreak": false
+    },
+    {
+      "id": "p6s1",
+      "text": "ដារាចង់គូររូបតែរកខ្មៅដៃមិនឃើញ។",
+      "words": [
+        "ដារា",
+        "ចង់",
+        "គូររូប",
+        "តែ",
+        "រក",
+        "ខ្មៅដៃ",
+        "មិន",
+        "ឃើញ។"
+      ],
+      "pageBreak": true,
+      "picture": "photo-0f25fb272c31539d95df1bcfafdd08226c2f586aa4726e2c7f40d9fcbf4afd4c",
+      "pictureAt": "top",
+      "textSize": "normal",
+      "textAlign": "left"
+    },
+    {
+      "id": "p6s2",
+      "text": "គាត់ទុកខ្មៅដៃនៅលើតុកាលពីម្សិលមិញ។",
+      "words": [
+        "គាត់",
+        "ទុក",
+        "ខ្មៅដៃ",
+        "នៅ",
+        "លើ",
+        "តុ",
+        "កាលពី",
+        "ម្សិលមិញ។"
+      ],
+      "pageBreak": false
+    },
+    {
+      "id": "p7s1",
+      "text": "ដារាយកខ្មៅដៃមកដាក់ក្នុងកាបូប។",
+      "words": [
+        "ដារា",
+        "យក",
+        "ខ្មៅដៃ",
+        "មក",
+        "ដាក់",
+        "ក្នុង",
+        "កាបូប។"
+      ],
+      "pageBreak": true,
+      "picture": "photo-a45f7fe4228995551cd5501ccae984b43cd4fa2f24d8dc92a94af65806338d3b",
+      "pictureAt": "top",
+      "textSize": "normal",
+      "textAlign": "left"
+    },
+    {
+      "id": "p7s2",
+      "text": "យាយថា៖«ឥឡូវកូនមានរបស់គ្រប់ហើយ!»",
+      "words": [
+        "យាយ",
+        "ថា៖«",
+        "ឥឡូវ",
+        "កូន",
+        "មាន",
+        "របស់",
+        "គ្រប់ហើយ!»"
+      ],
+      "pageBreak": false
+    },
+    {
+      "id": "p8s1",
+      "text": "ដារាដាក់ប៊ិច សៀវភៅ និងបន្ទាត់ចូលក្នុងកាបូប។",
+      "words": [
+        "ដារា",
+        "ដាក់",
+        "ប៊ិច ",
+        "សៀវភៅ ",
+        "និង",
+        "បន្ទាត់",
+        "ចូល",
+        "ក្នុង",
+        "កាបូប។"
+      ],
+      "pageBreak": true,
+      "picture": "photo-fb8527a21cbd6f6e8edd8151a415670be7ac7ec60274f49b1a11b66f62648a69",
+      "pictureAt": "top",
+      "textSize": "normal",
+      "textAlign": "left",
+      "pageDesign": {
+        "heading": "រៀបកាបូប",
+        "layout": "steps"
+      }
+    },
+    {
+      "id": "p8s2",
+      "text": "គាត់បិទកាបូប។",
+      "words": [
+        "គាត់",
+        "បិទ",
+        "កាបូប។"
+      ],
+      "pageBreak": false
+    },
+    {
+      "id": "p9s1",
+      "text": "ល្ងាចនោះ ដារារៀបកាបូបមុនចូលគេង។",
+      "words": [
+        "ល្ងាច",
+        "នោះ ",
+        "ដារា",
+        "រៀប",
+        "កាបូប",
+        "មុន",
+        "ចូល",
+        "គេង។"
+      ],
+      "pageBreak": true,
+      "picture": "photo-5c2d7208745ed948fb8cccda0cc95a40c4854c6f64ad1ae8e03063710af3275f",
+      "pictureAt": "top",
+      "textSize": "normal",
+      "textAlign": "left",
+      "pageDesign": {
+        "heading": "ពិនិត្យម្ដងទៀត",
+        "layout": "steps",
+        "intro": true
+      }
+    },
+    {
+      "id": "p9s2",
+      "text": "គាត់រាប់របស់ទាំងបួន ដើម្បីកុំឱ្យភ្លេច។",
+      "words": [
+        "គាត់",
+        "រាប់",
+        "របស់",
+        "ទាំង",
+        "បួន ",
+        "ដើម្បី",
+        "កុំ",
+        "ឱ្យ",
+        "ភ្លេច។"
+      ],
+      "pageBreak": false
+    },
+    {
+      "id": "p10s1",
+      "text": "ព្រឹកបន្ទាប់ដារាយកកាបូបបានភ្លាម។",
+      "words": [
+        "ព្រឹក",
+        "បន្ទាប់",
+        "ដារា",
+        "យក",
+        "កាបូប",
+        "បាន",
+        "ភ្លាម។"
+      ],
+      "pageBreak": true,
+      "picture": "photo-5a193710acf48d16442caef514a9dab0884dd3219941aeccd5a8c8c8c81c64dc",
+      "pictureAt": "top",
+      "textSize": "normal",
+      "textAlign": "left"
+    },
+    {
+      "id": "p10s2",
+      "text": "គាត់ញញឹមថា៖«ខ្ញុំរៀបចំរួចហើយ!»",
+      "words": [
+        "គាត់",
+        "ញញឹម",
+        "ថា៖«",
+        "ខ្ញុំ",
+        "រៀបចំ",
+        "រួចហើយ!»"
+      ],
+      "pageBreak": false
+    }
+  ],
+  "questions": [
+    {
+      "id": "q1",
+      "kind": "comprehension",
+      "prompt": "តើយាយឃើញកាបូបនៅឯណា?",
+      "options": [
+        "នៅលើកៅអី។",
+        "នៅក្រោមតុ។",
+        "នៅក្បែរទ្វារ។"
+      ],
+      "answer": 1,
+      "evidence": "p2s1"
+    },
+    {
+      "id": "q2",
+      "kind": "comprehension",
+      "prompt": "តើដារាយកអ្វីចេញពីកាបូបមុនគេ?",
+      "options": [
+        "ប៊ិចមួយ។",
+        "បន្ទាត់មួយ។",
+        "ខ្មៅដៃមួយ។"
+      ],
+      "answer": 0,
+      "evidence": "p3s2"
+    },
+    {
+      "id": "q3",
+      "kind": "comprehension",
+      "prompt": "តើដារារកអ្វីមិនឃើញពេលចង់គូររូប?",
+      "options": [
+        "សៀវភៅ។",
+        "បន្ទាត់។",
+        "ខ្មៅដៃ។"
+      ],
+      "answer": 2,
+      "evidence": "p6s1"
+    },
+    {
+      "id": "q4",
+      "kind": "comprehension",
+      "prompt": "តើដារាទុកខ្មៅដៃនៅឯណាកាលពីម្សិលមិញ?",
+      "options": [
+        "នៅលើតុ។",
+        "នៅក្នុងកាបូប។",
+        "នៅលើកន្ទេល។"
+      ],
+      "answer": 0,
+      "evidence": "p6s2"
+    },
+    {
+      "id": "q5",
+      "kind": "comprehension",
+      "prompt": "តើដារារៀបកាបូបពេលណានៅល្ងាចនោះ?",
+      "options": [
+        "ពេលទៅដល់សាលា។",
+        "មុនចូលគេង។",
+        "ពេលកំពុងគូររូប។"
+      ],
+      "answer": 1,
+      "evidence": "p9s1"
+    },
+    {
+      "id": "word-pen",
+      "kind": "vocab",
+      "prompt": "តើរូបណាជាប៊ិច?",
+      "word": "ប៊ិច",
+      "options": [
+        "photo-4d6b6245ab537422be6fdf02a20a6cea2cb13247221865c3fd2216debd49d64f",
+        "photo-6539341bdf0a5d1e5443f635df71d7cbd7a78fcee7e779b875f2e080974c8709",
+        "photo-ac8da4726f8b6ef6564599eda92aec63239220df04af99e0b7763da93bdeeb58"
+      ],
+      "answer": 1
+    },
+    {
+      "id": "word-book",
+      "kind": "vocab",
+      "prompt": "តើរូបណាជាសៀវភៅ?",
+      "word": "សៀវភៅ",
+      "options": [
+        "photo-ac8da4726f8b6ef6564599eda92aec63239220df04af99e0b7763da93bdeeb58",
+        "photo-4d6b6245ab537422be6fdf02a20a6cea2cb13247221865c3fd2216debd49d64f",
+        "photo-6539341bdf0a5d1e5443f635df71d7cbd7a78fcee7e779b875f2e080974c8709"
+      ],
+      "answer": 0
+    },
+    {
+      "id": "word-ruler",
+      "kind": "vocab",
+      "prompt": "តើរូបណាជាបន្ទាត់?",
+      "word": "បន្ទាត់",
+      "options": [
+        "photo-6539341bdf0a5d1e5443f635df71d7cbd7a78fcee7e779b875f2e080974c8709",
+        "photo-ac8da4726f8b6ef6564599eda92aec63239220df04af99e0b7763da93bdeeb58",
+        "photo-4d6b6245ab537422be6fdf02a20a6cea2cb13247221865c3fd2216debd49d64f"
+      ],
+      "answer": 2
+    },
+    {
+      "id": "spell-table",
+      "kind": "spell",
+      "sentence": "p2s1",
+      "word": "តុ"
+    },
+    {
+      "id": "spell-pen",
+      "kind": "spell",
+      "sentence": "p3s2",
+      "word": "ប៊ិច"
+    },
+    {
+      "id": "spell-bag",
+      "kind": "spell",
+      "sentence": "p9s1",
+      "word": "កាបូប"
+    },
+    {
+      "id": "match-school-tools",
+      "kind": "match",
+      "prompt": "ភ្ជាប់តម្រុយទៅនឹងសម្ភារៈសិក្សា។",
+      "pairs": [
+        {
+          "left": "មានទឹកខ្មៅ",
+          "right": "ប៊ិច",
+          "evidence": "p3s2"
+        },
+        {
+          "left": "មានទំព័រ",
+          "right": "សៀវភៅ",
+          "evidence": "p4s3"
+        },
+        {
+          "left": "ប្រើគូសខ្សែត្រង់",
+          "right": "បន្ទាត់",
+          "evidence": "p5s3"
+        }
+      ]
+    }
+  ],
+  "pictures": {
+    "ប៊ិច": "photo-6539341bdf0a5d1e5443f635df71d7cbd7a78fcee7e779b875f2e080974c8709",
+    "សៀវភៅ": "photo-ac8da4726f8b6ef6564599eda92aec63239220df04af99e0b7763da93bdeeb58",
+    "បន្ទាត់": "photo-4d6b6245ab537422be6fdf02a20a6cea2cb13247221865c3fd2216debd49d64f"
+  },
+  "confirmedPictures": {
+    "ប៊ិច": "photo-6539341bdf0a5d1e5443f635df71d7cbd7a78fcee7e779b875f2e080974c8709",
+    "សៀវភៅ": "photo-ac8da4726f8b6ef6564599eda92aec63239220df04af99e0b7763da93bdeeb58",
+    "បន្ទាត់": "photo-4d6b6245ab537422be6fdf02a20a6cea2cb13247221865c3fd2216debd49d64f"
+  },
+  "wordNotes": {
+    "កាបូប": {
+      "reading": "កា បូប"
+    },
+    "សៀវភៅ": {
+      "reading": "សៀវ ភៅ"
+    },
+    "សាលា": {
+      "reading": "សា លា"
+    },
+    "បើក": {
+      "opposite": "បិទ"
+    },
+    "លើ": {
+      "opposite": "ក្រោម"
+    },
+    "ចេញ": {
+      "opposite": "ចូល"
+    }
+  },
+  "notesInQuiz": {
+    "reading": true,
+    "opposite": true
+  },
+  "noRecording": [],
+  "learningTakeaway": "ការរៀបចំទុកជាមុន ជួយឱ្យយើងធ្វើអ្វីបានដោយខ្លួនឯង។",
+  "provenance": "Original Khmer story written for Koda, 2026. Cover and ten page illustrations created with ChatGPT's built-in image generation tool, not the project's image API. Draft: Khmer wording, proposed word segmentation, images and questions await human review. Not published."
+}
