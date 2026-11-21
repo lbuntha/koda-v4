@@ -86,6 +86,13 @@ describe("ticking steps off", () => {
     expect(stepDone(read, plan, [ev({ type: "reading_finished", skillId: "koda-library", lessonId: "book-10@1" })], "kid")).toBe(false);
     expect(stepDone(write, plan, [ev({ type: "lesson_completed", skillId: "koda-trace", lessonId: "ka" })], "kid")).toBe(true);
   });
+
+  it("counts a book whose questions were finished in the passage screen, which logs no reading events", () => {
+    const read = plan.steps.find((s) => s.kind === "read")!;
+    expect(stepDone(read, plan, [ev({ type: "lesson_completed", skillId: "koda-library", lessonId: "book-1@1" })], "kid")).toBe(true);
+    expect(stepDone(read, plan, [ev({ type: "lesson_completed", skillId: "koda-library", lessonId: "book-10@1" })], "kid")).toBe(false);
+    expect(stepDone(read, plan, [ev({ type: "lesson_completed", skillId: "counting", lessonId: "book-1@1" })], "kid")).toBe(false);
+  });
 });
 
 describe("one plan per day", () => {

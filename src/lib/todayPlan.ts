@@ -64,6 +64,7 @@ export interface PlanInput {
 
 /** Word Guess, as its learning-log skill id (`src/puzzles/learning.ts`). */
 const WORD_GUESS = "koda-word-guess";
+const LIBRARY = "koda-library";
 
 export function buildPlan(input: PlanInput): TodayPlan {
   const steps: PlanStep[] = [];
@@ -110,7 +111,14 @@ export function stepDone(step: PlanStep, plan: TodayPlan, events: readonly Learn
     if (e.learnerId !== learnerId || e.ts < plan.createdAt || e.entry === "preview") return false;
     switch (step.kind) {
       case "read":
-        return e.type === "reading_finished" && Boolean(step.bookId) && e.lessonId.startsWith(`${step.bookId}@`);
+        /* Finished in the page-by-page reader, or its questions done in the
+           passage screen — which is where some books are read, and which logs
+           only the completed lesson. */
+        return (
+          Boolean(step.bookId) &&
+          e.lessonId.startsWith(`${step.bookId}@`) &&
+          (e.type === "reading_finished" || (e.type === "lesson_completed" && e.skillId === LIBRARY))
+        );
       case "puzzle":
         return e.type === "lesson_completed" && e.skillId === WORD_GUESS;
       case "write":

@@ -1,5 +1,5 @@
 import React from "react";
-import { Check, Play } from "lucide-react";
+import { Check, Play, Zap } from "lucide-react";
 import { themeSystem } from "../../lib/themeSystem";
 import { useT } from "../../lib/i18n";
 import type { PlanStep, PlanStepKind, TodayPlan } from "../../lib/todayPlan";
@@ -33,6 +33,8 @@ export interface TodayPlanCardProps {
   onStart(step: PlanStep): void;
   /** The run so far, for the cheer line. Weeks are left out: "3 days" must not mean three weeks. */
   streak?: { count: number; cadence: "daily" | "weekly" };
+  /** XP earned today. Hidden at 0 so the card never opens on a zero. */
+  xpToday?: number;
 }
 
 /**
@@ -59,7 +61,7 @@ export function planMessage(
   return null;
 }
 
-export const TodayPlanCard: React.FC<TodayPlanCardProps> = ({ plan, done, lessonLabel, onStart, streak }) => {
+export const TodayPlanCard: React.FC<TodayPlanCardProps> = ({ plan, done, lessonLabel, onStart, streak, xpToday = 0 }) => {
   const { t } = useT();
   const total = plan.steps.length;
   const finished = done.filter(Boolean).length;
@@ -86,9 +88,20 @@ export const TodayPlanCard: React.FC<TodayPlanCardProps> = ({ plan, done, lesson
             <p className="mt-1 text-sm font-bold text-violet-700 dark:text-violet-300">{t(message.key, message.values)}</p>
           ) : null}
         </div>
-        <span className="shrink-0 font-mono text-sm font-black text-ink tabular-nums">
-          {t("todayPlan.progress", { done: String(finished), total: String(total) })}
-        </span>
+        <div className="flex shrink-0 flex-col items-end gap-1">
+          <span className="font-mono text-sm font-black text-ink tabular-nums">
+            {t("todayPlan.progress", { done: String(finished), total: String(total) })}
+          </span>
+          {xpToday > 0 ? (
+            <span
+              data-testid="xp-today"
+              className="inline-flex items-center gap-1 rounded-full bg-violet-100 px-2 py-0.5 text-xs font-black text-violet-700 tabular-nums dark:bg-violet-950 dark:text-violet-300"
+            >
+              <Zap aria-hidden className="h-3.5 w-3.5 fill-current" />
+              {t("todayPlan.xpToday", { xp: String(xpToday) })}
+            </span>
+          ) : null}
+        </div>
       </div>
 
       <UIProgressBar value={finished} max={total} label={t("todayPlan.title")} />

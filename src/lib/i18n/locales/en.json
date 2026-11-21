@@ -5938,6 +5938,7 @@
     }
   },
   "todayPlan": {
+    "xpToday": "+{xp} XP today",
     "title": "Today's plan",
     "hint": "About 10 minutes. Old topics and mistakes come back a day or more later, so they stick.",
     "progress": "{done} of {total} done",

@@ -16,6 +16,13 @@ const plan: TodayPlan = {
 const label = (ref: string) => ({ title: ref === "addition/doubles" ? "Doubles" : "Count On", subject: "Addition" });
 
 describe("Today's plan card", () => {
+  it("shows the XP earned today, and nothing while it is still 0", () => {
+    const { rerender } = render(<TodayPlanCard plan={plan} done={[false, false, false]} lessonLabel={label} onStart={() => {}} />);
+    expect(screen.queryByTestId("xp-today")).toBeNull();
+    rerender(<TodayPlanCard plan={plan} done={[true, false, false]} lessonLabel={label} onStart={() => {}} xpToday={25} />);
+    expect(screen.getByTestId("xp-today").textContent).toBe("+25 XP today");
+  });
+
   it("shows progress and opens the first step not done with one button", () => {
     const onStart = vi.fn();
     render(<TodayPlanCard plan={plan} done={[true, false, false]} lessonLabel={label} onStart={onStart} />);

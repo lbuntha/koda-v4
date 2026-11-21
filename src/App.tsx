@@ -1,4 +1,6 @@
-import { useState, useEffect, useRef, useSyncExternalStore, useTransition } from "react";
+import { useCallback, useState, useEffect, useRef, useSyncExternalStore, useTransition } from "react";
+import { XpToday } from "./lib/xpToday";
+import { activeLearnerId } from "./lib/learning/learningLog";
 import { Megaphone } from "lucide-react";
 
 import { UserProgress } from "./types";
@@ -570,6 +572,12 @@ export default function App() {
   };
 
   const [userProgress, setUserProgress] = useState<UserProgress>(loadProgress);
+  /* Every XP award goes through here, so today's share is counted for the Today card.
+     Counted outside the state updater, which React may run twice. */
+  const awardXp = useCallback((earnedXp: number) => {
+    XpToday.add(activeLearnerId(), earnedXp);
+    setUserProgress((prev) => ({ ...prev, xp: prev.xp + earnedXp }));
+  }, []);
   // The record says what the run reached; this says what it reads as today, so
   // a round opened the morning after a missed day does not show a live streak.
   const streak = useStreak(userProgress);
@@ -762,7 +770,7 @@ export default function App() {
       pathComplete={!followingLesson}
       onStartLesson={(levelNumber) => void startLesson(levelNumber)}
       onAwardXp={(earnedXp) =>
-        setUserProgress((prev) => ({ ...prev, xp: prev.xp + earnedXp }))
+        awardXp(earnedXp)
       }
       onComplete={(result) => {
         setUserProgress((prev) => ({
@@ -933,7 +941,7 @@ export default function App() {
                   embedded
                   openBookId={learnTarget?.bookId}
                   onOpened={() => setLearnTarget(null)}
-                  onAwardXp={(earnedXp) => setUserProgress((prev) => ({ ...prev, xp: prev.xp + earnedXp }))}
+                  onAwardXp={(earnedXp) => awardXp(earnedXp)}
                   onReaderChange={setLibraryReaderOpen}
                   onBookChange={setLibraryBookOpen}
                 />
@@ -945,7 +953,7 @@ export default function App() {
                   canCreate={canTrace}
                   onDeepChange={setTraceDeep}
                   onPlayingChange={setTracePlaying}
-                  onAwardXp={(earnedXp) => setUserProgress((prev) => ({ ...prev, xp: prev.xp + earnedXp }))}
+                  onAwardXp={(earnedXp) => awardXp(earnedXp)}
                   onGoHome={() => setActiveTab("home")}
                 />
               ) : outsideHours && studyHours !== null ? (
@@ -961,7 +969,7 @@ export default function App() {
                 <DayDoneScreen cap={sessionCap} onGoHome={() => setActiveTab("home")} />
               ) : wordGuessOpen ? (
                 <WordGuessPage
-                  onAwardXp={(earnedXp) => setUserProgress((prev) => ({ ...prev, xp: prev.xp + earnedXp }))}
+                  onAwardXp={(earnedXp) => awardXp(earnedXp)}
                   onExit={() => setWordGuessOpen(false)}
                 />
               ) : rebusOpen ? (
@@ -972,7 +980,7 @@ export default function App() {
                     setRoomCode(null);
                   }}
                   onDeepChange={setRebusDeep}
-                  onAwardXp={(earnedXp) => setUserProgress((prev) => ({ ...prev, xp: prev.xp + earnedXp }))}
+                  onAwardXp={(earnedXp) => awardXp(earnedXp)}
                   onExit={() => setRebusOpen(false)}
                 />
               ) : selectedLearnSkillId ? (
@@ -1276,12 +1284,7 @@ export default function App() {
         currentQuestionText={kodaContext.question}
         currentProblemContext={kodaContext.where}
         studentName="Student"
-        onAwardXp={(earnedXp) => {
-          setUserProgress((prev) => ({
-            ...prev,
-            xp: prev.xp + earnedXp,
-          }));
-        }}
+        onAwardXp={awardXp}
       />
     </MainLayout>
   );

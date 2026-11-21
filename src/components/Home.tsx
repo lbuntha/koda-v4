@@ -39,6 +39,7 @@ import { planFor, stepDone, type PlanStep } from "../lib/todayPlan";
 import { readReview } from "../lib/learning/review";
 import { LearningLog, activeLearnerId, localDayOf } from "../lib/learning/learningLog";
 import { ChildSettingsAPI } from "../lib/childSettings";
+import { XpToday } from "../lib/xpToday";
 import { SidebarIcon } from "./ui";
 import type { PickWhy } from "../lib/today";
 
@@ -421,9 +422,11 @@ export const Home: React.FC<HomeProps> = ({
   React.useEffect(() => {
     const offLog = LearningLog.subscribe(refreshPlan);
     const offSettings = ChildSettingsAPI.subscribe(refreshPlan);
+    const offXp = XpToday.subscribe(refreshPlan);
     return () => {
       offLog();
       offSettings();
+      offXp();
     };
   }, []);
   const [showAllSubjects, setShowAllSubjects] = React.useState(false);
@@ -768,6 +771,7 @@ export const Home: React.FC<HomeProps> = ({
         done={planDone}
         onStart={startStep}
         streak={{ count: planStreak.days, cadence: planStreak.cadence }}
+        xpToday={XpToday.get(planLearner)}
         lessonLabel={(ref) => {
           const lesson = byRef.get(ref);
           return lesson ? { title: lesson.title, subject: byId.get(lesson.skillId)?.name ?? lesson.skillId } : null;
