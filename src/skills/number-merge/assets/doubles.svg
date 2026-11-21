@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+  <title>Doubles</title>
+  <rect x="6" y="6" width="88" height="88" rx="18" fill="#F4F2FF" stroke="#3B2F8F" stroke-width="4"/>
+  <rect x="14" y="36" width="28" height="28" rx="7" fill="#DDD6FE"/><text x="28" y="57" text-anchor="middle" font-family="Arial, sans-serif" font-weight="900" font-size="20" fill="#231C5C">4</text><path d="M44 50 H56" stroke="#7C4DFF" stroke-width="5" stroke-linecap="round"/><path d="M51 44 L57 50 L51 56" fill="none" stroke="#7C4DFF" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/><rect x="58" y="36" width="28" height="28" rx="7" fill="#DDD6FE"/><text x="72" y="57" text-anchor="middle" font-family="Arial, sans-serif" font-weight="900" font-size="20" fill="#231C5C">4</text><text x="50" y="84" text-anchor="middle" font-family="Arial, sans-serif" font-weight="900" font-size="16" fill="#7C4DFF">8</text>
+</svg>

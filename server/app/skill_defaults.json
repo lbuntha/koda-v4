@@ -21968,6 +21968,1757 @@
     ]
   },
   {
+    "id": "number-merge",
+    "name": "Number Merge",
+    "version": "0.1.0",
+    "description": "Drag or tap a number onto the one next to it to merge them. Make 5 and 10, doubles, exact sums, tens and hundreds, differences, times tables and fractions of one whole.",
+    "category": "core",
+    "author": "Koda Math Lab",
+    "iconName": "Layers",
+    "tagline": "Merge numbers, make the target.",
+    "thumbnail": "number-merge-quest",
+    "status": "draft",
+    "audience": {
+      "ages": [
+        5,
+        11
+      ],
+      "category": "operations"
+    },
+    "topics": [
+      "numbers",
+      "addition",
+      "subtraction",
+      "multiplication",
+      "fractions",
+      "place-value"
+    ],
+    "teaches": [
+      "five-benchmark",
+      "make-ten",
+      "doubles-merger",
+      "merge-target-adder",
+      "unitiser-ten",
+      "unitiser-hundred",
+      "difference-finder",
+      "factor-merger",
+      "fraction-whole-maker"
+    ],
+    "requires": [],
+    "features": [
+      {
+        "id": "audio_speech",
+        "name": "Spoken voice",
+        "description": "Reads the lesson prompt aloud. Turn off for a silent lesson.",
+        "isEnabled": true,
+        "tag": "Audio"
+      },
+      {
+        "id": "sound_chimes",
+        "name": "Sound chimes",
+        "description": "Plays a short sound when tiles merge, and when a merge is right or wrong.",
+        "isEnabled": true,
+        "tag": "Audio"
+      },
+      {
+        "id": "haptic_feedback",
+        "name": "Haptic vibration",
+        "description": "Adds a small vibration when a merge is right or wrong.",
+        "isEnabled": true,
+        "tag": "Haptic"
+      },
+      {
+        "id": "drag_merge",
+        "name": "Drag to merge",
+        "description": "Lets children drag a number onto its neighbour. Turn off to merge by tapping only.",
+        "isEnabled": true,
+        "tag": "Input"
+      }
+    ],
+    "settings": {
+      "speechRate": 0.95
+    },
+    "settingsSchema": [
+      {
+        "key": "speechRate",
+        "label": "Speech rate",
+        "help": "How fast Koda reads the prompt aloud.",
+        "type": "number",
+        "min": 0.5,
+        "max": 2,
+        "step": 0.05,
+        "unit": "x"
+      }
+    ],
+    "lessons": [
+      {
+        "id": "friends-of-five",
+        "title": "Friends of 5",
+        "concept": "Two Groups That Make 5",
+        "conceptKey": "five-benchmark",
+        "requires": [],
+        "activity": "number-merge/board",
+        "params": {
+          "level": 1,
+          "question": {
+            "mode": "bond",
+            "target": 5,
+            "size": 3,
+            "show": "dots",
+            "questionsPerRound": 5
+          },
+          "play": {
+            "targetObjective": "Merge two numbers that make 5.",
+            "stepByStep": [
+              "Pick a number.",
+              "Think: what does it need to make 5?",
+              "Find that number right next to it and merge them."
+            ],
+            "kidTip": "Count the dots on two tiles side by side. If there are 5 altogether, merge them.",
+            "audioPrompt": "Merge two numbers that make 5."
+          }
+        },
+        "difficulty": "Easy",
+        "icon": "number-merge-bonds",
+        "iconName": "star",
+        "iconTone": "pink",
+        "pedagogyTip": "Bonds to 5 are the first part-whole facts; dots let a child count before they recall.",
+        "standards": [
+          "CCSS.K.OA.A.5"
+        ],
+        "trajectoryLevel": "part-whole",
+        "ageBand": [
+          5,
+          6
+        ]
+      },
+      {
+        "id": "dots-to-five",
+        "title": "Dots and Numbers to 5",
+        "concept": "Seeing 5 Two Ways",
+        "conceptKey": "five-benchmark",
+        "requires": [
+          "five-benchmark"
+        ],
+        "activity": "number-merge/board",
+        "params": {
+          "level": 2,
+          "question": {
+            "mode": "bond",
+            "target": 5,
+            "size": 3,
+            "show": "both",
+            "questionsPerRound": 6
+          },
+          "play": {
+            "targetObjective": "Merge two numbers that make 5.",
+            "stepByStep": [
+              "Pick a number.",
+              "Think: what does it need to make 5?",
+              "Find that number right next to it and merge them."
+            ],
+            "kidTip": "Look at the dots and the number together. 3 and 2 make 5.",
+            "audioPrompt": "Merge two numbers that make 5."
+          }
+        },
+        "difficulty": "Easy",
+        "icon": "number-merge-bonds",
+        "iconName": "star",
+        "iconTone": "pink",
+        "pedagogyTip": "Bonds to 5 are the first part-whole facts; dots let a child count before they recall.",
+        "standards": [
+          "CCSS.K.OA.A.5"
+        ],
+        "trajectoryLevel": "part-whole",
+        "ageBand": [
+          5,
+          6
+        ]
+      },
+      {
+        "id": "numbers-to-five",
+        "title": "Numbers to 5",
+        "concept": "Pairs That Make 5",
+        "conceptKey": "five-benchmark",
+        "requires": [
+          "five-benchmark"
+        ],
+        "activity": "number-merge/board",
+        "params": {
+          "level": 3,
+          "question": {
+            "mode": "bond",
+            "target": 5,
+            "size": 4,
+            "questionsPerRound": 6
+          },
+          "play": {
+            "targetObjective": "Merge two numbers that make 5.",
+            "stepByStep": [
+              "Pick a number.",
+              "Think: what does it need to make 5?",
+              "Find that number right next to it and merge them."
+            ],
+            "kidTip": "Think of the pairs: 1 and 4, 2 and 3.",
+            "audioPrompt": "Merge two numbers that make 5."
+          }
+        },
+        "difficulty": "Easy",
+        "icon": "number-merge-bonds",
+        "iconName": "star",
+        "iconTone": "pink",
+        "pedagogyTip": "Bonds to 5 are the first part-whole facts; dots let a child count before they recall.",
+        "standards": [
+          "CCSS.K.OA.A.5"
+        ],
+        "trajectoryLevel": "part-whole",
+        "ageBand": [
+          5,
+          6
+        ]
+      },
+      {
+        "id": "make-five-star",
+        "title": "Make 5 Star",
+        "concept": "Pairs That Make 5, Fast",
+        "conceptKey": "five-benchmark",
+        "requires": [
+          "five-benchmark"
+        ],
+        "activity": "number-merge/board",
+        "params": {
+          "level": 4,
+          "question": {
+            "mode": "bond",
+            "target": 5,
+            "size": 4,
+            "questionsPerRound": 8
+          },
+          "play": {
+            "targetObjective": "Merge two numbers that make 5.",
+            "stepByStep": [
+              "Pick a number.",
+              "Think: what does it need to make 5?",
+              "Find that number right next to it and merge them."
+            ],
+            "kidTip": "Say the partner in your head: 4 needs 1, 3 needs 2.",
+            "audioPrompt": "Merge two numbers that make 5."
+          }
+        },
+        "difficulty": "Easy",
+        "icon": "number-merge-bonds",
+        "iconName": "star",
+        "iconTone": "pink",
+        "pedagogyTip": "Bonds to 5 are the first part-whole facts; dots let a child count before they recall.",
+        "standards": [
+          "CCSS.K.OA.A.5"
+        ],
+        "trajectoryLevel": "part-whole",
+        "ageBand": [
+          5,
+          6
+        ]
+      },
+      {
+        "id": "friends-of-ten",
+        "title": "Friends of 10",
+        "concept": "Pairs That Make 10",
+        "conceptKey": "make-ten",
+        "requires": [],
+        "activity": "number-merge/board",
+        "params": {
+          "level": 5,
+          "question": {
+            "mode": "bond",
+            "target": 10,
+            "size": 3,
+            "show": "both",
+            "questionsPerRound": 6
+          },
+          "play": {
+            "targetObjective": "Merge two numbers that make 10.",
+            "stepByStep": [
+              "Pick a number.",
+              "Think: what does it need to make 10?",
+              "Find that number right next to it and merge them."
+            ],
+            "kidTip": "Dots come in rows of five. Two full rows make 10.",
+            "audioPrompt": "Merge two numbers that make 10."
+          }
+        },
+        "difficulty": "Easy",
+        "icon": "number-merge-bonds",
+        "iconName": "star",
+        "iconTone": "pink",
+        "pedagogyTip": "Making 10 is the key to adding and taking away across ten.",
+        "standards": [
+          "CCSS.K.OA.A.4",
+          "CCSS.1.OA.C.6"
+        ],
+        "trajectoryLevel": "part-whole",
+        "ageBand": [
+          6,
+          7
+        ]
+      },
+      {
+        "id": "make-ten-board",
+        "title": "Make 10",
+        "concept": "Pairs That Make 10",
+        "conceptKey": "make-ten",
+        "requires": [
+          "make-ten"
+        ],
+        "activity": "number-merge/board",
+        "params": {
+          "level": 6,
+          "question": {
+            "mode": "bond",
+            "target": 10,
+            "size": 4,
+            "questionsPerRound": 6
+          },
+          "play": {
+            "targetObjective": "Merge two numbers that make 10.",
+            "stepByStep": [
+              "Pick a number.",
+              "Think: what does it need to make 10?",
+              "Find that number right next to it and merge them."
+            ],
+            "kidTip": "7 needs 3. 6 needs 4. Find the partner next to it.",
+            "audioPrompt": "Merge two numbers that make 10."
+          }
+        },
+        "difficulty": "Easy",
+        "icon": "number-merge-bonds",
+        "iconName": "star",
+        "iconTone": "pink",
+        "pedagogyTip": "Making 10 is the key to adding and taking away across ten.",
+        "standards": [
+          "CCSS.K.OA.A.4",
+          "CCSS.1.OA.C.6"
+        ],
+        "trajectoryLevel": "part-whole",
+        "ageBand": [
+          6,
+          7
+        ]
+      },
+      {
+        "id": "ten-pairs",
+        "title": "Ten Pairs",
+        "concept": "Pairs That Make 10",
+        "conceptKey": "make-ten",
+        "requires": [
+          "make-ten"
+        ],
+        "activity": "number-merge/board",
+        "params": {
+          "level": 7,
+          "question": {
+            "mode": "bond",
+            "target": 10,
+            "size": 4,
+            "questionsPerRound": 8
+          },
+          "play": {
+            "targetObjective": "Merge two numbers that make 10.",
+            "stepByStep": [
+              "Pick a number.",
+              "Think: what does it need to make 10?",
+              "Find that number right next to it and merge them."
+            ],
+            "kidTip": "Look for a big number with a small number beside it.",
+            "audioPrompt": "Merge two numbers that make 10."
+          }
+        },
+        "difficulty": "Medium",
+        "icon": "number-merge-bonds",
+        "iconName": "star",
+        "iconTone": "pink",
+        "pedagogyTip": "Making 10 is the key to adding and taking away across ten.",
+        "standards": [
+          "CCSS.K.OA.A.4",
+          "CCSS.1.OA.C.6"
+        ],
+        "trajectoryLevel": "part-whole",
+        "ageBand": [
+          6,
+          7
+        ]
+      },
+      {
+        "id": "make-ten-star",
+        "title": "Make 10 Star",
+        "concept": "Pairs That Make 10, Fast",
+        "conceptKey": "make-ten",
+        "requires": [
+          "make-ten"
+        ],
+        "activity": "number-merge/board",
+        "params": {
+          "level": 8,
+          "question": {
+            "mode": "bond",
+            "target": 10,
+            "size": 5,
+            "questionsPerRound": 10
+          },
+          "play": {
+            "targetObjective": "Merge two numbers that make 10.",
+            "stepByStep": [
+              "Pick a number.",
+              "Think: what does it need to make 10?",
+              "Find that number right next to it and merge them."
+            ],
+            "kidTip": "Say the partner in your head before you look.",
+            "audioPrompt": "Merge two numbers that make 10."
+          }
+        },
+        "difficulty": "Medium",
+        "icon": "number-merge-bonds",
+        "iconName": "star",
+        "iconTone": "pink",
+        "pedagogyTip": "Making 10 is the key to adding and taking away across ten.",
+        "standards": [
+          "CCSS.K.OA.A.4",
+          "CCSS.1.OA.C.6"
+        ],
+        "trajectoryLevel": "part-whole",
+        "ageBand": [
+          6,
+          7
+        ]
+      },
+      {
+        "id": "same-and-same",
+        "title": "Same and Same",
+        "concept": "Doubles to 10",
+        "conceptKey": "doubles-merger",
+        "requires": [],
+        "activity": "number-merge/board",
+        "params": {
+          "level": 9,
+          "question": {
+            "mode": "doubleFact",
+            "max": 5,
+            "size": 4,
+            "show": "both",
+            "questionsPerRound": 6
+          },
+          "play": {
+            "targetObjective": "Merge two numbers that are the same.",
+            "stepByStep": [
+              "Find two tiles with the same number.",
+              "Merge them: the new number is double.",
+              "Keep going until you reach the goal."
+            ],
+            "kidTip": "Find two tiles that look the same. 3 and 3 make 6.",
+            "audioPrompt": "Merge two numbers that are the same."
+          }
+        },
+        "difficulty": "Easy",
+        "icon": "number-merge-doubles",
+        "iconName": "sparkles",
+        "iconTone": "purple",
+        "pedagogyTip": "Doubles are the easiest facts to remember and the base for near doubles.",
+        "standards": [
+          "CCSS.1.OA.C.6"
+        ],
+        "trajectoryLevel": "deriver",
+        "ageBand": [
+          6,
+          8
+        ]
+      },
+      {
+        "id": "doubles-to-twenty",
+        "title": "Doubles to 20",
+        "concept": "Doubles to 20",
+        "conceptKey": "doubles-merger",
+        "requires": [
+          "doubles-merger"
+        ],
+        "activity": "number-merge/board",
+        "params": {
+          "level": 10,
+          "question": {
+            "mode": "doubleFact",
+            "max": 10,
+            "size": 4,
+            "questionsPerRound": 8
+          },
+          "play": {
+            "targetObjective": "Merge two numbers that are the same.",
+            "stepByStep": [
+              "Find two tiles with the same number.",
+              "Merge them: the new number is double.",
+              "Keep going until you reach the goal."
+            ],
+            "kidTip": "Double 6 is 12. Double 7 is 14.",
+            "audioPrompt": "Merge two numbers that are the same."
+          }
+        },
+        "difficulty": "Easy",
+        "icon": "number-merge-doubles",
+        "iconName": "sparkles",
+        "iconTone": "purple",
+        "pedagogyTip": "Doubles are the easiest facts to remember and the base for near doubles.",
+        "standards": [
+          "CCSS.1.OA.C.6",
+          "CCSS.2.OA.B.2"
+        ],
+        "trajectoryLevel": "deriver",
+        "ageBand": [
+          6,
+          8
+        ]
+      },
+      {
+        "id": "double-up-sixteen",
+        "title": "Double Up to 16",
+        "concept": "Doubling Again and Again",
+        "conceptKey": "doubles-merger",
+        "requires": [
+          "doubles-merger"
+        ],
+        "activity": "number-merge/board",
+        "params": {
+          "level": 11,
+          "question": {
+            "mode": "double",
+            "target": 16,
+            "size": 4,
+            "parts": [
+              1,
+              2
+            ],
+            "questionsPerRound": 3
+          },
+          "play": {
+            "targetObjective": "Merge the same numbers to double them. Make 16.",
+            "stepByStep": [
+              "Find two tiles with the same number.",
+              "Merge them: the new number is double.",
+              "Keep going until you reach the goal."
+            ],
+            "kidTip": "Make two the same, then merge them. 2 and 2 make 4, 4 and 4 make 8.",
+            "audioPrompt": "Merge the same numbers to double them. Make 16."
+          }
+        },
+        "difficulty": "Medium",
+        "icon": "number-merge-doubles",
+        "iconName": "sparkles",
+        "iconTone": "purple",
+        "pedagogyTip": "Doubles are the easiest facts to remember and the base for near doubles.",
+        "standards": [
+          "CCSS.MP7"
+        ],
+        "trajectoryLevel": "deriver",
+        "ageBand": [
+          6,
+          8
+        ]
+      },
+      {
+        "id": "double-up-sixty-four",
+        "title": "Double Up to 64",
+        "concept": "Doubling Again and Again",
+        "conceptKey": "doubles-merger",
+        "requires": [
+          "doubles-merger"
+        ],
+        "activity": "number-merge/board",
+        "params": {
+          "level": 12,
+          "question": {
+            "mode": "double",
+            "target": 64,
+            "size": 5,
+            "parts": [
+              2,
+              4
+            ],
+            "questionsPerRound": 2
+          },
+          "play": {
+            "targetObjective": "Merge the same numbers to double them. Make 64.",
+            "stepByStep": [
+              "Find two tiles with the same number.",
+              "Merge them: the new number is double.",
+              "Keep going until you reach the goal."
+            ],
+            "kidTip": "Plan ahead: build two of the same before you merge.",
+            "audioPrompt": "Merge the same numbers to double them. Make 64."
+          }
+        },
+        "difficulty": "Hard",
+        "icon": "number-merge-doubles",
+        "iconName": "sparkles",
+        "iconTone": "purple",
+        "pedagogyTip": "Doubles are the easiest facts to remember and the base for near doubles.",
+        "standards": [
+          "CCSS.MP7"
+        ],
+        "trajectoryLevel": "deriver",
+        "ageBand": [
+          6,
+          8
+        ]
+      },
+      {
+        "id": "reach-10",
+        "title": "Reach 10",
+        "concept": "Adding Up to 10",
+        "conceptKey": "merge-target-adder",
+        "requires": [],
+        "activity": "number-merge/board",
+        "params": {
+          "level": 13,
+          "question": {
+            "mode": "sum",
+            "target": 10,
+            "max": 5,
+            "size": 4,
+            "questionsPerRound": 5
+          },
+          "play": {
+            "targetObjective": "Merge numbers to make exactly 10.",
+            "stepByStep": [
+              "Merge small numbers to make bigger ones.",
+              "Watch the total: it must not go over 10.",
+              "Finish with the tile that makes exactly 10."
+            ],
+            "kidTip": "Before you merge, add the two numbers in your head. Is it still 10 or less?",
+            "audioPrompt": "Merge numbers to make exactly 10."
+          }
+        },
+        "difficulty": "Easy",
+        "icon": "number-merge-target",
+        "iconName": "zap",
+        "iconTone": "cyan",
+        "pedagogyTip": "Planning sums to an exact target practises adding several numbers and estimating.",
+        "standards": [
+          "CCSS.1.OA.C.6",
+          "CCSS.2.OA.B.2"
+        ],
+        "trajectoryLevel": "multi-addend",
+        "ageBand": [
+          6,
+          8
+        ]
+      },
+      {
+        "id": "reach-12",
+        "title": "Reach 12",
+        "concept": "Adding Up to 12",
+        "conceptKey": "merge-target-adder",
+        "requires": [
+          "merge-target-adder"
+        ],
+        "activity": "number-merge/board",
+        "params": {
+          "level": 14,
+          "question": {
+            "mode": "sum",
+            "target": 12,
+            "max": 6,
+            "size": 4,
+            "questionsPerRound": 5
+          },
+          "play": {
+            "targetObjective": "Merge numbers to make exactly 12.",
+            "stepByStep": [
+              "Merge small numbers to make bigger ones.",
+              "Watch the total: it must not go over 12.",
+              "Finish with the tile that makes exactly 12."
+            ],
+            "kidTip": "Before you merge, add the two numbers in your head. Is it still 12 or less?",
+            "audioPrompt": "Merge numbers to make exactly 12."
+          }
+        },
+        "difficulty": "Medium",
+        "icon": "number-merge-target",
+        "iconName": "zap",
+        "iconTone": "cyan",
+        "pedagogyTip": "Planning sums to an exact target practises adding several numbers and estimating.",
+        "standards": [
+          "CCSS.1.OA.C.6",
+          "CCSS.2.OA.B.2"
+        ],
+        "trajectoryLevel": "multi-addend",
+        "ageBand": [
+          6,
+          8
+        ]
+      },
+      {
+        "id": "reach-15",
+        "title": "Reach 15",
+        "concept": "Adding Up to 15",
+        "conceptKey": "merge-target-adder",
+        "requires": [
+          "merge-target-adder"
+        ],
+        "activity": "number-merge/board",
+        "params": {
+          "level": 15,
+          "question": {
+            "mode": "sum",
+            "target": 15,
+            "max": 7,
+            "size": 5,
+            "questionsPerRound": 6
+          },
+          "play": {
+            "targetObjective": "Merge numbers to make exactly 15.",
+            "stepByStep": [
+              "Merge small numbers to make bigger ones.",
+              "Watch the total: it must not go over 15.",
+              "Finish with the tile that makes exactly 15."
+            ],
+            "kidTip": "Before you merge, add the two numbers in your head. Is it still 15 or less?",
+            "audioPrompt": "Merge numbers to make exactly 15."
+          }
+        },
+        "difficulty": "Medium",
+        "icon": "number-merge-target",
+        "iconName": "zap",
+        "iconTone": "cyan",
+        "pedagogyTip": "Planning sums to an exact target practises adding several numbers and estimating.",
+        "standards": [
+          "CCSS.1.OA.C.6",
+          "CCSS.2.OA.B.2"
+        ],
+        "trajectoryLevel": "multi-addend",
+        "ageBand": [
+          6,
+          8
+        ]
+      },
+      {
+        "id": "reach-20",
+        "title": "Reach 20",
+        "concept": "Adding Up to 20",
+        "conceptKey": "merge-target-adder",
+        "requires": [
+          "merge-target-adder"
+        ],
+        "activity": "number-merge/board",
+        "params": {
+          "level": 16,
+          "question": {
+            "mode": "sum",
+            "target": 20,
+            "max": 9,
+            "size": 5,
+            "questionsPerRound": 6
+          },
+          "play": {
+            "targetObjective": "Merge numbers to make exactly 20.",
+            "stepByStep": [
+              "Merge small numbers to make bigger ones.",
+              "Watch the total: it must not go over 20.",
+              "Finish with the tile that makes exactly 20."
+            ],
+            "kidTip": "Before you merge, add the two numbers in your head. Is it still 20 or less?",
+            "audioPrompt": "Merge numbers to make exactly 20."
+          }
+        },
+        "difficulty": "Hard",
+        "icon": "number-merge-target",
+        "iconName": "zap",
+        "iconTone": "cyan",
+        "pedagogyTip": "Planning sums to an exact target practises adding several numbers and estimating.",
+        "standards": [
+          "CCSS.1.OA.C.6",
+          "CCSS.2.OA.B.2"
+        ],
+        "trajectoryLevel": "multi-addend",
+        "ageBand": [
+          6,
+          8
+        ]
+      },
+      {
+        "id": "ten-ones-one-ten",
+        "title": "Ten Ones Make a Ten",
+        "concept": "Bundling Ones Into Tens",
+        "conceptKey": "unitiser-ten",
+        "requires": [],
+        "activity": "number-merge/board",
+        "params": {
+          "level": 17,
+          "question": {
+            "mode": "bundle",
+            "target": 10,
+            "size": 4,
+            "show": "both",
+            "questionsPerRound": 6
+          },
+          "play": {
+            "targetObjective": "Merge ones to make a ten.",
+            "stepByStep": [
+              "Merge ones with ones until you have exactly 10.",
+              "A ten is a new tile.",
+              "Keep making tens."
+            ],
+            "kidTip": "Count the dots. Stop when you have exactly 10.",
+            "audioPrompt": "Merge ones to make a ten."
+          }
+        },
+        "difficulty": "Easy",
+        "icon": "number-merge-bundle",
+        "iconName": "boxes",
+        "iconTone": "indigo",
+        "pedagogyTip": "Ten ones become one ten: the idea behind place value.",
+        "standards": [
+          "CCSS.1.NBT.B.2a"
+        ],
+        "trajectoryLevel": "unitiser-ten",
+        "ageBand": [
+          7,
+          8
+        ]
+      },
+      {
+        "id": "bundle-tens",
+        "title": "Bundle Ten",
+        "concept": "Bundling Ones Into Tens",
+        "conceptKey": "unitiser-ten",
+        "requires": [
+          "unitiser-ten"
+        ],
+        "activity": "number-merge/board",
+        "params": {
+          "level": 18,
+          "question": {
+            "mode": "bundle",
+            "target": 10,
+            "size": 5,
+            "show": "dots",
+            "questionsPerRound": 8
+          },
+          "play": {
+            "targetObjective": "Merge ones to make a ten.",
+            "stepByStep": [
+              "Merge ones with ones until you have exactly 10.",
+              "A ten is a new tile.",
+              "Keep making tens."
+            ],
+            "kidTip": "Two full rows of dots make one ten.",
+            "audioPrompt": "Merge ones to make a ten."
+          }
+        },
+        "difficulty": "Medium",
+        "icon": "number-merge-bundle",
+        "iconName": "boxes",
+        "iconTone": "indigo",
+        "pedagogyTip": "Ten ones become one ten: the idea behind place value.",
+        "standards": [
+          "CCSS.1.NBT.B.2a"
+        ],
+        "trajectoryLevel": "unitiser-ten",
+        "ageBand": [
+          7,
+          8
+        ]
+      },
+      {
+        "id": "tens-to-hundred",
+        "title": "Tens Make a Hundred",
+        "concept": "Bundling Tens Into a Hundred",
+        "conceptKey": "unitiser-hundred",
+        "requires": [
+          "unitiser-ten"
+        ],
+        "activity": "number-merge/board",
+        "params": {
+          "level": 19,
+          "question": {
+            "mode": "bundle",
+            "target": 100,
+            "size": 5,
+            "show": "both",
+            "questionsPerRound": 2
+          },
+          "play": {
+            "targetObjective": "Merge ones into tens, and tens into a hundred.",
+            "stepByStep": [
+              "Merge ones with ones until you have exactly 10.",
+              "A ten is a new tile.",
+              "Merge tens with tens until you have exactly 100."
+            ],
+            "kidTip": "Ones go with ones and tens go with tens. Ten tens make one hundred.",
+            "audioPrompt": "Merge ones into tens, and tens into a hundred."
+          }
+        },
+        "difficulty": "Medium",
+        "icon": "number-merge-bundle",
+        "iconName": "boxes",
+        "iconTone": "indigo",
+        "pedagogyTip": "Ten ones become one ten: the idea behind place value.",
+        "standards": [
+          "CCSS.2.NBT.A.1a"
+        ],
+        "trajectoryLevel": "unitiser-hundred",
+        "ageBand": [
+          7,
+          8
+        ]
+      },
+      {
+        "id": "hundred-builder",
+        "title": "Hundred Builder",
+        "concept": "Bundling Tens Into a Hundred",
+        "conceptKey": "unitiser-hundred",
+        "requires": [
+          "unitiser-hundred"
+        ],
+        "activity": "number-merge/board",
+        "params": {
+          "level": 20,
+          "question": {
+            "mode": "bundle",
+            "target": 100,
+            "size": 5,
+            "questionsPerRound": 3
+          },
+          "play": {
+            "targetObjective": "Merge ones into tens, and tens into a hundred.",
+            "stepByStep": [
+              "Merge ones with ones until you have exactly 10.",
+              "A ten is a new tile.",
+              "Merge tens with tens until you have exactly 100."
+            ],
+            "kidTip": "Count in tens: 10, 20, 30… up to 100.",
+            "audioPrompt": "Merge ones into tens, and tens into a hundred."
+          }
+        },
+        "difficulty": "Hard",
+        "icon": "number-merge-bundle",
+        "iconName": "boxes",
+        "iconTone": "indigo",
+        "pedagogyTip": "Ten ones become one ten: the idea behind place value.",
+        "standards": [
+          "CCSS.2.NBT.A.1a"
+        ],
+        "trajectoryLevel": "unitiser-hundred",
+        "ageBand": [
+          7,
+          8
+        ]
+      },
+      {
+        "id": "apart-1",
+        "title": "1 Apart",
+        "concept": "Differences of 1",
+        "conceptKey": "difference-finder",
+        "requires": [],
+        "activity": "number-merge/board",
+        "params": {
+          "level": 21,
+          "question": {
+            "mode": "difference",
+            "target": 1,
+            "max": 9,
+            "size": 4,
+            "questionsPerRound": 6
+          },
+          "play": {
+            "targetObjective": "Merge two numbers that are 1 apart.",
+            "stepByStep": [
+              "Pick a number.",
+              "Think: what is 1 more, or 1 less?",
+              "Find it next to it and merge them."
+            ],
+            "kidTip": "Big take away small should be 1.",
+            "audioPrompt": "Merge two numbers that are 1 apart."
+          }
+        },
+        "difficulty": "Easy",
+        "icon": "number-merge-difference",
+        "iconName": "scale",
+        "iconTone": "emerald",
+        "pedagogyTip": "Finding a difference links taking away to counting on.",
+        "standards": [
+          "CCSS.1.OA.C.6",
+          "CCSS.2.OA.B.2"
+        ],
+        "trajectoryLevel": "part-whole",
+        "ageBand": [
+          7,
+          9
+        ]
+      },
+      {
+        "id": "apart-3",
+        "title": "3 Apart",
+        "concept": "Differences of 3",
+        "conceptKey": "difference-finder",
+        "requires": [
+          "difference-finder"
+        ],
+        "activity": "number-merge/board",
+        "params": {
+          "level": 22,
+          "question": {
+            "mode": "difference",
+            "target": 3,
+            "max": 9,
+            "size": 4,
+            "questionsPerRound": 6
+          },
+          "play": {
+            "targetObjective": "Merge two numbers that are 3 apart.",
+            "stepByStep": [
+              "Pick a number.",
+              "Think: what is 3 more, or 3 less?",
+              "Find it next to it and merge them."
+            ],
+            "kidTip": "Big take away small should be 3.",
+            "audioPrompt": "Merge two numbers that are 3 apart."
+          }
+        },
+        "difficulty": "Medium",
+        "icon": "number-merge-difference",
+        "iconName": "scale",
+        "iconTone": "emerald",
+        "pedagogyTip": "Finding a difference links taking away to counting on.",
+        "standards": [
+          "CCSS.1.OA.C.6",
+          "CCSS.2.OA.B.2"
+        ],
+        "trajectoryLevel": "part-whole",
+        "ageBand": [
+          7,
+          9
+        ]
+      },
+      {
+        "id": "apart-5",
+        "title": "5 Apart",
+        "concept": "Differences of 5",
+        "conceptKey": "difference-finder",
+        "requires": [
+          "difference-finder"
+        ],
+        "activity": "number-merge/board",
+        "params": {
+          "level": 23,
+          "question": {
+            "mode": "difference",
+            "target": 5,
+            "max": 12,
+            "size": 5,
+            "questionsPerRound": 8
+          },
+          "play": {
+            "targetObjective": "Merge two numbers that are 5 apart.",
+            "stepByStep": [
+              "Pick a number.",
+              "Think: what is 5 more, or 5 less?",
+              "Find it next to it and merge them."
+            ],
+            "kidTip": "Big take away small should be 5.",
+            "audioPrompt": "Merge two numbers that are 5 apart."
+          }
+        },
+        "difficulty": "Medium",
+        "icon": "number-merge-difference",
+        "iconName": "scale",
+        "iconTone": "emerald",
+        "pedagogyTip": "Finding a difference links taking away to counting on.",
+        "standards": [
+          "CCSS.1.OA.C.6",
+          "CCSS.2.OA.B.2"
+        ],
+        "trajectoryLevel": "part-whole",
+        "ageBand": [
+          7,
+          9
+        ]
+      },
+      {
+        "id": "apart-10",
+        "title": "10 Apart",
+        "concept": "Differences of 10",
+        "conceptKey": "difference-finder",
+        "requires": [
+          "difference-finder"
+        ],
+        "activity": "number-merge/board",
+        "params": {
+          "level": 24,
+          "question": {
+            "mode": "difference",
+            "target": 10,
+            "max": 20,
+            "size": 5,
+            "questionsPerRound": 8
+          },
+          "play": {
+            "targetObjective": "Merge two numbers that are 10 apart.",
+            "stepByStep": [
+              "Pick a number.",
+              "Think: what is 10 more, or 10 less?",
+              "Find it next to it and merge them."
+            ],
+            "kidTip": "Big take away small should be 10.",
+            "audioPrompt": "Merge two numbers that are 10 apart."
+          }
+        },
+        "difficulty": "Hard",
+        "icon": "number-merge-difference",
+        "iconName": "scale",
+        "iconTone": "emerald",
+        "pedagogyTip": "Finding a difference links taking away to counting on.",
+        "standards": [
+          "CCSS.1.OA.C.6",
+          "CCSS.2.OA.B.2"
+        ],
+        "trajectoryLevel": "part-whole",
+        "ageBand": [
+          7,
+          9
+        ]
+      },
+      {
+        "id": "multiply-to-12",
+        "title": "Multiply to 12",
+        "concept": "Factors of 12",
+        "conceptKey": "factor-merger",
+        "requires": [],
+        "activity": "number-merge/board",
+        "params": {
+          "level": 25,
+          "question": {
+            "mode": "product",
+            "target": 12,
+            "size": 4,
+            "questionsPerRound": 5
+          },
+          "play": {
+            "targetObjective": "Multiply numbers to make exactly 12.",
+            "stepByStep": [
+              "Merging multiplies the two numbers.",
+              "Only keep numbers that are part of 12's times facts.",
+              "Finish with two numbers that multiply to 12."
+            ],
+            "kidTip": "Which two numbers multiply to 12? Build one of them first.",
+            "audioPrompt": "Multiply numbers to make exactly 12."
+          }
+        },
+        "difficulty": "Medium",
+        "icon": "number-merge-times",
+        "iconName": "gem",
+        "iconTone": "purple",
+        "pedagogyTip": "Building a product from factors connects multiplication facts and division.",
+        "standards": [
+          "CCSS.3.OA.C.7"
+        ],
+        "trajectoryLevel": "deriver",
+        "ageBand": [
+          8,
+          10
+        ]
+      },
+      {
+        "id": "multiply-to-18",
+        "title": "Multiply to 18",
+        "concept": "Factors of 18",
+        "conceptKey": "factor-merger",
+        "requires": [
+          "factor-merger"
+        ],
+        "activity": "number-merge/board",
+        "params": {
+          "level": 26,
+          "question": {
+            "mode": "product",
+            "target": 18,
+            "size": 4,
+            "questionsPerRound": 5
+          },
+          "play": {
+            "targetObjective": "Multiply numbers to make exactly 18.",
+            "stepByStep": [
+              "Merging multiplies the two numbers.",
+              "Only keep numbers that are part of 18's times facts.",
+              "Finish with two numbers that multiply to 18."
+            ],
+            "kidTip": "Which two numbers multiply to 18? Build one of them first.",
+            "audioPrompt": "Multiply numbers to make exactly 18."
+          }
+        },
+        "difficulty": "Medium",
+        "icon": "number-merge-times",
+        "iconName": "gem",
+        "iconTone": "purple",
+        "pedagogyTip": "Building a product from factors connects multiplication facts and division.",
+        "standards": [
+          "CCSS.3.OA.C.7"
+        ],
+        "trajectoryLevel": "deriver",
+        "ageBand": [
+          8,
+          10
+        ]
+      },
+      {
+        "id": "multiply-to-24",
+        "title": "Multiply to 24",
+        "concept": "Factors of 24",
+        "conceptKey": "factor-merger",
+        "requires": [
+          "factor-merger"
+        ],
+        "activity": "number-merge/board",
+        "params": {
+          "level": 27,
+          "question": {
+            "mode": "product",
+            "target": 24,
+            "size": 5,
+            "questionsPerRound": 5
+          },
+          "play": {
+            "targetObjective": "Multiply numbers to make exactly 24.",
+            "stepByStep": [
+              "Merging multiplies the two numbers.",
+              "Only keep numbers that are part of 24's times facts.",
+              "Finish with two numbers that multiply to 24."
+            ],
+            "kidTip": "Which two numbers multiply to 24? Build one of them first.",
+            "audioPrompt": "Multiply numbers to make exactly 24."
+          }
+        },
+        "difficulty": "Hard",
+        "icon": "number-merge-times",
+        "iconName": "gem",
+        "iconTone": "purple",
+        "pedagogyTip": "Building a product from factors connects multiplication facts and division.",
+        "standards": [
+          "CCSS.3.OA.C.7"
+        ],
+        "trajectoryLevel": "deriver",
+        "ageBand": [
+          8,
+          10
+        ]
+      },
+      {
+        "id": "multiply-to-36",
+        "title": "Multiply to 36",
+        "concept": "Factors of 36",
+        "conceptKey": "factor-merger",
+        "requires": [
+          "factor-merger"
+        ],
+        "activity": "number-merge/board",
+        "params": {
+          "level": 28,
+          "question": {
+            "mode": "product",
+            "target": 36,
+            "size": 5,
+            "questionsPerRound": 6
+          },
+          "play": {
+            "targetObjective": "Multiply numbers to make exactly 36.",
+            "stepByStep": [
+              "Merging multiplies the two numbers.",
+              "Only keep numbers that are part of 36's times facts.",
+              "Finish with two numbers that multiply to 36."
+            ],
+            "kidTip": "Which two numbers multiply to 36? Build one of them first.",
+            "audioPrompt": "Multiply numbers to make exactly 36."
+          }
+        },
+        "difficulty": "Hard",
+        "icon": "number-merge-times",
+        "iconName": "gem",
+        "iconTone": "purple",
+        "pedagogyTip": "Building a product from factors connects multiplication facts and division.",
+        "standards": [
+          "CCSS.3.OA.C.7"
+        ],
+        "trajectoryLevel": "deriver",
+        "ageBand": [
+          8,
+          10
+        ]
+      },
+      {
+        "id": "halves-and-quarters",
+        "title": "Halves and Quarters",
+        "concept": "Parts That Make One Whole",
+        "conceptKey": "fraction-whole-maker",
+        "requires": [],
+        "activity": "number-merge/board",
+        "params": {
+          "level": 29,
+          "question": {
+            "mode": "fraction",
+            "target": 4,
+            "parts": [
+              1,
+              2
+            ],
+            "size": 4,
+            "questionsPerRound": 5
+          },
+          "play": {
+            "targetObjective": "Merge parts to make one whole.",
+            "stepByStep": [
+              "Merge two pieces to add them.",
+              "Watch the pie fill up.",
+              "Stop at one whole: a full pie."
+            ],
+            "kidTip": "Two quarters make a half. A half and a half make one whole.",
+            "audioPrompt": "Merge parts to make one whole."
+          }
+        },
+        "difficulty": "Medium",
+        "icon": "number-merge-fraction",
+        "iconName": "circleDot",
+        "iconTone": "cyan",
+        "pedagogyTip": "Adding like fractions to one whole builds fraction sense with pictures first.",
+        "standards": [
+          "CCSS.4.NF.B.3a",
+          "CCSS.3.NF.A.1"
+        ],
+        "trajectoryLevel": "unit-fraction-builder",
+        "ageBand": [
+          9,
+          11
+        ]
+      },
+      {
+        "id": "three-quarters",
+        "title": "Quarters to One",
+        "concept": "Parts That Make One Whole",
+        "conceptKey": "fraction-whole-maker",
+        "requires": [
+          "fraction-whole-maker"
+        ],
+        "activity": "number-merge/board",
+        "params": {
+          "level": 30,
+          "question": {
+            "mode": "fraction",
+            "target": 4,
+            "parts": [
+              1,
+              2,
+              3
+            ],
+            "size": 4,
+            "questionsPerRound": 6
+          },
+          "play": {
+            "targetObjective": "Merge parts to make one whole.",
+            "stepByStep": [
+              "Merge two pieces to add them.",
+              "Watch the pie fill up.",
+              "Stop at one whole: a full pie."
+            ],
+            "kidTip": "Two quarters make a half. A half and a half make one whole.",
+            "audioPrompt": "Merge parts to make one whole."
+          }
+        },
+        "difficulty": "Medium",
+        "icon": "number-merge-fraction",
+        "iconName": "circleDot",
+        "iconTone": "cyan",
+        "pedagogyTip": "Adding like fractions to one whole builds fraction sense with pictures first.",
+        "standards": [
+          "CCSS.4.NF.B.3a",
+          "CCSS.3.NF.A.1"
+        ],
+        "trajectoryLevel": "unit-fraction-builder",
+        "ageBand": [
+          9,
+          11
+        ]
+      },
+      {
+        "id": "eighths",
+        "title": "Eighths",
+        "concept": "Parts That Make One Whole",
+        "conceptKey": "fraction-whole-maker",
+        "requires": [
+          "fraction-whole-maker"
+        ],
+        "activity": "number-merge/board",
+        "params": {
+          "level": 31,
+          "question": {
+            "mode": "fraction",
+            "target": 8,
+            "parts": [
+              1,
+              2,
+              4
+            ],
+            "size": 4,
+            "questionsPerRound": 5
+          },
+          "play": {
+            "targetObjective": "Merge parts to make one whole.",
+            "stepByStep": [
+              "Merge two pieces to add them.",
+              "Watch the pie fill up.",
+              "Stop at one whole: a full pie."
+            ],
+            "kidTip": "Two quarters make a half. A half and a half make one whole.",
+            "audioPrompt": "Merge parts to make one whole."
+          }
+        },
+        "difficulty": "Hard",
+        "icon": "number-merge-fraction",
+        "iconName": "circleDot",
+        "iconTone": "cyan",
+        "pedagogyTip": "Adding like fractions to one whole builds fraction sense with pictures first.",
+        "standards": [
+          "CCSS.4.NF.B.3a",
+          "CCSS.3.NF.A.1"
+        ],
+        "trajectoryLevel": "unit-fraction-builder",
+        "ageBand": [
+          9,
+          11
+        ]
+      },
+      {
+        "id": "eighths-mix",
+        "title": "Eighths Mix",
+        "concept": "Parts That Make One Whole",
+        "conceptKey": "fraction-whole-maker",
+        "requires": [
+          "fraction-whole-maker"
+        ],
+        "activity": "number-merge/board",
+        "params": {
+          "level": 32,
+          "question": {
+            "mode": "fraction",
+            "target": 8,
+            "parts": [
+              1,
+              2,
+              3,
+              4
+            ],
+            "size": 4,
+            "questionsPerRound": 6
+          },
+          "play": {
+            "targetObjective": "Merge parts to make one whole.",
+            "stepByStep": [
+              "Merge two pieces to add them.",
+              "Watch the pie fill up.",
+              "Stop at one whole: a full pie."
+            ],
+            "kidTip": "Two quarters make a half. A half and a half make one whole.",
+            "audioPrompt": "Merge parts to make one whole."
+          }
+        },
+        "difficulty": "Hard",
+        "icon": "number-merge-fraction",
+        "iconName": "circleDot",
+        "iconTone": "cyan",
+        "pedagogyTip": "Adding like fractions to one whole builds fraction sense with pictures first.",
+        "standards": [
+          "CCSS.4.NF.B.3a",
+          "CCSS.3.NF.A.1"
+        ],
+        "trajectoryLevel": "unit-fraction-builder",
+        "ageBand": [
+          9,
+          11
+        ]
+      },
+      {
+        "id": "practice-make-five",
+        "title": "Practice: Make 5",
+        "concept": "Practice Without Help",
+        "conceptKey": "five-benchmark",
+        "requires": [
+          "five-benchmark"
+        ],
+        "activity": "number-merge/board",
+        "params": {
+          "level": 33,
+          "question": {
+            "mode": "bond",
+            "target": 5,
+            "size": 4,
+            "questionsPerRound": 10,
+            "practice": true
+          }
+        },
+        "difficulty": "Medium",
+        "icon": "number-merge-bonds",
+        "iconName": "star",
+        "iconTone": "pink",
+        "pedagogyTip": "Practice without hints or a spoken prompt.",
+        "standards": [
+          "CCSS.K.OA.A.5"
+        ],
+        "trajectoryLevel": "part-whole",
+        "ageBand": [
+          5,
+          6
+        ]
+      },
+      {
+        "id": "practice-make-ten",
+        "title": "Practice: Make 10",
+        "concept": "Practice Without Help",
+        "conceptKey": "make-ten",
+        "requires": [
+          "make-ten"
+        ],
+        "activity": "number-merge/board",
+        "params": {
+          "level": 34,
+          "question": {
+            "mode": "bond",
+            "target": 10,
+            "size": 5,
+            "questionsPerRound": 10,
+            "practice": true
+          }
+        },
+        "difficulty": "Medium",
+        "icon": "number-merge-bonds",
+        "iconName": "star",
+        "iconTone": "pink",
+        "pedagogyTip": "Practice without hints or a spoken prompt.",
+        "standards": [
+          "CCSS.K.OA.A.4",
+          "CCSS.1.OA.C.6"
+        ],
+        "trajectoryLevel": "part-whole",
+        "ageBand": [
+          6,
+          7
+        ]
+      },
+      {
+        "id": "practice-doubles",
+        "title": "Practice: Doubles",
+        "concept": "Practice Without Help",
+        "conceptKey": "doubles-merger",
+        "requires": [
+          "doubles-merger"
+        ],
+        "activity": "number-merge/board",
+        "params": {
+          "level": 35,
+          "question": {
+            "mode": "doubleFact",
+            "max": 10,
+            "size": 4,
+            "questionsPerRound": 10,
+            "practice": true
+          }
+        },
+        "difficulty": "Medium",
+        "icon": "number-merge-doubles",
+        "iconName": "sparkles",
+        "iconTone": "purple",
+        "pedagogyTip": "Practice without hints or a spoken prompt.",
+        "standards": [
+          "CCSS.1.OA.C.6",
+          "CCSS.2.OA.B.2"
+        ],
+        "trajectoryLevel": "deriver",
+        "ageBand": [
+          6,
+          8
+        ]
+      },
+      {
+        "id": "practice-reach-the-target",
+        "title": "Practice: Reach the Target",
+        "concept": "Practice Without Help",
+        "conceptKey": "merge-target-adder",
+        "requires": [
+          "merge-target-adder"
+        ],
+        "activity": "number-merge/board",
+        "params": {
+          "level": 36,
+          "question": {
+            "mode": "sum",
+            "target": 15,
+            "max": 7,
+            "size": 5,
+            "questionsPerRound": 10,
+            "practice": true
+          }
+        },
+        "difficulty": "Medium",
+        "icon": "number-merge-target",
+        "iconName": "zap",
+        "iconTone": "cyan",
+        "pedagogyTip": "Practice without hints or a spoken prompt.",
+        "standards": [
+          "CCSS.1.OA.C.6",
+          "CCSS.2.OA.B.2"
+        ],
+        "trajectoryLevel": "multi-addend",
+        "ageBand": [
+          6,
+          8
+        ]
+      },
+      {
+        "id": "practice-tens-and-hundreds",
+        "title": "Practice: Tens and Hundreds",
+        "concept": "Practice Without Help",
+        "conceptKey": "unitiser-hundred",
+        "requires": [
+          "unitiser-hundred"
+        ],
+        "activity": "number-merge/board",
+        "params": {
+          "level": 37,
+          "question": {
+            "mode": "bundle",
+            "target": 100,
+            "size": 5,
+            "questionsPerRound": 3,
+            "practice": true
+          }
+        },
+        "difficulty": "Medium",
+        "icon": "number-merge-bundle",
+        "iconName": "boxes",
+        "iconTone": "indigo",
+        "pedagogyTip": "Practice without hints or a spoken prompt.",
+        "standards": [
+          "CCSS.2.NBT.A.1a"
+        ],
+        "trajectoryLevel": "unitiser-hundred",
+        "ageBand": [
+          7,
+          8
+        ]
+      },
+      {
+        "id": "practice-take-away",
+        "title": "Practice: Take Away",
+        "concept": "Practice Without Help",
+        "conceptKey": "difference-finder",
+        "requires": [
+          "difference-finder"
+        ],
+        "activity": "number-merge/board",
+        "params": {
+          "level": 38,
+          "question": {
+            "mode": "difference",
+            "target": 4,
+            "max": 12,
+            "size": 5,
+            "questionsPerRound": 10,
+            "practice": true
+          }
+        },
+        "difficulty": "Medium",
+        "icon": "number-merge-difference",
+        "iconName": "scale",
+        "iconTone": "emerald",
+        "pedagogyTip": "Practice without hints or a spoken prompt.",
+        "standards": [
+          "CCSS.1.OA.C.6",
+          "CCSS.2.OA.B.2"
+        ],
+        "trajectoryLevel": "part-whole",
+        "ageBand": [
+          7,
+          9
+        ]
+      },
+      {
+        "id": "practice-times-tables",
+        "title": "Practice: Times Tables",
+        "concept": "Practice Without Help",
+        "conceptKey": "factor-merger",
+        "requires": [
+          "factor-merger"
+        ],
+        "activity": "number-merge/board",
+        "params": {
+          "level": 39,
+          "question": {
+            "mode": "product",
+            "target": 24,
+            "size": 5,
+            "questionsPerRound": 10,
+            "practice": true
+          }
+        },
+        "difficulty": "Medium",
+        "icon": "number-merge-times",
+        "iconName": "gem",
+        "iconTone": "purple",
+        "pedagogyTip": "Practice without hints or a spoken prompt.",
+        "standards": [
+          "CCSS.3.OA.C.7"
+        ],
+        "trajectoryLevel": "deriver",
+        "ageBand": [
+          8,
+          10
+        ]
+      },
+      {
+        "id": "practice-fractions",
+        "title": "Practice: Fractions to One",
+        "concept": "Practice Without Help",
+        "conceptKey": "fraction-whole-maker",
+        "requires": [
+          "fraction-whole-maker"
+        ],
+        "activity": "number-merge/board",
+        "params": {
+          "level": 40,
+          "question": {
+            "mode": "fraction",
+            "target": 8,
+            "parts": [
+              1,
+              2,
+              3,
+              4
+            ],
+            "size": 4,
+            "questionsPerRound": 10,
+            "practice": true
+          }
+        },
+        "difficulty": "Medium",
+        "icon": "number-merge-fraction",
+        "iconName": "circleDot",
+        "iconTone": "cyan",
+        "pedagogyTip": "Practice without hints or a spoken prompt.",
+        "standards": [
+          "CCSS.4.NF.B.3a",
+          "CCSS.3.NF.A.1"
+        ],
+        "trajectoryLevel": "unit-fraction-builder",
+        "ageBand": [
+          9,
+          11
+        ]
+      }
+    ]
+  },
+  {
     "id": "observation",
     "name": "Observation Quest",
     "version": "0.1.0",

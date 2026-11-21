@@ -1,0 +1,94 @@
+{
+  "title": "Number Merge",
+  "goal": {
+    "make": "Make {value}",
+    "apart": "{value} apart",
+    "same": "Same and same",
+    "whole": "One whole"
+  },
+  "prompt": {
+    "bond": "Merge two numbers that make {target}.",
+    "difference": "Merge two numbers that are {target} apart.",
+    "sum": "Merge numbers to make exactly {target}.",
+    "product": "Multiply numbers to make exactly {target}.",
+    "bundleTen": "Merge ones to make a ten.",
+    "bundleHundred": "Merge ones into tens, and tens into a hundred.",
+    "fraction": "Merge parts to make one whole.",
+    "doubleFact": "Merge two numbers that are the same.",
+    "double": "Merge the same numbers to double them. Make {target}."
+  },
+  "right": {
+    "title": "Merged!",
+    "bond": "{a} + {b} = {target}.",
+    "difference": "{big} − {small} = {target}.",
+    "made": "You made {target}!",
+    "product": "{a} × {b} = {target}.",
+    "fraction": "You made one whole!",
+    "double": "Double {a} is {target}."
+  },
+  "wrong": {
+    "title": "Not a pair",
+    "bond": "{a} and {b} make {sum}, not {target}. {a} needs {need}.",
+    "difference": "{a} and {b} are {gap} apart, not {target}.",
+    "notSame": "{a} and {b} are not the same. Find two {a}s."
+  },
+  "refuse": {
+    "over": "{a} and {b} make {value}. That goes over {target}.",
+    "notFactor": "{a} × {b} = {value}. {target} is not in the {value} times table, so you could not reach it.",
+    "overTen": "{a} and {b} ones are more than one ten. Make exactly 10.",
+    "overHundred": "{a} and {b} make more than 100. Make exactly 100.",
+    "mixed": "Ones merge with ones, and tens merge with tens.",
+    "far": "Move a tile onto a tile right next to it."
+  },
+  "status": {
+    "grow": "{a} and {b} make {value}.",
+    "growProduct": "{a} × {b} = {value}.",
+    "growDouble": "Double {a} is {value}.",
+    "ten": "Ten ones make one ten!",
+    "reshuffled": "No moves were left, so new tiles fell in.",
+    "dragOrTap": "Drag a number onto the one next to it, or tap one and then the other.",
+    "tapOnly": "Tap a number, then tap the one next to it."
+  },
+  "hint": {
+    "bond": "{a} needs {need} to make {target}. Look for a {need} next to it.",
+    "difference": "{target} apart means the bigger one is {target} more. Look for {a} and {need} side by side.",
+    "build": "You need exactly {target}. Merge small tiles first, then finish with the right one.",
+    "product": "Think of the {target} times facts. Merge two numbers that multiply to a part of {target}.",
+    "bundle": "Ones go with ones and tens go with tens. Stop at exactly 10 or 100.",
+    "fraction": "Add the parts. Stop when the top and bottom numbers are the same.",
+    "doubleFact": "Look for two tiles with the same number, side by side.",
+    "double": "Only the same numbers merge. Make two the same, then merge them to double.",
+    "worked": "Move the {a} onto the {b} next to it."
+  },
+  "label": {
+    "tile": "Row {row}, column {col}: {value}",
+    "chosen": "{label}, chosen"
+  },
+  "unit": {
+    "ones": {
+      "one": "{count} one",
+      "other": "{count} ones"
+    },
+    "tens": {
+      "one": "{count} ten",
+      "other": "{count} tens"
+    }
+  },
+  "fraction": "{n} over {d}",
+  "sheet": {
+    "double": "Double {a} = {blank}",
+    "ones": "{a} ones + {blank} ones = 1 ten",
+    "method": {
+      "bond": "Think of the partner: what do you add to make {target}?",
+      "difference": "Count on from the smaller number to find the bigger one.",
+      "doubleFact": "Double means the same number twice: add it to itself.",
+      "double": "Double means the same number twice: add it to itself.",
+      "sum": "Add the numbers you have, then count on to {target}.",
+      "product": "Use the times facts: which number times this one makes {target}?",
+      "bundle": "Ten ones make one ten, and ten tens make one hundred.",
+      "fraction": "Count the parts you have, then the parts still missing from one whole."
+    },
+    "half": "Double {blank} = {value}",
+    "onesFirst": "{blank} ones + {a} ones = 1 ten"
+  }
+}

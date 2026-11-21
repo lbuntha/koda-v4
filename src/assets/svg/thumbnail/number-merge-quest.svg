@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="100%" height="100%" viewBox="0 0 400 200">
+<defs><linearGradient id="nmGround" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#2A1E6B"/><stop offset="100%" stop-color="#101236"/></linearGradient>
+<radialGradient id="nmGlow" cx="62%" cy="50%" r="55%"><stop offset="0%" stop-color="#34D399" stop-opacity="0.35"/><stop offset="100%" stop-color="#34D399" stop-opacity="0"/></radialGradient></defs>
+<rect width="400" height="200" fill="url(#nmGround)"/><rect width="400" height="200" fill="url(#nmGlow)"/>
+<rect x="196" y="16" width="176" height="132" rx="18" fill="#C9C2FF" opacity="0.25"/>
+<rect x="204" y="28" width="36" height="34" rx="9" fill="#000" opacity="0.18"/><rect x="204" y="24" width="36" height="34" rx="9" fill="#BAE6FD"/><text x="222" y="48" text-anchor="middle" font-family="Arial, sans-serif" font-weight="900" font-size="19" fill="#231C5C">7</text>
+<rect x="246" y="28" width="36" height="34" rx="9" fill="#000" opacity="0.18"/><rect x="246" y="24" width="36" height="34" rx="9" fill="#F9A8D4"/><text x="264" y="48" text-anchor="middle" font-family="Arial, sans-serif" font-weight="900" font-size="19" fill="#231C5C">3</text>
+<rect x="288" y="28" width="36" height="34" rx="9" fill="#000" opacity="0.18"/><rect x="288" y="24" width="36" height="34" rx="9" fill="#A7F3D0"/><text x="306" y="48" text-anchor="middle" font-family="Arial, sans-serif" font-weight="900" font-size="19" fill="#231C5C">5</text>
+<rect x="330" y="28" width="36" height="34" rx="9" fill="#000" opacity="0.18"/><rect x="330" y="24" width="36" height="34" rx="9" fill="#DDD6FE"/><text x="348" y="48" text-anchor="middle" font-family="Arial, sans-serif" font-weight="900" font-size="19" fill="#231C5C">5</text>
+<rect x="204" y="69" width="36" height="34" rx="9" fill="#000" opacity="0.18"/><rect x="204" y="65" width="36" height="34" rx="9" fill="#A5F3FC"/><text x="222" y="89" text-anchor="middle" font-family="Arial, sans-serif" font-weight="900" font-size="19" fill="#231C5C">2</text>
+<rect x="330" y="69" width="36" height="34" rx="9" fill="#000" opacity="0.18"/><rect x="330" y="65" width="36" height="34" rx="9" fill="#99F6E4"/><text x="348" y="89" text-anchor="middle" font-family="Arial, sans-serif" font-weight="900" font-size="19" fill="#231C5C">6</text>
+<rect x="204" y="110" width="36" height="34" rx="9" fill="#000" opacity="0.18"/><rect x="204" y="106" width="36" height="34" rx="9" fill="#BAE6FD"/><text x="222" y="130" text-anchor="middle" font-family="Arial, sans-serif" font-weight="900" font-size="19" fill="#231C5C">1</text>
+<rect x="246" y="110" width="36" height="34" rx="9" fill="#000" opacity="0.18"/><rect x="246" y="106" width="36" height="34" rx="9" fill="#DDD6FE"/><text x="264" y="130" text-anchor="middle" font-family="Arial, sans-serif" font-weight="900" font-size="19" fill="#231C5C">9</text>
+<rect x="288" y="110" width="36" height="34" rx="9" fill="#000" opacity="0.18"/><rect x="288" y="106" width="36" height="34" rx="9" fill="#A7F3D0"/><text x="306" y="130" text-anchor="middle" font-family="Arial, sans-serif" font-weight="900" font-size="19" fill="#231C5C">6</text>
+<rect x="330" y="110" width="36" height="34" rx="9" fill="#000" opacity="0.18"/><rect x="330" y="106" width="36" height="34" rx="9" fill="#F9A8D4"/><text x="348" y="130" text-anchor="middle" font-family="Arial, sans-serif" font-weight="900" font-size="19" fill="#231C5C">4</text>
+<circle cx="289" cy="82" r="30" fill="none" stroke="#34D399" stroke-width="4" opacity="0.9"/>
+<circle cx="249" cy="70" r="5" fill="#F472B6"/>
+<circle cx="329" cy="70" r="5" fill="#38BDF8"/>
+<circle cx="255" cy="104" r="5" fill="#A78BFA"/>
+<circle cx="323" cy="104" r="5" fill="#34D399"/>
+<circle cx="289" cy="44" r="5" fill="#22D3EE"/>
+<circle cx="289" cy="122" r="5" fill="#FB7185"/>
+<rect x="262" y="66" width="54" height="34" rx="10" fill="#34D399"/><text x="289" y="90" text-anchor="middle" font-family="Arial, sans-serif" font-weight="900" font-size="20" fill="#06281C">10</text>
+<rect x="232" y="158" width="114" height="28" rx="14" fill="#34D399"/><text x="289" y="177" text-anchor="middle" font-family="Arial, sans-serif" font-weight="900" font-size="15" fill="#06281C">7 + 3 = 10</text>
+<text x="24" y="86" font-family="Arial, sans-serif" font-weight="900" font-size="30" fill="#F4F2FF">Number</text><text x="24" y="122" font-family="Arial, sans-serif" font-weight="900" font-size="30" fill="#34D399">Merge</text>
+<text x="24" y="150" font-family="Arial, sans-serif" font-weight="700" font-size="13" fill="#C9C2FF">Merge numbers, make the target.</text></svg>

@@ -14,7 +14,7 @@ import "./kit/i18n";
 const SKILL_IDS = [
   "counting", "addition", "subtraction", "multiplication", "division",
   "fractions", "observation", "bottle-sort", "color-sweeper", "cross-math",
-  "dot-connect", "sudoku",
+  "dot-connect", "sudoku", "number-merge",
 ] as const;
 
 /*

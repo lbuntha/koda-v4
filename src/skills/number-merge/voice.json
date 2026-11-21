@@ -1,0 +1,32 @@
+{
+  "_comment": [
+    "Number Merge's read-aloud prompts, one per lesson target. Lesson intros are picked up from lessons.json;",
+    "reactions come from the common pack. Must match locales/en.json word for word."
+  ],
+  "subjects": [],
+  "templates": [],
+  "prompts": [
+    "Merge numbers to make exactly 10.",
+    "Merge numbers to make exactly 12.",
+    "Merge numbers to make exactly 15.",
+    "Merge numbers to make exactly 20.",
+    "Merge ones into tens, and tens into a hundred.",
+    "Merge ones to make a ten.",
+    "Merge parts to make one whole.",
+    "Merge the same numbers to double them. Make 16.",
+    "Merge the same numbers to double them. Make 64.",
+    "Merge two numbers that are 1 apart.",
+    "Merge two numbers that are 10 apart.",
+    "Merge two numbers that are 3 apart.",
+    "Merge two numbers that are 4 apart.",
+    "Merge two numbers that are 5 apart.",
+    "Merge two numbers that are the same.",
+    "Merge two numbers that make 10.",
+    "Merge two numbers that make 5.",
+    "Multiply numbers to make exactly 12.",
+    "Multiply numbers to make exactly 18.",
+    "Multiply numbers to make exactly 24.",
+    "Multiply numbers to make exactly 36."
+  ],
+  "phrases": []
+}

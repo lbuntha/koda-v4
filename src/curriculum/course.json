@@ -1723,6 +1723,127 @@
         "sudoku/practice-pairs",
         "sudoku/practice-x-wing"
       ]
+    },
+    {
+      "id": "u132",
+      "unitNumber": 132,
+      "title": "Unit 132: Number Merge — Make 5",
+      "description": "Merge two numbers that make 5, with dots first.",
+      "icon": "number-merge-bonds",
+      "lessons": [
+        "number-merge/friends-of-five",
+        "number-merge/dots-to-five",
+        "number-merge/numbers-to-five",
+        "number-merge/make-five-star"
+      ]
+    },
+    {
+      "id": "u133",
+      "unitNumber": 133,
+      "title": "Unit 133: Number Merge — Make 10",
+      "description": "Partners that make 10, from dots to fast recall.",
+      "icon": "number-merge-bonds",
+      "lessons": [
+        "number-merge/friends-of-ten",
+        "number-merge/make-ten-board",
+        "number-merge/ten-pairs",
+        "number-merge/make-ten-star"
+      ]
+    },
+    {
+      "id": "u134",
+      "unitNumber": 134,
+      "title": "Unit 134: Number Merge — Doubles",
+      "description": "Same and same, then double up again and again.",
+      "icon": "number-merge-doubles",
+      "lessons": [
+        "number-merge/same-and-same",
+        "number-merge/doubles-to-twenty",
+        "number-merge/double-up-sixteen",
+        "number-merge/double-up-sixty-four"
+      ]
+    },
+    {
+      "id": "u135",
+      "unitNumber": 135,
+      "title": "Unit 135: Number Merge — Reach the Target",
+      "description": "Add tiles up to an exact number, never over.",
+      "icon": "number-merge-target",
+      "lessons": [
+        "number-merge/reach-10",
+        "number-merge/reach-12",
+        "number-merge/reach-15",
+        "number-merge/reach-20"
+      ]
+    },
+    {
+      "id": "u136",
+      "unitNumber": 136,
+      "title": "Unit 136: Number Merge — Tens and Hundreds",
+      "description": "Ones bundle into tens, tens into a hundred.",
+      "icon": "number-merge-bundle",
+      "lessons": [
+        "number-merge/ten-ones-one-ten",
+        "number-merge/bundle-tens",
+        "number-merge/tens-to-hundred",
+        "number-merge/hundred-builder"
+      ]
+    },
+    {
+      "id": "u137",
+      "unitNumber": 137,
+      "title": "Unit 137: Number Merge — Take Away",
+      "description": "Two numbers that are a set amount apart.",
+      "icon": "number-merge-difference",
+      "lessons": [
+        "number-merge/apart-1",
+        "number-merge/apart-3",
+        "number-merge/apart-5",
+        "number-merge/apart-10"
+      ]
+    },
+    {
+      "id": "u138",
+      "unitNumber": 138,
+      "title": "Unit 138: Number Merge — Times Tables",
+      "description": "Multiply factors to reach a product.",
+      "icon": "number-merge-times",
+      "lessons": [
+        "number-merge/multiply-to-12",
+        "number-merge/multiply-to-18",
+        "number-merge/multiply-to-24",
+        "number-merge/multiply-to-36"
+      ]
+    },
+    {
+      "id": "u139",
+      "unitNumber": 139,
+      "title": "Unit 139: Number Merge — Fractions to One",
+      "description": "Add parts of a pie to make one whole.",
+      "icon": "number-merge-fraction",
+      "lessons": [
+        "number-merge/halves-and-quarters",
+        "number-merge/three-quarters",
+        "number-merge/eighths",
+        "number-merge/eighths-mix"
+      ]
+    },
+    {
+      "id": "u140",
+      "unitNumber": 140,
+      "title": "Unit 140: Practice — Number Merge",
+      "description": "Every Number Merge mode, without hints.",
+      "icon": "kit-repeat",
+      "lessons": [
+        "number-merge/practice-make-five",
+        "number-merge/practice-make-ten",
+        "number-merge/practice-doubles",
+        "number-merge/practice-reach-the-target",
+        "number-merge/practice-tens-and-hundreds",
+        "number-merge/practice-take-away",
+        "number-merge/practice-times-tables",
+        "number-merge/practice-fractions"
+      ]
     }
   ]
 }
