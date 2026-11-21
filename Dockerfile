@@ -49,10 +49,10 @@ RUN npm run build
 FROM node:22-alpine AS prod
 WORKDIR /app
 ENV NODE_ENV=production
-COPY package.json package-lock.json ./
-# The server bundle keeps its dependencies external, so express, ws and the
-# Gemini SDK still have to be here — but nothing from devDependencies does.
-RUN npm ci --omit=dev && npm cache clean --force
+# No node_modules: esbuild bundles express, ws and the AI SDKs into
+# dist/server.cjs, and the browser libraries are already compiled into dist.
+# Installing "dependencies" here used to add ~386MB (Firebase, icons, React…)
+# that nothing at runtime read, and every deploy re-sent it.
 COPY --from=build /app/dist ./dist
 EXPOSE 3001
 CMD ["node", "dist/server.cjs"]

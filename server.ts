@@ -2,7 +2,6 @@ import express from "express";
 import fs from "fs";
 import http from "http";
 import path from "path";
-import { createServer as createViteServer } from "vite";
 import { GoogleGenAI, LiveServerMessage, Modality, Type } from "@google/genai";
 import Anthropic from "@anthropic-ai/sdk";
 import { WebSocketServer, WebSocket } from "ws";
@@ -2718,6 +2717,9 @@ async function startServer() {
      * that handler claims `/api/live` and ignores every other upgrade, which is
      * exactly the room Vite needs.
      */
+    // Loaded only here, in dev: the production bundle never touches Vite, so the
+    // production image carries no node_modules at all (see the Dockerfile).
+    const { createServer: createViteServer } = await import("vite");
     const vite = await createViteServer({
       server: { middlewareMode: true, hmr: { server } },
       appType: "spa",
