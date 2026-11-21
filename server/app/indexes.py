@@ -286,6 +286,10 @@ INDEXES: dict[str, list[IndexModel]] = {
             name="by_public_sharing",
         ),
     ],
+    "study_cheers": [
+        # One cheer per viewer per finished lesson; the feed counts by event.
+        IndexModel([("eventId", ASCENDING)], name="by_event"),
+    ],
     "buddy_invites": [
         IndexModel([("codeHash", ASCENDING)], unique=True, name="buddy_code_unique"),
         IndexModel(

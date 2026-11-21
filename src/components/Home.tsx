@@ -34,6 +34,7 @@ import { useT } from "../lib/i18n";
 import { useTodayPicks } from "./learn/useToday";
 import { StarterPicks } from "./learn/StarterPicks";
 import { TodayPlanCard } from "./learn/TodayPlanCard";
+import { StudyFeedCard } from "./learn/StudyFeedCard";
 import { planFor, stepDone, type PlanStep } from "../lib/todayPlan";
 import { readReview } from "../lib/learning/review";
 import { LearningLog, activeLearnerId, localDayOf } from "../lib/learning/learningLog";
@@ -235,7 +236,9 @@ const HomeRail: React.FC<{
   totalMastered: number;
   totalLessons: number;
   starsEarned: number;
-}> = ({ userProgress, totalMastered, totalLessons, starsEarned }) => {
+  /** Drawn first in the rail: the "learning with others" card on a wide screen. */
+  top?: React.ReactNode;
+}> = ({ userProgress, totalMastered, totalLessons, starsEarned, top }) => {
   // Read through the streak rule, not off the record: `dailySolved` belongs to
   // the day it was counted for, so an app opened the next morning shows today's
   // empty goal and a streak that has lapsed, without anything having run
@@ -292,6 +295,7 @@ const HomeRail: React.FC<{
      * sits over the bottom-right corner of exactly this column.
      */
     <aside className="hidden lg:flex flex-col gap-4 lg:sticky lg:top-6 lg:pb-24">
+      {top}
       {fresh ? (
         <section
           className={`${themeSystem.card("default")} ${themeSystem.spacing.card} bg-gradient-to-br from-violet-50 to-sky-50 dark:from-violet-950/40 dark:to-sky-950/30`}
@@ -715,6 +719,29 @@ export const Home: React.FC<HomeProps> = ({
     else if (step.bookId) onOpenBook?.(step.bookId);
     else if (step.collectionId) onOpenCollection?.(step.collectionId);
   };
+  /*
+   * What students of the same age finished this week. Only for a learner
+   * session: a parent's Home is about their children, not a feed. One element,
+   * placed twice by CSS — under Today on a phone, top of the rail on a computer.
+   */
+  const feedLearner = session?.learnerId ?? null;
+  const studyFeed = (className: string) =>
+    feedLearner ? (
+      <StudyFeedCard
+        learnerId={feedLearner}
+        className={className}
+        lessonTitle={(skillId, lessonId) =>
+          byRef.get(`${skillId}/${lessonId}`)?.title ?? null
+        }
+        onTry={(item) => {
+          if (item.kind === "book") {
+            playSound("pop");
+            onOpenBook?.(item.lessonId);
+          } else if (byRef.has(`${item.skillId}/${item.lessonId}`)) start(`${item.skillId}/${item.lessonId}`);
+          else open(item.skillId);
+        }}
+      />
+    ) : null;
   const planCard =
     plan && plan.steps.length > 0 ? (
       <TodayPlanCard
@@ -779,6 +806,7 @@ export const Home: React.FC<HomeProps> = ({
               </h1>
 
               {planCard}
+              {studyFeed("mt-4 lg:hidden")}
 
               {today.length || interrupted || categoryCards.length ? (
                 /*
@@ -971,6 +999,7 @@ export const Home: React.FC<HomeProps> = ({
         starsEarned={Object.values(completedLevels).reduce((total, stars) => total + stars, 0)}
         totalMastered={totalMastered}
         totalLessons={totalLessons}
+        top={studyFeed("")}
       />
     </div>
   );

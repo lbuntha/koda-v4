@@ -127,6 +127,7 @@ async def delete_learner(learner_id: str, db: Db, p: CanDelete) -> None:
     await db.concept_totals.delete_many({"familyId": p.family_id, "learnerId": learner_id})
     await leaderboard_privacy.remove(db, p.family_id, learner_id)
     await buddies.remove_learner(db, learner_id)
+    await db.study_cheers.delete_many({"familyId": p.family_id, "fromLearnerId": learner_id})
 
 
 @router.post("/{learner_id}/join-code")

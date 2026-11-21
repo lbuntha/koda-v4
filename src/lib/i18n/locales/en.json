@@ -310,7 +310,25 @@
     "startTitle": "Let's get started!",
     "startBody": "Finish your first lesson to start your streak and earn XP.",
     "todayGoal": "Today's goal",
-    "goalCount": "{done} of {goal} done"
+    "goalCount": "{done} of {goal} done",
+    "studyFeed": {
+      "title": "Learning with others",
+      "popular": "Popular this week",
+      "popularAges": "Popular with ages {low}–{high} this week",
+      "learners": {
+        "one": "{count} student your age finished this",
+        "other": "{count} students your age finished this"
+      },
+      "try": "Try it",
+      "friends": "Friends are learning",
+      "finished": "{name} finished {title}",
+      "read": "{name} read {title}",
+      "cheerFor": "Cheer for {name}",
+      "cheers": {
+        "one": "{count} cheer",
+        "other": "{count} cheers"
+      }
+    }
   },
   "today": {
     "review": "Let's warm up with something you already know!",

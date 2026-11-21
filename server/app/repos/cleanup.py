@@ -93,6 +93,7 @@ async def purge_family(db: AsyncIOMotorDatabase, family_id: str) -> dict[str, in
     await db.invites.delete_many(in_family)
     await db.push_tokens.delete_many(in_family)
     await db.leaderboard_privacy.delete_many(in_family)
+    await db.study_cheers.delete_many(in_family)
     await db.menu_items.delete_many(in_family)
     await db.subscriptions.delete_one({"_id": family_id})
     await db.upgrade_requests.delete_one({"_id": family_id})
