@@ -15,9 +15,10 @@ import { messageOf } from "../../rebus/studio/useStudioAction";
 import { CalendarPanel, LOW_DAYS } from "./CalendarPanel";
 import { WordForm } from "./WordForm";
 import { WordList } from "./WordList";
+import { PlaysPanel } from "./PlaysPanel";
 import { PuzzleStudioAPI, type Overview } from "./studioApi";
 
-type Tab = "add" | "review" | "words" | "calendar";
+type Tab = "add" | "review" | "words" | "calendar" | "plays";
 
 /** The line closest to running out of new words. */
 const fewestDays = (o: Overview): number => {
@@ -51,7 +52,11 @@ export const PuzzleStudio: React.FC = () => {
 
   return (
     <div className="mx-auto flex w-full max-w-5xl flex-col gap-5">
-      <UISectionHeader title={t("puzzleStudio.title")} subtitle={t("puzzleStudio.subtitle")} icon={<Puzzle className="h-5 w-5 text-indigo-600 dark:text-indigo-400" />} />
+      <UISectionHeader
+        title={t("puzzleStudio.title")}
+        subtitle={t("puzzleStudio.subtitle")}
+        icon={<Puzzle className="h-5 w-5 text-indigo-600 dark:text-indigo-400" />}
+      />
 
       {error && (
         <p role="alert" className={themeSystem.flash("error")}>
@@ -60,9 +65,27 @@ export const PuzzleStudio: React.FC = () => {
       )}
 
       <UIStatGrid>
-        <UIStatTile icon={<CheckCircle2 />} value={overview ? sum("published") : "—"} label={t("puzzleStudio.statLive")} tone="success" onClick={() => setTab("words")} />
-        <UIStatTile icon={<ClipboardCheck />} value={overview ? sum("review") : "—"} label={t("puzzleStudio.statReview")} tone="primary" onClick={() => setTab("review")} />
-        <UIStatTile icon={<Puzzle />} value={overview ? sum("draft") : "—"} label={t("puzzleStudio.statDrafts")} tone="primary" onClick={() => setTab("words")} />
+        <UIStatTile
+          icon={<CheckCircle2 />}
+          value={overview ? sum("published") : "—"}
+          label={t("puzzleStudio.statLive")}
+          tone="success"
+          onClick={() => setTab("words")}
+        />
+        <UIStatTile
+          icon={<ClipboardCheck />}
+          value={overview ? sum("review") : "—"}
+          label={t("puzzleStudio.statReview")}
+          tone="primary"
+          onClick={() => setTab("review")}
+        />
+        <UIStatTile
+          icon={<Puzzle />}
+          value={overview ? sum("draft") : "—"}
+          label={t("puzzleStudio.statDrafts")}
+          tone="primary"
+          onClick={() => setTab("words")}
+        />
         <UIStatTile
           icon={low.length ? <TriangleAlert /> : <CalendarDays />}
           value={overview ? fewestDays(overview) : "—"}
@@ -75,7 +98,9 @@ export const PuzzleStudio: React.FC = () => {
       {low.length > 0 && canRun && (
         <p className={themeSystem.flash("warning")}>
           {t("puzzleStudio.lowLines", {
-            lines: low.map((l) => `${l.lang === "km" ? "ខ្មែរ" : "English"} ${t("puzzleStudio.nTiles", { n: String(l.level) })} (${l.newDaysLeft})`).join(", "),
+            lines: low
+              .map((l) => `${l.lang === "km" ? "ខ្មែរ" : "English"} ${t("puzzleStudio.nTiles", { n: String(l.level) })} (${l.newDaysLeft})`)
+              .join(", "),
           })}
         </p>
       )}
@@ -84,9 +109,14 @@ export const PuzzleStudio: React.FC = () => {
         label={t("puzzleStudio.title")}
         items={[
           { id: "add", label: t("puzzleStudio.tabAdd") },
-          { id: "review", label: canRun ? t("puzzleStudio.tabReview") : t("puzzleStudio.tabMine"), count: canRun ? sum("review") : undefined },
+          {
+            id: "review",
+            label: canRun ? t("puzzleStudio.tabReview") : t("puzzleStudio.tabMine"),
+            count: canRun ? sum("review") : undefined,
+          },
           { id: "words", label: t("puzzleStudio.tabWords") },
           { id: "calendar", label: t("puzzleStudio.tabCalendar") },
+          { id: "plays", label: t("puzzleStudio.tabPlays") },
         ]}
         value={shown}
         onChange={(id) => setTab(id as Tab)}
@@ -104,9 +134,18 @@ export const PuzzleStudio: React.FC = () => {
           />
         </>
       )}
-      {shown === "review" && <WordList key={`r${listKey}`} canRun={canRun} initialStatus={canRun ? "review" : ""} onChanged={() => void refresh()} />}
+      {shown === "review" && (
+        <WordList key={`r${listKey}`} canRun={canRun} initialStatus={canRun ? "review" : ""} onChanged={() => void refresh()} />
+      )}
       {shown === "words" && <WordList key={`w${listKey}`} canRun={canRun} onChanged={() => void refresh()} />}
-      {shown === "calendar" && overview && <CalendarPanel lines={overview.lines.filter((l) => (l.byStatus.published ?? 0) > 0)} canRun={canRun} onChanged={() => void refresh()} />}
+      {shown === "plays" && <PlaysPanel today={overview?.today ?? new Date().toISOString().slice(0, 10)} />}
+      {shown === "calendar" && overview && (
+        <CalendarPanel
+          lines={overview.lines.filter((l) => (l.byStatus.published ?? 0) > 0)}
+          canRun={canRun}
+          onChanged={() => void refresh()}
+        />
+      )}
     </div>
   );
 };

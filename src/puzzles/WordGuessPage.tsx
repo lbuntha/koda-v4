@@ -9,7 +9,7 @@
  */
 
 import React, { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState, useSyncExternalStore } from "react";
-import { ArrowLeft, Flame, HelpCircle, Lightbulb, SlidersHorizontal, Sparkles } from "lucide-react";
+import { ArrowLeft, Check, Flame, HelpCircle, House, Lightbulb, RotateCcw, SlidersHorizontal, Sparkles, Trophy, X } from "lucide-react";
 import { useT } from "../lib/i18n";
 import { themeSystem } from "../lib/themeSystem";
 import { playSound } from "../utils/audio";
@@ -89,6 +89,10 @@ export const WordGuessPage: React.FC<WordGuessPageProps> = ({ onExit, onAwardXp,
   /* On a phone the choices fold into one line, so the board and keys fit the screen. Always open on a wide screen. */
   const [optionsOpen, setOptionsOpen] = useState(false);
   const today = puzzleDay();
+  /* Play comes in rounds, so it has an end: 5 words, 3 for the youngest. Then the child chooses — another round, or done for today. */
+  const roundSize = roundSizeFor(viewer.age ?? null);
+  const [round, setRound] = useState<boolean[]>([]);
+  const roundDone = round.length >= roundSize;
 
   // Opened from further down Home or Learn: start at the top, with the clue and the first row in view.
   useEffect(() => {
@@ -248,6 +252,8 @@ export const WordGuessPage: React.FC<WordGuessPageProps> = ({ onExit, onAwardXp,
         />
       )}
 
+      <RoundDots results={round} size={roundSize} />
+
       <Game
         key={`${mode}:${key}:${puzzle.id}`}
         puzzle={puzzle}
@@ -258,12 +264,104 @@ export const WordGuessPage: React.FC<WordGuessPageProps> = ({ onExit, onAwardXp,
         onKeys={(k) => setPrefs({ keys: k })}
         onAwardXp={onAwardXp}
         lineIds={lineIds}
+        lastInRound={roundDone}
+        onFinished={(won) => setRound((r) => (r.length >= roundSize ? [won] : [...r, won]))}
         onNext={() => {
           setMode("practice");
           setPracticeId(null);
         }}
       />
+
+      {roundDone && (
+        <RoundDone
+          results={round}
+          onAgain={() => {
+            setRound([]);
+            setMode("practice");
+            setPracticeId(null);
+            window.scrollTo?.({ top: 0, behavior: "smooth" });
+          }}
+          onFinish={onExit}
+        />
+      )}
     </div>
+  );
+};
+
+/** Words in a round: 3 for children of 7 and under, 5 from 8. */
+export const roundSizeFor = (age: number | null): number => ((age ?? 8) <= 7 ? 3 : 5);
+
+/** Where the child is in the round: a dot per word — solved, missed, this one, still to come. */
+const RoundDots: React.FC<{ results: boolean[]; size: number }> = ({ results, size }) => {
+  const { t } = useT();
+  const done = results.length >= size;
+  const at = Math.min(results.length + 1, size);
+  return (
+    <div
+      className="-mt-1 flex items-center justify-center gap-2"
+      role="status"
+      aria-label={done ? t("wordGuess.roundComplete") : t("wordGuess.roundOf", { n: String(at), total: String(size) })}
+    >
+      <span className="text-xs font-black uppercase tracking-wide text-muted" aria-hidden>
+        {done ? t("wordGuess.roundComplete") : t("wordGuess.roundOf", { n: String(at), total: String(size) })}
+      </span>
+      <span className="flex gap-1.5" aria-hidden>
+        {Array.from({ length: size }, (_, i) => (
+          <span
+            key={i}
+            className={`h-2.5 rounded-full transition-all duration-300 ${
+              i < results.length
+                ? results[i]
+                  ? "w-2.5 bg-emerald-500"
+                  : "w-2.5 bg-rose-400"
+                : i === results.length
+                  ? "w-6 bg-indigo-500"
+                  : "w-2.5 bg-slate-200 dark:bg-slate-700"
+            }`}
+          />
+        ))}
+      </span>
+    </div>
+  );
+};
+
+/** The end of a round: what they did, then one clear choice. Never a dead end, never a nag. */
+const RoundDone: React.FC<{ results: boolean[]; onAgain(): void; onFinish(): void }> = ({ results, onAgain, onFinish }) => {
+  const { t } = useT();
+  const solved = results.filter(Boolean).length;
+  const title =
+    solved === results.length ? "wordGuess.roundPerfect" : solved * 2 >= results.length ? "wordGuess.roundGreat" : "wordGuess.roundGood";
+  return (
+    <section
+      ref={(el) => el?.scrollIntoView?.({ behavior: "smooth", block: "center" })}
+      className={themeSystem.card("default", "koda-celebrate space-y-4 border-2 border-indigo-200 p-6 text-center dark:border-indigo-800")}
+      aria-live="polite"
+    >
+      <div className="mx-auto grid h-16 w-16 place-items-center rounded-full bg-emerald-50 text-emerald-600 dark:bg-emerald-950/60 dark:text-emerald-300">
+        <Trophy className="h-8 w-8" aria-hidden />
+      </div>
+      <h3 className="text-2xl font-black text-ink">{t(title)}</h3>
+      <p className="text-base font-bold text-body">{t("wordGuess.roundSolved", { n: String(solved), total: String(results.length) })}</p>
+      <div className="flex justify-center gap-2" aria-hidden>
+        {results.map((won, i) => (
+          <span
+            key={i}
+            className={`grid h-9 w-9 place-items-center rounded-full ${won ? "bg-emerald-500 text-white" : "bg-rose-100 text-rose-600 dark:bg-rose-950/60 dark:text-rose-300"}`}
+          >
+            {won ? <Check className="h-5 w-5" /> : <X className="h-5 w-5" />}
+          </span>
+        ))}
+      </div>
+      <div className="grid gap-2 sm:grid-cols-2">
+        <UIButton size="lg" icon={<RotateCcw />} onClick={onAgain}>
+          {t("wordGuess.anotherRound")}
+        </UIButton>
+        <UIButton size="lg" variant="outline" icon={<House />} onClick={onFinish}>
+          {t("wordGuess.finishToday")}
+        </UIButton>
+      </div>
+      <p className="text-xs font-semibold text-muted">{t("wordGuess.roundBye")}</p>
+    </section>
   );
 };
 
@@ -361,6 +459,10 @@ interface GameProps {
   onKeys(k: "easy" | "all"): void;
   onAwardXp?(xp: number): void;
   onNext(): void;
+  /** The game ended this visit (not one reopened already finished). */
+  onFinished?(won: boolean): void;
+  /** The last word of a round: no "next word" here, the round card offers the choice. */
+  lastInRound?: boolean;
   /** Every live word on this line, to count the child's word book. */
   lineIds: readonly string[];
 }
@@ -414,7 +516,19 @@ export function clueLine(puzzle: DailyPuzzle, ui: string, means: (word: string) 
   return km;
 }
 
-const Game: React.FC<GameProps> = ({ puzzle, daily, slot, day, keys, onKeys, onAwardXp, onNext, lineIds }) => {
+const Game: React.FC<GameProps> = ({
+  puzzle,
+  daily,
+  slot,
+  day,
+  keys,
+  onKeys,
+  onAwardXp,
+  onNext,
+  onFinished,
+  lastInRound = false,
+  lineIds,
+}) => {
   const { t, language } = useT();
   const answer = useMemo(() => tilesOf(puzzle.data.word, puzzle.lang), [puzzle]);
   const n = answer.length;
@@ -495,6 +609,7 @@ const Game: React.FC<GameProps> = ({ puzzle, daily, slot, day, keys, onKeys, onA
       setXpCapped(!daily && earned === 0);
       setXp(earned);
       onAwardXp?.(earned);
+      onFinished?.(won);
       recorder.current?.finish(won, rows.length, earned);
       if (!daily) savePractice(next, day);
       setTimeout(() => playSound(won ? "success" : "page"), 120 * n + 200);
@@ -502,7 +617,7 @@ const Game: React.FC<GameProps> = ({ puzzle, daily, slot, day, keys, onKeys, onA
       playSound("pop");
       setNote(t(rows.length === MAX_GUESSES - 1 ? "wordGuess.lastTry" : "wordGuess.keepGoing"));
     }
-  }, [game, current, n, answer, daily, slot, day, onAwardXp, puzzle.lang, t]);
+  }, [game, current, n, answer, daily, slot, day, onAwardXp, onFinished, puzzle.lang, t]);
 
   // A real keyboard works too, for English.
   useEffect(() => {
@@ -609,6 +724,7 @@ const Game: React.FC<GameProps> = ({ puzzle, daily, slot, day, keys, onKeys, onA
             xpCapped={xpCapped}
             book={{ solvedBefore, spelled: lineIds.filter((id) => solvedIds().has(id)).length, total: lineIds.length }}
             onNext={onNext}
+            hideNext={lastInRound}
           />
         ) : (
           <div className={themeSystem.card("default", "p-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] shadow-lg sm:p-4 lg:shadow-none")}>

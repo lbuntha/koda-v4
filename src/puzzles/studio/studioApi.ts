@@ -57,7 +57,52 @@ const qs = (q: Record<string, string | number | undefined>) => {
   return s ? `?${s}` : "";
 };
 
+export interface PlayChild {
+  learnerId: string;
+  name: string;
+  birthYear?: number | null;
+  avatarSeed?: string;
+  games: number;
+  solved: number;
+  solvedPct: number;
+  lastDay: string;
+}
+
+export interface PlayWord {
+  lang: PuzzleLang;
+  word: string;
+  picture?: string;
+  played: number;
+  solved: number;
+  solvedPct: number;
+  avgGuesses: number;
+  hints: number;
+}
+
+export interface Plays {
+  totals: { games: number; children: number; solvedPct: number };
+  children: PlayChild[];
+  words: PlayWord[];
+  days: number;
+  canSeeChildren: boolean;
+}
+
+export interface PlayGame {
+  day: string;
+  ts: string;
+  lang: PuzzleLang;
+  word: string;
+  picture?: string;
+  solved: boolean;
+  guesses: number;
+  hints: number;
+  practice: boolean;
+}
+
 export const PuzzleStudioAPI = {
+  plays: (days: number) => call<Plays>(`/plays${qs({ days })}`),
+  childPlays: (learnerId: string, days: number) =>
+    call<{ child: PlayChild; games: PlayGame[]; days: number }>(`/plays/${encodeURIComponent(learnerId)}${qs({ days })}`),
   overview: () => call<Overview>("/overview"),
   list: (q: { lang?: string; level?: number; status?: string; q?: string; category?: string; skip?: number; limit?: number }) =>
     call<{ puzzles: StudioWord[]; total: number }>(`/puzzles${qs({ limit: 50, ...q })}`),

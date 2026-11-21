@@ -19,6 +19,7 @@ from app.deps import AUTHENTICATED, CurrentPrincipal, Db, require
 from app.errors import AppError, Forbidden, NotFound
 from app.models.auth import Principal
 from app.models.daily_puzzle import CalendarIn, StatusIn, WordGuessIn, WordGuessPatch
+from app.repos import daily_puzzle_plays as plays
 from app.repos import daily_puzzles as repo
 from app.routers.library import AudioSaved, ImageWrite, store_image
 from app.security import ownership, principal_can
@@ -102,6 +103,56 @@ async def daily(db: Db, p: CanRead, days: Annotated[int, Query(ge=1, le=45)] = 3
 
 
 # ---- the Studio ---------------------------------------------------------------
+
+
+@router.get("/studio/plays")
+async def studio_plays(db: Db, p: CanWrite, days: Annotated[int, Query(ge=1, le=90)] = 7) -> dict[str, Any]:
+    """Who played and how it went. The owner sees every child; a teacher sees only their own words, and no children."""
+    rows = await plays.games(db, plays.since(repo.today(), days))
+    mine = _mine_only(p)
+    allowed: set[tuple[str, str]] | None = None
+    if mine:
+        allowed = {(r["lang"], r["data"]["word"]) async for r in db.daily_puzzles.find({"createdBy": mine}, {"lang": 1, "data.word": 1})}
+    names = await plays.learner_names(db, {r["learnerId"] for r in rows}) if allowed is None else {}
+    out = plays.summary(rows, names, allowed)
+    pictures = {
+        (r["lang"], r["data"]["word"]): r["data"].get("picture", "")
+        async for r in db.daily_puzzles.find(
+            {"data.word": {"$in": [w["word"] for w in out["words"]]}}, {"lang": 1, "data.word": 1, "data.picture": 1}
+        )
+    }
+    for w in out["words"]:
+        w["picture"] = pictures.get((w["lang"], w["word"]), "")
+    return {**out, "days": days, "canSeeChildren": allowed is None}
+
+
+@router.get("/studio/plays/{learner_id}")
+async def studio_child_plays(db: Db, p: CanRun, learner_id: str, days: Annotated[int, Query(ge=1, le=90)] = 30) -> dict[str, Any]:
+    """One child's games, newest first. Owner only."""
+    rows = await plays.games(db, plays.since(repo.today(), days), learner_id)
+    who = (await plays.learner_names(db, {learner_id})).get(learner_id)
+    if not who and not rows:
+        raise NotFound("No such child.", "not_found")
+    pictures = {
+        (r["lang"], r["data"]["word"]): r["data"].get("picture", "")
+        async for r in db.daily_puzzles.find(
+            {"data.word": {"$in": list({g["word"] for g in rows})}}, {"lang": 1, "data.word": 1, "data.picture": 1}
+        )
+    }
+    games = [
+        {k: g[k] for k in ("day", "ts", "lang", "word", "solved", "guesses", "hints", "practice")}
+        | {"picture": pictures.get((g["lang"], g["word"]), "")}
+        for g in rows[:300]
+    ]
+    summary = plays.summary(rows, {learner_id: who or {}}, None)
+    return {
+        "child": (
+            summary["children"]
+            or [{"learnerId": learner_id, "name": (who or {}).get("displayName", ""), "games": 0, "solved": 0, "solvedPct": 0}]
+        )[0],
+        "games": games,
+        "days": days,
+    }
 
 
 @router.get("/studio/overview")

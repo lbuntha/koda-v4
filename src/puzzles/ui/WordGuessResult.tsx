@@ -32,7 +32,9 @@ export const WordGuessResult: React.FC<{
   /** The child's word book on this line: was this word in it already, and how many words it holds now. */
   book?: { solvedBefore: boolean; spelled: number; total: number };
   onNext(): void;
-}> = ({ puzzle, game, daily, day, xp, xpCapped = false, book, onNext }) => {
+  /** The round is over: the round card below makes the next choice. */
+  hideNext?: boolean;
+}> = ({ puzzle, game, daily, day, xp, xpCapped = false, book, onNext, hideNext = false }) => {
   const { t } = useT();
   const [copied, setCopied] = useState<"" | "yes" | "show">("");
   const tiles = tilesOf(puzzle.data.word, puzzle.lang);
@@ -126,9 +128,11 @@ export const WordGuessResult: React.FC<{
             {t("wordGuess.share")}
           </UIButton>
         )}
-        <UIButton size="lg" iconRight={<ArrowRight />} onClick={onNext} className={daily ? "" : "sm:col-span-2"}>
-          {daily ? t("wordGuess.playMore") : t("wordGuess.nextWord")}
-        </UIButton>
+        {!hideNext && (
+          <UIButton size="lg" iconRight={<ArrowRight />} onClick={onNext} className={daily ? "" : "sm:col-span-2"}>
+            {daily ? t("wordGuess.playMore") : t("wordGuess.nextWord")}
+          </UIButton>
+        )}
       </div>
       {copied === "yes" && <p className="text-xs font-semibold text-muted">{t("wordGuess.copied")}</p>}
       {copied === "show" && (

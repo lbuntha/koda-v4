@@ -5958,7 +5958,16 @@
     "allTopics": "All topics",
     "newInBook": "New word in your word book!",
     "spelledBefore": "You spelled this one before",
-    "bookCount": "You have spelled {n} of {total} words at this length."
+    "bookCount": "You have spelled {n} of {total} words at this length.",
+    "roundOf": "Word {n} of {total}",
+    "roundComplete": "Round done",
+    "roundPerfect": "Perfect round!",
+    "roundGreat": "Great round!",
+    "roundGood": "Good effort!",
+    "roundSolved": "You solved {n} of {total} words.",
+    "anotherRound": "Play another round",
+    "finishToday": "Finish for today",
+    "roundBye": "A new word is waiting tomorrow."
   },
   "puzzles": {
     "category": {
@@ -6086,6 +6095,37 @@
     "photoHelp": "A JPEG or PNG from your computer. Koda makes it smaller before sending it, and children's devices keep it for offline play.",
     "photoFailed": "The photo could not be added. Try again.",
     "allTopics": "All topics",
-    "shownRange": "{from}–{to} of {total} words"
+    "shownRange": "{from}–{to} of {total} words",
+    "tabPlays": "Plays",
+    "plays": {
+      "period": "Time",
+      "today": "Today",
+      "yesterday": "Yesterday",
+      "lastDays": "{n} days",
+      "daysAgo": "{n} days ago",
+      "games": "Games played",
+      "children": "Children playing",
+      "solved": "Solved",
+      "none": "No games yet in this time.",
+      "noneHelp": "When children play Word Guess, their games show here.",
+      "noneMine": "When children play your words, you will see how they did here.",
+      "childrenTitle": "Children",
+      "childrenHelp": "Tap a child to see every word they played.",
+      "unnamed": "A child",
+      "age": "age {n}",
+      "childLine": "{games} games",
+      "wordsTitle": "Hardest words first",
+      "wordsHelp": "Words few children solve may need a clearer clue or a longer list.",
+      "wordLine": "Played {played} · avg {guesses} guesses",
+      "hints": "{n} hints",
+      "allChildren": "All children",
+      "wordsSpelled": "Words spelled",
+      "solvedIn": "Solved in {n}",
+      "notSolved": "Not solved",
+      "practice": "Practice",
+      "daily": "Today's word",
+      "hint1": "1 hint",
+      "solvedShort": "solved"
+    }
   }
 }

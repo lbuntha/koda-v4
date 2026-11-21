@@ -143,3 +143,10 @@ describe("practice picks", () => {
     for (let i = 0; i < 20; i++) expect(practicePuzzle(snap, slot, new Set(), Math.random, { topic: "animal" })?.data.category).toBe("animal");
   });
 });
+
+describe("rounds", () => {
+  it("a round is 3 words for children of 7 and under, 5 from 8", async () => {
+    const { roundSizeFor } = await import("./WordGuessPage");
+    expect([roundSizeFor(5), roundSizeFor(7), roundSizeFor(8), roundSizeFor(14), roundSizeFor(null)]).toEqual([3, 3, 5, 5, 5]);
+  });
+});

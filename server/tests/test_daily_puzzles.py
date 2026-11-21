@@ -148,3 +148,49 @@ async def test_a_word_can_have_a_drawing_an_art_picture_or_an_uploaded_photo_tha
     seen = await client.get(f"/library/images/{up.json()['id']}", headers=family)
     assert seen.status_code == 200 and seen.headers["content-type"] == "image/png"
     assert (await client.post("/daily-puzzles/studio/images", json={"mime": "image/png", "data": png}, headers=family)).status_code == 403
+
+
+async def test_plays_add_up_every_child_and_the_owner_can_open_one(client, db, owner, teacher, family):
+    day = repo.today()
+
+    def ev(n, learner, word, given, correct, practice=False, lang="en"):
+        return {
+            "eventId": f"e{n}",
+            "familyId": "f1",
+            "learnerId": learner,
+            "skillId": "koda-word-guess",
+            "type": "answer_submitted",
+            "lessonId": f"word-guess:{lang}:3",
+            "expected": word,
+            "given": given,
+            "correct": correct,
+            "supportsUsed": 0,
+            "practice": practice,
+            "localDay": day,
+            "ts": f"{day}T0{n}:00:00Z",
+        }
+
+    await db.learners.insert_one({"_id": "l_kid", "familyId": "f1", "displayName": "Sokha", "birthYear": 2019, "avatarSeed": "a1"})
+    await db.events.insert_many(
+        [
+            ev(1, "l_kid", "cat", "solved in 2", True),
+            ev(2, "l_kid", "dog", "not solved", False, True),
+            ev(3, "l_two", "cat", "solved in 4", True),
+        ]
+    )
+    body = (await client.get(f"{S}/plays?days=7", headers=owner)).json()
+    assert body["totals"] == {"games": 3, "children": 2, "solvedPct": 67} and body["canSeeChildren"]
+    sokha = next(c for c in body["children"] if c["learnerId"] == "l_kid")
+    assert sokha["name"] == "Sokha" and sokha["games"] == 2 and sokha["solvedPct"] == 50
+    words = {w["word"]: w for w in body["words"]}
+    assert words["dog"]["solvedPct"] == 0 and words["cat"]["avgGuesses"] == 3.0 and body["words"][0]["word"] == "dog"
+
+    one = (await client.get(f"{S}/plays/l_kid", headers=owner)).json()
+    assert [g["word"] for g in one["games"]] == ["dog", "cat"] and one["games"][0]["practice"] and one["games"][1]["guesses"] == 2
+    assert one["games"][1]["picture"] == "rebus-cat"
+
+    # A teacher sees only their own words and no children; only the owner opens a child; a family sees none of it.
+    mine = (await client.get(f"{S}/plays", headers=teacher)).json()
+    assert mine["totals"]["games"] == 0 and mine["children"] == [] and not mine["canSeeChildren"]
+    assert (await client.get(f"{S}/plays/l_kid", headers=teacher)).status_code == 403
+    assert (await client.get(f"{S}/plays", headers=family)).status_code == 403
