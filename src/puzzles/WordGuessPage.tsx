@@ -8,6 +8,7 @@
  * colour that is never the only signal.
  */
 
+import { ActivityDone } from "../lib/streak";
 import React, { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState, useSyncExternalStore } from "react";
 import { ArrowLeft, Check, Flame, HelpCircle, House, Lightbulb, RotateCcw, SlidersHorizontal, Sparkles, Trophy, X } from "lucide-react";
 import { useT } from "../lib/i18n";
@@ -611,6 +612,8 @@ const Game: React.FC<GameProps> = ({
       onAwardXp?.(earned);
       onFinished?.(won);
       recorder.current?.finish(won, rows.length, earned);
+      // A finished game counts towards today's goal, like a lesson or a book.
+      ActivityDone.announce();
       if (!daily) savePractice(next, day);
       setTimeout(() => playSound(won ? "success" : "page"), 120 * n + 200);
     } else {

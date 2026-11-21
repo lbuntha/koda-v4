@@ -72,7 +72,7 @@ const TONE_FOR: Record<PickWhy, "review" | "practise" | "advance" | "resume"> = 
 };
 
 /** Beyond this many subjects the list folds, so Home stays about one screen. */
-const SUBJECTS_SHOWN = 6;
+const SUBJECTS_SHOWN = 2;
 
 /** One line of the progress card: an icon well, a label and its number. */
 /**
@@ -511,8 +511,21 @@ export const Home: React.FC<HomeProps> = ({
         isUnlocked(lesson, completedLevels, viewer),
     ).length;
 
-  /* Something to do first, then whatever changed most recently. A subject with
-     nothing open still appears — it is the learner's, not a suggestion. */
+  /*
+   * When this learner last finished a lesson in each subject, newest wins.
+   * "Continue" means the subject they were just doing, not the one an author
+   * edited last.
+   */
+  const lastPlayed = new Map<string, string>();
+  const homeLearner = activeLearnerId();
+  for (const e of LearningLog.all()) {
+    if (e.learnerId !== homeLearner || e.type !== "lesson_completed" || !e.skillId) continue;
+    const at = e.ts ?? e.localDay;
+    if (at > (lastPlayed.get(e.skillId) ?? "")) lastPlayed.set(e.skillId, at);
+  }
+
+  /* Started first, most recently played first; then something to do. A subject
+     with nothing open still appears — it is the learner's, not a suggestion. */
   const subjects = registered
     .map((skill) => ({
       skill,
@@ -533,9 +546,15 @@ export const Home: React.FC<HomeProps> = ({
     .sort(
       (a, b) =>
         Number(Boolean(b.current)) - Number(Boolean(a.current)) ||
+        (lastPlayed.get(b.skill.id) ?? "").localeCompare(lastPlayed.get(a.skill.id) ?? "") ||
         b.ready - a.ready ||
         (b.skill.modified ?? 0) - (a.skill.modified ?? 0),
     );
+  /*
+   * Two subjects, not six. Today's plan already says what to do; this is only
+   * "carry on where you were". Everything else is one tap away under Show all
+   * and on the Learn page, so the phone screen holds one main action.
+   */
   const visibleSubjects = showAllSubjects ? subjects : subjects.slice(0, SUBJECTS_SHOWN);
   const inProgress = visibleSubjects.filter((entry) => entry.current);
   const otherSubjects = visibleSubjects.filter((entry) => !entry.current);
@@ -791,15 +810,6 @@ export const Home: React.FC<HomeProps> = ({
                 only exists on a day with practice in it. */}
             <DailyGoalBanner userProgress={userProgress} />
             <WelcomeBack userProgress={userProgress} />
-            <WhatsNew
-              who={session?.learnerId ?? session?.userId ?? null}
-              age={viewer.age}
-              allAges={viewer.showAllSkills}
-              skills={byId}
-              onOpenSkill={onOpenSkill}
-              onOpenBook={onOpenBook}
-              onOpenRebus={onOpenRebus}
-            />
             <section>
               <h1 className="font-mono font-black uppercase tracking-widest text-xs text-indigo-600">
                 {t("home.today")}
@@ -808,7 +818,14 @@ export const Home: React.FC<HomeProps> = ({
               {planCard}
               {studyFeed("mt-4 lg:hidden")}
 
-              {today.length || interrupted || categoryCards.length ? (
+              {/*
+                * With a plan, the plan is the one main action: its steps
+                * already hold the lesson, the book and the writing, so the
+                * cards below would only repeat them with more buttons.
+                * Without one, the lead card and today's book and writing
+                * stand in for it.
+                */}
+              {planCard ? null : today.length || interrupted || categoryCards.length ? (
                 /*
                  * One first thing, then the alternatives.
                  *
@@ -855,6 +872,17 @@ export const Home: React.FC<HomeProps> = ({
                 starsEarned={Object.values(completedLevels).reduce((t, stars) => t + stars, 0)}
               />
             </div>
+
+            {/* What's new, under today's work rather than above it. */}
+            <WhatsNew
+              who={session?.learnerId ?? session?.userId ?? null}
+              age={viewer.age}
+              allAges={viewer.showAllSkills}
+              skills={byId}
+              onOpenSkill={onOpenSkill}
+              onOpenBook={onOpenBook}
+              onOpenRebus={onOpenRebus}
+            />
 
             <section>
               <h2 className="font-mono font-black uppercase tracking-widest text-xs text-muted">

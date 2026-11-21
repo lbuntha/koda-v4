@@ -143,6 +143,8 @@ export function LibraryPage({ onAwardXp, onReaderChange, onBookChange, embedded 
             // with nothing to press, so reading it to the end finishes it.
             if (quizOf(book).length === 0) {
               LibraryProgress.set(book.id, { stage: "done", rev: book.rev, firstTry: 0, total: 0 });
+              // Reading it to the end is the activity, so it counts towards today's goal.
+              ActivityDone.announce();
               playSound("pop");
               go("book");
               return;
