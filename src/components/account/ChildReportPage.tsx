@@ -30,6 +30,7 @@ import { UIAvatar, UIBadge, UIButton, UISectionHeader, UIStatGrid, UIStatTile, U
 import { NoAccess } from "./NoAccess";
 import { VoiceNotesCard } from "./VoiceNotesCard";
 import { ReportGlance, type GlanceAction } from "./ReportGlance";
+import { ShareWeekButton } from "./ShareWeekCard";
 import { LessonBars, PracticeTrend } from "./ReportCharts";
 import { TraceReport } from "../../trace/report/TraceReport";
 import { PaintingsReport } from "../../trace/report/PaintingsReport";
@@ -573,6 +574,11 @@ export const ChildReportPage: React.FC<ChildReportPageProps> = ({
                 actions={actions}
                 onJump={jumpTo}
               />
+            )}
+            {report && (
+              <div className="flex justify-end">
+                <ShareWeekButton report={report} />
+              </div>
             )}
 
             {/*

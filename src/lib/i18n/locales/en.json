@@ -2160,6 +2160,26 @@
         "other": "Show all {count} lessons"
       },
       "weekInitials": "S,M,T,W,T,F,S"
+    },
+    "share": {
+      "button": "Share this week",
+      "title": "Share this week",
+      "badge": "This week",
+      "headline": {
+        "one": "My child studied {count} day this week",
+        "other": "My child studied {count} days this week"
+      },
+      "mastered": "Lessons learned well",
+      "questions": "Questions answered",
+      "offer": "Free for 3 months",
+      "offerDetail": "Khmer, English, math, reading and writing. Works offline.",
+      "footer": "Shared by a parent on Koda",
+      "share": "Share",
+      "save": "Save picture",
+      "alt": "A picture of this week's learning, ready to post",
+      "failed": "The picture could not be made on this device.",
+      "privacy": "No name, photo or score is on the picture.",
+      "message": "My child is learning on Koda. Join free: {link}"
     }
   },
   "leaderboard": {
