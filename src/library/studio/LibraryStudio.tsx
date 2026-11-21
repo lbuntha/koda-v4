@@ -1,12 +1,13 @@
-import { useEffect, useMemo, useState, type ReactNode } from "react";
+import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { ArrowLeft, Space, BookOpen, Check, ChevronDown, ChevronRight, ChevronUp, CornerDownLeft, CornerLeftUp, Download, Merge, Scissors, Mic, Play, Pencil, RefreshCw, Sparkles, Square, Trash2, Upload } from "lucide-react";
-import { BANDS, bookAges, CHOICES, MATCH_MAX_QUESTIONS, meetsTarget, minimumQuestions, TARGET_MAX, type Band, type Language, type Question, type QuestionCounts, type WordCue } from "../data/passage";
+import { BANDS, bookAges, CHOICES, MATCH_MIN_PAIRS, MATCH_MAX_QUESTIONS, meetsTarget, minimumQuestions, TARGET_MAX, type Band, type Language, type Question, type QuestionCounts, type WordCue } from "../data/passage";
 import { readingLexiconFor, readingWordsFor } from "../data/readingLexicon";
-import { core, hasSpaceAfter, sentenceText, tokenizeSentence, withSpaceAfter } from "../data/text";
+import { core, gapOf, hasSpaceAfter, sentenceText, tokenizeSentence, withSpaceAfter } from "../data/text";
 import { RULES, verifyPassage, type Verdict } from "../data/verifyPassage";
 import { deleteBook, fetchDraft, fetchReports, fetchStudioMeta, publishBook, requestAiCorrection, requestAiDraft, requestAiMatch, requestAiStory, resolveReport, saveDraft, unpublishBook, type BookReport, type BookRow, type BookSummary, type Provider, type StudioMeta } from "../api";
 import { baseOf, draftLocally, fromModel, withStoryPictures, joinSentences, splitSentence, mergeWords, pictureFor, sentenceIdFor, withVocabWord, type StoryInput, type VocabEdit } from "../draft";
-import { BookPreview } from "../LibraryPage";
+import { BookPreview, matchOrder } from "../LibraryPage";
+import { notesQuiz } from "../session";
 import { bookTopics } from "../tags";
 import { PagesStep } from "./PagesStep";
 import { PageTextBar } from "./PageTextBar";
@@ -24,10 +25,10 @@ import { SectionEmpty, SectionHeader } from "./questions/SectionHeader";
 import { OPENAI_VOICES, fetchVoxVoices, openaiVoice, orderedFor, voxVoice, type VoxVoice } from "../voxApi";
 import { PICTURE_KEYS } from "../Picture";
 import { BookStore } from "../bookStore";
-import { clipSizes, clipUrl, pcmToWav, uploadClip } from "../clips";
+import { clipsOf, clipSizes, clipUrl, pcmToWav, uploadClip } from "../clips";
 import { isPhoto, photoSizes, photoDimensions } from "../photos";
 import { joinPageToPrevious, layoutBook, pagePicture, paginate, withPageBreak, withPageChoice } from "../bookLayout";
-import { say, stop } from "../voice";
+import { playBookRecording, say, stop } from "../voice";
 import { tutorHeaders } from "../../lib/tutorApi";
 import { aiDefault } from "../../lib/aiDefaults";
 import { ScoringAPI } from "../../lib/scoring";
@@ -144,12 +145,58 @@ export function LibraryStudio() {
 const draftFingerprint = (d: Pick<Draft, "title" | "sentences"> | null | undefined) =>
   d ? JSON.stringify({ title: d.title, lines: d.sentences.map((s) => s.words) }) : "";
 
+type VoiceSection = "understand" | "match" | "words" | "opposite" | "spell";
+const oppositeBoards = (draft: Draft) => notesQuiz({ ...draft, rev: 0 }, "opposite");
+const voiceKey = (section: VoiceSection, id: string) => section === "opposite" ? `notes-${id}` : id;
+const spellSentence = (draft: Draft, id: string) => draft.sentences.find((sentence) => sentence.id === id);
+
+function sameQuestionVoice(a: Question, b: Question, aDraft: Draft, bDraft: Draft): boolean {
+  if (a.kind === "spell" || b.kind === "spell") {
+    return a.kind === "spell" && b.kind === "spell" && a.word === b.word
+      && spellSentence(aDraft, a.sentence)?.text === spellSentence(bDraft, b.sentence)?.text;
+  }
+  if (a.prompt !== b.prompt) return false;
+  if (a.kind === "vocab" && b.kind === "vocab") return a.word === b.word;
+  if (a.kind === "match" && b.kind === "match") {
+    return a.pairs.length === b.pairs.length && a.pairs.every(({ left, right }, i) => left === b.pairs[i].left && right === b.pairs[i].right);
+  }
+  return a.kind === "comprehension" && b.kind === "comprehension"
+    && a.options.length === b.options.length && a.options.every((option, i) => option === b.options[i]);
+}
+
+function questionVoiceReady(q: Question, section: VoiceSection, draft: Draft): boolean {
+  if (q.kind === "spell") {
+    const sentence = spellSentence(draft, q.sentence);
+    return !!sentence && !!gapOf(sentence, q.word, draft.language);
+  }
+  if (!q.prompt.trim()) return false;
+  if (q.kind === "match") return q.pairs.length >= (section === "opposite" ? 2 : MATCH_MIN_PAIRS) && q.pairs.every(({ left, right }) => left.trim() && right.trim());
+  return q.options.length === CHOICES && q.options.every((option) => option.trim()) && (q.kind !== "vocab" || Boolean(q.word.trim()));
+}
+
+function spokenQuestion(q: Question, section: VoiceSection, draft: Draft): string[] {
+  const { language } = draft;
+  if (q.kind === "spell") return [spellSentence(draft, q.sentence)?.text ?? ""];
+  if (q.kind === "vocab") return [q.prompt, q.word];
+  if (q.kind === "comprehension") return [q.prompt, ...q.options.map((answer, i) =>
+    translate("library.spokenChoice", { letter: String.fromCharCode(65 + i), answer }, language))];
+  const prompt = section === "opposite" ? translate("library.notesQuiz.opposite", undefined, language) : q.prompt;
+  return [
+    prompt,
+    translate("studio.voice.leftColumn", undefined, language),
+    ...q.pairs.map((pair) => pair.left),
+    translate("studio.voice.rightColumn", undefined, language),
+    ...matchOrder(q.id, q.pairs.length).map((i) => q.pairs[i].right),
+  ];
+}
+
 function Editor({ row, categories, reports = [], onResolved, onClose }: { row: BookRow | null; categories: readonly string[]; reports?: BookReport[]; onResolved?(id: string): void; onClose(): void }) {
   const { t } = useT();
   const start = row?.draft;
   const [step, setStep] = useState<Step>(start ? 2 : 1);
   const [previewed, setPreviewed] = useState(false);
   const [reviewTarget, setReviewTarget] = useState("");
+  const [voiceTarget, setVoiceTarget] = useState<string | null>(null);
   const [undoStory, setUndoStory] = useState<{ input: StoryInput; draft: Draft | null; confirmed: boolean } | null>(null);
   const [source, setSource] = useState<Source>(() => (row?.provider as Source) ?? libraryDefault());
   const [input, setInput] = useState<StoryInput>(() =>
@@ -201,8 +248,43 @@ function Editor({ row, categories, reports = [], onResolved, onClose }: { row: B
 
   const verdict = useMemo<Verdict | null>(() => (draft ? verifyPassage({ ...draft, rev: 1 }, { confirmedSplit: confirmed, lexicon: readingLexiconFor(draft.band, draft.language) }) : null), [draft, confirmed]);
   const edit = (next: Draft) => {
-    setDraft(next);
+    setDraft((current) => {
+      if (!current) return next;
+      const oldBoards = next.oppositeAudio ? oppositeBoards(current) : [];
+      const oppositeAudio = next.oppositeAudio ? Object.fromEntries(oppositeBoards(next).flatMap((board) => {
+        const before = oldBoards.find((old) => old.id === board.id);
+        return before && board.audio && current.language === next.language && sameQuestionVoice(board, before, next, current)
+          ? [[board.id, board.audio]] : [];
+      })) : undefined;
+      return {
+        ...next,
+        oppositeAudio,
+        questions: next.questions.map((q) => {
+          if (!q.audio) return q;
+          const before = current.questions.find((old) => old.id === q.id);
+          return before && (current.language !== next.language || !sameQuestionVoice(q, before, next, current)) ? { ...q, audio: undefined } : q;
+        }),
+      };
+    });
     setInput((current) => ({ ...current, title: next.title, category: next.category ?? "", language: next.language, band: next.band, ages: next.ages, topics: next.topics, text: next.sentences.map((sentence) => sentence.text).join("\n"), questionCounts: next.questionCounts }));
+    setDirty(true);
+    setPreviewed(false);
+  };
+
+  const setQuestionAudio = (question: Question, section: VoiceSection, sourceDraft: Draft, audio: string | undefined) => {
+    setDraft((current) => {
+      if (current?.language !== sourceDraft.language) return current;
+      if (section === "opposite") {
+        const board = oppositeBoards(current).find((q) => q.id === question.id);
+        if (!board || !sameQuestionVoice(question, board, sourceDraft, current)) return current;
+        const oppositeAudio = { ...current.oppositeAudio };
+        if (audio) oppositeAudio[board.id] = audio;
+        else delete oppositeAudio[board.id];
+        return { ...current, oppositeAudio };
+      }
+      return { ...current, questions: current.questions.map((q) =>
+        q.id === question.id && sameQuestionVoice(question, q, sourceDraft, current) ? { ...q, audio } : q) };
+    });
     setDirty(true);
     setPreviewed(false);
   };
@@ -265,7 +347,7 @@ function Editor({ row, categories, reports = [], onResolved, onClose }: { row: B
         className="mb-5"
         label={t("studio.steps")}
         current={step - 1}
-        onSelect={(i) => setStep((i + 1) as Step)}
+        onSelect={(i) => { setVoiceTarget(null); setStep((i + 1) as Step); }}
         steps={STEPS.map((name, i) => {
           const n = (i + 1) as Step;
           const complete = n === 1 ? Boolean(input.title.trim() && input.text.trim())
@@ -340,9 +422,9 @@ function Editor({ row, categories, reports = [], onResolved, onClose }: { row: B
             }}
           />
         )}
-        {step === 2 && draft && verdict && <ReviewStep source={source} target={reviewTarget} draft={draft} verdict={verdict} confirmed={confirmed} onConfirmed={(c) => { setConfirmed(c); setDirty(true); }} onEdit={edit} />}
+        {step === 2 && draft && verdict && <ReviewStep source={source} target={reviewTarget} draft={draft} verdict={verdict} confirmed={confirmed} onConfirmed={(c) => { setConfirmed(c); setDirty(true); }} onEdit={edit} onVoice={(id) => { setVoiceTarget(id); setStep(4); }} />}
         {step === 3 && draft && <PagesStep draft={draft} onEdit={edit} />}
-        {step === 4 && draft && <VoiceStep draft={draft} onEdit={edit} />}
+        {step === 4 && draft && <VoiceStep draft={draft} onEdit={edit} onQuestionAudio={setQuestionAudio} target={voiceTarget} />}
         {undoStory && <UIButton type="button" variant="secondary" onClick={() => { setInput(undoStory.input); setDraft(undoStory.draft); setConfirmed(undoStory.confirmed); setUndoStory(null); setDirty(true); }}>{t("studio.storyAi.undo")}</UIButton>}
         {step === 5 && draft && (
           <BookPreview
@@ -557,8 +639,8 @@ function SourceStep({ input, categories, isNew, source, onSource, onInput, onNex
 
 /* -------------------------------------------------------------------------- */
 
-function ReviewStep({ draft, verdict, confirmed, onConfirmed, onEdit, target, source }: {
-  source: Source; draft: Draft; verdict: Verdict; confirmed: boolean; onConfirmed(c: boolean): void; onEdit(d: Draft): void; target?: string;
+function ReviewStep({ draft, verdict, confirmed, onConfirmed, onEdit, target, source, onVoice }: {
+  source: Source; draft: Draft; verdict: Verdict; confirmed: boolean; onConfirmed(c: boolean): void; onEdit(d: Draft): void; target?: string; onVoice(id: string): void;
 }) {
   const { t } = useT();
   const km = draft.language === "km";
@@ -962,10 +1044,20 @@ function ReviewStep({ draft, verdict, confirmed, onConfirmed, onEdit, target, so
       )}
 
       {activeQuestions.map((q) => (
-        <div key={q.id} id={`studio-question-${q.id}`}><QuestionCard q={q} draft={draft} checks={byQ(q.id)} onChange={(patch) => setQ(q.id, patch)} onVocab={(next) => setVocab(q.id, next)} onDelete={() => del(q.id)} /></div>
+        <div key={q.id} id={`studio-question-${q.id}`}><QuestionCard q={q} draft={draft} checks={byQ(q.id)} onChange={(patch) => setQ(q.id, patch)} onVocab={(next) => setVocab(q.id, next)} onDelete={() => del(q.id)} onVoice={() => onVoice(q.id)} /></div>
       ))}
 
-      {tab === "notes" && <WordNotesFields draft={draft} provider={aiProvider} onChange={(wordNotes) => onEdit({ ...draft, wordNotes })} onInQuiz={(notesInQuiz) => onEdit({ ...draft, notesInQuiz })} />}
+      {tab === "notes" && (
+        <>
+          <WordNotesFields draft={draft} provider={aiProvider} onChange={(wordNotes) => onEdit({ ...draft, wordNotes })} onInQuiz={(notesInQuiz) => onEdit({ ...draft, notesInQuiz })} />
+          {oppositeBoards(draft).map((board, i) => (
+            <UIButton key={board.id} type="button" size="sm" variant="outline" icon={<Mic aria-hidden="true" />}
+              onClick={() => onVoice(voiceKey("opposite", board.id))}>
+              {t("studio.voice.oppositeShortcut", { n: i + 1 })}
+            </UIButton>
+          ))}
+        </>
+      )}
 
       <RuleList verdict={verdict} />
     </div>
@@ -984,9 +1076,9 @@ function CheckLines({ checks }: { checks: Verdict["checks"] }) {
   );
 }
 
-function QuestionCard({ q, draft, checks, onChange, onVocab, onDelete }: {
+function QuestionCard({ q, draft, checks, onChange, onVocab, onDelete, onVoice }: {
   q: Question; draft: Draft; checks: Verdict["checks"];
-  onChange(patch: Partial<Question>): void; onVocab(next: VocabEdit): void; onDelete(): void;
+  onChange(patch: Partial<Question>): void; onVocab(next: VocabEdit): void; onDelete(): void; onVoice(): void;
 }) {
   const { t } = useT();
   const failing = checks.some((c) => c.status === "fail");
@@ -1028,6 +1120,10 @@ function QuestionCard({ q, draft, checks, onChange, onVocab, onDelete }: {
           <span>{q.id}</span>
         </div>
         <div className="flex items-center gap-2">
+          <UIButton type="button" size="icon" variant="outline" icon={<Mic aria-hidden="true" />}
+            aria-label={t("studio.voice.questionShortcut", { id: q.id })}
+            title={t("studio.voice.questionShortcut", { id: q.id })}
+            onClick={onVoice} />
           {/* The AI corrector knows the three required parts; a matching set is the author's own. */}
           {q.kind !== "match" && <button type="button" className="inline-flex h-9 w-9 items-center justify-center rounded-full border border-indigo-200 text-indigo-700 hover:bg-indigo-50 disabled:opacity-50 dark:border-indigo-800 dark:text-indigo-300 dark:hover:bg-indigo-950" onClick={() => void correctWithAi()} disabled={correcting} aria-label={correcting ? t("studio.ai.checking") : t("studio.ai.correct")} title={correcting ? t("studio.ai.checking") : t("studio.ai.correct")}>
             <Sparkles className={`h-4 w-4 ${correcting ? "animate-spin" : ""}`} aria-hidden="true" />
@@ -1166,12 +1262,29 @@ function formatBytes(bytes: number): string {
 }
 
 
-function VoiceStep({ draft, onEdit }: { draft: Draft; onEdit(d: Draft): void }) {
+function VoiceStep({ draft, onEdit, onQuestionAudio, target }: {
+  draft: Draft;
+  onEdit(d: Draft): void;
+  onQuestionAudio(question: Question, section: VoiceSection, sourceDraft: Draft, audio: string | undefined): void;
+  target: string | null;
+}) {
   const { t } = useT();
   const km = draft.language === "km";
   const [busy, setBusy] = useState<string | null>(null);
   const [err, setErr] = useState("");
+  const [batch, setBatch] = useState<{ section: VoiceSection; pending: string[]; total: number } | null>(null);
+  const [aiBatch, setAiBatch] = useState<{ section: VoiceSection; done: number; total: number; error?: string } | null>(null);
+  const active = useRef(true);
+  const batchQuestion = batch?.pending[0];
+  const focusQuestion = batch ? batchQuestion : target;
+  useEffect(() => {
+    if (focusQuestion) document.getElementById(`studio-voice-${focusQuestion}`)?.focus();
+  }, [focusQuestion]);
   const recorder = useRecorder();
+  useEffect(() => {
+    active.current = true;
+    return () => { active.current = false; stop(); };
+  }, []);
   const [sizes, setSizes] = useState<Record<string, number>>({});
   const [voiceCharacter, setVoiceCharacter] = useState<VoiceCharacterId>(rememberedVoiceCharacter);
   const [source, setSourceState] = useState<VoiceSource>(() => {
@@ -1187,6 +1300,13 @@ function VoiceStep({ draft, onEdit }: { draft: Draft; onEdit(d: Draft): void }) 
   const [voxVoiceId, setVoxVoiceIdState] = useState(() => remembered(VOX_VOICE_KEY) ?? "");
   const canRecord = typeof navigator !== "undefined" && !!navigator.mediaDevices?.getUserMedia && typeof MediaRecorder !== "undefined";
   const recorded = draft.sentences.filter((s) => s.audio).length;
+  const voiceSections: { section: VoiceSection; questions: Question[] }[] = [
+    { section: "understand", questions: draft.questions.filter((q) => q.kind === "comprehension") },
+    { section: "match", questions: draft.questions.filter((q) => q.kind === "match") },
+    { section: "words", questions: draft.questions.filter((q) => q.kind === "vocab") },
+    { section: "opposite", questions: oppositeBoards(draft) },
+    { section: "spell", questions: draft.questions.filter((q) => q.kind === "spell") },
+  ];
   const clipIds = [...new Set(draft.sentences.flatMap((s) => s.audio ? [s.audio] : []))];
   const clipKey = clipIds.join(",");
   const totalBytes = clipIds.reduce((total, id) => total + (sizes[id] ?? 0), 0);
@@ -1277,6 +1397,34 @@ function VoiceStep({ draft, onEdit }: { draft: Draft; onEdit(d: Draft): void }) 
     } finally {
       setBusy(null);
     }
+  };
+  const attachQuestion = async (q: Question, section: VoiceSection, blob: Blob) => {
+    const clip = await uploadClip(blob);
+    if (active.current) onQuestionAudio(q, section, draft, clip.id);
+  };
+  const generateQuestion = async (q: Question, section: VoiceSection) => {
+    const script = spokenQuestion(q, section, draft).join("\n").trim();
+    if (script.length > 400) throw new Error(t("studio.voice.quizScriptTooLong"));
+    const { blob } = await generateLine(script, tokenizeSentence(script, draft.language));
+    if (active.current) await attachQuestion(q, section, blob);
+  };
+  const generateQuestionBatch = (section: VoiceSection, questions: Question[]) => {
+    void run(`generate:${section}`, async () => {
+      stop();
+      const total = questions.length;
+      let done = 0;
+      setAiBatch({ section, done, total });
+      for (const q of questions) {
+        if (!active.current) return;
+        try {
+          await generateQuestion(q, section);
+        } catch (error) {
+          if (active.current) setAiBatch({ section, done, total, error: error instanceof Error ? error.message : t("studio.error.generic") });
+          return;
+        }
+        if (active.current) setAiBatch({ section, done: ++done, total });
+      }
+    });
   };
   const allByAi = () =>
     run("all", async () => {
@@ -1449,6 +1597,106 @@ function VoiceStep({ draft, onEdit }: { draft: Draft; onEdit(d: Draft): void }) 
         ))}
       </ol>
       {!canRecord && <p className="text-xs text-muted">{t("studio.voice.cannotRecord")}</p>}
+      {voiceSections.filter(({ questions }) => questions.length).map(({ section, questions }) => {
+        const missing = questions.filter((q) => !q.audio);
+        const queued = missing.length ? missing : questions;
+        const sectionBusy = busy === `generate:${section}`;
+        const blocked = busy !== null || recorder.recording !== null || !!batchQuestion;
+        const ready = questions.every((q) => questionVoiceReady(q, section, draft));
+        return (
+          <section key={section} aria-labelledby={`studio-voice-section-${section}`} className="grid gap-2 rounded-2xl border border-line bg-surface p-3">
+            <h3 id={`studio-voice-section-${section}`} className="koda-admin-card-title text-ink">{t(`studio.voice.${section}Title`)}</h3>
+            <p className="text-sm text-muted">{t(`studio.voice.${section}Intro`)}</p>
+            <div className="flex flex-wrap items-center gap-2">
+              <UIButton type="button" size="sm" variant="secondary" icon={<Sparkles aria-hidden="true" />} isLoading={sectionBusy}
+                disabled={blocked || !ready} onClick={() => generateQuestionBatch(section, queued)}>
+                {sectionBusy && aiBatch?.section === section
+                  ? t("studio.voice.aiQuestionProgress", { done: aiBatch.done, total: aiBatch.total })
+                  : t(missing.length ? "studio.voice.generateMissingQuestions" : "studio.voice.regenerateQuestions", { name: readerName })}
+              </UIButton>
+              {canRecord && (batchQuestion && batch?.section === section ? (
+                <UIButton type="button" size="sm" variant="outline" disabled={busy !== null || recorder.recording !== null}
+                  onClick={() => setBatch(null)}>{t("studio.voice.endQuestionBatch")}</UIButton>
+              ) : (
+                <UIButton type="button" size="sm" variant="outline" icon={<Mic aria-hidden="true" />}
+                  disabled={blocked || !ready}
+                  onClick={() => setBatch({ section, pending: questions.map((q) => voiceKey(section, q.id)), total: questions.length })}>
+                  {t("studio.voice.recordQuestionsWithMic")}
+                </UIButton>
+              ))}
+              {batch?.section === section && (
+                <p role="status" className="text-sm text-muted">
+                  {batchQuestion
+                    ? t("studio.voice.questionBatchProgress", { n: batch.total - batch.pending.length + 1, total: batch.total })
+                    : t("studio.voice.questionBatchDone")}
+                </p>
+              )}
+            </div>
+            {!ready && <p className="text-sm text-muted">{t("studio.voice.finishQuestions")}</p>}
+            {aiBatch?.section === section && aiBatch.error && (
+              <p role="alert" className="text-sm text-rose-700 dark:text-rose-300">
+                {t("studio.voice.aiQuestionError", { done: aiBatch.done, total: aiBatch.total, reason: aiBatch.error })}
+              </p>
+            )}
+            {aiBatch?.section === section && aiBatch.done === aiBatch.total && (
+              <p role="status" className="text-sm text-muted">{t("studio.voice.questionBatchDone")}</p>
+            )}
+            <ol className="grid gap-2">
+              {questions.map((q, i) => {
+                const id = voiceKey(section, q.id);
+                const key = `question:${id}`;
+                const line = String(i + 1);
+                const unavailable = !questionVoiceReady(q, section, draft) || busy !== null || recorder.recording !== null || (!!batchQuestion && batchQuestion !== id);
+                const [prompt, ...lines] = spokenQuestion(q, section, draft);
+                return (
+                  <li key={id} id={`studio-voice-${id}`} tabIndex={-1}
+                    className={`grid gap-2 rounded-2xl border p-3 focus-visible:outline-2 focus-visible:outline-indigo-600 ${focusQuestion === id ? "border-indigo-400" : "border-line"}`}>
+                    <div className="flex flex-wrap items-center gap-2">
+                      <p lang={draft.language} className={`min-w-0 flex-1 text-ink ${km ? KHMER : ""}`}>{prompt || t("studio.voice.finishQuestion")}</p>
+                      <UIBadge variant={q.audio ? "success" : "neutral"}>{t(q.audio ? "studio.voice.recorded" : "studio.voice.notRecorded")}</UIBadge>
+                    </div>
+                    {lines.length > 0 && <p lang={draft.language} className={`whitespace-pre-line text-sm text-muted ${km ? KHMER : ""}`}>{lines.join("\n")}</p>}
+                    <div className="flex flex-wrap items-center gap-2">
+                      {q.audio && (
+                        <UIButton type="button" size="sm" variant="outline" icon={<Play aria-hidden="true" />} aria-label={t("studio.voice.playQuestion", { line })} disabled={busy !== null || recorder.recording !== null}
+                          onClick={() => void run(key, async () => {
+                            if (!await playBookRecording(q.audio!)) throw new Error(t("reader.cannotPlay"));
+                          })}>
+                          {t("studio.voice.playQuestion", { line })}
+                        </UIButton>
+                      )}
+                      {canRecord && (recorder.recording === key ? (
+                        <UIButton type="button" size="sm" icon={<Square aria-hidden="true" />} onClick={recorder.stop}>{t("studio.voice.stop")}</UIButton>
+                      ) : (
+                        <UIButton type="button" size="sm" variant="outline" icon={<Mic aria-hidden="true" />} aria-label={t("studio.voice.recordQuestion", { line })} disabled={unavailable}
+                          onClick={() => void run(key, () => {
+                            stop();
+                            return recorder.start(key, (blob) => void run(key, async () => {
+                              await attachQuestion(q, section, blob);
+                              setBatch((current) => current?.pending[0] === id
+                                ? { ...current, pending: current.pending.slice(1) }
+                                : current);
+                            }));
+                          })}>
+                          {t(q.audio ? "studio.voice.reRecord" : "studio.voice.record")}
+                        </UIButton>
+                      ))}
+                      <UIButton type="button" size="sm" variant="outline" icon={<Sparkles aria-hidden="true" />} aria-label={t("studio.voice.generateQuestion", { name: SOURCE_NAME[source], line })} disabled={unavailable || !!batchQuestion}
+                        onClick={() => void run(key, () => generateQuestion(q, section))}>
+                        {readerName}
+                      </UIButton>
+                      {q.audio && (
+                        <UIButton type="button" size="icon" variant="ghost" icon={<Trash2 aria-hidden="true" />} aria-label={t("studio.voice.removeQuestion", { line })} disabled={unavailable || !!batchQuestion}
+                          onClick={() => { stop(); onQuestionAudio(q, section, draft, undefined); }} />
+                      )}
+                    </div>
+                  </li>
+                );
+              })}
+            </ol>
+          </section>
+        );
+      })}
       {/* Sentences are for reading the story aloud; these are for a child who
           stops at one word. Both, not either — see WordVoicePanel. */}
       <WordVoicePanel
@@ -1470,7 +1718,9 @@ function SummaryStep({ draft, verdict, confirmed, onEdit, onNavigate, onQuestion
   const [suggestError, setSuggestError] = useState("");
   const sentenceAudio = draft.sentences.map((sentence) => sentence.audio).filter((id): id is string => Boolean(id));
   const wordAudio = Object.values(draft.wordAudio ?? {});
-  const audioIds = [...new Set([...sentenceAudio, ...wordAudio])];
+  const quizAudio = draft.questions.filter((q) => q.audio).length
+    + Object.keys(draft.oppositeAudio ?? {}).length;
+  const audioIds = clipsOf(draft);
   const pages = layoutBook(draft).story;
   const pageImages = pages.map((page) => pagePicture(page, draft).key).filter((picture): picture is string => Boolean(picture));
   const [imageDetails, setImageDetails] = useState<Record<string, number>>({});
@@ -1512,7 +1762,7 @@ function SummaryStep({ draft, verdict, confirmed, onEdit, onNavigate, onQuestion
       <div className="grid grid-cols-2 gap-2 lg:grid-cols-4">
         <SummaryCard label={t("studio.summary.story")} value={t("studio.summary.storyValue", { sentences: draft.sentences.length, words: storyWords })} detail={t("studio.summary.storyDetail", { language: draft.language === "km" ? "ភាសាខ្មែរ" : "English", ages: `${bookAges(draft)[0]}–${bookAges(draft)[1]}` })} />
         <SummaryCard label={t("studio.summary.questions")} value={t("studio.summary.questionValue", { understand: verdict.counts.comprehension, words: verdict.counts.vocab, spell: verdict.counts.spell })} detail={t("studio.summary.questionDetail", { checks: verdict.failures })} />
-        <SummaryCard label={t("studio.summary.voices")} value={t("studio.summary.voiceValue", { sentences: sentenceAudio.length, total: draft.sentences.length, words: wordAudio.length })} detail={mediaBytes.voice ? t("studio.summary.storage", { size: formatBytes(mediaBytes.voice) }) : t("studio.summary.noStorage")} />
+        <SummaryCard label={t("studio.summary.voices")} value={t("studio.summary.voiceValue", { sentences: sentenceAudio.length, total: draft.sentences.length, words: wordAudio.length, questions: quizAudio })} detail={mediaBytes.voice ? t("studio.summary.storage", { size: formatBytes(mediaBytes.voice) }) : t("studio.summary.noStorage")} />
         <SummaryCard label={t("studio.summary.images")} value={t("studio.summary.imageValue", { total: imageIds.length, pages: pageImages.length })} detail={uploadedImages.length ? t("studio.summary.imageStorage", { count: uploadedImages.length, size: mediaBytes.images ? formatBytes(mediaBytes.images) : "…" }) : t("studio.summary.builtInImages")} />
       </div>
 

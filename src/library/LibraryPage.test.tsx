@@ -1,10 +1,11 @@
 import { act, fireEvent, render, screen, within } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { LearningLog } from "../lib/learning";
-import { LibraryPage } from "./LibraryPage";
+import { BookPreview, LibraryPage } from "./LibraryPage";
 import { LibraryProgress } from "./progress";
 import { STARTER_PASSAGES } from "./data/starterPassages";
 import { BookStore } from "./bookStore";
+import { canSpeak, playBookRecording, say, stop } from "./voice";
 
 /**
  * A child's whole visit, driven by what is on screen: open the library, pick a
@@ -16,7 +17,7 @@ import { BookStore } from "./bookStore";
  * drag is "press on one tile's centre, move to the next, lift".
  */
 
-vi.mock("./voice", () => ({ canSpeak: () => false, voiceStatus: () => "no-voice", bookSpeaks: () => false, sentenceSpeaks: () => false, say: vi.fn(async () => {}), stop: vi.fn() }));
+vi.mock("./voice", () => ({ canSpeak: vi.fn(() => false), voiceStatus: () => "no-voice", bookSpeaks: () => false, sentenceSpeaks: () => false, say: vi.fn(async () => true), playBookRecording: vi.fn(async () => true), stop: vi.fn() }));
 vi.mock("./clips", () => ({ prefetchBook: vi.fn(async () => ({ ready: 0, total: 0 })), uploadClip: vi.fn(async () => "c".repeat(64)), pcmToWav: vi.fn(() => new Blob()) }));
 const reportBook = vi.hoisted(() => vi.fn(async () => {}));
 vi.mock("./api", () => ({ reportBook, fetchPublished: vi.fn(async () => { throw new Error("offline"); }) }));
@@ -29,7 +30,10 @@ const MARKET = STARTER_PASSAGES[0];
 beforeEach(() => {
   localStorage.clear();
   LibraryProgress.clear();
+  LearningLog.clear();
   playSound.mockClear();
+  vi.mocked(canSpeak).mockReturnValue(false);
+  vi.mocked(say).mockClear();
   vi.useFakeTimers({ shouldAdvanceTime: true });
 });
 afterEach(() => vi.useRealTimers());
@@ -108,6 +112,83 @@ describe("the catalog", () => {
     fireEvent.click(screen.getByRole("button", { name: "Weather & play" }));
     expect(screen.queryByRole("heading", { name: "Food" })).toBeNull();
   });
+});
+
+it("uses the question's Studio recording independently of Koda voice", () => {
+  const onExit = vi.fn();
+  const { rerender } = render(<BookPreview book={MARKET} onExit={onExit} />);
+  fireEvent.click(screen.getByRole("button", { name: "Next page" }));
+  fireEvent.click(screen.getByRole("button", { name: "Next page" }));
+  fireEvent.click(screen.getByRole("button", { name: "Quiz time!" }));
+
+  const question = MARKET.questions.find((q) => q.kind === "comprehension")!;
+  const listenLabel = "Listen to the question and choices";
+  vi.mocked(canSpeak).mockReturnValue(true);
+  rerender(<BookPreview book={{ ...MARKET }} onExit={onExit} />);
+  expect(screen.queryByRole("button", { name: listenLabel })).toBeNull();
+  vi.mocked(canSpeak).mockReturnValue(false);
+  const audio = "f".repeat(64);
+  rerender(<BookPreview book={{ ...MARKET, questions: MARKET.questions.map((q) => q === question ? { ...question, audio } : q) }} onExit={onExit} />);
+  const speaker = screen.getByRole("button", { name: listenLabel });
+  expect(speaker.nextElementSibling).toBe(screen.getByText(question.prompt));
+
+  playSound.mockClear();
+  fireEvent.click(speaker);
+  expect(playBookRecording).toHaveBeenCalledWith(audio);
+  expect(say).not.toHaveBeenCalled();
+  expect(screen.getByText("Question 1 of 2")).toBeTruthy();
+  expect(playSound).not.toHaveBeenCalled();
+
+  vi.mocked(stop).mockClear();
+  fireEvent.click(screen.getByRole("button", { name: question.options[question.answer] }));
+  expect(stop).toHaveBeenCalled();
+});
+
+it("plays saved Match, Words, Opposites, and Spell recordings in the quiz", async () => {
+  const book = structuredClone(MARKET);
+  book.questions.push({
+    id: "m1", kind: "match", prompt: "Match the clues.", audio: "a".repeat(64),
+    pairs: [{ left: "Clue one", right: "One" }, { left: "Clue two", right: "Two" }, { left: "Clue three", right: "Three" }],
+  });
+  book.wordNotes = { sweet: { opposite: "sour" }, hot: { opposite: "cold" } };
+  book.notesInQuiz = { opposite: true };
+  book.oppositeAudio = { "opposite-1": "c".repeat(64) };
+  book.questions.forEach((q) => { if (q.kind === "vocab") q.audio = "b".repeat(64); });
+  const firstSpell = book.questions.find((q) => q.kind === "spell")!;
+  firstSpell.audio = "d".repeat(64);
+  render(<BookPreview book={book} onExit={vi.fn()} />);
+  fireEvent.click(screen.getByRole("button", { name: "Next page" }));
+  fireEvent.click(screen.getByRole("button", { name: "Next page" }));
+  fireEvent.click(screen.getByRole("button", { name: "Quiz time!" }));
+  for (const q of book.questions.filter((q) => q.kind === "comprehension")) {
+    fireEvent.click(screen.getByRole("button", { name: q.options[q.answer] }));
+    await advance();
+  }
+
+  fireEvent.click(screen.getByRole("button", { name: "Listen to the question and choices" }));
+  expect(playBookRecording).toHaveBeenLastCalledWith("a".repeat(64));
+  for (const [clue, answer] of [["Clue one", "One"], ["Clue two", "Two"], ["Clue three", "Three"]]) {
+    fireEvent.click(screen.getByRole("button", { name: clue }));
+    fireEvent.click(screen.getByRole("button", { name: answer }));
+  }
+  await advance();
+  for (const q of book.questions.filter((q) => q.kind === "vocab")) {
+    fireEvent.click(screen.getByRole("button", { name: "Hear the word" }));
+    expect(playBookRecording).toHaveBeenLastCalledWith("b".repeat(64));
+    fireEvent.click(screen.getByRole("button", { name: q.options[q.answer] }));
+    await advance();
+  }
+
+  fireEvent.click(screen.getByRole("button", { name: "Listen to the question and choices" }));
+  expect(playBookRecording).toHaveBeenLastCalledWith("c".repeat(64));
+  for (const [word, opposite] of [["sweet", "sour"], ["hot", "cold"]]) {
+    fireEvent.click(screen.getByRole("button", { name: word }));
+    fireEvent.click(screen.getByRole("button", { name: opposite }));
+  }
+  await advance();
+  fireEvent.click(screen.getByRole("button", { name: "Read the sentence to me" }));
+  expect(playBookRecording).toHaveBeenLastCalledWith("d".repeat(64));
+  expect(say).not.toHaveBeenCalled();
 });
 
 describe("a whole book, as a child plays it", () => {

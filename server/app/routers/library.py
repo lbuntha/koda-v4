@@ -125,9 +125,11 @@ class AudioSizes(Model):
 
 
 def clip_ids_of(passage: dict[str, Any]) -> set[str]:
-    """Every recording a book points at: one per sentence, one per word, all optional."""
+    """Every recording a book points at, including quiz read-aloud clips."""
     ids = {s.get("audio") for s in passage.get("sentences") or [] if s.get("audio")}
     ids |= set((passage.get("wordAudio") or {}).values())
+    ids |= {q["audio"] for q in passage.get("questions") or [] if q.get("audio")}
+    ids |= set((passage.get("oppositeAudio") or {}).values())
     return {str(i) for i in ids}
 
 
@@ -210,6 +212,8 @@ def _clean(passage: dict[str, Any]) -> dict[str, Any]:
     for q in questions:
         if not isinstance(q, dict) or too_long(q.get("prompt")) or any(too_long(o) for o in q.get("options") or []):
             raise AppError(400, "invalid_passage", "A question is malformed or too long.")
+        if "audio" in q and (q.get("kind") not in ("comprehension", "vocab", "match", "spell") or not isinstance(q["audio"], str) or not CLIP_ID.fullmatch(q["audio"])):
+            raise AppError(400, "invalid_passage", "A question recording must reference a valid audio clip.")
         pairs = q.get("pairs")
         if pairs is not None and (
             not isinstance(pairs, list)
@@ -234,6 +238,13 @@ def _clean(passage: dict[str, Any]) -> dict[str, Any]:
         not isinstance(in_quiz, dict) or any(k not in ("opposite", "reading") or not isinstance(v, bool) for k, v in in_quiz.items())
     ):
         raise AppError(400, "invalid_passage", "notesInQuiz takes true or false for opposite and reading.")
+    opposite_audio = passage.get("oppositeAudio")
+    if opposite_audio is not None and (
+        not isinstance(opposite_audio, dict) or len(opposite_audio) > MAX_WORD_NOTES
+        or any(not re.fullmatch(r"opposite-[1-9][0-9]*", key) or not isinstance(clip, str)
+               or not CLIP_ID.fullmatch(clip) for key, clip in opposite_audio.items())
+    ):
+        raise AppError(400, "invalid_passage", "An Opposites recording must reference a valid board and audio clip.")
     passage["ages"] = clean_ages(passage.get("ages"))
     passage["topics"] = clean_topics(passage.get("topics"))
     if passage.get("category") is not None:

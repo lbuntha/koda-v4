@@ -20,7 +20,7 @@ import { Picture } from "./Picture";
 import { isPhoto } from "./photos";
 import { LibraryProgress, type BookProgress } from "./progress";
 import { OPTIONAL_PARTS, PARTS, notesQuiz, isFirstTry, minutesToRead, parentSummary, quizOf, reward, tally, wordsToPractise, type Outcome, type QuizItem } from "./session";
-import { canSpeak, say, sentenceSpeaks, stop } from "./voice";
+import { playBookRecording, stop } from "./voice";
 import { prefetchBook } from "./clips";
 import { prefetchPhotos } from "./photos";
 import { reportBook, type ReportReason } from "./api";
@@ -710,6 +710,7 @@ function Quiz({ book, onLeave, onFinish, preview = false }: { book: Passage; onL
   }, [item, recorder]);
 
   const readAgain = (evidence: string | null = null) => {
+    stop();
     if (cur.current) cur.current.reread = true;
     recorder.support("reveal");
     setSheet({ evidence });
@@ -799,7 +800,7 @@ function Quiz({ book, onLeave, onFinish, preview = false }: { book: Passage; onL
             cur.current!.hints = Math.max(cur.current!.hints, level);
             recorder.support("hint", level);
             if (level === 2 && item.part === "understand") readAgain(item.question.evidence);
-            if (level === 2 && item.part === "words") void say(item.question.word, book.language);
+            if (level === 2 && item.part === "words" && item.question.audio) void playBookRecording(item.question.audio);
           }}
           hintHost={hintHost}
         />
@@ -895,6 +896,23 @@ export function WordNotes({ book, word, className = "mt-2" }: { book: Passage; w
   );
 }
 
+function QuizPrompt({ book, prompt, audio, listenLabel }: { book: Passage; prompt: string; audio?: string; listenLabel: string }) {
+  useEffect(() => {
+    if (audio) return () => stop();
+  }, [audio]);
+
+  return (
+    <div className="flex items-center gap-3">
+      {audio && (
+        <UIButton type="button" variant="secondary" size="icon" className="mt-2 min-h-11 min-w-11 shrink-0"
+          aria-label={listenLabel} title={listenLabel} icon={<Volume2 aria-hidden="true" />}
+          onClick={() => void playBookRecording(audio)} />
+      )}
+      <p className={`${themeSystem.quiz.question} ${kh(book)} min-w-0`} lang={book.language}>{prompt}</p>
+    </div>
+  );
+}
+
 function ChoiceQuestion({ book, item, onWrong, onRight, onHint, hintHost }: {
   book: Passage;
   item: Extract<QuizItem, { part: "understand" | "words" }>;
@@ -914,6 +932,7 @@ function ChoiceQuestion({ book, item, onWrong, onRight, onHint, hintHost }: {
 
   const pick = (i: number) => {
     if (right || wrong.includes(i) || out.includes(i)) return;
+    if (q.audio) stop();
     if (i === q.answer) {
       setRight(true);
       playSound("success");
@@ -929,7 +948,7 @@ function ChoiceQuestion({ book, item, onWrong, onRight, onHint, hintHost }: {
     setHint(level);
     onHint(level);
     if (level === 1) setHintText(pics ? tr("library.hint.sayWord") : tr("library.hint.inStory"));
-    if (level === 2) setHintText(pics ? tr("library.hint.listenWord") : tr("library.hint.lookHere"));
+    if (level === 2) setHintText(pics ? tr(q.audio ? "library.hint.listenWord" : "library.hint.sayWord") : tr("library.hint.lookHere"));
     if (level === 3) {
       const candidate = q.options.map((_, i) => i).find((i) => i !== q.answer && !wrong.includes(i) && !out.includes(i));
       if (candidate !== undefined) setOut((o) => [...o, candidate]);
@@ -940,14 +959,7 @@ function ChoiceQuestion({ book, item, onWrong, onRight, onHint, hintHost }: {
   const long = !pics && q.options.some((o) => o.length > 22);
   return (
     <div>
-      <p className={`${themeSystem.quiz.question} ${kh(book)}`}>
-        {q.prompt}
-        {pics && canSpeak(book.language) && (
-          <button type="button" onClick={() => void say(q.kind === "vocab" ? q.word : "", book.language)} aria-label={tr("library.hearWord")} className="ml-2 inline-grid h-11 w-11 place-items-center rounded-full border border-line bg-surface-muted align-middle text-ink hover:bg-indigo-50 dark:hover:bg-indigo-950">
-            <Volume2 className="h-4 w-4" aria-hidden="true" />
-          </button>
-        )}
-      </p>
+      <QuizPrompt book={book} prompt={q.prompt} audio={q.audio} listenLabel={tr(pics ? "library.hearWord" : "library.listenQuestion")} />
       <div className={`mt-4 grid gap-2.5 sm:gap-3 ${pics ? "grid-cols-3" : long ? "" : "sm:grid-cols-3"}`}>
         {q.options.map((o, i) => {
           const isWrong = wrong.includes(i) || out.includes(i);
@@ -1019,6 +1031,7 @@ function MatchQuestionView({ book, item, onWrong, onRight, onHint, hintHost }: {
   const done = Object.keys(joined).length === q.pairs.length;
 
   const join = (l: number) => {
+    if (q.audio) stop();
     const next = { ...joined, [l]: Object.keys(joined).length };
     setJoined(next);
     if (Object.keys(next).length === q.pairs.length) {
@@ -1027,6 +1040,7 @@ function MatchQuestionView({ book, item, onWrong, onRight, onHint, hintHost }: {
     } else playSound("pop");
   };
   const miss = (l: number, r: number) => {
+    if (q.audio) stop();
     playSound("error");
     onWrong(`${q.pairs[l].left} → ${q.pairs[r].right}`);
   };
@@ -1045,7 +1059,7 @@ function MatchQuestionView({ book, item, onWrong, onRight, onHint, hintHost }: {
 
   return (
     <div>
-      <p className={`${themeSystem.quiz.question} ${kh(book)}`}>{q.prompt}</p>
+      <QuizPrompt book={book} prompt={q.prompt} audio={q.audio} listenLabel={tr("library.listenQuestion")} />
       <p className="mt-1 text-sm text-muted">{tr(item.part === "match" ? "library.matchHow" : "library.notesQuiz.how")}</p>
       <div className="mt-4">
         <UIMatchPairs
@@ -1104,16 +1118,18 @@ function SpellQuestion({ book, item, onWrong, onRight, onHint, hintHost }: {
           : tr("library.hint.wordIs", { word: w.original })
         : hintText);
   const sentence = book.sentences.find((x) => x.id === w.sentenceId);
-  const voice = !!sentence && sentenceSpeaks(book, sentence);
-  const full = w.gapped.replace("___", w.original);
+  const audio = w.audio ?? sentence?.audio;
+  useEffect(() => {
+    if (audio) return () => stop();
+  }, [audio]);
 
   const nextHint = () => {
     const level = hint + 1;
     setHint(level);
     onHint(level);
     if (level === 1) {
-      if (voice) void say(full, book.language, sentence?.audio);
-      setHintText(voice ? tr("library.hint.listenSentence") : tr("library.hint.readSentence"));
+      if (audio) void playBookRecording(audio);
+      setHintText(tr(audio ? "library.hint.listenSentence" : "library.hint.readSentence"));
     }
     setCoach(null);
     if (km && level === 2) void sayUnit(next.unit);
@@ -1124,8 +1140,8 @@ function SpellQuestion({ book, item, onWrong, onRight, onHint, hintHost }: {
       <div>
         <h2 className={`${themeSystem.quiz.question} !mt-1 !text-lg sm:!text-xl`}>{tr("library.finishSentence")}</h2>
         <p className={`mt-3 rounded-2xl bg-surface-muted px-4 py-3 text-xl sm:text-2xl leading-loose text-ink ${kh(book)}`}>
-          {voice && (
-            <button type="button" onClick={() => void say(full, book.language, sentence?.audio)} aria-label={tr("library.readSentenceToMe")} title={tr("library.readSentenceToMe")} className="mr-2 inline-grid h-11 w-11 place-items-center rounded-full border border-line bg-surface-muted align-middle">
+          {audio && (
+            <button type="button" onClick={() => void playBookRecording(audio)} aria-label={tr("library.readSentenceToMe")} title={tr("library.readSentenceToMe")} className="mr-2 inline-grid h-11 w-11 place-items-center rounded-full border border-line bg-surface-muted align-middle">
               <Volume2 className="h-5 w-5" aria-hidden="true" />
             </button>
           )}
@@ -1174,6 +1190,7 @@ function SpellQuestion({ book, item, onWrong, onRight, onHint, hintHost }: {
           if (labels.length) setCoach(null);
         }}
         onSubmit={(labels) => {
+          if (audio) stop();
           const given = labels.join("");
           if (spellsWord(labels, w.word, book.language)) {
             setSolved(true);

@@ -67,7 +67,11 @@ export function notesQuiz(p: Passage, kind: "opposite" | "reading"): MatchQuesti
   for (let i = 0; i < unique.length; i += NOTE_PAIRS) boards.push(unique.slice(i, i + NOTE_PAIRS));
   if (boards.length > 1 && boards[boards.length - 1].length < 2) boards[boards.length - 2].push(...boards.pop()!);
   const prompt = translate(kind === "opposite" ? "library.notesQuiz.opposite" : "library.notesQuiz.reading");
-  return boards.map((board, i) => ({ id: `${kind}-${i + 1}`, kind: "match", prompt, pairs: board }));
+  return boards.map((board, i) => {
+    const id = `${kind}-${i + 1}`;
+    const audio = kind === "opposite" ? p.oppositeAudio?.[id] : undefined;
+    return { id, kind: "match", prompt, pairs: board, ...(audio ? { audio } : {}) };
+  });
 }
 
 export const itemId = (p: Passage, item: QuizItem): string =>

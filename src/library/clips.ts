@@ -148,8 +148,14 @@ export function clipUrl(id: string): Promise<string | null> {
 }
 
 /** Every recording a book points at. */
-export const clipsOf = (p: Pick<Passage, "sentences" | "wordAudio">): string[] =>
-  [...new Set([...p.sentences.map((s) => s.audio).filter((x): x is string => !!x), ...Object.values(p.wordAudio ?? {})])];
+type BookClips = Pick<Passage, "sentences" | "questions" | "wordAudio" | "oppositeAudio">;
+export const clipsOf = (p: BookClips): string[] =>
+  [...new Set([
+    ...p.sentences.flatMap((s) => s.audio ? [s.audio] : []),
+    ...p.questions.flatMap((q) => q.audio ? [q.audio] : []),
+    ...Object.values(p.wordAudio ?? {}),
+    ...Object.values(p.oppositeAudio ?? {}),
+  ])];
 
 /** How a save is going, for a page that wants to show it. */
 export interface ClipProgress {
@@ -182,7 +188,7 @@ export async function prefetchClips(ids: readonly string[], onProgress?: (p: Cli
 }
 
 /** Fetch a book's recordings now, so it reads aloud offline later. Resolves to how many are ready. */
-export async function prefetchBook(p: Pick<Passage, "sentences" | "wordAudio">, onProgress?: (p: ClipProgress) => void): Promise<ClipProgress> {
+export async function prefetchBook(p: BookClips, onProgress?: (p: ClipProgress) => void): Promise<ClipProgress> {
   return prefetchClips(clipsOf(p), onProgress);
 }
 

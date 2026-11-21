@@ -29,7 +29,7 @@ const api = vi.hoisted(() => ({
 vi.mock("../api", () => api);
 vi.mock("../bookStore", () => ({ BookStore: { refresh: vi.fn() }, useShelf: () => [] }));
 vi.mock("../voice", () => ({ canSpeak: () => false, voiceStatus: () => "no-voice", bookSpeaks: () => false, sentenceSpeaks: () => false, say: vi.fn(async () => {}), stop: vi.fn() }));
-vi.mock("../clips", () => ({ clipSizes: vi.fn(async () => ({})), prefetchBook: vi.fn(async () => ({ ready: 0, total: 0 })), uploadClip: vi.fn(async () => ({ id: "c".repeat(64), bytes: 12_345 })), pcmToWav: vi.fn(() => new Blob()) }));
+vi.mock("../clips", async (original) => ({ ...(await original<typeof import("../clips")>()), clipSizes: vi.fn(async () => ({})), prefetchBook: vi.fn(async () => ({ ready: 0, total: 0 })), uploadClip: vi.fn(async () => ({ id: "c".repeat(64), bytes: 12_345 })), pcmToWav: vi.fn(() => new Blob()) }));
 vi.mock("../../assets/svg", () => ({
   SvgAsset: ({ fallback }: { fallback?: React.ReactNode }) => <>{fallback}</>,
   SvgMarkup: () => null,
@@ -51,6 +51,7 @@ vi.mock("../imageGenerationApi", async (orig) => ({ ...(await orig<typeof import
 vi.mock("../photos", async (orig) => ({ ...(await orig<typeof import("../photos")>()), uploadPhoto, photoUrl: vi.fn(async () => null) }));
 
 import { LibraryStudio } from "./LibraryStudio";
+import { uploadClip } from "../clips";
 import { UnitVoices } from "../unitVoices";
 import { STARTER_PASSAGES } from "../data/starterPassages";
 import { spellingUnits } from "../data/khmer";
@@ -519,9 +520,101 @@ describe("Library Studio", () => {
     expect(screen.queryByRole("button", { name: "ដល់" })).toBeNull();
   });
 
-  it("records a sentence with the AI voice, and the saved draft points at the clip", async () => {
+  it("opens an Understand recording from Review and guides a microphone session through all questions", async () => {
+    const savedMediaDevices = Object.getOwnPropertyDescriptor(navigator, "mediaDevices");
+    const stopTrack = vi.fn();
+    Object.defineProperty(navigator, "mediaDevices", {
+      configurable: true,
+      value: { getUserMedia: vi.fn(async () => ({ getTracks: () => [{ stop: stopTrack }] })) },
+    });
+    class TestRecorder {
+      state = "inactive";
+      mimeType = "audio/webm";
+      ondataavailable?: (event: { data: Blob }) => void;
+      onstop?: () => void;
+      start() { this.state = "recording"; }
+      stop() {
+        this.state = "inactive";
+        this.ondataavailable?.({ data: new Blob(["quiz audio"]) });
+        this.onstop?.();
+      }
+    }
+    vi.stubGlobal("MediaRecorder", TestRecorder);
+    try {
+      await startBook();
+      fireEvent.click(screen.getByRole("radio", { name: /Offline drafter/ }));
+      fireEvent.click(screen.getByRole("button", { name: "Continue" }));
+      await fillSections();
+      fireEvent.click(screen.getByRole("tab", { name: /Understand/ }));
+
+      const shortcuts = screen.getAllByRole("button", { name: /Manage recording for/ });
+      expect(shortcuts).toHaveLength(2);
+      const questionIds = shortcuts.map((button) => button.getAttribute("aria-label")!.split(" ").at(-1));
+      fireEvent.click(shortcuts[1]);
+      expect(document.activeElement?.id).toBe(`studio-voice-${questionIds[1]}`);
+
+      const understand = within(screen.getByRole("region", { name: "Understand recordings" }));
+      fireEvent.click(understand.getByRole("button", { name: "Record with microphone" }));
+      for (const [i, id] of questionIds.entries()) {
+        expect(document.activeElement?.id).toBe(`studio-voice-${id}`);
+        const row = within(document.activeElement as HTMLElement);
+        await act(async () => fireEvent.click(row.getByRole("button", { name: `Record question ${i + 1}` })));
+        await act(async () => fireEvent.click(row.getByRole("button", { name: "Stop" })));
+        expect(row.getByRole("button", { name: `Play question ${i + 1}` })).toBeTruthy();
+      }
+      expect(screen.getByText(/All question recordings are ready/)).toBeTruthy();
+      expect(uploadClip).toHaveBeenCalledTimes(2);
+      expect(stopTrack).toHaveBeenCalledTimes(2);
+      await act(async () => fireEvent.click(screen.getByRole("button", { name: /Save draft/ })));
+      const saved = api.saveDraft.mock.calls.at(-1)![1] as typeof STARTER_PASSAGES[number];
+      expect(saved.questions.filter((q) => q.kind === "comprehension").map((q) => q.audio)).toEqual(["c".repeat(64), "c".repeat(64)]);
+    } finally {
+      vi.unstubAllGlobals();
+      if (savedMediaDevices) Object.defineProperty(navigator, "mediaDevices", savedMediaDevices);
+      else Reflect.deleteProperty(navigator, "mediaDevices");
+    }
+  });
+
+  it("generates Words and Spell audio in batches and retries only missing clips", async () => {
+    const scripts: string[] = [];
+    const fetchMock = vi.spyOn(globalThis, "fetch").mockImplementation(async (_url, init) => {
+      scripts.push(JSON.parse(String(init?.body)).text);
+      return scripts.length === 2
+        ? Response.json({ error: { message: "Provider is temporarily unavailable." } }, { status: 503 })
+        : Response.json({ audio: btoa("\u0000\u0000") });
+    });
+    try {
+      await startBook();
+      fireEvent.click(screen.getByRole("radio", { name: /Offline drafter/ }));
+      fireEvent.click(screen.getByRole("button", { name: "Continue" }));
+      await fillSections();
+      fireEvent.click(screen.getByRole("button", { name: /Voice \(optional\)/ }));
+
+      const words = within(screen.getByRole("region", { name: "Words recordings" }));
+      await act(async () => fireEvent.click(words.getByRole("button", { name: "Generate missing with Lila" })));
+      expect(words.getByRole("alert").textContent).toContain("Generated 1 of 2. Provider is temporarily unavailable.");
+      expect(words.getByRole("button", { name: "Play question 1" })).toBeTruthy();
+      expect(words.queryByRole("button", { name: "Play question 2" })).toBeNull();
+      await act(async () => fireEvent.click(words.getByRole("button", { name: "Generate missing with Lila" })));
+      expect(scripts[1]).toBe(scripts[2]);
+      expect(words.getByRole("button", { name: "Regenerate all with Lila" })).toBeTruthy();
+
+      const spell = within(screen.getByRole("region", { name: "Spell recordings" }));
+      await act(async () => fireEvent.click(spell.getByRole("button", { name: "Generate missing with Lila" })));
+      expect(spell.getAllByRole("button", { name: /Play question/ })).toHaveLength(3);
+      expect(scripts.slice(3).every((text) => STORY.split("\n").includes(text))).toBe(true);
+
+      await act(async () => fireEvent.click(screen.getByRole("button", { name: /Save draft/ })));
+      const saved = api.saveDraft.mock.calls.at(-1)![1] as typeof STARTER_PASSAGES[number];
+      expect(saved.questions.filter((q) => (q.kind === "vocab" || q.kind === "spell") && q.audio)).toHaveLength(5);
+    } finally {
+      fetchMock.mockRestore();
+    }
+  });
+
+  it("saves story and Understand recordings and clears stale question audio", async () => {
     const cues = Array.from({ length: 8 }, (_, i) => ({ startMs: i * 100, endMs: (i + 1) * 100 }));
-    const fetchMock = vi.spyOn(globalThis, "fetch").mockResolvedValue(new Response(JSON.stringify({ audio: btoa("\u0000\u0000"), cues }), { status: 200 }));
+    const fetchMock = vi.spyOn(globalThis, "fetch").mockImplementation(async () => Response.json({ audio: btoa("\u0000\u0000"), cues }));
     await startBook();
     fireEvent.click(screen.getByRole("radio", { name: /Offline drafter/ }));
     fireEvent.click(screen.getByRole("button", { name: "Continue" }));
@@ -542,11 +635,24 @@ describe("Library Studio", () => {
       words: ["Sokha", "goes", "to", "the", "market", "with", "her", "mother."],
     });
 
+    const understand = within(screen.getByRole("region", { name: "Understand recordings" }));
+    await act(async () => { fireEvent.click(understand.getByRole("button", { name: "Generate question 1 with Gemini" })); });
+    expect(understand.getByRole("button", { name: "Play question 1" })).toBeTruthy();
+    const questionRequest = fetchMock.mock.calls.filter(([url]) => url === "/api/library/voice").at(-1)?.[1];
+    expect(JSON.parse(String(questionRequest?.body)).text).toMatch(/Choice A\. .+\nChoice B\. .+\nChoice C\. .+/);
+
     await act(async () => { fireEvent.click(screen.getByRole("button", { name: /Save draft/ })); });
-    const saved = api.saveDraft.mock.calls.at(-1)![1] as { sentences: Array<{ id: string; audio?: string; audioCues?: unknown[] }> };
+    const saved = api.saveDraft.mock.calls.at(-1)![1] as typeof STARTER_PASSAGES[number];
     expect(saved.sentences.find((x) => x.id === "s1")?.audio).toBe("c".repeat(64));
     expect(saved.sentences.find((x) => x.id === "s1")?.audioCues).toEqual(cues);
     expect(saved.sentences.find((x) => x.id === "s2")?.audio).toBeUndefined();
+    expect(saved.questions.find((q) => q.kind === "comprehension")?.audio).toBe("c".repeat(64));
+
+    fireEvent.click(screen.getByRole("button", { name: /Review & modify/ }));
+    fireEvent.click(screen.getByRole("tab", { name: /Understand/ }));
+    fireEvent.change(screen.getAllByRole("textbox", { name: "Choice 1" })[0], { target: { value: "Home under the sun" } });
+    fireEvent.click(screen.getByRole("button", { name: /Voice \(optional\)/ }));
+    expect(within(screen.getByRole("region", { name: "Understand recordings" })).queryByRole("button", { name: "Play question 1" })).toBeNull();
     fetchMock.mockRestore();
   });
 

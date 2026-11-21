@@ -559,6 +559,41 @@ async def test_a_book_pointing_at_a_missing_recording_is_refused(client, db):
     assert (await client.post("/library/drafts/farm-day/publish", headers=dev)).json()["error"]["code"] == "not_publishable"
 
 
+@pytest.mark.parametrize("part", ["understand", "match", "words", "opposites", "spell"])
+async def test_quiz_audio_requires_a_stored_clip_and_is_published(client, db, part):
+    dev = await _login(client, db, "dev@example.com", platform_role="developer")
+    book = copy.deepcopy(MARKET)
+    book["questionCounts"] = {"understand": 2, "words": 2, "spell": 3}
+    if part == "match":
+        question = copy.deepcopy(MATCH_SET)
+        book["questions"].append(question)
+        book["questionCounts"]["match"] = 1
+    elif part == "opposites":
+        book["notesInQuiz"] = {"opposite": True}
+        book["wordNotes"] = {"hot": {"opposite": "cold"}, "sweet": {"opposite": "sour"}}
+        question = book.setdefault("oppositeAudio", {})
+    else:
+        kind = {"understand": "comprehension", "words": "vocab", "spell": "spell"}[part]
+        question = next(item for item in book["questions"] if item["kind"] == kind)
+    field = "opposite-1" if part == "opposites" else "audio"
+    question[field] = "quiz.m4a"
+    assert (await client.put("/library/drafts/farm-day", json=_draft(book), headers=dev)).status_code == 400
+
+    question[field] = "f" * 64
+    assert (await client.put("/library/drafts/farm-day", json=_draft(book), headers=dev)).status_code == 200
+    refused = await client.post("/library/drafts/farm-day/publish", headers=dev)
+    assert refused.status_code == 422 and refused.json()["error"]["code"] == "missing_audio"
+
+    up = await client.post("/library/audio", json={"mime": "audio/wav", "data": _b64(WAV)}, headers=dev)
+    question[field] = up.json()["id"]
+    assert (await client.put("/library/drafts/farm-day", json=_draft(book), headers=dev)).status_code == 200
+    published = await client.post("/library/drafts/farm-day/publish", headers=dev)
+    assert published.status_code == 200, published.text
+    passage = published.json()["published"]
+    kept = passage["oppositeAudio"] if part == "opposites" else q(passage, question["id"])
+    assert kept[field] == question[field]
+
+
 async def test_recordings_are_bounded(client, db):
     dev = await _login(client, db, "dev@example.com", platform_role="developer")
     assert (await client.post("/library/audio", json={"mime": "text/html", "data": _b64(WAV)}, headers=dev)).status_code == 415

@@ -43,8 +43,7 @@ export function voiceStatus(lang: Language): "ok" | "off" | "no-voice" {
 /** Whether anything can read this language aloud on this device right now. */
 export const canSpeak = (lang: Language): boolean => voiceStatus(lang) === "ok";
 
-async function serverVoice(text: string): Promise<string | null> {
-  const controller = new AbortController();
+async function serverVoice(text: string, controller: AbortController): Promise<string | null> {
   const timer = setTimeout(() => controller.abort(), SERVER_TIMEOUT_MS);
   try {
     const res = await fetch("/api/tutor/speech", {
@@ -67,6 +66,8 @@ let playing: HTMLAudioElement | null = null;
 let playingFrame: number | null = null;
 let audioElement: HTMLAudioElement | null = null;
 let finishPlaying: ((played: boolean) => void) | null = null;
+let cancelServerSpeech: (() => void) | null = null;
+let recordingRun = 0;
 
 /** One configured media element is reused so iOS keeps playback permission between sentences. */
 function recordingPlayer(): HTMLAudioElement {
@@ -78,11 +79,12 @@ function recordingPlayer(): HTMLAudioElement {
 
 /** Play a book recording. Resolves true when it played to the end, false if it could not play. */
 async function playRecording(clipId: string, onTime?: (elapsedMs: number | null, durationMs?: number) => void): Promise<boolean> {
+  const run = recordingRun;
   // Keep the actual play call synchronous after a user taps the reader control
   // whenever prefetch has already prepared the clip. This matters on Safari and
   // mobile browsers, which reject playback after a late network await.
   const url = cachedClipUrl(clipId) ?? await clipUrl(clipId);
-  if (!url) return false;
+  if (!url || run !== recordingRun) return false;
   return new Promise<boolean>((resolve) => {
     try {
       // Mobile Safari is much more reliable when a reader reuses one media
@@ -123,6 +125,13 @@ async function playRecording(clipId: string, onTime?: (elapsedMs: number | null,
   });
 }
 
+/** Play a saved book clip without falling back to generated speech. */
+export async function playBookRecording(clipId: string): Promise<boolean> {
+  if (voiceFloorHeld()) return false;
+  stop();
+  return playRecording(clipId);
+}
+
 /** Whether this sentence can be read aloud here: its own recording, or a voice for its language. */
 export const sentenceSpeaks = (book: Pick<Passage, "language">, s: Pick<Sentence, "audio">): boolean =>
   !!s.audio || (isVoiceEnabled() && canSpeak(book.language));
@@ -141,7 +150,9 @@ export const sentenceSpeaks = (book: Pick<Passage, "language">, s: Pick<Sentence
 export async function say(text: string, lang: Language, clipId?: string, onTime?: (elapsedMs: number | null, durationMs?: number) => void): Promise<boolean> {
   if (!text || voiceFloorHeld()) return false;
   stop();
+  const run = recordingRun;
   if (clipId && (await playRecording(clipId, onTime))) return true;
+  if (run !== recordingRun) return false;
   if (!isVoiceEnabled()) return false;
 
   let done!: () => void;
@@ -165,10 +176,25 @@ export async function say(text: string, lang: Language, clipId?: string, onTime?
     });
   }
 
-  const audio = await serverVoice(text);
+  const request = new AbortController();
+  const cancelRequest = () => request.abort();
+  cancelServerSpeech = cancelRequest;
+  const audio = await serverVoice(text, request);
+  if (cancelServerSpeech !== cancelRequest) return false;
+  cancelServerSpeech = null;
   if (audio) {
     const source = playBase64Pcm(audio);
-    if (source) return new Promise<boolean>((resolve) => (source.onended = () => resolve(true)));
+    if (source) return new Promise<boolean>((resolve) => {
+      cancelServerSpeech = () => {
+        source.onended = null;
+        source.stop();
+        resolve(false);
+      };
+      source.onended = () => {
+        cancelServerSpeech = null;
+        resolve(true);
+      };
+    });
   }
   return new Promise<boolean>((resolve) => {
     speakWebSpeech(text, 0.95, () => resolve(true));
@@ -176,6 +202,10 @@ export async function say(text: string, lang: Language, clipId?: string, onTime?
 }
 
 export function stop() {
+  recordingRun++;
+  const cancel = cancelServerSpeech;
+  cancelServerSpeech = null;
+  cancel?.();
   if (playingFrame !== null) cancelAnimationFrame(playingFrame);
   playingFrame = null;
   const current = playing;

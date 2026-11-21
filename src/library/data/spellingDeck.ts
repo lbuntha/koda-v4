@@ -25,6 +25,7 @@ export interface DeckWord {
   extras: string[];
   /** The sentence with the word replaced by a blank. */
   gapped: string;
+  audio?: string;
 }
 
 export function buildSpellingDeck(p: Passage): DeckWord[] {
@@ -43,7 +44,8 @@ export function buildSpellingDeck(p: Passage): DeckWord[] {
     // Khmer word gets two when there is room: its look-alikes are the lesson.
     const want = p.language === "km" ? 2 : 1;
     const extras = pickExtras(tiles, p.language, Math.max(0, Math.min(want, RING_MAX - tiles.length)));
-    deck.push({ id: `${p.id}/${q.id}`, sentenceId: sentence.id, word: q.word, original: gap.original, tiles, extras, gapped: gap.text });
+    deck.push({ id: `${p.id}/${q.id}`, sentenceId: sentence.id, word: q.word, original: gap.original, tiles, extras, gapped: gap.text,
+      ...(q.audio ? { audio: q.audio } : {}) });
   }
   return deck;
 }

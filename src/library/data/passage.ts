@@ -162,6 +162,8 @@ export interface ComprehensionQuestion {
   answer: number;
   /** The id of the sentence the answer comes from. */
   evidence: string;
+  /** Studio recording of the question and its answer choices, in display order. */
+  audio?: string;
 }
 
 /** "Which picture is 'banana'?" — options are picture keys. */
@@ -172,6 +174,8 @@ export interface VocabQuestion {
   word: string;
   options: string[];
   answer: number;
+  /** Studio recording of the instruction and target word. */
+  audio?: string;
 }
 
 /** The story sentence with one word missing, to be spelled on the ring. */
@@ -181,6 +185,8 @@ export interface SpellQuestion {
   /** The id of the sentence the word is taken from. */
   sentence: string;
   word: string;
+  /** Studio recording of the full sentence as a listening prompt. */
+  audio?: string;
 }
 
 /** One pair a child joins: a question (or word) on the left, its answer on the right. */
@@ -201,6 +207,8 @@ export interface MatchQuestion {
   kind: "match";
   prompt: string;
   pairs: MatchPair[];
+  /** Studio recording of the instruction and both columns in screen order. */
+  audio?: string;
 }
 
 /** Pairs in one matching question: fewer is a guess, more does not fit a phone. */
@@ -249,6 +257,8 @@ export interface Passage {
   wordNotes?: Record<string, WordNote>;
   /** Which notes the author ticked to become quiz boards. Absent or false: not in the quiz. */
   notesInQuiz?: { opposite?: boolean; reading?: boolean };
+  /** Studio recordings for the generated Opposites boards, keyed by board id. */
+  oppositeAudio?: Record<string, string>;
   /** Optional recordings of single words, word → clip id, for tap-a-word. */
   wordAudio?: Record<string, string>;
   /** Words with no recording, so tapping one shows text and no dead speaker. */
