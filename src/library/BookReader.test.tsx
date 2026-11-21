@@ -146,6 +146,36 @@ describe("a recording that did not arrive", () => {
 });
 
 describe("a page's picture in the reader", () => {
+  it("shows a Khmer page heading and introduction, then continues numbered steps on the next page", async () => {
+    const khmer = STARTER_PASSAGES.find((book) => book.language === "km")!;
+    const firstFour = [...khmer.sentences.slice(0, 3), khmer.sentences[0]].map((sentence, i) => ({
+      ...sentence, id: `step-fixture-${i}`, pageBreak: i === 2,
+    }));
+    const [intro, firstStep, secondStep, thirdStep] = firstFour;
+    const firstPage = withPageChoice({ ...khmer, sentences: firstFour, questions: [] }, [intro.id, firstStep.id], {
+      picture: PHOTO, design: { heading: "ទៅផ្សារ", layout: "steps", intro: true, tone: "sky" },
+    });
+    const book = withPageChoice(firstPage, [secondStep.id, thirdStep.id], {
+      design: { layout: "steps" },
+    });
+    const { container } = render(<BookReader book={book} preview onBack={() => {}} onReady={() => {}} />);
+    fireEvent.click(screen.getByRole("button", { name: "Next page" }));
+    await screen.findByRole("heading", { name: "ទៅផ្សារ" });
+    const first = container.querySelector('[data-book-page="1"]')!;
+    const list = first.querySelector("ol")!;
+    const artwork = first.querySelector("[data-picture-at]")!;
+    const lead = first.querySelector(`[data-sentence="${intro.id}"]`)!;
+    expect(lead.compareDocumentPosition(artwork) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+    expect(list.textContent).toContain("១");
+    expect(list.querySelectorAll("li")).toHaveLength(1);
+    fireEvent.click(screen.getByRole("button", { name: "Next page" }));
+    await waitFor(() => {
+      const next = container.querySelector('[data-book-page="2"] ol');
+      expect(next?.getAttribute("start")).toBe("2");
+      expect(next?.textContent).toContain("៣");
+    });
+  });
+
   it("shows an uploaded photo where the author placed it", async () => {
     const ids = paginate(MARKET)[0].map((s) => s.id);
     const book = withPageChoice(MARKET, ids, { picture: PHOTO, at: "right" });

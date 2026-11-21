@@ -115,6 +115,7 @@ export function PagesStep({ draft, onEdit }: { draft: Draft; onEdit(d: Draft): v
         <div className="min-w-0 flex-1">
           <h2 className="text-lg font-extrabold text-ink">{t("studio.step.pages")}</h2>
           <p className="text-sm text-muted">{t("studio.pages.intro", { count: pages.length })}</p>
+          <p className="text-sm text-muted">{t("studio.pages.design.hint")}</p>
         </div>
         <div className="flex flex-wrap gap-2">
           {hasOwnPages(draft) && !batch.selecting && (

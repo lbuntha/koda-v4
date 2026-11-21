@@ -111,6 +111,18 @@ export interface Sentence {
   textSize?: PageTextSize;
   /** How this page's words line up. Absent means left (start). Written beside `picture`. */
   textAlign?: PageTextAlign;
+  /** Optional page design. Portrait screens stack the illustration and text. */
+  pageDesign?: PageDesign;
+}
+
+export const PAGE_HEADING_LIMIT = 80;
+
+export interface PageDesign {
+  heading?: string;
+  layout?: "steps";
+  tone?: "sky" | "sun";
+  /** In a step layout, use the first sentence as an unnumbered introduction. */
+  intro?: boolean;
 }
 
 /** What an author adds about one story word. Either part may be missing. */

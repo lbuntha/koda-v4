@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState, type ReactNode } from "react";
 import { ArrowLeft, Space, BookOpen, Check, ChevronDown, ChevronRight, ChevronUp, CornerDownLeft, CornerLeftUp, Download, Merge, Scissors, Mic, Play, Pencil, RefreshCw, Sparkles, Square, Trash2, Upload } from "lucide-react";
 import { BANDS, bookAges, CHOICES, MATCH_MAX_QUESTIONS, meetsTarget, minimumQuestions, TARGET_MAX, type Band, type Language, type Question, type QuestionCounts, type WordCue } from "../data/passage";
 import { readingLexiconFor, readingWordsFor } from "../data/readingLexicon";
-import { core, hasSpaceAfter, withSpaceAfter } from "../data/text";
+import { core, hasSpaceAfter, sentenceText, tokenizeSentence, withSpaceAfter } from "../data/text";
 import { RULES, verifyPassage, type Verdict } from "../data/verifyPassage";
 import { deleteBook, fetchDraft, fetchReports, fetchStudioMeta, publishBook, requestAiCorrection, requestAiDraft, requestAiMatch, requestAiStory, resolveReport, saveDraft, unpublishBook, type BookReport, type BookRow, type BookSummary, type Provider, type StudioMeta } from "../api";
 import { baseOf, draftLocally, fromModel, withStoryPictures, joinSentences, splitSentence, mergeWords, pictureFor, sentenceIdFor, withVocabWord, type StoryInput, type VocabEdit } from "../draft";
@@ -725,6 +725,31 @@ function ReviewStep({ draft, verdict, confirmed, onConfirmed, onEdit, target, so
   const activeQuestions = tab === "splits" || tab === "notes" ? [] : draft.questions.filter((q) => q.kind === tabKind[tab]);
   const [splitTarget, setSplitTarget] = useState<{ sid: string; index: number } | null>(null);
   const [splitText, setSplitText] = useState("");
+  const [sentenceEdit, setSentenceEdit] = useState<{ id: string; text: string } | null>(null);
+  const saveSentence = () => {
+    if (!sentenceEdit) return;
+    const original = draft.sentences.find((s) => s.id === sentenceEdit.id);
+    const entered = sentenceEdit.text.trim();
+    if (!original || !entered) return;
+    // Preserve the spaces an author wants children to see in Khmer prose.
+    const chunks = entered.split(/\s+/u);
+    const words = km ? chunks.flatMap((chunk, index) => {
+      const tokens = tokenizeSentence(chunk, "km");
+      if (tokens.length > 1 && tokens[0] === "«") tokens.splice(0, 2, "«" + tokens[1]);
+      if (tokens.length && index < chunks.length - 1) tokens[tokens.length - 1] = withSpaceAfter(tokens[tokens.length - 1], true);
+      return tokens;
+    }) : tokenizeSentence(entered, "en");
+    const text = sentenceText(words, draft.language);
+    if (!text || text.length > 400) return;
+    if (text !== original.text.trimEnd()) {
+      onEdit({
+        ...draft,
+        sentences: draft.sentences.map((s) => s.id === original.id ? { ...s, text, words, audio: undefined, audioCues: undefined } : s),
+      });
+      if (km) onConfirmed(false);
+    }
+    setSentenceEdit(null);
+  };
   // The book's pages, as sentence ids, and the sentence each one starts at.
   const pages = paginate(draft).map((page) => page.map((x) => x.id));
   const pageStarts = new Map(pages.map((ids, i) => [ids[0], { n: i + 1 }]));
@@ -794,8 +819,13 @@ function ReviewStep({ draft, verdict, confirmed, onConfirmed, onEdit, target, so
               )}
             </div>
           )}
-          <div className="mt-2 flex gap-2">
+          <div className="mt-2 flex flex-wrap gap-2 sm:flex-nowrap">
             <b className="w-8 shrink-0 pt-2 font-mono text-xs text-muted">{s.id}</b>
+            <UIButton type="button" size="sm" variant="ghost" className="shrink-0 self-start" icon={<Pencil aria-hidden="true" />}
+              aria-label={t("studio.review.editSentenceFor", { line: s.id })}
+              onClick={() => { setSplitTarget(null); setSentenceEdit({ id: s.id, text: s.text }); }}>
+              {t("studio.review.editSentence")}
+            </UIButton>
             {si > 0 && (
               <button type="button" aria-label={t("studio.review.joinLines", { line: s.id, above: draft.sentences[si - 1].id })} title={t("studio.review.joinLines", { line: s.id, above: draft.sentences[si - 1].id })}
                 onClick={() => {
@@ -806,7 +836,7 @@ function ReviewStep({ draft, verdict, confirmed, onConfirmed, onEdit, target, so
                 <CornerLeftUp className="h-4 w-4" aria-hidden="true" />
               </button>
             )}
-            <div className="flex flex-wrap gap-1.5">
+            <div className="order-last flex min-w-0 basis-full flex-wrap gap-1.5 sm:order-none sm:basis-auto">
               {s.words.map((w, i) => (
                 <div key={i} className="flex items-center gap-1">
                   <button type="button" disabled={i === s.words.length - 1} title={i === s.words.length - 1 ? t("studio.review.lastWord") : t("studio.review.joinNext")} onClick={() => {
@@ -815,7 +845,7 @@ function ReviewStep({ draft, verdict, confirmed, onConfirmed, onEdit, target, so
                   }} className={`rounded-xl border border-indigo-200 bg-indigo-50 px-2.5 py-1 text-indigo-900 dark:border-indigo-800 dark:bg-indigo-950 dark:text-indigo-100 ${km ? `${KHMER} text-lg` : ""}`}>
                     {w}
                   </button>
-                  <button type="button" aria-label={t("studio.review.editWord", { line: s.id, n: i + 1 })} title={t("studio.review.fixWordTitle")} onClick={() => { setSplitTarget({ sid: s.id, index: i }); setSplitText(w.trimEnd()); }} className="grid h-7 w-7 shrink-0 place-items-center rounded-lg text-muted hover:bg-indigo-50 hover:text-indigo-700 dark:hover:bg-indigo-950 dark:hover:text-indigo-300">
+                  <button type="button" aria-label={t("studio.review.editWord", { line: s.id, n: i + 1 })} title={t("studio.review.fixWordTitle")} onClick={() => { setSentenceEdit(null); setSplitTarget({ sid: s.id, index: i }); setSplitText(w.trimEnd()); }} className="grid h-7 w-7 shrink-0 place-items-center rounded-lg text-muted hover:bg-indigo-50 hover:text-indigo-700 dark:hover:bg-indigo-950 dark:hover:text-indigo-300">
                     <Pencil className="h-3.5 w-3.5" aria-hidden="true" />
                   </button>
                   {i < s.words.length - 1 && (
@@ -851,6 +881,21 @@ function ReviewStep({ draft, verdict, confirmed, onConfirmed, onEdit, target, so
                 <Scissors className="h-4 w-4" aria-hidden="true" />
               </button>
             )}
+          </div>
+          {sentenceEdit?.id === s.id && (
+            <UICard className="mt-2 grid gap-2 p-3">
+              <label className="grid gap-1">
+                <span className="koda-admin-label">{t("studio.review.sentenceText")}</span>
+                <UITextarea autoFocus rows={2} maxLength={400} lang={draft.language} value={sentenceEdit.text}
+                  onChange={(e) => setSentenceEdit({ id: s.id, text: e.target.value })} />
+              </label>
+              {s.audio && <p className="koda-admin-label">{t("studio.review.sentenceAudioNotice")}</p>}
+              <div className="flex flex-wrap gap-2">
+                <UIButton type="button" size="sm" disabled={!sentenceEdit.text.trim()} onClick={saveSentence}>{t("studio.review.applySentence")}</UIButton>
+                <UIButton type="button" size="sm" variant="secondary" onClick={() => setSentenceEdit(null)}>{t("common.cancel")}</UIButton>
+              </div>
+            </UICard>
+          )}
             {splitTarget?.sid === s.id && (() => {
               const pieces = splitText.trim().split(/[\s\u200B]+/u).filter(Boolean);
               const unchanged = pieces.length === 1 && pieces[0] === s.words[splitTarget.index].trimEnd();
@@ -875,7 +920,6 @@ function ReviewStep({ draft, verdict, confirmed, onConfirmed, onEdit, target, so
                 </div>
               );
             })()}
-          </div>
           </div>
           );
         })}

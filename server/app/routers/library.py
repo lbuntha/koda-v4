@@ -196,6 +196,15 @@ def _clean(passage: dict[str, Any]) -> dict[str, Any]:
             raise AppError(400, "invalid_passage", "A page's text size is normal, large, larger or huge.")
         if "textAlign" in s and s["textAlign"] not in TEXT_ALIGNS:
             raise AppError(400, "invalid_passage", "A page's text lines up left, center or right.")
+        if "pageDesign" in s:
+            design = s["pageDesign"]
+            if not isinstance(design, dict) or not design.keys() <= {"heading", "layout", "tone", "intro"}:
+                raise AppError(400, "invalid_passage", "The page design is malformed.")
+            if ("heading" in design and (not isinstance(design["heading"], str) or len(design["heading"]) > 80)
+                    or "layout" in design and design["layout"] != "steps"
+                    or "tone" in design and design["tone"] not in ("sky", "sun")
+                    or "intro" in design and not isinstance(design["intro"], bool)):
+                raise AppError(400, "invalid_passage", "The page design has an invalid heading, layout, colour or introduction.")
     if not (isinstance(passage.get("picture"), str) and PICTURE_KEY.fullmatch(passage["picture"])):
         raise AppError(400, "invalid_passage", "The cover picture must be a picture key.")
     for q in questions:

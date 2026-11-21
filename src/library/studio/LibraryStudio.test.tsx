@@ -122,6 +122,26 @@ describe("Khmer sound names", () => {
 });
 
 describe("Library Studio", () => {
+  it("rephrases a whole sentence without replacing its question references", async () => {
+    await startBook();
+    fireEvent.click(screen.getByRole("radio", { name: /Offline drafter/ }));
+    fireEvent.click(screen.getByRole("button", { name: "Continue" }));
+    await fillSections();
+    fireEvent.click(screen.getByRole("tab", { name: "Content" }));
+    fireEvent.click(screen.getByText("Word splits (English splits on spaces)"));
+    fireEvent.click(screen.getByRole("button", { name: "Edit sentence s1" }));
+    fireEvent.change(screen.getByRole("textbox", { name: "Sentence text" }), {
+      target: { value: "Sokha and her mother go to the market." },
+    });
+    fireEvent.click(screen.getByRole("button", { name: "Apply sentence" }));
+    fireEvent.click(screen.getByRole("button", { name: "Save draft" }));
+    await waitFor(() => expect(api.saveDraft).toHaveBeenCalled());
+    expect(api.saveDraft.mock.calls.at(-1)?.[1]).toMatchObject({
+      sentences: [expect.objectContaining({ id: "s1", text: "Sokha and her mother go to the market." }), ...Array(3).fill(expect.any(Object))],
+      questions: expect.arrayContaining([expect.objectContaining({ kind: "comprehension", evidence: "s1" })]),
+    });
+  });
+
   it("saves a source story before generating questions", async () => {
     await startBook();
     fireEvent.click(screen.getByRole("button", { name: "Save draft" }));

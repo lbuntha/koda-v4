@@ -1,8 +1,8 @@
 import { memo, useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState, type CSSProperties, type PointerEvent as ReactPointerEvent, type ReactNode, type RefObject } from "react";
 import { animate, motion, useMotionValue, useReducedMotion, useTransform } from "motion/react";
 import { Mic, Square, Volume2, X } from "lucide-react";
-import { BANDS, noteFor, PAGE_TEXT_SIZES, type Passage, type PicturePlace, type Sentence } from "./data/passage";
-import { layoutBook, type PageText, type SetSentence, type SetToken, widestPage } from "./bookLayout";
+import { BANDS, noteFor, PAGE_TEXT_SIZES, type PageDesign, type Passage, type PicturePlace, type Sentence } from "./data/passage";
+import { layoutBook, pageDesign, type PageText, type SetSentence, type SetToken, widestPage } from "./bookLayout";
 import { FIT_MAX, FIT_MIN, WORDS_MIN, solveFit } from "./fitPage";
 import { FLAT, SPRING, TURNED, angularVelocity, castOf, completes, curlOf, dragAngle, shadeOf, type Dir } from "./pageTurn";
 import { drawingRatio, Picture } from "./Picture";
@@ -298,6 +298,8 @@ export interface ReaderPage {
   /** Its sentences, in order: what a page choice is written against. */
   ids: string[];
   text: PageText;
+  design: PageDesign;
+  at: PicturePlace;
 }
 
 export function BookReader({ book, onBack, onReady, preview = false, pageControls }: {
@@ -673,7 +675,7 @@ export function BookReader({ book, onBack, onReady, preview = false, pageControl
   const sheet = (i: number) => (
     <FittedSheet index={i} count={pages.count} box={scrollEl} scale={scale} words={words}>
       {(fit) => i === 0 ? <TitlePage book={book} km={km} fit={fit} intro={!opened && !reduce} /> : (
-        <StoryPage book={book} sentences={pages.story[i - 1]} picture={pages.pictures[i - 1]} at={pages.places[i - 1]} text={pages.texts[i - 1]} scale={scale} fit={fit} words={words} playing={playing} playingWord={playingWord} peek={peek} onWord={tapWord} end={i === last} />
+        <StoryPage book={book} sentences={pages.story[i - 1]} picture={pages.pictures[i - 1]} at={pages.places[i - 1]} text={pages.texts[i - 1]} stepStart={pages.stepStarts[i - 1]} scale={scale} fit={fit} words={words} playing={playing} playingWord={playingWord} peek={peek} onWord={tapWord} end={i === last} />
       )}
     </FittedSheet>
   );
@@ -742,7 +744,8 @@ export function BookReader({ book, onBack, onReady, preview = false, pageControl
         )}
       </UIReaderToolbar>}
       controls={(() => {
-        const authoring = pageControls?.(page > 0 && pages.story[page - 1] ? { n: page, ids: pages.story[page - 1].map((s) => s.sentence.id), text: pages.texts[page - 1] } : null);
+        const story = pages.story[page - 1];
+        const authoring = pageControls?.(story ? { n: page, ids: story.map((s) => s.sentence.id), text: pages.texts[page - 1], design: pageDesign(story), at: pages.places[page - 1] } : null);
         const reading = canRecord && voice.stage !== "idle" ? (
           <VoiceNoteBar
             voice={voice}
@@ -786,7 +789,7 @@ export function BookReader({ book, onBack, onReady, preview = false, pageControl
       >
         {widest !== null && (
           <BookWordsProbe index={widest} count={pages.count} box={scrollEl} scale={scale} of={pages} onWords={setWords}>
-            <StoryPage book={book} sentences={pages.story[widest - 1]} picture={pages.pictures[widest - 1]} at={pages.places[widest - 1]} text={pages.texts[widest - 1]} scale={scale} fit={FIT_MIN} words={1} playing={null} playingWord={null} peek={null} onWord={ignoreWord} end={widest === last} />
+            <StoryPage book={book} sentences={pages.story[widest - 1]} picture={pages.pictures[widest - 1]} at={pages.places[widest - 1]} text={pages.texts[widest - 1]} stepStart={pages.stepStarts[widest - 1]} scale={scale} fit={FIT_MIN} words={1} playing={null} playingWord={null} peek={null} onWord={ignoreWord} end={widest === last} />
           </BookWordsProbe>
         )}
         <div className="relative col-start-1 row-start-1 bg-surface" aria-hidden={over !== null && over === page ? true : undefined} inert={over !== null && over === page ? true : undefined}>
@@ -954,7 +957,7 @@ const ALIGN: Record<PageText["align"], string> = { left: "", center: "text-cente
  */
 const phoneSize = (size: number) => 1 + (size - 1) * 0.6;
 
-const StoryPage = memo(function StoryPage({ book, sentences, picture, at = "top", text = DEFAULT_TEXT, scale, fit, words, playing, playingWord, peek, onWord, end }: {
+const StoryPage = memo(function StoryPage({ book, sentences, picture, at = "top", text = DEFAULT_TEXT, stepStart, scale, fit, words, playing, playingWord, peek, onWord, end }: {
   book: Passage;
   sentences: SetSentence[];
   /** The reader's text size, as a multiple of the page's own size; the page's fit is applied on top. */
@@ -969,6 +972,7 @@ const StoryPage = memo(function StoryPage({ book, sentences, picture, at = "top"
   at?: PicturePlace;
   /** The author's size and alignment for this page's words. */
   text?: PageText;
+  stepStart: number;
   playing: string | null;
   playingWord: { sentence: string; index: number } | null;
   peek: string | null;
@@ -977,6 +981,11 @@ const StoryPage = memo(function StoryPage({ book, sentences, picture, at = "top"
 }) {
   const km = book.language === "km";
   const wordsEl = useRef<HTMLDivElement>(null);
+  const introEl = useRef<HTMLDivElement>(null);
+  const design = pageDesign(sentences);
+  const steps = design.layout === "steps";
+  const intro = steps && design.intro && sentences.length > 1 ? sentences[0] : null;
+  const tone = design.tone === "sky" ? "bg-sky-50 dark:bg-sky-950/40" : design.tone === "sun" ? "bg-amber-50 dark:bg-amber-950/40" : "";
   /*
    * The picture's own shape: what it was drawn to until it says otherwise.
    *
@@ -997,8 +1006,8 @@ const StoryPage = memo(function StoryPage({ book, sentences, picture, at = "top"
   }, [picture]);
   // Sentences run on as one paragraph, as in a book; a heading starts a new one.
   const blocks: Array<{ heading: string | null; sentences: SetSentence[] }> = [];
-  for (const s of sentences) {
-    if (s.heading || !blocks.length) blocks.push({ heading: s.heading, sentences: [s] });
+  for (const s of intro ? sentences.slice(1) : sentences) {
+    if (steps || s.heading || !blocks.length) blocks.push({ heading: s.heading, sentences: [s] });
     else blocks[blocks.length - 1].sentences.push(s);
   }
   // Sized for a phone first and growing with the screen, then by the reader's
@@ -1008,61 +1017,77 @@ const StoryPage = memo(function StoryPage({ book, sentences, picture, at = "top"
   const size = PAGE_TEXT_SIZES[text.size] ?? 1;
   const align = ALIGN[text.align] ?? "";
 
-  return (
-    <div data-fit-root className="@container flex flex-1 flex-col [--cap:var(--picture-max)] sm:[--cap:var(--picture-max-wide)]" style={{ "--fit": fit, "--wfit": words, "--picture-max": PICTURE_MAX, "--picture-max-wide": PICTURE_MAX_WIDE, "--shape": shape, "--picture-w": PICTURE_W, "--page-size-phone": phoneSize(size), "--page-size-wide": size } as CSSProperties}>
-      <div data-picture-at={picture ? at : undefined} className={`flex gap-6 sm:gap-8 ${picture ? PLACE[at].page : "my-auto flex-col"} ${picture && at !== "top" ? "my-auto" : ""}`}>
-      {picture && (
-        <div className={`overflow-hidden rounded-lg transition-[width] duration-200 ease-out motion-reduce:transition-none ${PLACE[at].frame}`}>
-          {/* The frame is already this picture's shape, so nothing is cropped
-              and nothing is letterboxed; `whole` only matters where a height cap
-              has forced the frame off-shape. */}
-          <Picture name={picture} className="h-full w-full" whole onRatio={learnShape} />
-        </div>
+  const renderBlock = (b: (typeof blocks)[number]) => (
+    <>
+      {b.heading && (
+        <h2 className={`mb-3 text-xs font-bold uppercase tracking-[0.2em] text-neutral-500 dark:text-neutral-400 ${align} ${km ? KHMER : ""}`}>
+          {b.sentences[0].sentence.words.slice(0, b.sentences[0].sentence.words.length - b.sentences[0].tokens.length).map((word, wordIndex, heading) => (
+            <span
+              key={wordIndex}
+              data-speaking={playingWord?.sentence === b.sentences[0].sentence.id && playingWord.index === wordIndex || undefined}
+              className={`rounded-sm transition-colors ${playingWord?.sentence === b.sentences[0].sentence.id && playingWord.index === wordIndex ? "text-neutral-950 dark:text-white" : ""}`}
+            >
+              {wordIndex === heading.length - 1 ? word.replace(/:$/, "") : word}{wordIndex === heading.length - 1 ? "" : " "}
+            </span>
+          ))}
+        </h2>
       )}
-      <div ref={wordsEl} className={`relative isolate grid gap-6 px-1 ${picture ? PLACE[at].words : "mx-auto w-full max-w-[34em]"}`}>
-        <ReadMarker box={wordsEl} word={playingWord} scale={scale * words * size} />
-        {blocks.map((b, i) => (
-          <div key={i}>
-            {b.heading && (
-              <h2 className={`mb-3 text-xs font-bold uppercase tracking-[0.2em] text-neutral-500 dark:text-neutral-400 ${align} ${km ? KHMER : ""}`}>
-                {b.sentences[0].sentence.words.slice(0, b.sentences[0].sentence.words.length - b.sentences[0].tokens.length).map((word, wordIndex, heading) => (
-                  <span
-                    key={wordIndex}
-                    data-speaking={playingWord?.sentence === b.sentences[0].sentence.id && playingWord.index === wordIndex || undefined}
-                    className={`rounded-sm transition-colors ${playingWord?.sentence === b.sentences[0].sentence.id && playingWord.index === wordIndex ? "text-neutral-950 dark:text-white" : ""}`}
-                  >
-                    {wordIndex === heading.length - 1 ? word.replace(/:$/, "") : word}{wordIndex === heading.length - 1 ? "" : " "}
-                  </span>
-                ))}
-              </h2>
-            )}
-            <p className={`m-0 ${type} ${align} text-pretty [overflow-wrap:anywhere] transition-[font-size] duration-200 ease-out motion-reduce:transition-none [--page-size:var(--page-size-phone)] sm:[--page-size:var(--page-size-wide)]`} data-text-scale={scale} data-page-size={text.size} data-page-align={text.align} style={{ fontSize: `calc(${base} * ${scale} * var(--wfit) * var(--page-size))` }}>
-              {b.sentences.map((s, j) => (
-                <span key={s.sentence.id}>
-                  <span
-                    data-sentence={s.sentence.id}
-                    data-playing={playing === s.sentence.id || undefined}
-                    className={`rounded-sm box-decoration-clone transition-colors duration-300 motion-reduce:transition-none ${playing && playing !== s.sentence.id ? "text-neutral-400 dark:text-neutral-500" : ""}`}
-                  >
-                    {s.tokens.map((t, k) => (
-                      <span key={k}>
-                        <Word
-                          token={t}
-                          active={peek === t.word}
-                          speaking={playingWord?.sentence === s.sentence.id && playingWord.index === s.sentence.words.length - s.tokens.length + k}
-                          onWord={onWord}
-                        />
-                        {k === s.tokens.length - 1 ? "" : t.spaced ? " " : km ? KHMER_WORD_BREAK : " "}
-                      </span>
-                    ))}
-                  </span>
-                  {j === b.sentences.length - 1 ? "" : km && !/[។៕?!.»”"]$/u.test(s.sentence.text.trimEnd()) ? <br /> : s.tokens[s.tokens.length - 1]?.spaced ? " " : km ? KHMER_WORD_BREAK : " "}
+      <p className={`m-0 ${type} ${align} text-pretty [overflow-wrap:anywhere] transition-[font-size] duration-200 ease-out motion-reduce:transition-none [--page-size:var(--page-size-phone)] sm:[--page-size:var(--page-size-wide)]`} data-text-scale={scale} data-page-size={text.size} data-page-align={text.align} style={{ fontSize: `calc(${base} * ${scale} * var(--wfit) * var(--page-size))` }}>
+        {b.sentences.map((s, j) => (
+          <span key={s.sentence.id}>
+            <span
+              data-sentence={s.sentence.id}
+              data-playing={playing === s.sentence.id || undefined}
+              className={`rounded-sm box-decoration-clone transition-colors duration-300 motion-reduce:transition-none ${playing && playing !== s.sentence.id ? "text-neutral-400 dark:text-neutral-500" : ""}`}
+            >
+              {s.tokens.map((t, k) => (
+                <span key={k}>
+                  <Word
+                    token={t}
+                    active={peek === t.word}
+                    speaking={playingWord?.sentence === s.sentence.id && playingWord.index === s.sentence.words.length - s.tokens.length + k}
+                    onWord={onWord}
+                  />
+                  {k === s.tokens.length - 1 ? "" : t.spaced ? " " : km ? KHMER_WORD_BREAK : " "}
                 </span>
               ))}
-            </p>
-          </div>
+            </span>
+            {j === b.sentences.length - 1 ? "" : km && !/[។៕?!.»”"]$/u.test(s.sentence.text.trimEnd()) ? <br /> : s.tokens[s.tokens.length - 1]?.spaced ? " " : km ? KHMER_WORD_BREAK : " "}
+          </span>
         ))}
-      </div>
+      </p>
+    </>
+  );
+  return (
+    <div data-fit-root data-page-layout={steps ? "steps" : undefined} className={`@container flex flex-1 flex-col [--cap:var(--picture-max)] sm:[--cap:var(--picture-max-wide)] ${tone ? `rounded-2xl p-3 sm:p-5 ${tone}` : ""}`} style={{ "--fit": fit, "--wfit": words, "--picture-max": PICTURE_MAX, "--picture-max-wide": PICTURE_MAX_WIDE, "--shape": shape, "--picture-w": PICTURE_W, "--page-size-phone": phoneSize(size), "--page-size-wide": size } as CSSProperties}>
+      {design.heading?.trim() && (
+        <h2 className={`mb-3 text-2xl font-semibold text-ink [overflow-wrap:anywhere] sm:text-3xl ${type} ${align}`}>{design.heading}</h2>
+      )}
+      {intro && <div ref={introEl} className="relative isolate mb-4 px-1">
+        <ReadMarker box={introEl} word={playingWord} scale={scale * words * size} />
+        {renderBlock({ heading: intro.heading, sentences: [intro] })}
+      </div>}
+      <div data-picture-at={picture ? at : undefined} className={`flex ${steps ? "gap-4" : "gap-6 sm:gap-8"} ${picture ? PLACE[at].page : "my-auto flex-col"} ${picture && at !== "top" && !steps ? "my-auto" : ""}`}>
+        {picture && (
+          <div className={`overflow-hidden rounded-lg transition-[width] duration-200 ease-out motion-reduce:transition-none ${PLACE[at].frame}`}>
+            <Picture name={picture} className="h-full w-full" whole onRatio={learnShape} />
+          </div>
+        )}
+        <div ref={wordsEl} className={`relative isolate grid px-1 ${steps ? "gap-3" : "gap-6"} ${picture ? PLACE[at].words : "mx-auto w-full max-w-[34em]"}`}>
+          <ReadMarker box={wordsEl} word={playingWord} scale={scale * words * size} />
+          {steps ? (
+            <ol start={stepStart} role="list" className="m-0 grid list-none gap-3 p-0">
+              {blocks.map((block, i) => (
+                <li key={block.sentences[0].sentence.id} className="grid grid-cols-[auto_minmax(0,1fr)] items-start gap-3">
+                  <span className={`mt-1 grid min-h-8 min-w-8 place-items-center rounded-full bg-indigo-100 px-1.5 text-sm font-semibold text-indigo-900 dark:bg-indigo-900 dark:text-indigo-100 ${km ? KHMER : ""}`}>
+                    {km ? String(stepStart + i).replace(/[0-9]/g, digit => "០១២៣៤៥៦៧៨៩"[Number(digit)]) : stepStart + i}
+                  </span>
+                  <div>{renderBlock(block)}</div>
+                </li>
+              ))}
+            </ol>
+          ) : blocks.map((block) => <div key={block.sentences[0].sentence.id}>{renderBlock(block)}</div>)}
+        </div>
       </div>
       {end && (
         <p className={`mt-auto pt-10 text-center text-base italic text-neutral-500 dark:text-neutral-400 ${km ? KHMER : SERIF}`}>

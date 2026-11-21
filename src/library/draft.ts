@@ -366,6 +366,7 @@ export function joinSentences<T extends Pick<Passage, "sentences" | "questions" 
     pictureAt: prev.pictureAt ?? gone.pictureAt,
     textSize: prev.textSize ?? gone.textSize,
     textAlign: prev.textAlign ?? gone.textAlign,
+    pageDesign: prev.pageDesign ?? gone.pageDesign,
     audio: prev.audio && gone.audio ? undefined : prev.audio ?? gone.audio,
     // The sentence changed, so old word offsets no longer map to its words.
     audioCues: undefined,

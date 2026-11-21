@@ -10,7 +10,7 @@
  * what the author published.
  */
 
-import type { Band, PageTextAlign, PageTextSize, Passage, PicturePlace, Sentence } from "./data/passage";
+import type { Band, PageDesign, PageTextAlign, PageTextSize, Passage, PicturePlace, Sentence } from "./data/passage";
 import { core } from "./data/text";
 
 export type Emphasis = "key" | "name" | null;
@@ -146,6 +146,11 @@ export function pagePicture(page: readonly Pick<SetSentence, "sentence" | "token
 }
 
 export type PageText = { size: PageTextSize; align: PageTextAlign };
+export type PageChoice = { picture?: string | null | undefined; at?: PicturePlace; textSize?: PageTextSize; textAlign?: PageTextAlign; design?: PageDesign };
+
+export function pageDesign(page: readonly Pick<SetSentence, "sentence">[]): PageDesign {
+  return page.find((s) => s.sentence.pageDesign)?.sentence.pageDesign ?? {};
+}
 
 /** How a page's words are set: the first sentence on it that says, else normal and left. */
 export function pageText(page: readonly Pick<SetSentence, "sentence">[]): PageText {
@@ -165,7 +170,7 @@ export function pageText(page: readonly Pick<SetSentence, "sentence">[]): PageTe
 export function withPageChoice<T extends Pick<Passage, "sentences">>(
   book: T,
   pageIds: readonly string[],
-  patch: { picture?: string | null | undefined; at?: PicturePlace; textSize?: PageTextSize; textAlign?: PageTextAlign },
+  patch: PageChoice,
 ): T {
   const on = new Set(pageIds);
   const page = book.sentences.filter((s) => on.has(s.id));
@@ -174,11 +179,12 @@ export function withPageChoice<T extends Pick<Passage, "sentences">>(
   const at = patch.at ?? page.find((s) => s.pictureAt)?.pictureAt;
   const size = patch.textSize ?? page.find((s) => s.textSize)?.textSize;
   const align = patch.textAlign ?? page.find((s) => s.textAlign)?.textAlign;
+  const design = patch.design ?? page.find((s) => s.pageDesign)?.pageDesign;
   return {
     ...book,
     sentences: book.sentences.map((s) => {
       if (!on.has(s.id)) return s;
-      const { picture: _p, pictureAt: _a, textSize: _s, textAlign: _l, ...rest } = s;
+      const { picture: _p, pictureAt: _a, textSize: _s, textAlign: _l, pageDesign: _d, ...rest } = s;
       if (s.id !== pageIds[0]) return rest;
       return {
         ...rest,
@@ -186,6 +192,7 @@ export function withPageChoice<T extends Pick<Passage, "sentences">>(
         ...(at && at !== "top" ? { pictureAt: at } : {}),
         ...(size && size !== "normal" ? { textSize: size } : {}),
         ...(align && align !== "left" ? { textAlign: align } : {}),
+        ...(design && (design.heading || design.layout || design.tone || design.intro) ? { pageDesign: design } : {}),
       };
     }),
   };
@@ -240,6 +247,8 @@ export interface BookPages {
   places: PicturePlace[];
   /** How each story page's words are set. */
   texts: PageText[];
+  /** First step number on each page. Consecutive step pages share a sequence. */
+  stepStarts: number[];
   keys: Set<string>;
   count: number;
 }
@@ -248,7 +257,18 @@ export function layoutBook(book: Pick<Passage, "band" | "language" | "sentences"
   const keys = keyWordsOf(book);
   const story = paginate(book).map((page) => page.map((s) => setSentence(s, book, keys)));
   const chosen = story.map((pg) => pagePicture(pg, book));
-  return { story, pictures: chosen.map((c) => c.key), places: chosen.map((c) => c.at), texts: story.map(pageText), keys, count: story.length + 1 };
+  let nextStep = 1;
+  const stepStarts = story.map((page) => {
+    const design = pageDesign(page);
+    if (design.layout !== "steps") {
+      nextStep = 1;
+      return 1;
+    }
+    const start = nextStep;
+    nextStep += page.length - Number(!!design.intro && page.length > 1);
+    return start;
+  });
+  return { story, pictures: chosen.map((c) => c.key), places: chosen.map((c) => c.at), texts: story.map(pageText), stepStarts, keys, count: story.length + 1 };
 }
 
 /**
