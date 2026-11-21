@@ -16,6 +16,11 @@ class AppError(Exception):
         super().__init__(message)
 
 
+class BadRequest(AppError):
+    def __init__(self, message: str, code: str = "bad_request"):
+        super().__init__(400, code, message)
+
+
 class Unauthorized(AppError):
     def __init__(self, message: str = "Sign in to continue.", code: str = "unauthorized"):
         super().__init__(401, code, message)

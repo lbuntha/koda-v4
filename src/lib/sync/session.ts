@@ -542,10 +542,11 @@ export const SessionAPI = {
     password: string,
     familyName: string,
     accountType: "parent" | "student" = "parent",
+    birthYear?: number,
   ): Promise<Session | EmailVerificationPending> {
     const result = await request<TokenPair | EmailVerificationPending>("/auth/signup", {
       method: "POST",
-      body: { email, password, familyName, accountType, deviceName: deviceName(), installId: installId() },
+      body: { email, password, familyName, accountType, birthYear, deviceName: deviceName(), installId: installId() },
     });
     if ("verificationRequired" in result) return result;
     const session = fromPair(result, { email, familyName });
@@ -584,6 +585,7 @@ export const SessionAPI = {
     credential: string,
     createAccount: boolean,
     familyName?: string,
+    newAccount?: { accountType: "parent" | "student"; birthYear?: number },
   ): Promise<Session> {
     const pair = await request<TokenPair>("/auth/google", {
       method: "POST",
@@ -591,6 +593,7 @@ export const SessionAPI = {
         credential,
         createAccount,
         familyName,
+        ...newAccount,
         deviceName: deviceName(),
         installId: installId(),
       },

@@ -36,6 +36,7 @@ async def test_google_can_create_a_parent_and_then_sign_in_again(client, db, mon
             "credential": CREDENTIAL,
             "createAccount": True,
             "familyName": "Sokha's family",
+            "birthYear": 1988,
             "installId": "i_google_browser",
         },
     )
@@ -169,3 +170,30 @@ async def test_google_only_account_fails_password_login_cleanly(client, monkeypa
     )
     assert response.status_code == 401
     assert response.json()["error"]["code"] == "bad_credentials"
+
+
+async def test_google_sign_up_needs_a_birth_year_of_someone_15_or_older(client, monkeypatch):
+    from app.models.common import now
+
+    configure_google(monkeypatch, google_claims())
+    body = {"credential": CREDENTIAL, "createAccount": True}
+    missing = await client.post("/auth/google", json=body)
+    assert missing.status_code == 400
+    assert missing.json()["error"]["code"] == "birth_year_required"
+    young = await client.post("/auth/google", json={**body, "birthYear": now().year - 12})
+    assert young.status_code == 400
+    assert young.json()["error"]["code"] == "too_young"
+
+
+async def test_google_for_myself_makes_a_student_who_is_their_own_learner(client, db, monkeypatch):
+    configure_google(monkeypatch, google_claims(email="dara@gmail.com", subject="google-dara"))
+    created = await client.post(
+        "/auth/google",
+        json={"credential": CREDENTIAL, "createAccount": True, "accountType": "student", "birthYear": 2009},
+    )
+    assert created.status_code == 200, created.text
+    assert created.json()["role"] == "student"
+    me = (await client.get("/auth/me", headers={"Authorization": f"Bearer {created.json()['accessToken']}"})).json()
+    assert me["role"] == "student"
+    assert me["learnerId"]
+    assert me["learnerBirthYear"] == 2009

@@ -18,7 +18,7 @@ async def _family(client, db, email="parent@example.com"):
     tokens = (
         await client.post(
             "/auth/signup",
-            json={"email": email, "password": "correct horse battery", "familyName": "The Riveras"},
+            json={"email": email, "password": "correct horse battery", "familyName": "The Riveras", "birthYear": 1990},
         )
     ).json()
     auth = {"Authorization": f"Bearer {tokens['accessToken']}"}

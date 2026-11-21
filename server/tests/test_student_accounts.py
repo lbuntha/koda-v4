@@ -22,6 +22,7 @@ async def signup(client, email: str, account_type: str = "student"):
             "email": email,
             "password": PASSWORD,
             "accountType": account_type,
+            "birthYear": 2005,
             "deviceName": "Their laptop",
             "installId": "i_theirs",
         },

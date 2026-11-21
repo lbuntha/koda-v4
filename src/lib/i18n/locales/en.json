@@ -220,8 +220,12 @@
       "offlineShort": "Can't connect. Try again in a moment.",
       "offlineSaved": "Can't connect right now. Your work is saved on this device.",
       "googleOffline": "Google sign-in needs the internet. Your work is still saved on this device.",
-      "firstMessage": "We couldn't send the email. Check the address and try again."
-    }
+      "firstMessage": "We couldn't send the email. Check the address and try again.",
+      "birthYear": "Choose the year you were born first."
+    },
+    "birthYear": "Year you were born",
+    "birthYearPick": "Choose a year",
+    "birthYearNote": "Accounts are for people 15 and older. Under 15? Ask a parent to add you: you'll sign in with a child code."
   },
   "install": {
     "button": "Add to home screen",
@@ -938,6 +942,11 @@
       "storyHintKm": "One sentence after another. Khmer has no spaces — type one wherever two words must break."
     },
     "review": {
+      "editSentence": "Edit sentence",
+      "editSentenceFor": "Edit sentence {line}",
+      "sentenceText": "Sentence text",
+      "sentenceAudioNotice": "Changing this sentence clears its old recording.",
+      "applySentence": "Apply sentence",
       "full": "This section already has its requested number of questions.",
       "sections": "Review sections",
       "toPublish": "To publish, reach at least 85% in each group: Understand {understand}, Words {words}, and Spell {spell}.",
@@ -1046,6 +1055,19 @@
     "notRunYet": "not run yet",
     "malformed": "The book itself is malformed:",
     "pages": {
+      "design": {
+        "layout": "Page layout",
+        "story": "Picture story",
+        "steps": "Step-by-step",
+        "heading": "Page heading",
+        "tone": "Page background",
+        "paper": "Paper",
+        "sky": "Sky blue",
+        "sun": "Warm yellow",
+        "picturePosition": "Picture position",
+        "intro": "Use the first sentence as an introduction",
+        "hint": "Open Preview to set a heading, background, or step-by-step layout."
+      },
       "intro": {
         "one": "This is the book as a reader turns it — {count} page after the cover. Pick a card to change its picture. A page left on Automatic shows the picture of a word on it.",
         "other": "This is the book as a reader turns it — {count} pages after the cover. Pick a card to change its picture. A page left on Automatic shows the picture of a word on it."

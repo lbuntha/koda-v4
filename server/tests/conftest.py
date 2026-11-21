@@ -48,6 +48,6 @@ async def client(db):
 @pytest.fixture
 def signup_body():
     def _make(email: str = "parent@example.com", password: str = "correct horse battery"):
-        return {"email": email, "password": password, "familyName": "The Riveras"}
+        return {"email": email, "password": password, "familyName": "The Riveras", "birthYear": 1990}
 
     return _make

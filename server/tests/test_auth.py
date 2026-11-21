@@ -34,6 +34,7 @@ async def test_student_signup_creates_restricted_personal_workspace(client):
             "password": "student password",
             "familyName": "My learning space",
             "accountType": "student",
+            "birthYear": 2008,
         },
     )
     assert r.status_code == 201, r.text
@@ -516,3 +517,23 @@ async def test_a_student_s_own_sign_in_cannot_use_this_door(client, signup_body)
     refused = await client.post(f"/auth/switch/{me['learnerId']}", headers=student_auth)
     assert refused.status_code == 403, refused.text
     assert refused.json()["error"]["code"] == "child_switch_forbidden"
+
+
+async def test_sign_up_is_for_people_15_and_older_with_a_birth_year(client, db, signup_body):
+    from app.models.common import now
+
+    body = signup_body("young@example.com")
+    missing = await client.post("/auth/signup", json={k: v for k, v in body.items() if k != "birthYear"})
+    assert missing.status_code == 400
+    assert missing.json()["error"]["code"] == "birth_year_required"
+
+    too_young = await client.post("/auth/signup", json={**body, "accountType": "student", "birthYear": now().year - 14})
+    assert too_young.status_code == 400
+    assert too_young.json()["error"]["code"] == "too_young"
+    assert await db.users.count_documents({"email": "young@example.com"}) == 0
+
+    fifteen = await client.post("/auth/signup", json={**body, "accountType": "student", "birthYear": now().year - 15})
+    assert fifteen.status_code == 201, fifteen.text
+    me = (await client.get("/auth/me", headers={"Authorization": f"Bearer {fifteen.json()['accessToken']}"})).json()
+    assert me["role"] == "student"
+    assert me["learnerBirthYear"] == now().year - 15

@@ -13,7 +13,7 @@ from fastapi.security import OAuth2PasswordRequestForm
 
 from app import notify_i18n
 from app.deps import AUTHENTICATED, CurrentPrincipal, Db, require
-from app.errors import Conflict, Forbidden, NotFound, Unauthorized
+from app.errors import BadRequest, Conflict, Forbidden, NotFound, Unauthorized
 from app.models.auth import (
     AvatarIn,
     AvatarOut,
@@ -296,6 +296,24 @@ async def _send_verification(db, user: dict) -> bool:
     )
 
 
+#: The youngest age that may have its own account. Younger children are added
+#: by a parent and sign in with a child code, never with an email.
+MIN_ACCOUNT_AGE = 15
+
+
+def _check_birth_year(year: int | None) -> int:
+    """The birth year of someone creating an account: required, and 15 or older."""
+    if year is None:
+        raise BadRequest("Choose the year you were born.", "birth_year_required")
+    if now().year - year < MIN_ACCOUNT_AGE:
+        raise BadRequest(
+            "Koda accounts are for people 15 and older. "
+            "Ask a parent to add you; you will sign in with a child code.",
+            "too_young",
+        )
+    return year
+
+
 def _name_from_email(email: str) -> str:
     """Something to call a student until they rename themselves.
 
@@ -390,6 +408,8 @@ async def signup(
     if not await system_repo.value_of(db, "account.signupOpen", True):
         raise Forbidden("This deployment is not accepting new accounts.", "signup_closed")
 
+    birth_year = _check_birth_year(body.birth_year)
+
     if await users.by_email(db, body.email):
         raise Conflict("That email already has an account. Sign in instead.", "email_taken")
 
@@ -407,6 +427,7 @@ async def signup(
         display_name=_name_from_email(body.email) if body.account_type == "student" else None,
         email_verified=not verification_required,
     )
+    user = await users.update_account(db, user["_id"], {"birthYear": birth_year}) or user
     fallback_name = "My family" if body.account_type == "parent" else "My learning space"
     family_name = body.family_name or fallback_name
     family = await families.create(db, family_name, owner_id=user["_id"])
@@ -426,7 +447,7 @@ async def signup(
     # added.
     learner_id = None
     if role == "student":
-        learner = await learners.create(db, family["_id"], _name_from_email(body.email))
+        learner = await learners.create(db, family["_id"], _name_from_email(body.email), birth_year)
         learner_id = learner["_id"]
 
     if verification_required:
@@ -568,18 +589,28 @@ async def google_auth(body: GoogleAuthIn, db: Db, request: Request) -> TokenPair
                     "This deployment is not accepting new accounts.", "signup_closed"
                 )
 
+            birth_year = _check_birth_year(body.birth_year)
+            student = body.account_type == "student"
             display_name = str(claims.get("name", "")).strip()[:80] or None
             user = await users.create(
                 db,
                 email,
                 None,
-                display_name=display_name,
+                display_name=display_name or (_name_from_email(email) if student else None),
                 google_sub=str(subject),
             )
+            user = await users.update_account(db, user["_id"], {"birthYear": birth_year}) or user
             family = await families.create(
-                db, body.family_name or "My family", owner_id=user["_id"]
+                db,
+                body.family_name or ("My learning space" if student else "My family"),
+                owner_id=user["_id"],
             )
-            await memberships.add(db, user["_id"], family["_id"], role="owner")
+            # As an email sign-up does: "For myself" is a student, their own learner.
+            await memberships.add(db, user["_id"], family["_id"], role="student" if student else "owner")
+            if student:
+                await learners.create(
+                    db, family["_id"], display_name or _name_from_email(email), birth_year
+                )
 
     if user.get("status", "active") == "suspended":
         raise Forbidden(

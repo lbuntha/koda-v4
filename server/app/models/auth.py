@@ -17,6 +17,9 @@ class SignupIn(Model):
     family_name: str | None = Field(default=None, max_length=60, alias="familyName")
     device_name: str = Field(default="This device", max_length=60, alias="deviceName")
     account_type: Literal["parent", "student"] = Field(default="parent", alias="accountType")
+    # Required at sign-up (checked in the route, so the refusal has a sentence):
+    # an account with an email is for someone 15 or older.
+    birth_year: int | None = Field(default=None, ge=1900, le=2100, alias="birthYear")
     # A stable id the client keeps for the life of an install.
     #
     # Optional, and absent from an older client, which is exactly the case the
@@ -94,6 +97,9 @@ class GoogleAuthIn(Model):
     credential: str = Field(min_length=100, max_length=10_000)
     create_account: bool = Field(default=False, alias="createAccount")
     family_name: str | None = Field(default=None, max_length=60, alias="familyName")
+    # Only read when creating an account, as for an email sign-up.
+    account_type: Literal["parent", "student"] = Field(default="parent", alias="accountType")
+    birth_year: int | None = Field(default=None, ge=1900, le=2100, alias="birthYear")
     device_name: str = Field(default="This device", max_length=60, alias="deviceName")
     install_id: str | None = Field(default=None, max_length=64, alias="installId")
 

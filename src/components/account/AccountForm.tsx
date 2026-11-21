@@ -13,6 +13,13 @@ import { currentLanguage, useT } from "../../lib/i18n";
 
 export type AccountMode = "signIn" | "signUp";
 type SignupType = "parent" | "student";
+
+/** Accounts with an email are for people 15 and older; younger children get a child code from a parent. */
+export const MIN_ACCOUNT_AGE = 15;
+/** Birth years the sign-up form offers: 15 years ago back to 90. */
+export const accountYears = (now = new Date().getFullYear()): number[] =>
+  Array.from({ length: 76 }, (_, i) => now - MIN_ACCOUNT_AGE - i);
+const ACCOUNT_YEARS = accountYears();
 type LoginMethod = "email" | "childCode";
 
 /**
@@ -328,6 +335,8 @@ export const AccountForm: React.FC<AccountFormProps> = ({ onSignedIn, autoFocus 
    * a teenager. Settings → Your learning lets them skip ahead on day one.
    */
   const [signupType, setSignupType] = useState<SignupType>("parent");
+  /** Required to sign up: an account with an email is for someone 15 or older. */
+  const [birthYear, setBirthYear] = useState("");
   const [urlJoin] = useState(joinFromUrl);
   const [loginMethod, setLoginMethod] = useState<LoginMethod>(urlJoin ? "childCode" : "email");
   const [joinCode, setJoinCode] = useState(urlJoin ?? "");
@@ -432,11 +441,16 @@ export const AccountForm: React.FC<AccountFormProps> = ({ onSignedIn, autoFocus 
     setError(null);
     try {
       if (mode === "signUp") {
+        if (!birthYear) {
+          setError(t("account.error.birthYear"));
+          return;
+        }
         const result = await SessionAPI.signUp(
           email.trim(),
           password,
           signupType === "parent" ? familyName.trim() || t("account.defaultFamilyName") : t("account.defaultStudentSpace"),
           signupType,
+          Number(birthYear),
         );
         if ("verificationRequired" in result) {
           setVerificationEmail(result.email);
@@ -475,6 +489,10 @@ export const AccountForm: React.FC<AccountFormProps> = ({ onSignedIn, autoFocus 
 
   const googleSignIn = async (credential: string) => {
     if (busy) return;
+    if (mode === "signUp" && !birthYear) {
+      setError(t("account.error.birthYear"));
+      return;
+    }
     setBusy(true);
     setError(null);
     try {
@@ -482,6 +500,7 @@ export const AccountForm: React.FC<AccountFormProps> = ({ onSignedIn, autoFocus 
         credential,
         mode === "signUp",
         familyName.trim() || undefined,
+        mode === "signUp" ? { accountType: signupType, birthYear: Number(birthYear) } : undefined,
       );
       playSound("pop");
       onSignedIn?.();
@@ -572,39 +591,10 @@ export const AccountForm: React.FC<AccountFormProps> = ({ onSignedIn, autoFocus 
       {/* Hidden rather than unmounted on the child-code path: taking the
           Google button out of the tree and putting it back rebuilds its iframe,
           which is the same blink as re-rendering it on a tab switch. */}
-      {googleConfigured && (
-        <div
-          data-google-block
-          className={`space-y-3 ${mode === "signIn" && loginMethod === "childCode" ? "hidden" : ""}`}
-        >
-          <GoogleSignInButton
-            key={language}
-            busy={busy}
-            onCredential={(credential) => void googleSignIn(credential)}
-            onUnavailable={() => setGoogleUnavailable(true)}
-          />
-
-          {googleUnavailable && (
-            <p
-              role="status"
-              className={themeSystem.flash("warning", "text-sm")}
-            >
-              {t("account.googleUnavailable")}
-            </p>
-          )}
-
-          {/* A labelled rule, so the two routes read as alternatives rather than
-              as steps one after the other. */}
-          <div className="flex items-center gap-3 pt-1">
-            <span className="h-px flex-1 bg-line" />
-            <span className="text-xs font-semibold text-muted">{t("account.orEmail")}</span>
-            <span className="h-px flex-1 bg-line" />
-          </div>
-        </div>
-      )}
-
-      <form onSubmit={submit} className="space-y-4">
-        {mode === "signUp" && (
+      {/* Who it is for and the birth year come before both ways in, Google and email:
+          each creates the account, and each needs them. */}
+      {mode === "signUp" && (
+        <div className="space-y-4">
           /*
            * "Who will learn?" as two picture cards rather than a toggle: the
            * choice decides everything after it, so it gets the size of a
@@ -645,7 +635,63 @@ export const AccountForm: React.FC<AccountFormProps> = ({ onSignedIn, autoFocus 
               );
             })}
           </div>
-        )}
+          <div>
+            <label className={labelClass} htmlFor="account-birth-year">
+              {t("account.birthYear")}
+            </label>
+            <select
+              id="account-birth-year"
+              value={birthYear}
+              disabled={busy}
+              onChange={(e) => setBirthYear(e.target.value)}
+              className={field}
+            >
+              <option value="" disabled>
+                {t("account.birthYearPick")}
+              </option>
+              {ACCOUNT_YEARS.map((y) => (
+                <option key={y} value={y}>
+                  {y}
+                </option>
+              ))}
+            </select>
+            <p className="mt-1.5 text-xs leading-relaxed text-muted">{t("account.birthYearNote")}</p>
+          </div>
+        </div>
+      )}
+
+      {googleConfigured && (
+        <div
+          data-google-block
+          className={`space-y-3 ${mode === "signIn" && loginMethod === "childCode" ? "hidden" : ""}`}
+        >
+          <GoogleSignInButton
+            key={language}
+            busy={busy}
+            onCredential={(credential) => void googleSignIn(credential)}
+            onUnavailable={() => setGoogleUnavailable(true)}
+          />
+
+          {googleUnavailable && (
+            <p
+              role="status"
+              className={themeSystem.flash("warning", "text-sm")}
+            >
+              {t("account.googleUnavailable")}
+            </p>
+          )}
+
+          {/* A labelled rule, so the two routes read as alternatives rather than
+              as steps one after the other. */}
+          <div className="flex items-center gap-3 pt-1">
+            <span className="h-px flex-1 bg-line" />
+            <span className="text-xs font-semibold text-muted">{t("account.orEmail")}</span>
+            <span className="h-px flex-1 bg-line" />
+          </div>
+        </div>
+      )}
+
+      <form onSubmit={submit} className="space-y-4">
         {mode === "signIn" && loginMethod === "childCode" ? (
           <div>
             <label className={labelClass} htmlFor="account-join-code">

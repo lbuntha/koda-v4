@@ -15,8 +15,8 @@ const signUp = vi.fn();
 vi.mock("../../lib/sync", () => ({
   ApiError: class ApiError extends Error {},
   SessionAPI: {
-    signUp: (email: string, password: string, space: string, type: string) =>
-      signUp(email, password, space, type),
+    signUp: (email: string, password: string, space: string, type: string, birthYear?: number) =>
+      signUp(email, password, space, type, birthYear),
     join: vi.fn(),
     signIn: vi.fn(),
     signInWithGoogle: vi.fn(),
@@ -51,10 +51,11 @@ describe("creating an account", () => {
     fill("Email", "dara@example.com");
     fill("Password", "correct horse battery");
     fireEvent.change(screen.getByLabelText(/Family or group name/), { target: { value: "The Riveras" } });
+    fireEvent.change(screen.getByLabelText("Year you were born"), { target: { value: "1990" } });
     fireEvent.click(screen.getByRole("button", { name: /Create account/ }));
 
     await waitFor(() =>
-      expect(signUp).toHaveBeenCalledWith("dara@example.com", "correct horse battery", "The Riveras", "parent"),
+      expect(signUp).toHaveBeenCalledWith("dara@example.com", "correct horse battery", "The Riveras", "parent", 1990),
     );
   });
 
@@ -66,11 +67,25 @@ describe("creating an account", () => {
     expect(screen.queryByLabelText(/Family or group name/)).toBeNull();
     fill("Email", "sam@example.com");
     fill("Password", "correct horse battery");
+    fireEvent.change(screen.getByLabelText("Year you were born"), { target: { value: "2010" } });
     fireEvent.click(screen.getByRole("button", { name: /Create account/ }));
 
     await waitFor(() =>
-      expect(signUp).toHaveBeenCalledWith("sam@example.com", "correct horse battery", "My learning space", "student"),
+      expect(signUp).toHaveBeenCalledWith("sam@example.com", "correct horse battery", "My learning space", "student", 2010),
     );
+  });
+
+  it("asks the year someone was born, offers only 15 and older, and will not sign up without it", async () => {
+    render(<AccountForm />);
+    fireEvent.click(screen.getByRole("tab", { name: "Create account" }));
+    const years = [...(screen.getByLabelText("Year you were born") as HTMLSelectElement).options].map((o) => o.value).filter(Boolean);
+    expect(Number(years[0])).toBe(new Date().getFullYear() - 15);
+
+    fill("Email", "sam@example.com");
+    fill("Password", "correct horse battery");
+    fireEvent.click(screen.getByRole("button", { name: /Create account/ }));
+    expect(await screen.findByRole("alert")).toHaveProperty("textContent", "Choose the year you were born first.");
+    expect(signUp).not.toHaveBeenCalled();
   });
 
   it("keeps Google's button in place when the tab changes", () => {
