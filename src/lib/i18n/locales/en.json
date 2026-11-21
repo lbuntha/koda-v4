@@ -3035,7 +3035,8 @@
       "inEachFamilyRsquoSOwn": "in each family’s own time",
       "tellAParentAfter": "Tell a parent after",
       "nameDays": "{name} days",
-      "daysWithoutPractice": "days without practice"
+      "daysWithoutPractice": "days without practice",
+      "defaultHour": "Parents who never chose an hour get it at"
     },
     "planCard": {
       "yourPlan": "Your plan",

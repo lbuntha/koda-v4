@@ -57,8 +57,9 @@ export const whenOf = (job: NotifyJob | undefined): string => {
   if (job.id === "absence-check") {
     return `After ${job.days ?? 7} days away, at each parent's reminder hour, once`;
   }
-  if (job.id === "daily-digest") return "At each parent's digest hour, on days with practice";
-  if (job.id === "daily-reminders") return "At the hour each parent chose";
+  if (job.id === "daily-digest")
+    return `At each parent's digest hour (${hourLabel(job.hour ?? 19)} if they never chose), on days with practice`;
+  if (job.id === "daily-reminders") return `At the hour each parent chose (${hourLabel(job.hour ?? 17)} if they never chose)`;
   if (job.id === "skill-announcements") return "Within the hour a skill is published";
   return "Nightly";
 };
@@ -294,6 +295,25 @@ export const NotifyEventsPanel: React.FC = () => {
                       ))}
                     </select>
                     <span>{translate("admin.notifyEventsPanel.at")}</span>
+                    <select
+                      aria-label={translate("admin.notifyEventsPanel.nameHour", { name: name })}
+                      value={job.hour}
+                      disabled={busy || !job.enabled}
+                      onChange={(e) => void saveJob(job.id, { hour: Number(e.target.value) })}
+                      className={select}
+                    >
+                      {Array.from({ length: 24 }, (_, hour) => (
+                        <option key={hour} value={hour}>
+                          {hourLabel(hour)}
+                        </option>
+                      ))}
+                    </select>
+                    <span>{translate("admin.notifyEventsPanel.inEachFamilyRsquoSOwn")}</span>
+                  </div>
+                )}
+                {job.weekday === null && job.hour !== null && (
+                  <div className="flex flex-wrap items-center gap-2 text-xs text-muted">
+                    <span>{translate("admin.notifyEventsPanel.defaultHour")}</span>
                     <select
                       aria-label={translate("admin.notifyEventsPanel.nameHour", { name: name })}
                       value={job.hour}

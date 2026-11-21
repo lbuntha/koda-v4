@@ -61,10 +61,25 @@ def _clamp_hour(value: Any, fallback: int) -> int:
     return hour if 0 <= hour <= 23 else fallback
 
 
+async def admin_defaults(db: AsyncIOMotorDatabase) -> dict[str, Any]:
+    """The defaults, with the hours the admin set on the Events screen.
+
+    A parent who chose an hour keeps it; this is only for everyone who did not.
+    """
+    base = defaults()
+    rows = {
+        row["_id"]: row
+        async for row in db.notify_jobs.find({"_id": {"$in": ["daily-reminders", "daily-digest"]}}, {"hour": 1})
+    }
+    base["reminderHour"] = _clamp_hour(rows.get("daily-reminders", {}).get("hour"), base["reminderHour"])
+    base["digestHour"] = _clamp_hour(rows.get("daily-digest", {}).get("hour"), base["digestHour"])
+    return base
+
+
 async def for_user(db: AsyncIOMotorDatabase, user_id: str) -> dict[str, Any]:
     """One person's schedule, filled in from the defaults where they said nothing."""
     row = await db.notify_schedule.find_one({"_id": user_id}) or {}
-    base = defaults()
+    base = await admin_defaults(db)
     return {
         "reminderHour": _clamp_hour(row.get("reminderHour"), base["reminderHour"]),
         "quietFrom": _clamp_hour(row.get("quietFrom"), base["quietFrom"]),
@@ -80,7 +95,7 @@ async def for_users(db: AsyncIOMotorDatabase, user_ids: list[str]) -> dict[str, 
         return {}
     rows = await db.notify_schedule.find({"_id": {"$in": user_ids}}).to_list(length=500)
     found = {row["_id"]: row for row in rows}
-    base = defaults()
+    base = await admin_defaults(db)
     return {
         user_id: {
             "reminderHour": _clamp_hour(found.get(user_id, {}).get("reminderHour"), base["reminderHour"]),

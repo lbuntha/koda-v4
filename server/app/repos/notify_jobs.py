@@ -22,12 +22,12 @@ from app.models.common import now
 #: Every job, and how it ships.
 JOB_DEFAULTS: dict[str, dict[str, Any]] = {
     "weekly-summary": {"enabled": True, "weekday": 6, "hour": 18},
-    "daily-reminders": {"enabled": True},
+    "daily-reminders": {"enabled": True, "hour": 17},
     "skill-announcements": {"enabled": True},
     # Phase 2. Both ride the hourly `daily-reminders` call, so neither needs a
     # Cloud Scheduler job of its own.
     "absence-check": {"enabled": True, "days": 7},
-    "daily-digest": {"enabled": True},
+    "daily-digest": {"enabled": True, "hour": 19},
     "token-sweep": {"enabled": True},
 }
 
@@ -35,6 +35,10 @@ JOB_DEFAULTS: dict[str, dict[str, Any]] = {
 #: reminders go at each parent's own hour, announcements as soon as there is a
 #: skill to announce, and the sweep at night when nothing notices it.
 TIMED = frozenset({"weekly-summary"})
+
+#: The jobs whose hour is a *default*: each parent may pick their own hour, and
+#: this is the one used for every parent who never did. The admin sets it.
+DEFAULT_HOUR = frozenset({"daily-reminders", "daily-digest"})
 
 #: The jobs with a number of days an operator can set — how long a child is
 #: away before a parent is told.
@@ -56,7 +60,7 @@ def _merge(job: str, row: dict[str, Any]) -> dict[str, Any]:
         "id": job,
         "enabled": bool(row.get("enabled", base["enabled"])),
         "weekday": _clamp(row.get("weekday"), 0, 6, base["weekday"]) if job in TIMED else None,
-        "hour": _clamp(row.get("hour"), 0, 23, base["hour"]) if job in TIMED else None,
+        "hour": _clamp(row.get("hour"), 0, 23, base["hour"]) if job in TIMED | DEFAULT_HOUR else None,
         "days": _clamp(row.get("days"), 1, 60, base["days"]) if job in THRESHOLD else None,
         "lastRunAt": last.isoformat() if last else None,
         "lastSent": row.get("lastSent"),
@@ -92,7 +96,7 @@ async def save(
         patch["enabled"] = enabled
     if job in TIMED and weekday is not None:
         patch["weekday"] = _clamp(weekday, 0, 6, JOB_DEFAULTS[job]["weekday"])
-    if job in TIMED and hour is not None:
+    if job in TIMED | DEFAULT_HOUR and hour is not None:
         patch["hour"] = _clamp(hour, 0, 23, JOB_DEFAULTS[job]["hour"])
     await db.notify_jobs.update_one({"_id": job}, {"$set": patch}, upsert=True)
     return await get(db, job)

@@ -112,3 +112,20 @@ async def test_other_family_cannot_read_a_learners_feed(client, db, signup_body)
     stranger = await family_with_child(client, signup_body, "x@example.com", "Xi")
     response = await client.get(f"/study-feed/{viewer[1]['id']}", headers=auth(stranger[0]))
     assert response.status_code == 404
+
+
+async def test_admin_default_hours_apply_to_parents_who_never_chose(db):
+    from app.repos import notify_jobs, notify_schedule
+
+    await notify_jobs.save(db, "daily-reminders", hour=8, updated_by="admin")
+    await notify_jobs.save(db, "daily-digest", hour=20, updated_by="admin")
+    await notify_schedule.save(db, "u_chose", reminder_hour=15)
+
+    chose = await notify_schedule.for_user(db, "u_chose")
+    never = (await notify_schedule.for_users(db, ["u_never"]))["u_never"]
+
+    assert chose["reminderHour"] == 15  # a parent's own choice wins
+    assert never["reminderHour"] == 8
+    assert never["digestHour"] == 20
+    assert (await notify_jobs.get(db, "daily-digest"))["hour"] == 20
+    assert (await notify_jobs.get(db, "daily-digest"))["weekday"] is None

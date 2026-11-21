@@ -2891,7 +2891,8 @@
       "inEachFamilyRsquoSOwn": "តាមម៉ោងផ្ទាល់របស់គ្រួសារនីមួយៗ",
       "tellAParentAfter": "ប្រាប់ឪពុកម្ដាយក្រោយ",
       "nameDays": "{name} ថ្ងៃ",
-      "daysWithoutPractice": "ថ្ងៃដោយមិនបានហាត់"
+      "daysWithoutPractice": "ថ្ងៃដោយមិនបានហាត់",
+      "defaultHour": "ឪពុកម្ដាយដែលមិនបានជ្រើសម៉ោង នឹងទទួលបាននៅម៉ោង"
     },
     "planCard": {
       "yourPlan": "គម្រោងរបស់អ្នក",
