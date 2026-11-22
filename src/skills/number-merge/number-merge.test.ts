@@ -16,10 +16,10 @@ const isPracticeLesson = (lesson: (typeof skill.lessons)[number]): boolean =>
 const levelOf = (lesson: (typeof skill.lessons)[number]) => (lesson.params as { level: number }).level;
 
 describe("Number Merge registration", () => {
-  it("ships 32 teaching lessons and 8 practice lessons on one engine, as a draft", () => {
-    expect(skill.lessons).toHaveLength(40);
-    expect(skill.lessons.map(levelOf)).toEqual(Array.from({ length: 40 }, (_, i) => i + 1));
-    expect(skill.lessons.filter(isPracticeLesson).map(levelOf)).toEqual([33, 34, 35, 36, 37, 38, 39, 40]);
+  it("ships 39 teaching lessons and 11 practice lessons on one engine, as a draft", () => {
+    expect(skill.lessons).toHaveLength(50);
+    expect(skill.lessons.map(levelOf)).toEqual(Array.from({ length: 50 }, (_, i) => i + 1));
+    expect(skill.lessons.filter(isPracticeLesson).map(levelOf)).toEqual([33, 34, 35, 36, 37, 38, 39, 40, 48, 49, 50]);
     expect(Object.keys(skill.activities)).toEqual(["board"]);
     expect(skill.manifest.status).toBe("draft");
   });
@@ -64,10 +64,10 @@ describe("Number Merge in the course", () => {
     expect(ours.flatMap((u) => u.lessons)).toEqual(skill.lessons.map((l) => `number-merge/${l.id}`));
   });
 
-  it("keeps teaching and practice in separate units, practice last", () => {
+  it("keeps teaching and practice in separate units, each block ending in practice", () => {
     const kinds = ours.map((u) => u.lessons.map((ref) => isPracticeLesson(skill.lessons.find((l) => `number-merge/${l.id}` === ref)!)));
     for (const unit of kinds) expect(new Set(unit).size).toBe(1);
-    expect(kinds.map((u) => u[0])).toEqual([false, false, false, false, false, false, false, false, true]);
+    expect(kinds.map((u) => u[0])).toEqual([false, false, false, false, false, false, false, false, true, false, false, false, true]);
   });
 
   it("gives every unit an icon from the art library, not an emoji", () => {

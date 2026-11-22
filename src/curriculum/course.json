@@ -1844,6 +1844,52 @@
         "number-merge/practice-times-tables",
         "number-merge/practice-fractions"
       ]
+    },
+    {
+      "id": "u141",
+      "unitNumber": 141,
+      "title": "Unit 141: Number Merge — Make 20",
+      "description": "Partners that make 20, using the 10 facts you know.",
+      "icon": "number-merge-bonds",
+      "lessons": [
+        "number-merge/friends-of-twenty",
+        "number-merge/make-twenty-board"
+      ]
+    },
+    {
+      "id": "u142",
+      "unitNumber": 142,
+      "title": "Unit 142: Number Merge — Times Tables to 60",
+      "description": "Build 20, 30 and 60 from the 2, 3, 5 and 10 times tables.",
+      "icon": "number-merge-times",
+      "lessons": [
+        "number-merge/multiply-to-20",
+        "number-merge/multiply-to-30",
+        "number-merge/multiply-to-60"
+      ]
+    },
+    {
+      "id": "u143",
+      "unitNumber": 143,
+      "title": "Unit 143: Number Merge — Sixths and Tenths",
+      "description": "Thirds, sixths, fifths and tenths make one whole.",
+      "icon": "number-merge-fraction",
+      "lessons": [
+        "number-merge/thirds-and-sixths",
+        "number-merge/tenths-to-one"
+      ]
+    },
+    {
+      "id": "u144",
+      "unitNumber": 144,
+      "title": "Unit 144: Practice — Number Merge 2",
+      "description": "Make 20, times to 30 and sixths, without hints.",
+      "icon": "kit-repeat",
+      "lessons": [
+        "number-merge/practice-make-twenty",
+        "number-merge/practice-multiply-to-30",
+        "number-merge/practice-sixths"
+      ]
     }
   ]
 }

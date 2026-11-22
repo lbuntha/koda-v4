@@ -13,10 +13,11 @@
     "ages": [5, 11],
     "category": "operations"
   },
-  "topics": ["numbers", "addition", "subtraction", "multiplication", "fractions", "place-value"],
+  "topics": ["numbers", "addition", "subtraction", "multiplication", "fractions"],
   "teaches": [
     "five-benchmark",
     "make-ten",
+    "make-twenty",
     "doubles-merger",
     "merge-target-adder",
     "unitiser-ten",

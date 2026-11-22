@@ -1664,6 +1664,420 @@
         9,
         11
       ]
+    },
+    {
+      "id": "friends-of-twenty",
+      "title": "Friends of 20",
+      "concept": "Two Numbers That Make 20",
+      "conceptKey": "make-twenty",
+      "requires": [
+        "make-ten"
+      ],
+      "activity": "number-merge/board",
+      "params": {
+        "level": 41,
+        "question": {
+          "mode": "bond",
+          "target": 20,
+          "size": 4,
+          "questionsPerRound": 5
+        },
+        "play": {
+          "targetObjective": "Merge two numbers that make 20.",
+          "stepByStep": [
+            "Pick a number.",
+            "Use the 10 fact you know: 7 needs 3 to make 10.",
+            "So 7 needs 13 to make 20. Find it next to your number and merge."
+          ],
+          "kidTip": "Make 10 first in your head, then add another 10.",
+          "audioPrompt": "Merge two numbers that make 20."
+        }
+      },
+      "difficulty": "Medium",
+      "icon": "number-merge-bonds",
+      "iconName": "star",
+      "iconTone": "pink",
+      "pedagogyTip": "Bonds to 20 are bonds to 10 with a ten added; the board rewards using the fact a child already holds.",
+      "standards": [
+        "CCSS.1.OA.C.6",
+        "CCSS.2.OA.B.2"
+      ],
+      "trajectoryLevel": "part-whole",
+      "ageBand": [
+        6,
+        8
+      ]
+    },
+    {
+      "id": "make-twenty-board",
+      "title": "Make 20 on a Big Board",
+      "concept": "Finding Pairs to 20 Fast",
+      "conceptKey": "make-twenty",
+      "requires": [
+        "make-twenty"
+      ],
+      "activity": "number-merge/board",
+      "params": {
+        "level": 42,
+        "question": {
+          "mode": "bond",
+          "target": 20,
+          "size": 5,
+          "questionsPerRound": 6
+        },
+        "play": {
+          "targetObjective": "Merge two numbers that make 20.",
+          "stepByStep": [
+            "Look for a big number first, like 15 or 18.",
+            "Ask: what does it need to make 20?",
+            "Find that partner right next to it and merge."
+          ],
+          "kidTip": "Big numbers need small partners: 18 needs 2.",
+          "audioPrompt": "Merge two numbers that make 20."
+        }
+      },
+      "difficulty": "Hard",
+      "icon": "number-merge-bonds",
+      "iconName": "star",
+      "iconTone": "pink",
+      "pedagogyTip": "A bigger board means more pairs to scan, which moves a child from counting on towards recall.",
+      "standards": [
+        "CCSS.1.OA.C.6",
+        "CCSS.2.OA.B.2"
+      ],
+      "trajectoryLevel": "part-whole",
+      "ageBand": [
+        6,
+        8
+      ]
+    },
+    {
+      "id": "multiply-to-20",
+      "title": "Multiply to 20",
+      "concept": "Times 2, 5 and 10 Make 20",
+      "conceptKey": "factor-merger",
+      "requires": [
+        "doubles-merger"
+      ],
+      "activity": "number-merge/board",
+      "params": {
+        "level": 43,
+        "question": {
+          "mode": "product",
+          "target": 20,
+          "size": 4,
+          "questionsPerRound": 5
+        },
+        "play": {
+          "targetObjective": "Multiply numbers to make exactly 20.",
+          "stepByStep": [
+            "Merging multiplies the two numbers.",
+            "20 is 2 × 10, 4 × 5 or 2 × 2 × 5.",
+            "Finish with two numbers that multiply to 20."
+          ],
+          "kidTip": "Think of the 2, 5 and 10 times tables. Which ones land on 20?",
+          "audioPrompt": "Multiply numbers to make exactly 20."
+        }
+      },
+      "difficulty": "Easy",
+      "icon": "number-merge-times",
+      "iconName": "gem",
+      "iconTone": "purple",
+      "pedagogyTip": "The 2, 5 and 10 tables come first; 20 can be built from all three.",
+      "standards": [
+        "CCSS.3.OA.C.7"
+      ],
+      "trajectoryLevel": "deriver",
+      "ageBand": [
+        7,
+        9
+      ]
+    },
+    {
+      "id": "multiply-to-30",
+      "title": "Multiply to 30",
+      "concept": "Factors of 30",
+      "conceptKey": "factor-merger",
+      "requires": [
+        "factor-merger"
+      ],
+      "activity": "number-merge/board",
+      "params": {
+        "level": 44,
+        "question": {
+          "mode": "product",
+          "target": 30,
+          "size": 4,
+          "questionsPerRound": 5
+        },
+        "play": {
+          "targetObjective": "Multiply numbers to make exactly 30.",
+          "stepByStep": [
+            "Merging multiplies the two numbers.",
+            "30 is 5 × 6, 3 × 10 or 2 × 15.",
+            "Only keep numbers that are part of 30's times facts."
+          ],
+          "kidTip": "2 × 3 makes 6, and 6 × 5 makes 30. Build one part first.",
+          "audioPrompt": "Multiply numbers to make exactly 30."
+        }
+      },
+      "difficulty": "Medium",
+      "icon": "number-merge-times",
+      "iconName": "gem",
+      "iconTone": "purple",
+      "pedagogyTip": "Three small factors (2, 3, 5) can be merged in any order and still reach 30.",
+      "standards": [
+        "CCSS.3.OA.C.7"
+      ],
+      "trajectoryLevel": "deriver",
+      "ageBand": [
+        8,
+        10
+      ]
+    },
+    {
+      "id": "multiply-to-60",
+      "title": "Multiply to 60",
+      "concept": "Many Ways to Make 60",
+      "conceptKey": "factor-merger",
+      "requires": [
+        "factor-merger"
+      ],
+      "activity": "number-merge/board",
+      "params": {
+        "level": 45,
+        "question": {
+          "mode": "product",
+          "target": 60,
+          "size": 5,
+          "questionsPerRound": 5
+        },
+        "play": {
+          "targetObjective": "Multiply numbers to make exactly 60.",
+          "stepByStep": [
+            "60 has many factor pairs: 6 × 10, 5 × 12, 4 × 15, 3 × 20.",
+            "Merge small numbers into a factor of 60.",
+            "Finish with two numbers that multiply to 60."
+          ],
+          "kidTip": "If a merge makes a number that does not go into 60, it will not be allowed.",
+          "audioPrompt": "Multiply numbers to make exactly 60."
+        }
+      },
+      "difficulty": "Hard",
+      "icon": "number-merge-times",
+      "iconName": "gem",
+      "iconTone": "purple",
+      "pedagogyTip": "60 has more factors than any number before it, so a child has to plan which pair to build.",
+      "standards": [
+        "CCSS.3.OA.C.7"
+      ],
+      "trajectoryLevel": "deriver",
+      "ageBand": [
+        9,
+        11
+      ]
+    },
+    {
+      "id": "thirds-and-sixths",
+      "title": "Thirds and Sixths",
+      "concept": "Sixths, Thirds and Halves Make One Whole",
+      "conceptKey": "fraction-whole-maker",
+      "requires": [
+        "fraction-whole-maker"
+      ],
+      "activity": "number-merge/board",
+      "params": {
+        "level": 46,
+        "question": {
+          "mode": "fraction",
+          "target": 6,
+          "parts": [
+            1,
+            2,
+            3
+          ],
+          "size": 4,
+          "questionsPerRound": 5
+        },
+        "play": {
+          "targetObjective": "Merge parts to make one whole.",
+          "stepByStep": [
+            "The pies show sixths, thirds and halves.",
+            "Change each one into sixths: a third is 2 sixths, a half is 3 sixths.",
+            "Merge until you have 6 sixths. That is one whole."
+          ],
+          "kidTip": "1/2 is 3 sixths and 1/3 is 2 sixths. Add the sixths until you have 6.",
+          "audioPrompt": "Merge parts to make one whole."
+        }
+      },
+      "difficulty": "Medium",
+      "icon": "number-merge-fraction",
+      "iconName": "circleDot",
+      "iconTone": "cyan",
+      "pedagogyTip": "A third and a half are both sixths; the pie shows why 1/3 + 1/6 = 1/2.",
+      "standards": [
+        "CCSS.4.NF.B.3a",
+        "CCSS.3.NF.A.1"
+      ],
+      "trajectoryLevel": "unit-fraction-builder",
+      "ageBand": [
+        9,
+        11
+      ]
+    },
+    {
+      "id": "tenths-to-one",
+      "title": "Tenths to One",
+      "concept": "Tenths, Fifths and Halves Make One Whole",
+      "conceptKey": "fraction-whole-maker",
+      "requires": [
+        "fraction-whole-maker"
+      ],
+      "activity": "number-merge/board",
+      "params": {
+        "level": 47,
+        "question": {
+          "mode": "fraction",
+          "target": 10,
+          "parts": [
+            1,
+            2,
+            5
+          ],
+          "size": 4,
+          "questionsPerRound": 5
+        },
+        "play": {
+          "targetObjective": "Merge parts to make one whole.",
+          "stepByStep": [
+            "The pies show tenths, fifths and halves.",
+            "Change each one into tenths: a fifth is 2 tenths, a half is 5 tenths.",
+            "Merge until you have 10 tenths. That is one whole."
+          ],
+          "kidTip": "1/2 is 5 tenths and 1/5 is 2 tenths. Add the tenths until you have 10.",
+          "audioPrompt": "Merge parts to make one whole."
+        }
+      },
+      "difficulty": "Hard",
+      "icon": "number-merge-fraction",
+      "iconName": "circleDot",
+      "iconTone": "cyan",
+      "pedagogyTip": "Tenths are the bridge to decimals: one whole is ten tenths, as 1.0 is ten lots of 0.1.",
+      "standards": [
+        "CCSS.4.NF.B.3a",
+        "CCSS.3.NF.A.1"
+      ],
+      "trajectoryLevel": "unit-fraction-builder",
+      "ageBand": [
+        10,
+        11
+      ]
+    },
+    {
+      "id": "practice-make-twenty",
+      "title": "Practice: Make 20",
+      "concept": "Practice Without Help",
+      "conceptKey": "make-twenty",
+      "requires": [
+        "make-twenty"
+      ],
+      "activity": "number-merge/board",
+      "params": {
+        "level": 48,
+        "question": {
+          "mode": "bond",
+          "target": 20,
+          "size": 5,
+          "questionsPerRound": 10,
+          "practice": true
+        }
+      },
+      "difficulty": "Medium",
+      "icon": "number-merge-bonds",
+      "iconName": "star",
+      "iconTone": "pink",
+      "pedagogyTip": "Practice without hints or a spoken prompt.",
+      "standards": [
+        "CCSS.1.OA.C.6",
+        "CCSS.2.OA.B.2"
+      ],
+      "trajectoryLevel": "part-whole",
+      "ageBand": [
+        6,
+        8
+      ]
+    },
+    {
+      "id": "practice-multiply-to-30",
+      "title": "Practice: Multiply to 30",
+      "concept": "Practice Without Help",
+      "conceptKey": "factor-merger",
+      "requires": [
+        "factor-merger"
+      ],
+      "activity": "number-merge/board",
+      "params": {
+        "level": 49,
+        "question": {
+          "mode": "product",
+          "target": 30,
+          "size": 5,
+          "questionsPerRound": 10,
+          "practice": true
+        }
+      },
+      "difficulty": "Medium",
+      "icon": "number-merge-times",
+      "iconName": "gem",
+      "iconTone": "purple",
+      "pedagogyTip": "Practice without hints or a spoken prompt.",
+      "standards": [
+        "CCSS.3.OA.C.7"
+      ],
+      "trajectoryLevel": "deriver",
+      "ageBand": [
+        8,
+        10
+      ]
+    },
+    {
+      "id": "practice-sixths",
+      "title": "Practice: Sixths to One",
+      "concept": "Practice Without Help",
+      "conceptKey": "fraction-whole-maker",
+      "requires": [
+        "fraction-whole-maker"
+      ],
+      "activity": "number-merge/board",
+      "params": {
+        "level": 50,
+        "question": {
+          "mode": "fraction",
+          "target": 6,
+          "parts": [
+            1,
+            2,
+            3
+          ],
+          "size": 4,
+          "questionsPerRound": 10,
+          "practice": true
+        }
+      },
+      "difficulty": "Medium",
+      "icon": "number-merge-fraction",
+      "iconName": "circleDot",
+      "iconTone": "cyan",
+      "pedagogyTip": "Practice without hints or a spoken prompt.",
+      "standards": [
+        "CCSS.4.NF.B.3a",
+        "CCSS.3.NF.A.1"
+      ],
+      "trajectoryLevel": "unit-fraction-builder",
+      "ageBand": [
+        9,
+        11
+      ]
     }
   ]
 }

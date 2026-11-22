@@ -22,11 +22,15 @@
     "Merge two numbers that are 5 apart.",
     "Merge two numbers that are the same.",
     "Merge two numbers that make 10.",
+    "Merge two numbers that make 20.",
     "Merge two numbers that make 5.",
     "Multiply numbers to make exactly 12.",
     "Multiply numbers to make exactly 18.",
+    "Multiply numbers to make exactly 20.",
     "Multiply numbers to make exactly 24.",
-    "Multiply numbers to make exactly 36."
+    "Multiply numbers to make exactly 30.",
+    "Multiply numbers to make exactly 36.",
+    "Multiply numbers to make exactly 60."
   ],
   "phrases": []
 }
