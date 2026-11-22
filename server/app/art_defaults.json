@@ -205,6 +205,11 @@
     "markup": "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 100 100\">\n  <title>Badge</title>\n  <path fill=\"#EC4899\" d=\"M30 56 L20 94 L36 86 L44 98 L52 62 Z\" />\n  <path fill=\"#0EA5E9\" d=\"M70 56 L80 94 L64 86 L56 98 L48 62 Z\" />\n  <circle cx=\"50\" cy=\"40\" r=\"32\" fill=\"#8B5CF6\" />\n  <path fill=\"#A78BFA\" d=\"M50 8 A32 32 0 0 0 22 56 L32 50 A20 20 0 0 1 50 20 Z\" />\n  <circle cx=\"50\" cy=\"40\" r=\"20\" fill=\"#FFFFFF\" />\n  <path fill=\"#8B5CF6\" d=\"M50 26 L54 36 L64 37 L56 44 L59 54 L50 48 L41 54 L44 44 L36 37 L46 36 Z\" />\n</svg>"
   },
   {
+    "id": "kit-bolt",
+    "category": "kit",
+    "markup": "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 100 100\">\n  <title>XP</title>\n  <path fill=\"#6366F1\" d=\"M58 6 L20 56 H46 L38 94 L80 40 H54 Z\" />\n  <path fill=\"#818CF8\" d=\"M58 6 L20 56 H46 L50 36 L54 40 Z\" />\n  <circle cx=\"44\" cy=\"30\" r=\"4\" fill=\"#FFFFFF\" opacity=\"0.7\" />\n</svg>"
+  },
+  {
     "id": "kit-calendar",
     "category": "kit",
     "markup": "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 100 100\">\n  <title>Calendar</title>\n  <rect x=\"12\" y=\"18\" width=\"76\" height=\"72\" rx=\"14\" fill=\"#6366F1\" />\n  <path fill=\"#818CF8\" d=\"M26 18 H74 L12 74 V32 a14 14 0 0 1 14 -14 Z\" />\n  <rect x=\"20\" y=\"38\" width=\"60\" height=\"44\" rx=\"8\" fill=\"#FFFFFF\" />\n  <rect x=\"28\" y=\"8\" width=\"10\" height=\"20\" rx=\"5\" fill=\"#3730A3\" />\n  <rect x=\"62\" y=\"8\" width=\"10\" height=\"20\" rx=\"5\" fill=\"#3730A3\" />\n  <rect x=\"28\" y=\"46\" width=\"12\" height=\"10\" rx=\"3\" fill=\"#10B981\" />\n  <rect x=\"44\" y=\"46\" width=\"12\" height=\"10\" rx=\"3\" fill=\"#10B981\" />\n  <rect x=\"60\" y=\"46\" width=\"12\" height=\"10\" rx=\"3\" fill=\"#E0E7FF\" />\n  <rect x=\"28\" y=\"62\" width=\"12\" height=\"10\" rx=\"3\" fill=\"#10B981\" />\n  <rect x=\"44\" y=\"62\" width=\"12\" height=\"10\" rx=\"3\" fill=\"#E0E7FF\" />\n  <rect x=\"60\" y=\"62\" width=\"12\" height=\"10\" rx=\"3\" fill=\"#E0E7FF\" />\n</svg>"
@@ -238,6 +243,11 @@
     "id": "kit-flag",
     "category": "kit",
     "markup": "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 100 100\">\n  <title>Start</title>\n  <rect x=\"18\" y=\"8\" width=\"8\" height=\"86\" rx=\"4\" fill=\"#475569\" />\n  <path fill=\"#10B981\" d=\"M26 12 C40 6 52 18 66 14 C74 12 80 10 86 10 V54 C80 54 74 56 66 58 C52 62 40 50 26 56 Z\" />\n  <path fill=\"#34D399\" d=\"M26 12 C40 6 52 18 66 14 C70 13 73 12 76 11.5 L26 46 Z\" />\n  <circle cx=\"22\" cy=\"90\" r=\"8\" fill=\"#334155\" />\n</svg>"
+  },
+  {
+    "id": "kit-flame",
+    "category": "kit",
+    "markup": "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 100 100\">\n  <title>Streak</title>\n  <path fill=\"#F43F5E\" d=\"M50 8 C56 24 76 34 76 60 C76 78 64 92 50 92 C36 92 24 78 24 60 C24 46 32 38 36 30 C38 40 42 44 46 46 C44 30 46 18 50 8 Z\" />\n  <path fill=\"#FB7185\" d=\"M50 8 C44 18 44 30 46 46 C42 44 38 40 36 30 C32 38 24 46 24 60 C24 70 28 80 34 86 Z\" />\n  <path fill=\"#FFE4E6\" d=\"M50 52 C54 60 62 64 62 74 C62 82 56 88 50 88 C44 88 38 82 38 74 C38 66 46 62 50 52 Z\" />\n</svg>"
   },
   {
     "id": "kit-globe",
@@ -358,6 +368,11 @@
     "id": "kit-timer",
     "category": "kit",
     "markup": "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 100 100\">\n  <title>Time limit</title>\n  <rect x=\"40\" y=\"6\" width=\"20\" height=\"10\" rx=\"4\" fill=\"#BE123C\" />\n  <rect x=\"46\" y=\"14\" width=\"8\" height=\"10\" fill=\"#BE123C\" />\n  <rect x=\"74\" y=\"20\" width=\"10\" height=\"14\" rx=\"4\" fill=\"#BE123C\" transform=\"rotate(45 79 27)\" />\n  <circle cx=\"50\" cy=\"56\" r=\"36\" fill=\"#F43F5E\" />\n  <path fill=\"#FB7185\" d=\"M50 20 A36 36 0 0 0 20 76 L32 68 A22 22 0 0 1 50 34 Z\" />\n  <circle cx=\"50\" cy=\"56\" r=\"26\" fill=\"#FFFFFF\" />\n  <path fill=\"#FFE4E6\" d=\"M50 56 V30 A26 26 0 0 1 72.5 69 Z\" />\n  <path fill=\"none\" stroke=\"#9F1239\" stroke-width=\"6\" stroke-linecap=\"round\" d=\"M50 56 L62 44\" />\n  <circle cx=\"50\" cy=\"56\" r=\"5\" fill=\"#9F1239\" />\n</svg>"
+  },
+  {
+    "id": "kit-trophy",
+    "category": "kit",
+    "markup": "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 100 100\">\n  <title>Trophy</title>\n  <path fill=\"none\" stroke=\"#7C3AED\" stroke-width=\"7\" stroke-linecap=\"round\" d=\"M26 26 H14 V34 C14 46 22 52 32 52\" />\n  <path fill=\"none\" stroke=\"#7C3AED\" stroke-width=\"7\" stroke-linecap=\"round\" d=\"M74 26 H86 V34 C86 46 78 52 68 52\" />\n  <path fill=\"#8B5CF6\" d=\"M24 14 H76 V40 C76 56 64 66 50 66 C36 66 24 56 24 40 Z\" />\n  <path fill=\"#A78BFA\" d=\"M24 14 H52 L24 52 C24 48 24 44 24 40 Z\" />\n  <rect x=\"44\" y=\"64\" width=\"12\" height=\"12\" fill=\"#7C3AED\" />\n  <rect x=\"30\" y=\"76\" width=\"40\" height=\"12\" rx=\"4\" fill=\"#F43F5E\" />\n  <rect x=\"30\" y=\"76\" width=\"20\" height=\"12\" rx=\"4\" fill=\"#FB7185\" />\n  <path fill=\"#FFFFFF\" d=\"M50 24 L53.5 31.5 L61.5 32.3 L55.5 37.6 L57.3 45.5 L50 41.4 L42.7 45.5 L44.5 37.6 L38.5 32.3 L46.5 31.5 Z\" />\n</svg>"
   },
   {
     "id": "kit-words",

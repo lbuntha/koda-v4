@@ -1,5 +1,6 @@
 import React, { useEffect } from "react";
-import { Star, RotateCcw, ArrowRight, Trophy, Sparkles, Flame, Zap, Target, Home } from "lucide-react";
+import { RotateCcw, ArrowRight } from "lucide-react";
+import { SvgAsset } from "../../../assets/svg";
 import { playSound } from "../../../utils/audio";
 import { levelBar, roundPraise, type PraiseFacts } from "../round/roundPraise";
 import { useT } from "../../../lib/i18n";
@@ -194,13 +195,13 @@ export const PracticeRoundCompleteModal: React.FC<PracticeRoundCompleteModalProp
         <div className="absolute top-0 left-1/2 -translate-x-1/2 w-48 h-48 bg-violet-500/10 rounded-full filter blur-3xl pointer-events-none -z-10" />
 
         {/* 1. Golden Trophy Badge with Soft Glow */}
-        <div className="relative mx-auto flex items-center justify-center w-16 h-16">
+        <div className="relative mx-auto flex items-center justify-center w-20 h-20">
           {/* Pulsing Outer Glow Ring */}
           <div className="absolute inset-0 rounded-full bg-violet-500/20 animate-pulse scale-110 filter blur-md" />
           
           {/* Main Gold Trophy Circle Backdrop */}
-          <div className="relative w-14 h-14 rounded-full bg-gradient-to-b from-violet-400 to-rose-500 flex items-center justify-center shadow-[0_8px_30px_rgba(139,92,246,0.5)] border-2 border-violet-300">
-            <Trophy className="w-7 h-7 text-slate-950 stroke-[2.5]" />
+          <div className="relative w-[4.5rem] h-[4.5rem] rounded-full bg-violet-50 dark:bg-violet-950/60 flex items-center justify-center shadow-[0_8px_30px_rgba(139,92,246,0.35)] border-2 border-violet-200 dark:border-violet-500/40">
+            <SvgAsset untitled id="kit-trophy" size={44} />
           </div>
         </div>
 
@@ -239,22 +240,25 @@ export const PracticeRoundCompleteModal: React.FC<PracticeRoundCompleteModalProp
             const earned = n <= stars;
             const big = n === 2;
             return (
-              <Star
+              <span
                 key={n}
                 aria-hidden="true"
+                data-earned={earned ? "true" : "false"}
                 className={[
-                  big ? "w-9 h-9" : "w-7 h-7",
+                  "inline-flex",
                   earned
-                    ? `text-violet-500 fill-violet-500 dark:text-violet-400 dark:fill-violet-400 filter ${
+                    ? `filter ${
                         big
-                          ? "drop-shadow-[0_0_12px_rgba(139,92,246,0.8)]"
-                          : "drop-shadow-[0_0_8px_rgba(139,92,246,0.6)]"
+                          ? "drop-shadow-[0_0_12px_rgba(139,92,246,0.6)]"
+                          : "drop-shadow-[0_0_8px_rgba(139,92,246,0.45)]"
                       } animate-bounce`
-                    : "text-slate-300 fill-slate-200 dark:text-slate-700 dark:fill-slate-800/60",
+                    : "grayscale opacity-30",
                   earned && n === 1 ? "delay-75" : "",
                   earned && n === 3 ? "delay-150" : "",
                 ].join(" ")}
-              />
+              >
+                <SvgAsset untitled id="kit-star" size={big ? 44 : 34} />
+              </span>
             );
           })}
         </div>
@@ -272,7 +276,7 @@ export const PracticeRoundCompleteModal: React.FC<PracticeRoundCompleteModalProp
           <div className="bg-surface-muted border border-line rounded-2xl px-3 py-2.5 grid grid-cols-3 items-start divide-x divide-line text-center font-mono">
             <div className="px-1">
               <div className="flex items-center justify-center gap-1 text-cyan-600 dark:text-cyan-400">
-                <Zap className="w-3.5 h-3.5 fill-current" aria-hidden="true" />
+                <SvgAsset untitled id="kit-bolt" size={18} />
                 <span className="text-base font-black leading-none">+{xpWon}</span>
               </div>
               <span className="mt-1 block text-[10px] font-bold uppercase leading-tight tracking-wider text-muted">
@@ -283,13 +287,12 @@ export const PracticeRoundCompleteModal: React.FC<PracticeRoundCompleteModalProp
             <div className="px-1">
               <div
                 className={`flex items-center justify-center gap-1 ${
-                  streak > 0 ? "text-orange-500 dark:text-orange-400" : "text-muted"
+                  streak > 0 ? "text-rose-600 dark:text-rose-400" : "text-muted"
                 }`}
               >
-                <Flame
-                  className={`w-3.5 h-3.5 ${streak > 0 ? "fill-current" : ""}`}
-                  aria-hidden="true"
-                />
+                <span className={`inline-flex ${streak > 0 ? "" : "grayscale opacity-40"}`}>
+                  <SvgAsset untitled id="kit-flame" size={18} />
+                </span>
                 <span className="text-base font-black leading-none">{streak}</span>
               </div>
               <span className="mt-1 block text-[10px] font-bold uppercase leading-tight tracking-wider text-muted">
@@ -305,7 +308,7 @@ export const PracticeRoundCompleteModal: React.FC<PracticeRoundCompleteModalProp
                     : "text-ink"
                 }`}
               >
-                <Target className="w-3.5 h-3.5" aria-hidden="true" />
+                <SvgAsset untitled id="kit-target" size={18} />
                 <span className="text-base font-black leading-none">
                   {standing ? `${standing.dailySolved}/${standing.dailyGoal}` : "—"}
                 </span>
@@ -356,7 +359,9 @@ export const PracticeRoundCompleteModal: React.FC<PracticeRoundCompleteModalProp
         */}
         {recommendation && advance.primary && (
           <div className="flex items-start gap-2.5 text-left bg-surface-muted border border-line rounded-2xl px-4 py-3 max-w-xs mx-auto">
-            <Sparkles className="w-4 h-4 text-violet-600 dark:text-violet-400 shrink-0 mt-0.5" />
+            <span className="shrink-0 mt-0.5 inline-flex">
+              <SvgAsset untitled id="kit-sparkle" size={18} />
+            </span>
             <p className="text-xs text-ink font-medium leading-snug">
               {t(`today.${recommendation.kind}`)}
             </p>
@@ -394,7 +399,7 @@ export const PracticeRoundCompleteModal: React.FC<PracticeRoundCompleteModalProp
             onClick={advance.primary ? onNextLevel : onPracticeAgain}
             className={SECONDARY}
           >
-            <RotateCcw className="w-3.5 h-3.5" />
+            <SvgAsset untitled id={advance.primary ? "menu-learn" : "kit-repeat"} size={18} />
             {/* "Practice Again" would be the word twice with two meanings on the
                 screen that offers a practice round: this button replays the
                 lesson just finished, and the one above opens a different kind
@@ -422,6 +427,7 @@ export const PracticeRoundCompleteModal: React.FC<PracticeRoundCompleteModalProp
             <div className="flex items-center justify-center gap-4">
               {showExit && (
                 <button onClick={onBackToLessons} className={QUIET}>
+                  <SvgAsset untitled id="menu-learn" size={16} />
                   {t("round.backToLessons")}
                 </button>
               )}
@@ -432,7 +438,7 @@ export const PracticeRoundCompleteModal: React.FC<PracticeRoundCompleteModalProp
               )}
               {onGoHome && (
                 <button onClick={onGoHome} className={QUIET}>
-                  <Home className="w-3 h-3" aria-hidden="true" />
+                  <SvgAsset untitled id="menu-home" size={16} />
                   {t("nav.home")}
                 </button>
               )}

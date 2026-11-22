@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+  <title>Trophy</title>
+  <path fill="none" stroke="#7C3AED" stroke-width="7" stroke-linecap="round" d="M26 26 H14 V34 C14 46 22 52 32 52" />
+  <path fill="none" stroke="#7C3AED" stroke-width="7" stroke-linecap="round" d="M74 26 H86 V34 C86 46 78 52 68 52" />
+  <path fill="#8B5CF6" d="M24 14 H76 V40 C76 56 64 66 50 66 C36 66 24 56 24 40 Z" />
+  <path fill="#A78BFA" d="M24 14 H52 L24 52 C24 48 24 44 24 40 Z" />
+  <rect x="44" y="64" width="12" height="12" fill="#7C3AED" />
+  <rect x="30" y="76" width="40" height="12" rx="4" fill="#F43F5E" />
+  <rect x="30" y="76" width="20" height="12" rx="4" fill="#FB7185" />
+  <path fill="#FFFFFF" d="M50 24 L53.5 31.5 L61.5 32.3 L55.5 37.6 L57.3 45.5 L50 41.4 L42.7 45.5 L44.5 37.6 L38.5 32.3 L46.5 31.5 Z" />
+</svg>
