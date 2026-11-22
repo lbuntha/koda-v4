@@ -72,10 +72,10 @@ const PRIMARY =
 
 /** The two doors out. Quiet on purpose — see where they are drawn. */
 const QUIET =
-  "inline-flex items-center gap-1.5 py-1 font-mono text-[11px] font-bold uppercase tracking-wider text-slate-500 hover:text-slate-300 transition-colors cursor-pointer";
+  "inline-flex items-center gap-1.5 py-1 font-mono text-[11px] font-bold uppercase tracking-wider text-muted hover:text-ink transition-colors cursor-pointer";
 
 const SECONDARY =
-  "w-full py-2.5 rounded-full bg-slate-800/80 hover:bg-slate-750 text-slate-300 hover:text-white font-mono font-bold text-xs transition-all active:scale-[0.97] flex items-center justify-center gap-1.5 border border-slate-700/50 cursor-pointer";
+  "w-full py-2.5 rounded-full bg-surface-muted hover:bg-violet-50 dark:hover:bg-slate-800 text-body hover:text-ink font-mono font-bold text-xs transition-all active:scale-[0.97] flex items-center justify-center gap-1.5 border border-line cursor-pointer";
 
 export const PracticeRoundCompleteModal: React.FC<PracticeRoundCompleteModalProps> = ({
   levelNumber,
@@ -173,7 +173,7 @@ export const PracticeRoundCompleteModal: React.FC<PracticeRoundCompleteModalProp
   return (
     <div
       id="practice-round-complete-backdrop"
-      className="fixed inset-0 z-50 bg-slate-950/90 backdrop-blur-md flex items-center justify-center p-4 animate-fadeIn"
+      className="fixed inset-0 z-50 bg-slate-900/40 dark:bg-slate-950/90 backdrop-blur-md flex items-center justify-center p-4 animate-fadeIn"
     >
       <div
         id="practice-round-complete-container"
@@ -188,7 +188,7 @@ export const PracticeRoundCompleteModal: React.FC<PracticeRoundCompleteModalProp
          * a ceiling and somewhere for the overflow to go, not a shorter
          * screen: every line here is something a child earned.
          */
-        className="relative bg-slate-900 border-2 border-violet-500/30 rounded-[32px] max-w-md w-full p-5 sm:p-6 text-center shadow-2xl space-y-3.5 max-h-[92dvh] overflow-y-auto md:max-w-lg"
+        className="relative bg-surface border-2 border-violet-200 dark:border-violet-500/30 rounded-[32px] max-w-md w-full p-5 sm:p-6 text-center shadow-2xl space-y-3.5 max-h-[92dvh] overflow-y-auto md:max-w-lg"
       >
         {/* Soft background ambient glows */}
         <div className="absolute top-0 left-1/2 -translate-x-1/2 w-48 h-48 bg-violet-500/10 rounded-full filter blur-3xl pointer-events-none -z-10" />
@@ -206,19 +206,19 @@ export const PracticeRoundCompleteModal: React.FC<PracticeRoundCompleteModalProp
 
         {/* 2. Headline Information */}
         <div className="space-y-1">
-          <span className="text-[11px] font-mono font-black text-violet-400 uppercase tracking-widest block">
+          <span className="text-[11px] font-mono font-black text-violet-600 dark:text-violet-400 uppercase tracking-widest block">
             {praise.tag}
           </span>
-          <h2 className="text-xl sm:text-2xl font-black text-white tracking-tight">
+          <h2 className="text-xl sm:text-2xl font-black text-ink tracking-tight">
             {praise.headline}
           </h2>
-          <p className="text-xs sm:text-sm text-slate-300 font-medium">{praise.note}</p>
+          <p className="text-xs sm:text-sm text-body font-medium">{praise.note}</p>
           {/* Which lesson this was, kept small: the child knows what they just
               played, and the headline is now the news.
 
               "Lesson", not "Level" — the level bar below is the learner's XP
               level, and one word cannot mean both on one card. */}
-          <p className="text-[11px] text-slate-500 font-medium pt-1">
+          <p className="text-[11px] text-muted font-medium pt-1">
             {totalLessons
               ? t(practiceRound ? "round.practiceNOf" : "round.lessonNOf", { n: levelNumber, total: totalLessons })
               : t(practiceRound ? "round.practiceN" : "round.lessonN", { n: levelNumber })}{" "}
@@ -245,12 +245,12 @@ export const PracticeRoundCompleteModal: React.FC<PracticeRoundCompleteModalProp
                 className={[
                   big ? "w-9 h-9" : "w-7 h-7",
                   earned
-                    ? `text-violet-400 fill-violet-400 filter ${
+                    ? `text-violet-500 fill-violet-500 dark:text-violet-400 dark:fill-violet-400 filter ${
                         big
                           ? "drop-shadow-[0_0_12px_rgba(139,92,246,0.8)]"
                           : "drop-shadow-[0_0_8px_rgba(139,92,246,0.6)]"
                       } animate-bounce`
-                    : "text-slate-700 fill-slate-800/60",
+                    : "text-slate-300 fill-slate-200 dark:text-slate-700 dark:fill-slate-800/60",
                   earned && n === 1 ? "delay-75" : "",
                   earned && n === 3 ? "delay-150" : "",
                 ].join(" ")}
@@ -269,13 +269,13 @@ export const PracticeRoundCompleteModal: React.FC<PracticeRoundCompleteModalProp
           Each is drawn only when there is something true to say.
         */}
         <div className="space-y-2 max-w-xs mx-auto">
-          <div className="bg-slate-950/80 border border-slate-800/80 rounded-2xl px-3 py-2.5 grid grid-cols-3 items-start divide-x divide-slate-800/80 text-center font-mono">
+          <div className="bg-surface-muted border border-line rounded-2xl px-3 py-2.5 grid grid-cols-3 items-start divide-x divide-line text-center font-mono">
             <div className="px-1">
-              <div className="flex items-center justify-center gap-1 text-cyan-400">
-                <Zap className="w-3.5 h-3.5 fill-cyan-400" aria-hidden="true" />
+              <div className="flex items-center justify-center gap-1 text-cyan-600 dark:text-cyan-400">
+                <Zap className="w-3.5 h-3.5 fill-current" aria-hidden="true" />
                 <span className="text-base font-black leading-none">+{xpWon}</span>
               </div>
-              <span className="mt-1 block text-[10px] font-bold uppercase leading-tight tracking-wider text-slate-500">
+              <span className="mt-1 block text-[10px] font-bold uppercase leading-tight tracking-wider text-muted">
                 XP won
               </span>
             </div>
@@ -283,16 +283,16 @@ export const PracticeRoundCompleteModal: React.FC<PracticeRoundCompleteModalProp
             <div className="px-1">
               <div
                 className={`flex items-center justify-center gap-1 ${
-                  streak > 0 ? "text-orange-400" : "text-slate-600"
+                  streak > 0 ? "text-orange-500 dark:text-orange-400" : "text-muted"
                 }`}
               >
                 <Flame
-                  className={`w-3.5 h-3.5 ${streak > 0 ? "fill-orange-400" : ""}`}
+                  className={`w-3.5 h-3.5 ${streak > 0 ? "fill-current" : ""}`}
                   aria-hidden="true"
                 />
                 <span className="text-base font-black leading-none">{streak}</span>
               </div>
-              <span className="mt-1 block text-[10px] font-bold uppercase leading-tight tracking-wider text-slate-500">
+              <span className="mt-1 block text-[10px] font-bold uppercase leading-tight tracking-wider text-muted">
                 {streak === 1 ? unit : `${unit}s`} in a row
               </span>
             </div>
@@ -301,8 +301,8 @@ export const PracticeRoundCompleteModal: React.FC<PracticeRoundCompleteModalProp
               <div
                 className={`flex items-center justify-center gap-1 ${
                   standing && standing.dailySolved >= standing.dailyGoal
-                    ? "text-emerald-400"
-                    : "text-slate-300"
+                    ? "text-emerald-600 dark:text-emerald-400"
+                    : "text-ink"
                 }`}
               >
                 <Target className="w-3.5 h-3.5" aria-hidden="true" />
@@ -310,7 +310,7 @@ export const PracticeRoundCompleteModal: React.FC<PracticeRoundCompleteModalProp
                   {standing ? `${standing.dailySolved}/${standing.dailyGoal}` : "—"}
                 </span>
               </div>
-              <span className="mt-1 block text-[10px] font-bold uppercase leading-tight tracking-wider text-slate-500">
+              <span className="mt-1 block text-[10px] font-bold uppercase leading-tight tracking-wider text-muted">
                 today
               </span>
             </div>
@@ -325,12 +325,11 @@ export const PracticeRoundCompleteModal: React.FC<PracticeRoundCompleteModalProp
           */}
           {bar && (
             <div className="space-y-1.5">
-              <div className="flex items-baseline justify-between font-mono text-[10px] font-bold uppercase tracking-wider text-slate-500">
+              <div className="flex items-baseline justify-between font-mono text-[10px] font-bold uppercase tracking-wider text-muted">
                 <span>{t("home.xpLevel", { level: bar.level })}</span>
                 <span>{bar.toNext} XP to Level {bar.level + 1}</span>
               </div>
               <UIRewardProgress
-                onDark
                 value={bar.into}
                 max={bar.per}
                 label={t("round.levelProgress", { level: bar.level })}
@@ -356,9 +355,9 @@ export const PracticeRoundCompleteModal: React.FC<PracticeRoundCompleteModalProp
           is the reason why.
         */}
         {recommendation && advance.primary && (
-          <div className="flex items-start gap-2.5 text-left bg-slate-950/60 border border-slate-800 rounded-2xl px-4 py-3 max-w-xs mx-auto">
-            <Sparkles className="w-4 h-4 text-violet-400 shrink-0 mt-0.5" />
-            <p className="text-xs text-slate-200 font-medium leading-snug">
+          <div className="flex items-start gap-2.5 text-left bg-surface-muted border border-line rounded-2xl px-4 py-3 max-w-xs mx-auto">
+            <Sparkles className="w-4 h-4 text-violet-600 dark:text-violet-400 shrink-0 mt-0.5" />
+            <p className="text-xs text-ink font-medium leading-snug">
               {t(`today.${recommendation.kind}`)}
             </p>
           </div>
@@ -427,7 +426,7 @@ export const PracticeRoundCompleteModal: React.FC<PracticeRoundCompleteModalProp
                 </button>
               )}
               {showExit && onGoHome && (
-                <span className="text-slate-700" aria-hidden="true">
+                <span className="text-line" aria-hidden="true">
                   ·
                 </span>
               )}
