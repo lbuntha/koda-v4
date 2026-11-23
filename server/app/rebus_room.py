@@ -1,6 +1,6 @@
-"""Rebus Rush group rooms: the rules, with no database and no clock of their own.
+"""Group rooms (Rebus Rush and skill lessons): the rules, with no database and no clock of their own.
 
-A room is a short-lived race. Everyone sees the same puzzles; the first player
+A room runs one of two games. A **Rebus** room is a short-lived race. Everyone sees the same puzzles; the first player
 to claim a correct answer takes the puzzle's points and ends it for the others.
 The server decides who was first, by the order claims arrive, and decides when a
 puzzle ends and the next begins. Time is passed in as epoch milliseconds, so a
@@ -9,6 +9,12 @@ test can play a whole room in microseconds.
 Safety for children who join without an account is built into the data, not
 bolted on: a player is only ever a nickname and an avatar chosen from the lists
 here. There is no free text from a child anywhere in a room.
+
+A **skill** room plays one lesson of a learning skill. Every device builds the
+same questions from the room's seed and plays the round on its own; it reports
+how far it has got. The race ends when everyone has finished, or when time is
+up, so a slower child finishes their round rather than being cut off. Places go
+by answers right first time, then by who finished first.
 """
 
 from __future__ import annotations
@@ -155,8 +161,28 @@ def points_for(hints: int, *, per_puzzle: int, hint_cost: int) -> int:
     return max(1, per_puzzle - hint_cost * max(0, hints))
 
 
+#: The longest a skill race runs before it is called, however far anyone has got.
+SKILL_LIMIT_MS = 6 * 60 * 1000
+
+
+def is_skill(room: dict[str, Any]) -> bool:
+    return room.get("settings", {}).get("game") == "skill"
+
+
 def limit_ms(room: dict[str, Any]) -> int:
+    if is_skill(room):
+        return int(room["settings"].get("limitSec", SKILL_LIMIT_MS // 1000)) * 1000
     return int(room["settings"]["puzzleLimitSec"]) * 1000
+
+
+def _skill_tick(room: dict[str, Any], now_ms: int) -> dict[str, Any] | None:
+    """A skill race ends when every player has finished their round, or when time is up."""
+    if room["status"] != "playing":
+        return None
+    everyone_done = bool(room["players"]) and all(p.get("doneMs") is not None for p in room["players"])
+    if everyone_done or now_ms >= room["puzzleStartMs"] + limit_ms(room):
+        return {"status": "finished", "endedMs": now_ms}
+    return None
 
 
 def tick(room: dict[str, Any], now_ms: int) -> dict[str, Any] | None:
@@ -166,6 +192,8 @@ def tick(room: dict[str, Any], now_ms: int) -> dict[str, Any] | None:
     in a loop, so a device that was away for a minute is told where the room is
     now, not where it was.
     """
+    if is_skill(room):
+        return _skill_tick(room, now_ms)
     if room["status"] != "playing":
         return None
     index = room["index"]
@@ -201,14 +229,25 @@ def tick(room: dict[str, Any], now_ms: int) -> dict[str, Any] | None:
 
 
 def standings(room: dict[str, Any]) -> list[dict[str, Any]]:
-    """Players by score, highest first; equal scores share a place."""
-    ranked = sorted(room["players"], key=lambda p: (-p["score"], p["joinedMs"]))
+    """Players by score, highest first; equal scores share a place.
+
+    In a skill race the score is answers right first time, and finishing sooner
+    breaks a tie; a player who has not finished comes after everyone who has.
+    """
+    skill = is_skill(room)
+
+    def rank_key(p: dict[str, Any]) -> tuple[int, float]:
+        done = p.get("doneMs")
+        return (-p["score"], float(done) if skill and done is not None else float("inf") if skill else 0.0)
+
+    ranked = sorted(room["players"], key=lambda p: (*rank_key(p), p["joinedMs"]))
     out: list[dict[str, Any]] = []
     place = 0
-    last: int | None = None
+    last: tuple[int, float] | None = None
     for position, player in enumerate(ranked, start=1):
-        if player["score"] != last:
+        key = rank_key(player)
+        if key != last:
             place = position
-            last = player["score"]
+            last = key
         out.append({"pid": player["pid"], "place": place, "score": player["score"]})
     return out

@@ -41,6 +41,9 @@ from app.security.tokens import read_access
 router = APIRouter(prefix="/rebus/rooms", tags=["rebus-rooms"])
 
 CanRead = Annotated[Principal, Depends(require("settings:read"))]
+
+#: The owner's switch for playing skill lessons together. Rebus rooms have their own.
+SKILL_SWITCH = "group.skills"
 CanOperate = Annotated[Principal, Depends(require("system:write"))]
 
 #: What a puzzle looks like to a player in a room: everything to show and check it, nothing about its authoring.
@@ -104,6 +107,7 @@ def _view(room: dict[str, Any], me: dict[str, Any], now_ms: int, **extra: Any) -
             "isHost": p["pid"] == room["hostPid"],
             "isKodaUser": p.get("userId") is not None,
             "connected": now_ms - p["seenMs"] < rules.PRESENT_MS,
+            "done": p.get("doneMs") is not None,
         }
         for p in room["players"]
     ]
@@ -124,6 +128,12 @@ def _view(room: dict[str, Any], me: dict[str, Any], now_ms: int, **extra: Any) -
     }
     if me["pid"] == room["hostPid"]:
         out["requests"] = waiting
+    if rules.is_skill(room):
+        if room["status"] in ("playing", "finished"):
+            out.update(total=int(room["settings"]["count"]), standings=rules.standings(room), seed=room["seed"])
+        if room["status"] == "playing":
+            out.update(startMs=room["puzzleStartMs"], limitMs=rules.limit_ms(room))
+        return out
     if room["status"] in ("playing", "finished"):
         total = len(room["puzzles"])
         out["total"] = total
@@ -208,7 +218,11 @@ async def create_room(body: RoomCreateIn, db: Db, p: CanRead) -> dict[str, Any]:
 @router.post("/{code}/join")
 async def join_room(code: str, body: RoomJoinIn, db: Db, request: Request, user: MaybeUser) -> dict[str, Any]:
     await limiter.hit(db, "room:ip", _caller(request), ROOM_JOIN_PER_IP)
-    if not await _switch(db, "rebus.enabled") or not await _switch(db, "rebus.group"):
+    door = await repo.get(db, rules.normalize_code(code))
+    if door and rules.is_skill(door):
+        if not await _switch(db, SKILL_SWITCH):
+            raise Forbidden("Playing in a group is switched off.", "group_off")
+    elif not await _switch(db, "rebus.enabled") or not await _switch(db, "rebus.group"):
         raise Forbidden("Playing in a group is switched off.", "group_off")
     _check_choice(body.name, body.avatar)
     if user is None and not (await _owner_settings(db)).guestsAllowed:
@@ -263,6 +277,12 @@ async def start_room(code: str, db: Db, x_player_token: Annotated[str | None, He
         raise Conflict("The game has already started.", "room_started")
     if len(room["players"]) < 2:
         raise Conflict("Wait for at least one friend to join.", "need_players")
+    if rules.is_skill(room):
+        started = await repo.start(db, room["_id"], puzzles=[], now_ms=now_ms)
+        if not started:
+            raise Conflict("The game has already started.", "room_started")
+        await repo.count(db, now_ms, gamesStarted=1, skillGamesStarted=1, playersStarted=len(started["players"]))
+        return _view(started, repo.seat_of(started, x_player_token) or me, now_ms)
     s = room["settings"]
     bank = await puzzles_repo.published(db)
     language = s.get("language") or "en"
@@ -285,7 +305,7 @@ async def solve(code: str, body: SolveIn, db: Db, x_player_token: Annotated[str 
     """ "I solved it": first claim on the live puzzle wins its points. The device has already checked the answer."""
     now_ms = _now_ms()
     room, me = await _seat(db, code, x_player_token, now_ms)
-    if room["status"] != "playing":
+    if room["status"] != "playing" or rules.is_skill(room):
         raise Conflict("There is no puzzle to answer.", "not_playing")
     s = room["settings"]
     hints = min(body.hints, int(s["hintRungs"]))

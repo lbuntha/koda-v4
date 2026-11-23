@@ -44,3 +44,24 @@ class AnswerIn(Model):
     """The host's answer to someone at the door."""
 
     pid: str = Field(min_length=2, max_length=20)
+
+
+class SkillRoomCreateIn(Model):
+    """Open a room that plays one lesson of a learning skill."""
+
+    skill: str = Field(min_length=2, max_length=40, pattern=r"^[a-z0-9-]+$")
+    lesson: str = Field(min_length=2, max_length=80, pattern=r"^[a-z0-9-]+$")
+    name: str = Field(min_length=2, max_length=30)
+    avatar: str = Field(min_length=2, max_length=20)
+    language: Literal["en", "km"] = "en"
+
+
+class ProgressIn(Model):
+    """How far a player has got through a skill round. Only ever moves forward."""
+
+    #: Questions finished (answered right, on any attempt).
+    answered: int = Field(ge=0, le=50)
+    #: Of those, answered right first time — the score.
+    firstTry: int = Field(ge=0, le=50)
+    #: The round is over for this player.
+    done: bool = False

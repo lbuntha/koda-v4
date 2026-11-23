@@ -38,6 +38,7 @@ def _player(*, name: str, avatar: str, user_id: str | None, token: str, now_ms: 
         "seenMs": now_ms,
         "score": 0,
         "solved": 0,
+        "doneMs": None,
     }
 
 
@@ -292,8 +293,37 @@ async def rematch(db: AsyncIOMotorDatabase, code: str, *, now_ms: int) -> dict[s
                 "expiresAt": _expires(now_ms),
                 "players.$[].score": 0,
                 "players.$[].solved": 0,
+                "players.$[].doneMs": None,
             }
         },
+        return_document=True,
+    )
+
+
+async def progress(
+    db: AsyncIOMotorDatabase, code: str, *, pid: str, answered: int, first_try: int, done: bool, total: int, now_ms: int
+) -> dict[str, Any] | None:
+    """Record how far a player has got in a skill race.
+
+    Counts only move forward (`$max`), so a late or repeated report from a
+    flaky connection cannot take a score back. Nothing is accepted before the
+    countdown ends or after the race is over, and a count can never pass the
+    round's length.
+    """
+    answered = min(answered, total)
+    first_try = min(first_try, answered)
+    update: dict[str, Any] = {"$max": {"players.$[w].solved": answered, "players.$[w].score": first_try}}
+    if done or answered >= total:
+        # The first report of being done sets the finishing time; later ones leave it.
+        await _col(db).update_one(
+            {"_id": code, "status": "playing", "puzzleStartMs": {"$lte": now_ms}},
+            {"$set": {"players.$[w].doneMs": now_ms}},
+            array_filters=[{"w.pid": pid, "w.doneMs": None}],
+        )
+    return await _col(db).find_one_and_update(
+        {"_id": code, "status": "playing", "puzzleStartMs": {"$lte": now_ms}, "players.pid": pid},
+        update,
+        array_filters=[{"w.pid": pid}],
         return_document=True,
     )
 
@@ -312,6 +342,8 @@ COUNTERS = (
     "gamesFinished",
     "rematches",
     "askedGrownUp",
+    "skillRoomsOpened",
+    "skillGamesStarted",
 )
 
 

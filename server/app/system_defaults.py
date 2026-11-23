@@ -514,6 +514,19 @@ DEFAULT_SETTINGS: list[dict] = [
         "order": 116,
     },
     {
+        "settingId": "group.skills",
+        "group": "Play together",
+        "label": "Play lessons together",
+        "description": (
+            "Lets a signed-in player open a room for a skill lesson, and friends join with the code and race the "
+            "same questions. Only skills that support it, and have it on in the Skill Manager, show the button. "
+            "Off closes the door to new lesson rooms."
+        ),
+        "type": "bool",
+        "value": True,
+        "order": 117,
+    },
+    {
         "settingId": "ai.rebusDrafts",
         "group": "Rebus Rush",
         "label": "Draft puzzles with AI",
