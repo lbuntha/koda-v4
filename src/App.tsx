@@ -38,12 +38,17 @@ import { SkillHost } from "./skills/host/SkillHost";
 import {
   getCourseLessons,
   getLessonByLevel,
+  getSkillLessons,
   isPracticeLesson,
   nextSkillLesson,
   pathPosition,
   practiceInvitation,
+  resumeLesson,
   skillLessonNumber,
+  type ResolvedLesson,
 } from "./curriculum";
+import { getSkill } from "./skills/registry";
+import { SkillStoreAPI, skillTitle } from "./lib/skillStore";
 import { useAudienceViewer } from "./skills/viewer";
 import { SignInScreen } from "./components/account/SignInScreen";
 import { LandingPage } from "./components/landing/LandingPage";
@@ -64,6 +69,11 @@ const firstEntry = (): "landing" | "signIn" => {
 import { ResetPasswordScreen, resetTokenFromUrl } from "./components/account/ResetPasswordScreen";
 import { VerifyEmailScreen, verificationTokenFromUrl } from "./components/account/VerifyEmailScreen";
 import { clearRoomFromUrl, roomCodeFromUrl } from "./rebus/group/roomLink";
+import { clearRaceFromUrl, raceCodeFromUrl } from "./group/race/raceLink";
+import { RacePage } from "./group/race/RacePage";
+import { skillCanRace } from "./group/raceable";
+import { loadRaceSeat } from "./group/race/raceSeat";
+import type { RaceRoomProps } from "./group/race/RaceRoom";
 import { LearnersPage } from "./components/account/LearnersPage";
 import { DevicesPage } from "./components/account/DevicesPage";
 import { ProfilePage } from "./components/account/ProfilePage";
@@ -138,6 +148,15 @@ export default function App() {
   const [rebusDeep, setRebusDeep] = useState(false);
   // An invitation link to a Rebus Rush room: a guest sees the join screen before sign-in, a signed-in player is taken to it.
   const [roomCode, setRoomCode] = useState<string | null>(roomCodeFromUrl);
+  /*
+   * Playing a lesson together: opened from a skill's page (`skillId`, can open
+   * a race) or from an invitation link (`code`, joins only). Null is not racing.
+   */
+  const [race, setRace] = useState<{ skillId?: string; code?: string; resume?: boolean } | null>(() => {
+    const code = raceCodeFromUrl();
+    // A seat this tab already holds: a refresh mid-race goes straight back to it.
+    return code ? { code } : loadRaceSeat() ? { resume: true } : null;
+  });
   const [guestSignIn, setGuestSignIn] = useState(false);
   const [entry, setEntry] = useState<"landing" | "signIn" | "signUp">(firstEntry);
   /** A Trace item is open (writing or colouring): like a book, it takes the phone's whole screen. */
@@ -424,7 +443,7 @@ export default function App() {
    */
   useSyncExternalStore(PreferencesAPI.subscribe, PreferencesAPI.version, PreferencesAPI.version);
   const { soundEnabled, voiceEnabled } = PreferencesAPI.current();
-  const { notice: systemNotice } = useSystem();
+  const { notice: systemNotice, allows: systemAllows } = useSystem();
   const [activeLevelNumber, setActiveLevelNumber] = useState<number>(1);
   const lessonStartInFlight = useRef(false);
   const [lessonAccessError, setLessonAccessError] = useState<string | null>(null);
@@ -449,7 +468,7 @@ export default function App() {
    * round is actually open, so a child reading the Learn page is not spending
    * their afternoon.
    */
-  useSessionClock(inRound);
+  useSessionClock(inRound || race !== null);
   // Someone signed in who opens an invitation link goes straight to the join screen for that room.
   useEffect(() => {
     if (!session || !roomCode) return;
@@ -457,6 +476,13 @@ export default function App() {
     setLearnCategory("lessons");
     setRebusOpen(true);
   }, [session, roomCode, setLearnCategory]);
+  // The same for a lesson race's link, or a race this tab was already in.
+  const raceArrival = race?.code ?? (race?.resume ? "resume" : undefined);
+  useEffect(() => {
+    if (!session || !raceArrival) return;
+    setActiveTab("game");
+    setLearnCategory("lessons");
+  }, [session, raceArrival, setLearnCategory]);
 
   const { cap: sessionCap, dayDone, hours: studyHours, outsideHours } = useStudyGate();
 
@@ -711,6 +737,61 @@ export default function App() {
       ? practiceInvitation(activeLesson.skillId, completedGameLevels, viewer)
       : undefined;
 
+  /** Whether a skill's lessons can be raced here; see `group/raceable.ts`. */
+  const canRace = (skillId: string): boolean => skillCanRace(skillId, { signedIn: Boolean(session), allowed: systemAllows("group.skills") });
+  /** What the host form offers for one skill: its lessons as this child sees them, starting at their next one. */
+  const raceHostFor = (skillId: string) => {
+    const lessons = getSkillLessons(skillId, viewer);
+    const info = getSkill(skillId);
+    return {
+      skillId,
+      skillName: skillTitle(info?.manifest.name ?? skillId, SkillStoreAPI.getSkill(skillId)),
+      lessons: lessons.map((l) => ({ id: l.id, title: l.title })),
+      suggested: resumeLesson(lessons, completedGameLevels, viewer)?.id,
+    };
+  };
+
+  /** What the learning log files a round's events under, for any lesson in the course. */
+  const lessonContextOf = (lesson: ResolvedLesson) => {
+    if (!lesson.conceptKey) return undefined;
+    const position = lesson.ref === activeLesson?.ref ? activePosition : pathPosition(lesson, viewer);
+    return {
+      lessonId: lesson.id,
+      conceptKey: lesson.conceptKey,
+      standards: lesson.standards,
+      ageBand: lesson.ageBand,
+      title: lesson.title,
+      concept: lesson.concept,
+      lessonNumber: position?.number ?? skillLessonNumber(lesson, viewer),
+      totalLessons: position?.total,
+      // Which kind of round this is, decided once by the course: the
+      // chrome reads it to stop repeating the word, and every event
+      // carries it so speed can be read off practice alone.
+      practice: isPracticeLesson(lesson),
+    };
+  };
+  const hostSnapshot = {
+    ...userProgress,
+    level: levelFromXp(userProgress.xp),
+    streakDays: streak.days,
+    streakCadence: streak.cadence,
+    dailySolved: streak.solvedToday,
+  };
+  const recordRound = (result: { levelNumber: number; stars: number }) => {
+    setUserProgress((prev) => ({
+      ...recordPractice(prev),
+      problemsSolved: prev.problemsSolved + 1,
+    }));
+    setCompletedGameLevels((prev) => ({
+      ...prev,
+      // Best ever, not most recent: a level's stars are what the learner has
+      // shown they can do, so replaying it and having an off day must never
+      // take a star away. Counting already kept the maximum internally; the
+      // app's copy — the one the Learn page reads — did not.
+      [result.levelNumber]: Math.max(prev[result.levelNumber] ?? 0, result.stars),
+    }));
+  };
+
   const lessonHost = (
     <SkillHost
       key={activeLesson?.ref ?? activeLevelNumber}
@@ -720,30 +801,9 @@ export default function App() {
       lesson={
         // Without this the learning log is a silent no-op — the SDK refuses to
         // record events it cannot attribute to a concept.
-        activeLesson?.conceptKey
-          ? {
-              lessonId: activeLesson.id,
-              conceptKey: activeLesson.conceptKey,
-              standards: activeLesson.standards,
-              ageBand: activeLesson.ageBand,
-              title: activeLesson.title,
-              concept: activeLesson.concept,
-              lessonNumber: activePosition?.number ?? skillLessonNumber(activeLesson, viewer),
-              totalLessons: activePosition?.total,
-              // Which kind of round this is, decided once by the course: the
-              // chrome reads it to stop repeating the word, and every event
-              // carries it so speed can be read off practice alone.
-              practice: isPracticeLesson(activeLesson),
-            }
-          : undefined
+        activeLesson ? lessonContextOf(activeLesson) : undefined
       }
-      snapshot={{
-        ...userProgress,
-        level: levelFromXp(userProgress.xp),
-        streakDays: streak.days,
-        streakCadence: streak.cadence,
-        dailySolved: streak.solvedToday,
-      }}
+      snapshot={hostSnapshot}
       onExit={() => setInRound(false)}
       /* The other door off the round-complete screen. `onExit` goes back to
          the lesson list this round was opened from; a child who has finished
@@ -772,22 +832,40 @@ export default function App() {
       onAwardXp={(earnedXp) =>
         awardXp(earnedXp)
       }
-      onComplete={(result) => {
-        setUserProgress((prev) => ({
-          ...recordPractice(prev),
-          problemsSolved: prev.problemsSolved + 1,
-        }));
-        setCompletedGameLevels((prev) => ({
-          ...prev,
-          // Best ever, not most recent: a level's stars are what the learner has
-          // shown they can do, so replaying it and having an off day must never
-          // take a star away. Counting already kept the maximum internally; the
-          // app's copy — the one the Learn page reads — did not.
-          [result.levelNumber]: Math.max(prev[result.levelNumber] ?? 0, result.stars),
-        }));
-      }}
+      onComplete={recordRound}
     />
   );
+
+  /*
+   * A lesson race's round: the same skill round as above, for the room's
+   * lesson, with the room's seed and an observer. Rewards and the learning
+   * record are the solo round's own — winning adds nothing.
+   */
+  const renderRaceRound: RaceRoomProps["renderRound"] = (room, round) => {
+    const { skill: skillId, lesson: lessonId } = room.settings;
+    // The joiner's own path first (their level numbers); any visible copy otherwise,
+    // so a friend a year younger can still play the host's lesson.
+    const lesson =
+      getSkillLessons(skillId, viewer).find((l) => l.id === lessonId) ?? getSkillLessons(skillId).find((l) => l.id === lessonId);
+    if (!lesson) return null;
+    return (
+      <SkillHost
+        key={round.seed}
+        activityRef={lesson.activity}
+        params={{ level: lesson.levelNumber, ...(lesson.params ?? {}) }}
+        level={lesson.levelNumber}
+        lesson={lessonContextOf(lesson)}
+        snapshot={hostSnapshot}
+        race={{ seed: round.seed, observer: round.observer }}
+        onExit={round.onClose}
+        // A race is one round: no "next lesson" off its end card, only back to the race.
+        nextLesson={undefined}
+        pathComplete={false}
+        onAwardXp={(earnedXp) => awardXp(earnedXp)}
+        onComplete={recordRound}
+      />
+    );
+  };
 
   /**
    * Sign-in is required to reach the app.
@@ -870,7 +948,7 @@ export default function App() {
       // Only a running round wants the full width; the picker is a normal page.
       contained={!inLesson}
       hideMobileChrome={inBooks && libraryReaderOpen}
-      hideMobileTabBar={(inBooks && libraryBookOpen) || tracePlayingHere || (activeTab === "game" && !inRound && learnCategory === "lessons" && ((rebusOpen && rebusDeep) || wordGuessOpen) && !outsideHours && !dayDone)}
+      hideMobileTabBar={(inBooks && libraryBookOpen) || tracePlayingHere || (activeTab === "game" && !inRound && learnCategory === "lessons" && ((rebusOpen && rebusDeep) || wordGuessOpen || race !== null) && !outsideHours && !dayDone)}
       /* Two shells, each hiding itself at the width that is not its own — the
          rail from `rail:` up, the toolbar and tab bar below it. A round stands
          both of them down: what a rail shows a five-year-old counting crowns is
@@ -928,7 +1006,9 @@ export default function App() {
               pending={switchingCategory}
               immersed={
                 learnCategory === "lessons"
-                  ? (rebusOpen || wordGuessOpen) && !outsideHours && !dayDone
+                  ? race !== null && !outsideHours && !dayDone
+                    ? true
+                    : (rebusOpen || wordGuessOpen) && !outsideHours && !dayDone
                     ? rebusOpen ? rebusDeep : true
                     : Boolean(selectedLearnSkillId) && !outsideHours && !dayDone
                   : learnCategory === "books"
@@ -967,6 +1047,17 @@ export default function App() {
                 /* Stands in for the picker rather than sitting beside it: a path a
                    child can still tap is a path they will keep tapping. */
                 <DayDoneScreen cap={sessionCap} onGoHome={() => setActiveTab("home")} />
+              ) : race && session ? (
+                <RacePage
+                  userToken={session.accessToken}
+                  host={race.skillId ? raceHostFor(race.skillId) : undefined}
+                  initialCode={race.code ?? null}
+                  renderRound={renderRaceRound}
+                  onExit={() => {
+                    clearRaceFromUrl();
+                    setRace(null);
+                  }}
+                />
               ) : wordGuessOpen ? (
                 <WordGuessPage
                   onAwardXp={(earnedXp) => awardXp(earnedXp)}
@@ -989,6 +1080,7 @@ export default function App() {
                   completedLevels={completedGameLevels}
                   onBack={() => setSelectedLearnSkillId(null)}
                   onStartLesson={startLesson}
+                  onPlayTogether={canRace(selectedLearnSkillId) ? () => setRace({ skillId: selectedLearnSkillId }) : undefined}
                 />
               ) : (
                 <SkillCatalogPage

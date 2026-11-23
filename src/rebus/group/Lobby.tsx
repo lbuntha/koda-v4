@@ -16,10 +16,15 @@ import { formatCode } from "./choices";
 import { useNickname } from "./NicknamePicker";
 import { RoomAvatar } from "./RoomAvatar";
 import { linkFor } from "./roomLink";
-import type { RoomView } from "./types";
+import type { AnyRoomView } from "../../group/types";
 
 export interface LobbyProps {
-  room: RoomView;
+  /** A Rebus room, or any other game's: the lobby only reads the shared parts unless told otherwise. */
+  room: AnyRoomView;
+  /** What the room will play, in one line. A Rebus room says its topic and puzzle count when this is absent. */
+  summary?: string;
+  /** Another game's invitation: its own link and words to share. */
+  invite?: { link: string; text: string; title: string };
   busy?: boolean;
   error?: string;
   reconnecting?: boolean;
@@ -40,7 +45,7 @@ const copyText = async (text: string): Promise<boolean> => {
   }
 };
 
-export const Lobby: React.FC<LobbyProps> = ({ room, busy = false, error, reconnecting = false, onStart, onLock, onKick, onAccept, onDecline, onLeave }) => {
+export const Lobby: React.FC<LobbyProps> = ({ room, summary, invite, busy = false, error, reconnecting = false, onStart, onLock, onKick, onAccept, onDecline, onLeave }) => {
   const { t } = useT();
   const show = useNickname();
   const [copied, setCopied] = useState<"code" | "link" | null>(null);
@@ -48,7 +53,7 @@ export const Lobby: React.FC<LobbyProps> = ({ room, busy = false, error, reconne
   const enough = room.players.length >= 2;
 
   const copy = async (what: "code" | "link") => {
-    if (await copyText(what === "code" ? room.code : linkFor(room.code))) {
+    if (await copyText(what === "code" ? room.code : invite?.link ?? linkFor(room.code))) {
       setCopied(what);
       window.setTimeout(() => setCopied(null), 2000);
     }
@@ -56,7 +61,11 @@ export const Lobby: React.FC<LobbyProps> = ({ room, busy = false, error, reconne
 
   const share = async () => {
     try {
-      await navigator.share({ title: t("rebus.title"), text: t("rebus.group.shareText", { code: room.code }), url: linkFor(room.code) });
+      await navigator.share(
+        invite
+          ? { title: invite.title, text: invite.text, url: invite.link }
+          : { title: t("rebus.title"), text: t("rebus.group.shareText", { code: room.code }), url: linkFor(room.code) },
+      );
     } catch {
       /* Cancelled, or not available: the copy buttons are still there. */
     }
@@ -141,7 +150,7 @@ export const Lobby: React.FC<LobbyProps> = ({ room, busy = false, error, reconne
       </section>
 
       <p className={themeSystem.typography("body-sm", "text-center")}>
-        {room.settings.category === "mixed" ? t("rebus.mixed") : categoryLabel(room.settings.category)} · {t("rebus.puzzlesCount", { count: room.settings.count })}
+        {summary ?? `${room.settings.category === "mixed" ? t("rebus.mixed") : categoryLabel(room.settings.category)} · ${t("rebus.puzzlesCount", { count: room.settings.count })}`}
       </p>
 
       {reconnecting && (

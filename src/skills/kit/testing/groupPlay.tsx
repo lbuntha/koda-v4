@@ -23,23 +23,30 @@ export function describeGroupPlay(skill: Skill): void {
       expect(declaresGroupPlay(skill)).toBe(true);
     });
 
-    it.each(skill.lessons.map((l) => [l.id, l] as const))("%s deals the same first question for the same seed", (_id, lesson) => {
+    const first = (lesson: Skill["lessons"][number], seed: string) => {
       const [, activityId] = lesson.activity.split("/");
       const activity = skill.activities[activityId];
       expect(activity, lesson.activity).toBeDefined();
-      const first = (seed: string) => {
-        const h = renderActivity(activity, { params: withRaceSeed(lesson.params as Record<string, unknown>, seed), settings: { praiseMs: 0 } });
-        const presented = h.koda.only("learning.present")[0]?.args[0] as { prompt?: string; expected?: string; questionId?: string } | undefined;
-        const screen = h.text();
-        h.unmount();
-        cleanup();
-        return { presented, screen };
-      };
-      const a = first("race-seed");
-      const b = first("race-seed");
+      const h = renderActivity(activity, { params: withRaceSeed(lesson.params as Record<string, unknown>, seed), settings: { praiseMs: 0 } });
+      const presented = h.koda.only("learning.present")[0]?.args[0] as { prompt?: string; expected?: string; questionId?: string } | undefined;
+      const screen = h.text();
+      h.unmount();
+      cleanup();
+      return { presented, screen };
+    };
+
+    it.each(skill.lessons.map((l) => [l.id, l] as const))("%s deals the same first question for the same seed", (_id, lesson) => {
+      const a = first(lesson, "race-seed");
+      const b = first(lesson, "race-seed");
       expect(a.presented, "a question was presented").toBeDefined();
       expect(b.presented).toEqual(a.presented);
       expect(b.screen).toEqual(a.screen);
+    });
+
+    // Otherwise the test above would pass for a skill that ignored the seed and dealt one fixed round.
+    it("deals a different round for a different seed", () => {
+      const differs = skill.lessons.some((lesson) => first(lesson, "seed-a").screen !== first(lesson, "seed-b").screen);
+      expect(differs).toBe(true);
     });
   });
 }

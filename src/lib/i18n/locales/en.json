@@ -6238,5 +6238,35 @@
     "later": "Not now",
     "failed": "That didn't save. Try again.",
     "offline": "You're offline. Connect to the internet, then try again."
+  },
+  "race": {
+    "playTogether": "Play together",
+    "playTogetherText": "Race friends on the same lesson",
+    "title": "Play together",
+    "titleFor": "{skill}: play together",
+    "subtitle": "Everyone plays the same questions. Get them right first time to win.",
+    "openText": "Pick a lesson, then share the code with friends.",
+    "pickLesson": "Pick a lesson",
+    "yourNext": "Your next",
+    "questions": "{count} questions",
+    "shareText": "Race me on \"{lesson}\" in Koda! Code: {code}",
+    "progress": "How far everyone has got",
+    "playerProgress": "{name}: {n} of {total}",
+    "finished": "Finished",
+    "timeLeft": "{time} left",
+    "waitOthers": "You finished! Waiting for friends to finish…",
+    "notOnDevice": "This lesson is not on your Koda yet. Ask the host to pick another one.",
+    "rightOf": "{n} of {total} right",
+    "howPlaced": "Places go by answers right first time. The same score goes to whoever finished first.",
+    "ownXp": "Your XP and stars come from your own answers, just like playing alone.",
+    "again": "Race again",
+    "err": {
+      "group_unsupported": "This lesson cannot be played together yet.",
+      "skill_not_found": "That skill is not available.",
+      "lesson_not_found": "Pick a lesson from this skill."
+    },
+    "resultsReady": "Everyone has finished!",
+    "seeResults": "See the results",
+    "timeUp": "Time's up! The race is over."
   }
 }

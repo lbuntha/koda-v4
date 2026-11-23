@@ -9,8 +9,11 @@ import { roomErrorKey } from "./errors";
 import { GroupAPI } from "./groupApi";
 import { NicknamePicker } from "./NicknamePicker";
 import { CODE_PATTERN, cleanCode } from "./roomLink";
-import type { Seat } from "./types";
+import type { AnyRoomView, Seat as SharedSeat } from "../../group/types";
 import { NO_SUGGESTIONS } from "../noSuggestions";
+
+/** A seat in any game's room: Rebus, or a lesson race. */
+type Seat = SharedSeat<AnyRoomView>;
 
 export interface JoinFormProps {
   /** A code from the invitation link. */
@@ -18,9 +21,11 @@ export interface JoinFormProps {
   /** The signed-in Koda user's token, linking the seat to them. Missing for a guest. */
   userToken: string | null;
   onJoined(seat: Seat): void;
+  /** Join through another game's rooms (a lesson race): the same door, a different address. */
+  join?: (code: string, body: { name: string; avatar: string }, userToken: string | null) => Promise<Seat>;
 }
 
-export const JoinForm: React.FC<JoinFormProps> = ({ initialCode, userToken, onJoined }) => {
+export const JoinForm: React.FC<JoinFormProps> = ({ initialCode, userToken, onJoined, join: joinRoom = GroupAPI.join }) => {
   const { t } = useT();
   const [code, setCode] = useState(cleanCode(initialCode ?? ""));
   const [name, setName] = useState("");
@@ -35,7 +40,7 @@ export const JoinForm: React.FC<JoinFormProps> = ({ initialCode, userToken, onJo
     setBusy(true);
     setError("");
     try {
-      onJoined(await GroupAPI.join(code, { name, avatar }, userToken));
+      onJoined(await joinRoom(code, { name, avatar }, userToken));
     } catch (e) {
       const key = roomErrorKey(e);
       setError(t(key));

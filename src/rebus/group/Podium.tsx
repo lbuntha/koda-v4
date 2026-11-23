@@ -17,6 +17,8 @@ export interface PodiumProps {
   standings: readonly Standing[];
   players: readonly RoomPlayer[];
   mePid: string;
+  /** How a score reads under a name. Points, unless the game counts something else. */
+  scoreText?(score: number): string;
 }
 
 /** Step height (rem) and colour for places 1 to 3. Never yellow: it is hard to read. */
@@ -29,7 +31,7 @@ const STEPS: Record<1 | 2 | 3, { height: number; tone: string }> = {
 /** Second, first, third: the shape of a podium. */
 const ORDER: ReadonlyArray<1 | 2 | 3> = [2, 1, 3];
 
-export const Podium: React.FC<PodiumProps> = ({ standings, players, mePid }) => {
+export const Podium: React.FC<PodiumProps> = ({ standings, players, mePid, scoreText }) => {
   const { t } = useT();
   const show = useNickname();
   const [risen, setRisen] = useState(false);
@@ -58,7 +60,7 @@ export const Podium: React.FC<PodiumProps> = ({ standings, players, mePid }) => 
                     {show(player.name)}
                     {player.pid === mePid && <span className="ml-1 text-xs font-bold text-muted">{t("rebus.group.you")}</span>}
                   </span>
-                  <span className="text-xs font-bold text-muted">{t("rebus.group.play.pts", { n: standing.score })}</span>
+                  <span className="text-xs font-bold text-muted">{scoreText ? scoreText(standing.score) : t("rebus.group.play.pts", { n: standing.score })}</span>
                 </div>
               ) : null,
             )}

@@ -68,6 +68,8 @@ const sharedSource = (): string =>
        directory: `src/lib` is the whole app, and scanning it would let any
        stray mention of an id pass for reading it. */
     readFileSync(join(process.cwd(), "src/lib/premiumLessons.ts"), "utf8"),
+    // Playing a lesson together, which the app offers for any skill that declares it.
+    readFileSync(join(process.cwd(), "src/group/raceable.ts"), "utf8"),
   ].join("\n");
 
 /**

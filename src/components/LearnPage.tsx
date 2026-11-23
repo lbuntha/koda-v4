@@ -1,5 +1,5 @@
 import React, { useMemo, useState } from "react";
-import { ArrowLeft, BookOpen, CheckCircle2, Circle, CircleDot, Printer, Repeat } from "lucide-react";
+import { ArrowLeft, BookOpen, CheckCircle2, ChevronRight, Circle, CircleDot, Printer, Repeat } from "lucide-react";
 import { outcomeSummary } from "../lib/learnOutcomes";
 import {
   type CourseUnit,
@@ -44,6 +44,8 @@ export interface LearnPageProps {
   completedLevels: Record<number, number>;
   onBack(): void;
   onStartLesson(levelNumber: number): void;
+  /** Race friends on one of this skill's lessons. Absent where the skill cannot be raced. */
+  onPlayTogether?(): void;
 }
 
 /**
@@ -99,6 +101,7 @@ export const LearnPage: React.FC<LearnPageProps> = ({
   completedLevels,
   onBack,
   onStartLesson,
+  onPlayTogether,
 }) => {
   const viewer = useAudienceViewer();
   const { t, tNodes } = useT();
@@ -506,6 +509,25 @@ export const LearnPage: React.FC<LearnPageProps> = ({
       />
 
       {registrationError && <p className={themeSystem.flash("error")}>{registrationError}</p>}
+
+      {/* Racing friends is a way to play these lessons, not a lesson: one
+          row under the card, never in the way of Continue. */}
+      {onPlayTogether && registered && (
+        <button
+          type="button"
+          onClick={onPlayTogether}
+          className={themeSystem.card("interactive", "flex min-h-11 w-full items-center gap-3 px-4 py-3 text-left")}
+        >
+          <span className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-indigo-50 dark:bg-indigo-950/50">
+            <UIArtIcon id="kit-trophy" className="h-6 w-6" />
+          </span>
+          <span className="flex min-w-0 flex-1 flex-col">
+            <span className="text-base font-black text-ink">{t("race.playTogether")}</span>
+            <span className="text-sm text-muted">{t("race.playTogetherText")}</span>
+          </span>
+          <ChevronRight aria-hidden="true" className="h-5 w-5 shrink-0 text-muted" />
+        </button>
+      )}
 
       {offlineMessage(offline) && (
         <p
