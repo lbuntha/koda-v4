@@ -1068,6 +1068,12 @@ export default function App() {
                     clearRaceFromUrl();
                     setRace(null);
                   }}
+                  onRebusRoom={(code) => {
+                    clearRaceFromUrl();
+                    setRace(null);
+                    setRoomCode(code);
+                    setRebusOpen(true);
+                  }}
                 />
               ) : wordGuessOpen ? (
                 <WordGuessPage
@@ -1082,6 +1088,12 @@ export default function App() {
                     setRoomCode(null);
                   }}
                   onDeepChange={setRebusDeep}
+                  onLessonRoom={(code) => {
+                    clearRoomFromUrl();
+                    setRoomCode(null);
+                    setRebusOpen(false);
+                    setRace({ code });
+                  }}
                   onAwardXp={(earnedXp) => awardXp(earnedXp)}
                   onExit={() => setRebusOpen(false)}
                 />

@@ -33,11 +33,13 @@ export interface GroupHomeProps {
   onExit(): void;
   /** A guest who has an account: go to sign in (the link is kept so they come back to the room). */
   onSignIn?(): void;
+  /** The code typed is for a lesson race: take the player there to join it. */
+  onLessonRoom?(code: string): void;
 }
 
 type View = "choose" | "host" | "join" | "room";
 
-export const GroupHome: React.FC<GroupHomeProps> = ({ userToken, settings, counts, initialCode = null, onAwardXp, onExit, onSignIn }) => {
+export const GroupHome: React.FC<GroupHomeProps> = ({ userToken, settings, counts, initialCode = null, onAwardXp, onExit, onSignIn, onLessonRoom }) => {
   const { t } = useT();
   const stored = initialCode ? null : loadSeat();
   const [seat, setSeat] = useState<{ code: string; token: string; initial: Seat["room"] | null } | null>(stored ? { ...stored, initial: null } : null);
@@ -95,7 +97,7 @@ export const GroupHome: React.FC<GroupHomeProps> = ({ userToken, settings, count
       )}
 
       {view === "host" && userToken && <HostForm userToken={userToken} settings={settings} counts={counts} onOpened={sit} />}
-      {view === "join" && <JoinForm initialCode={initialCode} userToken={userToken} onJoined={sit} />}
+      {view === "join" && <JoinForm initialCode={initialCode} userToken={userToken} onJoined={sit} onWrongGame={onLessonRoom && ((game, code) => game === "skill" && onLessonRoom(code))} />}
     </div>
   );
 };

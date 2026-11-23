@@ -185,6 +185,7 @@ async def touch(db: AsyncIOMotorDatabase, code: str, pid: str, now_ms: int) -> N
 
 async def settle(db: AsyncIOMotorDatabase, code: str, now_ms: int) -> dict[str, Any] | None:
     """Apply whatever time has done to the room, and return it."""
+    await settle_lobby(db, code, now_ms)
     for _ in range(6):
         room = await get(db, code)
         if not room:
@@ -273,8 +274,31 @@ async def set_host(db: AsyncIOMotorDatabase, code: str, pid: str) -> None:
     await _col(db).update_one({"_id": code}, {"$set": {"hostPid": pid}})
 
 
-async def close(db: AsyncIOMotorDatabase, code: str) -> None:
-    await _col(db).update_one({"_id": code}, {"$set": {"status": "closed", "players": [], "puzzles": []}})
+async def close(db: AsyncIOMotorDatabase, code: str, reason: str | None = None) -> None:
+    await _col(db).update_one(
+        {"_id": code}, {"$set": {"status": "closed", "players": [], "puzzles": [], "closedReason": reason}}
+    )
+
+
+async def settle_lobby(db: AsyncIOMotorDatabase, code: str, now_ms: int) -> None:
+    """A host who closed the screen without pressing Leave: pass hosting on, or close the room.
+
+    Guarded by who the host was, so two pollers cannot both act on the same departure.
+    """
+    room = await get(db, code)
+    if not room:
+        return
+    change = rules.lobby_host_change(room, now_ms)
+    if change is None:
+        return
+    what, pid = change
+    guard = {"_id": code, "status": "lobby", "hostPid": room["hostPid"]}
+    if what == "host":
+        await _col(db).update_one(guard, {"$set": {"hostPid": pid}})
+    else:
+        await _col(db).update_one(
+            guard, {"$set": {"status": "closed", "players": [], "puzzles": [], "closedReason": rules.HOST_LEFT}}
+        )
 
 
 async def rematch(db: AsyncIOMotorDatabase, code: str, *, now_ms: int) -> dict[str, Any] | None:

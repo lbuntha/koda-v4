@@ -18,7 +18,7 @@ containers, and a child's flaky connection simply catches up on the next one.
 from __future__ import annotations
 
 import time
-from typing import Annotated, Any
+from typing import Annotated, Any, NoReturn
 
 from fastapi import APIRouter, Depends, Header, Request
 from fastapi.security import HTTPAuthorizationCredentials
@@ -176,18 +176,39 @@ def _view(room: dict[str, Any], me: dict[str, Any], now_ms: int, **extra: Any) -
     return out
 
 
+def _check_game(door: dict[str, Any] | None, *, lesson_door: bool) -> None:
+    """Each game has its own code box, and a child cannot tell the codes apart.
+
+    Refuse a code typed into the other game's box, naming the game it is for,
+    so the app can take the child to the right one instead of seating them in a
+    room their screen cannot play.
+    """
+    if not door or rules.is_skill(door) == lesson_door:
+        return
+    if rules.is_skill(door):
+        raise Conflict("That code is for a lesson race.", "skill_room")
+    raise Conflict("That code is for a Rebus Rush room.", "rebus_room")
+
+
+def _gone(room: dict[str, Any] | None) -> NoReturn:
+    """A closed room, saying why when the host left (so a friend at the door is not left guessing)."""
+    if room and room.get("closedReason") == rules.HOST_LEFT:
+        raise NotFound("The host has left this room.", rules.HOST_LEFT)
+    raise NotFound("That room is not open any more.", "room_not_found")
+
+
 async def _seat(db, code: str, token: str | None, now_ms: int) -> tuple[dict[str, Any], dict[str, Any]]:
     """The room, brought up to date, and the seat this token holds."""
     room = await repo.get(db, rules.normalize_code(code))
     if not room or room["status"] == "closed":
-        raise NotFound("That room is not open any more.", "room_not_found")
+        _gone(room)
     me = repo.seat_of(room, token)
     if not me:
         raise Forbidden("You are not in this room.", "not_in_room")
     await repo.touch(db, room["_id"], me["pid"], now_ms)
     room = await repo.settle(db, room["_id"], now_ms)
     if not room or room["status"] == "closed":
-        raise NotFound("That room is not open any more.", "room_not_found")
+        _gone(room)
     me = repo.seat_of(room, token)
     if not me:
         raise Forbidden("You are not in this room.", "not_in_room")
@@ -241,7 +262,9 @@ async def create_room(body: RoomCreateIn, db: Db, p: CanRead) -> dict[str, Any]:
 @router.post("/{code}/join")
 async def join_room(code: str, body: RoomJoinIn, db: Db, request: Request, user: MaybeUser) -> dict[str, Any]:
     await limiter.hit(db, "room:ip", _caller(request), ROOM_JOIN_PER_IP)
-    door = await repo.get(db, rules.normalize_code(code))
+    room_code = rules.normalize_code(code)
+    await repo.settle_lobby(db, room_code, _now_ms())
+    door = await repo.get(db, room_code)
     if door and rules.is_skill(door):
         if not await _switch(db, SKILL_SWITCH):
             raise Forbidden("Playing in a group is switched off.", "group_off")
@@ -249,6 +272,9 @@ async def join_room(code: str, body: RoomJoinIn, db: Db, request: Request, user:
         raise Forbidden("Playing in a group is switched off.", "group_off")
     _check_choice(body.name, body.avatar)
     await check_parent(db, user)
+    if door and door["status"] == "closed":
+        _gone(door)
+    _check_game(door, lesson_door="/group/rooms/" in request.url.path)
     if user is None and not (await _owner_settings(db)).guestsAllowed:
         raise Forbidden("Only players with a Koda account can join right now.", "guests_off")
     now_ms = _now_ms()
@@ -283,6 +309,7 @@ async def report(db: Db, p: CanOperate, days: int = 30) -> dict[str, Any]:
 @router.get("/{code}")
 async def poll_room(code: str, db: Db, x_player_token: Annotated[str | None, Header()] = None) -> dict[str, Any]:
     now_ms = _now_ms()
+    await repo.settle_lobby(db, rules.normalize_code(code), now_ms)
     room = await repo.get(db, rules.normalize_code(code))
     waiting = repo.request_of(room, x_player_token) if room and room["status"] == "lobby" else None
     if room and waiting:
@@ -416,7 +443,7 @@ async def leave(code: str, db: Db, x_player_token: Annotated[str | None, Header(
         if me["pid"] == after["hostPid"]:
             await repo.set_host(db, room["_id"], after["players"][0]["pid"])
     else:
-        await repo.close(db, room["_id"])
+        await repo.close(db, room["_id"], rules.HOST_LEFT if me["pid"] == room["hostPid"] else None)
     return {"status": "left"}
 
 

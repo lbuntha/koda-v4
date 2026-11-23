@@ -26,11 +26,13 @@ export interface RacePageProps {
   initialCode?: string | null;
   renderRound: RaceRoomProps["renderRound"];
   onExit(): void;
+  /** A Rebus Rush code was typed into the race's door: the host takes the player there. */
+  onRebusRoom?(code: string): void;
 }
 
 type View = "choose" | "host" | "join" | "room";
 
-export const RacePage: React.FC<RacePageProps> = ({ userToken, host, initialCode = null, renderRound, onExit }) => {
+export const RacePage: React.FC<RacePageProps> = ({ userToken, host, initialCode = null, renderRound, onExit, onRebusRoom }) => {
   const { t } = useT();
   const stored = initialCode ? null : loadRaceSeat();
   const [seat, setSeat] = useState<{ code: string; token: string; initial: SkillRoomView | null } | null>(stored ? { ...stored, initial: null } : null);
@@ -83,7 +85,7 @@ export const RacePage: React.FC<RacePageProps> = ({ userToken, host, initialCode
       )}
 
       {view === "host" && host && <RaceHostForm userToken={userToken} skillId={host.skillId} lessons={host.lessons} suggested={host.suggested} onOpened={sit} />}
-      {view === "join" && <JoinForm initialCode={initialCode} userToken={userToken} join={SkillRoomsAPI.join} onJoined={(s) => sit(s as Seat<SkillRoomView>)} />}
+      {view === "join" && <JoinForm initialCode={initialCode} userToken={userToken} join={SkillRoomsAPI.join} onJoined={(s) => sit(s as Seat<SkillRoomView>)} onWrongGame={onRebusRoom && ((game, code) => game === "rebus" && onRebusRoom(code))} />}
     </div>
   );
 };

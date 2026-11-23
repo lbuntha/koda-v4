@@ -48,9 +48,11 @@ export interface RebusPageProps {
   joinCode?: string | null;
   /** The invitation code has been used (or the player backed out of it). */
   onJoinCodeUsed?(): void;
+  /** A code for a lesson race was typed into Rebus's door: the host takes the player there. */
+  onLessonRoom?(code: string): void;
 }
 
-export const RebusPage: React.FC<RebusPageProps> = ({ age: ageOverride, settings: settingsProp, onDeepChange, onAwardXp, onExit, joinCode = null, onJoinCodeUsed }) => {
+export const RebusPage: React.FC<RebusPageProps> = ({ age: ageOverride, settings: settingsProp, onDeepChange, onAwardXp, onExit, joinCode = null, onJoinCodeUsed, onLessonRoom }) => {
   const { t, language } = useT();
   const ownerSettings = useRebusSettings();
   const settings = settingsProp ?? ownerSettings;
@@ -136,6 +138,7 @@ export const RebusPage: React.FC<RebusPageProps> = ({ age: ageOverride, settings
         counts={fullBank.counts}
         initialCode={joinCode}
         onAwardXp={onAwardXp}
+        onLessonRoom={onLessonRoom}
         onExit={() => {
           setGroup(false);
           onJoinCodeUsed?.();

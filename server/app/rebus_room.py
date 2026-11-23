@@ -66,6 +66,30 @@ ROOM_LIFETIME_MS = 2 * 60 * 60 * 1000
 PRESENT_MS = 10_000
 #: A request at the door still shows to the host if its owner polled within this long.
 REQUEST_FRESH_MS = 30_000
+#: A host silent this long in the lobby has left: hosting passes on, or the room closes.
+#: Long enough to switch to a chat app and send the code (a phone pauses the page meanwhile).
+HOST_AWAY_MS = 90_000
+#: Why a room closed when its host left, so the door can say so instead of "no such room".
+HOST_LEFT = "host_left"
+
+
+def lobby_host_change(room: dict[str, Any], now_ms: int) -> tuple[str, str | None] | None:
+    """What to do about a lobby whose host has stopped asking for it.
+
+    ("host", pid) hands hosting to a friend still here; ("close", None) shuts a
+    room nobody is left in to run; None means the host is still around. Only in
+    the lobby: once a race is playing it runs on its own clock.
+    """
+    if room.get("status") != "lobby":
+        return None
+    host = next((p for p in room.get("players", []) if p["pid"] == room.get("hostPid")), None)
+    if host and now_ms - int(host.get("seenMs", 0)) < HOST_AWAY_MS:
+        return None
+    here = [
+        p for p in room.get("players", [])
+        if p["pid"] != room.get("hostPid") and now_ms - int(p.get("seenMs", 0)) < HOST_AWAY_MS
+    ]
+    return ("host", here[0]["pid"]) if here else ("close", None)
 
 
 

@@ -29,8 +29,8 @@ export type Link = "connecting" | "live" | "reconnecting" | "gone";
 export interface RoomFeed<View extends AnyRoomView = AnyRoomView> {
   room: View | null;
   link: Link;
-  /** Why the room is gone: removed by the host, closed, or never found. */
-  goneBecause: "removed" | "closed" | null;
+  /** Why the room is gone: removed by the host, the host left, or closed (or never found). */
+  goneBecause: "removed" | "hostLeft" | "closed" | null;
   /** Take a newer room the caller already has (the answer to an action), without waiting for the next ask. */
   apply(room: View): void;
   /** The server clock minus this device's clock, in ms, for counting down in step with everyone. */
@@ -79,7 +79,7 @@ export const useRoom = <View extends AnyRoomView = AnyRoomView>(
         const err = e instanceof ApiError ? e : null;
         if (err && (err.status === 403 || err.status === 404)) {
           // Not in the room any more: the host removed this seat, or the room closed.
-          setGone(err.status === 403 ? "removed" : "closed");
+          setGone(err.status === 403 ? "removed" : err.code === "host_left" ? "hostLeft" : "closed");
           setLink("gone");
           return;
         }

@@ -5220,6 +5220,8 @@
       "connecting": "Joining the room…",
       "removed": "The host removed you from the room.",
       "closed": "This room is closed.",
+      "hostLeft": "The host left, so this room is closed. Ask them to open a new one.",
+      "hostLeftYou": "Your room closed while you were away. Open a new one to play again.",
       "back": "Back",
       "started": "The game has started!",
       "shareText": "Join my Rebus Rush game! Code: {code}",
@@ -5257,7 +5259,10 @@
         "too_many_attempts": "Too many tries. Wait a minute and try again.",
         "signIn": "Sign in to do that.",
         "other": "Something went wrong. Try again.",
-        "parent_off": "A grown-up has turned off playing with others."
+        "parent_off": "A grown-up has turned off playing with others.",
+        "host_left": "The host left, so this room is closed. Ask them to open a new one.",
+        "skill_room": "That code is for a lesson race. Join it from a skill's Play together.",
+        "rebus_room": "That code is for Rebus Rush. Join it from Rebus Rush."
       }
     },
     "nick": {

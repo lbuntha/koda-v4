@@ -16,6 +16,8 @@ import type { RoundObserver } from "../../skills/sdk/createKodaSDK";
 import { SkillRoomsAPI } from "../skillRoomsApi";
 import type { SkillRoomView } from "../types";
 import { useRoom } from "../useRoom";
+import { roomGoneKey } from "../roomGone";
+import { useLeaveOnClose } from "../useLeaveOnClose";
 import { useServerClock } from "../useServerClock";
 import { raceErrorKey } from "./raceErrors";
 import { raceLinkFor } from "./raceLink";
@@ -80,23 +82,26 @@ export const RaceRoom: React.FC<RaceRoomProps> = ({ code, token, initial = null,
     }
   };
 
-  const leave = async () => {
-    if (left.current) return;
+  /** Tell the server this seat is free. Once only, whoever asks first. */
+  const giveUpSeat = () => {
+    if (left.current) return Promise.resolve();
     left.current = true;
     clearRaceSeat();
-    try {
-      await SkillRoomsAPI.leave(code, token);
-    } catch {
-      /* The room tidies itself up. */
-    }
+    // The room tidies itself up if this fails.
+    return SkillRoomsAPI.leave(code, token).catch(() => undefined);
+  };
+
+  const leave = async () => {
+    await giveUpSeat();
     onLeft();
   };
 
+  useLeaveOnClose(() => void giveUpSeat(), link !== "gone" && (room?.status === "lobby" || room?.status === "pending"));
+
   if (link === "gone") {
-    const turnedAway = room?.status === "pending";
     return (
       <div className="mx-auto flex w-full max-w-xl flex-col items-center gap-4 pb-20 text-center">
-        <Status tone="info">{turnedAway ? t("rebus.group.declined") : goneBecause === "removed" ? t("rebus.group.removed") : t("rebus.group.closed")}</Status>
+        <Status tone="info">{t(roomGoneKey(room, goneBecause))}</Status>
         <UIButton size="lg" onClick={onLeft}>
           {t("rebus.group.back")}
         </UIButton>

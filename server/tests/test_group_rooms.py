@@ -255,3 +255,63 @@ async def test_a_child_plays_with_others_unless_a_grown_up_switched_it_off(clien
 
     await _parent_switch(db, family_id, kid_id, True)
     assert (await open_room(client, kid)).status_code == 201
+
+
+async def test_a_lesson_code_typed_into_rebus_says_which_game_it_is(client, owner, registry, clock):
+    code = (await open_room(client, owner)).json()["room"]["code"]
+    res = await client.post(f"/rebus/rooms/{code}/join", json={"name": "Clever Fox", "avatar": "fox"})
+    assert res.status_code == 409 and res.json()["error"]["code"] == "skill_room"
+
+
+async def test_a_rebus_code_typed_into_a_lesson_race_says_which_game_it_is(client, owner, registry, clock):
+    made = await client.post("/rebus/rooms", json={"category": "mixed", "name": "Brave Tiger", "avatar": "tiger"}, headers=owner)
+    if made.status_code != 201:
+        pytest.skip(f"no Rebus room here: {made.text}")
+    code = made.json()["room"]["code"]
+    res = await client.post(f"/group/rooms/{code}/join", json={"name": "Clever Fox", "avatar": "fox"})
+    assert res.status_code == 409 and res.json()["error"]["code"] == "rebus_room"
+
+
+async def test_a_host_who_closed_the_screen_hands_the_room_to_a_friend_still_here(client, owner, registry, clock):
+    made = (await open_room(client, owner)).json()
+    code, host = made["room"]["code"], seat(made["playerToken"])
+    asked = (await client.post(f"/group/rooms/{code}/join", json={"name": "Clever Fox", "avatar": "fox"})).json()
+    await client.post(f"/group/rooms/{code}/accept", json={"pid": asked["room"]["me"]["pid"]}, headers=host)
+    friend = seat(asked["playerToken"])
+
+    # The friend keeps asking; the host has gone quiet.
+    for _ in range(4):
+        clock["ms"] += rules.HOST_AWAY_MS // 3
+        view = (await client.get(f"/group/rooms/{code}", headers=friend)).json()
+    assert view["me"]["isHost"] is True
+
+
+async def test_a_host_who_left_alone_closes_the_room_and_the_door_says_so(client, owner, registry, clock):
+    made = (await open_room(client, owner)).json()
+    code = made["room"]["code"]
+    asked = (await client.post(f"/group/rooms/{code}/join", json={"name": "Clever Fox", "avatar": "fox"})).json()
+    knocker = seat(asked["playerToken"])
+
+    clock["ms"] += rules.HOST_AWAY_MS + 1
+    res = await client.get(f"/group/rooms/{code}", headers=knocker)
+    assert res.status_code == 404 and res.json()["error"]["code"] == "host_left"
+    late = await client.post(f"/group/rooms/{code}/join", json={"name": "Merry Penguin", "avatar": "fox"})
+    assert late.status_code == 404 and late.json()["error"]["code"] == "host_left"
+
+
+async def test_a_host_switching_apps_for_a_minute_keeps_the_room(client, owner, registry, clock):
+    made = (await open_room(client, owner)).json()
+    code = made["room"]["code"]
+    asked = (await client.post(f"/group/rooms/{code}/join", json={"name": "Clever Fox", "avatar": "fox"})).json()
+    clock["ms"] += 60_000
+    assert (await client.get(f"/group/rooms/{code}", headers=seat(asked["playerToken"]))).status_code == 200
+    assert (await client.get(f"/group/rooms/{code}", headers=seat(made["playerToken"]))).json()["me"]["isHost"] is True
+
+
+async def test_a_host_pressing_leave_alone_tells_the_door_the_host_left(client, owner, registry, clock):
+    made = (await open_room(client, owner)).json()
+    code = made["room"]["code"]
+    asked = (await client.post(f"/group/rooms/{code}/join", json={"name": "Clever Fox", "avatar": "fox"})).json()
+    await client.post(f"/group/rooms/{code}/leave", headers=seat(made["playerToken"]))
+    res = await client.get(f"/group/rooms/{code}", headers=seat(asked["playerToken"]))
+    assert res.json()["error"]["code"] == "host_left"

@@ -18,6 +18,8 @@ import { clearSeat } from "./seatStore";
 import type { RoomView } from "./types";
 import { useGroupLearning } from "./useGroupLearning";
 import { useRoom } from "./useRoom";
+import { roomGoneKey } from "../../group/roomGone";
+import { useLeaveOnClose } from "../../group/useLeaveOnClose";
 import type { RebusSettings } from "../settings";
 
 export interface GroupRoomProps {
@@ -59,25 +61,27 @@ export const GroupRoom: React.FC<GroupRoomProps> = ({ code, token, initial = nul
     }
   };
 
-  const leave = async () => {
-    if (left.current) return;
+  /** Tell the server this seat is free. Once only, whoever asks first. */
+  const giveUpSeat = () => {
+    if (left.current) return Promise.resolve();
     left.current = true;
     clearSeat();
-    try {
-      await GroupAPI.leave(code, token);
-    } catch {
-      /* Leaving still works for this player: the room tidies itself up. */
-    }
+    // Leaving still works for this player if this fails: the room tidies itself up.
+    return GroupAPI.leave(code, token).catch(() => undefined);
+  };
+
+  const leave = async () => {
+    await giveUpSeat();
     onLeft();
   };
 
-  const turnedAway = link === "gone" && room?.status === "pending";
+  useLeaveOnClose(() => void giveUpSeat(), link !== "gone" && (room?.status === "lobby" || room?.status === "pending"));
 
   if (link === "gone") {
     return (
       <div className="mx-auto flex w-full max-w-xl flex-col items-center gap-4 pb-20 text-center">
         <p role="status" className={themeSystem.flash("info")}>
-          {turnedAway ? t("rebus.group.declined") : goneBecause === "removed" ? t("rebus.group.removed") : t("rebus.group.closed")}
+          {t(roomGoneKey(room, goneBecause))}
         </p>
         <UIButton size="lg" onClick={onLeft}>
           {t("rebus.group.back")}

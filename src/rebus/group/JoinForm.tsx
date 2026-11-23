@@ -5,6 +5,7 @@ import { LogIn } from "lucide-react";
 import { useT } from "../../lib/i18n";
 import { themeSystem } from "../../lib/themeSystem";
 import { UIButton, UIInput } from "../../components/ui";
+import { ApiError } from "../../lib/sync";
 import { roomErrorKey } from "./errors";
 import { GroupAPI } from "./groupApi";
 import { NicknamePicker } from "./NicknamePicker";
@@ -23,9 +24,16 @@ export interface JoinFormProps {
   onJoined(seat: Seat): void;
   /** Join through another game's rooms (a lesson race): the same door, a different address. */
   join?: (code: string, body: { name: string; avatar: string }, userToken: string | null) => Promise<Seat>;
+  /**
+   * The code belongs to the other game. The caller opens that game's join
+   * screen with the code filled in; without this, the form just says so.
+   */
+  onWrongGame?(game: "skill" | "rebus", code: string): void;
 }
 
-export const JoinForm: React.FC<JoinFormProps> = ({ initialCode, userToken, onJoined, join: joinRoom = GroupAPI.join }) => {
+const WRONG_GAME = { skill_room: "skill", rebus_room: "rebus" } as const;
+
+export const JoinForm: React.FC<JoinFormProps> = ({ initialCode, userToken, onJoined, join: joinRoom = GroupAPI.join, onWrongGame }) => {
   const { t } = useT();
   const [code, setCode] = useState(cleanCode(initialCode ?? ""));
   const [name, setName] = useState("");
@@ -42,6 +50,11 @@ export const JoinForm: React.FC<JoinFormProps> = ({ initialCode, userToken, onJo
     try {
       onJoined(await joinRoom(code, { name, avatar }, userToken));
     } catch (e) {
+      const other = e instanceof ApiError ? WRONG_GAME[e.code as keyof typeof WRONG_GAME] : undefined;
+      if (other && onWrongGame) {
+        onWrongGame(other, code);
+        return;
+      }
       const key = roomErrorKey(e);
       setError(t(key));
       if (key === "rebus.group.err.name_taken") {
