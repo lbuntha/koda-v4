@@ -48,6 +48,11 @@ export interface KodaHost {
   exit(): void;
   /** Leave for the home screen. Absent where the host has no home. */
   goHome?(): void;
+  /**
+   * Whether a grown-up's limit (daily minutes or study hours) has closed play.
+   * Absent where no limit applies — a teacher preview, a race.
+   */
+  timeUp?(): boolean;
   /** Sequential next lesson in this skill. Null means this path is complete.
    *  `practice` marks an optional practice round offered after the last
    *  teaching lesson — an invitation, not the next step. */
@@ -404,6 +409,7 @@ export function createKodaSDK(
       nextLesson: host.nextLesson ?? null,
       pathComplete: host.pathComplete ?? false,
       goHome: host.goHome ?? null,
+      timeUp: () => host.timeUp?.() ?? false,
     },
   };
 }

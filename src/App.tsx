@@ -469,7 +469,13 @@ export default function App() {
    * round is actually open, so a child reading the Learn page is not spending
    * their afternoon.
    */
-  useSessionClock(inRound || race !== null);
+  // Word Guess and a Rebus round are play too: before they ticked nothing, so a
+  // child could spend the whole afternoon there with the cap never moving.
+  useSessionClock(
+    inRound ||
+      race !== null ||
+      (activeTab === "game" && learnCategory === "lessons" && (wordGuessOpen || (rebusOpen && rebusDeep))),
+  );
   // Someone signed in who opens an invitation link goes straight to the join screen for that room.
   useEffect(() => {
     if (!session || !roomCode) return;
@@ -808,6 +814,8 @@ export default function App() {
       }
       snapshot={hostSnapshot}
       onExit={() => setInRound(false)}
+      // Between questions, the round asks whether a limit closed play.
+      timeUp={() => studyGateNow().closed}
       /* The other door off the round-complete screen. `onExit` goes back to
          the lesson list this round was opened from; a child who has finished
          for the day wants the dashboard, and before this the only way there

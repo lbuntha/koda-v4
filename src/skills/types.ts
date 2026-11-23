@@ -208,6 +208,11 @@ export interface KodaSDK {
      * the activity harness both have a list and no dashboard.
      */
     readonly goHome: (() => void) | null;
+    /**
+     * Whether a grown-up's limit has closed play for now. The round asks this
+     * between questions, never mid-question, and leaves when it says yes.
+     */
+    timeUp(): boolean;
   };
 }
 

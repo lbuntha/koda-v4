@@ -53,6 +53,8 @@ export interface FakeKodaOptions {
   snapshot?: Partial<LearnerSnapshot>;
   /** Give the fake host a home screen, so `ui.goHome` is offered. */
   goHome?: boolean;
+  /** What `ui.timeUp` answers: a grown-up's limit has closed play. */
+  timeUp?: boolean | (() => boolean);
   theme?: "light" | "dark";
   /** The learner's voice preference, as `speech.isEnabled()` reports it. */
   voiceEnabled?: boolean;
@@ -175,6 +177,7 @@ export function createFakeKoda(options: FakeKodaOptions = {}): FakeKoda {
       /* Null by default, like a host with no home screen: a test that wants the
          home door has to ask for it, so no test gets it by accident. */
       goHome: options.goHome ? () => record("ui.goHome") : null,
+      timeUp: () => (typeof options.timeUp === "function" ? options.timeUp() : options.timeUp ?? false),
     },
   };
 

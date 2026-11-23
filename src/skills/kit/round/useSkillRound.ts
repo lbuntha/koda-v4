@@ -372,6 +372,16 @@ export function useSkillRound({
 
     remember(index, nextFirstTry);
 
+    // A grown-up's limit closed play while this question was open. The child
+    // finished it — never cut off mid-question — but no next one is served;
+    // the host's "done for today" screen takes over. Unmounting abandons the
+    // lesson in the log, and practice keeps its place for next time.
+    if (koda.ui.timeUp()) {
+      koda.log("EXIT_GAME", `Time limit reached after question ${index}`, levelNumber, index);
+      koda.ui.exit();
+      return;
+    }
+
     const n = index + 1;
     const q = fns.current.nextQuestion(n);
     missedRef.current = false;

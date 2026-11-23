@@ -32,6 +32,11 @@ export interface SkillHostProps {
    * the activity harness — simply omits it and the chrome stops offering it.
    */
   onGoHome?(): void;
+  /**
+   * Whether a grown-up's limit has closed play. A round checks it between
+   * questions and leaves when it is true. Omitted for previews and races.
+   */
+  timeUp?(): boolean;
   /** Course-owned route to the next lesson in this skill. `practice` marks the
    *  optional practice round offered once the teaching path is finished. */
   nextLesson?: { levelNumber: number; lessonNumber: number; practice?: boolean };
@@ -109,6 +114,7 @@ export const SkillHost: React.FC<SkillHostProps> = ({
   onComplete,
   onExit,
   onGoHome,
+  timeUp,
   nextLesson,
   pathComplete = false,
   onStartLesson,
@@ -138,11 +144,12 @@ export const SkillHost: React.FC<SkillHostProps> = ({
     onExit,
     onGoHome,
     onStartLesson,
+    timeUp,
     snapshot,
     viewer,
     race,
   });
-  hostRef.current = { onAwardXp, onComplete, onExit, onGoHome, onStartLesson, snapshot, viewer, race };
+  hostRef.current = { onAwardXp, onComplete, onExit, onGoHome, onStartLesson, timeUp, snapshot, viewer, race };
 
   const koda = useMemo(() => {
     const skillId = activityRef.split("/")[0] ?? "unknown";
@@ -152,6 +159,7 @@ export const SkillHost: React.FC<SkillHostProps> = ({
       getSnapshot: () => hostRef.current.snapshot,
       theme,
       exit: () => hostRef.current.onExit(),
+      timeUp: () => hostRef.current.timeUp?.() ?? false,
       /* Bound only when the host actually has a home screen, because the SDK
          publishes `goHome` as null when it does not and the chrome draws the
          door from that. A closure that always exists would always draw it. */
