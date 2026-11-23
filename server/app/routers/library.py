@@ -212,7 +212,12 @@ def _clean(passage: dict[str, Any]) -> dict[str, Any]:
     for q in questions:
         if not isinstance(q, dict) or too_long(q.get("prompt")) or any(too_long(o) for o in q.get("options") or []):
             raise AppError(400, "invalid_passage", "A question is malformed or too long.")
-        if "audio" in q and (q.get("kind") not in ("comprehension", "vocab", "match", "spell") or not isinstance(q["audio"], str) or not CLIP_ID.fullmatch(q["audio"])):
+        bad_audio = (
+            q.get("kind") not in ("comprehension", "vocab", "match", "spell")
+            or not isinstance(q.get("audio"), str)
+            or not CLIP_ID.fullmatch(q["audio"])
+        )
+        if "audio" in q and bad_audio:
             raise AppError(400, "invalid_passage", "A question recording must reference a valid audio clip.")
         pairs = q.get("pairs")
         if pairs is not None and (
