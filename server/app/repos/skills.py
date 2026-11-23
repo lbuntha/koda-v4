@@ -67,7 +67,24 @@ async def seed_default(db: AsyncIOMotorDatabase, manifest: dict[str, Any]) -> bo
         },
         upsert=True,
     )
+    if result.upserted_id is None:
+        await _add_new_features(db, skill_id, manifest.get("features") or [])
     return result.upserted_id is not None
+
+
+async def _add_new_features(db: AsyncIOMotorDatabase, skill_id: str, declared: list[dict[str, Any]]) -> None:
+    """Give an existing row the features a later release declared, as the manifest sets them.
+
+    Features are the operator's after the first insert, so a restart never
+    touches one already there: switched off stays off. But a feature the row
+    has never heard of would otherwise never reach the Skill Manager at all —
+    nobody could see it, let alone switch it.
+    """
+    row = await db.skill_registry.find_one({"id": skill_id}, {"features.id": 1})
+    known = {f.get("id") for f in (row or {}).get("features") or []}
+    missing = [f for f in declared if f.get("id") not in known]
+    if missing:
+        await db.skill_registry.update_one({"id": skill_id}, {"$push": {"features": {"$each": missing}}})
 
 
 async def set_status(

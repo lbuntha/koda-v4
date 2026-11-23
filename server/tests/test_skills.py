@@ -292,3 +292,22 @@ async def test_operator_saves_the_complete_skill_manager_configuration(client, d
     listing = (await client.get("/skills", headers=operator)).json()["skills"][0]
     assert listing["features"][0]["isEnabled"] is False
     assert listing["thumbnail"] == "apple"
+
+
+async def test_deploy_adds_a_feature_a_later_release_declares_and_keeps_the_operator_s_switches(db):
+    default = _bundled("number-merge")
+    first = [f for f in default["features"] if f["id"] != "group_play"]
+    await skills_repo.seed_default(db, {**default, "features": first})
+    # An operator switches one of the original features off.
+    await db.skill_registry.update_one(
+        {"id": "number-merge", "features.id": first[0]["id"]}, {"$set": {"features.$.isEnabled": False}}
+    )
+
+    later = {**default, "features": [*first, {"id": "group_play", "name": "Play together", "isEnabled": True}]}
+    await skills_repo.seed_default(db, later)
+    await skills_repo.seed_default(db, later)  # and again: never added twice
+
+    features = (await skills_repo.get(db, "number-merge"))["features"]
+    assert [f["id"] for f in features].count("group_play") == 1
+    assert next(f for f in features if f["id"] == "group_play")["isEnabled"] is True
+    assert next(f for f in features if f["id"] == first[0]["id"])["isEnabled"] is False
