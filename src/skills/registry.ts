@@ -177,7 +177,9 @@ export type HiddenReason =
  * so a skill cannot be hidden in one place and showing in another.
  *
  *   draft      → developers only
- *   published  → anyone in its audience
+ *   published  → anyone old enough for it. The audience's top age is who it
+ *                is written for, not a ceiling: an older child can always go
+ *                back to easier work (catch up, review, an easy win).
  *
  * On top of status, a parent's per-install choice can always switch a skill off.
  */
@@ -189,8 +191,8 @@ export function hiddenReason(p: SkillInfo, viewer: Viewer): HiddenReason {
     // skill turned off in the Skill Manager still filling the Learn page.
     if (!viewer.isDeveloper) return "draft";
   } else {
-    const [minAge, maxAge] = p.manifest.audience.ages;
-    if (viewer.age < minAge || viewer.age > maxAge) return "outside-age-range";
+    const [minAge] = p.manifest.audience.ages;
+    if (viewer.age < minAge) return "outside-age-range";
   }
 
   return isEnabledHere(p) ? null : "disabled-here";

@@ -32,6 +32,11 @@ describe("learner audience viewer", () => {
     });
     expect(developer.isDeveloper).toBe(true);
     expect(developer.showAllSkills).toBe(false);
-    expect(hiddenReason(counting, developer)).toBe("outside-age-range");
+    expect(hiddenReason(counting, { ...developer, age: 4 })).toBe("outside-age-range");
+  });
+
+  it("shows a published skill to a learner older than its range", () => {
+    expect(hiddenReason(counting, { ...preview, age: 13 })).toBeNull();
+    expect(hiddenReason(counting, { ...preview, age: 4 })).toBe("outside-age-range");
   });
 });

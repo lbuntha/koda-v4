@@ -72,20 +72,23 @@ async def test_draft_and_disabled_skills_cannot_be_registered(client, db, signup
     assert (await client.post("/skill-registrations/disabled-skill", headers=auth)).status_code == 404
 
 
-async def test_a_child_cannot_register_a_skill_outside_their_age(client, db, signup_body):
+async def test_a_child_cannot_register_a_skill_above_their_age(client, db, signup_body):
     from app.repos import learners, skills
 
     await skills.seed_default(db, _skill("early-math", ages=[5, 7]))
+    await skills.seed_default(db, _skill("older-math", ages=[10, 12]))
     pair, parent_auth = await _signup(client, signup_body())
-    learner = await learners.create(
-        db,
-        pair["familyId"],
-        "Older learner",
-        birth_year=datetime.now().year - 12,
-    )
-    switched = await client.post(f"/auth/switch/{learner['_id']}", headers=parent_auth)
-    child_auth = {"Authorization": f"Bearer {switched.json()['accessToken']}"}
 
-    refused = await client.post("/skill-registrations/early-math", headers=child_auth)
+    async def child(years: int) -> dict:
+        learner = await learners.create(db, pair["familyId"], f"Learner {years}", birth_year=datetime.now().year - years)
+        switched = await client.post(f"/auth/switch/{learner['_id']}", headers=parent_auth)
+        return {"Authorization": f"Bearer {switched.json()['accessToken']}"}
+
+    younger = await child(6)
+    refused = await client.post("/skill-registrations/older-math", headers=younger)
     assert refused.status_code == 403
     assert refused.json()["error"]["code"] == "skill_outside_age_range"
+
+    # Older than the range is fine: going back to easier work is allowed.
+    older = await child(12)
+    assert (await client.post("/skill-registrations/early-math", headers=older)).status_code == 201

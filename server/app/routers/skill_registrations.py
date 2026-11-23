@@ -57,7 +57,9 @@ async def _eligible_skill(skill_id: str, db: Db, p: CurrentPrincipal) -> dict:
         ages = (skill.get("audience") or {}).get("ages")
         if birth_year and isinstance(ages, list) and len(ages) == 2:
             age = datetime.now().year - int(birth_year)
-            if age < int(ages[0]) or age > int(ages[1]):
+            # Only the bottom of the range gates: an older child may go back to
+            # easier work, so the top age is who it is for, not a ceiling.
+            if age < int(ages[0]):
                 raise Forbidden(
                     "That skill is outside this learner's age range.",
                     "skill_outside_age_range",
