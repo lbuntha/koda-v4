@@ -29,6 +29,7 @@ from app.models.rebus_room import ProgressIn, SkillRoomCreateIn
 from app.repos import rebus_rooms as repo
 from app.repos import skills as skills_repo
 from app.routers import rebus_rooms as rooms
+from app.skill_defaults import load_defaults as load_skill_defaults
 
 router = APIRouter(prefix="/group/rooms", tags=["group-rooms"])
 
@@ -39,7 +40,19 @@ DEFAULT_COUNT = 5
 
 
 def _feature_on(skill: dict[str, Any]) -> bool:
-    return any(f.get("id") == GROUP_FEATURE and f.get("isEnabled", True) for f in skill.get("features") or [])
+    """Whether the skill can be raced: the operator's switch if they have one, else what the code declares.
+
+    A registry row keeps the features it had when the skill was first
+    registered (an operator's choices must survive a deploy), so a feature a
+    later release adds is absent from the row until someone saves it in the
+    Skill Manager. Absent means "as the deployed manifest says".
+    """
+    stored = next((f for f in skill.get("features") or [] if f.get("id") == GROUP_FEATURE), None)
+    if stored is not None:
+        return bool(stored.get("isEnabled", True))
+    manifest = next((m for m in load_skill_defaults() if m.get("id") == skill.get("id")), None)
+    declared = next((f for f in (manifest or {}).get("features") or [] if f.get("id") == GROUP_FEATURE), None)
+    return bool(declared and declared.get("isEnabled", True))
 
 
 def _question_count(lesson: dict[str, Any]) -> int:

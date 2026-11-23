@@ -91,6 +91,22 @@ async def test_a_skill_must_declare_group_play(client, owner, registry, clock):
     assert res.status_code == 403 and res.json()["error"]["code"] == "group_unsupported"
 
 
+async def test_a_feature_added_by_a_later_release_counts_before_anyone_saves_it(client, owner, registry, db, clock, monkeypatch):
+    # The row predates the feature; the deployed manifest declares it.
+    await db.skill_registry.update_one({"id": SKILL}, {"$pull": {"features": {"id": "group_play"}}})
+    from app.routers import group_rooms
+
+    def manifests():
+        out = load_defaults()
+        for m in out:
+            if m["id"] == SKILL:
+                m["features"] = [*m["features"], {"id": "group_play", "isEnabled": True}]
+        return out
+
+    monkeypatch.setattr(group_rooms, "load_skill_defaults", manifests)
+    assert (await open_room(client, owner)).status_code == 201
+
+
 async def test_switching_the_feature_off_in_the_skill_manager_closes_it(client, owner, registry, db, clock):
     await db.skill_registry.update_one({"id": SKILL, "features.id": "group_play"}, {"$set": {"features.$.isEnabled": False}})
     res = await open_room(client, owner)
