@@ -1,29 +1,9 @@
-/** A group room as the server describes it (`routers/rebus_rooms.py`, `_view`). */
+/** A Rebus room as the server describes it. The shapes are shared with every game; see `group/types.ts`. */
 
 import type { Puzzle } from "../types";
+import type { RoomView as SharedRoomView, Seat as SharedSeat } from "../../group/types";
 
-/** "pending": at the door, waiting for the host to accept. */
-export type RoomStatus = "pending" | "lobby" | "playing" | "finished";
-
-export interface RoomPlayer {
-  pid: string;
-  name: string;
-  avatar: string;
-  score: number;
-  solved: number;
-  isHost: boolean;
-  /** Signed in to Koda. The only thing a room says about anyone's account. */
-  isKodaUser: boolean;
-  connected: boolean;
-}
-
-/** Someone at the door, as the host sees them. */
-export interface RoomRequest {
-  pid: string;
-  name: string;
-  avatar: string;
-  isKodaUser: boolean;
-}
+export type { Choices, PuzzleResult, RoomPlayer, RoomRequest, RoomStatus, Standing } from "../../group/types";
 
 export interface RoomSettings {
   category: string;
@@ -37,51 +17,5 @@ export interface RoomSettings {
   hintCost: number;
 }
 
-export interface PuzzleResult {
-  index: number;
-  winnerPid: string | null;
-  points: number;
-  hints: number;
-  atMs: number;
-}
-
-export interface Standing {
-  pid: string;
-  place: number;
-  score: number;
-}
-
-export interface RoomView {
-  code: string;
-  status: RoomStatus;
-  locked: boolean;
-  settings: RoomSettings;
-  players: RoomPlayer[];
-  me: { pid: string; isHost: boolean; isKodaUser: boolean };
-  /** The server's clock when this was sent, so a device can tell how far its own is off. */
-  nowMs: number;
-  /** Only the host gets this: who is waiting to be let in. */
-  requests?: RoomRequest[];
-  // While playing or finished:
-  total?: number;
-  results?: PuzzleResult[];
-  standings?: Standing[];
-  // While playing:
-  index?: number;
-  puzzle?: Puzzle;
-  startMs?: number;
-  limitMs?: number;
-  endedMs?: number | null;
-  revealUntilMs?: number | null;
-  result?: PuzzleResult | null;
-}
-
-export interface Seat {
-  playerToken: string;
-  room: RoomView;
-}
-
-export interface Choices {
-  nicknames: string[];
-  avatars: string[];
-}
+export type RoomView = SharedRoomView<RoomSettings, Puzzle>;
+export type Seat = SharedSeat<RoomView>;

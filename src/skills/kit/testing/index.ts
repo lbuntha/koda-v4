@@ -23,3 +23,4 @@ export {
 } from "./renderActivity";
 export { describeActivitySmoke } from "./activitySmoke";
 export { describeSkillLocales } from "./skillLocales";
+export { describeGroupPlay, declaresGroupPlay, GROUP_FEATURE } from "./groupPlay";

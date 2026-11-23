@@ -70,6 +70,21 @@ export interface KodaHost {
     lessonId: string;
     skillId: string;
   }): Recommendation | undefined;
+  /**
+   * Something outside the skill following this round's answers, or nothing.
+   *
+   * Group play uses it: a race reports how far each player has got by watching
+   * the same answers the learning log hears, so no skill has to know it is in
+   * a race. It sees what was asked and whether it was right — never more.
+   * Called even in a preview, where the learning log is off, because a race is
+   * a race whoever is watching.
+   */
+  roundObserver?: RoundObserver;
+}
+
+export interface RoundObserver {
+  answered(report: { questionId: string; correct: boolean }): void;
+  completed(): void;
 }
 
 /**
@@ -365,12 +380,14 @@ export function createKodaSDK(
       },
       answered(report: AnswerReport) {
         tracker?.answered(report);
+        host.roundObserver?.answered({ questionId: report.questionId, correct: report.correct });
       },
       supportUsed(support: SupportKind, hintLevel?: number) {
         tracker?.supportUsed(support, hintLevel);
       },
       completeLesson(extras) {
         tracker?.completeLesson(extras);
+        host.roundObserver?.completed();
       },
       abandonLesson() {
         tracker?.abandonLesson();

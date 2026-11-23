@@ -3,7 +3,7 @@ import { useTheme } from "../../context/ThemeContext";
 import { getSkill, loadSkill, resolveActivity, skillLoadFailed, useLoadedSkill } from "../registry";
 import { UIButton, UIPageLoader } from "../../components/ui";
 import { translate } from "../../lib/i18n";
-import { createKodaSDK, type KodaHost } from "../sdk/createKodaSDK";
+import { createKodaSDK, type KodaHost, type RoundObserver } from "../sdk/createKodaSDK";
 import type { ActivityLesson, LearnerSnapshot, SkillResult } from "../types";
 import type { LearningContext, LessonEntry } from "../../lib/learning/events";
 import { getCourseLessons, getLessonByLevel } from "../../curriculum";
@@ -69,6 +69,28 @@ export interface SkillHostProps {
   };
   /** How the learner got here. `"preview"` also disables telemetry. */
   entry?: LessonEntry;
+  /**
+   * Playing this round in a group race, or not.
+   *
+   * `seed` is the room's: handed to the activity as `params.seed` (and
+   * `params.question.seed`), so every player's device builds the same
+   * questions — the promise a skill makes by declaring `group_play`. The
+   * observer follows the answers so the race can report progress.
+   */
+  race?: { seed: string; observer: RoundObserver };
+}
+
+/**
+ * A lesson's params with the race's seed laid over them, where every engine looks.
+ *
+ * Engines flatten `{ ...params, ...params.question }`, so the seed goes in both
+ * places: on the question it wins over a lesson that pinned its own, at the top
+ * it reaches an engine that reads params directly.
+ */
+export function withRaceSeed(params: Record<string, unknown>, seed: string | undefined): Record<string, unknown> {
+  if (!seed) return params;
+  const question = (params.question && typeof params.question === "object" ? params.question : {}) as Record<string, unknown>;
+  return { ...params, seed, question: { ...question, seed } };
 }
 
 /**
@@ -92,6 +114,7 @@ export const SkillHost: React.FC<SkillHostProps> = ({
   onStartLesson,
   lesson,
   entry = "path",
+  race,
 }) => {
   const { theme } = useTheme();
   const viewer = useAudienceViewer();
@@ -117,8 +140,9 @@ export const SkillHost: React.FC<SkillHostProps> = ({
     onStartLesson,
     snapshot,
     viewer,
+    race,
   });
-  hostRef.current = { onAwardXp, onComplete, onExit, onGoHome, onStartLesson, snapshot, viewer };
+  hostRef.current = { onAwardXp, onComplete, onExit, onGoHome, onStartLesson, snapshot, viewer, race };
 
   const koda = useMemo(() => {
     const skillId = activityRef.split("/")[0] ?? "unknown";
@@ -140,6 +164,14 @@ export const SkillHost: React.FC<SkillHostProps> = ({
           }
         : null,
       pathComplete,
+      ...(race
+        ? {
+            roundObserver: {
+              answered: (report) => hostRef.current.race?.observer.answered(report),
+              completed: () => hostRef.current.race?.observer.completed(),
+            },
+          }
+        : {}),
       // The course, not the skill, decides what a level means. Telemetry is off
       // for previews, so this resolver is not consulted there either.
       // Built fresh per call so a skill enabled or a lesson unlocked between
@@ -225,6 +257,7 @@ export const SkillHost: React.FC<SkillHostProps> = ({
     nextLesson?.practice,
     pathComplete,
     Boolean(onGoHome),
+    race?.seed,
   ]);
 
   if (!ownerLoaded && getSkill(ownerId)) {
@@ -274,7 +307,7 @@ export const SkillHost: React.FC<SkillHostProps> = ({
   return (
     <ActivityErrorBoundary key={activityRef} activityRef={activityRef} onExit={onExit}>
       <Component
-        params={{ ...(activity.defaultParams as object), ...(params ?? {}) }}
+        params={withRaceSeed({ ...(activity.defaultParams as object), ...(params ?? {}) }, race?.seed)}
         level={level}
         koda={koda}
         onComplete={onComplete}
