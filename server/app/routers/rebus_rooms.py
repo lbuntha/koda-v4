@@ -84,6 +84,28 @@ async def _switch(db, setting_id: str) -> bool:
     return bool(await system_repo.value_of(db, setting_id, True))
 
 
+async def _parent_allows(db, p: Principal | None) -> bool:
+    """Whether this child's grown-up lets them play with others ("Play with others", on unless switched off).
+
+    The setting lives in the child's synced `childSettings`, keyed by learner.
+    An adult, a guest or staff has no learner to be held to: allowed. Checked
+    here as well as on the device, so a child cannot reach a room by a link or
+    a stale screen the switch already hid.
+    """
+    if p is None or not p.family_id or not p.learner_id:
+        return True
+    doc = await db.docs.find_one(
+        {"familyId": p.family_id, "kind": "childSettings", "key": p.learner_id, "deleted": {"$ne": True}},
+        {"body.groupPlayEnabled": 1},
+    )
+    return ((doc or {}).get("body") or {}).get("groupPlayEnabled") is not False
+
+
+async def check_parent(db, p: Principal | None) -> None:
+    if not await _parent_allows(db, p):
+        raise Forbidden("A grown-up has turned off playing with others.", "parent_off")
+
+
 async def _owner_settings(db) -> RebusSettings:
     raw = await system_repo.value_of(db, "rebus.settings", None)
     try:
@@ -195,6 +217,7 @@ async def create_room(body: RoomCreateIn, db: Db, p: CanRead) -> dict[str, Any]:
     if body.category != "mixed" and body.category not in await categories_repo.ids(db, only_enabled=True):
         raise AppError(400, "bad_category", "Pick a topic.")
     _check_choice(body.name, body.avatar)
+    await check_parent(db, p)
     owner = await _owner_settings(db)
     settings = {
         "category": body.category,
@@ -225,6 +248,7 @@ async def join_room(code: str, body: RoomJoinIn, db: Db, request: Request, user:
     elif not await _switch(db, "rebus.enabled") or not await _switch(db, "rebus.group"):
         raise Forbidden("Playing in a group is switched off.", "group_off")
     _check_choice(body.name, body.avatar)
+    await check_parent(db, user)
     if user is None and not (await _owner_settings(db)).guestsAllowed:
         raise Forbidden("Only players with a Koda account can join right now.", "guests_off")
     now_ms = _now_ms()

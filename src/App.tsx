@@ -72,6 +72,7 @@ import { clearRoomFromUrl, roomCodeFromUrl } from "./rebus/group/roomLink";
 import { clearRaceFromUrl, raceCodeFromUrl } from "./group/race/raceLink";
 import { RacePage } from "./group/race/RacePage";
 import { skillCanRace } from "./group/raceable";
+import { ChildSettingsAPI } from "./lib/childSettings";
 import { loadRaceSeat } from "./group/race/raceSeat";
 import type { RaceRoomProps } from "./group/race/RaceRoom";
 import { LearnersPage } from "./components/account/LearnersPage";
@@ -737,6 +738,8 @@ export default function App() {
       ? practiceInvitation(activeLesson.skillId, completedGameLevels, viewer)
       : undefined;
 
+  // A grown-up switching "Play with others" redraws the Play together row at once.
+  useSyncExternalStore(ChildSettingsAPI.subscribe, ChildSettingsAPI.version);
   /** Whether a skill's lessons can be raced here; see `group/raceable.ts`. */
   const canRace = (skillId: string): boolean => skillCanRace(skillId, { signedIn: Boolean(session), allowed: systemAllows("group.skills") });
   /** What the host form offers for one skill: its lessons as this child sees them, starting at their next one. */

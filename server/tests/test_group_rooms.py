@@ -218,3 +218,40 @@ async def test_reporting_counts_skill_rooms_without_keeping_anything_about_a_chi
     stats = await db.rebus_group_stats.find_one({})
     assert stats["skillRoomsOpened"] == 1 and stats["skillGamesStarted"] == 1
     assert set(stats) <= {"_id", *rooms_repo.COUNTERS}
+
+
+async def _child(client, db, owner):
+    """A child on the family tablet: the parent hands the device over."""
+    from app.repos import learners
+
+    me = (await client.get("/auth/me", headers=owner)).json()
+    kid = await learners.create(db, me["familyId"], "Mia")
+    switched = (await client.post(f"/auth/switch/{kid['_id']}", headers=owner)).json()
+    return me["familyId"], kid["_id"], {"Authorization": f"Bearer {switched['accessToken']}"}
+
+
+async def _parent_switch(db, family_id, learner_id, on):
+    await db.docs.update_one(
+        {"familyId": family_id, "kind": "childSettings", "key": learner_id},
+        {"$set": {"body": {"groupPlayEnabled": on}}},
+        upsert=True,
+    )
+
+
+async def test_a_child_plays_with_others_unless_a_grown_up_switched_it_off(client, owner, registry, db, clock):
+    family_id, kid_id, kid = await _child(client, db, owner)
+    assert (await open_room(client, kid)).status_code == 201
+
+    await _parent_switch(db, family_id, kid_id, False)
+    refused = await open_room(client, kid)
+    assert refused.status_code == 403 and refused.json()["error"]["code"] == "parent_off"
+
+    # Joining is the same door: a code from a friend does not get round it.
+    made = (await open_room(client, owner, name="Happy Panda")).json()
+    joined = await client.post(f"/group/rooms/{made['room']['code']}/join", json={"name": "Clever Fox", "avatar": "fox"}, headers=kid)
+    assert joined.status_code == 403 and joined.json()["error"]["code"] == "parent_off"
+    rebus = await client.post(f"/rebus/rooms/{made['room']['code']}/join", json={"name": "Clever Fox", "avatar": "fox"}, headers=kid)
+    assert rebus.status_code == 403
+
+    await _parent_switch(db, family_id, kid_id, True)
+    assert (await open_room(client, kid)).status_code == 201

@@ -70,6 +70,7 @@ async def create_skill_room(body: SkillRoomCreateIn, db: Db, p: rooms.CanRead) -
     if not await rooms._switch(db, rooms.SKILL_SWITCH):
         raise Forbidden("Playing in a group is switched off.", "group_off")
     rooms._check_choice(body.name, body.avatar)
+    await rooms.check_parent(db, p)
     skill = await skills_repo.get(db, body.skill)
     if not skill or not skill.get("isEnabled", True):
         raise NotFound("That skill is not available.", "skill_not_found")

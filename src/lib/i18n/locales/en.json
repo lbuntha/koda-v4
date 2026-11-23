@@ -1812,6 +1812,10 @@
         "detail": "Practise this week to grow it."
       },
       "goalNote": "Daily goals count rounds."
+    },
+    "groupPlay": {
+      "title": "Play with others",
+      "hint": "Lets your child race friends on the same lesson, or play Rebus Rush in a room. Friends only see a nickname and a picture, and there is no chat."
     }
   },
   "pin": {
@@ -5252,7 +5256,8 @@
         "bad_avatar": "Pick a look from the list.",
         "too_many_attempts": "Too many tries. Wait a minute and try again.",
         "signIn": "Sign in to do that.",
-        "other": "Something went wrong. Try again."
+        "other": "Something went wrong. Try again.",
+        "parent_off": "A grown-up has turned off playing with others."
       }
     },
     "nick": {

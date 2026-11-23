@@ -7,7 +7,7 @@
  * can hide its switcher the way Library does inside a book.
  */
 
-import React, { useEffect, useMemo, useRef, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState, useSyncExternalStore } from "react";
 import { useT } from "../lib/i18n";
 import { themeSystem } from "../lib/themeSystem";
 import { useAudienceViewer } from "../skills/viewer";
@@ -20,6 +20,8 @@ import { loadSeen, markSeen } from "./seenStore";
 import type { RebusSettings } from "./settings";
 import { useRebusSettings } from "./settingsStore";
 import { GroupHome } from "./group/GroupHome";
+import { childMayPlayWithOthers } from "../group/raceable";
+import { ChildSettingsAPI } from "../lib/childSettings";
 import { TurnsHome } from "./turns/TurnsHome";
 import { useSession } from "../lib/sync";
 import { seenSet } from "./seen";
@@ -71,6 +73,8 @@ export const RebusPage: React.FC<RebusPageProps> = ({ age: ageOverride, settings
   const [replay, setReplay] = useState(false);
   const phase = round.state?.phase;
   const session = useSession();
+  // A grown-up can switch off playing with others for this child ("Play with others").
+  useSyncExternalStore(ChildSettingsAPI.subscribe, ChildSettingsAPI.version);
   // Playing with friends: its own screens, opened from setup or from an invitation link.
   const [group, setGroup] = useState(joinCode !== null);
   // Taking turns on this device: its own screens, no network.
@@ -147,7 +151,7 @@ export const RebusPage: React.FC<RebusPageProps> = ({ age: ageOverride, settings
   if (!round.state) {
     return (
       <>
-        <RebusSetup bank={bank} settings={settings} results={results} onStart={(pick) => start(pick)} onGroup={() => setGroup(true)} onTurns={() => setTurns(true)} onBack={onExit} />
+        <RebusSetup bank={bank} settings={settings} results={results} onStart={(pick) => start(pick)} onGroup={childMayPlayWithOthers() ? () => setGroup(true) : undefined} onTurns={() => setTurns(true)} onBack={onExit} />
         {short && <p role="alert" className={themeSystem.flash("info", "mx-auto mt-3 max-w-2xl")}>{t("rebus.noneFit")}</p>}
       </>
     );

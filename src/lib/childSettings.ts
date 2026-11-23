@@ -161,6 +161,13 @@ export type ChildSettings = {
    * switching it back on picks up where it left off.
    */
   reviewEnabled: boolean;
+  /**
+   * Whether this child may play with others: racing a lesson or Rebus Rush in
+   * a room with friends. On by default, like review; a grown-up switches it
+   * off here. The server checks the same synced value before it lets the child
+   * open or join a room (`routers/rebus_rooms.py`, `_parent_allows`).
+   */
+  groupPlayEnabled: boolean;
 };
 
 export const CHILD_SETTINGS_DEFAULTS: ChildSettings = {
@@ -172,6 +179,7 @@ export const CHILD_SETTINGS_DEFAULTS: ChildSettings = {
   startingPoint: "age",
   personaId: null,
   reviewEnabled: true,
+  groupPlayEnabled: true,
 };
 
 /** Below this a cap is not a limit, it is a locked door. */
@@ -250,6 +258,7 @@ const sanitise = (raw: Partial<ChildSettings> | null): ChildSettings => ({
   personaId: typeof raw?.personaId === "string" && raw.personaId ? raw.personaId : null,
   // On unless a grown-up said no, like `aiHelpEnabled`.
   reviewEnabled: raw?.reviewEnabled !== false,
+  groupPlayEnabled: raw?.groupPlayEnabled !== false,
 });
 
 /**

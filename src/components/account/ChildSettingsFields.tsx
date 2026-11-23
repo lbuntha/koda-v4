@@ -468,6 +468,22 @@ export const ChildSettingsFields: React.FC<ChildSettingsFieldsProps> = ({
       </Row>
 
       <Row
+        icon={<UIArtIcon id="kit-trophy" className="h-6 w-6" />}
+        tint="text-indigo-500"
+        title={t("childSettings.groupPlay.title")}
+        hint={t("childSettings.groupPlay.hint")}
+      >
+        <UIToggle
+          checked={value.groupPlayEnabled}
+          onChange={() => {
+            playSound("pop");
+            onChange({ groupPlayEnabled: !value.groupPlayEnabled });
+          }}
+          label={t("childSettings.groupPlay.title")}
+        />
+      </Row>
+
+      <Row
         stacked
         icon={<UIArtIcon id="streak" className="h-6 w-6" />}
         tint="text-orange-500"

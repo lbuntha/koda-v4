@@ -48,6 +48,7 @@ describe("a child nobody has configured", () => {
       // looked up, so a family that never opens this screen still gets one.
       personaId: null,
       reviewEnabled: true,
+      groupPlayEnabled: true,
     });
   });
 
@@ -71,6 +72,7 @@ describe("setting one thing", () => {
       startingPoint: "age",
       personaId: null,
       reviewEnabled: true,
+      groupPlayEnabled: true,
     });
   });
 
@@ -89,6 +91,7 @@ describe("setting one thing", () => {
         startingPoint: "age",
         personaId: null,
         reviewEnabled: true,
+        groupPlayEnabled: true,
       },
       { learnerId: "l_mia" },
     );
@@ -165,6 +168,7 @@ describe("a document that arrived damaged", () => {
       startingPoint: "age",
       personaId: null,
       reviewEnabled: true,
+      groupPlayEnabled: true,
     });
   });
 });
@@ -294,5 +298,12 @@ describe("the hours of the day Koda is open", () => {
 
     expect(after.allowedHours).toBeNull();
     expect(after.sessionMinutes).toBe(30);
+  });
+});
+
+describe("play with others", () => {
+  it("is on unless a grown-up switched it off", async () => {
+    const { ChildSettingsAPI } = await import("./childSettings");
+    expect(ChildSettingsAPI.current().groupPlayEnabled).toBe(true);
   });
 });
