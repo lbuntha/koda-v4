@@ -14212,6 +14212,13 @@
     "requires": [],
     "features": [
       {
+        "id": "group_play",
+        "name": "Play together",
+        "description": "Friends race the same lesson with the same questions. XP and stars still come from each child's own answers.",
+        "isEnabled": true,
+        "tag": "Group"
+      },
+      {
         "id": "audio_speech",
         "name": "Spoken voice",
         "description": "Reads the lesson opening, the hint line and the question when the speaker is pressed.",
@@ -29556,6 +29563,13 @@
     ],
     "requires": [],
     "features": [
+      {
+        "id": "group_play",
+        "name": "Play together",
+        "description": "Friends race the same lesson with the same questions. XP and stars still come from each child's own answers.",
+        "isEnabled": true,
+        "tag": "Group"
+      },
       {
         "id": "audio_speech",
         "name": "Spoken voice",

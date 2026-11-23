@@ -44,6 +44,13 @@ export function transformBoard<B extends Board>(board: B, t: number): B {
   return out;
 }
 
+/** A starting place in the bank (0–999) from a seed: the same seed, the same place on every device. */
+export function offsetForSeed(seed: string): number {
+  let h = 2166136261;
+  for (let i = 0; i < seed.length; i++) h = Math.imul(h ^ seed.charCodeAt(i), 16777619);
+  return (h >>> 0) % 1000;
+}
+
 /**
  * Board `index` (1-based) of a lesson, starting from `offset` into the bank.
  * A spec missing from the bank — a lesson authored after the last build — is

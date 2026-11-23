@@ -2,7 +2,7 @@ import React, { useCallback, useEffect, useMemo, useRef, useState } from "react"
 import type { ActivityProps } from "../../types";
 import { SkillRound, guideSetup, isPractice, playCopy, useGuide, useSkillRound, type RoundQuestion } from "../../kit";
 import { useT } from "../../../lib/i18n";
-import { boardFor } from "../internal/bank";
+import { boardFor, offsetForSeed } from "../internal/bank";
 import { checkLines, isSolved } from "../internal/check";
 import { dragTo, emptyLines, isJoined, lineAt, sameLines, startDrag, type Drag, type Lines, type Refusal } from "../internal/drawing";
 import { connectHints, focusColour } from "../internal/hints";
@@ -18,6 +18,8 @@ interface ConnectSetup {
   practice?: boolean;
   /** Where in the board bank this round starts. Random per round unless set. */
   offset?: number;
+  /** A race's seed: every player starts at the same place in the bank. */
+  seed?: string;
   /** A teaching lesson with the hints taken away. */
   noHints?: boolean;
 }
@@ -91,9 +93,13 @@ function cellFromPoint(svg: SVGSVGElement, size: number, x: number, y: number): 
 
 export const ConnectBoard: React.FC<ActivityProps<ConnectParams>> = ({ params, koda, onComplete, lesson }) => {
   useT();
-  // Where in the bank this round starts: random per round so a replay deals
-  // different boards, fixed for the round so StrictMode agrees with itself.
-  const [offset] = useState(() => params.question?.offset ?? params.offset ?? Math.floor(Math.random() * 1000));
+  // Where in the bank this round starts: from a race's seed so friends get the
+  // same boards, otherwise random per round so a replay deals different ones;
+  // fixed for the round so StrictMode agrees with itself.
+  const [offset] = useState(() => {
+    const seed = params.question?.seed ?? params.seed;
+    return params.question?.offset ?? params.offset ?? (seed ? offsetForSeed(seed) : Math.floor(Math.random() * 1000));
+  });
   const setup = useMemo(() => ({ ...params, ...params.question, offset }), [params, offset]);
   const copy = playCopy(params);
   const practising = isPractice(setup);

@@ -93,7 +93,8 @@ export const Spot: React.FC<ActivityProps<SpotParams>> = ({ params, koda, onComp
   const soundEnabled = koda.config.isEnabled("sound_chimes", true);
   const hapticsEnabled = koda.config.isEnabled("haptic_feedback", true);
 
-  const seed = useRef(freshSeed());
+  // A race's seed when there is one, so every player gets the same puzzles.
+  const seed = useRef(setup.seed ?? freshSeed());
   const furthest = useRef(0);
   const nextQuestion = useCallback((index: number) => {
     if (index === 1 && furthest.current > 1) seed.current = freshSeed();
