@@ -445,9 +445,38 @@ async def test_the_studio_list_searches_filters_and_offers_only_real_options(cli
     assert (await client.get("/library/drafts?language=km", headers=dev)).json()["total"] == 1
     assert (await client.get("/library/drafts?band=B&category=Weather %26 play", headers=dev)).json()["total"] == 2
 
-    facets = got["facets"]
+    facets = (await client.get("/library/drafts", headers=dev)).json()["facets"]
     assert {f["value"]: f["count"] for f in facets["languages"]} == {"en": 5, "km": 1}
     assert {f["value"] for f in facets["categories"]} >= {"Weather & play"}
+
+
+async def test_each_filter_counts_within_the_other_filters(client, db):
+    dev = await _login(client, db, "dev@example.com", platform_role="developer")
+    await _shelf_of(client, dev, 3, title="Farm", prefix="farm", band="A")
+    await _shelf_of(client, dev, 2, title="Rain", prefix="rain", category="Weather & play", band="B")
+    await client.put("/library/drafts/km-one", json=_draft({**MARKET_KM, "band": "B"}), headers=dev)
+
+    def counts(page, menu):
+        return {f["value"]: f["count"] for f in page["facets"][menu]}
+
+    everything = (await client.get("/library/drafts", headers=dev)).json()
+    assert sum(counts(everything, "categories").values()) == 6
+
+    level_b = (await client.get("/library/drafts?band=B", headers=dev)).json()
+    # The shelf and language menus count only Level B books, and add up to the list.
+    assert sum(counts(level_b, "categories").values()) == level_b["total"] == 3
+    assert counts(level_b, "languages") == {"en": 2, "km": 1}
+    # The level menu ignores its own choice, so every level stays there to switch to.
+    assert counts(level_b, "bands") == {"A": 3, "B": 3}
+
+    # Search and status narrow the counts too.
+    rain = (await client.get("/library/drafts?q=rain", headers=dev)).json()
+    assert counts(rain, "categories") == {"Weather & play": 2}
+    assert (await client.get("/library/drafts?status=published", headers=dev)).json()["facets"]["categories"] == []
+
+    # A choice the other filters leave empty stays in its menu, at 0.
+    empty = (await client.get("/library/drafts?band=A&category=Weather %26 play", headers=dev)).json()
+    assert empty["total"] == 0 and counts(empty, "categories")["Weather & play"] == 0
 
 
 async def test_the_studio_list_knows_published_changed_and_reported(client, db):

@@ -193,7 +193,12 @@ INDEXES: dict[str, list[IndexModel]] = {
         IndexModel([("deletedAt", ASCENDING), ("summary.titleKey", ASCENDING), ("id", ASCENDING)], name="library_book_title"),
         IndexModel([("deletedAt", ASCENDING), ("createdAt", DESCENDING)], name="library_book_created"),
         IndexModel([("deletedAt", ASCENDING), ("publishedAt", DESCENDING)], name="library_book_published"),
-        IndexModel([("deletedAt", ASCENDING), ("summary.status", ASCENDING), ("summary.changed", ASCENDING)], name="library_book_status"),
+        # Status counts within the level, language and shelf filters, from the index alone.
+        IndexModel(
+            [("deletedAt", ASCENDING), ("summary.status", ASCENDING), ("summary.changed", ASCENDING),
+             ("summary.band", ASCENDING), ("summary.language", ASCENDING), ("summary.category", ASCENDING)],
+            name="library_book_status",
+        ),
     ],
     # Rebus Rush: every puzzle in any state, each publish, and the one version row.
     "rebus_puzzles": [

@@ -15,6 +15,7 @@ through `library_verify` first — see the router.
 
 from __future__ import annotations
 
+import asyncio
 import hashlib
 import re
 import secrets
@@ -189,7 +190,6 @@ async def studio_page(
     `owner` narrows it to one person's books (security.ownership.scope). Only
     the page's own rows are read in full; the counts are index counts.
     """
-    reported = await db.library_reports.distinct("bookId", {"resolvedAt": None})
     count_pipeline = [
         {"$match": {"resolvedAt": None}},
         {"$group": {"_id": "$bookId", "n": {"$sum": 1}}},
@@ -198,17 +198,14 @@ async def studio_page(
         row["_id"]: row["n"]
         for row in await db.library_reports.aggregate(count_pipeline).to_list(length=None)
     }
+    reported = list(open_counts)
 
-    narrow: dict[str, Any] = {"deletedAt": None, **(owner or {})}
+    base: dict[str, Any] = {"deletedAt": None, **(owner or {})}
     if query.strip():
         pattern = {"$regex": re.escape(query.strip().lower())}
-        narrow["$or"] = [{"summary.titleKey": pattern}, {"id": {"$regex": re.escape(query.strip()), "$options": "i"}}]
-    if language:
-        narrow["summary.language"] = language
-    if band:
-        narrow["summary.band"] = band
-    if category:
-        narrow["summary.category"] = category
+        base["$or"] = [{"summary.titleKey": pattern}, {"id": {"$regex": re.escape(query.strip()), "$options": "i"}}]
+    chosen = {"language": language, "band": band, "category": category}
+    narrow = {**base, **{f"summary.{k}": v for k, v in chosen.items() if v}}
 
     by_status: dict[str, dict[str, Any]] = {
         "draft": {"summary.status": "draft"},
@@ -219,34 +216,72 @@ async def studio_page(
     pick = by_status.get(status or "", {})
     order = STUDIO_SORTS.get(sort, STUDIO_SORTS["updated"])
 
-    cursor = (
-        db.library_books.find({**narrow, **pick}, _ROW_FIELDS)
-        .sort(order)
-        .skip((page - 1) * page_size)
-        .limit(page_size)
+    async def rows() -> list[dict[str, Any]]:
+        cursor = (
+            db.library_books.find({**narrow, **pick}, _ROW_FIELDS)
+            .sort(order)
+            .skip((page - 1) * page_size)
+            .limit(page_size)
+        )
+        return [_row(doc) async for doc in cursor]
+
+    names = ("all", *by_status)
+    # The page, the status counts and the filter counts are independent: ask for them all at once.
+    items, facets, *counts = await asyncio.gather(
+        rows(),
+        _facets(db, {**base, **pick}, chosen),
+        db.library_books.count_documents(narrow),
+        *(db.library_books.count_documents({**narrow, **extra}) for extra in by_status.values()),
     )
-    items = [_row(doc) async for doc in cursor]
     for row in items:
         row["reports"] = open_counts.get(row["id"], 0)
-    stats = {"all": await db.library_books.count_documents(narrow)}
-    for name, extra in by_status.items():
-        stats[name] = await db.library_books.count_documents({**narrow, **extra})
+    stats = dict(zip(names, counts, strict=True))
     return {
         "items": items,
         "total": stats["all"] if not pick else stats[status or ""],
         "stats": {k: int(stats.get(k, 0)) for k in ("all", *STUDIO_STATUSES)},
+        "facets": facets,
     }
 
 
-async def studio_facets(db: AsyncIOMotorDatabase, owner: dict[str, Any] | None = None) -> dict[str, list[dict[str, Any]]]:
-    """The languages, levels and categories books actually have, with counts — the filter options."""
-    group = lambda field: [{"$group": {"_id": f"$summary.{field}", "count": {"$sum": 1}}}, {"$sort": {"_id": 1}}]  # noqa: E731
+_FACET_FIELDS = ("language", "band", "category")
+_FACET_KEYS = {"language": "languages", "band": "bands", "category": "categories"}
+
+
+async def _facets(db: AsyncIOMotorDatabase, match: dict[str, Any], chosen: dict[str, str | None]) -> dict[str, list[dict[str, Any]]]:
+    """Each filter's options with how many books picking it would show.
+
+    A menu counts within every other filter (search, status, the other menus)
+    but not its own, so it still lists every choice to switch to. One
+    aggregation: the shared filters run once, on an index, and only three
+    small summary fields of each match are carried into the per-menu counts.
+    """
+    def branch(field: str) -> list[dict[str, Any]]:
+        others = {f"summary.{k}": v for k, v in chosen.items() if v and k != field}
+        return [
+            *([{"$match": others}] if others else []),
+            {"$group": {"_id": f"$summary.{field}", "count": {"$sum": 1}}},
+            {"$sort": {"_id": 1}},
+        ]
+
     out = (await db.library_books.aggregate([
-        {"$match": {"deletedAt": None, **(owner or {})}},
-        {"$project": {"_id": 0, "summary.language": 1, "summary.band": 1, "summary.category": 1}},
-        {"$facet": {"languages": group("language"), "bands": group("band"), "categories": group("category")}},
+        {"$match": match},
+        {"$project": {"_id": 0, **{f"summary.{f}": 1 for f in _FACET_FIELDS}}},
+        {"$facet": {_FACET_KEYS[f]: branch(f) for f in _FACET_FIELDS}},
     ]).to_list(length=1))[0]
-    return {k: [{"value": row["_id"], "count": row["count"]} for row in v if row["_id"] is not None] for k, v in out.items()}
+    facets: dict[str, list[dict[str, Any]]] = {}
+    for field in _FACET_FIELDS:
+        got = [{"value": r["_id"], "count": r["count"]} for r in out[_FACET_KEYS[field]] if r["_id"] is not None]
+        # The choice on screen stays in its menu even when the other filters leave it no books.
+        if chosen[field] and all(r["value"] != chosen[field] for r in got):
+            got = sorted([*got, {"value": chosen[field], "count": 0}], key=lambda r: str(r["value"]))
+        facets[_FACET_KEYS[field]] = got
+    return facets
+
+
+async def studio_facets(db: AsyncIOMotorDatabase, owner: dict[str, Any] | None = None) -> dict[str, list[dict[str, Any]]]:
+    """The languages, levels and categories books actually have, with counts, over every book."""
+    return await _facets(db, {"deletedAt": None, **(owner or {})}, {f: None for f in _FACET_FIELDS})
 
 
 async def spelling_words(db: AsyncIOMotorDatabase, language: str) -> list[str]:

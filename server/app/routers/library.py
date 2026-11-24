@@ -441,7 +441,7 @@ async def list_drafts(
         total=total,
         pages=max(1, (total + page_size - 1) // page_size),
         stats=StudioStats(**got["stats"]),
-        facets=StudioFacets(**await library_repo.studio_facets(db, mine)),
+        facets=StudioFacets(**got["facets"]),
     )
 
 
