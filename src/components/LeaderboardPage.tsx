@@ -28,6 +28,7 @@ import {
 } from "./ui";
 
 import { currentLanguage, translate } from "../lib/i18n";
+import { levelFromXp } from "../lib/level";
 interface LearnerChoice {
   id: string;
   displayName: string;
@@ -66,7 +67,12 @@ const rankTone = (rank: number): string => {
   return "bg-indigo-50 text-indigo-700 border-indigo-200";
 };
 
-export const LeaderboardPage: React.FC = () => {
+export interface LeaderboardPageProps {
+  /** The signed-in learner's lifetime XP — shown so a fresh week never reads as lost progress. */
+  lifetimeXp?: number;
+}
+
+export const LeaderboardPage: React.FC<LeaderboardPageProps> = ({ lifetimeXp = 0 }) => {
   const session = useSession();
   const { can } = usePermissions();
   const canConsent = can("leaderboard:consent");
@@ -473,6 +479,13 @@ export const LeaderboardPage: React.FC = () => {
                   )}
                 </div>
 
+                {/* The board restarts every Monday; a child's own XP never does. Said
+                    here, beside the weekly numbers, because a board of zeroes on a
+                    Monday morning otherwise reads as lost progress. */}
+                {lifetimeXp > 0 && <p data-testid="lifetime-xp-note" className="rounded-2xl bg-violet-50 px-3 py-2 text-sm font-bold text-violet-900 dark:bg-violet-950/40 dark:text-violet-200">
+                  {translate("leaderboard.lifetimeXpKept", { xp: lifetimeXp.toLocaleString(), level: levelFromXp(lifetimeXp) })}
+                </p>}
+
                 {activeBoard?.rows.length ? (
                   <ol className="space-y-2" aria-label={translate("leaderboard.weeklyBoardscopeRankings", { boardScope: boardScope })}>
                     {activeBoard.rows.map((row, index) => (
@@ -485,7 +498,7 @@ export const LeaderboardPage: React.FC = () => {
                             <p className="truncate font-black text-ink">{row.isYou ? translate("leaderboard.you") : row.nickname}</p>
                             {row.isYou && <p className="truncate text-xs font-semibold text-violet-700 dark:text-violet-300">{row.nickname}</p>}
                           </div>
-                          <span className="shrink-0 font-black tabular-nums text-ink">{translate("leaderboard.valueXp", { value: row.weeklyXp.toLocaleString() })}</span>
+                          <span className="shrink-0 font-black tabular-nums text-ink">{translate("leaderboard.valueXpThisWeek", { value: row.weeklyXp.toLocaleString() })}</span>
                         </li>
                       </React.Fragment>
                     ))}

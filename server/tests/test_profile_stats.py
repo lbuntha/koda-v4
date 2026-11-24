@@ -94,3 +94,33 @@ async def test_a_field_nobody_declared_is_not_stored(client, db, signup_body):
 
 async def test_the_figures_need_a_session(client):
     assert (await client.get("/profile/stats")).status_code == 401
+
+
+async def test_an_empty_device_cannot_lower_lifetime_xp(client, signup_body):
+    # A tablet that has not pulled the child's record yet publishes its empty
+    # local copy. Lifetime figures must survive it; today's figures follow it.
+    tokens = (await client.post("/auth/signup", json=signup_body())).json()
+    auth = {"Authorization": f"Bearer {tokens['accessToken']}"}
+
+    await client.patch(
+        "/profile/stats",
+        headers=auth,
+        json={"totalXp": 2146, "level": 22, "starsEarned": 169, "dayStreak": 3, "dailySolved": 21},
+    )
+    after = (
+        await client.patch(
+            "/profile/stats",
+            headers=auth,
+            json={"totalXp": 0, "level": 1, "starsEarned": 0, "dayStreak": 0, "dailySolved": 0},
+        )
+    ).json()
+
+    assert after["totalXp"] == 2146
+    assert after["level"] == 22
+    assert after["starsEarned"] == 169
+    # Day-scoped figures are not lifetime records: a lapsed streak does drop.
+    assert after["dayStreak"] == 0
+    assert after["dailySolved"] == 0
+
+    raised = (await client.patch("/profile/stats", headers=auth, json={"totalXp": 2166})).json()
+    assert raised["totalXp"] == 2166

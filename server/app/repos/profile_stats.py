@@ -56,6 +56,15 @@ PLACEHOLDERS: dict[str, Any] = {
 #: so a client cannot invent a field and have it stored beside the real ones.
 FIELDS = frozenset(PLACEHOLDERS)
 
+#: Lifetime figures a write may raise but never lower.
+#:
+#: A device that has not pulled the child's record yet — a new tablet, or one
+#: just signed in — publishes its empty local copy, and a plain `$set` wrote
+#: that 0 over 2,000 real XP until sync caught up. The `progress` document
+#: already merges these with `max()`; this row has to agree with it. A real
+#: reset still works: every reset deletes the row rather than writing to it.
+NEVER_LOWER = frozenset({"totalXp", "level", "longestStreak", "starsEarned", "lessonsMastered"})
+
 
 async def ensure(db: AsyncIOMotorDatabase, subject_id: str, kind: str) -> dict[str, Any]:
     """The subject's row, created from the placeholders if it is not there yet.
@@ -93,8 +102,13 @@ async def record(
     await ensure(db, subject_id, kind)
     if not known:
         return await ensure(db, subject_id, kind)
+    raised = {key: value for key, value in known.items() if key in NEVER_LOWER}
+    replaced = {key: value for key, value in known.items() if key not in NEVER_LOWER}
+    update: dict[str, Any] = {"$set": {**replaced, "source": "recorded", "updatedAt": now()}}
+    if raised:
+        update["$max"] = raised
     return await db.profile_stats.find_one_and_update(
         {"_id": subject_id},
-        {"$set": {**known, "source": "recorded", "updatedAt": now()}},
+        update,
         return_document=ReturnDocument.AFTER,
     )

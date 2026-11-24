@@ -1229,7 +1229,7 @@ export default function App() {
 
           {activeTab === "leaderboard" && (
             <Deferred label="Loading buddy leaderboard">
-              <LeaderboardPage />
+              <LeaderboardPage lifetimeXp={userProgress.xp} />
             </Deferred>
           )}
 
