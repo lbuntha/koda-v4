@@ -33,7 +33,7 @@ import { SkillCatalogPage } from "./components/SkillCatalogPage";
 import { AppNav } from "./components/AppNav";
 import { SidebarNav } from "./components/SidebarNav";
 import { MainLayout } from "./components/layout/MainLayout";
-import { UIModal } from "./components/ui";
+import { UILevelUp, UIModal } from "./components/ui";
 import { SkillHost } from "./skills/host/SkillHost";
 import {
   getCourseLessons,
@@ -607,10 +607,23 @@ export default function App() {
   const [userProgress, setUserProgress] = useState<UserProgress>(loadProgress);
   /* Every XP award goes through here, so today's share is counted for the Today card.
      Counted outside the state updater, which React may run twice. */
+  /* The level just reached, for the one level-up moment every activity shares.
+     Worked out from a ref beside the state, not inside the updater: an updater
+     can run twice, and a celebration must not. */
+  const [levelReached, setLevelReached] = useState<number | null>(null);
+  const xpNow = useRef(userProgress.xp);
+  useEffect(() => {
+    xpNow.current = userProgress.xp;
+  }, [userProgress.xp]);
   const awardXp = useCallback((earnedXp: number) => {
     XpToday.add(activeLearnerId(), earnedXp);
+    const before = xpNow.current;
+    const after = before + Math.max(0, earnedXp);
+    xpNow.current = after;
+    if (levelFromXp(after) > levelFromXp(before)) setLevelReached(levelFromXp(after));
     setUserProgress((prev) => ({ ...prev, xp: prev.xp + earnedXp }));
   }, []);
+  const closeLevelUp = useCallback(() => setLevelReached(null), []);
   // The record says what the run reached; this says what it reads as today, so
   // a round opened the morning after a missed day does not show a live streak.
   const streak = useStreak(userProgress);
@@ -1388,6 +1401,9 @@ export default function App() {
           setSettingsFocus("notifications");
         }}
       />
+
+      {/* One level-up moment, whichever activity filled the level. */}
+      <UILevelUp level={levelReached} onClose={closeLevelUp} />
 
       {/* Global Gemini Live Voice Coach Modal */}
       <LiveVoiceCoachModal

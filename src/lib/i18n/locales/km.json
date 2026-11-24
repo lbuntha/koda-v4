@@ -1489,6 +1489,15 @@
     "yourSkills": "ជំនាញរបស់ខ្ញុំ"
   },
   "round": {
+    "xpWonLabel": "XP ទទួលបាន",
+    "inARowDays": {
+      "other": "ថ្ងៃជាប់ៗគ្នា"
+    },
+    "inARowWeeks": {
+      "other": "សប្តាហ៍ជាប់ៗគ្នា"
+    },
+    "todayLabel": "ថ្ងៃនេះ",
+    "xpToLevel": "{xp} XP ទៀតដល់កម្រិត {level}",
     "voiceOff": "បិទសំឡេងរបស់ Koda",
     "voiceOn": "បើកសំឡេងរបស់ Koda",
     "xpPoints": "ពិន្ទុបទពិសោធន៍ {count}",
@@ -6057,5 +6066,8 @@
     "resultsReady": "គ្រប់គ្នាធ្វើរួចហើយ!",
     "seeResults": "មើលលទ្ធផល",
     "timeUp": "អស់ម៉ោងហើយ! ការប្រណាំងបានបញ្ចប់។"
+  },
+  "levelUpMoment": {
+    "continue": "បន្តទៀត"
   }
 }

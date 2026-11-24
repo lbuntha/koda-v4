@@ -1572,6 +1572,17 @@
     "yourSkills": "Your skills"
   },
   "round": {
+    "xpWonLabel": "XP won",
+    "inARowDays": {
+      "one": "day in a row",
+      "other": "days in a row"
+    },
+    "inARowWeeks": {
+      "one": "week in a row",
+      "other": "weeks in a row"
+    },
+    "todayLabel": "today",
+    "xpToLevel": "{xp} XP to Level {level}",
     "voiceOff": "Turn Koda’s voice off",
     "voiceOn": "Turn Koda’s voice on",
     "xpPoints": "{count} experience points",
@@ -6280,5 +6291,8 @@
     "resultsReady": "Everyone has finished!",
     "seeResults": "See the results",
     "timeUp": "Time's up! The race is over."
+  },
+  "levelUpMoment": {
+    "continue": "Keep going"
   }
 }

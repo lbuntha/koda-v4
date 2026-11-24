@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from "vitest";
-import { render, screen } from "@testing-library/react";
+import { render, screen, waitFor } from "@testing-library/react";
 import React from "react";
 
 import { PracticeRoundCompleteModal } from "./RoundCompleteModal";
@@ -50,7 +50,7 @@ describe("what the round was worth", () => {
     expect(screen.getByText("weeks in a row")).toBeTruthy();
   });
 
-  it("draws the level bar where the learner actually stands", () => {
+  it("draws the level bar where the learner actually stands", async () => {
     draw({ standing: { xpAfter: 340, streakDays: 4, dailySolved: 2, dailyGoal: 5 } });
 
     // 340 XP is Level 4, forty into it, sixty short of Level 5. Named "XP
@@ -63,8 +63,21 @@ describe("what the round was worth", () => {
     // same rule under the same bar, and these two labels carry the scale.
     expect(screen.queryByText("100 XP earns a level")).toBeNull();
     const bar = screen.getByRole("progressbar", { name: /Level 4 progress/ });
-    expect(bar.getAttribute("aria-valuenow")).toBe("40");
+    // It fills from where the learner stood before the round (300, the start
+    // of Level 4) to where they stand now, so the XP is seen going in.
+    expect(bar.getAttribute("aria-valuenow")).toBe("0");
+    await waitFor(() => expect(bar.getAttribute("aria-valuenow")).toBe("40"));
     expect(bar.getAttribute("aria-valuemax")).toBe("100");
+  });
+
+  it("starts part-filled when the round stayed inside one level", async () => {
+    draw({ xpWon: 20, standing: { xpAfter: 370, streakDays: 1, dailySolved: 1, dailyGoal: 5 } });
+
+    const bar = screen.getByRole("progressbar", { name: /Level 4 progress/ });
+    expect(bar.getAttribute("aria-valuenow")).toBe("50");
+    await waitFor(() => expect(bar.getAttribute("aria-valuenow")).toBe("70"));
+    expect(screen.getByText("1")).toBeTruthy();
+    expect(screen.getByText("day in a row")).toBeTruthy();
   });
 
   it("still draws a complete screen when the host answered with nothing", () => {

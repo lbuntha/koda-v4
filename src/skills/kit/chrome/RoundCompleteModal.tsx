@@ -1,8 +1,9 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { RotateCcw, ArrowRight } from "lucide-react";
 import { SvgAsset } from "../../../assets/svg";
 import { playSound } from "../../../utils/audio";
 import { levelBar, roundPraise, type PraiseFacts } from "../round/roundPraise";
+import { levelFromXp, xpIntoLevel } from "../../../lib/level";
 import { useT } from "../../../lib/i18n";
 import { UIRewardProgress } from "../../../components/ui/UIRewardProgress";
 
@@ -159,6 +160,20 @@ export const PracticeRoundCompleteModal: React.FC<PracticeRoundCompleteModalProp
    */
   const showExit = Boolean(onBackToLessons) && Boolean(nextLevelNumber);
   const bar = standing ? levelBar(standing.xpAfter) : null;
+  /*
+   * The bar starts where the learner stood before this round and fills to
+   * where they stand now, so a child watches their XP go in rather than being
+   * told a number. A round that crossed a level starts from empty: the old
+   * level's bar is gone, and the level-up moment has already said why.
+   */
+  const xpBefore = Math.max(0, (standing?.xpAfter ?? 0) - Math.max(0, xpWon));
+  const startAt = bar ? (levelFromXp(xpBefore) < bar.level ? 0 : xpIntoLevel(xpBefore)) : 0;
+  const [barValue, setBarValue] = useState(startAt);
+  const target = bar?.into ?? 0;
+  useEffect(() => {
+    const id = window.setTimeout(() => setBarValue(target), 350);
+    return () => window.clearTimeout(id);
+  }, [target]);
   const streak = standing?.streakDays ?? 0;
   const unit = standing?.cadence === "weekly" ? "week" : "day";
 
@@ -280,7 +295,7 @@ export const PracticeRoundCompleteModal: React.FC<PracticeRoundCompleteModalProp
                 <span className="text-base font-black leading-none">+{xpWon}</span>
               </div>
               <span className="mt-1 block text-[10px] font-bold uppercase leading-tight tracking-wider text-muted">
-                XP won
+                {t("round.xpWonLabel")}
               </span>
             </div>
 
@@ -296,7 +311,7 @@ export const PracticeRoundCompleteModal: React.FC<PracticeRoundCompleteModalProp
                 <span className="text-base font-black leading-none">{streak}</span>
               </div>
               <span className="mt-1 block text-[10px] font-bold uppercase leading-tight tracking-wider text-muted">
-                {streak === 1 ? unit : `${unit}s`} in a row
+                {t(unit === "week" ? "round.inARowWeeks" : "round.inARowDays", { count: streak })}
               </span>
             </div>
 
@@ -314,7 +329,7 @@ export const PracticeRoundCompleteModal: React.FC<PracticeRoundCompleteModalProp
                 </span>
               </div>
               <span className="mt-1 block text-[10px] font-bold uppercase leading-tight tracking-wider text-muted">
-                today
+                {t("round.todayLabel")}
               </span>
             </div>
           </div>
@@ -330,10 +345,10 @@ export const PracticeRoundCompleteModal: React.FC<PracticeRoundCompleteModalProp
             <div className="space-y-1.5">
               <div className="flex items-baseline justify-between font-mono text-[10px] font-bold uppercase tracking-wider text-muted">
                 <span>{t("home.xpLevel", { level: bar.level })}</span>
-                <span>{bar.toNext} XP to Level {bar.level + 1}</span>
+                <span>{t("round.xpToLevel", { xp: bar.toNext, level: bar.level + 1 })}</span>
               </div>
               <UIRewardProgress
-                value={bar.into}
+                value={barValue}
                 max={bar.per}
                 label={t("round.levelProgress", { level: bar.level })}
               />
