@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+  <title>Strips and Squares</title>
+  <rect x="6" y="6" width="88" height="88" rx="18" fill="#F4F2FF" stroke="#3B2F8F" stroke-width="4"/>
+  <path d="M20 20 H80 V80 H20 Z M40 20 V80 M60 20 V80 M20 40 H80 M20 60 H80" fill="none" stroke="#C9C2FF" stroke-width="2"/><rect x="21" y="21" width="58" height="18" rx="6" fill="#A5F3FC" stroke="#06B6D4" stroke-width="3"/><text x="50" y="36" text-anchor="middle" font-family="Arial, sans-serif" font-weight="900" font-size="18" fill="#231C5C">3</text><rect x="21" y="41" width="38" height="38" rx="6" fill="#DDD6FE" stroke="#7C4DFF" stroke-width="3"/><text x="40" y="66" text-anchor="middle" font-family="Arial, sans-serif" font-weight="900" font-size="18" fill="#231C5C">4</text><rect x="61" y="41" width="18" height="38" rx="6" fill="#A7F3D0" stroke="#10B981" stroke-width="3"/><text x="70" y="66" text-anchor="middle" font-family="Arial, sans-serif" font-weight="900" font-size="18" fill="#231C5C">2</text>
+</svg>

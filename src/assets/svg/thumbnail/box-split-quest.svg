@@ -1,0 +1,29 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="100%" height="100%" viewBox="0 0 400 200">
+<defs><linearGradient id="bsGround" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#2A1E6B"/><stop offset="100%" stop-color="#101236"/></linearGradient>
+<radialGradient id="bsGlow" cx="64%" cy="50%" r="55%"><stop offset="0%" stop-color="#A78BFA" stop-opacity="0.4"/><stop offset="100%" stop-color="#A78BFA" stop-opacity="0"/></radialGradient></defs>
+<rect width="400" height="200" fill="url(#bsGround)"/><rect width="400" height="200" fill="url(#bsGlow)"/>
+<rect x="204" y="16" width="168" height="168" rx="14" fill="#fff" opacity="0.95"/>
+<path d="M236 22 V178 M210 48 H366" stroke="#E4E1FA" stroke-width="1.5"/>
+<path d="M262 22 V178 M210 74 H366" stroke="#E4E1FA" stroke-width="1.5"/>
+<path d="M288 22 V178 M210 100 H366" stroke="#E4E1FA" stroke-width="1.5"/>
+<path d="M314 22 V178 M210 126 H366" stroke="#E4E1FA" stroke-width="1.5"/>
+<path d="M340 22 V178 M210 152 H366" stroke="#E4E1FA" stroke-width="1.5"/>
+<rect x="212" y="24" width="74" height="48" rx="7" fill="#BAE6FD" stroke="#231C5C" stroke-opacity="0.35" stroke-width="2"/>
+<text x="223.0" y="41.0" text-anchor="middle" font-family="Arial, sans-serif" font-weight="900" font-size="17" fill="#231C5C">6</text>
+<rect x="290" y="24" width="74" height="22" rx="7" fill="#F9A8D4" stroke="#231C5C" stroke-opacity="0.35" stroke-width="2"/>
+<text x="301.0" y="41.0" text-anchor="middle" font-family="Arial, sans-serif" font-weight="900" font-size="17" fill="#231C5C">3</text>
+<rect x="290" y="50" width="22" height="48" rx="7" fill="#A7F3D0" stroke="#231C5C" stroke-opacity="0.35" stroke-width="2"/>
+<text x="301.0" y="67.0" text-anchor="middle" font-family="Arial, sans-serif" font-weight="900" font-size="17" fill="#231C5C">2</text>
+<rect x="316" y="50" width="48" height="74" rx="7" fill="#DDD6FE" stroke="#231C5C" stroke-opacity="0.35" stroke-width="2"/>
+<text x="327.0" y="67.0" text-anchor="middle" font-family="Arial, sans-serif" font-weight="900" font-size="17" fill="#231C5C">6</text>
+<rect x="212" y="76" width="48" height="48" rx="7" fill="#A5F3FC" stroke="#231C5C" stroke-opacity="0.35" stroke-width="2"/>
+<text x="223.0" y="93.0" text-anchor="middle" font-family="Arial, sans-serif" font-weight="900" font-size="17" fill="#231C5C">4</text>
+<rect x="264" y="76" width="48" height="48" rx="7" fill="#C7D2FE" stroke="#231C5C" stroke-opacity="0.35" stroke-width="2"/>
+<text x="275.0" y="93.0" text-anchor="middle" font-family="Arial, sans-serif" font-weight="900" font-size="17" fill="#231C5C">4</text>
+<rect x="212" y="128" width="100" height="48" rx="7" fill="#FBCFE8" stroke="#231C5C" stroke-opacity="0.35" stroke-width="2"/>
+<text x="223.0" y="145.0" text-anchor="middle" font-family="Arial, sans-serif" font-weight="900" font-size="17" fill="#231C5C">8</text>
+<rect x="316" y="128" width="48" height="48" rx="7" fill="#99F6E4" stroke="#231C5C" stroke-opacity="0.35" stroke-width="2"/>
+<text x="327.0" y="145.0" text-anchor="middle" font-family="Arial, sans-serif" font-weight="900" font-size="17" fill="#231C5C">4</text>
+<rect x="286" y="150" width="56" height="30" rx="8" fill="none" stroke="#34D399" stroke-width="4" stroke-dasharray="7 5"/>
+<text x="40" y="112" font-family="Arial, sans-serif" font-weight="900" font-size="30" fill="#C9C2FF">2 × 3 = 6</text>
+</svg>

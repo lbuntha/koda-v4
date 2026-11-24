@@ -1,0 +1,12 @@
+{
+  "_comment": [
+    "Box Split's read-aloud prompt: one line, the same for every lesson. Lesson intros are picked up from lessons.json;",
+    "reactions come from the common pack. Must match locales/en.json word for word."
+  ],
+  "subjects": [],
+  "templates": [],
+  "prompts": [
+    "Split the grid into boxes. Each box has one number, and that many squares."
+  ],
+  "phrases": []
+}

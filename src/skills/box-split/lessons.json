@@ -1,0 +1,2125 @@
+{
+  "lessons": [
+    {
+      "id": "first-boxes",
+      "title": "Your First Boxes",
+      "concept": "Counting Squares in a Box",
+      "conceptKey": "box-split-counter",
+      "requires": [],
+      "activity": "box-split/board",
+      "params": {
+        "level": 1,
+        "question": {
+          "size": 3,
+          "maxArea": 3,
+          "maxOnes": 2,
+          "dots": true,
+          "questionsPerRound": 3,
+          "technique": "single-fit"
+        },
+        "play": {
+          "targetObjective": "Split a 3×3 grid into boxes that match their numbers.",
+          "stepByStep": [
+            "Pick a number.",
+            "Count out that many squares next to it.",
+            "Draw a box around them. One number in each box."
+          ],
+          "kidTip": "Count the squares inside your box. It must be the same as the number.",
+          "audioPrompt": "Split the grid into boxes. Each box has one number, and that many squares."
+        }
+      },
+      "difficulty": "Easy",
+      "icon": "box-split-count",
+      "iconName": "star",
+      "iconTone": "pink",
+      "pedagogyTip": "Every puzzle is solved by boxes that fit only one way, so the rule is practised, not luck.",
+      "standards": [
+        "CCSS.K.CC.B.5"
+      ],
+      "trajectoryLevel": "area-by-counting",
+      "ageBand": [
+        5,
+        7
+      ]
+    },
+    {
+      "id": "count-to-four",
+      "title": "Boxes up to 4",
+      "concept": "Counting Squares to 4",
+      "conceptKey": "box-split-counter",
+      "requires": [],
+      "activity": "box-split/board",
+      "params": {
+        "level": 2,
+        "question": {
+          "size": 4,
+          "maxArea": 4,
+          "maxOnes": 2,
+          "dots": true,
+          "questionsPerRound": 3,
+          "technique": "single-fit"
+        },
+        "play": {
+          "targetObjective": "Split a 4×4 grid. Count the dots, then the squares.",
+          "stepByStep": [
+            "Pick a number.",
+            "Count out that many squares next to it.",
+            "Draw a box around them. One number in each box."
+          ],
+          "kidTip": "Count the squares inside your box. It must be the same as the number.",
+          "audioPrompt": "Split the grid into boxes. Each box has one number, and that many squares."
+        }
+      },
+      "difficulty": "Easy",
+      "icon": "box-split-count",
+      "iconName": "star",
+      "iconTone": "pink",
+      "pedagogyTip": "Every puzzle is solved by boxes that fit only one way, so the rule is practised, not luck.",
+      "standards": [
+        "CCSS.K.CC.B.5"
+      ],
+      "trajectoryLevel": "area-by-counting",
+      "ageBand": [
+        5,
+        7
+      ]
+    },
+    {
+      "id": "numbers-not-dots",
+      "title": "Numbers Without Dots",
+      "concept": "Reading the Number as a Size",
+      "conceptKey": "box-split-counter",
+      "requires": [],
+      "activity": "box-split/board",
+      "params": {
+        "level": 3,
+        "question": {
+          "size": 4,
+          "maxArea": 4,
+          "maxOnes": 2,
+          "questionsPerRound": 3,
+          "technique": "single-fit"
+        },
+        "play": {
+          "targetObjective": "Split a 4×4 grid using only the numbers.",
+          "stepByStep": [
+            "Pick a number.",
+            "Count out that many squares next to it.",
+            "Draw a box around them. One number in each box."
+          ],
+          "kidTip": "Count the squares inside your box. It must be the same as the number.",
+          "audioPrompt": "Split the grid into boxes. Each box has one number, and that many squares."
+        }
+      },
+      "difficulty": "Easy",
+      "icon": "box-split-count",
+      "iconName": "star",
+      "iconTone": "pink",
+      "pedagogyTip": "Every puzzle is solved by boxes that fit only one way, so the rule is practised, not luck.",
+      "standards": [
+        "CCSS.K.CC.B.5"
+      ],
+      "trajectoryLevel": "area-by-counting",
+      "ageBand": [
+        5,
+        7
+      ]
+    },
+    {
+      "id": "five-grid-count",
+      "title": "A Bigger Grid",
+      "concept": "Counting Squares to 5",
+      "conceptKey": "box-split-counter",
+      "requires": [],
+      "activity": "box-split/board",
+      "params": {
+        "level": 4,
+        "question": {
+          "size": 5,
+          "maxArea": 5,
+          "maxOnes": 2,
+          "dots": true,
+          "questionsPerRound": 3,
+          "technique": "single-fit"
+        },
+        "play": {
+          "targetObjective": "Split a 5×5 grid with boxes up to 5.",
+          "stepByStep": [
+            "Pick a number.",
+            "Count out that many squares next to it.",
+            "Draw a box around them. One number in each box."
+          ],
+          "kidTip": "Count the squares inside your box. It must be the same as the number.",
+          "audioPrompt": "Split the grid into boxes. Each box has one number, and that many squares."
+        }
+      },
+      "difficulty": "Medium",
+      "icon": "box-split-count",
+      "iconName": "star",
+      "iconTone": "pink",
+      "pedagogyTip": "Every puzzle is solved by boxes that fit only one way, so the rule is practised, not luck.",
+      "standards": [
+        "CCSS.K.CC.B.5"
+      ],
+      "trajectoryLevel": "area-by-counting",
+      "ageBand": [
+        5,
+        7
+      ]
+    },
+    {
+      "id": "count-squares-star",
+      "title": "Counting Star",
+      "concept": "Counting Squares to 6",
+      "conceptKey": "box-split-counter",
+      "requires": [],
+      "activity": "box-split/board",
+      "params": {
+        "level": 5,
+        "question": {
+          "size": 5,
+          "maxArea": 6,
+          "maxOnes": 1,
+          "questionsPerRound": 3,
+          "technique": "single-fit"
+        },
+        "play": {
+          "targetObjective": "Split a 5×5 grid with boxes up to 6.",
+          "stepByStep": [
+            "Pick a number.",
+            "Count out that many squares next to it.",
+            "Draw a box around them. One number in each box."
+          ],
+          "kidTip": "Count the squares inside your box. It must be the same as the number.",
+          "audioPrompt": "Split the grid into boxes. Each box has one number, and that many squares."
+        }
+      },
+      "difficulty": "Medium",
+      "icon": "box-split-count",
+      "iconName": "star",
+      "iconTone": "pink",
+      "pedagogyTip": "Every puzzle is solved by boxes that fit only one way, so the rule is practised, not luck.",
+      "standards": [
+        "CCSS.K.CC.B.5"
+      ],
+      "trajectoryLevel": "area-by-counting",
+      "ageBand": [
+        5,
+        7
+      ]
+    },
+    {
+      "id": "lines-of-three",
+      "title": "Lines of Squares",
+      "concept": "Lines Across and Down",
+      "conceptKey": "box-split-strips",
+      "requires": [
+        "box-split-counter"
+      ],
+      "activity": "box-split/board",
+      "params": {
+        "level": 6,
+        "question": {
+          "size": 5,
+          "minArea": 2,
+          "maxArea": 3,
+          "shapes": "strips",
+          "maxOnes": 1,
+          "questionsPerRound": 3,
+          "technique": "single-fit"
+        },
+        "play": {
+          "targetObjective": "Every box is a line of 2 or 3 squares.",
+          "stepByStep": [
+            "Pick a number.",
+            "Try a line of that many squares across, then down.",
+            "Keep the line that has no other number in it."
+          ],
+          "kidTip": "These boxes are lines or 2 by 2 squares. A 3 is a line of 3 squares.",
+          "audioPrompt": "Split the grid into boxes. Each box has one number, and that many squares."
+        }
+      },
+      "difficulty": "Easy",
+      "icon": "box-split-strips",
+      "iconName": "layers",
+      "iconTone": "cyan",
+      "pedagogyTip": "Every puzzle is solved by boxes that fit only one way, so the rule is practised, not luck.",
+      "standards": [
+        "CCSS.2.G.A.2"
+      ],
+      "trajectoryLevel": "area-by-counting",
+      "ageBand": [
+        6,
+        8
+      ]
+    },
+    {
+      "id": "lines-of-four",
+      "title": "Longer Lines",
+      "concept": "Lines up to 4",
+      "conceptKey": "box-split-strips",
+      "requires": [
+        "box-split-counter"
+      ],
+      "activity": "box-split/board",
+      "params": {
+        "level": 7,
+        "question": {
+          "size": 5,
+          "minArea": 2,
+          "maxArea": 4,
+          "shapes": "strips",
+          "maxOnes": 1,
+          "questionsPerRound": 3,
+          "technique": "single-fit"
+        },
+        "play": {
+          "targetObjective": "Every box is a line, or a 2 by 2 square.",
+          "stepByStep": [
+            "Pick a number.",
+            "Try a line of that many squares across, then down.",
+            "Keep the line that has no other number in it."
+          ],
+          "kidTip": "These boxes are lines or 2 by 2 squares. A 3 is a line of 3 squares.",
+          "audioPrompt": "Split the grid into boxes. Each box has one number, and that many squares."
+        }
+      },
+      "difficulty": "Easy",
+      "icon": "box-split-strips",
+      "iconName": "layers",
+      "iconTone": "cyan",
+      "pedagogyTip": "Every puzzle is solved by boxes that fit only one way, so the rule is practised, not luck.",
+      "standards": [
+        "CCSS.2.G.A.2"
+      ],
+      "trajectoryLevel": "area-by-counting",
+      "ageBand": [
+        6,
+        8
+      ]
+    },
+    {
+      "id": "lines-and-squares",
+      "title": "Lines and Squares",
+      "concept": "Telling a Line From a Square",
+      "conceptKey": "box-split-strips",
+      "requires": [
+        "box-split-counter"
+      ],
+      "activity": "box-split/board",
+      "params": {
+        "level": 8,
+        "question": {
+          "size": 5,
+          "minArea": 2,
+          "maxArea": 5,
+          "shapes": "strips",
+          "maxOnes": 1,
+          "questionsPerRound": 3,
+          "technique": "single-fit"
+        },
+        "play": {
+          "targetObjective": "Lines up to 5 and 2 by 2 squares.",
+          "stepByStep": [
+            "Pick a number.",
+            "Try a line of that many squares across, then down.",
+            "Keep the line that has no other number in it."
+          ],
+          "kidTip": "These boxes are lines or 2 by 2 squares. A 3 is a line of 3 squares.",
+          "audioPrompt": "Split the grid into boxes. Each box has one number, and that many squares."
+        }
+      },
+      "difficulty": "Medium",
+      "icon": "box-split-strips",
+      "iconName": "layers",
+      "iconTone": "cyan",
+      "pedagogyTip": "Every puzzle is solved by boxes that fit only one way, so the rule is practised, not luck.",
+      "standards": [
+        "CCSS.2.G.A.2"
+      ],
+      "trajectoryLevel": "area-by-counting",
+      "ageBand": [
+        6,
+        8
+      ]
+    },
+    {
+      "id": "six-grid-lines",
+      "title": "Lines on a 6×6",
+      "concept": "Lines on a Bigger Grid",
+      "conceptKey": "box-split-strips",
+      "requires": [
+        "box-split-counter"
+      ],
+      "activity": "box-split/board",
+      "params": {
+        "level": 9,
+        "question": {
+          "size": 6,
+          "minArea": 2,
+          "maxArea": 6,
+          "shapes": "strips",
+          "maxOnes": 1,
+          "questionsPerRound": 2,
+          "technique": "single-fit"
+        },
+        "play": {
+          "targetObjective": "Split a 6×6 grid into lines and squares.",
+          "stepByStep": [
+            "Pick a number.",
+            "Try a line of that many squares across, then down.",
+            "Keep the line that has no other number in it."
+          ],
+          "kidTip": "These boxes are lines or 2 by 2 squares. A 3 is a line of 3 squares.",
+          "audioPrompt": "Split the grid into boxes. Each box has one number, and that many squares."
+        }
+      },
+      "difficulty": "Medium",
+      "icon": "box-split-strips",
+      "iconName": "layers",
+      "iconTone": "cyan",
+      "pedagogyTip": "Every puzzle is solved by boxes that fit only one way, so the rule is practised, not luck.",
+      "standards": [
+        "CCSS.2.G.A.2"
+      ],
+      "trajectoryLevel": "area-by-counting",
+      "ageBand": [
+        6,
+        8
+      ]
+    },
+    {
+      "id": "lines-star",
+      "title": "Lines Star",
+      "concept": "Long Lines",
+      "conceptKey": "box-split-strips",
+      "requires": [
+        "box-split-counter"
+      ],
+      "activity": "box-split/board",
+      "params": {
+        "level": 10,
+        "question": {
+          "size": 6,
+          "minArea": 3,
+          "maxArea": 6,
+          "shapes": "strips",
+          "maxOnes": 1,
+          "questionsPerRound": 2,
+          "technique": "single-fit"
+        },
+        "play": {
+          "targetObjective": "Lines of 3 to 6 squares on a 6×6 grid.",
+          "stepByStep": [
+            "Pick a number.",
+            "Try a line of that many squares across, then down.",
+            "Keep the line that has no other number in it."
+          ],
+          "kidTip": "These boxes are lines or 2 by 2 squares. A 3 is a line of 3 squares.",
+          "audioPrompt": "Split the grid into boxes. Each box has one number, and that many squares."
+        }
+      },
+      "difficulty": "Medium",
+      "icon": "box-split-strips",
+      "iconName": "layers",
+      "iconTone": "cyan",
+      "pedagogyTip": "Every puzzle is solved by boxes that fit only one way, so the rule is practised, not luck.",
+      "standards": [
+        "CCSS.2.G.A.2"
+      ],
+      "trajectoryLevel": "area-by-counting",
+      "ageBand": [
+        6,
+        8
+      ]
+    },
+    {
+      "id": "start-in-a-corner",
+      "title": "Start in a Corner",
+      "concept": "Walls Block Shapes",
+      "conceptKey": "box-split-edges",
+      "requires": [
+        "box-split-strips"
+      ],
+      "activity": "box-split/board",
+      "params": {
+        "level": 11,
+        "question": {
+          "size": 6,
+          "minArea": 2,
+          "maxArea": 6,
+          "maxOnes": 1,
+          "questionsPerRound": 2,
+          "technique": "single-fit"
+        },
+        "play": {
+          "targetObjective": "Split a 6×6 grid. Start where the walls help.",
+          "stepByStep": [
+            "Look at a number near a corner or edge.",
+            "The wall blocks some shapes. Try the shapes that are left.",
+            "When only one shape fits, draw it."
+          ],
+          "kidTip": "Start at the corners and edges. The wall stops a box going that way.",
+          "audioPrompt": "Split the grid into boxes. Each box has one number, and that many squares."
+        }
+      },
+      "difficulty": "Medium",
+      "icon": "box-split-corners",
+      "iconName": "footprints",
+      "iconTone": "indigo",
+      "pedagogyTip": "Every puzzle is solved by boxes that fit only one way, so the rule is practised, not luck.",
+      "standards": [
+        "CCSS.3.MD.C.6",
+        "CCSS.MP1"
+      ],
+      "trajectoryLevel": "area-by-multiplying",
+      "ageBand": [
+        7,
+        9
+      ]
+    },
+    {
+      "id": "along-the-edge",
+      "title": "Along the Edge",
+      "concept": "Edges Cut Down the Shapes",
+      "conceptKey": "box-split-edges",
+      "requires": [
+        "box-split-strips"
+      ],
+      "activity": "box-split/board",
+      "params": {
+        "level": 12,
+        "question": {
+          "size": 6,
+          "minArea": 2,
+          "maxArea": 8,
+          "maxOnes": 1,
+          "questionsPerRound": 2,
+          "technique": "single-fit"
+        },
+        "play": {
+          "targetObjective": "Boxes up to 8 on a 6×6 grid.",
+          "stepByStep": [
+            "Look at a number near a corner or edge.",
+            "The wall blocks some shapes. Try the shapes that are left.",
+            "When only one shape fits, draw it."
+          ],
+          "kidTip": "Start at the corners and edges. The wall stops a box going that way.",
+          "audioPrompt": "Split the grid into boxes. Each box has one number, and that many squares."
+        }
+      },
+      "difficulty": "Medium",
+      "icon": "box-split-corners",
+      "iconName": "footprints",
+      "iconTone": "indigo",
+      "pedagogyTip": "Every puzzle is solved by boxes that fit only one way, so the rule is practised, not luck.",
+      "standards": [
+        "CCSS.3.MD.C.6",
+        "CCSS.MP1"
+      ],
+      "trajectoryLevel": "area-by-multiplying",
+      "ageBand": [
+        7,
+        9
+      ]
+    },
+    {
+      "id": "squares-and-oblongs",
+      "title": "Squares and Oblongs",
+      "concept": "Rows Times Columns",
+      "conceptKey": "box-split-edges",
+      "requires": [
+        "box-split-strips"
+      ],
+      "activity": "box-split/board",
+      "params": {
+        "level": 13,
+        "question": {
+          "size": 6,
+          "minArea": 2,
+          "maxArea": 9,
+          "maxOnes": 1,
+          "questionsPerRound": 2,
+          "technique": "single-fit"
+        },
+        "play": {
+          "targetObjective": "Boxes up to 9: some square, some long.",
+          "stepByStep": [
+            "Look at a number near a corner or edge.",
+            "The wall blocks some shapes. Try the shapes that are left.",
+            "When only one shape fits, draw it."
+          ],
+          "kidTip": "Start at the corners and edges. The wall stops a box going that way.",
+          "audioPrompt": "Split the grid into boxes. Each box has one number, and that many squares."
+        }
+      },
+      "difficulty": "Medium",
+      "icon": "box-split-corners",
+      "iconName": "footprints",
+      "iconTone": "indigo",
+      "pedagogyTip": "Every puzzle is solved by boxes that fit only one way, so the rule is practised, not luck.",
+      "standards": [
+        "CCSS.3.MD.C.6",
+        "CCSS.MP1"
+      ],
+      "trajectoryLevel": "area-by-multiplying",
+      "ageBand": [
+        7,
+        9
+      ]
+    },
+    {
+      "id": "seven-grid",
+      "title": "A 7×7 Grid",
+      "concept": "Walls on a Bigger Grid",
+      "conceptKey": "box-split-edges",
+      "requires": [
+        "box-split-strips"
+      ],
+      "activity": "box-split/board",
+      "params": {
+        "level": 14,
+        "question": {
+          "size": 7,
+          "minArea": 2,
+          "maxArea": 9,
+          "maxOnes": 1,
+          "questionsPerRound": 2,
+          "technique": "single-fit"
+        },
+        "play": {
+          "targetObjective": "Split a 7×7 grid with boxes up to 9.",
+          "stepByStep": [
+            "Look at a number near a corner or edge.",
+            "The wall blocks some shapes. Try the shapes that are left.",
+            "When only one shape fits, draw it."
+          ],
+          "kidTip": "Start at the corners and edges. The wall stops a box going that way.",
+          "audioPrompt": "Split the grid into boxes. Each box has one number, and that many squares."
+        }
+      },
+      "difficulty": "Medium",
+      "icon": "box-split-corners",
+      "iconName": "footprints",
+      "iconTone": "indigo",
+      "pedagogyTip": "Every puzzle is solved by boxes that fit only one way, so the rule is practised, not luck.",
+      "standards": [
+        "CCSS.3.MD.C.6",
+        "CCSS.MP1"
+      ],
+      "trajectoryLevel": "area-by-multiplying",
+      "ageBand": [
+        7,
+        9
+      ]
+    },
+    {
+      "id": "corners-star",
+      "title": "Corners Star",
+      "concept": "Using Every Wall",
+      "conceptKey": "box-split-edges",
+      "requires": [
+        "box-split-strips"
+      ],
+      "activity": "box-split/board",
+      "params": {
+        "level": 15,
+        "question": {
+          "size": 7,
+          "minArea": 2,
+          "maxArea": 10,
+          "maxOnes": 1,
+          "questionsPerRound": 2,
+          "technique": "single-fit"
+        },
+        "play": {
+          "targetObjective": "Boxes up to 10 on a 7×7 grid.",
+          "stepByStep": [
+            "Look at a number near a corner or edge.",
+            "The wall blocks some shapes. Try the shapes that are left.",
+            "When only one shape fits, draw it."
+          ],
+          "kidTip": "Start at the corners and edges. The wall stops a box going that way.",
+          "audioPrompt": "Split the grid into boxes. Each box has one number, and that many squares."
+        }
+      },
+      "difficulty": "Hard",
+      "icon": "box-split-corners",
+      "iconName": "footprints",
+      "iconTone": "indigo",
+      "pedagogyTip": "Every puzzle is solved by boxes that fit only one way, so the rule is practised, not luck.",
+      "standards": [
+        "CCSS.3.MD.C.6",
+        "CCSS.MP1"
+      ],
+      "trajectoryLevel": "area-by-multiplying",
+      "ageBand": [
+        7,
+        9
+      ]
+    },
+    {
+      "id": "six-two-ways",
+      "title": "6 Two Ways",
+      "concept": "Two Shapes for One Number",
+      "conceptKey": "box-split-factors",
+      "requires": [
+        "box-split-edges"
+      ],
+      "activity": "box-split/board",
+      "params": {
+        "level": 16,
+        "question": {
+          "size": 6,
+          "minArea": 2,
+          "maxArea": 6,
+          "maxOnes": 1,
+          "factorRich": 3,
+          "questionsPerRound": 2,
+          "technique": "single-fit"
+        },
+        "play": {
+          "targetObjective": "6 can be 1 × 6 or 2 × 3. Find which one fits.",
+          "stepByStep": [
+            "Say every times fact for the number.",
+            "Turn each fact into a box: rows × columns.",
+            "Draw the only box that fits without another number."
+          ],
+          "kidTip": "Say the times facts for the number: 6 is 1 × 6 and 2 × 3. Each fact is a shape.",
+          "audioPrompt": "Split the grid into boxes. Each box has one number, and that many squares."
+        }
+      },
+      "difficulty": "Medium",
+      "icon": "box-split-factors",
+      "iconName": "gem",
+      "iconTone": "purple",
+      "pedagogyTip": "Every puzzle is solved by boxes that fit only one way, so the rule is practised, not luck.",
+      "standards": [
+        "CCSS.4.OA.B.4",
+        "CCSS.3.MD.C.7.A"
+      ],
+      "trajectoryLevel": "area-by-multiplying",
+      "ageBand": [
+        8,
+        11
+      ]
+    },
+    {
+      "id": "eight-and-twelve",
+      "title": "8 and 12",
+      "concept": "Numbers With Many Shapes",
+      "conceptKey": "box-split-factors",
+      "requires": [
+        "box-split-edges"
+      ],
+      "activity": "box-split/board",
+      "params": {
+        "level": 17,
+        "question": {
+          "size": 6,
+          "minArea": 2,
+          "maxArea": 12,
+          "maxOnes": 1,
+          "factorRich": 3,
+          "questionsPerRound": 2,
+          "technique": "single-fit"
+        },
+        "play": {
+          "targetObjective": "Use times facts to try every shape for 8 and 12.",
+          "stepByStep": [
+            "Say every times fact for the number.",
+            "Turn each fact into a box: rows × columns.",
+            "Draw the only box that fits without another number."
+          ],
+          "kidTip": "Say the times facts for the number: 6 is 1 × 6 and 2 × 3. Each fact is a shape.",
+          "audioPrompt": "Split the grid into boxes. Each box has one number, and that many squares."
+        }
+      },
+      "difficulty": "Medium",
+      "icon": "box-split-factors",
+      "iconName": "gem",
+      "iconTone": "purple",
+      "pedagogyTip": "Every puzzle is solved by boxes that fit only one way, so the rule is practised, not luck.",
+      "standards": [
+        "CCSS.4.OA.B.4",
+        "CCSS.3.MD.C.7.A"
+      ],
+      "trajectoryLevel": "area-by-multiplying",
+      "ageBand": [
+        8,
+        11
+      ]
+    },
+    {
+      "id": "square-numbers",
+      "title": "Square Numbers",
+      "concept": "4, 9 and 16 as Squares",
+      "conceptKey": "box-split-factors",
+      "requires": [
+        "box-split-edges"
+      ],
+      "activity": "box-split/board",
+      "params": {
+        "level": 18,
+        "question": {
+          "size": 7,
+          "minArea": 2,
+          "maxArea": 16,
+          "maxOnes": 1,
+          "factorRich": 3,
+          "questionsPerRound": 2,
+          "technique": "single-fit"
+        },
+        "play": {
+          "targetObjective": "Square numbers can make square boxes. Can they here?",
+          "stepByStep": [
+            "Say every times fact for the number.",
+            "Turn each fact into a box: rows × columns.",
+            "Draw the only box that fits without another number."
+          ],
+          "kidTip": "Say the times facts for the number: 6 is 1 × 6 and 2 × 3. Each fact is a shape.",
+          "audioPrompt": "Split the grid into boxes. Each box has one number, and that many squares."
+        }
+      },
+      "difficulty": "Medium",
+      "icon": "box-split-factors",
+      "iconName": "gem",
+      "iconTone": "purple",
+      "pedagogyTip": "Every puzzle is solved by boxes that fit only one way, so the rule is practised, not luck.",
+      "standards": [
+        "CCSS.4.OA.B.4",
+        "CCSS.3.MD.C.7.A"
+      ],
+      "trajectoryLevel": "area-by-multiplying",
+      "ageBand": [
+        8,
+        11
+      ]
+    },
+    {
+      "id": "factor-pairs-grid",
+      "title": "Factor Pairs",
+      "concept": "Every Factor Pair Is a Shape",
+      "conceptKey": "box-split-factors",
+      "requires": [
+        "box-split-edges"
+      ],
+      "activity": "box-split/board",
+      "params": {
+        "level": 19,
+        "question": {
+          "size": 7,
+          "minArea": 2,
+          "maxArea": 12,
+          "maxOnes": 1,
+          "factorRich": 4,
+          "questionsPerRound": 2,
+          "technique": "single-fit"
+        },
+        "play": {
+          "targetObjective": "List the factor pairs of each number to find its box.",
+          "stepByStep": [
+            "Say every times fact for the number.",
+            "Turn each fact into a box: rows × columns.",
+            "Draw the only box that fits without another number."
+          ],
+          "kidTip": "Say the times facts for the number: 6 is 1 × 6 and 2 × 3. Each fact is a shape.",
+          "audioPrompt": "Split the grid into boxes. Each box has one number, and that many squares."
+        }
+      },
+      "difficulty": "Hard",
+      "icon": "box-split-factors",
+      "iconName": "gem",
+      "iconTone": "purple",
+      "pedagogyTip": "Every puzzle is solved by boxes that fit only one way, so the rule is practised, not luck.",
+      "standards": [
+        "CCSS.4.OA.B.4",
+        "CCSS.3.MD.C.7.A"
+      ],
+      "trajectoryLevel": "area-by-multiplying",
+      "ageBand": [
+        8,
+        11
+      ]
+    },
+    {
+      "id": "factor-star",
+      "title": "Factor Star",
+      "concept": "Factor Pairs on an 8×8",
+      "conceptKey": "box-split-factors",
+      "requires": [
+        "box-split-edges"
+      ],
+      "activity": "box-split/board",
+      "params": {
+        "level": 20,
+        "question": {
+          "size": 8,
+          "minArea": 2,
+          "maxArea": 16,
+          "maxOnes": 1,
+          "factorRich": 5,
+          "questionsPerRound": 2,
+          "technique": "single-fit"
+        },
+        "play": {
+          "targetObjective": "Boxes up to 16 on an 8×8 grid.",
+          "stepByStep": [
+            "Say every times fact for the number.",
+            "Turn each fact into a box: rows × columns.",
+            "Draw the only box that fits without another number."
+          ],
+          "kidTip": "Say the times facts for the number: 6 is 1 × 6 and 2 × 3. Each fact is a shape.",
+          "audioPrompt": "Split the grid into boxes. Each box has one number, and that many squares."
+        }
+      },
+      "difficulty": "Hard",
+      "icon": "box-split-factors",
+      "iconName": "gem",
+      "iconTone": "purple",
+      "pedagogyTip": "Every puzzle is solved by boxes that fit only one way, so the rule is practised, not luck.",
+      "standards": [
+        "CCSS.4.OA.B.4",
+        "CCSS.3.MD.C.7.A"
+      ],
+      "trajectoryLevel": "area-by-multiplying",
+      "ageBand": [
+        8,
+        11
+      ]
+    },
+    {
+      "id": "only-one-reaches",
+      "title": "Only One Reaches",
+      "concept": "A Square Only One Number Can Reach",
+      "conceptKey": "box-split-reach",
+      "requires": [
+        "box-split-factors"
+      ],
+      "activity": "box-split/board",
+      "params": {
+        "level": 21,
+        "question": {
+          "size": 6,
+          "minArea": 2,
+          "maxArea": 8,
+          "maxOnes": 1,
+          "technique": "only-reach",
+          "questionsPerRound": 2
+        },
+        "play": {
+          "targetObjective": "Find squares only one number can reach.",
+          "stepByStep": [
+            "Find an empty square that looks hard to reach.",
+            "Check which numbers could stretch a box over it.",
+            "If only one can, its box must cover that square."
+          ],
+          "kidTip": "Find an empty square only one number can reach. That number's box covers it.",
+          "audioPrompt": "Split the grid into boxes. Each box has one number, and that many squares."
+        }
+      },
+      "difficulty": "Medium",
+      "icon": "box-split-reach",
+      "iconName": "search",
+      "iconTone": "emerald",
+      "pedagogyTip": "Every puzzle needs at least one square that only one number can reach.",
+      "standards": [
+        "CCSS.MP1",
+        "CCSS.MP7"
+      ],
+      "trajectoryLevel": "box-split-solver",
+      "ageBand": [
+        9,
+        12
+      ]
+    },
+    {
+      "id": "lonely-squares",
+      "title": "Lonely Squares",
+      "concept": "Squares Far From Numbers",
+      "conceptKey": "box-split-reach",
+      "requires": [
+        "box-split-factors"
+      ],
+      "activity": "box-split/board",
+      "params": {
+        "level": 22,
+        "question": {
+          "size": 6,
+          "minArea": 2,
+          "maxArea": 9,
+          "maxOnes": 1,
+          "technique": "only-reach",
+          "questionsPerRound": 2
+        },
+        "play": {
+          "targetObjective": "Every square needs a box. Who can reach it?",
+          "stepByStep": [
+            "Find an empty square that looks hard to reach.",
+            "Check which numbers could stretch a box over it.",
+            "If only one can, its box must cover that square."
+          ],
+          "kidTip": "Find an empty square only one number can reach. That number's box covers it.",
+          "audioPrompt": "Split the grid into boxes. Each box has one number, and that many squares."
+        }
+      },
+      "difficulty": "Medium",
+      "icon": "box-split-reach",
+      "iconName": "search",
+      "iconTone": "emerald",
+      "pedagogyTip": "Every puzzle needs at least one square that only one number can reach.",
+      "standards": [
+        "CCSS.MP1",
+        "CCSS.MP7"
+      ],
+      "trajectoryLevel": "box-split-solver",
+      "ageBand": [
+        9,
+        12
+      ]
+    },
+    {
+      "id": "reach-seven",
+      "title": "Reach on a 7×7",
+      "concept": "Reaching on a Bigger Grid",
+      "conceptKey": "box-split-reach",
+      "requires": [
+        "box-split-factors"
+      ],
+      "activity": "box-split/board",
+      "params": {
+        "level": 23,
+        "question": {
+          "size": 7,
+          "minArea": 2,
+          "maxArea": 10,
+          "maxOnes": 1,
+          "technique": "only-reach",
+          "questionsPerRound": 2
+        },
+        "play": {
+          "targetObjective": "Use reach to split a 7×7 grid.",
+          "stepByStep": [
+            "Find an empty square that looks hard to reach.",
+            "Check which numbers could stretch a box over it.",
+            "If only one can, its box must cover that square."
+          ],
+          "kidTip": "Find an empty square only one number can reach. That number's box covers it.",
+          "audioPrompt": "Split the grid into boxes. Each box has one number, and that many squares."
+        }
+      },
+      "difficulty": "Hard",
+      "icon": "box-split-reach",
+      "iconName": "search",
+      "iconTone": "emerald",
+      "pedagogyTip": "Every puzzle needs at least one square that only one number can reach.",
+      "standards": [
+        "CCSS.MP1",
+        "CCSS.MP7"
+      ],
+      "trajectoryLevel": "box-split-solver",
+      "ageBand": [
+        9,
+        12
+      ]
+    },
+    {
+      "id": "reach-eight",
+      "title": "Reach on an 8×8",
+      "concept": "Reach and Fit Together",
+      "conceptKey": "box-split-reach",
+      "requires": [
+        "box-split-factors"
+      ],
+      "activity": "box-split/board",
+      "params": {
+        "level": 24,
+        "question": {
+          "size": 8,
+          "minArea": 2,
+          "maxArea": 12,
+          "maxOnes": 1,
+          "technique": "only-reach",
+          "questionsPerRound": 1
+        },
+        "play": {
+          "targetObjective": "Mix only-one-fits and only-one-reaches.",
+          "stepByStep": [
+            "Find an empty square that looks hard to reach.",
+            "Check which numbers could stretch a box over it.",
+            "If only one can, its box must cover that square."
+          ],
+          "kidTip": "Find an empty square only one number can reach. That number's box covers it.",
+          "audioPrompt": "Split the grid into boxes. Each box has one number, and that many squares."
+        }
+      },
+      "difficulty": "Hard",
+      "icon": "box-split-reach",
+      "iconName": "search",
+      "iconTone": "emerald",
+      "pedagogyTip": "Every puzzle needs at least one square that only one number can reach.",
+      "standards": [
+        "CCSS.MP1",
+        "CCSS.MP7"
+      ],
+      "trajectoryLevel": "box-split-solver",
+      "ageBand": [
+        9,
+        12
+      ]
+    },
+    {
+      "id": "reach-star",
+      "title": "Reach Star",
+      "concept": "Reach With Bigger Boxes",
+      "conceptKey": "box-split-reach",
+      "requires": [
+        "box-split-factors"
+      ],
+      "activity": "box-split/board",
+      "params": {
+        "level": 25,
+        "question": {
+          "size": 8,
+          "minArea": 2,
+          "maxArea": 14,
+          "maxOnes": 1,
+          "technique": "only-reach",
+          "questionsPerRound": 1
+        },
+        "play": {
+          "targetObjective": "Boxes up to 14 on an 8×8 grid.",
+          "stepByStep": [
+            "Find an empty square that looks hard to reach.",
+            "Check which numbers could stretch a box over it.",
+            "If only one can, its box must cover that square."
+          ],
+          "kidTip": "Find an empty square only one number can reach. That number's box covers it.",
+          "audioPrompt": "Split the grid into boxes. Each box has one number, and that many squares."
+        }
+      },
+      "difficulty": "Hard",
+      "icon": "box-split-reach",
+      "iconName": "search",
+      "iconTone": "emerald",
+      "pedagogyTip": "Every puzzle needs at least one square that only one number can reach.",
+      "standards": [
+        "CCSS.MP1",
+        "CCSS.MP7"
+      ],
+      "trajectoryLevel": "box-split-solver",
+      "ageBand": [
+        9,
+        12
+      ]
+    },
+    {
+      "id": "shared-squares",
+      "title": "Shared Squares",
+      "concept": "Squares Every Box Covers",
+      "conceptKey": "box-split-overlap",
+      "requires": [
+        "box-split-reach"
+      ],
+      "activity": "box-split/board",
+      "params": {
+        "level": 26,
+        "question": {
+          "size": 7,
+          "minArea": 2,
+          "maxArea": 10,
+          "maxOnes": 1,
+          "technique": "overlap",
+          "questionsPerRound": 2
+        },
+        "play": {
+          "targetObjective": "Find squares every box for a number covers.",
+          "stepByStep": [
+            "Pick a number with only a few boxes that fit.",
+            "Find the squares every one of those boxes covers.",
+            "Take those squares away from every other number."
+          ],
+          "kidTip": "If every box for a number covers the same squares, those squares are its. Nobody else can have them.",
+          "audioPrompt": "Split the grid into boxes. Each box has one number, and that many squares."
+        }
+      },
+      "difficulty": "Hard",
+      "icon": "box-split-overlap",
+      "iconName": "circleDot",
+      "iconTone": "cyan",
+      "pedagogyTip": "Every puzzle needs at least one shared-squares step; nothing needs a guess.",
+      "standards": [
+        "CCSS.MP1",
+        "CCSS.MP7"
+      ],
+      "trajectoryLevel": "box-split-solver",
+      "ageBand": [
+        11,
+        14
+      ]
+    },
+    {
+      "id": "shared-eight",
+      "title": "Shared on an 8×8",
+      "concept": "Clearing Squares for Others",
+      "conceptKey": "box-split-overlap",
+      "requires": [
+        "box-split-reach"
+      ],
+      "activity": "box-split/board",
+      "params": {
+        "level": 27,
+        "question": {
+          "size": 8,
+          "minArea": 2,
+          "maxArea": 12,
+          "maxOnes": 1,
+          "technique": "overlap",
+          "questionsPerRound": 1
+        },
+        "play": {
+          "targetObjective": "Use shared squares to rule out boxes.",
+          "stepByStep": [
+            "Pick a number with only a few boxes that fit.",
+            "Find the squares every one of those boxes covers.",
+            "Take those squares away from every other number."
+          ],
+          "kidTip": "If every box for a number covers the same squares, those squares are its. Nobody else can have them.",
+          "audioPrompt": "Split the grid into boxes. Each box has one number, and that many squares."
+        }
+      },
+      "difficulty": "Hard",
+      "icon": "box-split-overlap",
+      "iconName": "circleDot",
+      "iconTone": "cyan",
+      "pedagogyTip": "Every puzzle needs at least one shared-squares step; nothing needs a guess.",
+      "standards": [
+        "CCSS.MP1",
+        "CCSS.MP7"
+      ],
+      "trajectoryLevel": "box-split-solver",
+      "ageBand": [
+        11,
+        14
+      ]
+    },
+    {
+      "id": "shared-big-boxes",
+      "title": "Big Shared Boxes",
+      "concept": "Overlap With Big Numbers",
+      "conceptKey": "box-split-overlap",
+      "requires": [
+        "box-split-reach"
+      ],
+      "activity": "box-split/board",
+      "params": {
+        "level": 28,
+        "question": {
+          "size": 8,
+          "minArea": 2,
+          "maxArea": 16,
+          "maxOnes": 1,
+          "technique": "overlap",
+          "questionsPerRound": 1
+        },
+        "play": {
+          "targetObjective": "Big numbers overlap a lot. Use it.",
+          "stepByStep": [
+            "Pick a number with only a few boxes that fit.",
+            "Find the squares every one of those boxes covers.",
+            "Take those squares away from every other number."
+          ],
+          "kidTip": "If every box for a number covers the same squares, those squares are its. Nobody else can have them.",
+          "audioPrompt": "Split the grid into boxes. Each box has one number, and that many squares."
+        }
+      },
+      "difficulty": "Hard",
+      "icon": "box-split-overlap",
+      "iconName": "circleDot",
+      "iconTone": "cyan",
+      "pedagogyTip": "Every puzzle needs at least one shared-squares step; nothing needs a guess.",
+      "standards": [
+        "CCSS.MP1",
+        "CCSS.MP7"
+      ],
+      "trajectoryLevel": "box-split-solver",
+      "ageBand": [
+        11,
+        14
+      ]
+    },
+    {
+      "id": "shared-nine",
+      "title": "Shared on a 9×9",
+      "concept": "All Three Rules",
+      "conceptKey": "box-split-overlap",
+      "requires": [
+        "box-split-reach"
+      ],
+      "activity": "box-split/board",
+      "params": {
+        "level": 29,
+        "question": {
+          "size": 9,
+          "minArea": 2,
+          "maxArea": 16,
+          "maxOnes": 1,
+          "technique": "overlap",
+          "questionsPerRound": 1
+        },
+        "play": {
+          "targetObjective": "Fit, reach and shared squares on a 9×9.",
+          "stepByStep": [
+            "Pick a number with only a few boxes that fit.",
+            "Find the squares every one of those boxes covers.",
+            "Take those squares away from every other number."
+          ],
+          "kidTip": "If every box for a number covers the same squares, those squares are its. Nobody else can have them.",
+          "audioPrompt": "Split the grid into boxes. Each box has one number, and that many squares."
+        }
+      },
+      "difficulty": "Hard",
+      "icon": "box-split-overlap",
+      "iconName": "circleDot",
+      "iconTone": "cyan",
+      "pedagogyTip": "Every puzzle needs at least one shared-squares step; nothing needs a guess.",
+      "standards": [
+        "CCSS.MP1",
+        "CCSS.MP7"
+      ],
+      "trajectoryLevel": "box-split-solver",
+      "ageBand": [
+        11,
+        14
+      ]
+    },
+    {
+      "id": "shared-star",
+      "title": "Shared Star",
+      "concept": "Overlap Chains",
+      "conceptKey": "box-split-overlap",
+      "requires": [
+        "box-split-reach"
+      ],
+      "activity": "box-split/board",
+      "params": {
+        "level": 30,
+        "question": {
+          "size": 9,
+          "minArea": 2,
+          "maxArea": 18,
+          "maxOnes": 1,
+          "technique": "overlap",
+          "questionsPerRound": 1
+        },
+        "play": {
+          "targetObjective": "Boxes up to 18 on a 9×9 grid.",
+          "stepByStep": [
+            "Pick a number with only a few boxes that fit.",
+            "Find the squares every one of those boxes covers.",
+            "Take those squares away from every other number."
+          ],
+          "kidTip": "If every box for a number covers the same squares, those squares are its. Nobody else can have them.",
+          "audioPrompt": "Split the grid into boxes. Each box has one number, and that many squares."
+        }
+      },
+      "difficulty": "Hard",
+      "icon": "box-split-overlap",
+      "iconName": "circleDot",
+      "iconTone": "cyan",
+      "pedagogyTip": "Every puzzle needs at least one shared-squares step; nothing needs a guess.",
+      "standards": [
+        "CCSS.MP1",
+        "CCSS.MP7"
+      ],
+      "trajectoryLevel": "box-split-solver",
+      "ageBand": [
+        11,
+        14
+      ]
+    },
+    {
+      "id": "ten-grid",
+      "title": "A 10×10 Grid",
+      "concept": "Working a Big Grid",
+      "conceptKey": "box-split-big",
+      "requires": [
+        "box-split-overlap"
+      ],
+      "activity": "box-split/board",
+      "params": {
+        "level": 31,
+        "question": {
+          "size": 10,
+          "minArea": 2,
+          "maxArea": 16,
+          "maxOnes": 2,
+          "technique": "overlap",
+          "questionsPerRound": 1
+        },
+        "play": {
+          "targetObjective": "Split a 10×10 grid.",
+          "stepByStep": [
+            "Draw every box that fits only one way.",
+            "Look for squares only one number can reach.",
+            "Use shared squares to clear the rest."
+          ],
+          "kidTip": "On a big grid, place the sure boxes first. Each one makes the next easier.",
+          "audioPrompt": "Split the grid into boxes. Each box has one number, and that many squares."
+        }
+      },
+      "difficulty": "Hard",
+      "icon": "box-split-big",
+      "iconName": "crown",
+      "iconTone": "indigo",
+      "pedagogyTip": "Every puzzle needs at least one shared-squares step; nothing needs a guess.",
+      "standards": [
+        "CCSS.MP1",
+        "CCSS.MP7"
+      ],
+      "trajectoryLevel": "box-split-solver",
+      "ageBand": [
+        12,
+        16
+      ]
+    },
+    {
+      "id": "ten-big-boxes",
+      "title": "Big Boxes on 10×10",
+      "concept": "Big Areas, Few Shapes",
+      "conceptKey": "box-split-big",
+      "requires": [
+        "box-split-overlap"
+      ],
+      "activity": "box-split/board",
+      "params": {
+        "level": 32,
+        "question": {
+          "size": 10,
+          "minArea": 3,
+          "maxArea": 20,
+          "maxOnes": 1,
+          "technique": "overlap",
+          "questionsPerRound": 1
+        },
+        "play": {
+          "targetObjective": "Boxes up to 20 on a 10×10 grid.",
+          "stepByStep": [
+            "Draw every box that fits only one way.",
+            "Look for squares only one number can reach.",
+            "Use shared squares to clear the rest."
+          ],
+          "kidTip": "On a big grid, place the sure boxes first. Each one makes the next easier.",
+          "audioPrompt": "Split the grid into boxes. Each box has one number, and that many squares."
+        }
+      },
+      "difficulty": "Hard",
+      "icon": "box-split-big",
+      "iconName": "crown",
+      "iconTone": "indigo",
+      "pedagogyTip": "Every puzzle needs at least one shared-squares step; nothing needs a guess.",
+      "standards": [
+        "CCSS.MP1",
+        "CCSS.MP7"
+      ],
+      "trajectoryLevel": "box-split-solver",
+      "ageBand": [
+        12,
+        16
+      ]
+    },
+    {
+      "id": "eleven-grid",
+      "title": "An 11×11 Grid",
+      "concept": "Keeping Track",
+      "conceptKey": "box-split-big",
+      "requires": [
+        "box-split-overlap"
+      ],
+      "activity": "box-split/board",
+      "params": {
+        "level": 33,
+        "question": {
+          "size": 11,
+          "minArea": 2,
+          "maxArea": 20,
+          "maxOnes": 2,
+          "technique": "overlap",
+          "questionsPerRound": 1
+        },
+        "play": {
+          "targetObjective": "Split an 11×11 grid.",
+          "stepByStep": [
+            "Draw every box that fits only one way.",
+            "Look for squares only one number can reach.",
+            "Use shared squares to clear the rest."
+          ],
+          "kidTip": "On a big grid, place the sure boxes first. Each one makes the next easier.",
+          "audioPrompt": "Split the grid into boxes. Each box has one number, and that many squares."
+        }
+      },
+      "difficulty": "Hard",
+      "icon": "box-split-big",
+      "iconName": "crown",
+      "iconTone": "indigo",
+      "pedagogyTip": "Every puzzle needs at least one shared-squares step; nothing needs a guess.",
+      "standards": [
+        "CCSS.MP1",
+        "CCSS.MP7"
+      ],
+      "trajectoryLevel": "box-split-solver",
+      "ageBand": [
+        12,
+        16
+      ]
+    },
+    {
+      "id": "twelve-grid",
+      "title": "A 12×12 Grid",
+      "concept": "Expert Grid",
+      "conceptKey": "box-split-big",
+      "requires": [
+        "box-split-overlap"
+      ],
+      "activity": "box-split/board",
+      "params": {
+        "level": 34,
+        "question": {
+          "size": 12,
+          "minArea": 2,
+          "maxArea": 20,
+          "maxOnes": 2,
+          "technique": "overlap",
+          "questionsPerRound": 1
+        },
+        "play": {
+          "targetObjective": "Split a 12×12 grid.",
+          "stepByStep": [
+            "Draw every box that fits only one way.",
+            "Look for squares only one number can reach.",
+            "Use shared squares to clear the rest."
+          ],
+          "kidTip": "On a big grid, place the sure boxes first. Each one makes the next easier.",
+          "audioPrompt": "Split the grid into boxes. Each box has one number, and that many squares."
+        }
+      },
+      "difficulty": "Hard",
+      "icon": "box-split-big",
+      "iconName": "crown",
+      "iconTone": "indigo",
+      "pedagogyTip": "Every puzzle needs at least one shared-squares step; nothing needs a guess.",
+      "standards": [
+        "CCSS.MP1",
+        "CCSS.MP7"
+      ],
+      "trajectoryLevel": "box-split-solver",
+      "ageBand": [
+        12,
+        16
+      ]
+    },
+    {
+      "id": "big-grid-star",
+      "title": "Big Grid Star",
+      "concept": "Expert Grid, Big Boxes",
+      "conceptKey": "box-split-big",
+      "requires": [
+        "box-split-overlap"
+      ],
+      "activity": "box-split/board",
+      "params": {
+        "level": 35,
+        "question": {
+          "size": 12,
+          "minArea": 3,
+          "maxArea": 24,
+          "maxOnes": 1,
+          "technique": "overlap",
+          "questionsPerRound": 1
+        },
+        "play": {
+          "targetObjective": "Boxes up to 24 on a 12×12 grid.",
+          "stepByStep": [
+            "Draw every box that fits only one way.",
+            "Look for squares only one number can reach.",
+            "Use shared squares to clear the rest."
+          ],
+          "kidTip": "On a big grid, place the sure boxes first. Each one makes the next easier.",
+          "audioPrompt": "Split the grid into boxes. Each box has one number, and that many squares."
+        }
+      },
+      "difficulty": "Hard",
+      "icon": "box-split-big",
+      "iconName": "crown",
+      "iconTone": "indigo",
+      "pedagogyTip": "Every puzzle needs at least one shared-squares step; nothing needs a guess.",
+      "standards": [
+        "CCSS.MP1",
+        "CCSS.MP7"
+      ],
+      "trajectoryLevel": "box-split-solver",
+      "ageBand": [
+        12,
+        16
+      ]
+    },
+    {
+      "id": "speed-warm-up",
+      "title": "Speed Warm-Up",
+      "concept": "Fast and Sure",
+      "conceptKey": "box-split-speed",
+      "requires": [
+        "box-split-big"
+      ],
+      "activity": "box-split/board",
+      "params": {
+        "level": 36,
+        "question": {
+          "size": 7,
+          "minArea": 2,
+          "maxArea": 10,
+          "maxOnes": 1,
+          "technique": "only-reach",
+          "timed": true,
+          "questionsPerRound": 3
+        },
+        "play": {
+          "targetObjective": "Three 7×7 puzzles against the clock.",
+          "stepByStep": [
+            "Sweep the grid for boxes that fit one way.",
+            "Then hunt squares only one number reaches.",
+            "Finish with shared squares. Watch the clock."
+          ],
+          "kidTip": "Go fast, but never guess. Every box you draw should be sure.",
+          "audioPrompt": "Split the grid into boxes. Each box has one number, and that many squares."
+        }
+      },
+      "difficulty": "Medium",
+      "icon": "box-split-speed",
+      "iconName": "zap",
+      "iconTone": "pink",
+      "pedagogyTip": "Every puzzle needs at least one square that only one number can reach.",
+      "standards": [
+        "CCSS.MP1",
+        "CCSS.MP7"
+      ],
+      "trajectoryLevel": "box-split-solver",
+      "ageBand": [
+        13,
+        18
+      ]
+    },
+    {
+      "id": "speed-eight",
+      "title": "Speed 8×8",
+      "concept": "Fast on an 8×8",
+      "conceptKey": "box-split-speed",
+      "requires": [
+        "box-split-big"
+      ],
+      "activity": "box-split/board",
+      "params": {
+        "level": 37,
+        "question": {
+          "size": 8,
+          "minArea": 2,
+          "maxArea": 14,
+          "maxOnes": 1,
+          "technique": "overlap",
+          "timed": true,
+          "questionsPerRound": 2
+        },
+        "play": {
+          "targetObjective": "Two 8×8 puzzles against the clock.",
+          "stepByStep": [
+            "Sweep the grid for boxes that fit one way.",
+            "Then hunt squares only one number reaches.",
+            "Finish with shared squares. Watch the clock."
+          ],
+          "kidTip": "Go fast, but never guess. Every box you draw should be sure.",
+          "audioPrompt": "Split the grid into boxes. Each box has one number, and that many squares."
+        }
+      },
+      "difficulty": "Hard",
+      "icon": "box-split-speed",
+      "iconName": "zap",
+      "iconTone": "pink",
+      "pedagogyTip": "Every puzzle needs at least one shared-squares step; nothing needs a guess.",
+      "standards": [
+        "CCSS.MP1",
+        "CCSS.MP7"
+      ],
+      "trajectoryLevel": "box-split-solver",
+      "ageBand": [
+        13,
+        18
+      ]
+    },
+    {
+      "id": "speed-ten",
+      "title": "Speed 10×10",
+      "concept": "Fast on a 10×10",
+      "conceptKey": "box-split-speed",
+      "requires": [
+        "box-split-big"
+      ],
+      "activity": "box-split/board",
+      "params": {
+        "level": 38,
+        "question": {
+          "size": 10,
+          "minArea": 2,
+          "maxArea": 18,
+          "maxOnes": 2,
+          "technique": "overlap",
+          "timed": true,
+          "questionsPerRound": 2
+        },
+        "play": {
+          "targetObjective": "Two 10×10 puzzles against the clock.",
+          "stepByStep": [
+            "Sweep the grid for boxes that fit one way.",
+            "Then hunt squares only one number reaches.",
+            "Finish with shared squares. Watch the clock."
+          ],
+          "kidTip": "Go fast, but never guess. Every box you draw should be sure.",
+          "audioPrompt": "Split the grid into boxes. Each box has one number, and that many squares."
+        }
+      },
+      "difficulty": "Hard",
+      "icon": "box-split-speed",
+      "iconName": "zap",
+      "iconTone": "pink",
+      "pedagogyTip": "Every puzzle needs at least one shared-squares step; nothing needs a guess.",
+      "standards": [
+        "CCSS.MP1",
+        "CCSS.MP7"
+      ],
+      "trajectoryLevel": "box-split-solver",
+      "ageBand": [
+        13,
+        18
+      ]
+    },
+    {
+      "id": "speed-twelve",
+      "title": "Speed 12×12",
+      "concept": "Fast on a 12×12",
+      "conceptKey": "box-split-speed",
+      "requires": [
+        "box-split-big"
+      ],
+      "activity": "box-split/board",
+      "params": {
+        "level": 39,
+        "question": {
+          "size": 12,
+          "minArea": 2,
+          "maxArea": 20,
+          "maxOnes": 2,
+          "technique": "overlap",
+          "timed": true,
+          "questionsPerRound": 1
+        },
+        "play": {
+          "targetObjective": "A 12×12 puzzle against the clock.",
+          "stepByStep": [
+            "Sweep the grid for boxes that fit one way.",
+            "Then hunt squares only one number reaches.",
+            "Finish with shared squares. Watch the clock."
+          ],
+          "kidTip": "Go fast, but never guess. Every box you draw should be sure.",
+          "audioPrompt": "Split the grid into boxes. Each box has one number, and that many squares."
+        }
+      },
+      "difficulty": "Hard",
+      "icon": "box-split-speed",
+      "iconName": "zap",
+      "iconTone": "pink",
+      "pedagogyTip": "Every puzzle needs at least one shared-squares step; nothing needs a guess.",
+      "standards": [
+        "CCSS.MP1",
+        "CCSS.MP7"
+      ],
+      "trajectoryLevel": "box-split-solver",
+      "ageBand": [
+        13,
+        18
+      ]
+    },
+    {
+      "id": "speed-master",
+      "title": "Speed Master",
+      "concept": "Expert Speed",
+      "conceptKey": "box-split-speed",
+      "requires": [
+        "box-split-big"
+      ],
+      "activity": "box-split/board",
+      "params": {
+        "level": 40,
+        "question": {
+          "size": 12,
+          "minArea": 3,
+          "maxArea": 30,
+          "maxOnes": 1,
+          "technique": "overlap",
+          "timed": true,
+          "questionsPerRound": 2
+        },
+        "play": {
+          "targetObjective": "Two expert 12×12 puzzles against the clock.",
+          "stepByStep": [
+            "Sweep the grid for boxes that fit one way.",
+            "Then hunt squares only one number reaches.",
+            "Finish with shared squares. Watch the clock."
+          ],
+          "kidTip": "Go fast, but never guess. Every box you draw should be sure.",
+          "audioPrompt": "Split the grid into boxes. Each box has one number, and that many squares."
+        }
+      },
+      "difficulty": "Hard",
+      "icon": "box-split-speed",
+      "iconName": "zap",
+      "iconTone": "pink",
+      "pedagogyTip": "Every puzzle needs at least one shared-squares step; nothing needs a guess.",
+      "standards": [
+        "CCSS.MP1",
+        "CCSS.MP7"
+      ],
+      "trajectoryLevel": "box-split-solver",
+      "ageBand": [
+        13,
+        18
+      ]
+    },
+    {
+      "id": "practice-counting",
+      "title": "Practice: Counting Squares",
+      "concept": "Practice Without Help",
+      "conceptKey": "box-split-counter",
+      "requires": [
+        "box-split-counter"
+      ],
+      "activity": "box-split/board",
+      "params": {
+        "level": 41,
+        "question": {
+          "size": 5,
+          "maxArea": 5,
+          "maxOnes": 2,
+          "questionsPerRound": 4,
+          "technique": "single-fit",
+          "practice": true
+        },
+        "play": {
+          "targetObjective": "Counting Squares, with no hints.",
+          "kidTip": "Count the squares inside your box. It must be the same as the number.",
+          "audioPrompt": "Split the grid into boxes. Each box has one number, and that many squares."
+        }
+      },
+      "difficulty": "Medium",
+      "icon": "box-split-count",
+      "iconName": "star",
+      "iconTone": "pink",
+      "pedagogyTip": "Practice without hints, ranked on speed and first-try answers.",
+      "standards": [
+        "CCSS.K.CC.B.5"
+      ],
+      "trajectoryLevel": "area-by-counting",
+      "ageBand": [
+        5,
+        7
+      ]
+    },
+    {
+      "id": "practice-lines",
+      "title": "Practice: Lines and Squares",
+      "concept": "Practice Without Help",
+      "conceptKey": "box-split-strips",
+      "requires": [
+        "box-split-strips"
+      ],
+      "activity": "box-split/board",
+      "params": {
+        "level": 42,
+        "question": {
+          "size": 6,
+          "minArea": 2,
+          "maxArea": 6,
+          "shapes": "strips",
+          "maxOnes": 1,
+          "questionsPerRound": 3,
+          "technique": "single-fit",
+          "practice": true
+        },
+        "play": {
+          "targetObjective": "Lines and Squares, with no hints.",
+          "kidTip": "These boxes are lines or 2 by 2 squares. A 3 is a line of 3 squares.",
+          "audioPrompt": "Split the grid into boxes. Each box has one number, and that many squares."
+        }
+      },
+      "difficulty": "Medium",
+      "icon": "box-split-strips",
+      "iconName": "layers",
+      "iconTone": "cyan",
+      "pedagogyTip": "Practice without hints, ranked on speed and first-try answers.",
+      "standards": [
+        "CCSS.2.G.A.2"
+      ],
+      "trajectoryLevel": "area-by-counting",
+      "ageBand": [
+        6,
+        8
+      ]
+    },
+    {
+      "id": "practice-corners",
+      "title": "Practice: Corners and Edges",
+      "concept": "Practice Without Help",
+      "conceptKey": "box-split-edges",
+      "requires": [
+        "box-split-edges"
+      ],
+      "activity": "box-split/board",
+      "params": {
+        "level": 43,
+        "question": {
+          "size": 7,
+          "minArea": 2,
+          "maxArea": 9,
+          "maxOnes": 1,
+          "questionsPerRound": 3,
+          "technique": "single-fit",
+          "practice": true
+        },
+        "play": {
+          "targetObjective": "Corners and Edges, with no hints.",
+          "kidTip": "Start at the corners and edges. The wall stops a box going that way.",
+          "audioPrompt": "Split the grid into boxes. Each box has one number, and that many squares."
+        }
+      },
+      "difficulty": "Medium",
+      "icon": "box-split-corners",
+      "iconName": "footprints",
+      "iconTone": "indigo",
+      "pedagogyTip": "Practice without hints, ranked on speed and first-try answers.",
+      "standards": [
+        "CCSS.3.MD.C.6",
+        "CCSS.MP1"
+      ],
+      "trajectoryLevel": "area-by-multiplying",
+      "ageBand": [
+        7,
+        9
+      ]
+    },
+    {
+      "id": "practice-factors",
+      "title": "Practice: Factor Rectangles",
+      "concept": "Practice Without Help",
+      "conceptKey": "box-split-factors",
+      "requires": [
+        "box-split-factors"
+      ],
+      "activity": "box-split/board",
+      "params": {
+        "level": 44,
+        "question": {
+          "size": 7,
+          "minArea": 2,
+          "maxArea": 12,
+          "maxOnes": 1,
+          "factorRich": 3,
+          "questionsPerRound": 3,
+          "technique": "single-fit",
+          "practice": true
+        },
+        "play": {
+          "targetObjective": "Factor Rectangles, with no hints.",
+          "kidTip": "Say the times facts for the number: 6 is 1 × 6 and 2 × 3. Each fact is a shape.",
+          "audioPrompt": "Split the grid into boxes. Each box has one number, and that many squares."
+        }
+      },
+      "difficulty": "Medium",
+      "icon": "box-split-factors",
+      "iconName": "gem",
+      "iconTone": "purple",
+      "pedagogyTip": "Practice without hints, ranked on speed and first-try answers.",
+      "standards": [
+        "CCSS.4.OA.B.4",
+        "CCSS.3.MD.C.7.A"
+      ],
+      "trajectoryLevel": "area-by-multiplying",
+      "ageBand": [
+        8,
+        11
+      ]
+    },
+    {
+      "id": "practice-reach",
+      "title": "Practice: Only One Reaches",
+      "concept": "Practice Without Help",
+      "conceptKey": "box-split-reach",
+      "requires": [
+        "box-split-reach"
+      ],
+      "activity": "box-split/board",
+      "params": {
+        "level": 45,
+        "question": {
+          "size": 7,
+          "minArea": 2,
+          "maxArea": 10,
+          "maxOnes": 1,
+          "technique": "only-reach",
+          "questionsPerRound": 2,
+          "practice": true
+        },
+        "play": {
+          "targetObjective": "Only One Reaches, with no hints.",
+          "kidTip": "Find an empty square only one number can reach. That number's box covers it.",
+          "audioPrompt": "Split the grid into boxes. Each box has one number, and that many squares."
+        }
+      },
+      "difficulty": "Medium",
+      "icon": "box-split-reach",
+      "iconName": "search",
+      "iconTone": "emerald",
+      "pedagogyTip": "Practice without hints, ranked on speed and first-try answers.",
+      "standards": [
+        "CCSS.MP1",
+        "CCSS.MP7"
+      ],
+      "trajectoryLevel": "box-split-solver",
+      "ageBand": [
+        9,
+        12
+      ]
+    },
+    {
+      "id": "practice-shared",
+      "title": "Practice: Shared Squares",
+      "concept": "Practice Without Help",
+      "conceptKey": "box-split-overlap",
+      "requires": [
+        "box-split-overlap"
+      ],
+      "activity": "box-split/board",
+      "params": {
+        "level": 46,
+        "question": {
+          "size": 8,
+          "minArea": 2,
+          "maxArea": 12,
+          "maxOnes": 1,
+          "technique": "overlap",
+          "questionsPerRound": 2,
+          "practice": true
+        },
+        "play": {
+          "targetObjective": "Shared Squares, with no hints.",
+          "kidTip": "If every box for a number covers the same squares, those squares are its. Nobody else can have them.",
+          "audioPrompt": "Split the grid into boxes. Each box has one number, and that many squares."
+        }
+      },
+      "difficulty": "Medium",
+      "icon": "box-split-overlap",
+      "iconName": "circleDot",
+      "iconTone": "cyan",
+      "pedagogyTip": "Practice without hints, ranked on speed and first-try answers.",
+      "standards": [
+        "CCSS.MP1",
+        "CCSS.MP7"
+      ],
+      "trajectoryLevel": "box-split-solver",
+      "ageBand": [
+        11,
+        14
+      ]
+    },
+    {
+      "id": "practice-big-grids",
+      "title": "Practice: Big Grids",
+      "concept": "Practice Without Help",
+      "conceptKey": "box-split-big",
+      "requires": [
+        "box-split-big"
+      ],
+      "activity": "box-split/board",
+      "params": {
+        "level": 47,
+        "question": {
+          "size": 10,
+          "minArea": 2,
+          "maxArea": 18,
+          "maxOnes": 2,
+          "technique": "overlap",
+          "questionsPerRound": 1,
+          "practice": true
+        },
+        "play": {
+          "targetObjective": "Big Grids, with no hints.",
+          "kidTip": "On a big grid, place the sure boxes first. Each one makes the next easier.",
+          "audioPrompt": "Split the grid into boxes. Each box has one number, and that many squares."
+        }
+      },
+      "difficulty": "Medium",
+      "icon": "box-split-big",
+      "iconName": "crown",
+      "iconTone": "indigo",
+      "pedagogyTip": "Practice without hints, ranked on speed and first-try answers.",
+      "standards": [
+        "CCSS.MP1",
+        "CCSS.MP7"
+      ],
+      "trajectoryLevel": "box-split-solver",
+      "ageBand": [
+        12,
+        16
+      ]
+    },
+    {
+      "id": "practice-speed",
+      "title": "Practice: Speed Solve",
+      "concept": "Practice Without Help",
+      "conceptKey": "box-split-speed",
+      "requires": [
+        "box-split-speed"
+      ],
+      "activity": "box-split/board",
+      "params": {
+        "level": 48,
+        "question": {
+          "size": 10,
+          "minArea": 2,
+          "maxArea": 18,
+          "maxOnes": 2,
+          "technique": "overlap",
+          "timed": true,
+          "questionsPerRound": 2,
+          "practice": true
+        },
+        "play": {
+          "targetObjective": "Speed Solve, with no hints.",
+          "kidTip": "Go fast, but never guess. Every box you draw should be sure.",
+          "audioPrompt": "Split the grid into boxes. Each box has one number, and that many squares."
+        }
+      },
+      "difficulty": "Medium",
+      "icon": "box-split-speed",
+      "iconName": "zap",
+      "iconTone": "pink",
+      "pedagogyTip": "Practice without hints, ranked on speed and first-try answers.",
+      "standards": [
+        "CCSS.MP1",
+        "CCSS.MP7"
+      ],
+      "trajectoryLevel": "box-split-solver",
+      "ageBand": [
+        13,
+        18
+      ]
+    }
+  ]
+}

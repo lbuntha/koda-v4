@@ -1890,6 +1890,144 @@
         "number-merge/practice-multiply-to-30",
         "number-merge/practice-sixths"
       ]
+    },
+    {
+      "id": "u145",
+      "unitNumber": 145,
+      "title": "Unit 145: Box Split — Count the Squares",
+      "description": "Split small grids into boxes by counting squares.",
+      "icon": "box-split-count",
+      "lessons": [
+        "box-split/first-boxes",
+        "box-split/count-to-four",
+        "box-split/numbers-not-dots",
+        "box-split/five-grid-count",
+        "box-split/count-squares-star"
+      ]
+    },
+    {
+      "id": "u146",
+      "unitNumber": 146,
+      "title": "Unit 146: Box Split — Strips and Squares",
+      "description": "Every box is a line or a 2 by 2 square.",
+      "icon": "box-split-strips",
+      "lessons": [
+        "box-split/lines-of-three",
+        "box-split/lines-of-four",
+        "box-split/lines-and-squares",
+        "box-split/six-grid-lines",
+        "box-split/lines-star"
+      ]
+    },
+    {
+      "id": "u147",
+      "unitNumber": 147,
+      "title": "Unit 147: Box Split — Corners and Edges",
+      "description": "Start where the walls cut down the shapes.",
+      "icon": "box-split-corners",
+      "lessons": [
+        "box-split/start-in-a-corner",
+        "box-split/along-the-edge",
+        "box-split/squares-and-oblongs",
+        "box-split/seven-grid",
+        "box-split/corners-star"
+      ]
+    },
+    {
+      "id": "u148",
+      "unitNumber": 148,
+      "title": "Unit 148: Box Split — Factor Rectangles",
+      "description": "Turn times facts into box shapes: 6 is 1 × 6 or 2 × 3.",
+      "icon": "box-split-factors",
+      "lessons": [
+        "box-split/six-two-ways",
+        "box-split/eight-and-twelve",
+        "box-split/square-numbers",
+        "box-split/factor-pairs-grid",
+        "box-split/factor-star"
+      ]
+    },
+    {
+      "id": "u149",
+      "unitNumber": 149,
+      "title": "Unit 149: Box Split — Only One Reaches",
+      "description": "Find squares only one number can reach.",
+      "icon": "box-split-reach",
+      "lessons": [
+        "box-split/only-one-reaches",
+        "box-split/lonely-squares",
+        "box-split/reach-seven",
+        "box-split/reach-eight",
+        "box-split/reach-star"
+      ]
+    },
+    {
+      "id": "u150",
+      "unitNumber": 150,
+      "title": "Unit 150: Box Split — Shared Squares",
+      "description": "Squares every box for a number covers belong to it.",
+      "icon": "box-split-overlap",
+      "lessons": [
+        "box-split/shared-squares",
+        "box-split/shared-eight",
+        "box-split/shared-big-boxes",
+        "box-split/shared-nine",
+        "box-split/shared-star"
+      ]
+    },
+    {
+      "id": "u151",
+      "unitNumber": 151,
+      "title": "Unit 151: Box Split — Big Grids",
+      "description": "Expert 10×10 to 12×12 grids.",
+      "icon": "box-split-big",
+      "lessons": [
+        "box-split/ten-grid",
+        "box-split/ten-big-boxes",
+        "box-split/eleven-grid",
+        "box-split/twelve-grid",
+        "box-split/big-grid-star"
+      ]
+    },
+    {
+      "id": "u152",
+      "unitNumber": 152,
+      "title": "Unit 152: Box Split — Speed Solve",
+      "description": "Sure boxes, fast, against the clock.",
+      "icon": "box-split-speed",
+      "lessons": [
+        "box-split/speed-warm-up",
+        "box-split/speed-eight",
+        "box-split/speed-ten",
+        "box-split/speed-twelve",
+        "box-split/speed-master"
+      ]
+    },
+    {
+      "id": "u153",
+      "unitNumber": 153,
+      "title": "Unit 153: Practice — Box Split 1",
+      "description": "Counting Squares, Lines and Squares, Corners and Edges, Factor Rectangles, without hints.",
+      "icon": "kit-repeat",
+      "lessons": [
+        "box-split/practice-counting",
+        "box-split/practice-lines",
+        "box-split/practice-corners",
+        "box-split/practice-factors"
+      ]
+    },
+    {
+      "id": "u154",
+      "unitNumber": 154,
+      "title": "Unit 154: Practice — Box Split 2",
+      "description": "Only One Reaches, Shared Squares, Big Grids, Speed Solve, without hints.",
+      "icon": "kit-repeat",
+      "lessons": [
+        "box-split/practice-reach",
+        "box-split/practice-shared",
+        "box-split/practice-big-grids",
+        "box-split/practice-speed"
+      ]
     }
   ]
 }

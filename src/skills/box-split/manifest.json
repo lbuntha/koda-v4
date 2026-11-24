@@ -1,0 +1,80 @@
+{
+  "id": "box-split",
+  "name": "Box Split",
+  "version": "0.1.0",
+  "description": "A Shikaku-style logic puzzle. Split the grid into boxes: each box holds one number and covers that many squares. From counting squares at 5 to expert 12×12 grids and speed solves, with area, times facts and logic rules along the way.",
+  "category": "core",
+  "author": "Koda Math Lab",
+  "iconName": "Boxes",
+  "tagline": "Split the grid. Every box matches its number.",
+  "thumbnail": "box-split-quest",
+  "status": "draft",
+  "audience": {
+    "ages": [5, 18],
+    "category": "logic-and-planning"
+  },
+  "topics": ["logic", "measurement", "multiplication", "shapes"],
+  "teaches": [
+    "box-split-counter",
+    "box-split-strips",
+    "box-split-edges",
+    "box-split-factors",
+    "box-split-reach",
+    "box-split-overlap",
+    "box-split-big",
+    "box-split-speed"
+  ],
+  "requires": [],
+  "features": [
+    {
+      "id": "group_play",
+      "name": "Play together",
+      "description": "Friends race the same lesson with the same puzzles. XP and stars still come from each child's own answers.",
+      "isEnabled": true,
+      "tag": "Group"
+    },
+    {
+      "id": "audio_speech",
+      "name": "Spoken voice",
+      "description": "Reads the lesson prompt aloud. Turn off for a silent lesson.",
+      "isEnabled": true,
+      "tag": "Audio"
+    },
+    {
+      "id": "sound_chimes",
+      "name": "Sound chimes",
+      "description": "Plays a short sound when a box is drawn, and when a box is right or wrong.",
+      "isEnabled": true,
+      "tag": "Audio"
+    },
+    {
+      "id": "haptic_feedback",
+      "name": "Haptic vibration",
+      "description": "Adds a small vibration when a box is right or wrong.",
+      "isEnabled": true,
+      "tag": "Haptic"
+    },
+    {
+      "id": "drag_draw",
+      "name": "Drag to draw",
+      "description": "Lets children drag from corner to corner to draw a box. Turn off to draw by tapping two corners only.",
+      "isEnabled": true,
+      "tag": "Input"
+    }
+  ],
+  "settings": {
+    "speechRate": 0.95
+  },
+  "settingsSchema": [
+    {
+      "key": "speechRate",
+      "label": "Speech rate",
+      "help": "How fast Koda reads the prompt aloud.",
+      "type": "number",
+      "min": 0.5,
+      "max": 2,
+      "step": 0.05,
+      "unit": "x"
+    }
+  ]
+}

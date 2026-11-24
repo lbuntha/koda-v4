@@ -1,0 +1,52 @@
+{
+  "title": "Box Split",
+  "prompt": "Split the grid into boxes. Each box has one number, and that many squares.",
+  "count": "{done} of {total} boxes",
+  "time": "Time {time}",
+  "size": "{h} × {w} = {area}",
+  "square": "row {row}, column {col}",
+  "status": {
+    "dragOrTap": "Drag from corner to corner, or tap two corners.",
+    "tapOnly": "Tap one corner of a box, then the other.",
+    "secondCorner": "Now tap the other corner. Tap the same square for a 1-square box.",
+    "done": "Every square is in a box!"
+  },
+  "right": {
+    "title": "Grid split!",
+    "message": "Every box has one number and the right number of squares.",
+    "timed": "Every box is right. Your time: {time}."
+  },
+  "wrong": {
+    "title": "Not that box",
+    "message": "{size} is the right size, but the {area} in row {row}, column {col} does not go there. Try another shape."
+  },
+  "refuse": {
+    "noNumber": "That box has no number. Every box needs one number.",
+    "twoNumbers": "That box has two numbers. A box holds just one.",
+    "tooBig": "That box has {size} squares, but its number is {area}. Make it smaller.",
+    "tooSmall": "That box has {size} squares, but its number is {area}. Make it bigger.",
+    "overlaps": "That box covers a box you already drew."
+  },
+  "hint": {
+    "single-fit": {
+      "look": "Find a number that has only one box that fits.",
+      "where": "Look at the {area} in row {row}, column {col}. Try each shape with {area} squares. Only one fits."
+    },
+    "only-reach": {
+      "look": "Look for an empty square that only one number can reach.",
+      "where": "Only the {area} in row {row}, column {col} can reach the glowing square at {square}. Its box must cover it."
+    },
+    "overlap": {
+      "look": "Look for a number whose boxes all cover the same squares.",
+      "where": "Every box for the {area} in row {row}, column {col} covers the glowing squares. No other number can use them."
+    },
+    "worked": "The {area} in row {row}, column {col} gets a box {h} rows tall and {w} wide: {h} × {w} = {area}. Draw it where it glows.",
+    "workedOne": "The 1 in row {row}, column {col} is a box on its own. Tap it twice."
+  },
+  "label": {
+    "square": "Row {row}, column {col}",
+    "number": "Row {row}, column {col}, number {area}",
+    "inBox": "{label}, in a {size} box",
+    "corner": "{label}, first corner"
+  }
+}
