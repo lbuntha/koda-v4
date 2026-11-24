@@ -15,7 +15,8 @@ import { isAgeRange } from "../lib/ages";
 import { bulkGet, bulkRemove, bulkSet } from "../lib/bulkStore";
 import { accessToken, request } from "../lib/sync";
 import { isCategoryId, parseCategories, setCategories, type Category } from "./categories";
-import { prefetchPuzzlePhotos } from "./photos";
+import { prefetchPuzzlePhotos, puzzlesAhead } from "./photos";
+import { loadPlay } from "./playStore";
 import { validatePuzzle } from "./puzzle";
 import type { Piece, Puzzle } from "./types";
 
@@ -107,8 +108,9 @@ const adopt = (next: BankSnapshot): void => {
   // Not kept this time (storage full or off): the list is still used until the app closes.
   void bulkSet(KEY, JSON.stringify(next));
   listeners.forEach((fn) => fn());
-  // The photos in the list come along with it, so offline play never shows an empty frame.
-  void prefetchPuzzlePhotos(next.puzzles);
+  // Photos for what this child is likely to play next come along with it; the
+  // rest wait until a round needs them.
+  void prefetchPuzzlePhotos(puzzlesAhead(next.puzzles, loadPlay().seen));
 };
 
 /** Ask the server what is current. Quiet on any failure; the copy on this device stands. */

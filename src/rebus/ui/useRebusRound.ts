@@ -9,6 +9,7 @@
 
 import { useCallback, useEffect, useState } from "react";
 import { reduceRound, startRound, type RoundConfig, type RoundEvent, type RoundState } from "../engine";
+import { prefetchPuzzlePhotos } from "../photos";
 
 const TICK_MS = 200;
 const clock = (): number => performance.now() / 1000;
@@ -40,6 +41,8 @@ export const useRebusRound = (): RebusRound => {
     const at = clock();
     setNow(at);
     setState(startRound(config, at));
+    // This round's photos, all of them, before the child reaches them.
+    void prefetchPuzzlePhotos(config.puzzles);
   }, []);
 
   const reset = useCallback(() => setState(null), []);

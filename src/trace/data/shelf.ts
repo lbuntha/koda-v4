@@ -117,6 +117,9 @@ async function flushOutbox() {
   writeOutbox(left);
 }
 
+/** Collections downloaded at once on a refresh. */
+const BUNDLES_AT_ONCE = 3;
+
 export const TraceShelf = {
   subscribe(cb: () => void) {
     listeners.add(cb);
@@ -135,17 +138,26 @@ export const TraceShelf = {
         const list = await fetchShelf();
         const prev = read();
         const bundles: Record<string, CollectionBundle> = {};
-        for (const c of list) {
+        const stale = list.filter((c) => {
           const have = prev.bundles[c.id];
           if (have && have.rev === c.rev) bundles[c.id] = have;
-          else {
+          return !(have && have.rev === c.rev);
+        });
+        // A few at a time: one by one, a first visit to fifty collections was
+        // fifty round trips in a row; all at once would choke a slow line.
+        let next = 0;
+        const worker = async () => {
+          while (next < stale.length) {
+            const c = stale[next++];
+            const have = prev.bundles[c.id];
             try {
               bundles[c.id] = await fetchBundle(c.id);
             } catch {
               if (have) bundles[c.id] = have; // keep the older revision until the new one arrives
             }
           }
-        }
+        };
+        await Promise.all(Array.from({ length: Math.min(BUNDLES_AT_ONCE, stale.length) }, worker));
         write({ collections: list, bundles, checkedAt: Date.now() });
         // A photo cover is kept on the device too, so the shelf looks the same offline.
         await Promise.all(Object.values(bundles).map((b) => (isPhoto(b.picture) ? photoUrl(b.picture).catch(() => null) : null)));

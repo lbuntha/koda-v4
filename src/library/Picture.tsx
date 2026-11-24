@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { isPhoto, knownPhotoUrl, photoUrl } from "./photos";
 import { SvgAsset, SvgMarkup } from "../assets/svg";
 import { aspectOfViewBox, svgMarkupFor } from "../assets/svg/SvgAsset";
@@ -162,7 +162,29 @@ function Photo({ name, label, className, whole = false, fill = false, onRatio }:
   const [url, setUrl] = useState<string | null>(() => knownPhotoUrl(name));
   const [shown, setShown] = useState(() => knownPhotoUrl(name) !== null);
   const [failed, setFailed] = useState(false);
+  /*
+   * Fetched when it comes near the screen, not when it mounts. A shelf mounts
+   * every cover in every row at once, and on a library of hundreds that was
+   * hundreds of photo downloads before the child had scrolled at all. A photo
+   * this device already holds shows straight away either way.
+   */
+  const box = useRef<HTMLSpanElement>(null);
+  const [near, setNear] = useState(() => knownPhotoUrl(name) !== null || typeof IntersectionObserver === "undefined");
   useEffect(() => {
+    if (near) return;
+    const el = box.current;
+    if (!el) return;
+    const io = new IntersectionObserver((entries) => {
+      if (entries.some((e) => e.isIntersecting)) {
+        setNear(true);
+        io.disconnect();
+      }
+    }, { rootMargin: "300px" });
+    io.observe(el);
+    return () => io.disconnect();
+  }, [near]);
+  useEffect(() => {
+    if (!near) return;
     let live = true;
     setFailed(false);
     setShown(knownPhotoUrl(name) !== null);
@@ -174,9 +196,9 @@ function Photo({ name, label, className, whole = false, fill = false, onRatio }:
     return () => {
       live = false;
     };
-  }, [name]);
+  }, [name, near]);
   return (
-    <span role={label ? "img" : undefined} aria-label={label} aria-hidden={label ? undefined : true} className={`block overflow-hidden ${fill ? "absolute inset-0" : "relative h-full w-full"} ${!shown && !failed ? "koda-shimmer bg-surface-muted" : ""} ${withoutPadding(className)}`}>
+    <span ref={box} role={label ? "img" : undefined} aria-label={label} aria-hidden={label ? undefined : true} className={`block overflow-hidden ${fill ? "absolute inset-0" : "relative h-full w-full"} ${!shown && !failed ? "koda-shimmer bg-surface-muted" : ""} ${withoutPadding(className)}`}>
       {url && !failed ? (
         <img
           src={url}

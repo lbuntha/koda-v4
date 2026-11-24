@@ -47,7 +47,35 @@ export const usePieceImage = (key: string): PieceImage => {
   return state;
 };
 
-/** Fetch a published list's photos now, a few at a time, never blocking and never failing loudly. */
+/** Most photos fetched ahead of play when the bank changes. */
+export const AHEAD_MAX = 60;
+
+/**
+ * The puzzles worth having photos for before the child asks: unplayed ones in
+ * the categories they already play, up to `AHEAD_MAX` photos.
+ *
+ * Not the whole bank. Every device downloading every puzzle photo whenever an
+ * owner published one more would be thousands of images on a metered line,
+ * most of them for categories this child never opens. A round's own photos are
+ * fetched when it starts (`useRebusRound`), so nothing played goes without.
+ */
+export const puzzlesAhead = (bank: readonly Puzzle[], seen: readonly string[]): Puzzle[] => {
+  const played = new Set(seen);
+  const categories = new Set(bank.filter((p) => played.has(p.id)).map((p) => p.category));
+  const picked: Puzzle[] = [];
+  let photos = 0;
+  for (const p of bank) {
+    if (!categories.has(p.category) || played.has(p.id)) continue;
+    const count = photosIn([p]).length;
+    if (count === 0) continue;
+    if (photos + count > AHEAD_MAX) break;
+    picked.push(p);
+    photos += count;
+  }
+  return picked;
+};
+
+/** Fetch these puzzles' photos now, a few at a time, never blocking and never failing loudly. */
 export const prefetchPuzzlePhotos = async (puzzles: readonly Puzzle[]): Promise<void> => {
   const keys = photosIn(puzzles);
   let next = 0;

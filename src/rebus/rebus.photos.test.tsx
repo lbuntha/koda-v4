@@ -2,7 +2,7 @@ import { act, fireEvent, render, screen, waitFor } from "@testing-library/react"
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { PuzzleCanvas } from "./ui/PieceView";
 import { PuzzleEditor, BLANK_DRAFT } from "./studio/PuzzleEditor";
-import { photosIn, prefetchPuzzlePhotos } from "./photos";
+import { AHEAD_MAX, photosIn, prefetchPuzzlePhotos, puzzlesAhead } from "./photos";
 import type { Puzzle } from "./types";
 
 const lib = vi.hoisted(() => ({ photoUrl: vi.fn(), uploadPhoto: vi.fn(), knownPhotoUrl: vi.fn(() => null as string | null) }));
@@ -47,6 +47,21 @@ describe("photos with the published list", () => {
     lib.photoUrl.mockRejectedValueOnce(new Error("offline")).mockResolvedValue("blob:x");
     await expect(prefetchPuzzlePhotos(list)).resolves.toBeUndefined();
     expect(lib.photoUrl).toHaveBeenCalledTimes(2);
+  });
+
+  it("fetches ahead only unplayed photo puzzles in the categories a child plays, and only so many", () => {
+    const at = (id: string, category: string, n = 1): Puzzle => ({
+      ...puzzle(Array.from({ length: n }, (_, i) => ({ kind: "photo" as const, id: `photo-${id}-${i}`, name: id }))),
+      id,
+      category,
+    });
+    const bank = [at("played", "food"), at("next", "food"), at("plain", "food", 0), at("other", "animals")];
+    // Nothing played yet: nothing fetched ahead; a round fetches its own.
+    expect(puzzlesAhead(bank, [])).toEqual([]);
+    expect(puzzlesAhead(bank, ["played"]).map((p) => p.id)).toEqual(["next"]);
+
+    const many = [at("played", "food"), ...Array.from({ length: AHEAD_MAX + 5 }, (_, i) => at(`f${i}`, "food"))];
+    expect(photosIn(puzzlesAhead(many, ["played"]))).toHaveLength(AHEAD_MAX);
   });
 });
 
