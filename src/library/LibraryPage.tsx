@@ -7,7 +7,7 @@ import { readPickFrom, useTodayContext } from "../components/learn/useToday";
 import { ArrowLeft, BookOpen, Check, ChevronDown, Globe, RotateCcw, Search, Star, Volume2, X, Zap } from "lucide-react";
 import { LetterWheel } from "../components/wheel/LetterWheel";
 import { ScoringAPI } from "../lib/scoring";
-import { noteFor, type Language, type Passage } from "./data/passage";
+import { bookAges, noteFor, type Language, type Passage } from "./data/passage";
 import { ringOf } from "./data/spellingDeck";
 import { useShelf } from "./bookStore";
 import { spellsWord, tilesOf } from "./data/tiles";
@@ -226,15 +226,21 @@ const wordsIn = (book: Passage): number => {
 };
 const categoryOf = (p: Passage) => p.category ?? "Everyday";
 
-function Cover({ book, size = "shelf", showTitle = size === "page" }: { book: Passage; size?: "shelf" | "page"; showTitle?: boolean }) {
+function Cover({ book, size = "shelf", showTitle = size === "page", read = false }: { book: Passage; size?: "shelf" | "page"; showTitle?: boolean; read?: boolean }) {
   const { t: tr } = useT();
   const shelf = size === "shelf";
+  const [from, to] = bookAges(book);
   return (
     <span
       className={`relative grid ${size === "page" ? "aspect-[4/3] sm:aspect-[3/4]" : "aspect-[5/2] sm:aspect-[2/1]"} ${shelf ? "bg-gradient-to-br from-slate-50 to-indigo-100 p-3 sm:p-4" : "content-end overflow-hidden rounded-2xl bg-gradient-to-br p-3 shadow-md"} ${COVER[book.category ?? ""] ?? "from-indigo-500 to-indigo-800"} ${size === "page" ? "w-full max-w-none sm:max-w-[220px]" : "w-full"}`}
     >
-      <span className={`absolute left-3 top-3 z-10 rounded-full px-3 py-1 text-[11px] font-black ${shelf ? "bg-emerald-700 text-white" : "bg-white/95 text-slate-900"}`}>{tr("library.level", { level: book.band })}</span>
+      <span className={`absolute left-3 top-3 z-10 rounded-full px-3 py-1 text-[11px] font-black ${shelf ? "bg-emerald-700 text-white" : "bg-white/95 text-slate-900"}`}>{tr("library.level", { level: book.band })} · {tr("library.ages", { from, to })}</span>
       {shelf && <span className="absolute right-3 top-3 z-10 rounded-full bg-indigo-100 px-3 py-1 text-[11px] font-black text-slate-700">{book.category ?? "Story"}</span>}
+      {shelf && read && (
+        <span className="absolute bottom-3 left-3 z-10 inline-flex items-center gap-1 rounded-full bg-slate-800/85 px-3 py-1 text-[11px] font-black text-white">
+          <Check className="h-3.5 w-3.5" aria-hidden="true" />{tr("library.readBadge")}
+        </span>
+      )}
       <span className={`absolute ${shelf ? "inset-0" : "inset-x-[14%] top-[13%] aspect-square rounded-full bg-white/90 p-[10%]"}`}>
         <Picture name={book.picture} />
       </span>
@@ -254,10 +260,13 @@ function Catalog({ shelf, lang, onLang, onOpen, embedded }: { shelf: readonly Pa
   const mine = useMemo(() => shelf.filter((p) => p.language === lang), [shelf, lang]);
   const cats = useMemo(() => [...new Set(mine.map(categoryOf))], [mine]);
   const active = cat === "All" || cats.includes(cat) ? cat : "All";
-  const list = useMemo(
-    () => mine.filter((p) => (active === "All" || categoryOf(p) === active) && (!query || p.title.toLowerCase().includes(query))),
-    [mine, active, query],
-  );
+  /* A book already read stays on the shelf, but after the ones still to read. */
+  const list = useMemo(() => {
+    const done = (p: Passage) => (progressOf(p)?.stage === "done" ? 1 : 0);
+    return mine
+      .filter((p) => (active === "All" || categoryOf(p) === active) && (!query || p.title.toLowerCase().includes(query)))
+      .sort((a, b) => done(a) - done(b));
+  }, [mine, active, query, progressOf]);
   const reading = list
     .filter((p) => {
       const st = progressOf(p)?.stage;
@@ -464,14 +473,15 @@ const BookTile = memo(function BookTile({ book, progress, onOpen }: { book: Pass
   const wordCount = wordsIn(book);
   return (
     <UIBookCard
-      cover={<Cover book={book} />}
+      cover={<Cover book={book} read={st === "done"} />}
       title={<span className={kh(book)}>{book.title}</span>}
       meta={<>{tr("library.minRead", { count: minutesToRead(book) })}<span className="hidden sm:inline"> · {tr("library.words", { count: wordCount })}</span></>}
       status={<span className={st === "done" ? "text-emerald-700 dark:text-emerald-400" : undefined}>{label}</span>}
       quizLabel={tr("library.quizzes", { count: book.questions.length })}
       hasAudio={book.sentences.some((sentence) => Boolean(sentence.audio))}
       onClick={() => onOpen(book.id)}
-      ariaLabel={`${book.title}. ${tr("library.level", { level: book.band })}. ${label}.`}
+      ariaLabel={`${book.title}. ${tr("library.level", { level: book.band })}. ${tr("library.ages", { from: bookAges(book)[0], to: bookAges(book)[1] })}. ${label}.`}
+      className={st === "done" ? "opacity-80" : ""}
     />
   );
 });

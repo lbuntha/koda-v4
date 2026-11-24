@@ -739,7 +739,9 @@
       "opposites": "ពាក្យផ្ទុយ",
       "readings": "របៀបអាន"
     },
-    "questionOf": "សំណួរទី {n} នៃ {total}"
+    "questionOf": "សំណួរទី {n} នៃ {total}",
+    "ages": "អាយុ {from}–{to} ឆ្នាំ",
+    "readBadge": "បានអានរួច"
   },
   "coach": {
     "comesBefore": "ជិតត្រូវហើយ! {want} មកមុន {got}។ ប្រកបតាមលំដាប់ដែលអ្នកអាន។",

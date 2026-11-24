@@ -798,7 +798,9 @@
       "opposites": "Opposites",
       "readings": "How to read"
     },
-    "questionOf": "Question {n} of {total}"
+    "questionOf": "Question {n} of {total}",
+    "ages": "Ages {from}–{to}",
+    "readBadge": "Read"
   },
   "coach": {
     "comesBefore": "Nearly! {want} comes before {got}. Spell it in the order you say it.",

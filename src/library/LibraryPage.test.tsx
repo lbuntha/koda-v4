@@ -58,8 +58,8 @@ describe("the catalog", () => {
   it("shows the English books by default, grouped on shelves", () => {
     render(<LibraryPage />);
     expect(screen.getByRole("heading", { name: "Library" })).toBeTruthy();
-    expect(screen.getByRole("button", { name: /^At the Market\. Level A\. New\./ })).toBeTruthy();
-    expect(screen.getByRole("button", { name: /^A Rainy Day\. Level B\. New\./ })).toBeTruthy();
+    expect(screen.getByRole("button", { name: /^At the Market\. Level A\. Ages \d+–\d+\. New\./ })).toBeTruthy();
+    expect(screen.getByRole("button", { name: /^A Rainy Day\. Level B\. Ages \d+–\d+\. New\./ })).toBeTruthy();
     expect(screen.queryByRole("button", { name: /នៅផ្សារ/ })).toBeNull();
     expect(screen.getByRole("heading", { name: "Food" })).toBeTruthy();
   });
@@ -260,7 +260,7 @@ describe("a whole book, as a child plays it", () => {
     // The next unread story in the same language is one tap away.
     expect(screen.getByRole("button", { name: "Next story: A Rainy Day" })).toBeTruthy();
     fireEvent.click(screen.getByRole("button", { name: "Back to the library" }));
-    expect(screen.getByRole("button", { name: /^At the Market\. Level A\. Finished ✓/ })).toBeTruthy();
+    expect(screen.getByRole("button", { name: /^At the Market\. Level A\. Ages \d+–\d+\. Finished ✓/ })).toBeTruthy();
 
     // The reading is traced page by page, ahead of the quiz, in the same log.
     const all = LearningLog.all({ skillId: "koda-library" });
