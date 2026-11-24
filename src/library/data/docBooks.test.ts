@@ -16,7 +16,7 @@ const files = readdirSync(DIR).filter((f) => f.endsWith(".json"));
 describe("drafted books", () => {
   it.each(files)("%s passes every check but picture confirmation", (file) => {
     const book = JSON.parse(readFileSync(`${DIR}/${file}`, "utf8")) as Passage;
-    const lexicon = readingLexiconFor(book.band, book.language);
+    const lexicon = readingLexiconFor(book.band, book.language, book.ages);
     if (book.language === "en") expect(lexicon, "reading list missing, so rule 4 would be skipped").toBeDefined();
     const verdict = verifyPassage(book, { lexicon, confirmedSplit: true });
     const failing = verdict.checks.filter((c) => c.status === "fail" && !/^confirm the picture/.test(c.message));

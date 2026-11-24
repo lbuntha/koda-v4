@@ -26,10 +26,9 @@ from typing import Any
 
 from app.khmer_spelling import is_base, is_mark, khmer_problem, normalize_khmer, spelling_units
 
-BANDS: dict[str, dict[str, int]] = {
-    "A": {"understand": 10, "words": 10, "spell": 10},
-    "B": {"understand": 10, "words": 10, "spell": 10},
-}
+#: One level per school grade: A = Grade 1 (ages 6–7) … L = Grade 12 (17–18).
+LEVELS = "ABCDEFGHIJKL"
+BANDS: dict[str, dict[str, int]] = {band: {"understand": 10, "words": 10, "spell": 10} for band in LEVELS}
 QUESTION_MINIMUM_RATIO = 0.85
 MIN_TILES = 2
 MAX_TILES = 8
@@ -275,7 +274,7 @@ def verify_passage(p: dict[str, Any], *, confirmed_split: bool = False) -> Verdi
         add(0, "story", False, "the language must be en or km")
         lang = "en"
     if p.get("band") not in BANDS:
-        add(0, "story", False, "the band must be A or B")
+        add(0, "story", False, "the level must be A to L")
     if not str(p.get("title") or "").strip():
         add(0, "story", False, "the story has no title")
     if not sentences:

@@ -26,10 +26,19 @@ import { isAgeRange, type AgeRange } from "../../lib/ages";
 
 export type Language = "en" | "km";
 
-/** Two age bands are built for release 1. Band C (11+) needs typed spelling. */
-export type Band = "A" | "B";
+/**
+ * A book's level: one a school grade, A = Grade 1 through L = Grade 12.
+ *
+ * Named for the grade because that is how a parent or teacher in Cambodia
+ * places a child, and a level that matches a grade needs no explaining. A
+ * book's own `ages` say exactly who it is for; a level's ages are where they
+ * start.
+ */
+export type Band = "A" | "B" | "C" | "D" | "E" | "F" | "G" | "H" | "I" | "J" | "K" | "L";
 
 export interface BandSpec {
+  /** The school grade this level matches, 1–12. */
+  grade: number;
   /** The requested maximum per section; publication accepts 85% or more. */
   understand: number;
   words: number;
@@ -49,10 +58,16 @@ export type QuestionCounts = Pick<BandSpec, "understand" | "words" | "spell" | "
 /** The range an author may set each target to. */
 export const TARGET_MAX = 10;
 
-export const BANDS: Readonly<Record<Band, BandSpec>> = {
-  A: { understand: 10, words: 10, spell: 10, ages: [5, 7] },
-  B: { understand: 10, words: 10, spell: 10, ages: [8, 10] },
-};
+/** Every level, in order. */
+export const LEVELS: readonly Band[] = ["A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L"];
+
+/** Grade N is ages N+5 to N+6: Grade 1 is 6–7, Grade 12 is 17–18. */
+export const BANDS: Readonly<Record<Band, BandSpec>> = Object.fromEntries(
+  LEVELS.map((band, i) => [band, { grade: i + 1, understand: 10, words: 10, spell: 10, ages: [i + 6, i + 7] as const }]),
+) as Record<Band, BandSpec>;
+
+/** The level whose grade a child of these ages starts in — Grade 1 for anyone younger. */
+export const bandForAges = (ages: AgeRange): Band => LEVELS[Math.min(LEVELS.length - 1, Math.max(0, ages[0] - 6))];
 
 /** A book's audience: its own ages, else its band's, for books published before ages were required. */
 export const bookAges = (book: Pick<Passage, "ages" | "band">): AgeRange =>

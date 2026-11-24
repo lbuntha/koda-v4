@@ -50,7 +50,7 @@ const languageName = (code: string) => {
 const bandLabel = (b: string) => {
   const band = BANDS[b as Band];
   return band
-    ? translate("studio.bandAges", { band: b, from: band.ages[0], to: band.ages[1] })
+    ? translate("studio.levelGrade", { band: b, grade: band.grade, from: band.ages[0], to: band.ages[1] })
     : translate("library.level", { level: b });
 };
 

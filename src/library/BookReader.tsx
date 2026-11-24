@@ -1,7 +1,7 @@
 import { memo, useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState, type CSSProperties, type PointerEvent as ReactPointerEvent, type ReactNode, type RefObject } from "react";
 import { animate, motion, useMotionValue, useReducedMotion, useTransform } from "motion/react";
 import { Mic, Square, Volume2, X } from "lucide-react";
-import { BANDS, noteFor, PAGE_TEXT_SIZES, type PageDesign, type Passage, type PicturePlace, type Sentence } from "./data/passage";
+import { bookAges, noteFor, PAGE_TEXT_SIZES, type PageDesign, type Passage, type PicturePlace, type Sentence } from "./data/passage";
 import { layoutBook, pageDesign, type PageText, type SetSentence, type SetToken, widestPage } from "./bookLayout";
 import { FIT_MAX, FIT_MIN, WORDS_MIN, solveFit } from "./fitPage";
 import { FLAT, SPRING, TURNED, angularVelocity, castOf, completes, curlOf, dragAngle, shadeOf, type Dir } from "./pageTurn";
@@ -858,7 +858,7 @@ function Sheet({ index, count, sheetRef, children }: { index: number; count: num
 /** The cover: the book's picture, edge to edge, with the title beneath it. */
 const TitlePage = memo(function TitlePage({ book, km, fit, intro }: { book: Passage; km: boolean; fit: number; intro: boolean }) {
   const { t } = useT();
-  const [lo, hi] = BANDS[book.band].ages;
+  const [lo, hi] = bookAges(book);
   const learn = book.learningTakeaway?.trim();
   return (
     <div data-fit-root className="flex flex-1 flex-col" style={{ "--fit": fit } as CSSProperties}>

@@ -1,3 +1,4 @@
+import type { Band } from "./passage";
 /**
  * Coaching a child through a Khmer spelling, unit by unit.
  *
@@ -211,8 +212,8 @@ export function spellingLevel(units: readonly string[]): SpellingLevel {
   return level;
 }
 
-/** The hardest level a young band should be asked to spell: ages 5–7 stop before compound vowels. */
-export const BAND_LEVEL_CAP = { A: 3, B: 5 } as const satisfies Record<"A" | "B", SpellingLevel>;
+/** The hardest level a level's readers should be asked to spell: Grade 1 stops before compound vowels. */
+export const BAND_LEVEL_CAP: Readonly<Record<Band, SpellingLevel>> = { A: 3, B: 5, C: 5, D: 5, E: 5, F: 5, G: 5, H: 5, I: 5, J: 5, K: 5, L: 5 };
 
 /* ------------------------------------------------------------------ decoys */
 

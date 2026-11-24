@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { ArrowLeft, Space, BookOpen, Check, ChevronDown, ChevronRight, ChevronUp, CornerDownLeft, CornerLeftUp, Download, Merge, Scissors, Mic, Play, Pencil, RefreshCw, Sparkles, Square, Trash2, Upload } from "lucide-react";
-import { BANDS, bookAges, CHOICES, MATCH_MIN_PAIRS, MATCH_MAX_QUESTIONS, meetsTarget, minimumQuestions, TARGET_MAX, type Band, type Language, type Question, type QuestionCounts, type WordCue } from "../data/passage";
+import { BANDS, bookAges, CHOICES, LEVELS, MATCH_MIN_PAIRS, MATCH_MAX_QUESTIONS, meetsTarget, minimumQuestions, TARGET_MAX, type Band, type Language, type Question, type QuestionCounts, type WordCue } from "../data/passage";
 import { readingLexiconFor, readingWordsFor } from "../data/readingLexicon";
 import { core, gapOf, hasSpaceAfter, sentenceText, tokenizeSentence, withSpaceAfter } from "../data/text";
 import { RULES, verifyPassage, type Verdict } from "../data/verifyPassage";
@@ -246,7 +246,7 @@ function Editor({ row, categories, reports = [], onResolved, onClose }: { row: B
     } catch { /* Server draft saving remains available. */ }
   }, [input, draft, confirmed, dirty, recovered, recoveryKey, base]);
 
-  const verdict = useMemo<Verdict | null>(() => (draft ? verifyPassage({ ...draft, rev: 1 }, { confirmedSplit: confirmed, lexicon: readingLexiconFor(draft.band, draft.language) }) : null), [draft, confirmed]);
+  const verdict = useMemo<Verdict | null>(() => (draft ? verifyPassage({ ...draft, rev: 1 }, { confirmedSplit: confirmed, lexicon: readingLexiconFor(draft.band, draft.language, draft.ages) }) : null), [draft, confirmed]);
   const edit = (next: Draft) => {
     setDraft((current) => {
       if (!current) return next;
@@ -530,11 +530,12 @@ function SourceStep({ input, categories, isNew, source, onSource, onInput, onNex
         </div>
         <div>
           <span className={label}>{t("studio.field.ageBand")}</span>
-          <div className="flex gap-2">
-            {(Object.keys(BANDS) as Band[]).map((b) => (
-              <UIButton key={b} type="button" size="sm" variant={input.band === b ? "primary" : "secondary"} aria-pressed={input.band === b} onClick={() => onInput({ ...input, band: b, ages: BANDS[b].ages, questionCounts: { ...BANDS[b] } })}>{`${b} · ${BANDS[b].ages[0]}–${BANDS[b].ages[1]}`}</UIButton>
+          {/* One level per school grade; picking one sets the book's ages to that grade's. */}
+          <UISelect aria-label={t("studio.field.ageBand")} value={input.band} onChange={(e) => { const b = e.target.value as Band; onInput({ ...input, band: b, ages: BANDS[b].ages, questionCounts: { ...BANDS[b] } }); }}>
+            {LEVELS.map((b) => (
+              <option key={b} value={b}>{t("studio.levelGrade", { band: b, grade: BANDS[b].grade, from: BANDS[b].ages[0], to: BANDS[b].ages[1] })}</option>
             ))}
-          </div>
+          </UISelect>
         </div>
         {/* Who it is for: starts from the band, required to publish. */}
         <UIAgePicker className="sm:col-span-2" value={input.ages} onChange={(ages) => set("ages", ages)} />
@@ -733,7 +734,7 @@ function ReviewStep({ draft, verdict, confirmed, onConfirmed, onEdit, target, so
         : q.kind === "spell" ? `Spell: "${q.word}" (${num(q.sentence)})` : "");
       const reply = source === "offline"
         ? draftLocally(numbered, PICTURE_KEYS, have.length + 1)
-        : (await requestAiDraft({ provider: aiProvider, language: draft.language, band: draft.band, questionCounts: counts, sentences: draft.sentences.map((x) => x.text), pictures: [...PICTURE_KEYS], easyWords: readingWordsFor(draft.band, draft.language), avoid })).draft;
+        : (await requestAiDraft({ provider: aiProvider, language: draft.language, band: draft.band, questionCounts: counts, sentences: draft.sentences.map((x) => x.text), pictures: [...PICTURE_KEYS], easyWords: readingWordsFor(draft.band, draft.language, draft.ages), avoid })).draft;
       const made = fromModel(numbered, reply, PICTURE_KEYS);
       const usedWords = new Set(have.flatMap((q) => (q.kind === "vocab" || q.kind === "spell" ? [q.word] : [])));
       const usedSentences = new Set(have.flatMap((q) => (q.kind === "comprehension" ? [q.evidence] : q.kind === "spell" ? [q.sentence] : [])));
@@ -1091,7 +1092,7 @@ function QuestionCard({ q, draft, checks, onChange, onVocab, onDelete, onVoice }
   const correctWithAi = async () => {
     setCorrecting(true);
     try {
-      const result = await requestAiCorrection({ language: draft.language, band: draft.band, sentences: draft.sentences.map((s) => ({ id: s.id, text: s.text })), question: q, checks: checks.map((c) => ({ message: c.message, status: c.status })), easyWords: readingWordsFor(draft.band, draft.language) });
+      const result = await requestAiCorrection({ language: draft.language, band: draft.band, sentences: draft.sentences.map((s) => ({ id: s.id, text: s.text })), question: q, checks: checks.map((c) => ({ message: c.message, status: c.status })), easyWords: readingWordsFor(draft.band, draft.language, draft.ages) });
       const corrected = correctedQuestion(result.question, q, draft.sentences);
       if (!corrected) throw new Error(t("studio.ai.badFormat"));
       setSuggestion({ question: corrected, explanation: result.explanation });

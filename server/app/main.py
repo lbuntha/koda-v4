@@ -127,10 +127,6 @@ async def _each(items, step, limit: int = 16) -> list:
 async def _prepare(db) -> None:
     """Indexes and every seeded default. Idempotent; see `app.boot` for when it runs."""
     await ensure_indexes(db)
-    # Book rows saved before Studio summaries existed, or edited by a script.
-    summarised = await library_repo.backfill_summaries(db)
-    if summarised:
-        log.info("summarised %s library books", summarised)
 
     # The sidebar has to exist for a deployment to be usable, so it is seeded
     # here rather than by a second command somebody has to remember.
@@ -256,6 +252,12 @@ async def lifespan(app: FastAPI):
     else:
         await _prepare(db)
         await boot.mark_current(db, release)
+    # Every start, not once a release: a seed script or a copy between servers
+    # writes books behind the repo's back, and the Studio lists them from their
+    # summaries. One query when nothing changed.
+    summarised = await library_repo.backfill_summaries(db)
+    if summarised:
+        log.info("summarised %s library books", summarised)
 
     log.info("connected to %s", cfg.mongodb_db)
     yield

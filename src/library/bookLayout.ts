@@ -34,9 +34,11 @@ export interface SetSentence {
 }
 
 /** Sentences per page, and roughly how many characters a page holds. */
+const GRADE_1_PAGE = { sentences: 2, chars: 170 };
+const OLDER_PAGE = { sentences: 3, chars: 340 };
 const PAGE: Record<Band, { sentences: number; chars: number }> = {
-  A: { sentences: 2, chars: 170 },
-  B: { sentences: 3, chars: 340 },
+  A: GRADE_1_PAGE, B: OLDER_PAGE, C: OLDER_PAGE, D: OLDER_PAGE, E: OLDER_PAGE, F: OLDER_PAGE,
+  G: OLDER_PAGE, H: OLDER_PAGE, I: OLDER_PAGE, J: OLDER_PAGE, K: OLDER_PAGE, L: OLDER_PAGE,
 };
 
 /**
