@@ -24,6 +24,7 @@ from app.plan_defaults import DEFAULT_PLANS
 from app.repos import art as art_repo
 from app.repos import daily_puzzles as daily_puzzles_repo
 from app.repos import defaults as defaults_repo
+from app.repos import library as library_repo
 from app.repos import menu as menu_repo
 from app.repos import personas as personas_repo
 from app.repos import plans as plans_repo
@@ -126,6 +127,10 @@ async def _each(items, step, limit: int = 16) -> list:
 async def _prepare(db) -> None:
     """Indexes and every seeded default. Idempotent; see `app.boot` for when it runs."""
     await ensure_indexes(db)
+    # Book rows saved before Studio summaries existed, or edited by a script.
+    summarised = await library_repo.backfill_summaries(db)
+    if summarised:
+        log.info("summarised %s library books", summarised)
 
     # The sidebar has to exist for a deployment to be usable, so it is seeded
     # here rather than by a second command somebody has to remember.

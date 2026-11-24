@@ -25,8 +25,10 @@ from motor.motor_asyncio import AsyncIOMotorDatabase
 
 from app.models.common import now
 
-
-PUBLISHED = {"deletedAt": None, "published": {"$ne": None}}
+#: A book children can read. `live` is kept on the row by `refresh_summary`
+#: (true exactly while it is published and not deleted) so the shelf can be
+#: answered from an index instead of opening every book.
+PUBLISHED = {"live": True}
 
 #: Most books one batch request may ask for. A device fetches a big shelf in
 #: several of these rather than one response it may not finish on a slow line.
@@ -56,8 +58,9 @@ async def published_index(db: AsyncIOMotorDatabase) -> list[dict[str, Any]]:
     What a device compares against what it holds, so it downloads only the
     books that are new or changed instead of the whole shelf every time.
     """
-    cursor = db.library_books.find(PUBLISHED, {"_id": 0, "id": 1, "published.rev": 1}).sort("id", 1)
-    return [{"id": row["id"], "rev": int((row.get("published") or {}).get("rev") or 0)} async for row in cursor]
+    # Covered by the `library_book_live` index: no book is opened to answer it.
+    cursor = db.library_books.find(PUBLISHED, {"_id": 0, "id": 1, "liveRev": 1}).sort("id", 1)
+    return [{"id": row["id"], "rev": int(row.get("liveRev") or 0)} async for row in cursor]
 
 
 async def published_by_ids(db: AsyncIOMotorDatabase, ids: list[str]) -> list[dict[str, Any]]:
@@ -85,38 +88,87 @@ STUDIO_SORTS: dict[str, list[tuple[str, int]]] = {
 STUDIO_STATUSES = ("draft", "published", "changed", "reported")
 
 
-def _either(field: str, default: Any = None) -> dict[str, Any]:
-    return {"$ifNull": [f"$draft.{field}", {"$ifNull": [f"$published.{field}", default]}]}
+def _pick(row: dict[str, Any], field: str, default: Any = None) -> Any:
+    """A book's fact from its draft, falling back to its published revision."""
+    for side in ("draft", "published"):
+        value = (row.get(side) or {}).get(field)
+        if value is not None:
+            return value
+    return default
 
 
-# Only what a summary needs leaves the collection: never the sentences' text.
-_SUMMARY_PROJECTION: dict[str, Any] = {
-    "_id": 0, "id": 1, "rev": 1, "createdAt": 1, "updatedAt": 1, "publishedAt": 1, "ownerId": 1,
-    **{f"{side}.{f}": 1 for side in ("draft", "published") for f in ("title", "language", "band", "category", "picture")},
-    **{f"{side}.{f}.id": 1 for side in ("draft", "published") for f in ("sentences", "questions")},
-    "hasPublished": {"$ne": [{"$ifNull": ["$published", None]}, None]},
-}
+def summary_of(row: dict[str, Any]) -> dict[str, Any]:
+    """What the Studio list shows of a book, worked out once when the book changes.
+
+    Stored on the row as `summary` so a page of the list is an indexed query on
+    small fields, rather than opening every book to work out its title and
+    counts on every request — which grew with the library.
+    """
+    published = row.get("published") is not None
+    title = _pick(row, "title", row.get("id"))
+    updated, published_at = row.get("updatedAt"), row.get("publishedAt")
+    return {
+        "title": title,
+        "titleKey": str(title).lower(),
+        "language": _pick(row, "language", "en"),
+        "band": _pick(row, "band", "A"),
+        "category": _pick(row, "category"),
+        "picture": _pick(row, "picture", "book"),
+        "sentences": len(_pick(row, "sentences", []) or []),
+        "questions": len(_pick(row, "questions", []) or []),
+        "status": "published" if published else "draft",
+        # Saved since it was published: children still read the older revision.
+        "changed": bool(published and updated and published_at and updated > published_at),
+    }
 
 
-def _summary_stages(owner: dict[str, Any] | None = None) -> list[dict[str, Any]]:
-    return [
-        {"$match": {"deletedAt": None, **(owner or {})}},
-        {"$project": _SUMMARY_PROJECTION},
-        {"$addFields": {
-            "title": _either("title", "$id"),
-            "language": _either("language", "en"),
-            "band": _either("band", "A"),
-            "category": _either("category"),
-            "picture": _either("picture", "book"),
-            "sentences": {"$size": _either("sentences", [])},
-            "questions": {"$size": _either("questions", [])},
-            "status": {"$cond": ["$hasPublished", "published", "draft"]},
-            # Saved since it was published: children still read the older revision.
-            "changed": {"$and": ["$hasPublished", {"$gt": ["$updatedAt", {"$ifNull": ["$publishedAt", "$updatedAt"]}]}]},
+async def refresh_summary(db: AsyncIOMotorDatabase, book_id: str) -> None:
+    """Recompute a book's stored summary and whether children can read it."""
+    row = await db.library_books.find_one({"id": book_id})
+    if row is None:
+        return
+    live = row.get("deletedAt") is None and row.get("published") is not None
+    await db.library_books.update_one(
+        {"id": book_id},
+        {"$set": {
+            "summary": summary_of(row),
+            "live": live,
+            "liveRev": int((row.get("published") or {}).get("rev") or 0) if live else 0,
+            # What the summary was made from, so a row edited behind the repo's
+            # back (a seed script, a copy between servers) is redone at start.
+            "summaryAt": row.get("updatedAt"),
         }},
-        {"$addFields": {"titleKey": {"$toLower": "$title"}}},
-        {"$project": {"draft": 0, "published": 0, "hasPublished": 0}},
-    ]
+    )
+
+
+async def backfill_summaries(db: AsyncIOMotorDatabase) -> int:
+    """Redo the summary of every row that has none, or changed since it was made. Runs at start."""
+    stale = {"$or": [
+        {"summary": {"$exists": False}},
+        {"$expr": {"$ne": [{"$ifNull": ["$updatedAt", None]}, {"$ifNull": ["$summaryAt", None]}]}},
+    ]}
+    done = 0
+    async for row in db.library_books.find(stale, {"id": 1}):
+        await refresh_summary(db, row["id"])
+        done += 1
+    return done
+
+
+STUDIO_SORTS: dict[str, list[tuple[str, int]]] = {
+    "updated": [("updatedAt", -1), ("id", 1)],
+    "title": [("summary.titleKey", 1), ("id", 1)],
+    "created": [("createdAt", -1), ("id", 1)],
+    "published": [("publishedAt", -1), ("id", 1)],
+}
+STUDIO_STATUSES = ("draft", "published", "changed", "reported")
+
+_ROW_FIELDS = {"_id": 0, "id": 1, "rev": 1, "createdAt": 1, "updatedAt": 1, "publishedAt": 1, "ownerId": 1, "summary": 1}
+
+
+def _row(doc: dict[str, Any]) -> dict[str, Any]:
+    summary = dict(doc.get("summary") or {})
+    summary.pop("titleKey", None)
+    return {**{k: v for k, v in doc.items() if k != "summary"}, **summary}
 
 
 async def studio_page(
@@ -134,7 +186,8 @@ async def studio_page(
 ) -> dict[str, Any]:
     """One page of book summaries, plus counts per status for the same search.
 
-    `owner` narrows it to one person's books (security.ownership.scope).
+    `owner` narrows it to one person's books (security.ownership.scope). Only
+    the page's own rows are read in full; the counts are index counts.
     """
     reported = await db.library_reports.distinct("bookId", {"resolvedAt": None})
     count_pipeline = [
@@ -146,61 +199,51 @@ async def studio_page(
         for row in await db.library_reports.aggregate(count_pipeline).to_list(length=None)
     }
 
-    narrow: dict[str, Any] = {}
+    narrow: dict[str, Any] = {"deletedAt": None, **(owner or {})}
     if query.strip():
-        pattern = {"$regex": re.escape(query.strip()), "$options": "i"}
-        narrow["$or"] = [{"title": pattern}, {"id": pattern}]
+        pattern = {"$regex": re.escape(query.strip().lower())}
+        narrow["$or"] = [{"summary.titleKey": pattern}, {"id": {"$regex": re.escape(query.strip()), "$options": "i"}}]
     if language:
-        narrow["language"] = language
+        narrow["summary.language"] = language
     if band:
-        narrow["band"] = band
+        narrow["summary.band"] = band
     if category:
-        narrow["category"] = category
+        narrow["summary.category"] = category
 
     by_status: dict[str, dict[str, Any]] = {
-        "draft": {"status": "draft"},
-        "published": {"status": "published"},
-        "changed": {"changed": True},
+        "draft": {"summary.status": "draft"},
+        "published": {"summary.status": "published"},
+        "changed": {"summary.changed": True},
         "reported": {"id": {"$in": reported}},
     }
     pick = by_status.get(status or "", {})
     order = STUDIO_SORTS.get(sort, STUDIO_SORTS["updated"])
 
-    pipeline = [
-        *_summary_stages(owner),
-        *([{"$match": narrow}] if narrow else []),
-        {"$facet": {
-            "items": [{"$match": pick}, {"$sort": dict(order)}, {"$skip": (page - 1) * page_size}, {"$limit": page_size}],
-            "total": [{"$match": pick}, {"$count": "n"}],
-            "stats": [{"$group": {
-                "_id": None,
-                "all": {"$sum": 1},
-                "draft": {"$sum": {"$cond": [{"$eq": ["$status", "draft"]}, 1, 0]}},
-                "published": {"$sum": {"$cond": [{"$eq": ["$status", "published"]}, 1, 0]}},
-                "changed": {"$sum": {"$cond": ["$changed", 1, 0]}},
-                "reported": {"$sum": {"$cond": [{"$in": ["$id", reported]}, 1, 0]}},
-            }}],
-        }},
-    ]
-    out = (await db.library_books.aggregate(pipeline).to_list(length=1))[0]
-    items = out["items"]
+    cursor = (
+        db.library_books.find({**narrow, **pick}, _ROW_FIELDS)
+        .sort(order)
+        .skip((page - 1) * page_size)
+        .limit(page_size)
+    )
+    items = [_row(doc) async for doc in cursor]
     for row in items:
         row["reports"] = open_counts.get(row["id"], 0)
-        row.pop("titleKey", None)
-    stats = out["stats"][0] if out["stats"] else {}
-    stats.pop("_id", None)
+    stats = {"all": await db.library_books.count_documents(narrow)}
+    for name, extra in by_status.items():
+        stats[name] = await db.library_books.count_documents({**narrow, **extra})
     return {
         "items": items,
-        "total": out["total"][0]["n"] if out["total"] else 0,
+        "total": stats["all"] if not pick else stats[status or ""],
         "stats": {k: int(stats.get(k, 0)) for k in ("all", *STUDIO_STATUSES)},
     }
 
 
 async def studio_facets(db: AsyncIOMotorDatabase, owner: dict[str, Any] | None = None) -> dict[str, list[dict[str, Any]]]:
     """The languages, levels and categories books actually have, with counts — the filter options."""
-    group = lambda field: [{"$group": {"_id": f"${field}", "count": {"$sum": 1}}}, {"$sort": {"_id": 1}}]  # noqa: E731
+    group = lambda field: [{"$group": {"_id": f"$summary.{field}", "count": {"$sum": 1}}}, {"$sort": {"_id": 1}}]  # noqa: E731
     out = (await db.library_books.aggregate([
-        *_summary_stages(owner),
+        {"$match": {"deletedAt": None, **(owner or {})}},
+        {"$project": {"_id": 0, "summary.language": 1, "summary.band": 1, "summary.category": 1}},
         {"$facet": {"languages": group("language"), "bands": group("band"), "categories": group("category")}},
     ]).to_list(length=1))[0]
     return {k: [{"value": row["_id"], "count": row["count"]} for row in v if row["_id"] is not None] for k, v in out.items()}
@@ -255,6 +298,7 @@ async def save_draft(
         },
         upsert=True,
     )
+    await refresh_summary(db, book_id)
     row = await get(db, book_id)
     assert row is not None
     return row
@@ -274,6 +318,7 @@ async def publish(db: AsyncIOMotorDatabase, book_id: str, passage: dict[str, Any
         {"id": book_id},
         {"$set": {"published": frozen, "rev": rev, "publishedAt": timestamp, "updatedAt": timestamp, "updatedBy": published_by}},
     )
+    await refresh_summary(db, book_id)
     out = await get(db, book_id)
     assert out is not None
     return out
@@ -284,6 +329,7 @@ async def unpublish(db: AsyncIOMotorDatabase, book_id: str, by: str | None) -> d
         {"id": book_id, "deletedAt": None},
         {"$set": {"published": None, "updatedAt": now(), "updatedBy": by}},
     )
+    await refresh_summary(db, book_id)
     return await get(db, book_id)
 
 
@@ -292,6 +338,7 @@ async def delete(db: AsyncIOMotorDatabase, book_id: str, by: str | None) -> bool
         {"id": book_id, "deletedAt": None},
         {"$set": {"deletedAt": now(), "published": None, "updatedBy": by}},
     )
+    await refresh_summary(db, book_id)
     return result.modified_count > 0
 
 

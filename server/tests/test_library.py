@@ -750,10 +750,20 @@ async def test_the_shelf_index_and_batch_send_only_what_a_device_asks_for(client
     reader = {"Authorization": f"Bearer {tokens['accessToken']}"}
     for book_id, rev in (("b-one", 2), ("a-two", 1)):
         await db.library_books.insert_one(
-            {"id": book_id, "deletedAt": None, "draft": {"secret": "draft text"}, "published": {"id": book_id, "rev": rev, "title": book_id}}
+            {
+                "id": book_id,
+                "deletedAt": None,
+                "draft": {"secret": "draft text"},
+                "published": {"id": book_id, "rev": rev, "title": book_id},
+            }
         )
     await db.library_books.insert_one({"id": "c-draft", "deletedAt": None, "draft": {"id": "c-draft"}, "published": None})
     await db.library_books.insert_one({"id": "d-gone", "deletedAt": "2026-01-01", "published": {"id": "d-gone", "rev": 1}})
+    # Rows written straight to the database get their summary at the next start.
+    from app.repos import library as library_repo
+
+    assert await library_repo.backfill_summaries(db) == 4
+    assert await library_repo.backfill_summaries(db) == 0
 
     index = (await client.get("/library/books/index", headers=reader)).json()
     assert index == {"books": [{"id": "a-two", "rev": 1}, {"id": "b-one", "rev": 2}]}

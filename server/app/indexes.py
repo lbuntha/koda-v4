@@ -187,6 +187,13 @@ INDEXES: dict[str, list[IndexModel]] = {
     "library_books": [
         IndexModel([("id", ASCENDING)], unique=True, name="library_book_id_unique"),
         IndexModel([("deletedAt", ASCENDING), ("updatedAt", DESCENDING)], name="library_book_recent"),
+        # The children's shelf index, answered from this index alone.
+        IndexModel([("live", ASCENDING), ("id", ASCENDING), ("liveRev", ASCENDING)], name="library_book_live"),
+        # The Studio list: each sort, and the status counts, without opening books.
+        IndexModel([("deletedAt", ASCENDING), ("summary.titleKey", ASCENDING), ("id", ASCENDING)], name="library_book_title"),
+        IndexModel([("deletedAt", ASCENDING), ("createdAt", DESCENDING)], name="library_book_created"),
+        IndexModel([("deletedAt", ASCENDING), ("publishedAt", DESCENDING)], name="library_book_published"),
+        IndexModel([("deletedAt", ASCENDING), ("summary.status", ASCENDING), ("summary.changed", ASCENDING)], name="library_book_status"),
     ],
     # Rebus Rush: every puzzle in any state, each publish, and the one version row.
     "rebus_puzzles": [

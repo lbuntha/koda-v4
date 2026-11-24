@@ -224,6 +224,7 @@ async def import_pack(db: AsyncIOMotorDatabase, src: Path, *, update: bool = Fal
         row = {**book, "draft": book.get("draft") or book["published"], "updatedAt": stamp, "updatedBy": owner, "deletedAt": None}
         row.setdefault("createdAt", stamp)
         await db.library_books.replace_one({"id": book["id"]}, row, upsert=True)
+        await library_repo.refresh_summary(db, book["id"])
         await db.library_revisions.update_one(
             {"bookId": book["id"], "rev": rev},
             {
