@@ -79,3 +79,14 @@ export {
 } from "./round/useSpokenFinish";
 /** Practice: the same engine with the hints, the voice and the explanation off. */
 export { isPractice, modeAt, withoutPracticeLabel, type PracticeSetup } from "./practice";
+export {
+  HowToPlay,
+  HowToPlayButton,
+  useHowToPlay,
+  hasSeenHowToPlay,
+  markHowToPlaySeen,
+  forgetHowToPlay,
+  type DemoStep,
+  type DemoPhase,
+  type HowToPlayProps,
+} from "./chrome/HowToPlay";

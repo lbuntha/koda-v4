@@ -95,6 +95,10 @@ describe("Box Split words", () => {
   });
 
   /* A clip plays only when its words match what is said exactly. */
+  it("declares every How to play caption Koda says, word for word", () => {
+    expect(voice.phrases).toEqual(Object.values(en.demo));
+  });
+
   it("has the board's prompt, word for word, in the voice script and every lesson", () => {
     expect(voice.prompts).toEqual([promptOf()]);
     for (const lesson of skill.lessons) {

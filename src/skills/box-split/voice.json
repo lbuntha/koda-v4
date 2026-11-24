@@ -1,12 +1,20 @@
 {
   "_comment": [
-    "Box Split's read-aloud prompt: one line, the same for every lesson. Lesson intros are picked up from lessons.json;",
-    "reactions come from the common pack. Must match locales/en.json word for word."
+    "Box Split's read-aloud prompt (the same for every lesson) and the How to play captions, which Koda says step by step.",
+    "Reactions come from the common pack. Must match locales/en.json word for word."
   ],
   "subjects": [],
   "templates": [],
   "prompts": [
     "Split the grid into boxes. Each box has one number, and that many squares."
   ],
-  "phrases": []
+  "phrases": [
+    "Every number needs a box. The number says how many squares.",
+    "A 1 is a box on its own. Tap it twice.",
+    "This 3 needs 3 squares. Drag from corner to corner.",
+    "This 2 takes the square below it.",
+    "This 2 does too.",
+    "The last 1 is a box on its own.",
+    "Every square is in a box. Done!"
+  ]
 }

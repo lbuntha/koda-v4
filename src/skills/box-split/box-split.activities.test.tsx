@@ -1,6 +1,7 @@
 import { fireEvent } from "@testing-library/react";
-import { describe, expect, it } from "vitest";
+import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import { renderActivity } from "../kit/testing";
+import { forgetHowToPlay } from "../kit";
 import { skill } from ".";
 import { buildBoxQuestion, type BoxSplitParams } from "./activities/BoxSplit";
 import { candidatesFor, judge, nextBox, sameRect, type Puzzle, type Rect } from "./internal/rules";
@@ -194,5 +195,53 @@ describe("Box Split practice", () => {
     expect(h.screen.queryByRole("button", { name: /hint/i })).toBeNull();
     expect(h.screen.queryByRole("button", { name: /read/i })).toBeNull();
     h.unmount();
+  });
+});
+
+describe("Box Split's How to play", () => {
+  beforeEach(() => forgetHowToPlay());
+  afterEach(() => forgetHowToPlay());
+  const first = () => skill.lessons[0].params as Record<string, unknown>;
+
+  it("opens by itself the first time, and not once it was skipped", async () => {
+    const h = renderActivity(board, { params: first(), settings });
+    expect(h.screen.getByTestId("box-demo")).toBeTruthy();
+    expect(h.screen.getByTestId("how-to-play-caption").textContent).toContain("Every number needs a box");
+    await h.press("Skip");
+    expect(h.screen.queryByTestId("box-demo")).toBeNull();
+    h.unmount();
+    const again = renderActivity(board, { params: first(), settings });
+    expect(again.screen.queryByTestId("box-demo")).toBeNull();
+    // Still one press away.
+    await again.press("How to play");
+    expect(again.screen.getByTestId("box-demo")).toBeTruthy();
+    again.unmount();
+  });
+
+  it("stays shut in a race, which sets the seed, and has no button in practice", () => {
+    const race = renderActivity(board, { params: paramsFor({ size: 4 }, "room"), settings });
+    expect(race.screen.queryByTestId("box-demo")).toBeNull();
+    race.unmount();
+    const lesson = skill.lessons.find((l) => l.id === "practice-counting")!;
+    const practice = renderActivity(board, { params: lesson.params as Record<string, unknown>, settings });
+    expect(practice.screen.queryByTestId("box-demo")).toBeNull();
+    expect(practice.screen.queryByRole("button", { name: "How to play" })).toBeNull();
+    practice.unmount();
+  });
+
+  it("solves a real split: its boxes tile the grid, each around one number of its size", async () => {
+    const { demoBoxes, demoClues } = await import("./activities/Demo");
+    const cover = new Array(9).fill(0);
+    for (const b of demoBoxes()) {
+      const inside = demoClues().filter((cl) => {
+        const r = Math.floor(cl.cell / 3);
+        const c = cl.cell % 3;
+        return r >= b.r && r < b.r + b.h && c >= b.c && c < b.c + b.w;
+      });
+      expect(inside).toHaveLength(1);
+      expect(inside[0].area).toBe(b.h * b.w);
+      for (let r = b.r; r < b.r + b.h; r++) for (let c = b.c; c < b.c + b.w; c++) cover[r * 3 + c] += 1;
+    }
+    expect(cover.every((x) => x === 1)).toBe(true);
   });
 });

@@ -1,9 +1,11 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { AnimatePresence, motion } from "motion/react";
 import type { ActivityProps } from "../../types";
-import { SPRING, SkillRound, isPractice, openWith, playCopy, useMotionOK, useSkillRound, type RoundQuestion } from "../../kit";
+import { HowToPlay, HowToPlayButton, SPRING, SkillRound, isPractice, openWith, playCopy, useHowToPlay, useMotionOK, useSkillRound, type RoundQuestion } from "../../kit";
 import { useT } from "../../../lib/i18n";
 import { tx } from "../internal/i18n";
+import { TONES } from "./tones";
+import { DemoScene, demoSteps } from "./Demo";
 import {
   answerKey,
   clueAt,
@@ -136,18 +138,7 @@ export function refusalMessage(p: Puzzle, v: Exclude<ReturnType<typeof judge>, {
   return tx(`refuse.${v.reason}`, { size: v.size, area: want });
 }
 
-/* ---------- colours: bright, never yellow ---------- */
 
-const TONES = [
-  "bg-sky-200/80 border-sky-500 text-sky-950 dark:bg-sky-800/70 dark:border-sky-300 dark:text-sky-50",
-  "bg-violet-200/80 border-violet-500 text-violet-950 dark:bg-violet-800/70 dark:border-violet-300 dark:text-violet-50",
-  "bg-emerald-200/80 border-emerald-500 text-emerald-950 dark:bg-emerald-800/70 dark:border-emerald-300 dark:text-emerald-50",
-  "bg-pink-200/80 border-pink-500 text-pink-950 dark:bg-pink-800/70 dark:border-pink-300 dark:text-pink-50",
-  "bg-cyan-200/80 border-cyan-500 text-cyan-950 dark:bg-cyan-800/70 dark:border-cyan-300 dark:text-cyan-50",
-  "bg-indigo-200/80 border-indigo-500 text-indigo-950 dark:bg-indigo-800/70 dark:border-indigo-300 dark:text-indigo-50",
-  "bg-rose-200/80 border-rose-500 text-rose-950 dark:bg-rose-800/70 dark:border-rose-300 dark:text-rose-50",
-  "bg-teal-200/80 border-teal-500 text-teal-950 dark:bg-teal-800/70 dark:border-teal-300 dark:text-teal-50",
-];
 
 /* ---------- the activity ---------- */
 
@@ -195,6 +186,12 @@ export const BoxSplit: React.FC<ActivityProps<BoxSplitParams>> = ({ params, koda
     onComplete,
   });
   const question = round.question as BoxQuestion;
+
+  /* How to play: by itself the first time, never in practice or a race (a race sets the seed). */
+  const demo = useHowToPlay(koda.skillId, !practising && !s.seed);
+  const sayCaption = useCallback((line: string) => {
+    if (speechEnabled) void koda.speech.say(line, { rate: koda.config.get("speechRate", 1) });
+  }, [speechEnabled, koda]);
   const p = question.puzzle;
   const n = p.n;
 
@@ -505,7 +502,15 @@ export const BoxSplit: React.FC<ActivityProps<BoxSplitParams>> = ({ params, koda
         </div>
 
         <p className="min-h-6 text-center text-base font-semibold text-body" aria-live="polite">{play.status}</p>
+        {!practising && <HowToPlayButton onClick={demo.show} />}
       </div>
+      <HowToPlay
+        open={demo.open}
+        steps={demoSteps()}
+        scene={(step, phase, moveMs) => <DemoScene step={step} phase={phase} moveMs={moveMs} motionOK={motionOK} />}
+        onClose={demo.close}
+        speak={sayCaption}
+      />
     </SkillRound>
   );
 };

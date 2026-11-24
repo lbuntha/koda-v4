@@ -48,5 +48,14 @@
     "number": "Row {row}, column {col}, number {area}",
     "inBox": "{label}, in a {size} box",
     "corner": "{label}, first corner"
+  },
+  "demo": {
+    "intro": "Every number needs a box. The number says how many squares.",
+    "one": "A 1 is a box on its own. Tap it twice.",
+    "three": "This 3 needs 3 squares. Drag from corner to corner.",
+    "two": "This 2 takes the square below it.",
+    "twoAgain": "This 2 does too.",
+    "last": "The last 1 is a box on its own.",
+    "done": "Every square is in a box. Done!"
   }
 }

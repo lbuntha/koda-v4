@@ -1626,7 +1626,15 @@
     "gettingReady": "Getting the game ready…",
     "couldNotLoad": "This game isn't downloaded yet. Connect to the internet once, then try again.",
     "tryAgain": "Try again",
-    "startOver": "Start over"
+    "startOver": "Start over",
+    "howToPlay": {
+      "title": "How to play",
+      "skip": "Skip",
+      "again": "Watch again",
+      "play": "Let's play!",
+      "ready": "Now you try!",
+      "step": "Step {n} of {total}"
+    }
   },
   "praise": {
     "practiceComplete": {
