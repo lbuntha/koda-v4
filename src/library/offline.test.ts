@@ -8,7 +8,14 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
  */
 
 const fetchPublished = vi.fn();
-vi.mock("./api", () => ({ fetchPublished: (...a: unknown[]) => fetchPublished(...a) }));
+const fetchShelfIndex = vi.fn();
+const fetchBooks = vi.fn();
+vi.mock("./api", () => ({
+  BATCH_MAX: 2,
+  fetchPublished: (...a: unknown[]) => fetchPublished(...a),
+  fetchShelfIndex: (...a: unknown[]) => fetchShelfIndex(...a),
+  fetchBooks: (...a: unknown[]) => fetchBooks(...a),
+}));
 vi.mock("../lib/sync/session", () => ({ accessToken: async () => "t" }));
 vi.mock("../lib/sync", () => ({ API_BASE: "/v1" }));
 
@@ -16,54 +23,101 @@ import { BookStore } from "./bookStore";
 import { LibraryProgress } from "./progress";
 import { STARTER_PASSAGES } from "./data/starterPassages";
 import type { Passage } from "./data/passage";
+import { ApiError } from "../lib/sync/api";
 
 const book = (id: string, rev = 1): Passage => ({ ...STARTER_PASSAGES[0], id, rev, title: `Book ${id}` });
+
+/** A server whose shelf is `books`: the index, and batches answered from it. */
+const serve = (books: Passage[]) => {
+  fetchShelfIndex.mockResolvedValue(books.map((b) => ({ id: b.id, rev: b.rev })));
+  fetchBooks.mockImplementation(async (ids: string[]) => books.filter((b) => ids.includes(b.id)));
+};
 
 beforeEach(() => {
   localStorage.clear();
   fetchPublished.mockReset();
+  fetchShelfIndex.mockReset();
+  fetchBooks.mockReset();
   BookStore.reset([]);
   LibraryProgress.clear();
 });
 
 describe("the shelf", () => {
   it("is never empty: the starter books are there on a device that has never been online", async () => {
-    fetchPublished.mockRejectedValue(new Error("offline"));
+    fetchShelfIndex.mockRejectedValue(new Error("offline"));
     await BookStore.refresh();
     expect(BookStore.shelf().map((p) => p.id)).toEqual(STARTER_PASSAGES.map((p) => p.id));
   });
 
   it("keeps the last published books when a refresh fails", async () => {
-    fetchPublished.mockResolvedValueOnce([book("farm")]);
+    serve([book("farm")]);
     await BookStore.refresh();
     expect(BookStore.shelf().some((p) => p.id === "farm")).toBe(true);
 
-    fetchPublished.mockRejectedValueOnce(new Error("offline"));
+    fetchShelfIndex.mockRejectedValueOnce(new Error("offline"));
     await BookStore.refresh();
     expect(BookStore.shelf().some((p) => p.id === "farm")).toBe(true);
   });
 
   it("survives a reload: published books are stored on the device", async () => {
-    fetchPublished.mockResolvedValueOnce([book("farm", 3)]);
+    serve([book("farm", 3)]);
     await BookStore.refresh();
-    const stored = JSON.parse(localStorage.getItem("koda_library_books_v1")!);
-    expect(stored).toEqual([expect.objectContaining({ id: "farm", rev: 3 })]);
+    await new Promise((r) => setTimeout(r, 0));
+    const { bulkGet } = await import("../lib/bulkStore");
+    expect(JSON.parse((await bulkGet("koda_library_books_v1"))!)).toEqual([expect.objectContaining({ id: "farm", rev: 3 })]);
   });
 
   it("shows the starter books only while nothing is published", async () => {
     expect(BookStore.shelf().map((p) => p.id)).toEqual(STARTER_PASSAGES.map((p) => p.id));
-    fetchPublished.mockResolvedValueOnce([book("farm")]);
+    serve([book("farm")]);
     await BookStore.refresh();
     // Real books in: the shelf is exactly what was published — no starter left to delete.
     expect(BookStore.shelf().map((p) => p.id)).toEqual(["farm"]);
   });
 
   it("drops a book the server has taken off the shelf, once the server says so", async () => {
-    fetchPublished.mockResolvedValueOnce([book("farm")]);
+    serve([book("farm")]);
     await BookStore.refresh();
-    fetchPublished.mockResolvedValueOnce([]);
+    serve([]);
     await BookStore.refresh();
     expect(BookStore.shelf().some((p) => p.id === "farm")).toBe(false);
+  });
+});
+
+describe("a big shelf on a slow line", () => {
+  it("downloads only the books that are new or changed", async () => {
+    serve([book("a"), book("b"), book("c")]);
+    await BookStore.refresh();
+    // Three books, two a batch.
+    expect(fetchBooks.mock.calls).toEqual([[["a", "b"]], [["c"]]]);
+
+    fetchBooks.mockClear();
+    serve([book("a"), book("b"), book("c")]);
+    await BookStore.refresh();
+    expect(fetchBooks).not.toHaveBeenCalled();
+
+    serve([book("a"), book("b", 2), book("c"), book("d")]);
+    await BookStore.refresh();
+    expect(fetchBooks.mock.calls).toEqual([[["b", "d"]]]);
+    expect(BookStore.shelf().map((p) => [p.id, p.rev])).toEqual([["a", 1], ["b", 2], ["c", 1], ["d", 1]]);
+  });
+
+  it("keeps the older revision when the batch with the new one fails", async () => {
+    serve([book("a"), book("b")]);
+    await BookStore.refresh();
+
+    fetchShelfIndex.mockResolvedValueOnce([{ id: "a", rev: 1 }, { id: "b", rev: 2 }, { id: "new", rev: 1 }]);
+    fetchBooks.mockRejectedValueOnce(new Error("dropped"));
+    await BookStore.refresh();
+    // "b" stays at the revision the device has; "new" waits for the next refresh.
+    expect(BookStore.shelf().map((p) => [p.id, p.rev])).toEqual([["a", 1], ["b", 1]]);
+  });
+
+  it("takes the whole shelf from a server that has no index yet", async () => {
+    fetchShelfIndex.mockRejectedValueOnce(new ApiError(404, "not_found", "not found"));
+    fetchPublished.mockResolvedValueOnce([book("old-server")]);
+    await BookStore.refresh();
+    expect(BookStore.shelf().map((p) => p.id)).toEqual(["old-server"]);
   });
 });
 

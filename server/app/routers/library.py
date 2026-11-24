@@ -284,8 +284,42 @@ def _out(row: dict[str, Any]) -> BookOut:
 
 @router.get("/books")
 async def published_books(db: Db, _: CanRead) -> PublishedList:
-    """What a child's device puts on the shelf: the live revision of every published book."""
-    return PublishedList(books=[row["published"] for row in await library_repo.list_published(db)])
+    """What a child's device puts on the shelf: the live revision of every published book.
+
+    The whole shelf at once — what builds before the index used. Current builds
+    read `/books/index` and fetch only what changed with `/books/batch`.
+    """
+    return PublishedList(books=await library_repo.published_shelf(db))
+
+
+class ShelfEntry(Model):
+    id: str
+    rev: int
+
+
+class ShelfIndex(Model):
+    books: list[ShelfEntry]
+
+
+class BatchIn(Model):
+    ids: list[str] = Field(default_factory=list, max_length=library_repo.BATCH_MAX)
+
+
+@router.get("/books/index")
+async def published_index(db: Db, _: CanRead) -> ShelfIndex:
+    """Which books are on the shelf and at which revision — nothing else.
+
+    A device holding the books already compares this with what it has and asks
+    `/books/batch` for the difference, so an unchanged shelf costs a few
+    kilobytes rather than every story again.
+    """
+    return ShelfIndex(books=[ShelfEntry(**row) for row in await library_repo.published_index(db)])
+
+
+@router.post("/books/batch")
+async def published_batch(body: BatchIn, db: Db, _: CanRead) -> PublishedList:
+    """The live revision of the named books. Unknown or unpublished ids are left out."""
+    return PublishedList(books=await library_repo.published_by_ids(db, body.ids))
 
 
 # ------------------------------------------------------------------ authors

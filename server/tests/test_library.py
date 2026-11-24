@@ -743,3 +743,28 @@ async def test_a_book_s_topics_come_from_the_shared_list(client, db):
     book["topics"] = ["dragons"]
     refused = await client.put("/library/drafts/topics", json=_draft(book), headers=dev)
     assert refused.status_code == 400 and refused.json()["error"]["code"] == "invalid_topics"
+
+
+async def test_the_shelf_index_and_batch_send_only_what_a_device_asks_for(client, db, signup_body):
+    tokens = (await client.post("/auth/signup", json=signup_body())).json()
+    reader = {"Authorization": f"Bearer {tokens['accessToken']}"}
+    for book_id, rev in (("b-one", 2), ("a-two", 1)):
+        await db.library_books.insert_one(
+            {"id": book_id, "deletedAt": None, "draft": {"secret": "draft text"}, "published": {"id": book_id, "rev": rev, "title": book_id}}
+        )
+    await db.library_books.insert_one({"id": "c-draft", "deletedAt": None, "draft": {"id": "c-draft"}, "published": None})
+    await db.library_books.insert_one({"id": "d-gone", "deletedAt": "2026-01-01", "published": {"id": "d-gone", "rev": 1}})
+
+    index = (await client.get("/library/books/index", headers=reader)).json()
+    assert index == {"books": [{"id": "a-two", "rev": 1}, {"id": "b-one", "rev": 2}]}
+
+    batch = (await client.post("/library/books/batch", json={"ids": ["b-one", "c-draft", "d-gone", "nope"]}, headers=reader)).json()
+    assert batch == {"books": [{"id": "b-one", "rev": 2, "title": "b-one"}]}
+
+    # The whole-shelf answer older builds use: published copies only, never a draft.
+    whole = (await client.get("/library/books", headers=reader)).json()["books"]
+    assert [b["id"] for b in whole] == ["a-two", "b-one"]
+    assert "secret" not in str(whole)
+
+    too_many = await client.post("/library/books/batch", json={"ids": [f"x{i}" for i in range(101)]}, headers=reader)
+    assert too_many.status_code == 422

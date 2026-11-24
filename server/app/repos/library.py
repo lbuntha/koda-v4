@@ -26,9 +26,46 @@ from motor.motor_asyncio import AsyncIOMotorDatabase
 from app.models.common import now
 
 
+PUBLISHED = {"deletedAt": None, "published": {"$ne": None}}
+
+#: Most books one batch request may ask for. A device fetches a big shelf in
+#: several of these rather than one response it may not finish on a slow line.
+BATCH_MAX = 100
+
+
 async def list_published(db: AsyncIOMotorDatabase) -> list[dict[str, Any]]:
-    cursor = db.library_books.find({"deletedAt": None, "published": {"$ne": None}}).sort("id", 1)
-    return await cursor.to_list(length=2000)
+    """Every published book's whole row — for the content pack, which needs it all."""
+    cursor = db.library_books.find(PUBLISHED).sort("id", 1)
+    return await cursor.to_list(length=None)
+
+
+async def published_shelf(db: AsyncIOMotorDatabase) -> list[dict[str, Any]]:
+    """Every published book, live revision only — the whole shelf in one answer.
+
+    Kept for devices still running a build from before the index. Reads only
+    the published copy (never the draft beside it), and has no ceiling: the old
+    2,000-row cap would have hidden every book after it without a word.
+    """
+    cursor = db.library_books.find(PUBLISHED, {"_id": 0, "published": 1}).sort("id", 1)
+    return [row["published"] async for row in cursor]
+
+
+async def published_index(db: AsyncIOMotorDatabase) -> list[dict[str, Any]]:
+    """`{id, rev}` for every published book, in shelf order — a few bytes a book.
+
+    What a device compares against what it holds, so it downloads only the
+    books that are new or changed instead of the whole shelf every time.
+    """
+    cursor = db.library_books.find(PUBLISHED, {"_id": 0, "id": 1, "published.rev": 1}).sort("id", 1)
+    return [{"id": row["id"], "rev": int((row.get("published") or {}).get("rev") or 0)} async for row in cursor]
+
+
+async def published_by_ids(db: AsyncIOMotorDatabase, ids: list[str]) -> list[dict[str, Any]]:
+    """The live revision of each named book that is still published."""
+    if not ids:
+        return []
+    cursor = db.library_books.find({**PUBLISHED, "id": {"$in": ids[:BATCH_MAX]}}, {"_id": 0, "published": 1}).sort("id", 1)
+    return [row["published"] async for row in cursor]
 
 
 # ------------------------------------------------------------------ the studio list

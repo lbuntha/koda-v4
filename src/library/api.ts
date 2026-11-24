@@ -35,8 +35,31 @@ export interface BookRow {
 
 const token = async () => (await accessToken()) ?? null;
 
+/** How long one batch of books may take; a slow line still finishes a hundred books. */
+export const BATCH_DEADLINE_MS = 15_000;
+/** Most books one batch may ask for — the server's `BATCH_MAX`. */
+export const BATCH_MAX = 100;
+
+/** The whole shelf in one answer. The fallback for a server from before the index. */
 export async function fetchPublished(): Promise<Passage[]> {
   const body = await request<{ books: Passage[] }>("/library/books", { token: await token(), timeoutMs: BOOKS_DEADLINE_MS });
+  return body.books;
+}
+
+/** Which books are published, at which revision — a few bytes a book. */
+export async function fetchShelfIndex(): Promise<{ id: string; rev: number }[]> {
+  const body = await request<{ books: { id: string; rev: number }[] }>("/library/books/index", { token: await token(), timeoutMs: BOOKS_DEADLINE_MS });
+  return body.books;
+}
+
+/** The live revision of up to `BATCH_MAX` named books. */
+export async function fetchBooks(ids: readonly string[]): Promise<Passage[]> {
+  const body = await request<{ books: Passage[] }>("/library/books/batch", {
+    method: "POST",
+    token: await token(),
+    body: { ids: ids.slice(0, BATCH_MAX) },
+    timeoutMs: BATCH_DEADLINE_MS,
+  });
   return body.books;
 }
 
