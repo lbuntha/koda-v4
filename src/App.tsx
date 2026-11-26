@@ -629,10 +629,20 @@ export default function App() {
    * has to be re-read rather than left with whatever was loaded first.
    */
   const signedInLearner = session?.learnerId ?? null;
+  /*
+   * Whose record `userProgress` holds. Set in the same update as the record, so
+   * on the render where the session has already switched learner but the new
+   * record has not been read yet, the two disagree — and nothing is published
+   * under the new learner with the old one's XP. The server keeps the highest
+   * XP it has ever been sent, so one such write would stay on that child's
+   * profile for good.
+   */
+  const [progressOwner, setProgressOwner] = useState<string | null | undefined>(undefined);
   useEffect(() => {
     const adopt = () => {
       setUserProgress(loadProgress());
       setCompletedGameLevels(loadCompletedLevels());
+      setProgressOwner(signedInLearner);
     };
     adopt();
     /* The same learner's record changing underneath: merged, not replaced. A
@@ -672,8 +682,9 @@ export default function App() {
   })
     .map((rule) => rule.id)
     .join(",");
+  const progressIsTheirs = progressOwner === signedInLearner;
   useEffect(() => {
-    if (!isLearnerReading) return;
+    if (!isLearnerReading || !progressIsTheirs) return;
     void publishLearnerFigures({
       // The streak as the rule reads it today, not the number the record
       // reached — a run that lapsed overnight must not be written back as live.
@@ -693,6 +704,7 @@ export default function App() {
   }, [
     badges,
     isLearnerReading,
+    progressIsTheirs,
     streak.days,
     userProgress.longestStreak,
     streak.solvedToday,
