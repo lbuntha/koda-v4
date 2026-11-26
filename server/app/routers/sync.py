@@ -76,6 +76,19 @@ async def conversations(learner_id: str, db: Db, p: CanRead, limit: int = 100) -
     return {"learnerId": learner_id, "conversations": rows}
 
 
+@router.get("/journal/{learner_id}")
+async def journal(learner_id: str, db: Db, p: CanRead, days: int = 30) -> dict:
+    """What a learner read and practised, day by day: the rows behind "My learning".
+
+    The same tenancy rule as `profile`: a learner device reads its own record,
+    a parent reads their own family.
+    """
+    family_id = _family_of(p)
+    if p.learner_id and learner_id != p.learner_id:
+        raise Forbidden("That is not this device's learner.", "not_your_learner")
+    return await events_repo.journal(db, family_id, learner_id, days)
+
+
 @router.get("/profile/{learner_id}")
 async def profile(learner_id: str, db: Db, p: CanRead) -> ProfileOut:
     family_id = _family_of(p)

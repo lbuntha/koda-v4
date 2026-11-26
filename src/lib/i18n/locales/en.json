@@ -670,6 +670,9 @@
     },
     "wordsYouWillMeet": "Words you will meet",
     "coverLearn": "What you will learn",
+    "sourceCredits": "Story credits",
+    "originalStory": "Original story",
+    "sourceLicense": "Source license",
     "voice": {
       "saving": "Saving the voice for offline — {ready} of {total}. You can start reading.",
       "saved": "Read in a recorded voice · saved for offline",
@@ -6436,5 +6439,41 @@
   },
   "levelUpMoment": {
     "continue": "Keep going"
+  },
+  "journal": {
+    "title": "My learning",
+    "titleFor": "{name}'s learning",
+    "subtitle": "What you read and practised, day by day. Copy a line into your school reading book.",
+    "thisWeek": "Learned on {count} of the last 7 days",
+    "stat": {
+      "books": "Books finished",
+      "pages": "Pages read",
+      "right": "Right first try ({right} of {total})",
+      "minutes": "Minutes learning"
+    },
+    "window": "Totals for the last {count} days.",
+    "dayTotals": "{minutes} min",
+    "rightFirstTry": "{right} of {total} right first try",
+    "rounds": "Played {count} times",
+    "pages": "{read} of {total} pages",
+    "finished": "finished",
+    "quiz": "quiz {right}/{total}",
+    "untitledBook": "A Koda book",
+    "forHandbook": "For your reading book",
+    "copy": "Copy",
+    "copied": "Copied",
+    "line": {
+      "read": "Read: {books}",
+      "practised": "Practised: {lessons}"
+    },
+    "print": "Print this week",
+    "offline": "Can't reach Koda right now. Showing what this device has.",
+    "empty": "Nothing here yet. Read a book or finish a lesson and it shows up here.",
+    "loading": "Loading…",
+    "card": {
+      "title": "My learning",
+      "body": "See what you read and practised, and copy it into your reading book.",
+      "open": "Open"
+    }
   }
 }

@@ -1,5 +1,5 @@
 import React from "react";
-import { ArrowRight, BookOpen, Check, Flame, Sparkles, X, Zap } from "lucide-react";
+import { ArrowRight, BookOpen, Check, ChevronRight, Flame, Sparkles, X, Zap } from "lucide-react";
 import {
   getCourseLessons,
   isUnlocked,
@@ -34,6 +34,7 @@ import { useT } from "../lib/i18n";
 import { useTodayPicks } from "./learn/useToday";
 import { StarterPicks } from "./learn/StarterPicks";
 import { TodayPlanCard } from "./learn/TodayPlanCard";
+import { LearningJournal } from "./journal/LearningJournal";
 import { StudyFeedCard } from "./learn/StudyFeedCard";
 import { planFor, stepDone, type PlanStep } from "../lib/todayPlan";
 import { readReview } from "../lib/learning/review";
@@ -430,6 +431,7 @@ export const Home: React.FC<HomeProps> = ({
     };
   }, []);
   const [showAllSubjects, setShowAllSubjects] = React.useState(false);
+  const [journalOpen, setJournalOpen] = React.useState(false);
   const { t } = useT();
   const todayPicks = useTodayPicks();
   /** What a "goes with" pick shares, said plainly: the letter or number itself, or the topic's name. */
@@ -779,6 +781,35 @@ export const Home: React.FC<HomeProps> = ({
       />
     ) : null;
 
+  /*
+   * "My learning" opens in place of Home, for a learner session only: it is the
+   * child's own record. A parent reaches the same page from the child's report.
+   */
+  if (journalOpen && feedLearner) {
+    return (
+      <div className="w-full animate-fadeIn pb-6">
+        <LearningJournal learnerId={feedLearner} onBack={() => setJournalOpen(false)} />
+      </div>
+    );
+  }
+  const journalCard = feedLearner ? (
+    <button
+      type="button"
+      onClick={() => {
+        playSound("pop");
+        setJournalOpen(true);
+      }}
+      className={`${themeSystem.card("default", "p-4")} mt-4 flex w-full items-center gap-3 text-left transition hover:border-indigo-300`}
+    >
+      <UIArtIcon id="kit-report" className="h-11 w-11" />
+      <span className="min-w-0 flex-1">
+        <span className="block font-black text-ink">{t("journal.card.title")}</span>
+        <span className="block text-sm text-muted">{t("journal.card.body")}</span>
+      </span>
+      <ChevronRight className="h-5 w-5 shrink-0 text-muted" aria-hidden="true" />
+    </button>
+  ) : null;
+
   return (
     /* Column 1 is the app shell's sidebar; this is columns 2 and 3. Neither
        band grows with the lesson count — Today is capped, and the subject list
@@ -860,6 +891,8 @@ export const Home: React.FC<HomeProps> = ({
                 </p>
               )}
             </section>
+
+            {journalCard}
 
             {/*
               * The badge, on a phone only — under Today, not above it.

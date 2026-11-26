@@ -560,3 +560,45 @@ async def test_writing_lands_as_lessons_and_counts_towards_its_concept(client, p
     # The milestone rides along for the parent summary to read.
     stored = await db.events.find_one({"eventId": "t_5"})
     assert stored["milestone"] == "canDo"
+
+
+async def test_the_journal_returns_a_learner_s_reading_and_rounds_with_book_titles(client, parent, db, signup_body):
+    today = datetime.now(UTC) - timedelta(minutes=1)
+    await db.library_revisions.insert_many([
+        {"bookId": "starter-market", "rev": 1, "passage": {"title": "A Trip to the Market"}},
+        {"bookId": "starter-market", "rev": 2, "passage": {"title": "The Morning Market"}},
+    ])
+
+    def at(days_ago: int) -> dict:
+        when = today - timedelta(days=days_ago)
+        return {"ts": when.isoformat(timespec="milliseconds").replace("+00:00", "Z"), "localDay": when.date().isoformat()}
+
+    body = {"events": [
+        reading_event("j_page", type="page_read", seq=1, page=1, pageCount=4, dwellMs=30000, readAloud=0, wordsTapped=[], **at(1)),
+        reading_event("j_done", type="reading_finished", seq=2, lessonId="starter-market@2", pageCount=4, pagesSeen=4,
+                      durationMs=90000, readAloudPages=0, wordsTapped=0, **at(0)),
+        event("j_round", type="lesson_completed", seq=3, questionsAnswered=10, correctFirstTry=8, firstTryAccuracy=0.8,
+              medianResponseMs=2000, supportsUsed=1, durationMs=240000, **at(0)),
+        event("j_answer", seq=4, **at(0)),
+        event("j_preview", type="lesson_completed", seq=5, entry="preview", questionsAnswered=5, correctFirstTry=5,
+              firstTryAccuracy=1, medianResponseMs=1000, supportsUsed=0, durationMs=60000, **at(0)),
+        event("j_old", type="lesson_completed", seq=6, questionsAnswered=5, correctFirstTry=5, firstTryAccuracy=1,
+              medianResponseMs=1000, supportsUsed=0, durationMs=60000, **at(20)),
+        event("j_sibling", type="lesson_completed", seq=7, learnerId="l_sam", questionsAnswered=5, correctFirstTry=5,
+              firstTryAccuracy=1, medianResponseMs=1000, supportsUsed=0, durationMs=60000, **at(0)),
+    ]}
+    response = await client.post("/sync/push", json=body, headers=parent)
+    assert response.status_code == 200, response.text
+
+    response = await client.get("/sync/journal/l_mia", params={"days": 7}, headers=parent)
+    assert response.status_code == 200, response.text
+    journal = response.json()
+    assert journal["days"] == 7
+    assert [row["id"] for row in journal["events"]] == ["j_page", "j_done", "j_round"]
+    assert journal["events"][2]["questionsAnswered"] == 10
+    assert journal["titles"] == {"starter-market@1": "A Trip to the Market", "starter-market@2": "The Morning Market"}
+
+    other = (await client.post("/auth/signup", json=signup_body("other@example.com"))).json()
+    response = await client.get("/sync/journal/l_mia", headers={"Authorization": f"Bearer {other['accessToken']}"})
+    assert response.status_code == 200
+    assert response.json()["events"] == []

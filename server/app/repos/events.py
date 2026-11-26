@@ -331,6 +331,45 @@ async def reading_report(db: AsyncIOMotorDatabase, family_id: str, learner_id: s
     return report
 
 
+#: What the learning journal reads, and the fields it needs from each.
+JOURNAL_TYPES = ("page_read", "reading_finished", "lesson_completed")
+JOURNAL_FIELDS = ("eventId", "type", "ts", "localDay", "skillId", "lessonId", "entry", "page", "pageCount", "dwellMs",
+                  "durationMs", "questionsAnswered", "correctFirstTry")
+#: The longest window a journal can ask for, and a ceiling on rows, so one call stays small.
+JOURNAL_MAX_DAYS = 60
+JOURNAL_MAX_ROWS = 20_000
+
+
+async def journal(db: AsyncIOMotorDatabase, family_id: str, learner_id: str, days: int) -> dict[str, Any]:
+    """A learner's reading and finished rounds for the last `days` of their own days.
+
+    The rows, not a summary: the app folds them with the same function it uses
+    on a child's own device (src/lib/learning/journal.ts), so a parent's phone
+    and the child's tablet draw the same days. Preview runs are an author's, not
+    the child's, and are left out here. Book titles come with the rows, by the
+    revision the child actually opened.
+    """
+    days = max(1, min(days, JOURNAL_MAX_DAYS))
+    since = (now() - timedelta(days=days + 1)).date().isoformat()
+    cursor = db.events.find(
+        {
+            "familyId": family_id,
+            "learnerId": learner_id,
+            "type": {"$in": list(JOURNAL_TYPES)},
+            "localDay": {"$gte": since},
+            "entry": {"$ne": "preview"},
+        },
+        {"_id": 0, **{key: 1 for key in JOURNAL_FIELDS}},
+    ).sort("ts", -1).limit(JOURNAL_MAX_ROWS)
+    rows: list[dict[str, Any]] = []
+    async for row in cursor:
+        row["id"] = row.pop("eventId", None)
+        rows.append(row)
+    rows.reverse()
+    books = sorted({row["lessonId"] for row in rows if row.get("skillId") == READ_SKILL and "@" in row.get("lessonId", "")})
+    return {"learnerId": learner_id, "days": days, "events": rows, "titles": await revision_titles(db, books)}
+
+
 async def rounds_by_category(
     db: AsyncIOMotorDatabase, family_id: str, learner_id: str, days: list[str]
 ) -> dict[str, int]:

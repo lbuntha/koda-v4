@@ -26,6 +26,7 @@ import type { ErrorKind } from "../../lib/learning/events";
 import { SKILLS } from "../../skills/registry";
 import { ReviewReport } from "./ReviewReport";
 import { ReadingReport } from "./ReadingReport";
+import { LearningJournal } from "../journal/LearningJournal";
 import { themeSystem } from "../../lib/themeSystem";
 import { UIAvatar, UIBadge, UIButton, UISectionHeader, UIStatGrid, UIStatTile, UIArtIcon } from "../ui";
 import { NoAccess } from "./NoAccess";
@@ -551,6 +552,10 @@ export const ChildReportPage: React.FC<ChildReportPageProps> = ({
         {error && <p className={themeSystem.flash("error")}>{error}</p>}
 
         {reading && <ReadingReport reading={reading} />}
+
+        {/* The child's own "My learning" page, the same one they see: what they
+            read and practised, day by day, with the line for their reading book. */}
+        <LearningJournal learnerId={learnerId} learnerName={learnerName} />
 
         {/* What the child read aloud and sent. Absent until there is one. */}
         <VoiceNotesCard learnerId={learnerId} learnerName={learnerName} />
