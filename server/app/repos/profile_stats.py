@@ -14,6 +14,7 @@ every row is seeded from `PLACEHOLDERS` and says so through `source`, so a
 sample number is never mistaken for a measured one.
 """
 
+import math
 from typing import Any
 
 from motor.motor_asyncio import AsyncIOMotorDatabase
@@ -63,7 +64,32 @@ FIELDS = frozenset(PLACEHOLDERS)
 #: that 0 over 2,000 real XP until sync caught up. The `progress` document
 #: already merges these with `max()`; this row has to agree with it. A real
 #: reset still works: every reset deletes the row rather than writing to it.
-NEVER_LOWER = frozenset({"totalXp", "level", "longestStreak", "starsEarned", "lessonsMastered"})
+NEVER_LOWER = frozenset({"totalXp", "longestStreak", "starsEarned", "lessonsMastered"})
+
+#: Each level needs this much more XP than the one before (src/lib/level.ts).
+LEVEL_STEP = 100
+
+
+def level_from_xp(xp: Any) -> int:
+    """The level a lifetime XP total reads as — the app's rule, in one place here.
+
+    Level 2 at 100 XP, 3 at 300, 4 at 600, 5 at 1,000. Stored levels are never
+    trusted: a level is a reading of XP, so it is worked out from the XP this
+    row keeps, and a device on an older rule cannot write its old reading back.
+    """
+    try:
+        total = max(0.0, float(xp))
+    except (TypeError, ValueError):
+        return 1
+    if total != total:  # NaN
+        return 1
+    start = lambda level: LEVEL_STEP // 2 * level * (level - 1)  # noqa: E731
+    level = max(1, int((1 + math.sqrt(1 + 8 * total / LEVEL_STEP)) // 2))
+    while start(level + 1) <= total:
+        level += 1
+    while level > 1 and start(level) > total:
+        level -= 1
+    return level
 
 
 async def ensure(db: AsyncIOMotorDatabase, subject_id: str, kind: str) -> dict[str, Any]:
@@ -105,10 +131,17 @@ async def record(
     raised = {key: value for key, value in known.items() if key in NEVER_LOWER}
     replaced = {key: value for key, value in known.items() if key not in NEVER_LOWER}
     update: dict[str, Any] = {"$set": {**replaced, "source": "recorded", "updatedAt": now()}}
+    replaced.pop("level", None)
     if raised:
         update["$max"] = raised
-    return await db.profile_stats.find_one_and_update(
+    row = await db.profile_stats.find_one_and_update(
         {"_id": subject_id},
         update,
         return_document=ReturnDocument.AFTER,
     )
+    level = level_from_xp(row.get("totalXp", 0))
+    if row.get("level") != level:
+        row = await db.profile_stats.find_one_and_update(
+            {"_id": subject_id}, {"$set": {"level": level}}, return_document=ReturnDocument.AFTER
+        )
+    return row

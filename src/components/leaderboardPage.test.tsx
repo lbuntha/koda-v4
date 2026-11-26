@@ -144,7 +144,7 @@ describe("Buddy Leaderboard page", () => {
     expect(await screen.findByText("840 XP this week")).toBeTruthy();
     // The weekly board must not read as the child's whole XP.
     expect(screen.getByTestId("lifetime-xp-note").textContent).toContain("2,146");
-    expect(screen.getByTestId("lifetime-xp-note").textContent).toContain("Level 22");
+    expect(screen.getByTestId("lifetime-xp-note").textContent).toContain("Level 7");
     // The board shows StarFox once; the buddy list is behind "Manage buddies".
     expect(screen.getAllByTitle("Fox avatar")).toHaveLength(1);
     expect(screen.getByText("You")).toBeTruthy();

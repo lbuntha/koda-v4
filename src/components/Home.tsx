@@ -20,7 +20,7 @@ import { useSkillCatalog } from "../lib/useSkillCatalog";
 import { themeSystem } from "../lib/themeSystem";
 import { useStreak } from "../lib/streak";
 import { BADGE_METRICS, nextBadge, useBadges } from "../lib/badges";
-import { levelFromXp, XP_PER_LEVEL, xpToNextLevel } from "../lib/level";
+import { currentLevelSize, levelFromXp, xpToNextLevel } from "../lib/level";
 import { BadgeIcon } from "./account/BadgeVisuals";
 import type { UserProgress } from "../types";
 import { playSound } from "../utils/audio";
@@ -353,7 +353,7 @@ const HomeRail: React.FC<{
               * paragraph — a child learns it from the first level-up, and a
               * grown-up who wonders can hover.
               */}
-            <div className="pl-[3.75rem] -mt-1" title={t("home.xpRule", { xp: XP_PER_LEVEL })}>
+            <div className="pl-[3.75rem] -mt-1" title={t("home.xpRule")}>
               <div className="flex items-baseline justify-between gap-2">
                 <span className="text-xs font-bold text-muted">
                   {t("home.xpLevel", { level: levelFromXp(userProgress.xp) })}
@@ -364,8 +364,8 @@ const HomeRail: React.FC<{
               </div>
               <UIRewardProgress
                 className="mt-1.5"
-                value={XP_PER_LEVEL - xpToNextLevel(userProgress.xp)}
-                max={XP_PER_LEVEL}
+                value={currentLevelSize(userProgress.xp) - xpToNextLevel(userProgress.xp)}
+                max={currentLevelSize(userProgress.xp)}
                 label={t("home.xpLevel", { level: levelFromXp(userProgress.xp) })}
               />
             </div>

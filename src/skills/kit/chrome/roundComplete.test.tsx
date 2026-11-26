@@ -53,27 +53,28 @@ describe("what the round was worth", () => {
   it("draws the level bar where the learner actually stands", async () => {
     draw({ standing: { xpAfter: 340, streakDays: 4, dailySolved: 2, dailyGoal: 5 } });
 
-    // 340 XP is Level 4, forty into it, sixty short of Level 5. Named "XP
+    // 340 XP is Level 3 (300–599), forty into it, 260 short of Level 4. Named "XP
     // Level" because "Lesson 7" is on the same card and the two numbers are not
     // the same kind of thing.
-    expect(screen.getByText("XP Level 4")).toBeTruthy();
-    expect(screen.getByText("60 XP to Level 5")).toBeTruthy();
+    expect(screen.getByText("XP Level 3")).toBeTruthy();
+    expect(screen.getByText("260 XP to Level 4")).toBeTruthy();
     // "100 XP earns a level" used to sit under the bar as a third line. It was
     // dropped for height when this card was compacted — Home's rail states the
     // same rule under the same bar, and these two labels carry the scale.
     expect(screen.queryByText("100 XP earns a level")).toBeNull();
-    const bar = screen.getByRole("progressbar", { name: /Level 4 progress/ });
+    const bar = screen.getByRole("progressbar", { name: /Level 3 progress/ });
     // It fills from where the learner stood before the round (300, the start
-    // of Level 4) to where they stand now, so the XP is seen going in.
+    // of Level 3) to where they stand now, so the XP is seen going in.
     expect(bar.getAttribute("aria-valuenow")).toBe("0");
     await waitFor(() => expect(bar.getAttribute("aria-valuenow")).toBe("40"));
-    expect(bar.getAttribute("aria-valuemax")).toBe("100");
+    // Level 3 is 300 XP wide: each level needs 100 more than the last.
+    expect(bar.getAttribute("aria-valuemax")).toBe("300");
   });
 
   it("starts part-filled when the round stayed inside one level", async () => {
     draw({ xpWon: 20, standing: { xpAfter: 370, streakDays: 1, dailySolved: 1, dailyGoal: 5 } });
 
-    const bar = screen.getByRole("progressbar", { name: /Level 4 progress/ });
+    const bar = screen.getByRole("progressbar", { name: /Level 3 progress/ });
     expect(bar.getAttribute("aria-valuenow")).toBe("50");
     await waitFor(() => expect(bar.getAttribute("aria-valuenow")).toBe("70"));
     expect(screen.getByText("1")).toBeTruthy();
@@ -93,9 +94,9 @@ describe("what the round was worth", () => {
 
 describe("the headline names what happened", () => {
   it("calls out the level a round carried the learner into", () => {
-    draw({ standing: { xpAfter: 400, streakDays: 4, dailySolved: 2, dailyGoal: 5 } });
+    draw({ standing: { xpAfter: 620, streakDays: 4, dailySolved: 2, dailyGoal: 5 } });
 
-    expect(screen.getByText("Level 5!")).toBeTruthy();
+    expect(screen.getByText("XP Level 4!")).toBeTruthy();
     expect(screen.getByText("New level")).toBeTruthy();
   });
 
@@ -147,10 +148,10 @@ describe("the last lesson of a path", () => {
   });
 
   it("outranks a new level, which is the commoner thing", () => {
-    draw({ pathComplete: true, standing: { xpAfter: 400, streakDays: 4, dailySolved: 2, dailyGoal: 5 } });
+    draw({ pathComplete: true, standing: { xpAfter: 620, streakDays: 4, dailySolved: 2, dailyGoal: 5 } });
 
     expect(screen.getByText("You finished every lesson!")).toBeTruthy();
-    expect(screen.queryByText("Level 5!")).toBeNull();
+    expect(screen.queryByText("XP Level 4!")).toBeNull();
   });
 
   it("offers practice as practice, not as the next lesson", () => {

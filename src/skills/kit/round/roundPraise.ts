@@ -1,4 +1,4 @@
-import { levelFromXp, xpIntoLevel, XP_PER_LEVEL } from "../../../lib/level";
+import { currentLevelSize, levelFromXp, xpIntoLevel, xpToNextLevel } from "../../../lib/level";
 import { translate } from "../../../lib/i18n";
 
 /**
@@ -167,6 +167,6 @@ export function roundPraise(facts: PraiseFacts): RoundPraise {
 export const levelBar = (xp: number) => ({
   level: levelFromXp(xp),
   into: xpIntoLevel(xp),
-  per: XP_PER_LEVEL,
-  toNext: XP_PER_LEVEL - xpIntoLevel(xp),
+  per: currentLevelSize(xp),
+  toNext: xpToNextLevel(xp),
 });

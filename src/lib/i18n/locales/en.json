@@ -291,7 +291,7 @@
     "totalPoints": "Total XP",
     "xpLevel": "XP Level {level}",
     "xpToLevel": "{xp} XP to level {level}",
-    "xpRule": "Finish rounds to earn XP. Every {xp} XP is a new level.",
+    "xpRule": "Finish rounds to earn XP. Each level needs a little more XP than the one before.",
     "lessonsMastered": "Lessons mastered",
     "dailyGoal": "Daily goal",
     "goalMet": "Goal met today",
@@ -1660,7 +1660,7 @@
     },
     "levelUp": {
       "tag": "New level",
-      "headline": "Level {level}!",
+      "headline": "XP Level {level}!",
       "note": "All your rounds added up to this!"
     },
     "streak": {

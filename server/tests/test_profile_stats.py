@@ -116,7 +116,8 @@ async def test_an_empty_device_cannot_lower_lifetime_xp(client, signup_body):
     ).json()
 
     assert after["totalXp"] == 2146
-    assert after["level"] == 22
+    # Read from the XP the row keeps, never from what a device sent: 2,146 XP is Level 7.
+    assert after["level"] == 7
     assert after["starsEarned"] == 169
     # Day-scoped figures are not lifetime records: a lapsed streak does drop.
     assert after["dayStreak"] == 0
@@ -124,3 +125,20 @@ async def test_an_empty_device_cannot_lower_lifetime_xp(client, signup_body):
 
     raised = (await client.patch("/profile/stats", headers=auth, json={"totalXp": 2166})).json()
     assert raised["totalXp"] == 2166
+
+
+def test_level_reads_xp_on_a_rising_ladder():
+    from app.repos.profile_stats import level_from_xp
+
+    assert [level_from_xp(x) for x in (0, 99, 100, 299, 300, 600, 1000, 4227, 4500)] == [1, 1, 2, 2, 3, 4, 5, 9, 10]
+    assert level_from_xp(None) == 1
+    assert level_from_xp(float("nan")) == 1
+
+
+async def test_a_stored_level_from_the_old_rule_is_corrected_on_the_next_write(client, signup_body, db):
+    tokens = (await client.post("/auth/signup", json=signup_body())).json()
+    auth = {"Authorization": f"Bearer {tokens['accessToken']}"}
+    first = (await client.patch("/profile/stats", headers=auth, json={"totalXp": 4227, "level": 43})).json()
+    assert first["level"] == 9
+    again = (await client.patch("/profile/stats", headers=auth, json={"dayStreak": 2})).json()
+    assert again["level"] == 9

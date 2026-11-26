@@ -11,7 +11,7 @@ import {
   subscribeProfileStats,
   type ProfileStats,
 } from "../../lib/profileStats";
-import { levelFromXp, XP_PER_LEVEL, xpToNextLevel } from "../../lib/level";
+import { currentLevelSize, levelFromXp, xpToNextLevel } from "../../lib/level";
 import {
   ApiError,
   accessToken,
@@ -153,12 +153,12 @@ const ProfileProgress: React.FC<{ stats: ProfileStats }> = ({ stats }) => {
           </div>
           <UIRewardProgress
             className="mt-1.5"
-            value={XP_PER_LEVEL - xpToNextLevel(stats.totalXp)}
-            max={XP_PER_LEVEL}
+            value={currentLevelSize(stats.totalXp) - xpToNextLevel(stats.totalXp)}
+            max={currentLevelSize(stats.totalXp)}
             label={t("home.xpLevel", { level })}
           />
           <p className="mt-1.5 text-[0.6875rem] text-muted">
-            {t("home.xpRule", { xp: XP_PER_LEVEL })}
+            {t("home.xpRule")}
           </p>
         </div>
 

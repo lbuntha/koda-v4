@@ -13,7 +13,7 @@ describe("UILevelUp", () => {
     const onClose = vi.fn();
     render(<UILevelUp level={5} onClose={onClose} />);
 
-    expect(screen.getByRole("dialog", { name: "Level 5!" })).toBeTruthy();
+    expect(screen.getByRole("dialog", { name: "XP Level 5!" })).toBeTruthy();
     const button = screen.getByRole("button", { name: "Keep going" });
     expect(document.activeElement).toBe(button);
     fireEvent.click(button);

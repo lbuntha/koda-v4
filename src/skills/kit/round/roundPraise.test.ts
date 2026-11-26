@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 
 import { levelledUp, roundPraise, STREAK_MILESTONES, type PraiseFacts } from "./roundPraise";
-import { XP_PER_LEVEL } from "../../../lib/level";
+import { levelStartXp } from "../../../lib/level";
 
 /**
  * What a child is congratulated for.
@@ -38,9 +38,9 @@ describe("the biggest news wins the headline", () => {
   it("a new level beats everything, including a perfect round", async () => {
     const praise = roundPraise(
       round({
-        // 380 -> 420 crosses the 400 boundary.
+        // 580 -> 620 crosses 600, where Level 4 begins.
         xpWon: 40,
-        xpAfter: 420,
+        xpAfter: 620,
         perfect: true,
         stars: 3,
         streakDays: 7,
@@ -48,7 +48,7 @@ describe("the biggest news wins the headline", () => {
     );
 
     expect(praise.kind).toBe("levelUp");
-    expect(praise.headline).toBe("Level 5!");
+    expect(praise.headline).toBe("XP Level 4!");
   });
 
   it("a streak milestone beats a perfect round", () => {
@@ -78,7 +78,7 @@ describe("a new level", () => {
     // 90 XP, +40 -> 130. Level 1 becomes Level 2.
     const praise = roundPraise(round({ xpWon: 40, xpAfter: 130 }));
 
-    expect(praise.headline).toBe("Level 2!");
+    expect(praise.headline).toBe("XP Level 2!");
   });
 
   it("is not claimed by a round that only moved within a level", () => {
@@ -88,11 +88,11 @@ describe("a new level", () => {
 
   it("is not claimed by a round that paid nothing", () => {
     // A learner sitting exactly on a boundary has not just crossed it.
-    expect(levelledUp(XP_PER_LEVEL, 0)).toBe(false);
+    expect(levelledUp(levelStartXp(2), 0)).toBe(false);
   });
 
   it("is claimed exactly on the boundary the level begins at", () => {
-    expect(levelledUp(XP_PER_LEVEL, 40)).toBe(true);
+    expect(levelledUp(levelStartXp(2), 40)).toBe(true);
   });
 });
 

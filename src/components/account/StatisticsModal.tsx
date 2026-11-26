@@ -71,7 +71,8 @@ export const StatisticsModal: React.FC<StatisticsModalProps> = ({
   const local = loadProgress();
   const xp = stats.totalXp || local.xp || 0;
   const streak = stats.dayStreak || local.streakDays || 0;
-  const level = stats.level || levelFromXp(xp);
+  // From XP, never the stored figure: a level is a reading of XP, and a row written under an older rule must not outlive it.
+  const level = levelFromXp(xp);
   const dailyGoal = stats.dailyGoal || local.dailyGoal;
   const dailySolved = stats.dailySolved || 0;
   const courseDone = stats.lessonsMastered || 0;
