@@ -4092,7 +4092,6 @@
   "trace": {
     "title": "Trace",
     "subtitle": "Write letters and numbers, and draw pictures, one stroke at a time.",
-    "testItems": "These are practice items for testing. Real ones will come from Trace Studio.",
     "shelf": {
       "write": "Write",
       "draw": "Draw"
@@ -4213,7 +4212,6 @@
     "loadingShelf": "Getting the collections…",
     "draftsShelf": "Your drafts",
     "draftsShelfNote": "Only you see these. Try them as a child would before publishing.",
-    "testShelf": "Test items",
     "shelfProgress": "{done} of {total} done",
     "report": {
       "button": "Report a problem",

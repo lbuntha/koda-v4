@@ -17,7 +17,6 @@ import { useSession } from "../lib/sync";
 import { useT } from "../lib/i18n";
 import { themeSystem } from "../lib/themeSystem";
 import { useTraceShelf } from "./data/shelf";
-import { GOLDEN_ITEMS } from "./fixtures/items";
 import type { TraceItem } from "./geometry/types";
 import { activityOf, hasArt, modeOf } from "./geometry/types";
 import { ColorPlayer } from "./paint/ColorPlayer";
@@ -275,11 +274,6 @@ export function TracePage({ onAwardXp, canCreate = false, onGoHome, onDeepChange
       {canCreate && draftEntries.length > 0 && (
         <UICarousel title={t("trace.draftsShelf")} subtitle={t("trace.draftsShelfNote")} count={draftEntries.length} {...TILES}>
           {draftEntries.map((e) => <Tile key={e.item.id} entry={e} draft onOpen={() => setOpen(e)} />)}
-        </UICarousel>
-      )}
-      {canCreate && (
-        <UICarousel title={t("trace.testShelf")} subtitle={t("trace.testItems")} count={GOLDEN_ITEMS.length} {...TILES}>
-          {GOLDEN_ITEMS.map((item) => <Tile key={item.id} entry={{ item }} onOpen={() => setOpen({ item })} />)}
         </UICarousel>
       )}
     </div>
