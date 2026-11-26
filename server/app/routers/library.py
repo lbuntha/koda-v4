@@ -212,6 +212,8 @@ def _clean(passage: dict[str, Any]) -> dict[str, Any]:
     for q in questions:
         if not isinstance(q, dict) or too_long(q.get("prompt")) or any(too_long(o) for o in q.get("options") or []):
             raise AppError(400, "invalid_passage", "A question is malformed or too long.")
+        if "difficulty" in q and q["difficulty"] not in ("easy", "medium", "hard"):
+            raise AppError(400, "invalid_passage", "Question difficulty must be easy, medium or hard.")
         bad_audio = (
             q.get("kind") not in ("comprehension", "vocab", "match", "spell")
             or not isinstance(q.get("audio"), str)

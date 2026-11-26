@@ -167,8 +167,15 @@ export const PAGE_TEXT_SIZES: Record<PageTextSize, number> = { normal: 1, large:
 export type PageTextAlign = "left" | "center" | "right";
 export const PAGE_TEXT_ALIGNS: readonly PageTextAlign[] = ["left", "center", "right"];
 
+export const QUESTION_DIFFICULTIES = ["easy", "medium", "hard"] as const;
+export type QuestionDifficulty = (typeof QUESTION_DIFFICULTIES)[number];
+
+interface QuestionMetadata {
+  difficulty?: QuestionDifficulty;
+}
+
 /** "Where did they walk?" — a choice, with the sentence that proves it. */
-export interface ComprehensionQuestion {
+export interface ComprehensionQuestion extends QuestionMetadata {
   id: string;
   kind: "comprehension";
   prompt: string;
@@ -182,7 +189,7 @@ export interface ComprehensionQuestion {
 }
 
 /** "Which picture is 'banana'?" — options are picture keys. */
-export interface VocabQuestion {
+export interface VocabQuestion extends QuestionMetadata {
   id: string;
   kind: "vocab";
   prompt: string;
@@ -194,7 +201,7 @@ export interface VocabQuestion {
 }
 
 /** The story sentence with one word missing, to be spelled on the ring. */
-export interface SpellQuestion {
+export interface SpellQuestion extends QuestionMetadata {
   id: string;
   kind: "spell";
   /** The id of the sentence the word is taken from. */
@@ -217,7 +224,7 @@ export interface MatchPair {
  * none at all; when it has some, each is checked as fully as any other part.
  * The reader shuffles the right-hand side.
  */
-export interface MatchQuestion {
+export interface MatchQuestion extends QuestionMetadata {
   id: string;
   kind: "match";
   prompt: string;

@@ -211,6 +211,22 @@ async def test_word_highlight_times_must_match_the_approved_split(client, db):
     assert "approved word split" in refused.text
 
 
+async def test_a_draft_keeps_question_difficulty_and_refuses_unknown_values(client, db):
+    dev = await _login(client, db, "dev@example.com", platform_role="developer")
+    book = copy.deepcopy(MARKET)
+    book["band"] = "B"
+    book["questions"][0]["difficulty"] = "hard"
+    book["questions"][1]["difficulty"] = "medium"
+
+    saved = await client.put("/library/drafts/difficulty-book", json=_draft(book), headers=dev)
+    assert saved.status_code == 200, saved.text
+    assert saved.json()["draft"]["questions"] == book["questions"]
+
+    book["questions"][0]["difficulty"] = "advanced"
+    refused = await client.put("/library/drafts/difficulty-book", json=_draft(book), headers=dev)
+    assert refused.status_code == 400
+
+
 async def test_the_server_refuses_a_book_that_fails_its_checks(client, db):
     dev = await _login(client, db, "dev@example.com", platform_role="developer")
     broken = copy.deepcopy(MARKET)

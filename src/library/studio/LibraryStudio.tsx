@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { ArrowLeft, Space, BookOpen, Check, ChevronDown, ChevronRight, ChevronUp, CornerDownLeft, CornerLeftUp, Download, Merge, Scissors, Mic, Play, Pencil, RefreshCw, Sparkles, Square, Trash2, Upload } from "lucide-react";
-import { BANDS, bookAges, CHOICES, LEVELS, MATCH_MIN_PAIRS, MATCH_MAX_QUESTIONS, meetsTarget, minimumQuestions, TARGET_MAX, type Band, type Language, type Question, type QuestionCounts, type WordCue } from "../data/passage";
+import { BANDS, bookAges, CHOICES, LEVELS, MATCH_MIN_PAIRS, MATCH_MAX_QUESTIONS, meetsTarget, minimumQuestions, QUESTION_DIFFICULTIES, TARGET_MAX, type Band, type Language, type Question, type QuestionCounts, type QuestionDifficulty, type WordCue } from "../data/passage";
 import { readingLexiconFor, readingWordsFor } from "../data/readingLexicon";
 import { core, gapOf, hasSpaceAfter, sentenceText, tokenizeSentence, withSpaceAfter } from "../data/text";
 import { RULES, verifyPassage, type Verdict } from "../data/verifyPassage";
@@ -670,7 +670,7 @@ function ReviewStep({ draft, verdict, confirmed, onConfirmed, onEdit, target, so
     setAddingWord(false);
   };
   const setVocab = (id: string, next: VocabEdit) =>
-    onEdit({ ...draft, pictures: next.pictures, confirmedPictures: next.confirmedPictures, questions: draft.questions.map((x) => (x.id === id ? next.question : x)) });
+    onEdit({ ...draft, pictures: next.pictures, confirmedPictures: next.confirmedPictures, questions: draft.questions.map((x) => (x.id === id ? { ...next.question, difficulty: x.difficulty } : x)) });
   const picWords = [...new Set(draft.sentences.flatMap((s) => s.words.map(core)).filter((w) => w && pictureFor(w, draft.language, PICTURE_KEYS)))];
 
   const add = (kind: Question["kind"]) => {
@@ -1136,6 +1136,13 @@ function QuestionCard({ q, draft, checks, onChange, onVocab, onDelete, onVoice }
       </div>
 
       {(!collapsible || expanded) && <>
+        {draft.band === "B" && <label className="mb-3 grid w-full max-w-48 gap-1">
+          <span className="koda-admin-label">{t("studio.q.difficulty.label")}</span>
+          <UISelect value={q.difficulty ?? ""} onChange={(e) => onChange({ difficulty: (e.target.value || undefined) as QuestionDifficulty | undefined })}>
+            <option value="">{t("studio.q.difficulty.unset")}</option>
+            {QUESTION_DIFFICULTIES.map((value) => <option key={value} value={value}>{t(`studio.q.difficulty.${value}`)}</option>)}
+          </UISelect>
+        </label>}
         {q.kind === "comprehension" && <UnderstandFields q={q} draft={draft} onChange={onChange} />}
         {q.kind === "vocab" && <WordsFields q={q} draft={draft} onChange={onVocab} />}
         {q.kind === "spell" && <SpellFields q={q} draft={draft} onChange={onChange} />}
@@ -1166,7 +1173,7 @@ function QuestionCard({ q, draft, checks, onChange, onVocab, onDelete, onVoice }
 
 function correctedQuestion(value: unknown, current: Question, sentences: Draft["sentences"]): Question | null {
   if (!value || typeof value !== "object") return null;
-  const next = value as Record<string, unknown>;
+  const next: Record<string, unknown> = { ...value, difficulty: current.difficulty };
   if (next.id !== current.id || next.kind !== current.kind) return null;
   // A model that copied the sentence instead of its id still means a sentence; one that matches none keeps the current one.
   if (current.kind === "comprehension" && Array.isArray(next.options) && next.options.length === CHOICES && typeof next.prompt === "string" && typeof next.evidence === "string" && Number.isInteger(next.answer))

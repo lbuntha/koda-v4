@@ -123,6 +123,22 @@ describe("Khmer sound names", () => {
 });
 
 describe("Library Studio", () => {
+  it("saves a Level B question's selected difficulty", async () => {
+    await startBook();
+    fireEvent.change(screen.getByRole("combobox", { name: "Level (school grade)" }), { target: { value: "B" } });
+    fireEvent.click(screen.getByRole("radio", { name: /Offline drafter/ }));
+    fireEvent.click(screen.getByRole("button", { name: "Continue" }));
+    fireEvent.click(await screen.findByRole("tab", { name: /Understand/ }));
+    await act(async () => { fireEvent.click(screen.getByRole("button", { name: /with AI$/ })); });
+    fireEvent.change(screen.getAllByRole("combobox", { name: "Difficulty" })[0], { target: { value: "hard" } });
+    fireEvent.click(screen.getByRole("button", { name: "Save draft" }));
+    await waitFor(() => expect(api.saveDraft).toHaveBeenCalled());
+    expect(api.saveDraft.mock.calls.at(-1)?.[1]).toMatchObject({
+      band: "B",
+      questions: expect.arrayContaining([expect.objectContaining({ kind: "comprehension", difficulty: "hard" })]),
+    });
+  });
+
   it("rephrases a whole sentence without replacing its question references", async () => {
     await startBook();
     fireEvent.click(screen.getByRole("radio", { name: /Offline drafter/ }));

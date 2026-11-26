@@ -1045,7 +1045,14 @@
       "removePair": "Remove pair {n}",
       "pairEvidenceN": "Pair {n}: where the answer is",
       "anywhereInStory": "The answer is somewhere in the story",
-      "addPair": "Add a pair"
+      "addPair": "Add a pair",
+      "difficulty": {
+        "label": "Difficulty",
+        "unset": "Choose difficulty",
+        "easy": "Easy",
+        "medium": "Medium",
+        "hard": "Hard"
+      }
     },
     "ai": {
       "badFormat": "The AI returned a correction in the wrong format.",
