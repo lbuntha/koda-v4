@@ -382,6 +382,24 @@ async def revisions(db: AsyncIOMotorDatabase, book_id: str) -> list[dict[str, An
     return await cursor.to_list(length=500)
 
 
+async def revision_titles(db: AsyncIOMotorDatabase, latest_lessons: list[str]) -> dict[str, str]:
+    """Resolve the title of the revision the learner actually opened."""
+    wanted = []
+    for lesson in latest_lessons:
+        book_id, _, rev = lesson.rpartition("@")
+        if book_id and re.fullmatch(r"[0-9]{1,18}", rev):
+            wanted.append({"bookId": book_id, "rev": int(rev)})
+
+    titles: dict[str, str] = {}
+    for offset in range(0, len(wanted), BATCH_MAX):
+        cursor = db.library_revisions.find({"$or": wanted[offset:offset + BATCH_MAX]}, {"bookId": 1, "rev": 1, "passage.title": 1})
+        async for row in cursor:
+            title = (row.get("passage") or {}).get("title")
+            if isinstance(title, str) and title.strip():
+                titles[f"{row['bookId']}@{row['rev']}"] = title
+    return titles
+
+
 # --------------------------------------------------------------------- reports
 #
 # A reader flags a book; an author reads the flag and resolves it. The reporter is
