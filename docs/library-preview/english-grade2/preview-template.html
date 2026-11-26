@@ -1,0 +1,367 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Koda Readers · English books for Grade 2</title>
+<style>
+:root{font:16px/1.55 system-ui,sans-serif;color:#203635;background:#f6f6ee;--ink:#203635;--muted:#516864;--line:#dce5db;--green:#22614e;--paper:#fffefa}
+*{box-sizing:border-box}body{margin:0}button,input,select{font:inherit}button{cursor:pointer}button:disabled{cursor:default;opacity:.5}[hidden]{display:none!important}:focus-visible{outline:3px solid #9072a8;outline-offset:3px}a{color:var(--green);text-underline-offset:3px}
+header{background:var(--paper);border-bottom:1px solid var(--line);padding:15px max(20px,calc((100% - 1160px)/2));display:flex;justify-content:space-between;gap:12px;align-items:center}.brand{font-size:1.13rem;font-weight:750;letter-spacing:-.025em;color:var(--green)}.header-label{font-size:.88rem;color:var(--muted)}
+main{max-width:1200px;margin:auto;padding:34px 20px 64px}.hero{padding:32px clamp(20px,5vw,58px);border-radius:28px;background:#dcebdc;border:1px solid #d2e3d2}.hero p{max-width:670px;margin:12px 0 0;color:#36564b}.hero h1{font:700 clamp(2.3rem,6vw,4.5rem)/1.02 Georgia,serif;letter-spacing:-.05em;margin:0;color:#25483b}
+h2{line-height:1.2;margin:0 0 8px}h3{margin:0 0 6px;font-size:1rem}.small{font-size:.87rem;color:var(--muted)}.quiet{border:1px solid #c8d7cd;background:var(--paper);color:var(--green);padding:8px 13px;border-radius:11px;min-height:42px}.primary{background:var(--green);border-color:var(--green);color:white}.stage-strip{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:10px;margin:20px 0}.stage{background:var(--paper);border:1px solid var(--line);border-radius:13px;padding:12px;text-align:left;color:var(--ink)}.stage strong{display:block}.stage span{display:block;font-size:.82rem;color:var(--muted);margin-top:3px}.stage[aria-pressed=true]{box-shadow:0 0 0 2px var(--green);background:#eaf3e9}
+.shelf-tools{display:flex;flex-wrap:wrap;gap:10px;align-items:end;margin:24px 0 12px}.shelf-tools label{display:grid;gap:3px}.shelf-tools label:first-child{flex:1;min-width:200px}.shelf-tools label span,.style-label{font-size:.83rem;font-weight:650;color:var(--muted)}input[type=search],select{background:white;color:var(--ink);border:1px solid #c8d7cd;border-radius:10px;padding:8px 10px;min-height:42px;max-width:100%}.count{color:var(--muted);margin:0 0 12px}
+.grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:16px}.book{display:flex;flex-direction:column;overflow:hidden;background:var(--paper);border:1px solid var(--line);border-radius:16px;padding:0;text-align:left;color:var(--ink);height:100%}.book:hover{border-color:var(--green)}.cover{height:136px;background:var(--wash);display:grid;place-items:center;width:100%;position:relative}.cover .symbol{font-size:3.6rem}.done{position:absolute;right:9px;top:9px;background:#fffefa;border-radius:20px;padding:3px 8px;font-size:.74rem;color:#275841}.book-body{padding:13px 14px 15px}.book-title{display:block;font:700 1.24rem/1.2 Georgia,serif;margin:5px 0 7px}.book-focus{display:block;font-size:.86rem;color:var(--muted)}.book-meta{font-size:.75rem;color:#426158;font-weight:650}.teach{margin-top:24px;background:var(--paper);border:1px solid var(--line);border-radius:14px;padding:15px 19px}.teach p{color:var(--muted)}summary{cursor:pointer;color:var(--green);font-weight:650}details[open]>summary{margin-bottom:8px}
+.toolbar{display:flex;flex-wrap:wrap;gap:9px;align-items:center;justify-content:space-between;margin-bottom:18px}.toolbar select{flex:1 1 220px;max-width:450px}.reader-grid{display:grid;grid-template-columns:minmax(0,2fr) minmax(260px,1fr);gap:18px;align-items:start}.sheet,.panel{background:var(--paper);border:1px solid var(--line);border-radius:18px;overflow:hidden}.panel{padding:17px;margin-bottom:13px}.panel p{margin:5px 0 12px}.reader-title{font:700 clamp(1.65rem,4vw,2.6rem)/1.1 Georgia,serif;letter-spacing:-.025em;margin:0 0 8px}.reader-meta{margin:0 0 16px;color:var(--muted)}.scene{background:var(--wash);height:clamp(150px,30vw,230px);display:grid;place-items:center;position:relative}.scene .symbol{font-size:5rem}.scene .small{position:absolute;bottom:9px;color:#455f54}.story-box{padding:18px clamp(18px,4vw,34px);min-height:174px}.story{font:400 clamp(1.37rem,3vw,1.9rem)/1.48 Georgia,serif;margin:10px 0 14px;text-wrap:pretty}.story-title{font-weight:700}.pager{display:flex;align-items:center;justify-content:space-between;gap:8px;border-top:1px solid var(--line);padding:12px 14px}.progress{height:5px;background:#e5eee4}.progress i{height:100%;display:block;background:#529a75}.jump{display:flex;flex-wrap:wrap;gap:6px;margin:13px 0}.jump button{min-width:38px;min-height:38px;padding:3px 6px}.jump [aria-current=page]{background:var(--green);color:white}.chips{display:flex;flex-wrap:wrap;gap:5px}.chips span{background:#eaf2e7;border-radius:8px;padding:3px 8px}.question{border-top:1px solid var(--line);padding-top:9px;margin-top:9px}.question p{margin:6px 0}.art .quiet{margin-right:8px}.art select{width:100%;margin:4px 0 10px}.end-actions{display:flex;flex-wrap:wrap;gap:8px}.print-book{display:none}.empty{padding:22px;background:var(--paper);border-radius:14px}
+@media(max-width:850px){.grid{grid-template-columns:repeat(3,minmax(0,1fr))}.reader-grid{grid-template-columns:1fr}.stage-strip{grid-template-columns:repeat(auto-fit,minmax(115px,1fr))}}
+@media(max-width:560px){main{padding:18px 12px 38px}header{padding:12px}.grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}.cover{height:95px}.cover .symbol{font-size:2.9rem}.book-body{padding:10px}.book-title{font-size:1.12rem}.shelf-tools label{flex:1}.shelf-tools select{width:100%}.story-box{min-height:0}.pager{padding:9px}.pager .quiet{padding:7px 9px}.stage-strip{gap:7px}.stage{padding:8px}.toolbar select{order:3;flex-basis:100%;max-width:none}.scene .symbol{font-size:4.4rem}}
+@media print{header,main{display:none!important}.print-book{display:block;color:#222}.print-page{break-after:page;min-height:80vh;padding:30px;font:1.45rem/1.6 Georgia,serif}.print-page:last-child{break-after:auto}.print-page .symbol{font:88px system-ui}.print-page small{font:1rem system-ui}.print-page h2{margin:15px 0}}
+.choices{display:grid;gap:6px;margin:8px 0}.choices button{text-align:left}.choices .correct{background:#e4f2e6;border-color:#529a75}.choices .try-again{background:#fff0e3;border-color:#a26838}.quiz-result{min-height:1.38em}
+.review-actions{display:flex;flex-wrap:wrap;gap:8px;margin-top:15px}.benchmark-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin:10px 0 16px}.benchmark-grid article{background:#f6f7f0;border:1px solid var(--line);border-radius:11px;padding:12px}.benchmark-grid article p{margin:0}.audit-list{display:grid;gap:8px;margin:10px 0 0;padding:0;list-style:none}.audit-row{display:grid;grid-template-columns:minmax(165px,1fr) minmax(0,2fr);gap:10px;padding:10px 0;border-top:1px solid var(--line)}.audit-row p{margin:0}.audit-row span{display:block}.edition{display:inline-block;background:#e5f0e5;color:#285744;font-size:.73rem;font-weight:700;padding:2px 7px;border-radius:20px;margin-top:8px}.cover img,.scene img{width:100%;height:100%;display:block;object-fit:contain}.cover:has(img){background:#f2e9d4}.scene:has(img){height:auto;max-height:none;aspect-ratio:4/3;background:#f2e9d4}.scene:has(.cover-illustration){aspect-ratio:auto}.scene .cover-illustration{width:auto;max-width:100%;height:min(52vh,430px);margin:auto}.scene:has(img) .placeholder{display:none}.scene[hidden]{display:none}.picture-choices{grid-template-columns:repeat(3,minmax(0,1fr))}.picture-choices button{padding:4px;min-width:0}.picture-choices img{display:block;width:100%;aspect-ratio:1;object-fit:contain;border-radius:7px}.compare-text{padding:10px 12px;border-radius:8px;background:#f5f3eb;color:var(--ink);font:1.05rem/1.5 Georgia,serif;white-space:pre-line}.story{white-space:pre-line}.print-image{display:block;max-height:45vh;max-width:100%;margin:12px auto}.word-question{margin-bottom:12px}
+@media(max-width:550px){.benchmark-grid,.audit-row{grid-template-columns:1fr}.audit-row{gap:3px}.scene .cover-illustration{height:min(44vh,320px)}}
+</style>
+</head>
+<body>
+<header><div class="brand">Koda Readers</div><div class="header-label">English · Grade 2</div></header>
+<main>
+<section id="shelf" aria-labelledby="shelf-title">
+  <div class="hero"><h1 id="shelf-title" tabindex="-1">Longer stories, bigger ideas.</h1><p id="intro">Original books for Grade 2, with stories and facts from around the world. Longer chapters of 10 to 14 pages, with vowel teams, dialogue, money and time, science, and a little about living with technology.</p>
+    <div class="review-actions" id="review-actions" hidden><button class="quiet primary" id="samples" type="button">Browse revised samples</button><button class="quiet" id="show-benchmark" type="button">See all benchmark notes</button></div>
+  </div>
+  <details class="teach" id="benchmark" hidden>
+    <summary>Benchmark against four early-reader series</summary>
+    <p>The first drafts have useful topics and quiz evidence. The main gaps are control of the earliest reading words, a reason to turn the page, natural dialogue, and illustrations that carry part of the explanation. Each draft below has a specific editorial note. Word counts are descriptive, and this review is not a formal reading-level assessment.</p>
+    <div class="benchmark-grid" id="benchmark-refs"></div>
+    <details><summary>Book-by-book review · all 50 titles</summary><ol class="audit-list" id="audit-list"></ol></details>
+  </details>
+  <nav id="stages" class="stage-strip" aria-label="Reading stages"></nav>
+  <div class="shelf-tools">
+    <label><span>Search books</span><input id="search" type="search" placeholder="Try penguin, pizza, or robot"></label>
+    <label><span>Reading stage</span><select id="stage"><option value="">All stages</option></select></label>
+    <label><span>Topic</span><select id="topic"><option value="">All topics</option></select></label>
+    <label id="edition-filter" hidden><span>Review status</span><select id="edition"><option value="">All 50 drafts</option><option value="revised">Revised samples</option><option value="notes">Drafts with review notes</option></select></label>
+    <button type="button" class="quiet" id="download">Download book data</button>
+  </div>
+  <p class="count" id="count" aria-live="polite"></p><div class="grid" id="books"></div>
+  <details class="teach">
+    <summary>For grown-ups using this collection</summary>
+    <p>Choose a book that matches the letter patterns a child already knows. The early books include short phonics practice and some words that may need help. The five stages are an editorial reading path. Read the later books together when children need support.</p>
+    <p>Begin with the practice prompt, read and reread a page aloud, then go back to the story to explain an answer. Children can mark each book finished on this device. Story text and picture briefs are drafts for review.</p>
+    <p>The AI stories use fictional examples and adult guidance. Children practise checking claims, protecting private details, and deciding what to keep or change. <a href="https://ies.ed.gov/ncee/wwc/Docs/PracticeGuide/wwc_foundationalreading_040717.pdf">IES foundational reading guide</a> · <a href="https://www.unesco.org/en/articles/ai-competency-framework-students">UNESCO AI competency framework for students</a></p>
+  </details>
+</section>
+<section id="reader" hidden aria-labelledby="reader-title">
+  <div class="toolbar"><button class="quiet" id="back" type="button">Back to library</button><select id="book-select" aria-label="Choose book"></select><button class="quiet" id="print" type="button">Print book</button></div>
+  <h2 id="reader-title" class="reader-title" tabindex="-1"></h2><p class="reader-meta" id="reader-meta"></p>
+  <div class="reader-grid">
+    <div>
+      <article class="sheet" aria-label="Story reader">
+        <div class="scene" id="scene"><img id="scene-art" alt="" hidden><span class="symbol" id="symbol" aria-hidden="true"></span><span class="small placeholder">Illustration placeholder</span></div>
+        <div class="story-box" id="page" aria-live="polite"></div>
+        <div class="progress" aria-hidden="true"><i id="progress"></i></div>
+        <nav class="pager" aria-label="Page navigation"><button class="quiet" id="previous" type="button">Previous</button><span id="page-count" class="small"></span><button class="quiet primary" id="next" type="button">Next</button></nav>
+      </article>
+      <div class="jump" id="jump" aria-label="Jump to page"></div>
+      <details class="panel art">
+        <summary>Illustration brief for this page</summary>
+        <label class="style-label">Image template<select id="art-style"><option value="Gouache">Warm gouache</option><option value="Paper cut">Layered paper cut</option><option value="Cartoon">Soft rounded cartoon</option></select></label>
+        <p id="art-text"></p><button class="quiet" id="copy" type="button">Copy brief</button><span id="copy-status" class="small" role="status"></span>
+      </details>
+    </div>
+    <aside id="support" aria-label="Reading practice"></aside>
+  </div>
+</section>
+</main>
+<div class="print-book" id="print-book"></div>
+<script>
+const BOOKS = /* BOOK_DATA */;
+const REVIEW = /* REVIEW_DATA */ null;
+const STAGES = [
+  {name:"Warm up", detail:"Vowel teams, two-syllable words, retell in order."},
+  {name:"Read with feeling", detail:"Dialogue, characters and how they change."},
+  {name:"Find out", detail:"Fact books: main idea, cause and effect."},
+  {name:"Solve it", detail:"Problems, money, time and measuring."},
+  {name:"Think and share", detail:"Lessons, opinions and checking what is true."},
+];
+const PALETTES = ["#e8ebcf","#f7e4cf","#ddeadc","#dce8f3","#ebe0f4"];
+const STYLES = {
+  Gouache:"Warm painted gouache, subtle paper grain, soft colored-pencil edges, and clear, expressive shapes.",
+  "Paper cut":"Layered paper-cut shapes, gentle shadows, and large silhouettes with clear separation.",
+  Cartoon:"Soft rounded 2D cartoon, simple clean outlines, and expressive faces with natural proportions.",
+};
+const $ = (id) => document.getElementById(id);
+const escape = (value) => String(value).replace(/[&<>"']/g, (char) => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[char]));
+const option = (value, name) => `<option value="${escape(value)}">${escape(name)}</option>`;
+const storageKey = REVIEW ? "koda-english-grade1-review-completed-v1" : "koda-english-grade1-completed-v1";
+let completed = new Set();
+try {
+  const saved = JSON.parse(localStorage.getItem(storageKey) || "[]");
+  if (Array.isArray(saved)) completed = new Set(saved.filter((id) => BOOKS.some((b) => b.id === id)));
+} catch {}
+let current = null;
+let index = 0;
+const last = () => current.pages.length + 1;
+const pageTotal = BOOKS.reduce((sum, book) => sum + book.pages.length, 0);
+function renderShelf() {
+  const stage = $("stage").value;
+  const topic = $("topic").value;
+  const edition = $("edition").value;
+  const query = $("search").value.trim().toLowerCase();
+  const found = BOOKS.filter((b) =>
+    (!stage || stage === String(b.stage)) && (!topic || topic === b.topic) &&
+    (!edition || (edition === "revised" ? b.editorial?.revised : !b.editorial?.revised)) &&
+    [b.title, b.skill, b.topic, ...b.words].join(" ").toLowerCase().includes(query)
+  );
+  $("count").textContent = `${found.length} of ${BOOKS.length} books · ${completed.size} finished`;
+  $("stages").innerHTML = STAGES.map((s,i) => `<button class="stage" type="button" data-stage="${i+1}" aria-pressed="${stage===String(i+1)}"><strong>${i+1}. ${escape(s.name)}</strong><span>${escape(s.detail)}</span></button>`).join("");
+  $("books").innerHTML = found.map((b) => {
+    const cover = REVIEW?.pilot.id === b.id ? `<img src="${REVIEW.pilot.pictures[0]}" alt="">` : `<span class="symbol" aria-hidden="true"><svg viewBox="0 0 48 48" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M6 10c6-2 12-1 18 3v27c-6-4-12-5-18-3z"/><path d="M42 10c-6-2-12-1-18 3v27c6-4 12-5 18-3z"/></svg></span>`;
+    return `<button class="book" type="button" data-book="${b.id}"><span class="cover" style="--wash:${PALETTES[b.stage-1]}">${cover}${completed.has(b.id)?'<span class="done">Finished</span>':''}</span><span class="book-body"><span class="book-meta">${escape(b.topic)} · ${b.pages.length} pages</span><strong class="book-title">${escape(b.title)}</strong><span class="book-focus">${escape(b.skill)}</span>${b.editorial?.revised ? '<span class="edition">Revised sample</span>' : ''}</span></button>`;
+  }).join("") || '<p class="empty">No books match these filters.</p>';
+}
+function artBrief(book, i, selected) {
+  const cover = i === 0;
+  const description = cover ? book.cover : book.pages[i-1]?.art;
+  if (!description) return "The discussion page can use a simple vignette of a reader and an open book.";
+  const recurring = book.cover;
+  return `${cover ? "Portrait 3:4 cover. Leave a quiet area at the top for the separately set title." : "Landscape 4:3 story illustration. Use the established character and object references from the cover. Keep one clear action in the picture."} ${STYLES[selected]} Scene: ${description} ${cover ? "" : "Cover reference: " + recurring + " "}Keep story lettering separate from the artwork. No generated text or logos. Check that pictures agree with the page’s action and any quantities.`;
+}
+function showBook(id, page = 0) {
+  const book = BOOKS.find((b) => b.id === id);
+  if (!book) return;
+  current = book;
+  $("book-select").value = book.id;
+  $("reader-title").textContent = book.title;
+  $("reader-meta").textContent = `Stage ${book.stage} · ${book.topic} · ${book.pages.length} story pages${book.editorial ? " · " + book.editorial.mode : ""}`;
+  const questions = book.quiz.map((q,i) => `<details class="question"><summary>${escape(q.prompt)}</summary>
+    <div class="choices" role="group" aria-label="${escape(q.prompt)}">${q.options.map((text,j)=>`<button class="quiet" type="button" data-quiz="${i}" data-choice="${j}" aria-pressed="false">${escape(text)}</button>`).join("")}</div>
+    <p class="small quiz-result" role="status"></p><button class="quiet" type="button" data-evidence="${q.page}">Read page ${q.page} again</button></details>`).join("");
+  $("support").innerHTML = `<section class="panel"><h3>About the book</h3><p>${escape(book.about)}</p><h3>Try as you read</h3><p>${escape(book.read)}</p><div class="chips" aria-label="Words to notice">${book.words.map((word)=>`<span>${escape(word)}</span>`).join("")}</div></section>
+    <section class="panel" id="talk"><h3>Check your reading</h3><p class="small">Choose an answer. Use the page link to look for a clue.</p>${questions}</section>${wordPanel(book)}${editorialPanel(book)}`;
+  $("shelf").hidden = true;
+  $("reader").hidden = false;
+  index = Math.max(0, Math.min(last(), Math.trunc(Number(page)) || 0));
+  renderPage();
+  $("reader-title").focus();
+  window.scrollTo(0,0);
+}
+function wordPanel(book) {
+  const word = book.editorial?.wordQuiz;
+  if (!word) return "";
+  const meanings = `<details class="question"><summary>What does “${escape(word.word)}” mean here?</summary>
+    <div class="choices">${word.options.map((text, i) => `<button class="quiet" type="button" data-word-task="meaning" data-word-choice="${i}" aria-pressed="false">${escape(text)}</button>`).join("")}</div>
+    <p class="small quiz-result" role="status"></p><button class="quiet" type="button" data-evidence="${word.page}">Read page ${word.page} again</button></details>`;
+  const cards = REVIEW.pilot.id === book.id ? REVIEW.pilot.cards.map((target, i, all) => {
+    const options = all.filter((card) => card.word !== target.word);
+    options.splice((i + 1) % all.length, 0, target);
+    return `<details class="question"><summary>Which picture shows a ${escape(target.word)}?</summary>
+      <div class="choices picture-choices">${options.map((card) => `<button class="quiet" type="button" data-word-task="picture" data-word-choice="${card.word === target.word ? "yes" : "no"}" aria-pressed="false"><img src="${card.image}" alt="${escape(card.alt)}"></button>`).join("")}</div>
+      <p class="small quiz-result" role="status"></p></details>`;
+  }).join("") : "";
+  return `<section class="panel"><h3>Words</h3><p class="small">${cards ? "Try the picture cards and one story-word meaning." : "Try one story-word meaning. Picture cards are shown in the illustrated pilot."}</p>${meanings}${cards}</section>`;
+}
+function editorialPanel(book) {
+  const note = book.editorial;
+  if (!note) return "";
+  const change = note.revised ? `${note.originalMetrics.words} → ${note.metrics.words} story words. Longest page: ${note.originalMetrics.longestPage} → ${note.metrics.longestPage} words.` :
+    `${note.metrics.words} story words. Longest page: ${note.metrics.longestPage} words.`;
+  return `<details class="panel"><summary>Editor’s note · ${note.revised ? "Revised sample" : "Draft for review"}</summary>
+    <p>${escape(note.finding)} <a href="${escape(REVIEW.references[note.reference])}">${escape(note.reference)}</a></p>
+    <p class="small">${escape(change)}</p>${note.preteach ? `<p>${escape(note.preteach)}</p>` : ''}
+    ${note.before ? '<details><summary>Compare with the first draft</summary><p id="before-text" class="compare-text"></p></details>' : ""}</details>`;
+}
+function closeBook() {
+  const id = current?.id;
+  current = null;
+  $("reader").hidden = true;
+  $("shelf").hidden = false;
+  replaceLocation("");
+  renderShelf();
+  ($("books").querySelector(`[data-book="${id}"]`) || $("shelf-title")).focus();
+}
+function replaceLocation(hash) {
+  try { history.replaceState(null,"", location.pathname + location.search + hash); } catch {}
+}
+function renderPage() {
+  const b = current;
+  const cover = index === 0;
+  const end = index === last();
+  const story = b.pages[index-1];
+  const art = REVIEW?.pilot.id === b.id && !end ? REVIEW.pilot.pictures[index] : null;
+  const artEl = $("scene-art");
+  artEl.hidden = !art;
+  if (art) {
+    artEl.src = art;
+    artEl.alt = cover ? b.cover : story.art;
+  } else {
+    artEl.removeAttribute("src");
+    artEl.alt = "";
+  }
+  artEl.classList.toggle("cover-illustration", cover);
+  $("symbol").hidden = !!art;
+  $("scene").hidden = end;
+  $("scene").style.setProperty("--wash", PALETTES[b.stage-1]);
+  $("symbol").innerHTML = `<svg viewBox="0 0 48 48" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M6 10c6-2 12-1 18 3v27c-6-4-12-5-18-3z"/><path d="M42 10c-6-2-12-1-18 3v27c6-4 12-5 18-3z"/></svg>`;
+  $("page").innerHTML = cover
+    ? `<div class="small">Cover</div><p class="story story-title">${escape(b.title)}</p><p class="small">${escape(b.skill)}</p>`
+    : end
+    ? `<h3>Tell it in your own words</h3><p>What happened, or what did you learn? Try the discussion questions, then choose another book in your reading path.</p><div class="end-actions"><button class="quiet primary" type="button" id="finish" ${completed.has(b.id)?"disabled":""}>${completed.has(b.id)?"Finished":"Mark book finished"}</button>${BOOKS.indexOf(b)<BOOKS.length-1?'<button class="quiet" type="button" id="next-book">Next book</button>':''}</div>`
+    : `<div class="small">Page ${index}</div><p class="story">${escape(story.text)}</p>`;
+  $("page-count").textContent = cover ? "Cover" : end ? "Discussion" : `${index} / ${b.pages.length}`;
+  $("previous").disabled = cover;
+  $("next").disabled = end;
+  $("progress").style.width = `${index / last() * 100}%`;
+  $("jump").innerHTML = Array.from({length:last()+1},(_,i)=>`<button class="quiet" type="button" data-page="${i}" aria-label="${i===0?"Cover":i===last()?"Discussion":`Page ${i}`}" ${i===index?'aria-current="page"':''}>${i===0?"Cover":i===last()?"Talk":i}</button>`).join("");
+  $("art-text").textContent = artBrief(b,index,$("art-style").value);
+  if ($("before-text")) $("before-text").textContent = b.editorial.before[index - 1] ?? "Turn to a story page to compare its text.";
+  $("copy-status").textContent = "";
+  replaceLocation(`#${b.id}/${index}`);
+}
+function turn(to) {
+  if (!current || index === to || to < 0 || to > last()) return;
+  index = to;
+  renderPage();
+}
+function markFinished() {
+  completed.add(current.id);
+  try { localStorage.setItem(storageKey,JSON.stringify([...completed])); } catch {}
+  renderPage();
+  $("next-book")?.focus();
+}
+$("stage").insertAdjacentHTML("beforeend", STAGES.map((s,i)=>option(i+1,s.name)).join(""));
+$("topic").insertAdjacentHTML("beforeend", [...new Set(BOOKS.map((b)=>b.topic))].sort().map((s)=>option(s,s)).join(""));
+$("book-select").innerHTML = BOOKS.map((b)=>option(b.id,b.title)).join("");
+$("search").addEventListener("input",renderShelf);
+$("stage").addEventListener("change",renderShelf);
+$("topic").addEventListener("change",renderShelf);
+$("edition").addEventListener("change",renderShelf);
+$("stages").addEventListener("click",(event)=>{
+  const b=event.target.closest("[data-stage]");
+  if(!b) return;
+  $("stage").value=$("stage").value===b.dataset.stage?"":b.dataset.stage;
+  renderShelf();
+  $("stages").querySelector(`[data-stage="${b.dataset.stage}"]`).focus();
+});
+$("books").addEventListener("click",(event)=>{
+  const b=event.target.closest("[data-book]");
+  if(b) showBook(b.dataset.book);
+});
+$("book-select").addEventListener("change",(event)=>showBook(event.target.value));
+$("back").addEventListener("click",closeBook);
+$("previous").addEventListener("click",()=>turn(index-1));
+$("next").addEventListener("click",()=>turn(index+1));
+$("jump").addEventListener("click",(event)=>{
+  const b=event.target.closest("[data-page]");
+  if(!b) return;
+  turn(Number(b.dataset.page));
+  $("jump").querySelector("[aria-current=page]").focus();
+});
+$("support").addEventListener("click",(event)=>{
+  const choiceWord=event.target.closest("[data-word-task]");
+  if (choiceWord) {
+    const q=current.editorial.wordQuiz;
+    const right=choiceWord.dataset.wordTask==="picture" ? choiceWord.dataset.wordChoice==="yes" : Number(choiceWord.dataset.wordChoice)===q.answer;
+    choiceWord.closest(".choices").querySelectorAll("button").forEach((button)=>{
+      const picked=button===choiceWord;
+      button.setAttribute("aria-pressed",String(picked));
+      button.classList.toggle("correct",picked&&right);
+      button.classList.toggle("try-again",picked&&!right);
+    });
+    choiceWord.closest(".question").querySelector(".quiz-result").textContent=right ? "You found it." : "Take another look and try again.";
+    return;
+  }
+  const choice=event.target.closest("[data-choice]");
+  if (choice) {
+    const question=current.quiz[Number(choice.dataset.quiz)];
+    const correct=Number(choice.dataset.choice)===question.answer;
+    const group=choice.closest(".choices");
+    group.querySelectorAll("button").forEach((button)=>{
+      const picked=button===choice;
+      button.setAttribute("aria-pressed",String(picked));
+      button.classList.toggle("correct",picked&&correct);
+      button.classList.toggle("try-again",picked&&!correct);
+    });
+    choice.closest(".question").querySelector(".quiz-result").textContent=correct
+      ? `You found it. ${current.questions[Number(choice.dataset.quiz)].answer}` : "Try again, or reread the page for a clue.";
+    return;
+  }
+  const b=event.target.closest("[data-evidence]");
+  if(!b) return;
+  turn(Number(b.dataset.evidence));
+  $("reader-title").focus();
+  window.scrollTo(0,0);
+});
+$("page").addEventListener("click",(event)=>{
+  if(event.target.id==="finish") markFinished();
+  if(event.target.id==="next-book") showBook(BOOKS[BOOKS.indexOf(current)+1].id);
+});
+document.addEventListener("keydown",(event)=>{
+  if(!current || event.altKey || event.metaKey || event.ctrlKey || event.defaultPrevented) return;
+  if(["INPUT","SELECT","TEXTAREA","SUMMARY"].includes(document.activeElement.tagName)) return;
+  if(event.key==="ArrowLeft" || event.key==="ArrowRight") {
+    event.preventDefault();
+    turn(index + (event.key==="ArrowLeft" ? -1 : 1));
+  }
+});
+$("art-style").addEventListener("change",()=>{ $("art-text").textContent=artBrief(current,index,$("art-style").value); });
+$("copy").addEventListener("click",async()=>{
+  try {
+    await navigator.clipboard.writeText($("art-text").textContent);
+    $("copy-status").textContent="Copied.";
+  } catch {
+    const r=document.createRange(); r.selectNodeContents($("art-text"));
+    const s=window.getSelection(); s.removeAllRanges(); s.addRange(r);
+    $("copy-status").textContent="Brief selected. Use your copy shortcut.";
+  }
+});
+$("print").addEventListener("click",()=>{
+  const b=current;
+  const pictures = REVIEW?.pilot.id === b.id ? REVIEW.pilot.pictures : null;
+  const picture = (i) => pictures ? `<img class="print-image" src="${pictures[i]}" alt="">` : "";
+  $("print-book").innerHTML=`<section class="print-page"><small>Grade 2 · English reading draft</small><h1>${escape(b.title)}</h1>${picture(0) || `<p class="symbol" aria-hidden="true"><svg viewBox="0 0 48 48" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M6 10c6-2 12-1 18 3v27c-6-4-12-5-18-3z"/><path d="M42 10c-6-2-12-1-18 3v27c6-4 12-5 18-3z"/></svg></p>`}<p>${escape(b.about)}</p></section>`+
+  b.pages.map((p,i)=>`<section class="print-page"><small>${escape(b.title)} · ${i+1} / ${b.pages.length}</small>${picture(i+1)}<p>${escape(p.text)}</p></section>`).join("")+
+  `<section class="print-page"><h2>Talk about the story</h2><p>${escape(b.read)}</p><ol>${b.questions.map((q)=>`<li>${escape(q.question)}</li>`).join("")}</ol></section>`;
+  window.print();
+});
+$("download").addEventListener("click",()=>{
+  const payload={language:"en",grade:1,stages:STAGES,bookCount:BOOKS.length,storyPages:pageTotal,books:BOOKS};
+  const url=URL.createObjectURL(new Blob([JSON.stringify(payload,null,2)],{type:"application/json"}));
+  const a=document.createElement("a");
+  a.href=url;
+  a.download="koda-grade1-english-reading-library.json";
+  document.body.append(a);a.click();a.remove();
+  setTimeout(()=>URL.revokeObjectURL(url),1000);
+});
+if (REVIEW) {
+  $("intro").textContent="Compare eight revised samples with the first drafts and read an editorial note on all 50 books. Pip and the Red Lid is the fully illustrated first lesson.";
+  $("review-actions").hidden=false;
+  $("benchmark").hidden=false;
+  $("edition-filter").hidden=false;
+  const referenceNotes={
+    "Bob Books":"Short, controlled words and carefully introduced sounds. Koda’s earliest books need fewer untaught words and a clearer note about what to preview.",
+    "Biscuit":"Familiar routines and gentle stakes for shared reading. A puppy or kitten should have a small wish or problem that carries the story.",
+    "Elephant & Piggie":"A small character problem and dialogue worth reading aloud. Let an action, pause, or surprise show the meaning.",
+    "Nat Geo Kids":"Leveled nonfiction with visuals that convey facts. Plan matched views, simple diagrams, and captions readers can follow.",
+  };
+  $("benchmark-refs").innerHTML=Object.entries(referenceNotes).map(([name,note])=>`<article><h3><a href="${escape(REVIEW.references[name])}">${escape(name)}</a></h3><p>${escape(note)}</p></article>`).join("");
+  $("audit-list").innerHTML=BOOKS.map((b)=>`<li class="audit-row"><div><a href="#${b.id}/0" data-audit-book="${b.id}">${escape(b.title)}</a><span class="small">${escape(b.editorial.reference)} · ${escape(b.editorial.mode)}${b.editorial.revised?" · Revised":""}</span></div><p>${escape(b.editorial.finding)}</p></li>`).join("");
+  $("audit-list").addEventListener("click",(event)=>{
+    const link=event.target.closest("[data-audit-book]");
+    if(!link || event.metaKey || event.ctrlKey) return;
+    event.preventDefault();
+    showBook(link.dataset.auditBook);
+  });
+  $("show-benchmark").addEventListener("click",()=>{ $("benchmark").open=true; $("benchmark").scrollIntoView({block:"start"}); });
+  $("samples").addEventListener("click",()=>{
+    for(const id of ["search","topic","stage"]) $(id).value="";
+    $("edition").value="revised";
+    renderShelf();
+    $("books").querySelector("button")?.focus();
+  });
+}
+renderShelf();
+const [startId,startPage]=location.hash.slice(1).split("/");
+if (startId) showBook(startId,startPage);
+</script>
+</body>
+</html>

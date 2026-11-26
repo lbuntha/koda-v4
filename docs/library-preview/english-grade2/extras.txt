@@ -1,0 +1,254 @@
+# Per-book quiz extras for the Grade 2 Studio drafts.
+# M: matching set — clue => story answer @page (3 pairs, answer comes from that page)
+# O: opposites — story word=opposite (become the Opposites board)
+# R: how each focus word is read (become the Read board)
+
+## owens-paper-boat
+M: Where the rain made a long pool of water => puddle @1 | What Owen used to color the paper => blue crayon @7 | What Lucy named the second boat => The Speedy Snail @8
+O: low=high, soft=hard, new=old
+R: boat=b·oa·t, rain=r·ai·n, float=fl·oa·t, sail=s·ai·l, wax=w·a·x
+
+## the-pear-at-the-top
+M: What grew beside the porch => pear tree @1 | What Grandma brought back from the shed => long pole @6 | Where they sat to eat the pear => porch steps @10
+O: tall=short, thin=thick, first=last
+R: pear=p·ear, reach=r·ea·ch, ripe=r·ipe, tree=tr·ee, safe=s·afe
+
+## hannahs-kite-tail
+M: Who held the kite up high => Jack @2 | What Hannah tied to the tail => red ribbon @6 | What Hannah wound up at sunset => string @10
+O: short=long, first=last, better=worse
+R: kite=k·ite, tail=t·ai·l, wind=w·i·nd, spin=sp·i·n, steady=stead·y
+
+## the-lemonade-stand
+M: The price of one cup => fifty cents @5 | What Mr. Brooks gave Ella => one-dollar bill @4 | Coins Ella counted out => two quarters @6
+O: empty=full, first=last, cold=hot
+R: cents=c·ents, price=pr·ice, change=ch·ange, counted=count·ed, quarter=quar·ter
+
+## the-seed-in-the-jar
+M: What Noah pressed inside the jar => paper towel @3 | Where Noah set the jar => sunny windowsill @4 | Where the class planted the beans => school garden @10
+O: dry=wet, down=up, first=last
+R: seed=s·ee·d, root=r·oo·t, shoot=sh·oo·t, jar=j·ar, grow=gr·ow
+
+## whose-water-bottle
+M: Where Henry found the bottle => gate @1 | The sticker on the bottle => green frog @2 | Who owned the bottle => Sam @7
+O: lose=find, big=small, right=wrong
+R: bottle=bot·tle, label=la·bel, clue=cl·ue, owner=own·er, return=re·turn
+
+## moon-shapes
+M: What the thin moon looked like => smile @1 | What Dad set on the table => white ball @5 | What Chloe made to show each night's moon => moon chart @9
+O: thin=thick, bigger=smaller, bright=dark
+R: moon=m·oo·n, shape=sh·ape, half=h·alf, full=f·ull, light=l·igh·t
+
+## step-by-step-for-bot
+M: What Bot rolled on => grid of paper squares @1 | What Leo put on one square => paper star @2 | What they used to plan the path => arrow cards @4
+O: forward=backward, right=left, short=long
+R: robot=ro·bot, steps=st·eps, exact=ex·act, forward=for·ward, turn=t·ur·n
+
+## the-elephants-mud-bath
+M: Where elephants live => Africa and Asia @1 | What elephants spray water with => trunks @4 | Who baby elephants copy => grown-ups @8
+O: thick=thin, wet=dry, hot=cold
+R: elephant=el·e·phant, mud=m·u·d, skin=sk·i·n, trunk=tr·u·nk, cool=c·oo·l
+
+## a-gift-for-grandpa
+M: One gift the cousins bought => a new hat @1 | Where Grandpa loved to be => garden @4 | Where Grandpa put the card => next to his teapot @10
+O: empty=full, best=worst, slowly=quickly
+R: gift=g·i·ft, card=c·ar·d, proud=pr·ou·d, worried=wor·ried, smile=sm·ile
+
+## mias-first-snow
+M: Where Mia grew up => Australia @1 | Color of the mittens Mom gave Mia => red @4 | Who gave Mia a turn on the sled => Zoe @7
+O: cold=warm, heavy=light, quietly=loudly
+R: snow=sn·ow, nervous=ner·vous, mittens=mit·tens, sled=sl·e·d, friend=fr·iend
+
+## the-paper-lantern
+M: Where Ben's aunt lives => Germany @1 | Color of the paper that covered the hole => blue @8 | Shape Ben cut the patch into => moon @8
+O: loudly=softly, dark=light, before=after
+R: lantern=lan·tern, glow=gl·ow, torn=t·or·n, patch=p·a·tch, song=s·o·ng
+
+## lost-at-the-market
+M: The city Sophie visited => Mexico City @1 | What the woman was making => tortillas @5 | How many slow breaths Sophie took => three @8
+O: fast=slow, huge=tiny, busy=quiet
+R: market=mar·ket, crowd=cr·ow·d, plan=pl·a·n, calm=c·alm, helper=help·er
+
+## the-too-big-boots
+M: Country of the hike => Scotland @1 | Who gave Jack the boots => Sam @2 | What Jack saw from the top => blue lake @11
+O: old=new, wet=dry, heavy=light
+R: boots=b·oots, puddle=pud·dle, brother=broth·er, grow=gr·ow, hike=h·ike
+
+## two-kinds-of-brave
+M: City where Ava and Leo lived => Sydney @1 | Animal Leo's talk was about => sea turtles @8 | What Ava gave Leo in class => thumbs-up @10
+O: deep=shallow, strong=weak, tiny=huge
+R: brave=br·ave, scared=sc·ared, swim=sw·i·m, speak=sp·ea·k, practice=prac·tice
+
+## cherry-blossom-picnic
+M: City Emma visited => Tokyo @1 | Food Yuki gave Emma => rice ball @7 | What landed on Yuki's nose => petal @9
+O: soft=hard, small=big, short=long
+R: blossom=blos·som, picnic=pic·nic, words=w·ords, share=sh·are, wave=w·ave
+
+## the-broken-sandcastle
+M: Country of the beach => Portugal @1 | What Max kicked => beach ball @2 | How many towers fell => two @3
+O: alone=together, strong=weak, far=near
+R: sandcastle=sand·cas·tle, sorry=sor·ry, wave=w·ave, fix=f·i·x, together=to·geth·er
+
+## a-song-for-the-baby
+M: Name of the baby => Finn @1 | Who used to sing the moon song => Grandma @6 | What Finn wrapped around Isla's finger => tiny hand @9
+O: asleep=awake, softly=loudly, tiny=huge
+R: baby=ba·by, cry=cr·y, quiet=qui·et, song=s·o·ng, help=h·e·lp
+
+## the-camel-ride
+M: Country of the trip => Morocco @1 | Name of the camel => Nour @4 | What Lucas fed Nour => hay @12
+O: wide=narrow, tight=loose, slowly=quickly
+R: camel=cam·el, desert=des·ert, guide=gu·ide, dune=d·une, stars=st·ars
+
+## the-speaker-heard-it-wrong
+M: Animal Grace was writing about => blue whales @2 | Word the speaker heard wrong => rail @3 | What Grace turned off => radio @6
+O: long=short, slowly=quickly, wrong=right
+R: speaker=speak·er, heard=h·eard, whale=wh·ale, clearly=clear·ly, check=ch·e·ck
+
+## penguin-dads-of-antarctica
+M: The coldest place on Earth => Antarctica @1 | Who keeps the egg on his feet => father @3 | What comes out of the egg => fluffy gray chick @9
+O: warm=cold, inside=outside, hungry=full
+R: penguin=pen·guin, egg=e·gg, huddle=hud·dle, ice=i·ce, warm=w·ar·m
+
+## built-for-the-desert
+M: What a camel's hump is full of => fat @3 | What keeps sand out of a camel's eyes => long eyelashes @6 | Where camels have tough patches => knees @10
+O: hot=cold, dry=wet, thick=thin
+R: camel=cam·el, hump=h·u·mp, fat=f·a·t, sand=s·a·nd, feet=f·ee·t
+
+## up-and-down-the-rain-forest
+M: Where the Amazon is => South America @1 | Birds that nest in the emergent layer => eagles @4 | Animals that rest in the understory => jaguars @8
+O: top=bottom, dark=bright, slowly=quickly
+R: forest=for·est, layer=lay·er, canopy=can·o·py, sunlight=sun·light, floor=fl·oor
+
+## when-the-monsoon-comes
+M: The country in the story => India @1 | Month the rain often comes => June @5 | What children float down the streets => paper boats @7
+O: dry=wet, low=high, early=late
+R: monsoon=mon·soon, wind=w·i·nd, farmers=farm·ers, rice=r·ice, flood=fl·oo·d
+
+## the-land-of-windmills
+M: Walls of earth that kept the sea out => dikes @3 | What windmills lifted water into => canals @6 | Place with nineteen old windmills => Kinderdijk @9
+O: low=high, old=new, dry=wet
+R: windmill=wind·mill, water=wa·ter, pump=p·u·mp, land=l·a·nd, power=pow·er
+
+## the-honeybee-dance
+M: The bee that lays the eggs => queen @2 | Yellow dust that sticks to a bee => pollen @5 | What nectar turns into => honey @11
+O: thick=thin, young=old, sweet=sour
+R: bee=b·ee, hive=h·ive, nectar=nec·tar, dance=d·ance, flower=flow·er
+
+## why-leaves-change-color
+M: What makes leaves green => chlorophyll @2 | Country with a maple leaf on its flag => Canada @8 | Where the tree keeps its food in winter => trunk and roots @10
+O: shorter=longer, cooler=warmer, new=old
+R: leaves=l·ea·ves, green=gr·ee·n, autumn=au·tumn, maple=ma·ple, color=col·or
+
+## islands-made-of-fire
+M: Ocean where Hawaii is => Pacific Ocean @1 | Melted rock under the Earth => magma @2 | What hot lava sends up from the ocean => steam @8
+O: hot=cold, hard=soft, new=old
+R: volcano=vol·ca·no, lava=la·va, island=is·land, rock=r·o·ck, cool=c·oo·l
+
+## the-great-migration
+M: Grassy plains in East Africa => Serengeti @1 | River the herd must cross => Mara River @9 | Animals waiting in the river => crocodiles @9
+O: fast=slow, deep=shallow, weakest=strongest
+R: herd=h·er·d, grass=gr·a·ss, rain=r·ai·n, river=riv·er, journey=jour·ney
+
+## how-a-map-app-finds-the-way
+M: What appeared on the screen => blue line @2 | What the orange sign said => ROAD CLOSED @8 | What showed the detour => arrow @10
+O: slow=fast, left=right, high=low
+R: map=m·a·p, satellite=sat·el·lite, route=r·oute, signal=sig·nal, sign=s·ign
+
+## the-bake-sale-budget
+M: City of the school => London @1 | What Grace and Oscar baked => chocolate chip cookies @3 | Price of one cookie => fifty pence @10
+O: buy=sell, more=less, end=start
+R: pounds=p·ounds, cost=c·o·st, total=to·tal, cookies=cook·ies, sell=s·e·ll
+
+## the-9-15-train
+M: Country of the holiday => Switzerland @1 | Platform the train left from => platform three @2 | What they built at the top => small snowman @13
+O: short=long, slowly=quickly, top=bottom
+R: train=tr·ai·n, clock=cl·o·ck, minutes=min·utes, timetable=time·ta·ble, platform=plat·form
+
+## how-tall-is-the-sunflower
+M: What came up after two weeks => green shoot @2 | Tool longer than the ruler => measuring tape @7 | Where Amelia hung her chart => bedroom wall @14
+O: taller=shorter, small=big, faster=slower
+R: measure=meas·ure, centimeters=cen·ti·me·ters, ruler=rul·er, taller=tall·er, chart=ch·ar·t
+
+## fair-shares-of-pizza
+M: City where pizza was first made => Naples @1 | Nico's grandma => Nonna Rosa @1 | Where they ate => sunny courtyard @14
+O: bigger=smaller, slowly=quickly, same=different
+R: pizza=piz·za, half=h·alf, quarter=quar·ter, equal=e·qual, slice=sl·ice
+
+## the-leaky-tent
+M: Country of the camping trip => New Zealand @1 | What Dad pushed deep into the ground => peg @11 | What they wiped the wet patch with => towel @13
+O: inside=outside, tight=loose, open=shut
+R: tent=t·e·nt, leak=l·ea·k, drip=dr·i·p, rope=r·ope, dry=dr·y
+
+## the-heavy-suitcase
+M: Country Jake flew to => Ireland @1 | What Mum used to weigh the suitcase => bathroom scale @5 | What Jake took out first => football @10
+O: full=empty, less=more, big=small
+R: suitcase=suit·case, kilograms=kil·o·grams, scale=sc·ale, heavy=heav·y, limit=lim·it
+
+## lost-in-the-zoo-map
+M: Zoo the family visited => Singapore Zoo @1 | Symbol for food on the key => cup @4 | Animal Ava wanted to see => orangutans @7
+O: north=south, left=right, little=big
+R: map=m·a·p, north=n·or·th, path=p·a·th, key=k·ey, entrance=en·trance
+
+## saving-for-a-bike
+M: Color of the bike => green @1 | Neighbor who asked for help => Mrs. Hill @9 | What Zoe rang as she rode home => silver bell @14
+O: slow=fast, more=less, better=worse
+R: save=s·ave, dollars=dol·lars, weeks=w·eeks, chart=ch·ar·t, goal=g·oa·l
+
+## too-much-fish-food
+M: Name of the class goldfish => Bubbles @1 | Who said the class needed a schedule => Sara @9 | What you put in the box after feeding => tick @11
+O: cloudy=clear, dirty=clean, small=big
+R: fish=f·i·sh, schedule=sched·ule, calendar=cal·en·dar, pinch=p·i·nch, tank=t·a·nk
+
+## the-robot-vacuum-gets-stuck
+M: Where the vacuum got stuck on Monday => under the sofa @5 | What Dad put along the bottom of the sofa => wooden strip @10 | What the vacuum went back to => charger @13
+O: low=high, tight=loose, whole=part
+R: vacuum=vac·u·um, stuck=st·u·ck, pattern=pat·tern, test=t·e·st, cord=c·or·d
+
+## do-goldfish-really-forget
+M: Name of Ella's goldfish => Sunny @1 | Where Jake saw it => video @3 | The second source they visited => aquarium @9
+O: sad=happy, long=short, gently=roughly
+R: goldfish=gold·fish, memory=mem·o·ry, check=ch·e·ck, source=s·our·ce, fact=f·a·ct
+
+## the-owl-that-wasnt-real
+M: Who sent the picture => Uncle Pete @1 | Toes a real owl has on each foot => four @6 | Real owl Noah showed Ivy => snowy owl @12
+O: real=fake, smooth=rough, little=big
+R: picture=pic·ture, real=r·ea·l, clue=cl·ue, share=sh·are, owl=ow·l
+
+## should-we-get-a-class-pet
+M: Teacher of the class => Ms. Lee @1 | Pet Daniel wanted => rabbit @3 | What the class built => wooden bird feeder @13
+O: different=same, outside=inside, happy=sad
+R: opinion=o·pin·ion, reason=rea·son, vote=v·ote, pet=p·e·t, care=c·are
+
+## the-plastic-on-the-beach
+M: Country of the holiday => Thailand @1 | Straws the hotel will use => paper straws @12 | Club Mia and Jack started => cleanup club @14
+O: cleaner=dirtier, small=big, first=last
+R: plastic=plas·tic, beach=b·ea·ch, count=c·ount, letter=let·ter, ocean=o·cean
+
+## two-grandmas-two-kitchens
+M: Lily's Italian grandma => Nonna @2 | Korean dumplings => mandu @7 | What Nonna served the ravioli with => tomato sauce @6
+O: thin=thick, different=same, big=small
+R: dumplings=dump·lings, dough=d·ough, compare=com·pare, both=b·oth, family=fam·i·ly
+
+## leo-and-the-chatbot
+M: Teacher who read the stories => Ms. Reed @5 | Ideas the chatbot listed => a mouse, an eagle, and a dragon @9 | What Leo's dragon was scared of => the dark @10
+O: brave=scared, small=big, private=public
+R: chatbot=chat·bot, ideas=i·de·as, own=ow·n, private=pri·vate, story=sto·ry
+
+## a-tree-for-every-child
+M: Country of Ruby's pen pal => Kenya @1 | Amani's tree => small avocado tree @9 | Tree Ruby planted => apple tree @11
+O: dry=wet, small=big, hot=cold
+R: trees=tr·ees, plant=pl·a·nt, shade=sh·ade, soil=s·oi·l, roots=r·oots
+
+## how-should-we-get-to-school
+M: City where Anna lives => Amsterdam @1 | How many children came by bike => fourteen @4 | What Anna turned the tally chart into => bar graph @5
+O: fast=slow, far=near, tallest=shortest
+R: bike=b·ike, bus=b·u·s, walk=w·al·k, graph=gr·a·ph, safe=s·afe
+
+## hello-around-the-world
+M: Hello word Priya said => Namaste @4 | Sophea's greeting from Cambodia => sampeah @5 | Māori greeting Tama showed => hongi @8
+O: forward=backward, older=younger, higher=lower
+R: greeting=greet·ing, bow=b·ow, hands=h·a·nds, respect=re·spect, culture=cul·ture
+
+## the-super-shoes-ad
+M: Color of the shoes in the ad => bright red @1 | Who let Ben use the Super Shoes => cousin @4 | What Maya used to mark the wall => chalk @7
+O: same=different, loud=quiet, old=new
+R: ad=a·d, promise=prom·ise, test=t·e·st, jump=j·u·mp, fair=f·air

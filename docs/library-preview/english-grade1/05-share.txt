@@ -1,0 +1,189 @@
+# How a Seed Gets a Ride | Nature | 🌾 | Compare explanations across pages
+about: A field-guide story follows three ways seeds can travel and asks readers to explain one.
+words: seed, burr, float, wind, travel
+cover: A child’s notebook shows a flying seed, a burr, and a floating seed case.
+read: Make three headings: air, animal, water. Use the story to put one seed example under each heading.
+Kai finds a small seed with a tuft of fluff. It drifts past the garden gate. | Show one tufted seed moving in a light breeze.
+The wind carries it. The fluffy hairs help it stay in the air for a while. | A close view shows fine hairs above a seed.
+Another day, Kai’s dog walks back from the field. A burr is caught in its fur. | An adult checks a burr on the dog’s fur.
+Dad takes the burr off gently. It has small hooks that can catch on fur. | A simple close-up shows tiny hooks on a burr.
+“The burr got a ride,” Kai says. It may carry seeds away from the plant. | A diagram links a plant to a dog passing nearby.
+On a walk with Dad, Kai sees a light seed case in a stream. It floats past a stone. | A small case floats while Kai watches from a dry bank.
+Dad says some seeds can travel on water. The case may wash up somewhere new. | A simple arrow shows where a floating case might land.
+Kai makes three pictures in a notebook. One shows air, one an animal, and one water. | Three distinct diagram panels appear.
+Kai reads each caption to Dad. Dad asks, “Do all seeds travel the same way?” | Dad and Kai look at the three panels.
+“No,” Kai says. “Their shapes and what they touch can help them move in different ways.” | Kai compares the three seed shapes in the finished notebook.
+? What moves the fluffy seed? | The wind. | 2
+? What helps the burr catch on fur? | Small hooks. | 4
+? How does the seed case move in the stream? | It floats on the water. | 6
+
+# The Animal Guide That Got Mixed Up | AI & Technology | 🐋 | Check a claim against a source
+about: A child catches a mix-up between whales and fish and fixes a class card using a guide.
+words: whale, fish, air, surface, guide
+cover: A child points to a whale at the surface in an animal guide.
+read: Read the two claims about whales. Say which one agrees with the guide and where you found it.
+Tess wants one fact for her whale card. Her class has a stack of animal guides. | Tess chooses a folder with a whale picture.
+The teacher opens an AI tool. They ask it for a short fact about whales. | The teacher types the question at the class table.
+The tool says, “Whales breathe under water like fish.” Tess pauses. | A blank label area is ready for the deliberately incorrect quote.
+Tess has seen a film of a whale coming up to the surface. She wants to check both ideas. | A whale surfaces in a thought bubble.
+Her guide says whales breathe air. They come to the surface to take a breath. | An illustrated guide shows a whale surfacing.
+Most fish get oxygen from water through their gills. The whale page shows a blowhole instead. | Use separate fish and whale diagrams and avoid implying all fish breathe identically.
+Tess reads the whale fact aloud to the teacher. They agree to use that fact. | Tess identifies the printed fact with her finger.
+She changes the card. Her picture shows a whale at the surface, taking a breath. | A whale is level with the water’s surface.
+Tess writes the name of the guide at the bottom of her card. Now another reader can find the fact. | A blank source line sits at the bottom of the card.
+A friend asks why she checked. Tess says, “A quick answer can still mix things up.” | Both children look at the card and open guide.
+? What does the tool get wrong? | It says whales can breathe under water like fish. | 3
+? Where do whales go to take a breath? | To the surface. | 5
+? Why does Tess put the guide’s name on her card? | So another reader can find the fact. | 9
+
+# Make a Fair Sort | AI & Technology | 🧩 | Explain how examples change a rule
+about: Children play a sorting game to see how too few examples can make a tool miss something.
+words: sort, example, rule, shape, check
+cover: A sorting mat shows round paper shapes in several colors and sizes.
+read: Find which examples were missing. Explain what a child changes before the second test.
+The teacher sets out shape cards and two trays. One tray is for circles. | Two trays and a varied pile of cards sit on a table.
+To start, the teacher shows only large red circles. Jo notices that all the examples share a color. | All beginning circle examples are large and red.
+The class pretends to be a sorting tool. Some children make a rule: “Put red cards in the circle tray.” | Children place cards according to the first rule.
+Next comes a small blue circle. It goes in the wrong tray because the rule sorts by color. | A small blue circle is apart from the red circles.
+A red square comes next. The rule gets that one wrong, too. | A red square is clearly in the circle tray in error.
+Jo asks for more examples. The class looks at large and small circles in several colors. | Multiple sizes and colors of circles are arranged together.
+They also show squares in some of those same colors. Now red alone cannot tell a circle from a square. | Red and blue squares appear beside matching-color circles.
+The new rule looks at shape. The class tries it with cards they did not see before. | Several new shapes lie face down beside the trays.
+The teacher explains that AI tools can also learn from examples. People still have to check what the tools get wrong. | The teacher compares the sorting game to a simple tool icon.
+Jo finds one more card to test. It is a tiny green circle. | The tiny green circle is placed in its correct tray.
+? What do the first examples have in common besides shape? | They are all large and red. | 2
+? Why does the first rule miss the blue circle? | It sorts by color instead of shape. | 4
+? What do they use to test the new rule? | Cards they did not see before. | 8
+
+# A Letter That Sounds Like Me | AI & Technology | 💌 | Identify voice and choose a reason
+about: A child revises an overly formal suggestion into a warm message for a friend.
+words: letter, message, voice, words, spelling
+cover: A child writes a thank-you note beside a folded paper star.
+read: Read both messages. Explain which one sounds like Anya and point to the detail that makes it personal.
+Anya’s friend Finn showed her how to fold a star. Anya wants to write a thank-you letter. | A paper star sits beside blank writing paper.
+She knows what she wants to say. She feels stuck on how to start the letter. | Anya holds a pencil over the blank page.
+With her dad, she asks an AI tool for a sample thank-you message. They leave out real names. | Dad helps with a sample request that uses no names.
+The sample begins, “Please accept my deepest thanks.” Anya tries to read it aloud. | Anya reads a sample with a slightly puzzled face.
+“I would never say that to Finn,” she says. She thinks about their time together. | A small memory panel shows the children folding a paper star.
+Anya starts again in her own words. “Thanks for helping me fold the sharp tips.” | Anya writes a shorter sentence beside the star.
+She adds, “I liked the way you waited while I tried.” That is what she wants Finn to know. | Anya remembers Finn waiting patiently.
+Dad helps her check the spelling. Anya keeps her own words. | Dad points with an open hand while Anya holds the pencil.
+Finn reads the letter at school. “I remember those tips!” he says. | Finn smiles at the note and the paper star.
+Anya hears her own voice when Finn reads her words. Next time, she knows how she can start. | Anya smiles as Finn reads aloud.
+? What did Finn show Anya how to make? | A paper star. | 1
+? What personal detail does Anya add? | Finn waited while she tried. | 7
+? Who writes the final words? | Anya. | 8
+
+# When the Tool Says “I Don’t Know” | AI & Technology | 🔎 | Tell what can and cannot be known
+about: A child puts an unknown leaf aside and asks for help when a photo gives too little information.
+words: leaf, shape, spot, unknown, check
+cover: A spotted leaf sits on a classroom table beside a field guide and magnifying glass.
+read: Find the words “might be” and “not sure.” Explain why they matter.
+A leaf lies on the school path. It is broad, with two brown spots. | A leaf lies by itself on pavement.
+A teacher picks it up for the class. Arun draws the shape and the spots. | The teacher holds it by the stem and Arun sketches.
+They take a picture of the leaf with the teacher’s tablet. An AI tool suggests it might be from a fig tree. | A tablet points only at the leaf with no faces in view.
+The tool also says it is not sure. It asks for a clearer view of the plant. | A leaf image is shown with a blank area for words to be set later.
+“But we only have the leaf,” says Arun. He checks the picture again. | Arun sees only one loose leaf in the image.
+Their field guide shows several leaves shaped like it. The spots do not settle the question. | Several similar leaf shapes appear in a guide.
+Arun writes “unknown” on the card. He can still describe what he sees. | A blank label area lies beside the traced leaf.
+“We can ask our garden teacher,” says a friend. Arun keeps the notes ready. | Two children put away the guide and keep the notes.
+They do not pick or taste leaves to find out. The teacher shows them where to look from the path. | The class observes plants from a paved path.
+Arun reads his notes to the group. “I can tell you what I saw, even while I wait to learn its name.” | Arun points to his drawing rather than claiming a species.
+? What features does Arun draw? | The leaf’s shape and two brown spots. | 2
+? Why does the tool ask for another view? | It is not sure and wants to see more of the plant. | 4
+? What word does Arun put on the card? | “Unknown.” | 7
+
+# The Bench That Needed Us | Community | 🪑 | Compare a plan to what people say
+about: A class listens to several people before suggesting a better place for a school bench.
+words: bench, path, shade, space, plan
+cover: Three people discuss a bench location beside an open school path.
+read: Name two needs in the story. Find the pages that show how the final plan meets them.
+The class has a garden bench. There is room to set it in two places. | Show a garden bench and two open locations.
+Amir wants it right by the gate. He draws a little circle on the garden map. | Amir makes a tentative mark on a simple map.
+Tali checks the path. A bench there would make it hard to get past. | Show the gate as a narrow path and Tali measuring space.
+An older visitor says a seat in the shade would help on a hot day. The class adds that to the list. | A visitor points toward a shaded spot.
+The teacher asks everyone to compare the two places. Both have some good points. | Children look at map and real garden from a safe path.
+By the tree there is shade. There is also room to keep the path wide. | The second location is under a tree with clear space beside it.
+The class moves a paper bench on the map. The caretaker checks the real space. | Children move a tiny paper marker as a caretaker measures.
+They read the final plan together. The caretaker will place the bench by the tree. | The teacher holds a plain plan with the bench next to the tree symbol.
+When the bench is ready, people can walk past without squeezing. Tali stops for a rest. | The physical bench sits next to a wide unobstructed path.
+Amir looks at his first map. “I am glad we asked,” he says. | Amir compares his first mark with the final plan.
+? What problem does Tali see at the gate? | A bench would make the path hard to get through. | 3
+? What does the visitor ask for? | A seat in the shade. | 4
+? Why does the group choose the tree? | It has shade and enough space to keep the path wide. | 6
+
+# Who Came to the Pond? | Animals | 🐾 | Build an inference from two clues
+about: Two friends look at tracks and learn when a clue is enough for a guess rather than an answer.
+words: track, webbed, mud, clue, guess
+cover: Two children study webbed footprints at the edge of a muddy pond path.
+read: Find two clues for a duck. Say what the children did and did not see.
+The night rain leaves mud by the pond. Sol sees a row of prints on the path. | A line of clear tracks crosses damp mud.
+One print has toes with a flat edge between them. Sol draws it without stepping in the mud. | Close view of a clear webbed bird track.
+Val sees a feather near the prints. She leaves it where it lies. | A small feather sits close to the tracks.
+“Maybe a duck was here,” says Val. “Ducks have webbed feet.” | Val points from her sketch to a duck picture.
+Sol opens the bird guide they brought. It shows that other birds can have webbed feet, too. | A guide shows two kinds of webbed bird feet.
+The tracks make a good clue, but the prints alone do not tell the bird’s name. Sol writes “maybe duck.” | Sol records a tentative guess in a notebook.
+They sit on a dry bench and watch. After a while a duck waddles on the far bank. | A distant duck appears on the opposite side of the pond.
+The children see the duck make new marks in the mud. They watch its feet touch down. | A duck visibly makes fresh tracks across the far bank.
+“Those prints are from a duck,” says Sol. “We saw it make those ones.” | The children point toward the far bank.
+The old tracks might be from a duck, too. Val keeps the old guess and the new fact on different lines. | Her notebook has two rows with separate illustrations.
+? What clue does Val find near the old tracks? | A feather. | 3
+? Why can’t the old prints prove a duck was there? | Other birds can have webbed feet, too. | 5
+? How do they know what made the new marks? | They see the duck make them. | 8
+
+# We Can Fix the Directions | Make & Build | 🧭 | Read and revise missing steps
+about: A child tests directions for making a paper tent and notices one step is missing.
+words: direction, fold, edge, open, test
+cover: Two children test a simple folded paper tent on a table.
+read: Tell which action was missing. Read the finished directions to a partner who has not seen the tent.
+Sia folds a sheet of paper to make a tent for a toy. It stands on its edges. | A folded paper tent is open and balanced on a flat table.
+She writes two steps for a friend. The first says, “Fold the sheet in half.” | A diagram shows a sheet folded at the center.
+The next step says, “Put it on the table.” Sia gives the directions to Max. | Sia hands Max a short instruction sheet.
+Max folds the sheet and lays it flat. It does not stand up. | A closed folded sheet lies flat on the table.
+“Can you show me what you read?” asks Sia. Max points to each line. | Max points to the two lines, with blank spaces for typeset text.
+Sia sees that she left out a step. The two edges must open a little. | Both edges open slightly like an upside-down V.
+She adds a line between the other two. “Open the edges a little.” | The revised directions have three clear picture steps.
+Max reads all three. His paper tent stands this time. | Max’s tent stands with its open edges touching the table.
+A younger child tries the same directions. Sia waits to see if the words are clear. | A younger child follows the three-step strip without being shown first.
+The child sets a toy next to the tent. Sia keeps the tested directions for the class. | A tiny toy sits by the tent and the finished direction sheet.
+? What does Max do when he reads the first draft? | He folds the sheet and lays it flat. | 4
+? What step is missing? | Open the edges a little. | 7
+? How does Sia check the new directions again? | She lets another child try them. | 9
+
+# The Evening Power Pause | Everyday | 🌙 | Retell how a plan changes
+about: A family changes its reading plans when the lights go out, then shares the story by touch and memory.
+words: power, pause, lamp, remember, share
+cover: Two children use picture cards together at a table with an adult and a battery lamp.
+read: Retell what the family does before, during, and after the power goes out. Choose a favorite detail.
+A family is about to read a book together. The power goes out and the lamp goes dark. | The family has an open book on a sofa as the lamp goes dark.
+“Let’s pause,” says Dad. He asks the children to stay where they are while he gets a battery lamp. | An adult returns with a small battery lamp.
+The small lamp works. It is bright enough for one table, so they move there together. | The family settles near one pool of warm light.
+Mara wants to keep reading. Her brother wants to share a story he can remember. | The children each share what they want to do.
+They read one page first. It shows a bear at a gate. | The open book shows one bear near a gate.
+Then Dad turns the page toward the table. “What do you think happens next?” he asks. | An adult pauses with a hand at the page edge.
+Mara tells a possible next part. Her brother adds the sound of footsteps with his fingers. | A child taps two fingers lightly on the table.
+The family makes up an ending together. Then they read the book’s own ending to compare. | The family turns to the last page with interest.
+The room lights come back. Mara wants to leave the little lamp on for one more minute. | Both the power lamp and the small battery lamp are visible.
+Dad puts a bookmark in the book. “Tomorrow we can try another ending,” says Mara. | A bookmark saves their place as the family smiles.
+? What does Dad use when the power goes out? | A battery lamp. | 2
+? What does Mara’s brother add to their story? | The sound of footsteps. | 7
+? What do they read after making up an ending? | The book’s own ending. | 8
+
+# A Book for the Next Reader | Community | 📖 | Summarize, revise, and recommend
+about: A class writes a short book recommendation backed by a detail from the story.
+words: recommend, detail, reason, reread, reader
+cover: A child leaves a recommendation card on a library shelf beside a favorite book.
+read: Give a friend a short recommendation for one book in this collection. Include one real detail and a reason.
+The class wants to help the next group find books. Each child can write one book card. | A low shelf has a stack of blank cards.
+Noor picks a book about a frog. She writes, “It is good.” | Noor’s first card has space for a short typeset line.
+“What makes it good to you?” asks her friend. Noor opens the story again. | A friend points to an open frog book.
+Noor rereads one detail: the frog waits on a log because a bug is in its way. | An inset shows a frog and a beetle on a log.
+Noor remembers liking that pause. She wanted to know what the frog would do. | Noor looks at the page with a thoughtful expression.
+She writes a new card. “A frog stops for a bug. Read to see where it hops next.” | A revised card and the frog illustration lie side by side.
+Her friend reads the card. “I know what to look for now. Would you recommend it to another friend?” he asks. | The friend takes the card and chooses the book.
+Noor puts the card beside the book. Another reader can choose if that story is for them. | A recommendation card sits visibly next to the book.
+The teacher asks why Noor reread the page. Noor says the page helped her give a real reason. | Noor shows the teacher the exact page she used.
+Noor takes a fresh card. She has another book in mind, and she knows where to begin. | Noor picks up a blank card and looks toward the library shelf.
+? What detail does Noor find when she rereads? | The frog waits on a log because a bug is in its way. | 4
+? How does the new card help her friend? | It gives him something specific to look for. | 7
+? Why does Noor go back to the book before writing? | To find a real detail and give a reason. | 9

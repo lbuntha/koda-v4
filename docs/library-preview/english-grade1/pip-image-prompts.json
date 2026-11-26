@@ -1,0 +1,53 @@
+{
+  "generator": "Built-in image generation",
+  "cover": {
+    "asset": "pip-cover.webp",
+    "prompt": "Portrait 3:4 cover artwork for an original Grade 1 beginning reader called Pip and the Red Lid. Show a small playful ginger tabby kitten with four white paws, white chin and short curled tail, one large low shallow round RED jar lid without writing, and a little rectangular straw floor mat with a dark teal stripe near each short edge. Pip has just lifted one front paw to tap the red lid on the mat; his large curious eyes look right at the lid. Simple bright indoor corner, pale oatmeal walls, natural window light, plain floor, inviting expressive warm gouache and lightly textured painted paper. Strong simple silhouettes that read on a phone. Render subjects in the lower two thirds. The top is quiet pale cream for HTML title lettering added separately. No other toys, people, writing, letters, numbers, frame or logos. This is a standalone image and will establish reference for six illustrated pages."
+  },
+  "pages": [
+    {
+      "asset": "pip-page-1.webp",
+      "reference": "pip-cover.webp",
+      "prompt": "One landscape 4:3 picture book illustration. Use the attached cover as the style and character reference, not the composition. Preserve exactly Pip's small ginger tabby appearance with white paws, white chin, and short curled tail, the cream room, honey oak floor, window light, and painted-paper gouache texture. Preserve red jar lid and teal-edged straw mat only when specified. Large simple shapes for a phone, no panel borders, no empty title banner, no writing, letters, numbers, logos or watermarks. Pip is a cat: clear simple close view of only Pip standing on an oak floor beside a sunny window. The frame shows his white paws and ginger stripes. No mat or lid yet."
+    },
+    {
+      "asset": "pip-page-2.webp",
+      "reference": "pip-cover.webp",
+      "prompt": "One landscape 4:3 picture book illustration. Use the attached cover as the style and character reference, not the composition. Preserve exactly Pip's small ginger tabby appearance with white paws, white chin, and short curled tail, the cream room, honey oak floor, window light, and painted-paper gouache texture. Preserve red jar lid and teal-edged straw mat only when specified. Large simple shapes for a phone, no panel borders, no empty title banner, no writing, letters, numbers, logos or watermarks. Pip sits on the mat. Pip sits upright with front paws together in the middle of the rectangular straw mat with dark teal end stripes. No lid yet, and no other objects."
+    },
+    {
+      "asset": "pip-page-3.webp",
+      "reference": "pip-cover.webp",
+      "prompt": "One landscape 4:3 picture book illustration. Use the attached cover as the style and character reference, not the composition. Preserve exactly Pip's small ginger tabby appearance with white paws, white chin, and short curled tail, the cream room, honey oak floor, window light, and painted-paper gouache texture. Preserve red jar lid and teal-edged straw mat only when specified. Large simple shapes for a phone, no panel borders, no empty title banner, no writing, letters, numbers, logos or watermarks. Pip taps the red lid. Show the same mat and round red lid flat on it, with one white kitten paw just tapping the rim. Focus on the point of contact. No motion yet."
+    },
+    {
+      "asset": "pip-page-4.webp",
+      "reference": "pip-cover.webp",
+      "prompt": "One landscape 4:3 picture book illustration. Use the attached cover as the style and character reference, not the composition. Preserve exactly Pip's small ginger tabby appearance with white paws, white chin, and short curled tail, the cream room, honey oak floor, window light, and painted-paper gouache texture. Preserve red jar lid and teal-edged straw mat only when specified. Large simple shapes for a phone, no panel borders, no empty title banner, no writing, letters, numbers, logos or watermarks. The lid tips. Show a tight low-angle scene, kitten pulling one white paw back with curious wide eyes, round red lid tilted with one side visibly raised off the straw mat. The lid is still on its rim, not spinning. Full red shape clear."
+    },
+    {
+      "asset": "pip-page-5.webp",
+      "reference": "pip-cover.webp",
+      "prompt": "One landscape 4:3 picture book illustration. Use the attached cover as the style and character reference, not the composition. Preserve exactly Pip's small ginger tabby appearance with white paws, white chin, and short curled tail, the cream room, honey oak floor, window light, and painted-paper gouache texture. Preserve red jar lid and teal-edged straw mat only when specified. Large simple shapes for a phone, no panel borders, no empty title banner, no writing, letters, numbers, logos or watermarks. Pip sits on the lid. The same large red lid is flat on the mat with the little kitten sitting neatly in its shallow center, white paws visible near the rim. No other prop."
+    },
+    {
+      "asset": "pip-page-6.webp",
+      "reference": "pip-cover.webp",
+      "prompt": "One landscape 4:3 picture book illustration. Use the attached cover as the style and character reference, not the composition. Preserve exactly Pip's small ginger tabby appearance with white paws, white chin, and short curled tail, the cream room, honey oak floor, window light, and painted-paper gouache texture. Preserve red jar lid and teal-edged straw mat only when specified. Large simple shapes for a phone, no panel borders, no empty title banner, no writing, letters, numbers, logos or watermarks. Pip and the lid stay still. Show a quiet slightly wider view of the same kitten sitting very upright and still on the flat red lid on the straw mat. Gentle angle, warm window light, tail curled, a small contented expression, humor in the perfect stillness. No extra objects."
+    }
+  ],
+  "wordCards": [
+    {
+      "asset": "word-lid.webp",
+      "prompt": "An isolated picture vocabulary card for a beginning reader. Show a single RED shallow round jar lid, upturned at a slight angle, with a simple short ridged rim and a flat inside; no jar, no handles or markings. Warm gouache on a clean oatmeal background, a large unmistakable single object centered with space around it, muted shadows. Square 1:1. No words, lettering, numbers, logos, or other objects. Readable at 96 pixels."
+    },
+    {
+      "asset": "word-mat.webp",
+      "prompt": "An isolated picture vocabulary card for a beginning reader. Show a small rectangular straw woven floor mat laid flat, with a dark teal stripe near each short edge and no fringe; low viewpoint so you can see the thin woven surface and four corners, no cushion. Warm gouache on a clean oatmeal background, a large unmistakable single object centered with space around it, muted shadows. Square 1:1. No words, lettering, numbers, logos, or other objects. Readable at 96 pixels."
+    },
+    {
+      "asset": "word-cat.webp",
+      "prompt": "An isolated picture vocabulary card for a beginning reader. Show one small ginger tabby kitten with white chin and paws, curled tail, sitting upright, complete body, no accessories. Warm gouache on a clean oatmeal background, a large unmistakable single object centered with space around it, muted shadows. Square 1:1. No words, lettering, numbers, logos, or other objects. Readable at 96 pixels."
+    }
+  ]
+}
