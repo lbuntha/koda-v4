@@ -20594,6 +20594,1903 @@
     ]
   },
   {
+    "id": "measurement",
+    "name": "Measure It",
+    "version": "0.1.0",
+    "description": "Every kind of measuring a primary school teaches, for the US, UK and Cambodian curricula: comparing, units, rulers, mass, capacity, temperature, time, area, volume, angles and converting. Built phase by phase; this release covers comparing length, mass and capacity, measuring with blocks, cubes and cups, reading rulers in cm, mm and inches, estimating, reading scales, jugs and thermometers, and word problems.",
+    "category": "core",
+    "author": "Koda Math Lab",
+    "iconName": "Ruler",
+    "tagline": "Compare, measure, and know what the numbers mean.",
+    "thumbnail": "measurement-quest",
+    "status": "draft",
+    "audience": {
+      "ages": [
+        5,
+        12
+      ],
+      "category": "measurement"
+    },
+    "topics": [
+      "measurement"
+    ],
+    "teaches": [
+      "measurable-attribute",
+      "length-comparer",
+      "length-orderer",
+      "indirect-comparer",
+      "mass-comparer",
+      "capacity-comparer",
+      "unit-iterator",
+      "unit-size-reasoner",
+      "mass-unit-iterator",
+      "capacity-unit-iterator",
+      "ruler-reader",
+      "ruler-drawer",
+      "broken-ruler-reader",
+      "length-difference",
+      "unit-chooser",
+      "length-estimator",
+      "length-number-line",
+      "customary-length-reader",
+      "fraction-measurer",
+      "mm-reader",
+      "scale-reader",
+      "scale-interval-reader",
+      "customary-mass-reader",
+      "jug-reader",
+      "customary-capacity-reader",
+      "thermometer-reader",
+      "negative-temperature",
+      "temperature-change",
+      "fahrenheit-reader",
+      "measure-calculator"
+    ],
+    "requires": [
+      "comparer",
+      "counter"
+    ],
+    "features": [
+      {
+        "id": "audio_speech",
+        "name": "Spoken voice",
+        "description": "Reads the lesson prompt and the How to play captions aloud. Turn off for a silent lesson.",
+        "isEnabled": true,
+        "tag": "Audio"
+      },
+      {
+        "id": "sound_chimes",
+        "name": "Sound chimes",
+        "description": "Plays a short sound when something moves, and when an answer is right or wrong.",
+        "isEnabled": true,
+        "tag": "Audio"
+      },
+      {
+        "id": "haptic_feedback",
+        "name": "Haptic vibration",
+        "description": "Adds a small vibration when an answer is right or wrong.",
+        "isEnabled": true,
+        "tag": "Haptic"
+      },
+      {
+        "id": "instrument_motion",
+        "name": "Instrument motion",
+        "description": "The balance beam tips, water rises, the scale needle swings and the thermometer climbs. Off: each one jumps straight to its value.",
+        "isEnabled": true,
+        "tag": "Motion"
+      }
+    ],
+    "settings": {
+      "speechRate": 0.95
+    },
+    "settingsSchema": [
+      {
+        "key": "speechRate",
+        "label": "Speech rate",
+        "help": "How fast Koda reads aloud.",
+        "type": "number",
+        "min": 0.5,
+        "max": 2,
+        "step": 0.05,
+        "unit": "x"
+      }
+    ],
+    "lessons": [
+      {
+        "id": "what-can-we-measure",
+        "title": "What Can We Measure?",
+        "concept": "Long, Heavy or Holds More",
+        "conceptKey": "measurable-attribute",
+        "requires": [
+          "comparer"
+        ],
+        "activity": "measurement/compare",
+        "params": {
+          "level": 1,
+          "question": {
+            "mode": "attribute",
+            "questionsPerRound": 5
+          },
+          "play": {
+            "targetObjective": "Choose the tool that answers the question: how long, how heavy, or how much it holds.",
+            "stepByStep": [
+              "Listen to the question.",
+              "Is it about how long, how heavy, or how much it holds?",
+              "Tap the tool that finds out."
+            ],
+            "kidTip": "A ruler is for long. A balance is for heavy. A jug is for how much it holds.",
+            "audioPrompt": "What would you use to find out? Tap the tool."
+          }
+        },
+        "difficulty": "Easy",
+        "icon": "measurement-tools",
+        "iconName": "scale",
+        "iconTone": "purple",
+        "pedagogyTip": "Naming the attribute comes before measuring it: a child who says \"bigger\" for everything cannot yet choose what to compare.",
+        "standards": [
+          "CCSS.K.MD.A.1"
+        ],
+        "trajectoryLevel": "length-quantity-recognizer",
+        "ageBand": [
+          5,
+          6
+        ],
+        "curricula": {
+          "GB": "Y1"
+        }
+      },
+      {
+        "id": "longer-shorter",
+        "title": "Longer or Shorter?",
+        "concept": "Comparing Two Lengths",
+        "conceptKey": "length-comparer",
+        "requires": [
+          "measurable-attribute"
+        ],
+        "activity": "measurement/compare",
+        "params": {
+          "level": 2,
+          "question": {
+            "mode": "pick",
+            "questionsPerRound": 5
+          },
+          "play": {
+            "targetObjective": "Pick the longer or the shorter of two things that start at the same line.",
+            "stepByStep": [
+              "Both start at the line.",
+              "Look at the other ends.",
+              "The one that ends further away is longer."
+            ],
+            "kidTip": "Look at the ends. Which one goes further?",
+            "audioPrompt": "Which one is longer, or shorter? Tap it."
+          }
+        },
+        "difficulty": "Easy",
+        "icon": "measurement-compare",
+        "iconName": "ruler",
+        "iconTone": "cyan",
+        "pedagogyTip": "Both things start together, so the comparison is only about where they end. The next lesson takes that support away.",
+        "standards": [
+          "CCSS.K.MD.A.2"
+        ],
+        "trajectoryLevel": "length-direct-comparer",
+        "ageBand": [
+          5,
+          6
+        ],
+        "curricula": {
+          "GB": "Y1"
+        }
+      },
+      {
+        "id": "taller-shorter",
+        "title": "Taller or Shorter?",
+        "concept": "Comparing Two Heights",
+        "conceptKey": "length-comparer",
+        "requires": [
+          "length-comparer"
+        ],
+        "activity": "measurement/compare",
+        "params": {
+          "level": 3,
+          "question": {
+            "mode": "pick_vertical",
+            "questionsPerRound": 5
+          },
+          "play": {
+            "targetObjective": "Pick the taller or the shorter of two things standing on the same floor.",
+            "stepByStep": [
+              "Both stand on the floor.",
+              "Look at the tops.",
+              "The one with the higher top is taller."
+            ],
+            "kidTip": "They stand on the same floor. Look at the tops.",
+            "audioPrompt": "Which one is taller, or shorter? Tap it."
+          }
+        },
+        "difficulty": "Easy",
+        "icon": "measurement-tall",
+        "iconName": "ruler",
+        "iconTone": "pink",
+        "pedagogyTip": "Height is length standing up. Using the same floor is the vertical version of a shared start line.",
+        "standards": [
+          "CCSS.K.MD.A.2"
+        ],
+        "trajectoryLevel": "length-direct-comparer",
+        "ageBand": [
+          5,
+          6
+        ],
+        "curricula": {
+          "GB": "Y1"
+        }
+      },
+      {
+        "id": "line-them-up",
+        "title": "Line Them Up",
+        "concept": "Same Start, Fair Compare",
+        "conceptKey": "length-comparer",
+        "requires": [
+          "length-comparer"
+        ],
+        "activity": "measurement/compare",
+        "params": {
+          "level": 4,
+          "question": {
+            "mode": "align",
+            "questionsPerRound": 5
+          },
+          "play": {
+            "targetObjective": "Move things to the same start line before saying which is longer.",
+            "stepByStep": [
+              "Find the one that starts late.",
+              "Tap it, then tap the start line.",
+              "Now compare the ends."
+            ],
+            "kidTip": "Start them together before you choose.",
+            "audioPrompt": "Which one is really longer? Line them up first."
+          }
+        },
+        "difficulty": "Easy",
+        "icon": "measurement-line-up",
+        "iconName": "ruler",
+        "iconTone": "emerald",
+        "pedagogyTip": "The shorter thing starts late so its end sticks out further. A child who judges by the far end alone gets it wrong, which is the point.",
+        "standards": [
+          "CCSS.1.MD.A.1"
+        ],
+        "trajectoryLevel": "length-direct-comparer",
+        "ageBand": [
+          5,
+          7
+        ],
+        "curricula": {
+          "GB": "Y1"
+        }
+      },
+      {
+        "id": "order-three",
+        "title": "Shortest to Longest",
+        "concept": "Ordering Three Lengths",
+        "conceptKey": "length-orderer",
+        "requires": [
+          "length-comparer"
+        ],
+        "activity": "measurement/compare",
+        "params": {
+          "level": 5,
+          "question": {
+            "mode": "order",
+            "questionsPerRound": 5
+          },
+          "play": {
+            "targetObjective": "Put three things in order from shortest to longest.",
+            "stepByStep": [
+              "Find the shortest one.",
+              "Put it in the first space.",
+              "Then the middle one, then the longest."
+            ],
+            "kidTip": "Find the shortest one first.",
+            "audioPrompt": "Put them in order, shortest first."
+          }
+        },
+        "difficulty": "Medium",
+        "icon": "measurement-order",
+        "iconName": "layers",
+        "iconTone": "purple",
+        "pedagogyTip": "Ordering three needs two comparisons held together: shorter than this one, longer than that one.",
+        "standards": [
+          "CCSS.1.MD.A.1"
+        ],
+        "trajectoryLevel": "serial-orderer",
+        "ageBand": [
+          6,
+          7
+        ],
+        "curricula": {
+          "GB": "Y1"
+        }
+      },
+      {
+        "id": "compare-with-string",
+        "title": "Use a String",
+        "concept": "Comparing Things That Cannot Move",
+        "conceptKey": "indirect-comparer",
+        "requires": [
+          "length-orderer"
+        ],
+        "activity": "measurement/compare",
+        "params": {
+          "level": 6,
+          "question": {
+            "mode": "indirect",
+            "questionsPerRound": 5
+          },
+          "play": {
+            "targetObjective": "Use a string to compare two things that cannot be put side by side.",
+            "stepByStep": [
+              "Hold the string up to the first thing.",
+              "Take the string to the second thing.",
+              "Is the string longer or shorter?"
+            ],
+            "kidTip": "The string is as long as the first thing. Compare it with the second.",
+            "audioPrompt": "They cannot move. Use the string to compare them."
+          }
+        },
+        "difficulty": "Medium",
+        "icon": "measurement-string",
+        "iconName": "ruler",
+        "iconTone": "cyan",
+        "pedagogyTip": "Comparing through a third object is the idea a ruler is built on: the string carries one length to the other.",
+        "standards": [
+          "CCSS.1.MD.A.1"
+        ],
+        "trajectoryLevel": "indirect-length-comparer",
+        "ageBand": [
+          6,
+          7
+        ],
+        "curricula": {
+          "GB": "Y1"
+        }
+      },
+      {
+        "id": "heavier-lighter",
+        "title": "Heavier or Lighter?",
+        "concept": "Comparing Mass on a Balance",
+        "conceptKey": "mass-comparer",
+        "requires": [
+          "measurable-attribute"
+        ],
+        "activity": "measurement/balance",
+        "params": {
+          "level": 7,
+          "question": {
+            "mode": "compare",
+            "questionsPerRound": 5
+          },
+          "play": {
+            "targetObjective": "Use a pan balance to find which of two things is heavier or lighter.",
+            "stepByStep": [
+              "Put both things on the balance.",
+              "See which side goes down.",
+              "The side that goes down is heavier."
+            ],
+            "kidTip": "The heavier side goes down.",
+            "audioPrompt": "Which one is heavier, or lighter? Use the balance."
+          }
+        },
+        "difficulty": "Easy",
+        "icon": "measurement-heavier",
+        "iconName": "scale",
+        "iconTone": "purple",
+        "pedagogyTip": "Half the pairs are big-but-light against small-but-heavy, so a child who judges by size alone is wrong half the time. The balance, not the eye, decides.",
+        "standards": [
+          "CCSS.K.MD.A.2"
+        ],
+        "trajectoryLevel": "mass-direct-comparer",
+        "ageBand": [
+          5,
+          6
+        ],
+        "curricula": {
+          "GB": "Y1"
+        }
+      },
+      {
+        "id": "holds-more",
+        "title": "Which Holds More?",
+        "concept": "Comparing Capacity with Cups",
+        "conceptKey": "capacity-comparer",
+        "requires": [
+          "measurable-attribute"
+        ],
+        "activity": "measurement/capacity",
+        "params": {
+          "level": 8,
+          "question": {
+            "mode": "pour",
+            "questionsPerRound": 5
+          },
+          "play": {
+            "targetObjective": "Pour two containers into cups to find which one holds more.",
+            "stepByStep": [
+              "Pour the first one into cups.",
+              "Pour the second one into cups.",
+              "The one that fills more cups holds more."
+            ],
+            "kidTip": "Count the cups. More cups means it holds more.",
+            "audioPrompt": "Which one holds more? Pour each into cups."
+          }
+        },
+        "difficulty": "Easy",
+        "icon": "measurement-holds",
+        "iconName": "waves",
+        "iconTone": "cyan",
+        "pedagogyTip": "Tall containers look as if they hold more. Most rounds pair a tall one that holds less with a wide one that holds more, so counting cups beats looking.",
+        "standards": [
+          "CCSS.K.MD.A.2"
+        ],
+        "trajectoryLevel": "capacity-direct-comparer",
+        "ageBand": [
+          5,
+          6
+        ],
+        "curricula": {
+          "GB": "Y1"
+        }
+      },
+      {
+        "id": "measure-with-blocks",
+        "title": "Measure with Blocks",
+        "concept": "Laying Units End to End",
+        "conceptKey": "unit-iterator",
+        "requires": [
+          "indirect-comparer",
+          "counter"
+        ],
+        "activity": "measurement/units",
+        "params": {
+          "level": 9,
+          "question": {
+            "mode": "lay",
+            "questionsPerRound": 5
+          },
+          "play": {
+            "targetObjective": "Measure a length by laying blocks end to end with no gaps, then counting them.",
+            "stepByStep": [
+              "Start at the end of the thing.",
+              "Lay each block right after the last one.",
+              "Stop at the other end and count the blocks."
+            ],
+            "kidTip": "No gaps, no overlaps. Then count.",
+            "audioPrompt": "How many blocks long is it? Lay blocks along it."
+          }
+        },
+        "difficulty": "Easy",
+        "icon": "measurement-blocks",
+        "iconName": "boxes",
+        "iconTone": "purple",
+        "pedagogyTip": "The child lays every block, so the number is earned by covering the length, not read off a label. The count is never printed on screen.",
+        "standards": [
+          "CCSS.1.MD.A.2"
+        ],
+        "trajectoryLevel": "end-to-end-length-measurer",
+        "ageBand": [
+          5,
+          7
+        ],
+        "curricula": {
+          "GB": "Y1"
+        }
+      },
+      {
+        "id": "spot-the-mistake",
+        "title": "Spot the Mistake",
+        "concept": "Gaps and Overlaps",
+        "conceptKey": "unit-iterator",
+        "requires": [
+          "unit-iterator"
+        ],
+        "activity": "measurement/units",
+        "params": {
+          "level": 10,
+          "question": {
+            "mode": "spot",
+            "questionsPerRound": 5
+          },
+          "play": {
+            "targetObjective": "Tell a proper measurement from one with a gap or an overlap.",
+            "stepByStep": [
+              "Look at both rows of blocks.",
+              "Find the row with no gaps and no overlaps.",
+              "Count the blocks in that row."
+            ],
+            "kidTip": "Blocks must touch end to end.",
+            "audioPrompt": "Which row is measured right? Then count it."
+          }
+        },
+        "difficulty": "Easy",
+        "icon": "measurement-spot",
+        "iconName": "search",
+        "iconTone": "pink",
+        "pedagogyTip": "A gap gives too small a number and an overlap too big a one. Seeing someone else's mistake is easier than seeing your own, so it comes first.",
+        "standards": [
+          "CCSS.1.MD.A.2"
+        ],
+        "trajectoryLevel": "end-to-end-length-measurer",
+        "ageBand": [
+          6,
+          7
+        ],
+        "curricula": {
+          "GB": "Y1"
+        }
+      },
+      {
+        "id": "big-unit-small-unit",
+        "title": "Big Unit, Small Unit",
+        "concept": "Smaller Units, Bigger Numbers",
+        "conceptKey": "unit-size-reasoner",
+        "requires": [
+          "unit-iterator"
+        ],
+        "activity": "measurement/units",
+        "params": {
+          "level": 11,
+          "question": {
+            "mode": "unit_size",
+            "questionsPerRound": 5
+          },
+          "play": {
+            "targetObjective": "Explain that a smaller unit needs more of them to measure the same length.",
+            "stepByStep": [
+              "Look at the cubes and the rods.",
+              "Both measure the same thing.",
+              "The smaller unit needs more."
+            ],
+            "kidTip": "Small units, more of them. Big units, fewer.",
+            "audioPrompt": "Which needs more: cubes or rods?"
+          }
+        },
+        "difficulty": "Medium",
+        "icon": "measurement-unit-size",
+        "iconName": "layers",
+        "iconTone": "emerald",
+        "pedagogyTip": "The inverse relation between unit size and count is the idea behind every later conversion: 1 m is 100 cm because a centimetre is small.",
+        "standards": [
+          "CCSS.2.MD.A.2"
+        ],
+        "trajectoryLevel": "length-unit-relater",
+        "ageBand": [
+          6,
+          8
+        ],
+        "curricula": {
+          "GB": "Y2"
+        }
+      },
+      {
+        "id": "balance-with-cubes",
+        "title": "Balance with Cubes",
+        "concept": "Measuring Mass in Cubes",
+        "conceptKey": "mass-unit-iterator",
+        "requires": [
+          "mass-comparer",
+          "counter"
+        ],
+        "activity": "measurement/balance",
+        "params": {
+          "level": 12,
+          "question": {
+            "mode": "cubes",
+            "questionsPerRound": 5
+          },
+          "play": {
+            "targetObjective": "Find how many cubes weigh the same as a thing by making the balance level.",
+            "stepByStep": [
+              "Put cubes on the other pan.",
+              "Add or take off cubes.",
+              "When the beam is level, count the cubes."
+            ],
+            "kidTip": "Level beam means the same weight.",
+            "audioPrompt": "How many cubes weigh the same? Make it balance."
+          }
+        },
+        "difficulty": "Easy",
+        "icon": "measurement-cubes",
+        "iconName": "scale",
+        "iconTone": "purple",
+        "pedagogyTip": "The same idea as blocks along a length: a mass is measured by how many equal units match it.",
+        "standards": [],
+        "trajectoryLevel": "mass-unit-measurer",
+        "ageBand": [
+          5,
+          7
+        ],
+        "curricula": {
+          "GB": "Y1"
+        }
+      },
+      {
+        "id": "fill-with-cups",
+        "title": "Fill with Cups",
+        "concept": "Measuring Capacity in Cups",
+        "conceptKey": "capacity-unit-iterator",
+        "requires": [
+          "capacity-comparer",
+          "counter"
+        ],
+        "activity": "measurement/capacity",
+        "params": {
+          "level": 13,
+          "question": {
+            "mode": "cups",
+            "questionsPerRound": 5,
+            "minCups": 2,
+            "maxCups": 8
+          },
+          "play": {
+            "targetObjective": "Measure how much a container holds by pouring it into cups and counting them.",
+            "stepByStep": [
+              "Pour it into cups.",
+              "Count the full cups.",
+              "That is how many cups it holds."
+            ],
+            "kidTip": "Count each full cup.",
+            "audioPrompt": "How many cups does it fill? Pour it out."
+          }
+        },
+        "difficulty": "Easy",
+        "icon": "measurement-cups",
+        "iconName": "waves",
+        "iconTone": "cyan",
+        "pedagogyTip": "Capacity measured in equal cups, ready for millilitres and litres later.",
+        "standards": [],
+        "trajectoryLevel": "capacity-unit-measurer",
+        "ageBand": [
+          5,
+          7
+        ],
+        "curricula": {
+          "GB": "Y1"
+        }
+      },
+      {
+        "id": "read-the-ruler",
+        "title": "Read the Ruler",
+        "concept": "Reading Length from 0",
+        "conceptKey": "ruler-reader",
+        "requires": [
+          "unit-iterator"
+        ],
+        "activity": "measurement/ruler",
+        "params": {
+          "level": 14,
+          "question": {
+            "mode": "read",
+            "questionsPerRound": 5
+          },
+          "play": {
+            "targetObjective": "Read a length in centimetres when the thing starts at 0.",
+            "stepByStep": [
+              "Find the 0 on the ruler.",
+              "Look where the thing ends.",
+              "That number is how long it is."
+            ],
+            "kidTip": "Start at 0. Read the end.",
+            "audioPrompt": "How long is it? Read the ruler."
+          }
+        },
+        "difficulty": "Easy",
+        "icon": "measurement-ruler",
+        "iconName": "ruler",
+        "iconTone": "cyan",
+        "pedagogyTip": "A ruler is the blocks from Unit 157 with numbers written on. The number at the end only gives the length because the thing starts at 0.",
+        "standards": [
+          "CCSS.2.MD.A.1"
+        ],
+        "trajectoryLevel": "ruler-reader",
+        "ageBand": [
+          6,
+          8
+        ],
+        "curricula": {
+          "GB": "Y2"
+        }
+      },
+      {
+        "id": "measure-it",
+        "title": "Measure It",
+        "concept": "Starting at 0",
+        "conceptKey": "ruler-reader",
+        "requires": [
+          "ruler-reader"
+        ],
+        "activity": "measurement/ruler",
+        "params": {
+          "level": 15,
+          "question": {
+            "mode": "place",
+            "questionsPerRound": 5
+          },
+          "play": {
+            "targetObjective": "Line a thing up with the 0 mark, not the edge of the ruler, then read it.",
+            "stepByStep": [
+              "Pick up the thing.",
+              "Put its end on 0, not the edge.",
+              "Read the number at the other end."
+            ],
+            "kidTip": "The edge is not 0. Find the 0 mark.",
+            "audioPrompt": "Measure it. Put it on the 0 first."
+          }
+        },
+        "difficulty": "Easy",
+        "icon": "measurement-measure-it",
+        "iconName": "ruler",
+        "iconTone": "cyan",
+        "pedagogyTip": "On most rulers the 0 sits a little in from the edge. Children who start at the edge are out by a few millimetres, and on a cheap ruler by a whole centimetre.",
+        "standards": [
+          "CCSS.2.MD.A.1"
+        ],
+        "trajectoryLevel": "ruler-reader",
+        "ageBand": [
+          6,
+          8
+        ],
+        "curricula": {
+          "GB": "Y2"
+        }
+      },
+      {
+        "id": "draw-a-line",
+        "title": "Draw a Line",
+        "concept": "Drawing a Length",
+        "conceptKey": "ruler-drawer",
+        "requires": [
+          "ruler-reader"
+        ],
+        "activity": "measurement/ruler",
+        "params": {
+          "level": 16,
+          "question": {
+            "mode": "draw",
+            "questionsPerRound": 5
+          },
+          "play": {
+            "targetObjective": "Draw a line of a given length in centimetres, starting at 0.",
+            "stepByStep": [
+              "Start the line at 0.",
+              "Find the number you need.",
+              "Draw to that mark."
+            ],
+            "kidTip": "Start at 0, stop at the number.",
+            "audioPrompt": "Draw a line. Start at 0."
+          }
+        },
+        "difficulty": "Easy",
+        "icon": "measurement-draw-line",
+        "iconName": "ruler",
+        "iconTone": "purple",
+        "pedagogyTip": "Drawing is reading backwards: the child knows the length and finds the mark. It checks they understand where a length starts.",
+        "standards": [
+          "CCSS.2.MD.A.1"
+        ],
+        "trajectoryLevel": "ruler-drawer",
+        "ageBand": [
+          6,
+          8
+        ],
+        "curricula": {
+          "GB": "Y2"
+        }
+      },
+      {
+        "id": "broken-ruler",
+        "title": "Broken Ruler",
+        "concept": "Counting Spaces, Not Numbers",
+        "conceptKey": "broken-ruler-reader",
+        "requires": [
+          "ruler-reader"
+        ],
+        "activity": "measurement/ruler",
+        "params": {
+          "level": 17,
+          "question": {
+            "mode": "offset",
+            "questionsPerRound": 5
+          },
+          "play": {
+            "targetObjective": "Measure with a ruler that does not start at 0 by counting the spaces.",
+            "stepByStep": [
+              "Look at the number where the thing starts.",
+              "Count the spaces to the end.",
+              "Or take the start number from the end number."
+            ],
+            "kidTip": "Count the spaces, not the marks.",
+            "audioPrompt": "This ruler is broken. How long is it?"
+          }
+        },
+        "difficulty": "Medium",
+        "icon": "measurement-broken-ruler",
+        "iconName": "ruler",
+        "iconTone": "pink",
+        "pedagogyTip": "The end number is the classic wrong answer here, so it is always one of the choices. Counting spaces, not marks, is the idea behind every scale later.",
+        "standards": [
+          "CCSS.2.MD.A.1"
+        ],
+        "trajectoryLevel": "broken-ruler-reader",
+        "ageBand": [
+          7,
+          9
+        ],
+        "curricula": {
+          "GB": "Y2"
+        }
+      },
+      {
+        "id": "how-much-longer",
+        "title": "How Much Longer?",
+        "concept": "Comparing Lengths with Numbers",
+        "conceptKey": "length-difference",
+        "requires": [
+          "ruler-reader"
+        ],
+        "activity": "measurement/ruler",
+        "params": {
+          "level": 18,
+          "question": {
+            "mode": "difference",
+            "questionsPerRound": 5
+          },
+          "play": {
+            "targetObjective": "Find how much longer one thing is than another by measuring both.",
+            "stepByStep": [
+              "Read the long one.",
+              "Read the short one.",
+              "Take the short length from the long length."
+            ],
+            "kidTip": "Measure both, then subtract.",
+            "audioPrompt": "How much longer is one than the other?"
+          }
+        },
+        "difficulty": "Medium",
+        "icon": "measurement-longer",
+        "iconName": "layers",
+        "iconTone": "emerald",
+        "pedagogyTip": "Both lengths are on offer as wrong answers, because naming a length is the common slip. The green gap in the hint is the difference itself.",
+        "standards": [
+          "CCSS.2.MD.A.4"
+        ],
+        "trajectoryLevel": "length-difference",
+        "ageBand": [
+          7,
+          9
+        ],
+        "curricula": {
+          "GB": "Y2"
+        }
+      },
+      {
+        "id": "cm-or-m",
+        "title": "cm or m?",
+        "concept": "Choosing a Unit",
+        "conceptKey": "unit-chooser",
+        "requires": [
+          "ruler-reader"
+        ],
+        "activity": "measurement/estimate",
+        "params": {
+          "level": 19,
+          "question": {
+            "mode": "choose_unit",
+            "questionsPerRound": 5
+          },
+          "play": {
+            "targetObjective": "Choose cm, m or km to measure an everyday length.",
+            "stepByStep": [
+              "Think how big the thing is.",
+              "Small things are measured in cm.",
+              "Big things in m, and long trips in km."
+            ],
+            "kidTip": "Small: cm. Big: m. Far: km.",
+            "audioPrompt": "Which unit would you use?"
+          }
+        },
+        "difficulty": "Easy",
+        "icon": "measurement-cm-or-m",
+        "iconName": "search",
+        "iconTone": "purple",
+        "pedagogyTip": "Units are chosen by size, so each unit is asked about equally often and 'm' is never the safe guess.",
+        "standards": [
+          "CCSS.2.MD.A.3"
+        ],
+        "trajectoryLevel": "unit-chooser",
+        "ageBand": [
+          7,
+          9
+        ],
+        "curricula": {
+          "GB": "Y2"
+        }
+      },
+      {
+        "id": "estimate-length",
+        "title": "About How Long?",
+        "concept": "Estimating Length",
+        "conceptKey": "length-estimator",
+        "requires": [
+          "unit-chooser"
+        ],
+        "activity": "measurement/estimate",
+        "params": {
+          "level": 20,
+          "question": {
+            "mode": "benchmark",
+            "questionsPerRound": 5
+          },
+          "play": {
+            "targetObjective": "Estimate a length by picking the sensible amount.",
+            "stepByStep": [
+              "Picture the thing.",
+              "Compare it with something you know.",
+              "Pick the amount that makes sense."
+            ],
+            "kidTip": "A door is about 2 m tall.",
+            "audioPrompt": "About how long is it? Pick the one that makes sense."
+          }
+        },
+        "difficulty": "Easy",
+        "icon": "measurement-estimate",
+        "iconName": "footprints",
+        "iconTone": "emerald",
+        "pedagogyTip": "The wrong answer is always ten times off, so this is about sense of size, not exact digits. Benchmarks (a finger is 1 cm, a big step is 1 m) are the tool.",
+        "standards": [
+          "CCSS.2.MD.A.3"
+        ],
+        "trajectoryLevel": "length-estimator",
+        "ageBand": [
+          7,
+          9
+        ],
+        "curricula": {
+          "GB": "Y2"
+        }
+      },
+      {
+        "id": "lengths-on-a-number-line",
+        "title": "Lengths on a Number Line",
+        "concept": "Adding and Taking Away Lengths",
+        "conceptKey": "length-number-line",
+        "requires": [
+          "length-difference"
+        ],
+        "activity": "measurement/ruler",
+        "params": {
+          "level": 21,
+          "question": {
+            "mode": "numberline",
+            "questionsPerRound": 5
+          },
+          "play": {
+            "targetObjective": "Add and take away lengths by jumping along a number line.",
+            "stepByStep": [
+              "Find the starting length.",
+              "Jump right to add, left to take away.",
+              "Read where you land."
+            ],
+            "kidTip": "Right to add, left to take away.",
+            "audioPrompt": "Start at the first length. Jump. Where do you land?"
+          }
+        },
+        "difficulty": "Medium",
+        "icon": "measurement-number-line",
+        "iconName": "footprints",
+        "iconTone": "pink",
+        "pedagogyTip": "A number line is a ruler without the thing. It links measuring to adding and subtracting within 100.",
+        "standards": [
+          "CCSS.2.MD.B.6"
+        ],
+        "trajectoryLevel": "length-number-line",
+        "ageBand": [
+          7,
+          9
+        ],
+        "curricula": {
+          "GB": "Y3"
+        }
+      },
+      {
+        "id": "inches-and-feet",
+        "title": "Inches and Feet",
+        "concept": "Reading Inches",
+        "conceptKey": "customary-length-reader",
+        "requires": [
+          "ruler-reader"
+        ],
+        "activity": "measurement/ruler",
+        "params": {
+          "level": 22,
+          "question": {
+            "mode": "read_inch",
+            "questionsPerRound": 5
+          },
+          "play": {
+            "targetObjective": "Read a length in whole inches on a 1-foot ruler.",
+            "stepByStep": [
+              "Find the 0.",
+              "Look where the thing ends.",
+              "Read the inches. 12 inches make 1 foot."
+            ],
+            "kidTip": "12 inches make 1 foot.",
+            "audioPrompt": "How long is it in inches?"
+          }
+        },
+        "difficulty": "Easy",
+        "icon": "measurement-inches",
+        "iconName": "ruler",
+        "iconTone": "indigo",
+        "pedagogyTip": "Same skill as centimetres on a bigger unit. Only US learners see inches; elsewhere the metric ruler carries on.",
+        "standards": [
+          "CCSS.2.MD.A.1"
+        ],
+        "trajectoryLevel": "customary-length-reader",
+        "ageBand": [
+          7,
+          9
+        ],
+        "curricula": {},
+        "regions": [
+          "US"
+        ]
+      },
+      {
+        "id": "half-and-quarter-inches",
+        "title": "Half and Quarter Inches",
+        "concept": "Fractions on a Ruler",
+        "conceptKey": "fraction-measurer",
+        "requires": [
+          "customary-length-reader"
+        ],
+        "activity": "measurement/ruler",
+        "params": {
+          "level": 23,
+          "question": {
+            "mode": "read_inch_fraction",
+            "questionsPerRound": 5
+          },
+          "play": {
+            "targetObjective": "Read a length to the nearest half or quarter inch.",
+            "stepByStep": [
+              "Find the last whole inch.",
+              "Count the small parts after it.",
+              "2 parts make a half; 1 part is a quarter."
+            ],
+            "kidTip": "Each inch has 4 small parts.",
+            "audioPrompt": "How long is it? Count the small parts."
+          }
+        },
+        "difficulty": "Medium",
+        "icon": "measurement-quarter-inch",
+        "iconName": "ruler",
+        "iconTone": "indigo",
+        "pedagogyTip": "A ruler is a number line of fractions. The mirror mistake (¼ for ¾) is always offered, because reading from the wrong mark is the usual slip.",
+        "standards": [
+          "CCSS.3.MD.B.4"
+        ],
+        "trajectoryLevel": "fraction-measurer",
+        "ageBand": [
+          8,
+          10
+        ],
+        "curricula": {},
+        "regions": [
+          "US"
+        ]
+      },
+      {
+        "id": "millimetres",
+        "title": "Measure in mm",
+        "concept": "Reading Millimetres",
+        "conceptKey": "mm-reader",
+        "requires": [
+          "ruler-reader"
+        ],
+        "activity": "measurement/ruler",
+        "params": {
+          "level": 24,
+          "question": {
+            "mode": "read_mm",
+            "questionsPerRound": 5
+          },
+          "play": {
+            "targetObjective": "Read a length in millimetres, using 1 cm = 10 mm.",
+            "stepByStep": [
+              "Find the last cm before the end.",
+              "That many cm is that many tens of mm.",
+              "Count the small marks after it."
+            ],
+            "kidTip": "1 cm is 10 mm.",
+            "audioPrompt": "How long is it in mm? Count the small marks."
+          }
+        },
+        "difficulty": "Medium",
+        "icon": "measurement-mm",
+        "iconName": "ruler",
+        "iconTone": "cyan",
+        "pedagogyTip": "The zoom lens magnifies the one centimetre where the thing ends, so the marks can be counted on a phone. Being out by 10 means a cm was read as a mm.",
+        "standards": [
+          "CCSS.4.MD.A.1"
+        ],
+        "trajectoryLevel": "mm-reader",
+        "ageBand": [
+          8,
+          10
+        ],
+        "curricula": {
+          "GB": "Y3"
+        }
+      },
+      {
+        "id": "kg-or-g",
+        "title": "g or kg?",
+        "concept": "Choosing Units of Mass and Capacity",
+        "conceptKey": "unit-chooser",
+        "requires": [
+          "unit-chooser"
+        ],
+        "activity": "measurement/estimate",
+        "params": {
+          "level": 25,
+          "question": {
+            "mode": "choose_unit",
+            "questionsPerRound": 5,
+            "quantity": "mass_capacity"
+          },
+          "play": {
+            "targetObjective": "Choose g or kg to weigh a thing, and ml or l to measure how much it holds.",
+            "stepByStep": [
+              "Think how heavy it is, or how much it holds.",
+              "Light things: g. Heavy things: kg.",
+              "A little drink: ml. A lot of water: l."
+            ],
+            "kidTip": "Light: g. Heavy: kg.",
+            "audioPrompt": "Which unit would you use?"
+          }
+        },
+        "difficulty": "Easy",
+        "icon": "measurement-kg-or-g",
+        "iconName": "scale",
+        "iconTone": "purple",
+        "pedagogyTip": "The same idea as cm or m, now for mass and capacity. Each unit is the answer equally often.",
+        "standards": [
+          "CCSS.3.MD.A.2"
+        ],
+        "trajectoryLevel": "unit-chooser",
+        "ageBand": [
+          7,
+          9
+        ],
+        "curricula": {
+          "GB": "Y2"
+        }
+      },
+      {
+        "id": "read-the-scale",
+        "title": "Read the Scale",
+        "concept": "Reading a Kitchen Scale",
+        "conceptKey": "scale-reader",
+        "requires": [
+          "ruler-reader"
+        ],
+        "activity": "measurement/scale",
+        "params": {
+          "level": 26,
+          "question": {
+            "mode": "read",
+            "questionsPerRound": 5
+          },
+          "play": {
+            "targetObjective": "Read a weight in grams from a scale where every mark has a number.",
+            "stepByStep": [
+              "Look where the needle points.",
+              "Read the number there.",
+              "Say it in grams."
+            ],
+            "kidTip": "Follow the needle to the number.",
+            "audioPrompt": "How much does it weigh? Read the scale."
+          }
+        },
+        "difficulty": "Easy",
+        "icon": "measurement-scale",
+        "iconName": "scale",
+        "iconTone": "purple",
+        "pedagogyTip": "A round scale is a ruler bent into a circle. Here every mark is numbered, so the only new thing is the needle.",
+        "standards": [
+          "CCSS.3.MD.A.2"
+        ],
+        "trajectoryLevel": "scale-reader",
+        "ageBand": [
+          7,
+          9
+        ],
+        "curricula": {
+          "GB": "Y2"
+        }
+      },
+      {
+        "id": "scale-steps",
+        "title": "Scale Steps",
+        "concept": "Marks Without Numbers",
+        "conceptKey": "scale-interval-reader",
+        "requires": [
+          "scale-reader"
+        ],
+        "activity": "measurement/scale",
+        "params": {
+          "level": 27,
+          "question": {
+            "mode": "interval",
+            "questionsPerRound": 5
+          },
+          "play": {
+            "targetObjective": "Work out what each unnumbered mark is worth, then read the scale.",
+            "stepByStep": [
+              "Find two numbers next to each other.",
+              "Count the steps between them.",
+              "Share the gap by the steps, then count on from the number before the needle."
+            ],
+            "kidTip": "How much is one small mark?",
+            "audioPrompt": "How much does it weigh? Work out the small marks first."
+          }
+        },
+        "difficulty": "Medium",
+        "icon": "measurement-scale-steps",
+        "iconName": "scale",
+        "iconTone": "indigo",
+        "pedagogyTip": "Steps of 2, 5, 10, 20, 25, 50, 100 and 250 all appear. Counting the marks as 1s is the usual slip, so that answer is always offered.",
+        "standards": [
+          "CCSS.3.MD.A.2"
+        ],
+        "trajectoryLevel": "scale-interval-reader",
+        "ageBand": [
+          7,
+          10
+        ],
+        "curricula": {
+          "GB": "Y3"
+        }
+      },
+      {
+        "id": "kilogram-scales",
+        "title": "Kilogram Scales",
+        "concept": "Bathroom and Luggage Scales",
+        "conceptKey": "scale-reader",
+        "requires": [
+          "scale-interval-reader"
+        ],
+        "activity": "measurement/scale",
+        "params": {
+          "level": 28,
+          "question": {
+            "mode": "read_kg",
+            "questionsPerRound": 5
+          },
+          "play": {
+            "targetObjective": "Read a bathroom scale in kilograms and a luggage scale in half kilograms.",
+            "stepByStep": [
+              "Find the number before the needle.",
+              "Work out what each mark is worth.",
+              "Count on to the needle."
+            ],
+            "kidTip": "Find the number, then count the marks.",
+            "audioPrompt": "How heavy is it? Read the scale."
+          }
+        },
+        "difficulty": "Medium",
+        "icon": "measurement-kg",
+        "iconName": "scale",
+        "iconTone": "purple",
+        "pedagogyTip": "Real scales a child meets at home and at the airport. Luggage scales mark halves, so ½ kg is read as a mark, not a fraction sum.",
+        "standards": [
+          "CCSS.3.MD.A.2"
+        ],
+        "trajectoryLevel": "scale-reader",
+        "ageBand": [
+          7,
+          10
+        ],
+        "curricula": {
+          "GB": "Y3"
+        }
+      },
+      {
+        "id": "pounds-and-ounces",
+        "title": "Pounds and Ounces",
+        "concept": "Reading lb and oz",
+        "conceptKey": "customary-mass-reader",
+        "requires": [
+          "scale-reader"
+        ],
+        "activity": "measurement/scale",
+        "params": {
+          "level": 29,
+          "question": {
+            "mode": "read_lb",
+            "questionsPerRound": 5
+          },
+          "play": {
+            "targetObjective": "Read a weight in pounds and ounces, using 16 oz = 1 lb.",
+            "stepByStep": [
+              "Find the last pound before the needle.",
+              "Count the ounces after it.",
+              "Say it as pounds and ounces."
+            ],
+            "kidTip": "16 ounces make 1 pound.",
+            "audioPrompt": "How much does it weigh, in pounds and ounces?"
+          }
+        },
+        "difficulty": "Medium",
+        "icon": "measurement-lb",
+        "iconName": "scale",
+        "iconTone": "indigo",
+        "pedagogyTip": "Only US learners see pounds. Every ounce has a mark and every 4 ounces a longer one, so a quarter pound is easy to find.",
+        "standards": [
+          "CCSS.4.MD.A.1"
+        ],
+        "trajectoryLevel": "customary-mass-reader",
+        "ageBand": [
+          8,
+          10
+        ],
+        "curricula": {},
+        "regions": [
+          "US"
+        ]
+      },
+      {
+        "id": "read-the-jug",
+        "title": "Read the Jug",
+        "concept": "Reading a Measuring Jug",
+        "conceptKey": "jug-reader",
+        "requires": [
+          "scale-reader"
+        ],
+        "activity": "measurement/capacity",
+        "params": {
+          "level": 30,
+          "question": {
+            "mode": "jug",
+            "questionsPerRound": 5,
+            "steps": [
+              100,
+              50,
+              25
+            ]
+          },
+          "play": {
+            "targetObjective": "Read how much water is in a measuring jug, in millilitres.",
+            "stepByStep": [
+              "Look at the top of the water.",
+              "Find the number before it.",
+              "Count the marks up to the water."
+            ],
+            "kidTip": "Read at the top of the water.",
+            "audioPrompt": "How much water is in the jug?"
+          }
+        },
+        "difficulty": "Medium",
+        "icon": "measurement-jug",
+        "iconName": "waves",
+        "iconTone": "cyan",
+        "pedagogyTip": "The marks step down over the round: 100s, then 50s, then 25s, so the child meets unnumbered marks one size at a time.",
+        "standards": [
+          "CCSS.3.MD.A.2"
+        ],
+        "trajectoryLevel": "jug-reader",
+        "ageBand": [
+          7,
+          9
+        ],
+        "curricula": {
+          "GB": "Y2"
+        }
+      },
+      {
+        "id": "fill-to-the-line",
+        "title": "Fill to the Line",
+        "concept": "Measuring Out Water",
+        "conceptKey": "jug-reader",
+        "requires": [
+          "jug-reader"
+        ],
+        "activity": "measurement/capacity",
+        "params": {
+          "level": 31,
+          "question": {
+            "mode": "fill",
+            "questionsPerRound": 5,
+            "step": 50,
+            "labelEvery": 100
+          },
+          "play": {
+            "targetObjective": "Pour water into a jug until it reaches the amount asked for.",
+            "stepByStep": [
+              "Find the amount on the jug.",
+              "Pour in until the water reaches it.",
+              "Pour out a little if you go past."
+            ],
+            "kidTip": "Stop when the water meets the line.",
+            "audioPrompt": "Fill the jug to the line."
+          }
+        },
+        "difficulty": "Medium",
+        "icon": "measurement-fill",
+        "iconName": "waves",
+        "iconTone": "cyan",
+        "pedagogyTip": "Measuring out is the reverse of reading. Pouring in big and small steps teaches the marks by doing.",
+        "standards": [
+          "CCSS.3.MD.A.2"
+        ],
+        "trajectoryLevel": "jug-reader",
+        "ageBand": [
+          7,
+          9
+        ],
+        "curricula": {
+          "GB": "Y2"
+        }
+      },
+      {
+        "id": "cups-pints-quarts-gallons",
+        "title": "Cups, Pints, Quarts, Gallons",
+        "concept": "US Capacity",
+        "conceptKey": "customary-capacity-reader",
+        "requires": [
+          "capacity-unit-iterator"
+        ],
+        "activity": "measurement/capacity",
+        "params": {
+          "level": 32,
+          "question": {
+            "mode": "customary",
+            "questionsPerRound": 5
+          },
+          "play": {
+            "targetObjective": "Know how many cups, pints and quarts fill a bigger container.",
+            "stepByStep": [
+              "2 cups fill a pint.",
+              "2 pints fill a quart.",
+              "4 quarts fill a gallon."
+            ],
+            "kidTip": "2 cups, 2 pints, 4 quarts.",
+            "audioPrompt": "How many fill it?"
+          }
+        },
+        "difficulty": "Medium",
+        "icon": "measurement-gallon",
+        "iconName": "waves",
+        "iconTone": "cyan",
+        "pedagogyTip": "Only US learners see these. The containers are drawn to scale so the doubling can be seen, not just remembered.",
+        "standards": [
+          "CCSS.4.MD.A.1"
+        ],
+        "trajectoryLevel": "customary-capacity-reader",
+        "ageBand": [
+          8,
+          10
+        ],
+        "curricula": {},
+        "regions": [
+          "US"
+        ]
+      },
+      {
+        "id": "read-the-thermometer",
+        "title": "Read the Thermometer",
+        "concept": "Reading Temperature",
+        "conceptKey": "thermometer-reader",
+        "requires": [
+          "scale-interval-reader"
+        ],
+        "activity": "measurement/thermo",
+        "params": {
+          "level": 33,
+          "question": {
+            "mode": "read",
+            "questionsPerRound": 5
+          },
+          "play": {
+            "targetObjective": "Read a temperature in degrees Celsius.",
+            "stepByStep": [
+              "Find the top of the red line.",
+              "Find the number below it.",
+              "Count up the marks."
+            ],
+            "kidTip": "Read at the top of the red line.",
+            "audioPrompt": "What temperature does it show?"
+          }
+        },
+        "difficulty": "Medium",
+        "icon": "measurement-thermometer",
+        "iconName": "thermometer",
+        "iconTone": "pink",
+        "pedagogyTip": "A thermometer is a scale standing up. The marks go 1s, then 2s, then 5s over the round.",
+        "standards": [],
+        "trajectoryLevel": "thermometer-reader",
+        "ageBand": [
+          7,
+          9
+        ],
+        "curricula": {
+          "GB": "Y2"
+        }
+      },
+      {
+        "id": "below-zero",
+        "title": "Below Zero",
+        "concept": "Negative Temperatures",
+        "conceptKey": "negative-temperature",
+        "requires": [
+          "thermometer-reader"
+        ],
+        "activity": "measurement/thermo",
+        "params": {
+          "level": 34,
+          "question": {
+            "mode": "negative",
+            "questionsPerRound": 5
+          },
+          "play": {
+            "targetObjective": "Read temperatures below zero.",
+            "stepByStep": [
+              "Find the 0 on the thermometer.",
+              "Below 0 the numbers count down: −1, −2, −3.",
+              "Read the top of the red line."
+            ],
+            "kidTip": "Below zero, bigger numbers are colder.",
+            "audioPrompt": "What temperature does it show? It may be below zero."
+          }
+        },
+        "difficulty": "Medium",
+        "icon": "measurement-below-zero",
+        "iconName": "thermometer",
+        "iconTone": "indigo",
+        "pedagogyTip": "Cold places and freezers. The sign slip (3 for −3) is always offered as a choice, because it is the usual mistake.",
+        "standards": [
+          "CCSS.6.NS.C.5"
+        ],
+        "trajectoryLevel": "negative-temperature",
+        "ageBand": [
+          9,
+          11
+        ],
+        "curricula": {
+          "GB": "Y5"
+        }
+      },
+      {
+        "id": "warmer-colder",
+        "title": "Warmer, Colder",
+        "concept": "Changes in Temperature",
+        "conceptKey": "temperature-change",
+        "requires": [
+          "negative-temperature"
+        ],
+        "activity": "measurement/thermo",
+        "params": {
+          "level": 35,
+          "question": {
+            "mode": "change",
+            "questionsPerRound": 5
+          },
+          "play": {
+            "targetObjective": "Work out a new temperature after it gets warmer or colder, crossing zero.",
+            "stepByStep": [
+              "Start at the first temperature.",
+              "Warmer goes up; colder goes down.",
+              "Count the degrees, past 0 if you need to."
+            ],
+            "kidTip": "Warmer: up. Colder: down.",
+            "audioPrompt": "It got warmer or colder. What is it now?"
+          }
+        },
+        "difficulty": "Hard",
+        "icon": "measurement-warmer",
+        "iconName": "thermometer",
+        "iconTone": "pink",
+        "pedagogyTip": "Most changes cross 0, the hard part. Going the wrong way is offered as a choice so the direction is checked.",
+        "standards": [
+          "CCSS.6.NS.C.5"
+        ],
+        "trajectoryLevel": "temperature-change",
+        "ageBand": [
+          10,
+          12
+        ],
+        "curricula": {
+          "GB": "Y6"
+        }
+      },
+      {
+        "id": "fahrenheit",
+        "title": "Fahrenheit",
+        "concept": "Reading °F",
+        "conceptKey": "fahrenheit-reader",
+        "requires": [
+          "thermometer-reader"
+        ],
+        "activity": "measurement/thermo",
+        "params": {
+          "level": 36,
+          "question": {
+            "mode": "read_f",
+            "questionsPerRound": 5
+          },
+          "play": {
+            "targetObjective": "Read a temperature in degrees Fahrenheit.",
+            "stepByStep": [
+              "Find the top of the red line.",
+              "Find the number below it.",
+              "Each mark is 2 degrees: count up."
+            ],
+            "kidTip": "Each mark is 2 degrees.",
+            "audioPrompt": "What temperature does it show, in °F?"
+          }
+        },
+        "difficulty": "Medium",
+        "icon": "measurement-fahrenheit",
+        "iconName": "thermometer",
+        "iconTone": "pink",
+        "pedagogyTip": "US weather is given in °F. Same reading skill, with marks of 2.",
+        "standards": [],
+        "trajectoryLevel": "fahrenheit-reader",
+        "ageBand": [
+          8,
+          10
+        ],
+        "curricula": {},
+        "regions": [
+          "US"
+        ]
+      },
+      {
+        "id": "add-and-subtract-measures",
+        "title": "Add and Subtract Measures",
+        "concept": "Word Problems with Measures",
+        "conceptKey": "measure-calculator",
+        "requires": [
+          "scale-reader"
+        ],
+        "activity": "measurement/story",
+        "params": {
+          "level": 37,
+          "question": {
+            "mode": "same_unit",
+            "questionsPerRound": 5
+          },
+          "play": {
+            "targetObjective": "Solve word problems that add or subtract amounts in the same unit.",
+            "stepByStep": [
+              "Read the story.",
+              "Is it put together, taken away, or a difference?",
+              "Add or subtract, and give the unit."
+            ],
+            "kidTip": "Together: add. Taken away or how much more: subtract.",
+            "audioPrompt": "Read the story. Add or subtract."
+          }
+        },
+        "difficulty": "Medium",
+        "icon": "measurement-story",
+        "iconName": "layers",
+        "iconTone": "indigo",
+        "pedagogyTip": "Lengths, masses and capacities, all in one unit. The wrong operation is always a choice; the bar model hint shows which one is right.",
+        "standards": [
+          "CCSS.3.MD.A.2"
+        ],
+        "trajectoryLevel": "measure-calculator",
+        "ageBand": [
+          8,
+          10
+        ],
+        "curricula": {
+          "GB": "Y3"
+        }
+      },
+      {
+        "id": "practice-scales",
+        "title": "Practice: Scales",
+        "concept": "Practice Without Help",
+        "conceptKey": "scale-interval-reader",
+        "requires": [],
+        "activity": "measurement/scale",
+        "params": {
+          "level": 38,
+          "question": {
+            "practice": true,
+            "modes": [
+              "read",
+              "interval",
+              "read_kg",
+              "read_lb"
+            ],
+            "questionsPerRound": 10
+          },
+          "play": {
+            "mode": "practice",
+            "tier": "master",
+            "difficultyColor": "violet",
+            "category": "Practice",
+            "shortDesc": "Kitchen scales, marks in steps, kilograms and pounds, in turn.",
+            "targetObjective": "No hints, no explanations, no voice. Just the questions.",
+            "stepByStep": [
+              "The techniques you have learned, mixed together.",
+              "Nothing is read aloud and there are no hints.",
+              "Work each one out, and see how many you get first time."
+            ],
+            "kidTip": "",
+            "audioPrompt": "",
+            "prompts": {}
+          }
+        },
+        "difficulty": "Hard",
+        "icon": "measurement-scale",
+        "iconName": "gem",
+        "iconTone": "emerald",
+        "pedagogyTip": "Practice is retrieval, not instruction, and it is open from the start: a child who already knows a technique should not have to sit through the lesson to get at the questions. The help is removed on purpose — recalling something unaided is a different act from being walked through it, and it is the one that makes it stick.",
+        "standards": [],
+        "trajectoryLevel": "problem-solver",
+        "ageBand": [
+          7,
+          10
+        ]
+      },
+      {
+        "id": "practice-jugs",
+        "title": "Practice: Jugs",
+        "concept": "Practice Without Help",
+        "conceptKey": "jug-reader",
+        "requires": [],
+        "activity": "measurement/capacity",
+        "params": {
+          "level": 39,
+          "question": {
+            "practice": true,
+            "modes": [
+              "jug",
+              "fill",
+              "customary"
+            ],
+            "steps": [
+              100,
+              50,
+              25
+            ],
+            "questionsPerRound": 10
+          },
+          "play": {
+            "mode": "practice",
+            "tier": "master",
+            "difficultyColor": "violet",
+            "category": "Practice",
+            "shortDesc": "Read the jug, fill to the line, and cups to gallons, in turn.",
+            "targetObjective": "No hints, no explanations, no voice. Just the questions.",
+            "stepByStep": [
+              "The techniques you have learned, mixed together.",
+              "Nothing is read aloud and there are no hints.",
+              "Work each one out, and see how many you get first time."
+            ],
+            "kidTip": "",
+            "audioPrompt": "",
+            "prompts": {}
+          }
+        },
+        "difficulty": "Hard",
+        "icon": "measurement-jug",
+        "iconName": "gem",
+        "iconTone": "emerald",
+        "pedagogyTip": "Practice is retrieval, not instruction, and it is open from the start: a child who already knows a technique should not have to sit through the lesson to get at the questions. The help is removed on purpose — recalling something unaided is a different act from being walked through it, and it is the one that makes it stick.",
+        "standards": [],
+        "trajectoryLevel": "problem-solver",
+        "ageBand": [
+          7,
+          10
+        ]
+      },
+      {
+        "id": "practice-thermometers",
+        "title": "Practice: Thermometers",
+        "concept": "Practice Without Help",
+        "conceptKey": "temperature-change",
+        "requires": [],
+        "activity": "measurement/thermo",
+        "params": {
+          "level": 40,
+          "question": {
+            "practice": true,
+            "modes": [
+              "read",
+              "negative",
+              "change",
+              "read_f"
+            ],
+            "questionsPerRound": 10
+          },
+          "play": {
+            "mode": "practice",
+            "tier": "master",
+            "difficultyColor": "violet",
+            "category": "Practice",
+            "shortDesc": "Read it, below zero, warmer and colder, and °F, in turn.",
+            "targetObjective": "No hints, no explanations, no voice. Just the questions.",
+            "stepByStep": [
+              "The techniques you have learned, mixed together.",
+              "Nothing is read aloud and there are no hints.",
+              "Work each one out, and see how many you get first time."
+            ],
+            "kidTip": "",
+            "audioPrompt": "",
+            "prompts": {}
+          }
+        },
+        "difficulty": "Hard",
+        "icon": "measurement-thermometer",
+        "iconName": "gem",
+        "iconTone": "emerald",
+        "pedagogyTip": "Practice is retrieval, not instruction, and it is open from the start: a child who already knows a technique should not have to sit through the lesson to get at the questions. The help is removed on purpose — recalling something unaided is a different act from being walked through it, and it is the one that makes it stick.",
+        "standards": [],
+        "trajectoryLevel": "problem-solver",
+        "ageBand": [
+          8,
+          11
+        ]
+      },
+      {
+        "id": "practice-measure-stories",
+        "title": "Practice: Measure Stories",
+        "concept": "Practice Without Help",
+        "conceptKey": "measure-calculator",
+        "requires": [],
+        "activity": "measurement/story",
+        "params": {
+          "level": 41,
+          "question": {
+            "practice": true,
+            "mode": "same_unit",
+            "questionsPerRound": 10
+          },
+          "play": {
+            "mode": "practice",
+            "tier": "master",
+            "difficultyColor": "violet",
+            "category": "Practice",
+            "shortDesc": "Add and take away lengths, masses and amounts of water.",
+            "targetObjective": "No hints, no explanations, no voice. Just the questions.",
+            "stepByStep": [
+              "The techniques you have learned, mixed together.",
+              "Nothing is read aloud and there are no hints.",
+              "Work each one out, and see how many you get first time."
+            ],
+            "kidTip": "",
+            "audioPrompt": "",
+            "prompts": {}
+          }
+        },
+        "difficulty": "Hard",
+        "icon": "measurement-story",
+        "iconName": "gem",
+        "iconTone": "emerald",
+        "pedagogyTip": "Practice is retrieval, not instruction, and it is open from the start: a child who already knows a technique should not have to sit through the lesson to get at the questions. The help is removed on purpose — recalling something unaided is a different act from being walked through it, and it is the one that makes it stick.",
+        "standards": [],
+        "trajectoryLevel": "problem-solver",
+        "ageBand": [
+          8,
+          10
+        ]
+      }
+    ]
+  },
+  {
     "id": "multiplication",
     "name": "Multiplication",
     "version": "1.0.0",

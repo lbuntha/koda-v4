@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+  <title>What Can We Measure?</title>
+  <rect x="6" y="6" width="88" height="88" rx="18" fill="#F4F2FF" stroke="#3B2F8F" stroke-width="4"/>
+  <rect x="18" y="22" width="64" height="14" rx="3" fill="#BAE6FD" stroke="#0EA5E9" stroke-width="3"/><path d="M26 22v6M34 22v4M42 22v6M50 22v4M58 22v6M66 22v4M74 22v6" stroke="#0369A1" stroke-width="2"/>
+  <path d="M30 50 L70 50 M50 46 V74 M40 74 H60" stroke="#3B2F8F" stroke-width="4" stroke-linecap="round"/><path d="M22 52 Q30 66 38 52 Z M62 52 Q70 66 78 52 Z" fill="#DDD6FE" stroke="#7C3AED" stroke-width="3"/>
+</svg>

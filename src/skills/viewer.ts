@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useSession } from "../lib/sync/useSession";
 import type { Session } from "../lib/sync/session";
+import { regionFromCountry, type Region } from "./region";
 
 /**
  * Who is looking at the app.
@@ -17,6 +18,11 @@ export interface Viewer {
   isDeveloper: boolean;
   /** Platform admins inspect the complete catalog, ignoring release and age gates. */
   showAllSkills: boolean;
+  /**
+   * Which curriculum the learner follows, from their sign-up country. Hides
+   * lessons limited to other countries. Absent reads as `INTL`.
+   */
+  region?: Region;
 }
 
 const STORAGE_KEY = "koda_viewer_v1";
@@ -90,6 +96,7 @@ export function viewerForSession(session: Session | null, preview: Viewer): View
       : preview.age,
     isDeveloper: session ? isDeveloper : preview.isDeveloper,
     showAllSkills: isAdmin,
+    region: session?.country ? regionFromCountry(session.country) : preview.region,
   };
 }
 

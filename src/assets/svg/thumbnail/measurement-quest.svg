@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="100%" height="100%" viewBox="0 0 400 200">
+<defs><linearGradient id="mqGround" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#0E3A5C"/><stop offset="100%" stop-color="#101236"/></linearGradient>
+<radialGradient id="mqGlow" cx="68%" cy="50%" r="55%"><stop offset="0%" stop-color="#7DD3FC" stop-opacity="0.35"/><stop offset="100%" stop-color="#7DD3FC" stop-opacity="0"/></radialGradient></defs>
+<rect width="400" height="200" fill="url(#mqGround)"/><rect width="400" height="200" fill="url(#mqGlow)"/>
+<path d="M276 30 V70 M254 70 H298" stroke="#E0E7FF" stroke-width="5" stroke-linecap="round"/>
+<path d="M232 30 L320 30" stroke="#E0E7FF" stroke-width="5" stroke-linecap="round"/>
+<path d="M218 34 Q232 54 246 34 Z" fill="#F9A8D4"/><path d="M306 34 Q320 54 334 34 Z" fill="#6EE7B7"/>
+<rect x="196" y="86" width="132" height="20" rx="4" fill="#8B5CF6"/><rect x="196" y="86" width="10" height="20" rx="3" fill="#FBCFE8"/><path d="M328 86 L350 96 L328 106 Z" fill="#FDE7D8"/><path d="M342 93 L350 96 L342 99 Z" fill="#1E1B4B"/>
+<rect x="186" y="118" width="196" height="46" rx="8" fill="#E0F2FE" stroke="#7DD3FC" stroke-width="2"/>
+<g stroke="#0C4A6E" stroke-width="2.5"><path d="M196 118v19M215 118v11M234 118v19M253 118v11M272 118v19M291 118v11M310 118v19M329 118v11M348 118v19M367 118v11"/></g>
+<g font-family="Arial, sans-serif" font-weight="900" font-size="13" fill="#0C4A6E" text-anchor="middle"><text x="196" y="156">0</text><text x="234" y="156">2</text><text x="272" y="156">4</text><text x="310" y="156">6</text><text x="348" y="156">8</text></g>
+<g font-family="Arial, sans-serif" font-weight="900" fill="#fff"><text x="26" y="94" font-size="34">Measure</text><text x="26" y="132" font-size="34">It</text></g>
+<text x="27" y="160" font-family="Arial, sans-serif" font-weight="700" font-size="13" fill="#BAE6FD">cm · kg · ml</text>
+</svg>

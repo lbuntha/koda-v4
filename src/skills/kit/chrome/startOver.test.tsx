@@ -87,7 +87,7 @@ const CHOICE_ONLY = new Set([
 const PLUMBING = /^(nextStep|refused|nudge|phase|timer|flash|celebrating|finishing|announcement)$/;
 
 describe("no engine holding a child's work forgets the way back", () => {
-  const skills = ["counting", "addition", "subtraction", "multiplication", "division", "fractions"];
+  const skills = ["counting", "addition", "subtraction", "multiplication", "division", "fractions", "measurement"];
 
   for (const id of skills) {
     it(`offers it everywhere it is owed in ${id}`, () => {

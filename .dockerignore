@@ -14,3 +14,6 @@ coverage
 server/.venv
 server/__pycache__
 **/__pycache__
+
+# The promo video project (Remotion) has its own packages and is never part of the app image.
+video

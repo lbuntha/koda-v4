@@ -2028,6 +2028,119 @@
         "box-split/practice-big-grids",
         "box-split/practice-speed"
       ]
+    },
+    {
+      "id": "u155",
+      "unitNumber": 155,
+      "title": "Unit 155: Measure It — Longer, Taller, Heavier",
+      "description": "What we can measure, longer and taller, and lining things up fairly.",
+      "icon": "measurement-compare",
+      "lessons": [
+        "measurement/what-can-we-measure",
+        "measurement/longer-shorter",
+        "measurement/taller-shorter",
+        "measurement/line-them-up"
+      ]
+    },
+    {
+      "id": "u156",
+      "unitNumber": 156,
+      "title": "Unit 156: Measure It — Order and Hold",
+      "description": "Shortest to longest, a string, a pan balance, and which holds more.",
+      "icon": "measurement-holds",
+      "lessons": [
+        "measurement/order-three",
+        "measurement/compare-with-string",
+        "measurement/heavier-lighter",
+        "measurement/holds-more"
+      ]
+    },
+    {
+      "id": "u157",
+      "unitNumber": 157,
+      "title": "Unit 157: Measure It — Measure with Blocks",
+      "description": "Blocks end to end, gaps and overlaps, cubes or rods, balancing with cubes, and filling cups.",
+      "icon": "measurement-blocks",
+      "lessons": [
+        "measurement/measure-with-blocks",
+        "measurement/spot-the-mistake",
+        "measurement/big-unit-small-unit",
+        "measurement/balance-with-cubes",
+        "measurement/fill-with-cups"
+      ]
+    },
+    {
+      "id": "u158",
+      "unitNumber": 158,
+      "title": "Unit 158: Measure It — Rulers",
+      "description": "Read a ruler from 0, start at 0 not the edge, draw a line, use a broken ruler, and find how much longer.",
+      "icon": "measurement-ruler",
+      "lessons": [
+        "measurement/read-the-ruler",
+        "measurement/measure-it",
+        "measurement/draw-a-line",
+        "measurement/broken-ruler",
+        "measurement/how-much-longer"
+      ]
+    },
+    {
+      "id": "u159",
+      "unitNumber": 159,
+      "title": "Unit 159: Measure It — Good Guesses and Number Lines",
+      "description": "Choose cm, m or km, estimate lengths, jump along a number line, and read inches and millimetres.",
+      "icon": "measurement-estimate",
+      "lessons": [
+        "measurement/cm-or-m",
+        "measurement/estimate-length",
+        "measurement/lengths-on-a-number-line",
+        "measurement/inches-and-feet",
+        "measurement/half-and-quarter-inches",
+        "measurement/millimetres"
+      ]
+    },
+    {
+      "id": "u160",
+      "unitNumber": 160,
+      "title": "Unit 160: Measure It — Scales and Jugs",
+      "description": "g or kg, kitchen and bathroom scales, unnumbered marks, measuring jugs, and US cups to gallons.",
+      "icon": "measurement-scale",
+      "lessons": [
+        "measurement/kg-or-g",
+        "measurement/read-the-scale",
+        "measurement/scale-steps",
+        "measurement/kilogram-scales",
+        "measurement/pounds-and-ounces",
+        "measurement/read-the-jug",
+        "measurement/fill-to-the-line",
+        "measurement/cups-pints-quarts-gallons"
+      ]
+    },
+    {
+      "id": "u161",
+      "unitNumber": 161,
+      "title": "Unit 161: Measure It — Hot and Cold",
+      "description": "Read thermometers, go below zero, work out changes, read °F, and solve measure stories.",
+      "icon": "measurement-thermometer",
+      "lessons": [
+        "measurement/read-the-thermometer",
+        "measurement/below-zero",
+        "measurement/warmer-colder",
+        "measurement/fahrenheit",
+        "measurement/add-and-subtract-measures"
+      ]
+    },
+    {
+      "id": "u162",
+      "unitNumber": 162,
+      "title": "Unit 162: Measure It — Practice: Scales, Jugs and Thermometers",
+      "description": "Mixed practice without help: scales, jugs, thermometers and measure stories.",
+      "icon": "measurement-scale",
+      "lessons": [
+        "measurement/practice-scales",
+        "measurement/practice-jugs",
+        "measurement/practice-thermometers",
+        "measurement/practice-measure-stories"
+      ]
     }
   ]
 }

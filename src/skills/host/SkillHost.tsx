@@ -158,6 +158,7 @@ export const SkillHost: React.FC<SkillHostProps> = ({
       completeSkill: (result) => hostRef.current.onComplete(result),
       getSnapshot: () => hostRef.current.snapshot,
       theme,
+      region: viewer.region ?? "INTL",
       exit: () => hostRef.current.onExit(),
       timeUp: () => hostRef.current.timeUp?.() ?? false,
       /* Bound only when the host actually has a home screen, because the SDK

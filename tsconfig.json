@@ -28,5 +28,5 @@
     "noUnusedLocals": true,
     "noUnusedParameters": true
   },
-  "exclude": ["node_modules", "src/pwa/sw.ts"]
+  "exclude": ["node_modules", "src/pwa/sw.ts", "video"]
 }

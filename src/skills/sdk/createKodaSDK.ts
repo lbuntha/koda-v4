@@ -45,6 +45,8 @@ export interface KodaHost {
   completeSkill(result: SkillResult): void;
   getSnapshot(): LearnerSnapshot;
   theme: "light" | "dark";
+  /** The learner's curriculum. Absent where unknown, which reads as `INTL`. */
+  region?: "US" | "GB" | "KH" | "INTL";
   exit(): void;
   /** Leave for the home screen. Absent where the host has no home. */
   goHome?(): void;
@@ -405,6 +407,7 @@ export function createKodaSDK(
 
     ui: {
       theme: host.theme,
+      region: host.region ?? "INTL",
       exit: host.exit,
       nextLesson: host.nextLesson ?? null,
       pathComplete: host.pathComplete ?? false,

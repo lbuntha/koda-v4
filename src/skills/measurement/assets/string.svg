@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+  <title>Use a String</title>
+  <rect x="6" y="6" width="88" height="88" rx="18" fill="#F4F2FF" stroke="#3B2F8F" stroke-width="4"/>
+  <path d="M14 82 H86" stroke="#3B2F8F" stroke-width="4" stroke-linecap="round"/>
+  <rect x="20" y="26" width="22" height="56" rx="2" fill="#C4B5FD" stroke="#6D28D9" stroke-width="3"/><circle cx="37" cy="56" r="2.5" fill="#3B2F8F"/>
+  <path d="M50 26 V82" stroke="#F43F5E" stroke-width="4" stroke-linecap="round"/>
+  <rect x="58" y="40" width="26" height="42" rx="2" fill="#BAE6FD" stroke="#0369A1" stroke-width="3"/><path d="M58 54 H84 M58 68 H84" stroke="#0369A1" stroke-width="2.5"/>
+</svg>

@@ -1,0 +1,723 @@
+{
+  "listAnd": "{a} and {b}",
+  "colour": {
+    "purple": "purple",
+    "blue": "blue",
+    "pink": "pink",
+    "green": "green"
+  },
+  "thing": {
+    "pencil": "pencil",
+    "crayon": "crayon",
+    "ribbon": "ribbon",
+    "straw": "straw",
+    "sunflower": "sunflower",
+    "candle": "candle",
+    "tower": "tower",
+    "flag": "flag",
+    "door": "door",
+    "bookcase": "bookcase",
+    "window": "window",
+    "cupboard": "cupboard",
+    "apple": "apple",
+    "cup": "cup",
+    "book": "book",
+    "feather": "feather",
+    "car": "car",
+    "bath": "bath",
+    "key": "key",
+    "bus": "bus",
+    "carrot": "carrot",
+    "bed": "bed"
+  },
+  "named": "{colour} {thing}",
+  "the": "the {thing}",
+  "ask": {
+    "longer": "longer",
+    "shorter": "shorter",
+    "taller": "taller",
+    "lower": "shorter",
+    "heavier": "heavier",
+    "lighter": "lighter",
+    "holdsMore": "holds more"
+  },
+  "tool": {
+    "ruler": "Ruler",
+    "balance": "Balance scale",
+    "jug": "Measuring jug"
+  },
+  "prompt": {
+    "pick": "Which one is {ask}? Tap it.",
+    "align": "Which one is really longer? Line them up first.",
+    "order": "Put them in order, shortest first.",
+    "indirect": "Which is {ask}, {a} or {b}? They cannot move. Use the string.",
+    "attribute": "Which is {ask}, {a} or {b}? What would you use to find out?"
+  },
+  "label": {
+    "startLine": "Start line",
+    "startLineHeld": "Start line. Tap to move the {name} here.",
+    "onBench": "{name} on the bench. Tap to pick it up.",
+    "slot": {
+      "shortest": "Shortest",
+      "middle": "Middle",
+      "longest": "Longest"
+    },
+    "slotEmpty": "{slot}, empty",
+    "slotFilled": "{slot}: {name}. Tap to take it out.",
+    "inPool": "{name}. Tap to put it in the next space.",
+    "string": "String",
+    "measureWith": "Hold the string up to {a}",
+    "carryTo": "Take the string to {b}",
+    "check": "Check",
+    "answerIs": "{name}"
+  },
+  "status": {
+    "tapToMove": "Tap one that starts late, then tap the start line.",
+    "held": "Now tap the start line.",
+    "lined": "They both start at the line now.",
+    "stringStart": "First hold the string up to {a}.",
+    "stringCut": "The string is as tall as {a}. Now take it to {b}.",
+    "stringCarried": "The string is next to {b}. Compare them."
+  },
+  "refuse": {
+    "alignFirst": "Line them up at the start line first.",
+    "stringFirst": "Use the string first.",
+    "fillFirst": "Put all three in the spaces first."
+  },
+  "right": {
+    "pick": "Yes! {name} is {ask}.",
+    "order": "Yes! Shortest to longest.",
+    "attribute": "Yes! A {tool} tells you."
+  },
+  "wrong": {
+    "pick": "Look at the ends again.",
+    "pickVertical": "Look at the tops again.",
+    "align": "They start together now. Look at the ends.",
+    "order": "Not yet. Find the shortest one first.",
+    "indirect": "Look at where the string reaches.",
+    "attribute": "Which tool finds out how long, how heavy, or how much it holds?"
+  },
+  "hint": {
+    "pick": {
+      "look": "They start at the same line. Look at the other ends.",
+      "longer": "The one that ends further from the start line is longer.",
+      "shorter": "The one that ends nearer the start line is shorter."
+    },
+    "pickVertical": {
+      "look": "They stand on the same floor. Look at the tops.",
+      "taller": "The one whose top is higher is taller.",
+      "lower": "The one whose top is lower is shorter."
+    },
+    "align": {
+      "look": "One starts late. Tap it, then tap the start line.",
+      "worked": "When both start at the line, the one that ends further away is longer."
+    },
+    "order": {
+      "look": "The glowing one is the shortest. Put it first.",
+      "worked": "Shortest first, then the middle one, then the longest."
+    },
+    "indirect": {
+      "look": "Hold the string up to {a}, then take it to {b}.",
+      "taller": "If the string reaches higher than {b}, then {a} is taller.",
+      "lower": "If the string does not reach the top of {b}, then {a} is shorter."
+    },
+    "attribute": {
+      "look": "Is the question how long, how heavy, or how much it holds?",
+      "worked": "A ruler finds how long. A balance scale finds how heavy. A measuring jug finds how much it holds."
+    }
+  },
+  "demo": {
+    "compareIntro": "Which is longer? They must start at the same place.",
+    "compareTapLate": "This one starts late. Tap it.",
+    "compareTapLine": "Now tap the start line.",
+    "compareTogether": "Both start together now.",
+    "compareAnswer": "This one ends further away. It is longer!",
+    "orderIntro": "Put them in order, shortest first.",
+    "orderShortest": "This one is the shortest. Tap it.",
+    "orderMiddle": "Then the middle one.",
+    "orderLongest": "The longest goes last.",
+    "orderDone": "Shortest to longest. Done!"
+  },
+  "title": {
+    "right": "Well done!",
+    "wrong": "Not quite"
+  },
+  "mass": {
+    "feather": "feather",
+    "balloon": "balloon",
+    "pillow": "pillow",
+    "brick": "brick",
+    "rock": "rock",
+    "apple": "apple",
+    "watermelon": "watermelon",
+    "book": "book",
+    "shoe": "shoe"
+  },
+  "vessel": {
+    "jar": "jar",
+    "bowl": "bowl",
+    "bottle": "bottle",
+    "mug": "mug",
+    "vase": "vase",
+    "pot": "pot"
+  },
+  "customary": {
+    "cup": "cup",
+    "pint": "pint",
+    "quart": "quart",
+    "gallon": "gallon"
+  },
+  "customaryPlural": {
+    "cup": "cups",
+    "pint": "pints",
+    "quart": "quarts",
+    "gallon": "gallons"
+  },
+  "balance": {
+    "prompt": {
+      "compare": "Which is {ask}, the {left} or the {right}? Put them on the balance.",
+      "cubes": "How many cubes weigh the same as the {thing}? Make it balance."
+    },
+    "weigh": "Put them on the balance",
+    "addCube": "Add a cube",
+    "takeCube": "Take a cube off",
+    "balances": "It balances",
+    "cubeCount": "{count} cubes on the balance",
+    "status": {
+      "weighFirst": "Put them on the balance first.",
+      "weighed": "The heavier side goes down.",
+      "tooFew": "The {thing} side is down. Add cubes.",
+      "tooMany": "The cube side is down. Take a cube off.",
+      "level": "The beam is level!"
+    },
+    "right": {
+      "compare": "Yes! The {name} is {ask}.",
+      "cubes": "Yes! The {thing} weighs the same as {count} cubes."
+    },
+    "wrong": {
+      "compare": "Look at which side went down.",
+      "cubes": "The beam is not level yet."
+    },
+    "hint": {
+      "compare": {
+        "look": "The heavier side goes down. The lighter side goes up.",
+        "worked": "Big things are not always heavy. Trust the balance, not the size."
+      },
+      "cubes": {
+        "look": "Add cubes until the beam is level.",
+        "worked": "When the beam is level, both sides weigh the same. Count the cubes."
+      }
+    }
+  },
+  "pour": {
+    "prompt": {
+      "pour": "Which holds more, the {a} or the {b}? Pour each into cups.",
+      "cups": "How many cups does the {thing} fill? Pour it out.",
+      "jug": "How much water is in the jug?",
+      "fill": "Fill the jug to the line: {target} {unit}.",
+      "howMany": "How many {small} fill 1 {big}?",
+      "which": "Which holds more, a {a} or a {b}?"
+    },
+    "pourInto": "Pour the {thing} into cups",
+    "cupsFull": "{count} cups",
+    "add": "Pour in {amount} {unit}",
+    "remove": "Pour out {amount} {unit}",
+    "done": "Done",
+    "amount": "{amount} {unit}",
+    "inJug": "{amount} {unit} in the jug",
+    "status": {
+      "pourFirst": "Pour it into cups first.",
+      "pourBoth": "Pour both into cups first.",
+      "filled": "Count the cups the {thing} filled."
+    },
+    "right": {
+      "pour": "Yes! The {thing} holds more.",
+      "cups": "Yes! {count} cups.",
+      "jug": "Yes! {amount} {unit}.",
+      "fill": "Yes! Right on the line.",
+      "howMany": "Yes! {count} {small} fill 1 {big}.",
+      "which": "Yes! A {name} holds more."
+    },
+    "wrong": {
+      "pour": "Count the cups each one filled.",
+      "cups": "Count the full cups again.",
+      "jug": "Look at the top of the water, then the marks.",
+      "fill": "Look at the top of the water and the line.",
+      "customary": "Think how many small ones fill the big one."
+    },
+    "hint": {
+      "pour": {
+        "look": "Pour each one into cups, then count the cups.",
+        "worked": "The one that fills more cups holds more, even if it looks smaller."
+      },
+      "cups": {
+        "look": "Count each full cup, one by one.",
+        "worked": "Touch each cup as you count. The last number is how many."
+      },
+      "jug": {
+        "look": "Look at the top of the water. Which mark is it on?",
+        "worked": "The marks go up by {step}. Count up from the last number below the water."
+      },
+      "fill": {
+        "look": "Pour in water until the top reaches the dashed line.",
+        "worked": "The marks go up by {step}. Pour out a little if the water goes past the line."
+      },
+      "customary": {
+        "look": "2 cups fill a pint. 2 pints fill a quart. 4 quarts fill a gallon.",
+        "worked": "A gallon is 4 quarts, 8 pints, or 16 cups."
+      }
+    }
+  },
+  "demo2": {
+    "balanceIntro": "Which is heavier? Use the balance.",
+    "balanceTap": "Tap to put them on the balance.",
+    "balanceDown": "This side went down. It is heavier!",
+    "pourIntro": "Which holds more? Pour each into cups.",
+    "pourFirst": "Pour the jar into cups.",
+    "pourSecond": "Now pour the bowl into cups.",
+    "pourAnswer": "The bowl filled more cups. It holds more!",
+    "jugIntro": "Find the top of the water.",
+    "jugMarks": "Look across to the marks.",
+    "jugRead": "It is on the 300 mark."
+  },
+  "track": {
+    "prompt": {
+      "lay": "How many blocks long is the {thing}? Lay blocks along it.",
+      "spot": "Two children measured the {thing}. Which row is right?",
+      "unit_more": "Which needs more to measure the {thing}, cubes or rods?",
+      "unit_fewer": "Which needs fewer to measure the {thing}, cubes or rods?",
+      "count": "Now, how many blocks long is it?"
+    },
+    "addBlock": "Lay a block",
+    "takeBlock": "Take a block off",
+    "laid": "{count} blocks laid",
+    "row": "Row {n}",
+    "cube": "Cubes",
+    "rod": "Rods",
+    "status": {
+      "coverFirst": "Lay blocks until the {thing} is covered.",
+      "covered": "The {thing} is covered. Count the blocks.",
+      "past": "The blocks go past the end. Take one off.",
+      "rowRight": "Yes, that row is right. Now count it."
+    },
+    "right": {
+      "lay": "Yes! The {thing} is {count} blocks long.",
+      "spot": "Yes! The {thing} is {count} blocks long.",
+      "unit": "Yes! Small cubes need more; long rods need fewer."
+    },
+    "wrong": {
+      "lay": "Count the blocks one by one.",
+      "spot": "Look for a gap or an overlap.",
+      "count": "Count the blocks in the right row.",
+      "unit": "A small unit fits more times than a big one."
+    },
+    "hint": {
+      "lay": {
+        "look": "Start at the end of the {thing}. Put each block right after the last one.",
+        "worked": "No gaps, no overlaps. Count the blocks."
+      },
+      "spot": {
+        "look": "Look for a space between blocks, or blocks on top of each other.",
+        "worked": "Blocks must touch end to end, with no gaps and no overlaps."
+      },
+      "unit": {
+        "look": "A rod is as long as {rod} cubes.",
+        "worked": "The smaller the unit, the more of them you need."
+      }
+    }
+  },
+  "demo3": {
+    "unitsIntro": "How many blocks long is the pencil?",
+    "unitsLay": "Tap to lay a block.",
+    "unitsMore": "Lay one after another. No gaps.",
+    "unitsCount": "It is covered. Count: 1, 2, 3, 4. Four blocks!"
+  },
+  "ruler": {
+    "prompt": {
+      "read": "How long is the {thing}?",
+      "place": "Measure the {thing}. Move it to the ruler first.",
+      "draw": "Draw a line {n} {unit} long.",
+      "offset": "This ruler is broken. How long is the {thing}?",
+      "difference": "How much longer is the {a} than the {b}?",
+      "numberline_add": "A ribbon is {start} cm long. You add {change} cm more. How long is it now?",
+      "numberline_cut": "A ribbon is {start} cm long. You cut {change} cm off. How long is it now?",
+      "read_inch": "How long is the {thing}, in inches?",
+      "read_inch_fraction": "How long is the {thing}, in inches?",
+      "read_mm": "How long is the {thing}, in mm?"
+    },
+    "tapThing": "Pick up the {thing}",
+    "mark": "Mark {n}",
+    "edge": "Edge of the ruler",
+    "done": "Done",
+    "check": "Check",
+    "zoom": "Zoomed in",
+    "foot": "12 in = 1 ft",
+    "landing": "Lands on {n}",
+    "status": {
+      "pickUp": "Now tap the 0 on the ruler.",
+      "edge": "That is the edge of the ruler. Start at 0.",
+      "notZero": "Start at 0, not at {n}.",
+      "placed": "The {thing} starts at 0. Where does it end?",
+      "placeFirst": "Move the {thing} to the 0 first.",
+      "pickFirst": "Pick up the {thing} first.",
+      "drawFirst": "Tap a mark on the ruler to draw the line.",
+      "tapLine": "Tap the number line where it lands."
+    },
+    "right": {
+      "length": "Yes! The {thing} is {amount} long.",
+      "draw": "Yes! That line is {amount} long.",
+      "difference": "Yes! It is {amount} longer.",
+      "numberline": "Yes! It is {amount} long now."
+    },
+    "wrong": {
+      "read": "Find where the {thing} ends.",
+      "offset": "Count the spaces, not the end number.",
+      "difference": "Find both lengths, then take the short one from the long one.",
+      "draw": "Start at 0 and count along.",
+      "numberline": "Start at {start}, then jump {change}.",
+      "inch": "Count the small marks after the last whole inch.",
+      "mm": "Count the small marks after the last cm."
+    },
+    "hint": {
+      "read": {
+        "look": "The {thing} starts at 0. Look at the number where it ends.",
+        "worked": "Starting at 0, the number at the end is the length."
+      },
+      "offset": {
+        "look": "This ruler starts at {start}, not 0.",
+        "worked": "Count the spaces from {start} to the end. Or take {start} from the end number."
+      },
+      "draw": {
+        "look": "The line starts at 0. Find the {n}.",
+        "worked": "Tap the mark that says {n}."
+      },
+      "difference": {
+        "look": "Read each length from 0.",
+        "worked": "Take the short length from the long length."
+      },
+      "numberline": {
+        "look": "Start at {start}.",
+        "worked": "Jump {change} {dir}. Where do you land?",
+        "right": "right",
+        "left": "left"
+      },
+      "inch": {
+        "look": "Each inch is split into 4 small parts. Two parts make a half.",
+        "worked": "Find the last whole inch, then count the small parts after it."
+      },
+      "mm": {
+        "look": "Each cm has 10 small marks. Each is 1 mm.",
+        "worked": "Every cm is 10 mm. Count by 10s to the last cm, then count the small marks."
+      }
+    }
+  },
+  "estimate": {
+    "prompt": {
+      "unit": "Which unit would you use to measure {what}?"
+    },
+    "what": {
+      "key": "how long a key is",
+      "pencil": "how long a pencil is",
+      "phone": "how long a phone is",
+      "book": "how long a book is",
+      "scissors": "how long a pair of scissors is",
+      "door": "how tall a door is",
+      "bed": "how long a bed is",
+      "car": "how long a car is",
+      "bus": "how long a bus is",
+      "tree": "how tall a tree is",
+      "walk": "how far you walk to school",
+      "town": "how far it is to the next town",
+      "train": "how far a long train ride goes",
+      "apple": "how heavy an apple is",
+      "egg": "how heavy an egg is",
+      "banana": "how heavy a banana is",
+      "letter": "how heavy a letter is",
+      "dog": "how heavy a dog is",
+      "bike": "how heavy a bike is",
+      "child": "how heavy a child is",
+      "sofa": "how heavy a sofa is",
+      "glass": "how much a glass holds",
+      "mug": "how much a mug holds",
+      "can": "how much a can of drink holds",
+      "bath": "how much a bath holds",
+      "bucket": "how much a bucket holds"
+    },
+    "ask": {
+      "key": "About how long is a key?",
+      "pencil": "About how long is a pencil?",
+      "phone": "About how long is a phone?",
+      "book": "About how long is a book?",
+      "scissors": "About how long are school scissors?",
+      "door": "About how tall is a door?",
+      "bed": "About how long is a bed?",
+      "car": "About how long is a car?",
+      "bus": "About how long is a bus?",
+      "tree": "About how tall is a big tree?",
+      "walk": "About how far is a walk to school?",
+      "town": "About how far is it to the next town?",
+      "train": "About how far does a long train ride go?"
+    },
+    "name": {
+      "key": "key",
+      "pencil": "pencil",
+      "phone": "phone",
+      "book": "book",
+      "scissors": "scissors",
+      "door": "door",
+      "bed": "bed",
+      "car": "car",
+      "bus": "bus",
+      "tree": "tree",
+      "walk": "walk to school",
+      "town": "next town",
+      "train": "train ride",
+      "apple": "apple",
+      "egg": "egg",
+      "banana": "banana",
+      "letter": "letter",
+      "dog": "dog",
+      "bike": "bike",
+      "child": "child",
+      "sofa": "sofa",
+      "glass": "glass",
+      "mug": "mug",
+      "can": "can of drink",
+      "bath": "bath",
+      "bucket": "bucket"
+    },
+    "about": "About {amount}",
+    "right": {
+      "unit": "Yes! We use {unit} for that.",
+      "amount": "Yes! About {amount}."
+    },
+    "wrong": {
+      "unit": "Think how big it is: cm for small things, m for big things, km for long trips.",
+      "amount": "Picture it next to you. Is it really that big?",
+      "unit_mass": "Light things are weighed in g, heavy things in kg.",
+      "unit_capacity": "A little drink is measured in ml, a lot of water in l."
+    },
+    "bench": {
+      "cm": "1 cm: as wide as a finger",
+      "m": "1 m: one big step",
+      "km": "1 km: a long walk",
+      "g": "1 {unit}: a paper clip",
+      "kg": "1 {unit}: a bag of rice",
+      "mL": "1 {unit}: a few drops",
+      "L": "1 {unit}: a big bottle of water"
+    },
+    "hint": {
+      "unit": {
+        "look": "Think: is it smaller than you, bigger than you, or a long trip?",
+        "worked": "Small things: cm. Big things: m. Long trips: km."
+      },
+      "amount": {
+        "look": "One answer is ten times too big or too small.",
+        "worked": "Compare it with something you know: a door is about 2 m tall."
+      },
+      "unit_mass": {
+        "look": "Could you hold it on one finger, or do you need both arms?",
+        "worked": "Light things: g. Heavy things: kg."
+      },
+      "unit_capacity": {
+        "look": "Is it a sip or a lot of water?",
+        "worked": "A little: ml. A lot: l."
+      }
+    }
+  },
+  "demo4": {
+    "readIntro": "How long is the pencil?",
+    "readZero": "Find 0. The pencil starts there.",
+    "readEnd": "Look at the end. It ends at 7.",
+    "readAnswer": "It is 7 cm long.",
+    "placeIntro": "Measure the crayon.",
+    "placeTap": "Tap the crayon to pick it up.",
+    "placeZero": "Tap the 0, not the edge.",
+    "placeRead": "Now it starts at 0. It ends at 5. It is 5 cm long.",
+    "drawIntro": "Draw a line 6 cm long.",
+    "drawTap": "Tap the 6 mark.",
+    "drawDone": "The line goes from 0 to 6. It is 6 cm long.",
+    "estimateIntro": "About how tall is a door?",
+    "estimateThink": "A door is taller than a grown-up, but not by much.",
+    "estimateTap": "So a door is about 2 m, not 20 m."
+  },
+  "scale": {
+    "prompt": {
+      "g": "How much does it weigh? Read the scale.",
+      "kg": "How heavy is it? Read the scale.",
+      "oz": "How much does it weigh, in pounds and ounces?"
+    },
+    "load": {
+      "flour": "flour",
+      "apples": "apples",
+      "rice": "rice",
+      "child": "child",
+      "suitcase": "suitcase",
+      "carrots": "carrots"
+    },
+    "right": "Yes! It weighs {amount}.",
+    "wrong": {
+      "read": "Look at the number the needle points to.",
+      "interval": "Work out how much one small mark is worth.",
+      "kg": "Find the number before the needle, then count the marks.",
+      "lb": "16 oz make 1 lb. Count the ounces after the last pound."
+    },
+    "hint": {
+      "read": {
+        "look": "Follow the needle to the number it points at.",
+        "worked": "The needle points right at a number: that is the weight."
+      },
+      "interval": {
+        "look": "Find the number just before the needle.",
+        "worked": "From {from} to {to} there are {marks} steps, so each small mark is {step}."
+      },
+      "kg": {
+        "look": "Find the number just before the needle.",
+        "worked": "Each small mark is {step} kg. Count on from the number."
+      },
+      "lb": {
+        "look": "Each pound has 16 small marks: one for each ounce.",
+        "worked": "Find the last pound, then count the ounces after it."
+      }
+    }
+  },
+  "thermo": {
+    "prompt": {
+      "read": "What temperature does it show?",
+      "negative": "What temperature does it show? It may be below zero.",
+      "read_f": "What temperature does it show, in °F?",
+      "warmer": "It was {start} °C. It got {by} degrees warmer. What is it now?",
+      "colder": "It was {start} °C. It got {by} degrees colder. What is it now?"
+    },
+    "right": "Yes! It is {amount}.",
+    "wrong": {
+      "read": "Find the top of the red line and the number below it.",
+      "negative": "Below zero, the numbers go down as you go down.",
+      "change": "Warmer goes up, colder goes down. Count past zero."
+    },
+    "hint": {
+      "read": {
+        "look": "Look at the top of the red line.",
+        "worked": "Find the number below it, then count up the marks. Each mark is {step} degrees."
+      },
+      "negative": {
+        "look": "Under 0 the numbers count down: −1, −2, −3.",
+        "worked": "Find the number nearest the top of the line, then count the marks. Each mark is {step}."
+      },
+      "change": {
+        "look": "Start at {start}. Colder goes down, warmer goes up.",
+        "worked": "Count {by} marks {dir} from {start}."
+      },
+      "up": "up",
+      "down": "down"
+    }
+  },
+  "story": {
+    "t": {
+      "juice": "You pour {a} {u} of juice into a jug, then {b} {u} more. How much juice is in the jug?",
+      "jug": "A jug holds {a} {u} of water. You pour out {b} {u}. How much water is left?",
+      "bottles": "A big bottle holds {a} {u}. A small bottle holds {b} {u}. How much more does the big bottle hold?",
+      "flour": "A bag has {a} {u} of flour. A cook uses {b} {u}. How much flour is left?",
+      "fruit": "A basket of fruit weighs {a} {u}. You add vegetables that weigh {b} {u}. How much does the basket weigh now?",
+      "parcels": "A red parcel weighs {a} {u}. A blue parcel weighs {b} {u}. How much heavier is the red parcel?",
+      "ribbon": "A ribbon is {a} {u} long. You cut off {b} {u}. How long is it now?",
+      "tower": "A tower of blocks is {a} {u} tall. You add {b} {u} more. How tall is it now?",
+      "plants": "A sunflower is {a} {u} tall. A bean plant is {b} {u} tall. How much taller is the sunflower?"
+    },
+    "bar": {
+      "whole": "whole",
+      "part": "part",
+      "more": "more"
+    },
+    "right": "Yes! The answer is {amount}.",
+    "wrong": {
+      "join": "Put the two parts together: add.",
+      "left": "Some is taken away: subtract.",
+      "compare": "Find the difference: take the small one from the big one."
+    },
+    "hint": {
+      "join": {
+        "look": "Both amounts go into one: is the answer bigger or smaller?",
+        "worked": "The bar has two parts, {a} and {b}. Add them."
+      },
+      "left": {
+        "look": "You start with {a} and some goes. Is the answer bigger or smaller?",
+        "worked": "The whole bar is {a}. One part is {b}. The other part is {a} − {b}."
+      },
+      "compare": {
+        "look": "Line the two amounts up. How much sticks out?",
+        "worked": "The difference is {a} − {b}."
+      }
+    }
+  },
+  "demo5": {
+    "scaleIntro": "How much does the flour weigh?",
+    "scaleBefore": "Find the number before the needle: 600.",
+    "scaleSteps": "Each small mark is 50 g. 600, then 650.",
+    "scaleAnswer": "It weighs 650 g.",
+    "thermoIntro": "What temperature does it show?",
+    "thermoTop": "Find the top of the red line.",
+    "thermoCount": "The number below it is 20. Count by 2s: 22, 24, 26.",
+    "thermoAnswer": "It is 26 degrees.",
+    "storyIntro": "A bag has 600 g of flour. A cook uses 250 g.",
+    "storyBar": "The whole bar is 600 g. One part is 250 g.",
+    "storyAnswer": "The other part is 600 − 250 = 350 g."
+  },
+  "sheet": {
+    "fill": "Shade the jug up to {target} {unit}.",
+    "draw": "Use a ruler. Draw a line {n} {unit} long.",
+    "method": {
+      "ruler": {
+        "0": "Put the 0 at one end.",
+        "1": "Read the number at the other end. Between numbers, count the small marks."
+      },
+      "offset": {
+        "0": "Read the number at each end.",
+        "1": "Take the smaller number away from the bigger one."
+      },
+      "difference": {
+        "0": "Measure each one.",
+        "1": "Take the shorter length away from the longer one."
+      },
+      "numberline": {
+        "0": "Start at the first length.",
+        "1": "Add on, or take away, the change."
+      },
+      "draw": {
+        "0": "Put the ruler's 0 on a dot.",
+        "1": "Draw along the edge to the number."
+      },
+      "scale": {
+        "0": "Find the number just before the needle.",
+        "1": "Work out what each small mark is worth, then count on."
+      },
+      "thermo": {
+        "0": "Find the top of the line, and the number just below it.",
+        "1": "Count up the marks. Below 0 the numbers get bigger as you go down."
+      },
+      "change": {
+        "0": "Start at the first temperature.",
+        "1": "Warmer: count up. Colder: count down, past 0 if you need to."
+      },
+      "jug": {
+        "0": "Find the number just below the water.",
+        "1": "Work out what each small mark is worth, then count up."
+      },
+      "fill": {
+        "0": "Find the number on the jug.",
+        "1": "Shade up to that line."
+      },
+      "customary": {
+        "0": "2 cups fill a pint, 2 pints a quart, 4 quarts a gallon."
+      },
+      "story": {
+        "0": "Both amounts go into one: add.",
+        "1": "Taken away, or how much more: subtract."
+      },
+      "estimate": {
+        "0": "Think of something you know the size of, like your hand or a door.",
+        "1": "Pick the unit or the amount that makes sense."
+      }
+    }
+  }
+}

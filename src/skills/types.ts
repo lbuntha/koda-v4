@@ -185,6 +185,12 @@ export interface KodaSDK {
 
   ui: {
     readonly theme: "light" | "dark";
+    /**
+     * The learner's curriculum, from the country chosen at sign-up: what
+     * spelling, clock style and units a skill shows. `INTL` when unknown.
+     * Display only; which lessons exist is decided by the course, not here.
+     */
+    readonly region: "US" | "GB" | "KH" | "INTL";
     exit(): void;
     /**
      * What to offer when this round ends, or null when there is nothing after
@@ -459,6 +465,24 @@ export interface Lesson {
    * someone labelled it "Master".
    */
   ageBand?: [number, number];
+
+  /**
+   * The curricula this lesson belongs to, when it is not all of them.
+   *
+   * Absent means every learner sees it, which is almost every lesson. Set for
+   * the few that only one country teaches (inches, Roman-numeral clocks,
+   * hectares). A learner outside every listed region never sees the lesson, so
+   * a lesson that sets this must never be another lesson's only prerequisite.
+   */
+  regions?: ("US" | "GB" | "KH")[];
+
+  /**
+   * Where this lesson sits in curricula that publish no codes, as the year or
+   * grade only: `{ "GB": "Y3", "KH": "G3" }`. England's National Curriculum and
+   * Cambodia's MoEYS syllabus have no CCSS-style identifiers, and `standards`
+   * must never carry an invented one (`docs/PLUGINS.md` §7).
+   */
+  curricula?: { GB?: string; KH?: string };
 }
 
 /* -------------------------------------------------------------------------- */

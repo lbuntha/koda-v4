@@ -1,5 +1,6 @@
 import { getSkill, visibleTo } from "../skills/registry";
 import { getViewer } from "../skills/viewer";
+import { lessonInRegion } from "../skills/region";
 import type { Viewer } from "../skills/viewer";
 import type { Lesson } from "../skills/types";
 import { withoutPracticeLabel } from "../skills/kit/practice";
@@ -70,6 +71,10 @@ function resolve(ref: string, levelNumber: number, viewer: Viewer): ResolvedLess
     lesson.ageBand &&
     lesson.ageBand[0] > viewer.age + STRETCH_YEARS
   ) return undefined;
+
+  // A lesson only some countries teach (inches, Roman-numeral clocks) is held
+  // back from everyone else. Admins still see the whole course.
+  if (!viewer.showAllSkills && !lessonInRegion(lesson.regions, viewer.region ?? "INTL")) return undefined;
 
   // A teacher's wording edit applies here, once, rather than at each display.
   return { ...withLessonEdits(skillId, lesson), ref, skillId, levelNumber };

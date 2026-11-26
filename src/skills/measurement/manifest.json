@@ -1,0 +1,103 @@
+{
+  "id": "measurement",
+  "name": "Measure It",
+  "version": "0.1.0",
+  "description": "Every kind of measuring a primary school teaches, for the US, UK and Cambodian curricula: comparing, units, rulers, mass, capacity, temperature, time, area, volume, angles and converting. Built phase by phase; this release covers comparing length, mass and capacity, measuring with blocks, cubes and cups, reading rulers in cm, mm and inches, estimating, reading scales, jugs and thermometers, and word problems.",
+  "category": "core",
+  "author": "Koda Math Lab",
+  "iconName": "Ruler",
+  "tagline": "Compare, measure, and know what the numbers mean.",
+  "thumbnail": "measurement-quest",
+  "status": "draft",
+  "audience": {
+    "ages": [
+      5,
+      12
+    ],
+    "category": "measurement"
+  },
+  "topics": [
+    "measurement"
+  ],
+  "teaches": [
+    "measurable-attribute",
+    "length-comparer",
+    "length-orderer",
+    "indirect-comparer",
+    "mass-comparer",
+    "capacity-comparer",
+    "unit-iterator",
+    "unit-size-reasoner",
+    "mass-unit-iterator",
+    "capacity-unit-iterator",
+    "ruler-reader",
+    "ruler-drawer",
+    "broken-ruler-reader",
+    "length-difference",
+    "unit-chooser",
+    "length-estimator",
+    "length-number-line",
+    "customary-length-reader",
+    "fraction-measurer",
+    "mm-reader",
+    "scale-reader",
+    "scale-interval-reader",
+    "customary-mass-reader",
+    "jug-reader",
+    "customary-capacity-reader",
+    "thermometer-reader",
+    "negative-temperature",
+    "temperature-change",
+    "fahrenheit-reader",
+    "measure-calculator"
+  ],
+  "requires": [
+    "comparer",
+    "counter"
+  ],
+  "features": [
+    {
+      "id": "audio_speech",
+      "name": "Spoken voice",
+      "description": "Reads the lesson prompt and the How to play captions aloud. Turn off for a silent lesson.",
+      "isEnabled": true,
+      "tag": "Audio"
+    },
+    {
+      "id": "sound_chimes",
+      "name": "Sound chimes",
+      "description": "Plays a short sound when something moves, and when an answer is right or wrong.",
+      "isEnabled": true,
+      "tag": "Audio"
+    },
+    {
+      "id": "haptic_feedback",
+      "name": "Haptic vibration",
+      "description": "Adds a small vibration when an answer is right or wrong.",
+      "isEnabled": true,
+      "tag": "Haptic"
+    },
+    {
+      "id": "instrument_motion",
+      "name": "Instrument motion",
+      "description": "The balance beam tips, water rises, the scale needle swings and the thermometer climbs. Off: each one jumps straight to its value.",
+      "isEnabled": true,
+      "tag": "Motion"
+    }
+  ],
+  "settings": {
+    "speechRate": 0.95
+  },
+  "settingsSchema": [
+    {
+      "key": "speechRate",
+      "label": "Speech rate",
+      "help": "How fast Koda reads aloud.",
+      "type": "number",
+      "min": 0.5,
+      "max": 2,
+      "step": 0.05,
+      "unit": "x"
+    }
+  ]
+}

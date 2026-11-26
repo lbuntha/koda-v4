@@ -56,6 +56,8 @@ export interface FakeKodaOptions {
   /** What `ui.timeUp` answers: a grown-up's limit has closed play. */
   timeUp?: boolean | (() => boolean);
   theme?: "light" | "dark";
+  /** The learner's curriculum, as `ui.region` reports it. Default `INTL`. */
+  region?: "US" | "GB" | "KH" | "INTL";
   /** The learner's voice preference, as `speech.isEnabled()` reports it. */
   voiceEnabled?: boolean;
   /**
@@ -171,6 +173,7 @@ export function createFakeKoda(options: FakeKodaOptions = {}): FakeKoda {
 
     ui: {
       theme: options.theme ?? "light",
+      region: options.region ?? "INTL",
       exit: () => record("ui.exit"),
       nextLesson: null,
       pathComplete: false,

@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+  <title>Heavier or Lighter</title>
+  <rect x="6" y="6" width="88" height="88" rx="18" fill="#F4F2FF" stroke="#3B2F8F" stroke-width="4"/>
+  <path d="M24 34 L76 46" stroke="#3B2F8F" stroke-width="4" stroke-linecap="round"/><path d="M50 40 V80 M38 80 H62" stroke="#3B2F8F" stroke-width="4" stroke-linecap="round"/>
+  <ellipse cx="24" cy="22" rx="9" ry="11" fill="#F472B6" stroke="#BE185D" stroke-width="2.5"/>
+  <path d="M66 50 L72 40 L84 42 L86 52 Z" fill="#94A3B8" stroke="#475569" stroke-width="2.5"/>
+</svg>

@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+  <title>Longer or Shorter</title>
+  <rect x="6" y="6" width="88" height="88" rx="18" fill="#F4F2FF" stroke="#3B2F8F" stroke-width="4"/>
+  <path d="M20 20 V80" stroke="#3B2F8F" stroke-width="3" stroke-dasharray="5 4"/>
+  <rect x="20" y="32" width="54" height="12" rx="3" fill="#8B5CF6"/><path d="M74 32 L84 38 L74 44 Z" fill="#FDE7D8"/>
+  <rect x="20" y="56" width="34" height="12" rx="3" fill="#0EA5E9"/><path d="M54 56 L64 62 L54 68 Z" fill="#FDE7D8"/>
+</svg>
