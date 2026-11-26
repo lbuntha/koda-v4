@@ -155,7 +155,36 @@ class ConceptTotalsOut(Model):
     last_seen_ts: str | None = Field(default=None, alias="lastSeenTs")
 
 
+class ReadingQuizOut(Model):
+    answered: int = 0
+    correct_first_try: int = Field(default=0, alias="correctFirstTry")
+
+
+class ReadingComprehensionOut(ReadingQuizOut):
+    correct_with_help: int = Field(default=0, alias="correctWithHelp")
+    incorrect_first_try: int = Field(default=0, alias="incorrectFirstTry")
+
+
+class ReadingBookOut(Model):
+    book_id: str = Field(alias="bookId")
+    title: str | None = None
+    last_read_day: str = Field(alias="lastReadDay")
+    finished: bool = False
+    comprehension: ReadingComprehensionOut | None = None
+
+
+class ReadingReportOut(Model):
+    days: int = 30
+    reading_days: int = Field(default=0, alias="readingDays")
+    reading_dates: list[str] = Field(default_factory=list, alias="readingDates")
+    books_finished: int = Field(default=0, alias="booksFinished")
+    page_visits: int = Field(default=0, alias="pageVisits")
+    quiz: dict[str, ReadingQuizOut] = Field(default_factory=dict)
+    books: list[ReadingBookOut] = Field(default_factory=list)
+
+
 class ProfileOut(Model):
     learner_id: str = Field(alias="learnerId")
     concepts: list[ConceptTotalsOut]
     events_stored: int = Field(alias="eventsStored")
+    reading: ReadingReportOut

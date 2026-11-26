@@ -11,6 +11,7 @@ import {
 import type { ErrorKind } from "./learning/events";
 import { translate } from "./i18n";
 import { isLadderConcept } from "../trace/learning";
+import { LIBRARY_SKILL_ID } from "../library/ids";
 
 /**
  * What one child has learned, read by an adult.
@@ -35,6 +36,30 @@ interface ProfileResponse {
   learnerId: string;
   concepts: Partial<ConceptTotals>[];
   eventsStored: number;
+  reading?: ReadingSummary;
+}
+
+export const READING_QUIZ_PARTS = ["comprehension", "matching", "vocabulary", "wordReading", "spelling"] as const;
+
+interface ReadingScore {
+  answered: number;
+  correctFirstTry: number;
+}
+
+export interface ReadingSummary {
+  days: number;
+  readingDays: number;
+  readingDates?: string[];
+  booksFinished: number;
+  pageVisits: number;
+  quiz: Partial<Record<(typeof READING_QUIZ_PARTS)[number], ReadingScore>>;
+  books?: {
+    bookId: string;
+    title: string | null;
+    lastReadDay: string;
+    finished: boolean;
+    comprehension: (ReadingScore & { correctWithHelp: number; incorrectFirstTry: number }) | null;
+  }[];
 }
 
 /** How many days back "this week" reaches, today included. */
@@ -130,6 +155,7 @@ export interface ActivityDay {
 
 export interface ChildReport {
   learnerId: string;
+  reading?: ReadingSummary;
   /** Raw events the server still holds. Ages out at 400 days; the rollup does not. */
   eventsStored: number;
   /** Every concept this child has touched, hardest-first. */
@@ -324,10 +350,12 @@ export async function fetchChildReport(
 ): Promise<ChildReport> {
   const token = await accessToken();
   const profile = await request<ProfileResponse>(`/sync/profile/${learnerId}`, { token, signal });
-  // Writing has its own section on the report (the trace ladder, letter by letter); as one
-  // coarse concept it would read "mastered" after a few good letters, so it is left out here.
-  const concepts = (profile.concepts ?? []).filter((concept) => !isLadderConcept(concept.conceptKey ?? ""));
-  return buildReport(profile.learnerId, concepts, profile.eventsStored ?? 0);
+  // Reading and writing have their own sections with evidence specific to each activity.
+  const concepts = (profile.concepts ?? []).filter((concept) =>
+    !isLadderConcept(concept.conceptKey ?? "") &&
+    !(profile.reading && concept.skillIds?.includes(LIBRARY_SKILL_ID)),
+  );
+  return { ...buildReport(profile.learnerId, concepts, profile.eventsStored ?? 0), reading: profile.reading };
 }
 
 /**

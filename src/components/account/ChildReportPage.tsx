@@ -25,6 +25,7 @@ import type { ConceptMastery, MasteryStatus } from "../../lib/learning/mastery";
 import type { ErrorKind } from "../../lib/learning/events";
 import { SKILLS } from "../../skills/registry";
 import { ReviewReport } from "./ReviewReport";
+import { ReadingReport } from "./ReadingReport";
 import { themeSystem } from "../../lib/themeSystem";
 import { UIAvatar, UIBadge, UIButton, UISectionHeader, UIStatGrid, UIStatTile, UIArtIcon } from "../ui";
 import { NoAccess } from "./NoAccess";
@@ -382,7 +383,9 @@ export const ChildReportPage: React.FC<ChildReportPageProps> = ({
     setError(null);
     setDetail(null);
     fetchChildReport(learnerId, controller.signal)
-      .then(setReport)
+      .then((next) => {
+        if (!controller.signal.aborted) setReport(next);
+      })
       .catch((err) => {
         if (controller.signal.aborted) return;
         const problem = err as ApiError;
@@ -517,7 +520,10 @@ export const ChildReportPage: React.FC<ChildReportPageProps> = ({
         .filter(Boolean),
     ).size > 1;
 
-  const played = (report?.rhythm.questionsEver ?? 0) > 0;
+  const ready = !loading && !error && report?.learnerId === learnerId;
+  const played = ready && report.rhythm.questionsEver > 0;
+  const reading = ready ? report.reading : undefined;
+  const hasReadingActivity = reading && (reading.readingDays > 0 || Object.values(reading.quiz).some((part) => Boolean(part?.answered)));
 
   return (
     <div className="min-h-full bg-white p-4 dark:bg-canvas md:p-8">
@@ -544,20 +550,24 @@ export const ChildReportPage: React.FC<ChildReportPageProps> = ({
 
         {error && <p className={themeSystem.flash("error")}>{error}</p>}
 
+        {reading && <ReadingReport reading={reading} />}
+
         {/* What the child read aloud and sent. Absent until there is one. */}
         <VoiceNotesCard learnerId={learnerId} learnerName={learnerName} />
 
-        {loading ? (
+        {loading && (
           <div className="rounded-2xl border border-line bg-white p-8 text-center text-sm text-muted dark:bg-surface">
             {t("report.loading", { name: learnerName })}
           </div>
-        ) : !played ? (
+        )}
+        {ready && !played && !hasReadingActivity && (
           <section className={themeSystem.card("default", "p-8 text-center")}>
             <UIArtIcon id="kit-report" className="mx-auto block h-14 w-14" />
             <h2 className="mt-3 text-lg font-semibold text-ink">{t("common.nothingYet")}</h2>
             <p className="mx-auto mt-1 max-w-md text-sm text-muted">{t("report.emptyNote", { name: learnerName })}</p>
           </section>
-        ) : (
+        )}
+        {played && (
           <>
             {/*
               * AT A GLANCE — the whole page in one card: a coloured verdict,
@@ -859,12 +869,12 @@ export const ChildReportPage: React.FC<ChildReportPageProps> = ({
                 </ul>
               </section>
             )}
-
-            {/* Mistakes fixed and still open. Draws nothing until there is one. */}
+          </>
+        )}
+        {ready && (
+          <>
             <ReviewReport learnerId={learnerId} learnerName={learnerName} lessonName={lessonNameOf} />
-            {/* Koda Trace: what they can write and draw now. Draws nothing until they have tried an item. */}
             <TraceReport learnerId={learnerId} learnerName={learnerName} />
-            {/* The pictures they finished colouring. Draws nothing until there is one. */}
             <PaintingsReport learnerId={learnerId} learnerName={learnerName} />
           </>
         )}

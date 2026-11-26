@@ -2255,6 +2255,53 @@
       "failed": "The picture could not be made on this device.",
       "privacy": "No name, photo or score is on the picture.",
       "message": "My child is learning on Koda. Join free: {link}"
+    },
+    "reading": {
+      "title": "Reading",
+      "books": {
+        "title": "Book history",
+        "latest": "Latest book · {title}",
+        "activity": "{window} · Reading days {days} · Page visits {visits}",
+        "untitled": "Book title unavailable",
+        "finished": "Finished",
+        "explored": "Explored",
+        "lastRead": "Last read {date}",
+        "comprehension": "{right} of {total} story comprehension questions right on the first try without quiz help.",
+        "noComprehension": "No story comprehension answers recorded.",
+        "withHelp": "{count} right with quiz help on the first try",
+        "incorrect": "{count} incorrect on the first try"
+      },
+      "window": "Last {count} days",
+      "booksFinished": "Books finished",
+      "weeklyDays": "Reading goal · Last {count} days",
+      "quiz": "Quiz results by skill",
+      "score": "{right} of {total}",
+      "firstTry": "Correct first try without quiz help",
+      "noComprehension": "No comprehension answers yet",
+      "tryTogether": {
+        "title": "Try together",
+        "revisit": "Reread a few pages of “{title}” together. Ask your child to explain one thing they learned and point to the page that helped them.",
+        "discuss": "Read a few pages of “{title}” together. Ask your child to tell you what they remember in their own words.",
+        "start": "Pick a short book together. After a few pages, ask your child to tell you what they remember."
+      },
+      "targets": {
+        "weeklyGoal": "Read on {target} days in a {days}-day period.",
+        "weeklyProgress": "{done} of {target} days",
+        "quizGoal": "Target {percent}% correct on the first try without quiz help, with at least {count} answers per skill.",
+        "met": "Target met",
+        "below": "Below target",
+        "moreAnswers": {
+          "one": "{count} more answer needed",
+          "other": "{count} more answers needed"
+        }
+      },
+      "part": {
+        "comprehension": "Story comprehension",
+        "matching": "Matching",
+        "vocabulary": "Vocabulary",
+        "wordReading": "Word reading",
+        "spelling": "Spelling"
+      }
     }
   },
   "leaderboard": {

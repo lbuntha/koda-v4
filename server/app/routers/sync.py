@@ -90,4 +90,5 @@ async def profile(learner_id: str, db: Db, p: CanRead) -> ProfileOut:
         learnerId=learner_id,
         concepts=concepts,
         eventsStored=await events_repo.count_for_learner(db, family_id, learner_id),
+        reading=await events_repo.reading_report(db, family_id, learner_id),
     )

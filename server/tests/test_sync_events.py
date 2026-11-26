@@ -1,5 +1,7 @@
 """Events up: idempotent, rolled up, and scoped to the family that sent them."""
 
+from datetime import UTC, datetime, timedelta
+
 import pytest
 
 
@@ -424,7 +426,8 @@ def reading_event(event_id: str, **fields) -> dict:
     e = event(event_id, **{"skillId": "koda-library", "activityId": "reading", "lessonId": "starter-market@1",
                            "conceptKey": "read-and-answer", "entry": "picker", "readId": "r_1", **fields})
     for answer_field in ("correct", "attempt", "responseMs", "supportsUsed"):
-        e.pop(answer_field)
+        if answer_field not in fields:
+            e.pop(answer_field)
     return e
 
 
@@ -457,6 +460,75 @@ async def test_a_book_read_lands_page_by_page_and_counts_as_a_day_practised(clie
     assert totals["practisedOn"] == ["2026-08-19"]
     assert totals["questionsAnswered"] == 0
     assert totals.get("lessonsCompleted", 0) == 0
+
+
+async def test_reading_report_separates_page_activity_and_first_try_quiz_scores(client, parent, db):
+    today = datetime.now(UTC) - timedelta(minutes=1)
+    yesterday = (today - timedelta(days=1)).date().isoformat()
+    await db.library_revisions.insert_many([
+        {"bookId": "starter-market", "rev": 1, "passage": {"title": "A Trip to the Market"}},
+        {"bookId": "starter-market", "rev": 2, "passage": {"title": "The Morning Market"}},
+        {"bookId": "starter-market", "rev": 3, "passage": {"title": "Market Day"}},
+        {"bookId": "garden", "rev": 1, "passage": {"title": "The Garden"}},
+    ])
+
+    def recent(event_id, kind, seq, days_ago=0, **fields):
+        at = today - timedelta(days=days_ago)
+        return reading_event(event_id, type=kind, seq=seq, ts=at.isoformat(timespec="milliseconds").replace("+00:00", "Z"),
+                             localDay=at.date().isoformat(), **fields)
+
+    def quiz(event_id, kind, seq, **fields):
+        return recent(event_id, kind, seq, activityId="passage", **fields)
+
+    body = {"events": [
+        recent("rd_cover", "reading_started", 1, days_ago=2),
+        recent("rd_page", "page_read", 2, days_ago=1, page=1),
+        recent("rd_finish", "reading_finished", 3, days_ago=1),
+        recent("rd_repeat", "reading_finished", 4, lessonId="starter-market@2", readId="r_2"),
+        recent("rd_old", "reading_finished", 5, days_ago=31, lessonId="older-book@1"),
+        recent("rd_other_learner", "reading_finished", 6, learnerId="l_other", lessonId="other-book@1"),
+        recent("rd_preview", "page_read", 7, entry="preview", days_ago=3),
+        quiz("qz_start", "lesson_started", 8),
+        quiz("qz_understand", "question_presented", 9, questionId="q1", taskKind="comprehension_choice"),
+        quiz("qz_right", "answer_submitted", 10, questionId="q1", attempt=1, correct=True, supportsUsed=0),
+        quiz("qz_spell", "question_presented", 11, questionId="q2", taskKind="spell_word_in_sentence"),
+        quiz("qz_helped", "answer_submitted", 12, questionId="q2", attempt=1, correct=True, supportsUsed=1),
+        quiz("qz_words", "question_presented", 13, questionId="q3", taskKind="vocab_match"),
+        quiz("qz_wrong", "answer_submitted", 14, questionId="q3", attempt=1, correct=False, supportsUsed=0),
+        quiz("qz_retry", "answer_submitted", 15, questionId="q3", attempt=2, correct=True, supportsUsed=0),
+        quiz("qz_preview", "lesson_started", 16, entry="preview"),
+        quiz("qz_preview_question", "question_presented", 17, questionId="q4", taskKind="match_pairs"),
+        quiz("qz_preview_answer", "answer_submitted", 18, questionId="q4", attempt=1, correct=True, supportsUsed=0),
+        recent("rd_garden", "page_read", 19, days_ago=1, lessonId="garden@1", page=1),
+        quiz("qz_start_second", "lesson_started", 20),
+        quiz("qz_story_help", "question_presented", 21, questionId="q5", taskKind="comprehension_choice"),
+        quiz("qz_story_help_answer", "answer_submitted", 22, questionId="q5", attempt=1, correct=True, supportsUsed=1),
+        quiz("qz_story_miss", "question_presented", 23, questionId="q6", taskKind="comprehension_choice"),
+        quiz("qz_story_miss_answer", "answer_submitted", 24, questionId="q6", attempt=1, correct=False, supportsUsed=0),
+        quiz("qz_story_retry", "answer_submitted", 25, questionId="q6", attempt=2, correct=True, supportsUsed=0),
+    ]}
+    for _ in range(2):
+        response = await client.post("/sync/push", json=body, headers=parent)
+        assert response.status_code == 200, response.text
+
+    response = await client.get("/sync/profile/l_mia", headers=parent)
+    assert response.status_code == 200, response.text
+    assert response.json()["reading"] == {
+        "days": 30, "readingDays": 2, "booksFinished": 1, "pageVisits": 2,
+        "readingDates": [yesterday, today.date().isoformat()],
+        "quiz": {
+            "comprehension": {"answered": 3, "correctFirstTry": 1},
+            "spelling": {"answered": 1, "correctFirstTry": 0},
+            "vocabulary": {"answered": 1, "correctFirstTry": 0},
+        },
+        "books": [
+            {
+                "bookId": "starter-market", "title": "The Morning Market", "lastReadDay": today.date().isoformat(), "finished": True,
+                "comprehension": {"answered": 3, "correctFirstTry": 1, "correctWithHelp": 1, "incorrectFirstTry": 1},
+            },
+            {"bookId": "garden", "title": "The Garden", "lastReadDay": yesterday, "finished": False, "comprehension": None},
+        ],
+    }
 
 
 def trace_event(event_id: str, **fields) -> dict:

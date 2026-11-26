@@ -5,13 +5,15 @@ unique index — so a batch that is sent twice inserts nothing the second time a
 the rollup is never double-counted. That single index is the whole replay story.
 """
 
+from datetime import timedelta
 from typing import Any
 
 from motor.motor_asyncio import AsyncIOMotorDatabase
 from pymongo import UpdateOne
 
 from app.models.common import now
-from app.models.events import LearningEvent
+from app.models.events import LearningEvent, ReadingBookOut, ReadingComprehensionOut, ReadingQuizOut, ReadingReportOut
+from app.repos.library import revision_titles
 
 
 def to_document(
@@ -231,6 +233,102 @@ async def practised_on(
 #: Which of Learn's three a finished round belongs to, by the skill that sent it.
 READ_SKILL = "koda-library"
 WRITE_SKILL = "koda-trace"
+
+
+_READING_QUIZ_PARTS = {
+    "comprehension_choice": "comprehension",
+    "match_pairs": "matching",
+    "vocab_match": "vocabulary",
+    "opposite_match": "vocabulary",
+    "reading_match": "wordReading",
+    "spell_word_in_sentence": "spelling",
+}
+
+
+async def reading_report(db: AsyncIOMotorDatabase, family_id: str, learner_id: str) -> ReadingReportOut:
+    report = ReadingReportOut()
+    end = now()
+    start = end - timedelta(days=report.days)
+    start_ts, end_ts = (value.isoformat(timespec="milliseconds").replace("+00:00", "Z") for value in (start, end))
+    # Use the existing learner/type/day index to narrow the scan. Local days can
+    # differ from UTC, so use timestamps for the exact window.
+    cursor = db.events.find(
+        {
+            "familyId": family_id,
+            "learnerId": learner_id,
+            "skillId": READ_SKILL,
+            "type": {"$in": ["page_read", "reading_finished", "lesson_started", "question_presented", "answer_submitted"]},
+            "localDay": {"$gte": (start - timedelta(days=1)).date().isoformat()},
+            "ts": {"$gte": start_ts, "$lte": end_ts},
+        },
+        {key: 1 for key in ("type", "ts", "localDay", "sessionId", "lessonId", "entry", "questionId", "taskKind",
+                            "attempt", "correct", "supportsUsed")},
+    ).sort([("sessionId", 1), ("seq", 1), ("serverSeq", 1)]).allow_disk_use(True)
+
+    days: set[str] = set()
+    books: dict[str, ReadingBookOut] = {}
+    latest: dict[str, tuple[str, str]] = {}
+    comprehension: dict[str, ReadingComprehensionOut] = {}
+    quizzes: set[tuple[str, str]] = set()
+    questions: dict[tuple[str, str, str], str] = {}
+    async for row in cursor:
+        kind = row["type"]
+        session = row["sessionId"]
+        lesson = row.get("lessonId", "")
+        book_id = lesson.rsplit("@", 1)[0]
+        if kind == "lesson_started":
+            # Library quizzes mark preview mode on the start event.
+            if row.get("entry") == "preview":
+                quizzes.discard((session, lesson))
+            else:
+                quizzes.add((session, lesson))
+            continue
+        if row.get("entry") == "preview":
+            continue
+        if kind in ("page_read", "reading_finished"):
+            day = row["localDay"]
+            days.add(day)
+            if kind == "page_read":
+                report.page_visits += 1
+            if book_id:
+                if book_id not in books:
+                    books[book_id] = ReadingBookOut(bookId=book_id, lastReadDay=day)
+                book = books[book_id]
+                book.finished = book.finished or kind == "reading_finished"
+                if (activity := (row["ts"], lesson)) > latest.get(book_id, ("", "")):
+                    latest[book_id] = activity
+                    book.last_read_day = day
+            continue
+        if (session, lesson) not in quizzes or not isinstance(row.get("questionId"), str):
+            continue
+        question = (session, lesson, row["questionId"])
+        if kind == "question_presented":
+            task = row.get("taskKind")
+            part = _READING_QUIZ_PARTS.get(task) if isinstance(task, str) else None
+            if part:
+                questions[question] = part
+        elif row.get("attempt") == 1 and (part := questions.pop(question, None)):
+            correct = int(row.get("correct") is True and row.get("supportsUsed") == 0)
+            score = report.quiz.setdefault(part, ReadingQuizOut())
+            score.answered += 1
+            score.correct_first_try += correct
+            if part == "comprehension" and book_id:
+                story_score = comprehension.setdefault(book_id, ReadingComprehensionOut())
+                story_score.answered += 1
+                story_score.correct_first_try += correct
+                story_score.correct_with_help += int(row.get("correct") is True and (row.get("supportsUsed") or 0) > 0)
+                story_score.incorrect_first_try += int(row.get("correct") is False)
+
+    titles = await revision_titles(db, [lesson for _, lesson in latest.values()])
+    for book_id in sorted(books, key=latest.__getitem__, reverse=True):
+        book = books[book_id]
+        book.title = titles.get(latest[book_id][1])
+        book.comprehension = comprehension.get(book_id)
+        report.books.append(book)
+    report.books_finished = sum(book.finished for book in report.books)
+    report.reading_days = len(days)
+    report.reading_dates = sorted(days)
+    return report
 
 
 async def rounds_by_category(

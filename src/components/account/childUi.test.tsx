@@ -1,11 +1,14 @@
 import { describe, expect, it, vi } from "vitest";
-import { cleanup, render, screen } from "@testing-library/react";
+import { act, cleanup, fireEvent, render, screen, within } from "@testing-library/react";
 
 import { DayDoneScreen } from "../DayDoneScreen";
 import { PinPrompt } from "./PinPrompt";
 import { ChildSettingsFields } from "./ChildSettingsFields";
 import { CHILD_SETTINGS_DEFAULTS, type ChildSettings } from "../../lib/childSettings";
 import type { ConceptTotals } from "../../lib/learning/learningLog";
+import type { ReadingSummary } from "../../lib/childReport";
+import { STARTER_PASSAGES } from "../../library/data/starterPassages";
+import { PreferencesAPI } from "../../lib/preferences";
 
 /**
  * The screens Phase A and B added, actually mounted.
@@ -61,9 +64,9 @@ const report = async (rows: ConceptTotals[]) => {
 const ChildReportPage = async () =>
   (await import("./ChildReportPage")).ChildReportPage;
 
-const show = async (rows: ConceptTotals[]) => {
+const show = async (rows: ConceptTotals[], reading?: ReadingSummary) => {
   permissions.mockReturnValue(true);
-  fetchChildReport.mockResolvedValue(await report(rows));
+  fetchChildReport.mockResolvedValue({ ...await report(rows), reading });
   const Page = await ChildReportPage();
   render(<Page learnerId="l_mia" learnerName="Mia" />);
   // The fetch resolves on a microtask, so the page mounts in its loading state.
@@ -85,6 +88,88 @@ describe("a child's report, mounted", () => {
     await show([]);
 
     expect(await screen.findByText(/Nothing to show yet/)).toBeTruthy();
+  });
+
+  it("shows reading activity for a child who has only explored books", async () => {
+    await show([], { days: 30, readingDays: 1, readingDates: [localDay(0)], booksFinished: 0, pageVisits: 3, quiz: {} });
+
+    expect(await screen.findByRole("heading", { name: "Reading" })).toBeTruthy();
+    expect(screen.getByText("No comprehension answers yet")).toBeTruthy();
+    expect(screen.getByText("1 of 3 days")).toBeTruthy();
+    expect(screen.getByText(/Pick a short book together/)).toBeTruthy();
+    const history = screen.getByText("Book history");
+    expect(history.closest("details")?.open).toBe(false);
+    fireEvent.click(history);
+    expect(history.closest("details")?.open).toBe(true);
+    expect(screen.getByText(/Reading days 1 · Page visits 3/)).toBeTruthy();
+    expect(screen.queryByText(/Nothing to show yet/)).toBeNull();
+  });
+
+  it("shows quiz targets and only evaluates a skill after enough answers", async () => {
+    await show([], {
+      days: 30, readingDays: 4, readingDates: [localDay(0), localDay(1), localDay(6), localDay(7)],
+      booksFinished: 1, pageVisits: 6,
+      quiz: {
+        comprehension: { answered: 20, correctFirstTry: 17 },
+        vocabulary: { answered: 20, correctFirstTry: 16 },
+        spelling: { answered: 7, correctFirstTry: 7 },
+      },
+    });
+
+    const toggle = await screen.findByText("Quiz results by skill");
+    const details = toggle.closest("details")!;
+    expect(details.open).toBe(false);
+    expect(screen.getByText("3 of 3 days")).toBeTruthy();
+    expect(screen.getByText("Correct first try without quiz help")).toBeTruthy();
+    fireEvent.click(toggle);
+    expect(details.open).toBe(true);
+    const quiz = within(details);
+    expect(quiz.getByText(/Target 85%.*at least 8 answers/)).toBeTruthy();
+    const comprehension = within(quiz.getByText("Story comprehension").parentElement!);
+    expect(comprehension.getByText("17 of 20")).toBeTruthy();
+    expect(comprehension.getByText("Target met")).toBeTruthy();
+    expect(within(screen.getByText("Vocabulary").parentElement!).getByText("Below target")).toBeTruthy();
+    expect(within(screen.getByText("Spelling").parentElement!).getByText("1 more answer needed")).toBeTruthy();
+  });
+
+  it("shows what the learner did and how they answered by book title", async () => {
+    const starter = STARTER_PASSAGES[0];
+    await show([], {
+      days: 30, readingDays: 2, booksFinished: 1, pageVisits: 6, quiz: {},
+      books: [
+        { bookId: starter.id, title: null, lastReadDay: localDay(0), finished: false, comprehension: null },
+        {
+          bookId: "garden", title: "The Garden", lastReadDay: localDay(1), finished: true,
+          comprehension: { answered: 5, correctFirstTry: 2, correctWithHelp: 1, incorrectFirstTry: 2 },
+        },
+      ],
+    });
+
+    const latest = await screen.findByText(`Latest book · ${starter.title}`);
+    expect(latest.closest("details")?.open).toBe(false);
+    expect(screen.getByRole("heading", { name: "Try together" })).toBeTruthy();
+    expect(screen.getByText(/Reread a few pages of “The Garden” together/)).toBeTruthy();
+    fireEvent.click(latest);
+    const gardenTitle = await screen.findByRole("heading", { name: "The Garden" });
+    const garden = within(gardenTitle.closest("li")!);
+    expect(garden.getByText("Finished")).toBeTruthy();
+    expect(garden.getByText(/Last read/)).toBeTruthy();
+    expect(garden.getByText(/2 of 5 story comprehension questions/)).toBeTruthy();
+    expect(garden.getByText(/1 right with quiz help.*2 incorrect/)).toBeTruthy();
+    const explored = within(screen.getByRole("heading", { name: starter.title }).closest("li")!);
+    expect(explored.getByText("Explored")).toBeTruthy();
+    expect(explored.getByText("No story comprehension answers recorded.")).toBeTruthy();
+
+    const previousLanguage = PreferencesAPI.current().language;
+    try {
+      act(() => { PreferencesAPI.update({ language: "km" }); });
+      expect(screen.getByRole("heading", { name: "ការអាន" })).toBeTruthy();
+      expect(screen.getByRole("heading", { name: "អានជាមួយកូន" })).toBeTruthy();
+      expect(screen.getByText(/អានសៀវភៅ «The Garden» ឡើងវិញពីរបីទំព័រជាមួយកូន/)).toBeTruthy();
+      expect(screen.getByText("សៀវភៅដែលកូនបានអាន")).toBeTruthy();
+    } finally {
+      act(() => { PreferencesAPI.update({ language: previousLanguage }); });
+    }
   });
 
   it("draws the rhythm and the concept for a child who has", async () => {
