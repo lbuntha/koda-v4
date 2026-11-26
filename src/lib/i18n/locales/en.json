@@ -6443,7 +6443,7 @@
   "journal": {
     "title": "My learning",
     "titleFor": "{name}'s learning",
-    "subtitle": "What you read and practised, day by day. Copy a line into your school reading book.",
+    "subtitle": "What you read and practised, day by day. Write each day into your school reading book.",
     "thisWeek": "Learned on {count} of the last 7 days",
     "stat": {
       "books": "Books finished",
@@ -6453,18 +6453,14 @@
     },
     "window": "Totals for the last {count} days.",
     "dayTotals": "{minutes} min",
-    "rightFirstTry": "{right} of {total} right first try",
-    "rounds": "Played {count} times",
-    "pages": "{read} of {total} pages",
-    "finished": "finished",
-    "quiz": "quiz {right}/{total}",
+    "finished": "Finished",
+    "quiz": "Quiz {right}/{total}",
     "untitledBook": "A Koda book",
-    "forHandbook": "For your reading book",
     "copy": "Copy",
     "copied": "Copied",
     "line": {
-      "read": "Read: {books}",
-      "practised": "Practised: {lessons}"
+      "read": "Read",
+      "practised": "Practised"
     },
     "print": "Print this week",
     "offline": "Can't reach Koda right now. Showing what this device has.",
@@ -6474,6 +6470,8 @@
       "title": "My learning",
       "body": "See what you read and practised, and copy it into your reading book.",
       "open": "Open"
-    }
+    },
+    "pagesShort": "{read}/{total} pages",
+    "right": "{right}/{total} right"
   }
 }

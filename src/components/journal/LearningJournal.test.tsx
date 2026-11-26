@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from "vitest";
-import { render, screen } from "@testing-library/react";
+import { render, screen, within } from "@testing-library/react";
 import { buildJournal, type JournalEvent } from "../../lib/learning/journal";
 import { localDayOf } from "../../lib/learning/learningLog";
 
@@ -20,15 +20,27 @@ vi.mock("../../lib/learningJournal", () => ({
 }));
 
 describe("LearningJournal", () => {
-  it("shows the day's book and lesson, and a line to copy into the reading book", async () => {
+  it("shows the day's book and lesson, each as one clean row", async () => {
     const { LearningJournal } = await import("./LearningJournal");
     render(<LearningJournal learnerId="l_1" />);
     expect(screen.getByText("My learning")).toBeTruthy();
-    expect(screen.getAllByText("The Little Cat").length).toBeGreaterThan(0);
-    expect(screen.getByText("Read the Ruler")).toBeTruthy();
-    const line = screen.getByTestId("handbook-line").textContent!;
-    expect(line).toMatch(/Read: The Little Cat \(2 of 4 pages, finished\)/);
-    expect(line).toMatch(/Practised: Measure It: Read the Ruler 4\/5/);
+        const box = within(screen.getByTestId("journal-day"));
+    expect(box.getByText("The Little Cat")).toBeTruthy();
+    expect(box.getByText("2/4 pages · Finished")).toBeTruthy();
+    expect(box.getByText("Read the Ruler")).toBeTruthy();
+    expect(box.getByText("4/5 right")).toBeTruthy();
+  });
+
+  it("copies the entry as plain lines, one row each", async () => {
+    const { handbookEntry, handbookText } = await import("./LearningJournal");
+    const { buildJournal: build } = await import("../../lib/learning/journal");
+    const t = (key: string, vars?: Record<string, unknown>) =>
+      ({ "journal.line.read": "Read", "journal.line.practised": "Practised" })[key] ?? `${key}${vars ? JSON.stringify(vars) : ""}`;
+    const entry = handbookEntry(build(events).days[0], { "cat@2": "The Little Cat" }, t as never, "en");
+    const lines = handbookText(entry, t as never).split("\n");
+    expect(lines).toHaveLength(3);
+    expect(lines[1]).toMatch(/^Read: The Little Cat — /);
+    expect(lines[2]).toMatch(/^Practised: Read the Ruler — /);
   });
 
   it("names the child on a parent's view", async () => {

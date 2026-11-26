@@ -62,38 +62,38 @@ export function lessonNameOf(lesson: Pick<JournalLesson, "skillId" | "lessonId">
   };
 }
 
-/** The line a child copies into their school reading book. */
-export function handbookLine(day: JournalDay, titles: Record<string, string>, t: Translate, language: string): string {
-  const parts: string[] = [];
-  const books = day.books.filter((b) => b.pages > 0 || b.finished || b.quiz);
-  if (books.length) {
-    parts.push(
-      t("journal.line.read", {
-        books: books
-          .map((b) => {
-            const bits = [t("journal.pages", { read: b.pages, total: b.pageCount })];
-            if (b.finished) bits.push(t("journal.finished"));
-            if (b.quiz?.answered) bits.push(t("journal.quiz", { right: b.quiz.correctFirstTry, total: b.quiz.answered }));
-            return `${bookTitleOf(b, titles) ?? t("journal.untitledBook")} (${bits.join(", ")})`;
-          })
-          .join("; "),
-      }),
-    );
-  }
-  if (day.lessons.length) {
-    parts.push(
-      t("journal.line.practised", {
-        lessons: day.lessons
-          .map((l) => {
-            const name = lessonNameOf(l);
-            return `${name.lesson ? `${name.skill}: ${name.lesson}` : name.skill} ${l.correctFirstTry}/${l.answered}`;
-          })
-          .join("; "),
-      }),
-    );
-  }
-  return [dayDate(day.day, language, "short"), ...parts].join(" · ");
+/**
+ * One day as a child writes it in their school reading book: the date, then a
+ * short row per book or lesson — what it was, and how it went.
+ */
+export interface HandbookRow {
+  kind: "read" | "practised";
+  title: string;
+  detail: string;
 }
+export interface HandbookEntry {
+  date: string;
+  rows: HandbookRow[];
+}
+
+export function handbookEntry(day: JournalDay, titles: Record<string, string>, t: Translate, language: string): HandbookEntry {
+  const rows: HandbookRow[] = [];
+  for (const b of day.books.filter((b) => b.pages > 0 || b.finished || b.quiz)) {
+    const bits = [t("journal.pagesShort", { read: b.pages, total: b.pageCount })];
+    if (b.finished) bits.push(t("journal.finished"));
+    if (b.quiz?.answered) bits.push(t("journal.quiz", { right: b.quiz.correctFirstTry, total: b.quiz.answered }));
+    rows.push({ kind: "read", title: bookTitleOf(b, titles) ?? t("journal.untitledBook"), detail: bits.join(" · ") });
+  }
+  for (const l of day.lessons) {
+    const name = lessonNameOf(l);
+    rows.push({ kind: "practised", title: name.lesson ?? name.skill, detail: t("journal.right", { right: l.correctFirstTry, total: l.answered }) });
+  }
+  return { date: dayDate(day.day, language, "short"), rows };
+}
+
+/** The same entry as plain text, one row per line, for the clipboard. */
+export const handbookText = (entry: HandbookEntry, t: Translate): string =>
+  [entry.date, ...entry.rows.map((r) => `${t(`journal.line.${r.kind}`)}: ${r.title} — ${r.detail}`)].join("\n");
 
 const Stat: React.FC<{ icon: React.ReactNode; value: string; label: string }> = ({ icon, value, label }) => (
   <div className="flex min-w-0 items-center gap-3 rounded-2xl border border-line bg-surface-muted p-3">
@@ -105,35 +105,7 @@ const Stat: React.FC<{ icon: React.ReactNode; value: string; label: string }> = 
   </div>
 );
 
-const CopyLine: React.FC<{ line: string }> = ({ line }) => {
-  const { t } = useT();
-  const [copied, setCopied] = useState(false);
-  const copy = async () => {
-    try {
-      await navigator.clipboard.writeText(line);
-      setCopied(true);
-      setTimeout(() => setCopied(false), 1800);
-    } catch {
-      /* no clipboard (old browser, no permission): the line is on screen to copy by hand */
-    }
-  };
-  return (
-    <div className="mt-3 rounded-xl border-2 border-dashed border-indigo-300 bg-indigo-50/60 p-3 dark:border-indigo-700 dark:bg-indigo-950/40">
-      <p className="text-[11px] font-black uppercase tracking-wider text-indigo-700 dark:text-indigo-300">{t("journal.forHandbook")}</p>
-      <p className="mt-1 break-words text-sm text-ink" data-testid="handbook-line">{line}</p>
-      <button
-        type="button"
-        onClick={copy}
-        className="mt-2 inline-flex min-h-[40px] items-center gap-1.5 rounded-lg px-2 text-sm font-bold text-indigo-700 hover:bg-indigo-100 dark:text-indigo-300 dark:hover:bg-indigo-900/50"
-      >
-        {copied ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
-        {copied ? t("journal.copied") : t("journal.copy")}
-      </button>
-    </div>
-  );
-};
-
-function printLines(title: string, lines: string[]) {
+function printEntries(title: string, entries: HandbookEntry[], t: Translate) {
   const frame = document.createElement("iframe");
   frame.setAttribute("aria-hidden", "true");
   frame.style.cssText = "position:fixed;width:0;height:0;border:0;right:0;bottom:0";
@@ -141,11 +113,16 @@ function printLines(title: string, lines: string[]) {
   const doc = frame.contentDocument;
   if (!doc) return frame.remove();
   const esc = (s: string) => s.replace(/[&<>]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;" })[c]!);
+  const day = (e: HandbookEntry) =>
+    `<section><h2>${esc(e.date)}</h2><table>${e.rows
+      .map((r) => `<tr><th>${esc(t(`journal.line.${r.kind}`))}</th><td><b>${esc(r.title)}</b><br>${esc(r.detail)}</td></tr>`)
+      .join("")}</table></section>`;
   doc.open();
   doc.write(
     `<!doctype html><meta charset="utf-8"><title>${esc(title)}</title>` +
-      `<style>body{font:16px/1.6 system-ui,sans-serif;color:#000;margin:24px}h1{font-size:20px}li{margin:0 0 12px;padding-bottom:8px;border-bottom:1px solid #999}</style>` +
-      `<h1>${esc(title)}</h1><ul>${lines.map((l) => `<li>${esc(l)}</li>`).join("")}</ul>`,
+      `<style>body{font:15px/1.5 system-ui,sans-serif;color:#000;margin:24px}h1{font-size:20px}h2{font-size:16px;margin:18px 0 6px}` +
+      `table{border-collapse:collapse;width:100%}th{text-align:left;vertical-align:top;width:7em;padding:6px 8px 6px 0;font-weight:600}td{padding:6px 0;border-bottom:1px solid #bbb}</style>` +
+      `<h1>${esc(title)}</h1>${entries.map(day).join("")}`,
   );
   doc.close();
   frame.contentWindow?.focus();
@@ -153,62 +130,76 @@ function printLines(title: string, lines: string[]) {
   setTimeout(() => frame.remove(), 1000);
 }
 
+const CopyDay: React.FC<{ entry: HandbookEntry }> = ({ entry }) => {
+  const { t } = useT();
+  const [copied, setCopied] = useState(false);
+  const copy = async () => {
+    try {
+      await navigator.clipboard.writeText(handbookText(entry, t));
+      setCopied(true);
+      setTimeout(() => setCopied(false), 1800);
+    } catch {
+      /* no clipboard (old browser, no permission): the day is on screen to copy by hand */
+    }
+  };
+  return (
+    <button
+      type="button"
+      onClick={copy}
+      aria-label={copied ? t("journal.copied") : t("journal.copy")}
+      title={copied ? t("journal.copied") : t("journal.copy")}
+      className="grid h-10 w-10 shrink-0 place-items-center rounded-xl text-muted hover:bg-surface-muted hover:text-ink"
+    >
+      {copied ? <Check className="h-5 w-5 text-emerald-600" /> : <Copy className="h-5 w-5" />}
+    </button>
+  );
+};
+
+/** One day: the date, then a clean row per book or lesson — what it was, and how it went. */
 const DayCard: React.FC<{ day: JournalDay; titles: Record<string, string> }> = ({ day, titles }) => {
   const { t, language } = useT();
+  const entry = handbookEntry(day, titles, t, language);
   const books = day.books.filter((b) => b.pages > 0 || b.finished || b.quiz);
+  const icons: React.ReactNode[] = [
+    ...books.map(() => <UIArtIcon id="menu-library" className="h-10 w-10" />),
+    ...day.lessons.map((lesson) => {
+      const name = lessonNameOf(lesson);
+      return name.art ? (
+        <UIArtIcon id={name.art as React.ComponentProps<typeof UIArtIcon>["id"]} className="h-10 w-10" />
+      ) : (
+        <UILessonIcon name={name.iconName} tone={name.iconTone} />
+      );
+    }),
+  ];
   return (
-    <li className={themeSystem.card("default", "p-4")}>
-      <h3 className="text-base font-black text-ink">{dayDate(day.day, language, "long")}</h3>
-      <p className="text-xs font-bold text-muted">
-        {t("journal.dayTotals", { minutes: day.minutes })}
-        {day.answered > 0 && ` · ${t("journal.rightFirstTry", { right: day.correctFirstTry, total: day.answered })}`}
-      </p>
-      <ul className="mt-3 space-y-2">
-        {books.map((book) => (
-          <li key={book.bookId} className="flex items-start gap-3">
-            <UIArtIcon id="menu-library" className="mt-0.5 h-10 w-10" />
-            <span className="min-w-0">
-              <span className="block break-words font-bold text-ink">{bookTitleOf(book, titles) ?? t("journal.untitledBook")}</span>
-              <span className="block text-sm text-muted">
-                {[
-                  t("journal.pages", { read: book.pages, total: book.pageCount }),
-                  book.finished ? t("journal.finished") : null,
-                  book.quiz?.answered ? t("journal.quiz", { right: book.quiz.correctFirstTry, total: book.quiz.answered }) : null,
-                ]
-                  .filter(Boolean)
-                  .join(" · ")}
-              </span>
+    <li className={themeSystem.card("default", "p-4")} data-testid="journal-day">
+      <div className="flex items-start justify-between gap-2">
+        <div className="min-w-0">
+          <h3 className="text-base font-black text-ink">{dayDate(day.day, language, "long")}</h3>
+          <p className="text-xs font-bold text-muted">{t("journal.dayTotals", { minutes: day.minutes })}</p>
+        </div>
+        <CopyDay entry={entry} />
+      </div>
+      <ul className="mt-2 divide-y divide-line">
+        {entry.rows.map((row, i) => (
+          <li key={i} className="flex items-center gap-3 py-2.5">
+            <span className="shrink-0">{icons[i]}</span>
+            <span className="min-w-0 flex-1">
+              <span className="block break-words font-bold text-ink">{row.title}</span>
+              <span className="block text-sm tabular-nums text-muted">{row.detail}</span>
+            </span>
+            <span
+              className={`shrink-0 rounded-full px-2 py-0.5 text-xs font-bold ${
+                row.kind === "read"
+                  ? "bg-emerald-100 text-emerald-800 dark:bg-emerald-900/50 dark:text-emerald-200"
+                  : "bg-purple-100 text-purple-800 dark:bg-purple-900/50 dark:text-purple-200"
+              }`}
+            >
+              {t(`journal.line.${row.kind}`)}
             </span>
           </li>
         ))}
-        {day.lessons.map((lesson) => {
-          const name = lessonNameOf(lesson);
-          return (
-            <li key={`${lesson.skillId}/${lesson.lessonId}`} className="flex items-start gap-3">
-              <span className="mt-0.5 shrink-0">
-                {name.art ? (
-                  <UIArtIcon id={name.art as React.ComponentProps<typeof UIArtIcon>["id"]} className="h-10 w-10" />
-                ) : (
-                  <UILessonIcon name={name.iconName} tone={name.iconTone} />
-                )}
-              </span>
-              <span className="min-w-0">
-                <span className="block break-words font-bold text-ink">{name.lesson ?? name.skill}</span>
-                <span className="block text-sm text-muted">
-                  {[
-                    name.lesson ? name.skill : null,
-                    t("journal.rightFirstTry", { right: lesson.correctFirstTry, total: lesson.answered }),
-                    lesson.rounds > 1 ? t("journal.rounds", { count: lesson.rounds }) : null,
-                  ]
-                    .filter(Boolean)
-                    .join(" · ")}
-                </span>
-              </span>
-            </li>
-          );
-        })}
       </ul>
-      <CopyLine line={handbookLine(day, titles, t, language)} />
     </li>
   );
 };
@@ -291,7 +282,7 @@ export const LearningJournal: React.FC<{
       ) : (
         <>
           <div className="flex justify-end">
-            <UIButton variant="secondary" size="sm" icon={<Printer />} onClick={() => printLines(title, days.slice(0, 7).map((d) => handbookLine(d, titles, t, language)))}>
+            <UIButton variant="secondary" size="sm" icon={<Printer />} onClick={() => printEntries(title, days.slice(0, 7).map((d) => handbookEntry(d, titles, t, language)), t)}>
               {t("journal.print")}
             </UIButton>
           </div>
