@@ -693,7 +693,7 @@
       },
       "thermo": {
         "0": "Find the top of the line, and the number just below it.",
-        "1": "Count up the marks. Below 0 the numbers get bigger as you go down."
+        "1": "Count up the marks. Below 0, count down past zero: −1, −2, −3."
       },
       "change": {
         "0": "Start at the first temperature.",

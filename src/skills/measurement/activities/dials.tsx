@@ -155,7 +155,7 @@ export const ThermometerArt: React.FC<{
           </g>
         );
       })}
-      {scale.min < 0 && <line x1="40" x2="74" y1={thermoY(scale, 0)} y2={thermoY(scale, 0)} className="stroke-sky-600" strokeWidth="2" strokeDasharray="3 3" />}
+      {scale.min < 0 && <line x1="40" x2="74" y1={thermoY(scale, 0)} y2={thermoY(scale, 0)} className="stroke-sky-600 dark:stroke-sky-300" strokeWidth="2" strokeDasharray="3 3" />}
       {arrow && (
         <text x="22" y={top} dominantBaseline="central" textAnchor="middle" className="fill-emerald-600 text-[26px] font-black" data-testid="thermo-arrow">
           {arrow === "up" ? "↑" : "↓"}

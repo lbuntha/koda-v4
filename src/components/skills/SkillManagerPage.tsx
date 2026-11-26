@@ -1337,7 +1337,7 @@ const LessonContentEditor: React.FC<{ skillId: string; lesson: Lesson }> = ({
   );
 };
 
-const LessonPreview: React.FC<{ lesson: Lesson; onClose: () => void }> = ({ lesson, onClose }) => {
+export const LessonPreview: React.FC<{ lesson: Lesson; onClose: () => void }> = ({ lesson, onClose }) => {
   const [awarded, setAwarded] = useState(0);
 
   const q = (lesson.params?.question ?? {}) as Record<string, unknown>;
@@ -1397,6 +1397,10 @@ const LessonPreview: React.FC<{ lesson: Lesson; onClose: () => void }> = ({ less
 
       <div className="flex-1 min-h-0 overflow-auto">
         <SkillHost
+          // Keyed on the lesson: two lessons on the same engine would otherwise
+          // share one mounted round, and the second preview showed the first's
+          // questions under its own title. The learner app keys the same way.
+          key={lesson.id}
           activityRef={lesson.activity}
           params={lesson.params}
           level={(lesson.params?.level as number) ?? 1}

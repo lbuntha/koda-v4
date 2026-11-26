@@ -17,6 +17,7 @@ import { scaleDemoCheck, scaleDemoFacts } from "./activities/DialScale";
 import { thermoDemoFacts } from "./activities/Thermometer";
 import { storyDemoFacts } from "./activities/MeasureStory";
 import { MASS_THINGS } from "./internal/balance";
+import { readsAloud } from "./internal/readsAloud";
 import type { CompareMode } from "./internal/compare";
 
 describeSkillContract(skill);
@@ -167,8 +168,14 @@ describe("Measure It words", () => {
   });
 
   it("declares every lesson's spoken prompt in the voice script", () => {
-    // Practice says nothing, so it has no prompt to record.
-    for (const lesson of teaching) expect(voice.prompts, lesson.id).toContain(playOf(lesson).audioPrompt);
+    // Only lessons that read aloud on opening have a clip; practice and readers' lessons say nothing.
+    expect(voice.speaksPrompts).toBe(false);
+    for (const lesson of teaching) {
+      const spoken = readsAloud(lesson.id);
+      const prompt = playOf(lesson).audioPrompt;
+      const sharedWithSpoken = teaching.some((l) => readsAloud(l.id) && playOf(l).audioPrompt === prompt);
+      expect(voice.prompts.includes(prompt), lesson.id).toBe(spoken || sharedWithSpoken);
+    }
     for (const lesson of practice) expect(playOf(lesson).audioPrompt, lesson.id).toBe("");
   });
 
