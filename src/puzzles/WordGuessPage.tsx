@@ -9,6 +9,7 @@
  */
 
 import { ActivityDone } from "../lib/streak";
+import { ScoringAPI, type ScoringConfig } from "../lib/scoring";
 import React, { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState, useSyncExternalStore } from "react";
 import { ArrowLeft, Check, Flame, HelpCircle, House, Lightbulb, RotateCcw, SlidersHorizontal, Sparkles, Trophy, X } from "lucide-react";
 import { useT } from "../lib/i18n";
@@ -70,8 +71,23 @@ function writePrefs(p: Prefs) {
   }
 }
 
-/** XP for a game: a daily solve is worth more, and fewer guesses a little more again. */
-export const xpFor = (won: boolean, guesses: number, daily: boolean): number => (!won ? 2 : daily ? 15 + (MAX_GUESSES - guesses) * 2 : 5);
+/**
+ * Stars for a game, the way a lesson round earns them: solved in three
+ * guesses or fewer is three stars, four or five is two, and the last guess —
+ * or not solving it — is one, like finishing a hard round. Each hint used
+ * takes a star off, as help does in a lesson, never below one.
+ */
+export const starsFor = (won: boolean, guesses: number, hints = 0): 1 | 2 | 3 => {
+  const base = !won ? 1 : guesses <= 3 ? 3 : guesses <= MAX_GUESSES - 1 ? 2 : 1;
+  return Math.max(1, base - hints) as 1 | 2 | 3;
+};
+
+/** XP for a game: the same stars-to-XP rule (and the same Settings) as every lesson, book and Rebus round. */
+export const xpFor = (won: boolean, guesses: number, hints = 0, scoring: ScoringConfig = ScoringAPI.current()): number => {
+  const stars = starsFor(won, guesses, hints);
+  const share = stars === 3 ? 1 : stars === 2 ? scoring.twoStarShare : scoring.oneStarShare;
+  return Math.round(scoring.xpPerLevel * share);
+};
 
 export interface WordGuessPageProps {
   onExit(): void;
@@ -606,7 +622,7 @@ const Game: React.FC<GameProps> = ({
     setTimeout(() => setRevealRow(-1), 120 * n + 500);
     if (daily) saveDaily(slot, day, next);
     if (over) {
-      const earned = daily || practiceXpLeft(day) > 0 ? xpFor(won, rows.length, daily) : 0;
+      const earned = daily || practiceXpLeft(day) > 0 ? xpFor(won, rows.length, game.hints) : 0;
       setXpCapped(!daily && earned === 0);
       setXp(earned);
       onAwardXp?.(earned);

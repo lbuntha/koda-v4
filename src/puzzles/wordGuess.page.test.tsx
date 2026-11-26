@@ -1,5 +1,6 @@
 import { act, fireEvent, render, screen, within } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
+import { SCORING_DEFAULTS } from "../lib/scoring";
 import { puzzleDay } from "./day";
 import { dailySnapshot, resetDailyForTests, todaysPuzzle } from "./store";
 
@@ -32,7 +33,8 @@ describe("Word Guess", () => {
     for (const key of [...word.data.word, "Enter"]) act(() => void fireEvent.keyDown(window, { key }));
     expect(screen.getByText("Wow, first try!")).toBeTruthy();
     expect(screen.getAllByText(new RegExp(`^${word.data.word}$`, "i")).length).toBeGreaterThan(0);
-    expect(award).toHaveBeenCalledWith(25);
+    // Three stars, the same full round XP as a lesson (Settings' default here).
+    expect(award).toHaveBeenCalledWith(SCORING_DEFAULTS.xpPerLevel);
     expect(screen.queryByRole("button", { name: /Check/ })).toBeNull();
   });
 
