@@ -60,6 +60,37 @@ export interface UpgradeRequest {
   requestedAt: string;
 }
 
+export interface BillingPayment {
+  reference: string;
+  planName: string;
+  amountCents: number;
+  currency: string;
+  paidAt: string;
+  status: "paid" | "refunded";
+  sandbox?: boolean;
+}
+
+export interface PaymentHistory {
+  payments: BillingPayment[];
+  hasMore: boolean;
+}
+
+export interface SandboxCheckout {
+  reference: string;
+  planName: string;
+  amountCents: number;
+  currency: string;
+  expiresAt: string;
+  status: "pending" | "paid" | "closed";
+  qrImage: string | null;
+  deepLink: string | null;
+}
+
+export interface SandboxCheckoutState {
+  available: boolean;
+  checkout: SandboxCheckout | null;
+}
+
 /**
  * What a device shows before it has heard, and when it never will.
  *
@@ -182,6 +213,28 @@ export const Billing = {
     if (!token) return [];
     const body = await request<{ plans: Plan[] }>("/billing/plans", { token });
     return [...body.plans].sort((a, b) => a.order - b.order || a.priceCents - b.priceCents);
+  },
+
+  async paymentHistory(page: number, signal?: AbortSignal): Promise<PaymentHistory> {
+    const token = await accessToken();
+    return request<PaymentHistory>(`/billing/payments?page=${page}`, { token, signal });
+  },
+
+  async sandboxCheckout(): Promise<SandboxCheckoutState> {
+    const token = await accessToken();
+    return request<SandboxCheckoutState>("/billing/checkout", { token });
+  },
+
+  async startSandboxCheckout(planId: string): Promise<SandboxCheckout> {
+    const token = await accessToken();
+    return request<SandboxCheckout>("/billing/checkout", { method: "POST", token, body: { planId } });
+  },
+
+  async checkSandboxCheckout(reference: string): Promise<SandboxCheckout> {
+    const token = await accessToken();
+    return request<SandboxCheckout>(`/billing/checkout/${encodeURIComponent(reference)}/check`, {
+      method: "POST", token,
+    });
   },
 
   /** What this family has already asked for, if anything. */

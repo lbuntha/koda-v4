@@ -55,9 +55,11 @@ import { LandingPage } from "./components/landing/LandingPage";
 
 /** Set once a device has signed in, so a returning family skips the landing page. */
 const SIGNED_IN_BEFORE = "koda.signedInBefore";
+const isBillingLink = () => /^\/billing\/?$/.test(window.location.pathname);
 
 /** Where a signed-out visitor starts: the landing page, unless they have been here before or came by a join link. */
 const firstEntry = (): "landing" | "signIn" => {
+  if (isBillingLink()) return "signIn";
   try {
     if (new URLSearchParams(window.location.search).has("join")) return "signIn";
     if (localStorage.getItem(SIGNED_IN_BEFORE)) return "signIn";
@@ -84,6 +86,8 @@ import type { KodaContext } from "./lib/tutorApi";
 import { Personas } from "./lib/personas";
 import { useKoda } from "./lib/useKoda";
 import { SettingsPage } from "./components/SettingsPage";
+import { FamilyBillingPage } from "./components/account/FamilyBillingPage";
+import type { TabId } from "./components/navTabs";
 import {
   SessionAPI,
   installLearningSink,
@@ -178,6 +182,7 @@ export default function App() {
   const canManageMenu = Boolean(session && can("menu:manage"));
   const canManageRoles = Boolean(session && can("role:manage"));
   const canManageChildren = Boolean(session && can("learner:create"));
+  const canManageBilling = Boolean(session?.familyId && can("family:update"));
   /*
    * Parent setup — the guided "add your child" flow.
    *
@@ -329,36 +334,7 @@ export default function App() {
     session?.permissions?.join("|"),
   ]);
 
-  const [activeTab, setActiveTab] = useState<
-    | "home"
-    | "game"
-    | "profile"
-    | "leaderboard"
-    | "skills"
-    | "assets"
-    | "library-studio"
-    | "rebus-studio"
-    | "puzzle-studio"
-    | "trace-studio"
-    | "users"
-    | "roles"
-    | "children"
-    | "devices"
-    | "menu"
-    | "koda"
-    | "admin"
-    | "cleanup"
-    | "scoring"
-    | "subjects"
-    | "translations"
-    | "badges"
-    | "billing"
-    | "keys"
-    | "notifications"
-    | "notification-settings"
-    | "system"
-    | "settings"
-  >("home");
+  const [activeTab, setActiveTab] = useState<TabId>(() => isBillingLink() ? "family-billing" : "home");
   const [profileSheetOpen, setProfileSheetOpen] = useState(false);
   /** Where Settings should scroll to when it opens — set by the notification setup sheet. */
   const [settingsFocus, setSettingsFocus] = useState<"notifications" | null>(null);
@@ -413,6 +389,7 @@ export default function App() {
     if (activeTab === "menu" && !canManageMenu) setActiveTab("home");
     if (activeTab === "roles" && !canManageRoles) setActiveTab("home");
     if (activeTab === "children" && !canManageChildren) setActiveTab("home");
+    if (activeTab === "family-billing" && session && !canManageBilling) setActiveTab("home");
     if (activeTab === "assets" && !canEditArt) setActiveTab("home");
     if (activeTab === "library-studio" && !canEditArt) setActiveTab("home");
     if (activeTab === "rebus-studio" && !canEditArt) setActiveTab("home");
@@ -428,11 +405,13 @@ export default function App() {
     activeTab,
     canEditArt,
     canManageChildren,
+    canManageBilling,
     canManageMenu,
     canManageRoles,
     canManageSkills,
     canOperate,
     canClean,
+    session,
   ]);
   /**
    * Sound and voice come from the family's preferences, not from state here.
@@ -1318,6 +1297,10 @@ export default function App() {
             </Deferred>
           )}
 
+          {activeTab === "family-billing" && canManageBilling && (
+            <FamilyBillingPage key={session?.familyId} />
+          )}
+
           {activeTab === "settings" && (
             <SettingsPage
               soundEnabled={soundEnabled}
@@ -1375,7 +1358,7 @@ export default function App() {
       />
 
       {/* Mounted once. Any `requireFeature` call anywhere in the app shows it. */}
-      <UpgradePrompt onOpenPlan={() => setActiveTab("settings")} />
+      <UpgradePrompt onOpenPlan={canManageBilling ? () => setActiveTab("family-billing") : undefined} />
 
       {/* Asks an adult without notifications to set them up; Set up opens the switch. */}
       {setupOpen && !ageOpen && <ParentSetup onClose={() => setSetupOpen(false)} />}

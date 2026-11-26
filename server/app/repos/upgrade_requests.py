@@ -55,6 +55,44 @@ async def clear(db: AsyncIOMotorDatabase, family_id: str) -> None:
     await db.upgrade_requests.delete_one({"_id": family_id})
 
 
+async def answer(db: AsyncIOMotorDatabase, family_id: str, plan_id: str) -> dict[str, Any] | None:
+    """Take the matching request once, leaving a request for a different plan alone."""
+    return await db.upgrade_requests.find_one_and_delete({"_id": family_id, "planId": plan_id})
+
+
+async def pending_page(
+    db: AsyncIOMotorDatabase,
+    *,
+    pattern: dict[str, str] | None,
+    offset: int,
+    limit: int,
+) -> list[dict[str, Any]]:
+    """Oldest requests first, with search applied before pagination."""
+    pipeline: list[dict[str, Any]] = [
+        {"$sort": {"requestedAt": 1, "_id": 1}},
+        {"$lookup": {"from": "families", "localField": "_id", "foreignField": "_id", "as": "family"}},
+        {"$unwind": "$family"},
+    ]
+    if pattern:
+        pipeline.extend([
+            {"$lookup": {"from": "users", "localField": "requestedBy", "foreignField": "_id", "as": "requester"}},
+            {"$lookup": {"from": "users", "localField": "family.ownerId", "foreignField": "_id", "as": "owner"}},
+            {"$match": {"$or": [
+                {"family.name": pattern},
+                {"requester.email": pattern},
+                {"requester.displayName": pattern},
+                {"owner.email": pattern},
+                {"owner.displayName": pattern},
+            ]}},
+        ])
+    pipeline.extend([
+        {"$skip": offset},
+        {"$limit": limit},
+        {"$project": {"family": 1, "planId": 1, "requestedAt": 1, "requestedBy": 1}},
+    ])
+    return await db.upgrade_requests.aggregate(pipeline).to_list(length=limit)
+
+
 async def listing(
     db: AsyncIOMotorDatabase, family_ids: list[str]
 ) -> dict[str, dict[str, Any]]:

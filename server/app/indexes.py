@@ -37,6 +37,20 @@ INDEXES: dict[str, list[IndexModel]] = {
     ],
     "families": [
         IndexModel([("ownerId", ASCENDING)], name="by_owner"),
+        IndexModel([("createdAt", DESCENDING), ("_id", DESCENDING)], name="by_created"),
+    ],
+    "upgrade_requests": [
+        IndexModel([("requestedAt", ASCENDING), ("_id", ASCENDING)], name="by_requested_at"),
+    ],
+    "billing_payments": [
+        IndexModel(
+            [("familyId", ASCENDING)], unique=True, name="one_open_checkout",
+            partialFilterExpression={"open": True},
+        ),
+        IndexModel(
+            [("familyId", ASCENDING), ("paidAt", DESCENDING), ("_id", DESCENDING)],
+            name="by_family_payment_date",
+        ),
     ],
     "memberships": [
         IndexModel(

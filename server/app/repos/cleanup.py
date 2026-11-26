@@ -96,6 +96,7 @@ async def purge_family(db: AsyncIOMotorDatabase, family_id: str) -> dict[str, in
     await db.study_cheers.delete_many(in_family)
     await db.menu_items.delete_many(in_family)
     await db.subscriptions.delete_one({"_id": family_id})
+    await db.billing_payments.delete_many(in_family)
     await db.upgrade_requests.delete_one({"_id": family_id})
     if learner_ids:
         await db.skill_registrations.delete_many({"ownerType": "learner", "ownerId": {"$in": learner_ids}})

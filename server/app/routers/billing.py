@@ -27,7 +27,7 @@ from pydantic import Field
 
 from app import notify_i18n
 from app.deps import AUTHENTICATED, CurrentPrincipal, Db, require
-from app.errors import Conflict, NotFound
+from app.errors import Conflict, Forbidden, NotFound
 from app.models.auth import Principal
 from app.models.common import Model, now
 from app.plan_defaults import FEATURE_IDS, FREE_PLAN, PLAN_FEATURES
@@ -37,7 +37,7 @@ from app.repos import subscriptions as subs_repo
 from app.repos import upgrade_requests as wants_repo
 from app.security import principal_can
 from app.services import push as push_service
-from app.services.entitlements import entitlements
+from app.services.entitlements import entitlements, is_live
 
 router = APIRouter(prefix="/billing", tags=["billing"], dependencies=[AUTHENTICATED])
 
@@ -106,6 +106,21 @@ class UpgradeIn(Model):
     plan_id: str = Field(alias="planId")
 
 
+class PaymentOut(Model):
+    reference: str = Field(validation_alias="_id")
+    plan_name: str = Field(alias="planName")
+    amount_cents: int = Field(alias="amountCents", gt=0)
+    currency: str
+    paid_at: datetime = Field(alias="paidAt")
+    status: Literal["paid", "refunded"]
+    sandbox: bool = False
+
+
+class PaymentHistoryOut(Model):
+    payments: list[PaymentOut]
+    has_more: bool = Field(alias="hasMore")
+
+
 class SubscriptionRow(Model):
     family_id: str = Field(alias="familyId")
     family_name: str = Field(alias="familyName")
@@ -129,6 +144,14 @@ class SubscriptionRow(Model):
     #: behind a second call.
     wants_plan_id: str | None = Field(default=None, alias="wantsPlanId")
     wants_plan_name: str | None = Field(default=None, alias="wantsPlanName")
+    requested_at: datetime | None = Field(default=None, alias="requestedAt")
+    requested_by_name: str | None = Field(default=None, alias="requestedByName")
+    requested_by_email: str | None = Field(default=None, alias="requestedByEmail")
+
+
+class SubscriptionList(Model):
+    subscriptions: list[SubscriptionRow]
+    has_more: bool = Field(alias="hasMore")
 
 
 class GrantIn(Model):
@@ -167,6 +190,34 @@ async def my_entitlements(db: Db, p: CurrentPrincipal) -> EntitlementsOut:
     """
     return EntitlementsOut(
         **await entitlements(db, p.family_id, staff=principal_can(p, "system:write"))
+    )
+
+
+@router.get("/payments")
+async def payment_history(
+    db: Db, p: CanBuy, page: Annotated[int, Query(ge=1, le=1_000_000)] = 1
+) -> PaymentHistoryOut:
+    """Read confirmed payments for the family on the caller's session."""
+    if not p.family_id:
+        raise Forbidden("Payment history belongs to a family account.")
+
+    page_size = 12
+    rows = await (
+        db.billing_payments.find(
+            {"familyId": p.family_id, "status": {"$in": ["paid", "refunded"]}},
+            {"planName": 1, "amountCents": 1, "currency": 1, "paidAt": 1, "status": 1, "source": 1},
+        )
+        .sort([("paidAt", -1), ("_id", -1)])
+        .skip((page - 1) * page_size)
+        .limit(page_size + 1)
+        .to_list(length=page_size + 1)
+    )
+    return PaymentHistoryOut(
+        payments=[
+            PaymentOut.model_validate({**row, "sandbox": row.get("source") == "payway:sandbox"})
+            for row in rows[:page_size]
+        ],
+        hasMore=len(rows) > page_size,
     )
 
 
@@ -321,76 +372,96 @@ async def subscription_listing(
     p: CanOperate,
     query: str = Query(default="", max_length=80),
     limit: int = Query(default=50, ge=1, le=200),
-) -> dict[str, list[SubscriptionRow]]:
-    """Every family and what they are on, newest first.
-
-    Searchable by family name, by the owner's name, or by their email address —
-    all three, because they are the handles an operator actually has. A support
-    request names the person; the deployment's own test account is easiest to
-    find by the address it was signed up with; and neither is the family name,
-    which is often something a parent typed once and never thought about again.
-    """
+    page: int = Query(default=1, ge=1, le=1_000_000),
+    view: Literal["all", "pending"] = "all",
+) -> SubscriptionList:
+    """List families or the pending request queue, with bounded page lookups."""
     needle = query.strip()
-    selector: dict[str, Any] = {}
-    if needle:
-        # An email match is resolved to owner ids first: `families` holds an
-        # `ownerId`, not an address, so there is nothing to regex against here.
-        pattern = {"$regex": re.escape(needle), "$options": "i"}
-        owner_ids = await db.users.distinct(
-            "_id", {"$or": [{"email": pattern}, {"displayName": pattern}]}
+    pattern = {"$regex": re.escape(needle), "$options": "i"} if needle else None
+    offset = (page - 1) * limit
+    if view == "pending":
+        pending = await wants_repo.pending_page(db, pattern=pattern, offset=offset, limit=limit + 1)
+        family_rows = [row["family"] for row in pending[:limit]]
+        wants = {row["_id"]: row for row in pending[:limit]}
+        has_more = len(pending) > limit
+    else:
+        selector: dict[str, Any] = {}
+        if pattern:
+            owner_ids = await db.users.distinct(
+                "_id", {"$or": [{"email": pattern}, {"displayName": pattern}]}
+            )
+            selector["$or"] = [{"name": pattern}, {"ownerId": {"$in": owner_ids}}]
+        family_rows = await (
+            db.families.find(selector)
+            .sort([("createdAt", -1), ("_id", -1)])
+            .skip(offset)
+            .limit(limit + 1)
+            .to_list(length=limit + 1)
         )
-        selector["$or"] = [
-            {"name": pattern},
-            {"ownerId": {"$in": owner_ids}},
-        ]
+        has_more = len(family_rows) > limit
+        family_rows = family_rows[:limit]
+        wants = await wants_repo.listing(db, [row["_id"] for row in family_rows])
 
-    family_rows = await db.families.find(selector).sort("createdAt", -1).to_list(length=limit)
-    plans = {row["_id"]: row for row in await plans_repo.listing(db)}
-    wants = await wants_repo.listing(db, [row["_id"] for row in family_rows])
+    if not family_rows:
+        return SubscriptionList(subscriptions=[], hasMore=False)
 
-    # One query for every owner rather than one per row: this list is fifty
-    # families wide and a lookup inside the loop would be fifty round trips.
-    owner_ids = [row["ownerId"] for row in family_rows if row.get("ownerId")]
-    owners = {
-        row["_id"]: {"email": row.get("email"), "name": row.get("displayName")}
-        for row in (
-            await db.users.find({"_id": {"$in": owner_ids}}).to_list(length=len(owner_ids))
-            if owner_ids
-            else []
-        )
+    family_ids = [row["_id"] for row in family_rows]
+    subscriptions = await subs_repo.listing(db, family_ids)
+    plan_ids = {FREE_PLAN} | {
+        row["planId"] for row in [*subscriptions.values(), *wants.values()] if row.get("planId")
     }
+    plans = {
+        row["_id"]: row for row in await db.plans.find({"_id": {"$in": list(plan_ids)}}).to_list(length=len(plan_ids))
+    }
+    user_ids = {row["ownerId"] for row in family_rows if row.get("ownerId")} | {
+        row["requestedBy"] for row in wants.values() if row.get("requestedBy")
+    }
+    users = {
+        row["_id"]: row
+        for row in await db.users.find(
+            {"_id": {"$in": list(user_ids)}}, {"email": 1, "displayName": 1}
+        ).to_list(length=len(user_ids))
+    } if user_ids else {}
+    counts = await db.learners.aggregate([
+        {"$match": {"familyId": {"$in": family_ids}}},
+        {"$group": {"_id": "$familyId", "count": {"$sum": 1}}},
+    ]).to_list(length=len(family_ids))
+    learners_used = {row["_id"]: row["count"] for row in counts}
+    free = plans.get(FREE_PLAN, {})
 
     out: list[SubscriptionRow] = []
     for family in family_rows:
-        state = await entitlements(db, family["_id"])
-        row = await subs_repo.for_family(db, family["_id"])
-        named = plans.get((row or {}).get("planId", FREE_PLAN), {})
-        ends = (row or {}).get("currentPeriodEnd")
-        want = wants.get(family["_id"]) or {}
+        family_id = family["_id"]
+        row = subscriptions.get(family_id, {})
+        plan_id = row.get("planId", FREE_PLAN)
+        named = plans.get(plan_id)
+        effective = (named if is_live(row) else None) or free
+        ends = row.get("currentPeriodEnd")
+        want = wants.get(family_id, {})
+        wants_plan_id = want.get("planId")
+        owner = users.get(family.get("ownerId"), {})
+        requester = users.get(want.get("requestedBy"), {})
         out.append(
             SubscriptionRow(
-                familyId=family["_id"],
+                familyId=family_id,
                 familyName=family.get("name", "Family"),
-                ownerEmail=(owners.get(family.get("ownerId")) or {}).get("email"),
-                ownerName=(owners.get(family.get("ownerId")) or {}).get("name"),
-                # What they were sold, beside what is being honoured — an
-                # expired grant reads "active" on the row and free in practice.
-                planId=(row or {}).get("planId", FREE_PLAN),
-                planName=named.get("name", "Free"),
-                status=state["status"],
+                ownerEmail=owner.get("email"),
+                ownerName=owner.get("displayName"),
+                planId=plan_id,
+                planName=(named or {}).get("name", "Free"),
+                status=row.get("status", "none"),
                 renewsAt=ends.isoformat() if ends else None,
-                learnersUsed=state["learnersUsed"],
-                learnerLimit=state["learnerLimit"],
-                live=state["planId"] != FREE_PLAN,
-                wantsPlanId=want.get("planId"),
-                wantsPlanName=(
-                    plans.get(want.get("planId"), {}).get("name", want.get("planId"))
-                    if want
-                    else None
-                ),
+                learnersUsed=learners_used.get(family_id, 0),
+                learnerLimit=int(effective.get("learnerLimit", 1)),
+                live=effective.get("_id", FREE_PLAN) != FREE_PLAN,
+                wantsPlanId=wants_plan_id,
+                wantsPlanName=plans.get(wants_plan_id, {}).get("name", wants_plan_id),
+                requestedAt=want.get("requestedAt"),
+                requestedByName=requester.get("displayName"),
+                requestedByEmail=requester.get("email"),
             )
         )
-    return {"subscriptions": out}
+    return SubscriptionList(subscriptions=out, hasMore=has_more)
 
 
 @router.put("/subscriptions/{family_id}")
@@ -424,9 +495,8 @@ async def grant(
     # request, so it stops being outstanding. A grant onto some *other* plan is
     # left alone: that is a different conversation, and the ask is the record of
     # what the family actually wanted.
-    asked = await wants_repo.for_family(db, family_id)
-    if asked and asked.get("planId") == body.plan_id:
-        await wants_repo.clear(db, family_id)
+    asked = await wants_repo.answer(db, family_id, body.plan_id)
+    if asked:
         # The family asked, and somebody answered. An account kind: it is about
         # a request *they* made, it carries no preference, and the alternative
         # is a parent checking the plan screen every day to find out.
@@ -446,7 +516,7 @@ async def grant(
             kind="plan.request_decided",
             title=title,
             body=note,
-            path="/settings",
+            path="/billing",
         )
         from app.services import email_notify
 
@@ -458,7 +528,7 @@ async def grant(
             values=decided,
             family_id=family_id,
             user_ids=[requester] if requester else None,
-            path="/settings",
+            path="/billing",
         )
 
     state = await entitlements(db, family_id)

@@ -36,6 +36,7 @@ export type TabId =
   | "translations"
   | "badges"
   | "billing"
+  | "family-billing"
   | "keys"
   // An Admin tab rather than a sidebar row, like the four above it: named
   // here because the shell has to be able to *put it on screen*, which is not

@@ -5,10 +5,11 @@ import { ApiError, accessToken, request, usePermissions } from "../../lib/sync";
 import { formatPrice } from "../../lib/billing";
 import { themeSystem } from "../../lib/themeSystem";
 import { playSound } from "../../utils/audio";
-import { UIBadge, UIButton, UIModal, UISectionHeader, UISearchInput } from "../ui";
+import { UIBadge, UIButton, UIModal, UISectionHeader, UISearchInput, UITabs } from "../ui";
 import { NoAccess } from "./NoAccess";
+import { PayWayCredentialsPanel } from "./PayWayCredentialsPanel";
 
-import { translate } from "../../lib/i18n";
+import { translate, useT } from "../../lib/i18n";
 interface Feature {
   featureId: string;
   label: string;
@@ -42,6 +43,39 @@ interface Subscription {
   /** A plan this family asked for and has not been given. */
   wantsPlanId: string | null;
   wantsPlanName: string | null;
+  requestedAt: string | null;
+  requestedByName: string | null;
+  requestedByEmail: string | null;
+}
+
+type SubscriptionView = "all" | "pending";
+
+interface SubscriptionPage {
+  subscriptions: Subscription[];
+  hasMore: boolean;
+}
+
+function RequestDetails({ subscription }: { subscription: Subscription }) {
+  const { language, t } = useT();
+  const { requestedAt, requestedByName, requestedByEmail } = subscription;
+  const name = [requestedByName, requestedByEmail].filter(Boolean).join(" · ");
+  const date = requestedAt ? new Date(requestedAt) : null;
+  const formatted = date && Number.isFinite(date.getTime())
+    ? new Intl.DateTimeFormat(language, { dateStyle: "medium", timeStyle: "short" }).format(date)
+    : null;
+
+  return (
+    <div className="space-y-0.5 text-xs text-ink/75">
+      <p className="break-words">
+        {t("admin.billingPage.requestedBy", { name: name || t("admin.billingPage.unknownRequester") })}
+      </p>
+      {formatted && (
+        <p>
+          {t("admin.billingPage.requestedOn")} <time dateTime={requestedAt ?? undefined}>{formatted}</time>
+        </p>
+      )}
+    </div>
+  );
 }
 
 const field =
@@ -73,8 +107,12 @@ export const BillingPage: React.FC<{ embedded?: boolean }> = ({ embedded = false
 
   const [plans, setPlans] = useState<Plan[]>([]);
   const [features, setFeatures] = useState<Feature[]>([]);
-  const [subs, setSubs] = useState<Subscription[]>([]);
+  const [subs, setSubs] = useState<SubscriptionPage | null>(null);
   const [query, setQuery] = useState("");
+  const [filters, setFilters] = useState<{ query: string; page: number; view: SubscriptionView }>({
+    query: "", page: 1, view: "all",
+  });
+  const [subsError, setSubsError] = useState<string | null>(null);
   const [busy, setBusy] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [notice, setNotice] = useState<string | null>(null);
@@ -92,26 +130,34 @@ export const BillingPage: React.FC<{ embedded?: boolean }> = ({ embedded = false
     setFeatures(body.features);
   }, []);
 
-  const loadSubs = useCallback(async (search: string) => {
-    const token = await accessToken();
-    const body = await request<{ subscriptions: Subscription[] }>(
-      `/billing/subscriptions${search ? `?query=${encodeURIComponent(search)}` : ""}`,
-      { token },
-    );
-    setSubs(body.subscriptions);
-  }, []);
+  useEffect(() => {
+    if (!allowed) return;
+    void loadCatalogue().catch((e: ApiError) => setError(e.message));
+  }, [allowed, loadCatalogue]);
 
   useEffect(() => {
     if (!allowed) return;
-    void (async () => {
-      try {
-        await loadCatalogue();
-        await loadSubs("");
-      } catch (e) {
-        setError((e as ApiError).message);
-      }
-    })();
-  }, [allowed, loadCatalogue, loadSubs]);
+    const controller = new AbortController();
+    const params = new URLSearchParams({
+      query: filters.query, page: String(filters.page), view: filters.view, limit: "25",
+    });
+    setSubs(null);
+    setSubsError(null);
+    void accessToken().then((token) => request<SubscriptionPage>(
+      `/billing/subscriptions?${params}`, { token, signal: controller.signal },
+    )).then(
+      (result) => {
+        if (controller.signal.aborted) return;
+        if (result.subscriptions.length === 0 && filters.page > 1) {
+          setFilters((current) => ({ ...current, page: current.page - 1 }));
+          return;
+        }
+        setSubs(result);
+      },
+      (error: ApiError) => { if (!controller.signal.aborted) setSubsError(error.message); },
+    );
+    return () => controller.abort();
+  }, [allowed, filters]);
 
   if (!allowed) {
     return (
@@ -142,7 +188,7 @@ export const BillingPage: React.FC<{ embedded?: boolean }> = ({ embedded = false
             },
       });
       await loadCatalogue();
-      await loadSubs(query);
+      setFilters((current) => ({ ...current }));
       setEditing(null);
       setCreating(false);
       setNotice(isNew ? translate("admin.billingPage.planAdded") : translate("admin.billingPage.planUpdated"));
@@ -165,7 +211,7 @@ export const BillingPage: React.FC<{ embedded?: boolean }> = ({ embedded = false
         token,
         body: { planId: grantPlan, months: grantMonths, status: "active" },
       });
-      await loadSubs(query);
+      setFilters((current) => ({ ...current }));
       setGranting(null);
       setNotice(translate("admin.billingPage.subscriptionUpdated"));
       playSound("pop");
@@ -197,6 +243,8 @@ export const BillingPage: React.FC<{ embedded?: boolean }> = ({ embedded = false
           {notice}
         </div>
       )}
+
+      <PayWayCredentialsPanel />
 
       {/* ---- PLANS ---- */}
       <section className={themeSystem.card("default", `${themeSystem.spacing.card} space-y-4`)}>
@@ -279,28 +327,47 @@ export const BillingPage: React.FC<{ embedded?: boolean }> = ({ embedded = false
           icon={<Users className="h-5 w-5 text-indigo-600 dark:text-indigo-400" />}
         />
 
-        <div className="flex items-center gap-2">
+        <UITabs<SubscriptionView>
+          label={translate("admin.billingPage.subscriptions")}
+          items={[
+            { id: "all", label: translate("admin.billingPage.allFamilies") },
+            { id: "pending", label: translate("admin.billingPage.pendingRequests") },
+          ]}
+          value={filters.view}
+          onChange={(view) => setFilters((current) => ({ ...current, view, page: 1 }))}
+        />
+
+        <form className="flex items-center gap-2" onSubmit={(event) => {
+          event.preventDefault();
+          setFilters((current) => ({ ...current, query: query.trim(), page: 1 }));
+        }}>
           <UISearchInput
               className="flex-1"
               label={translate("admin.billingPage.searchByNameEmailOrFamily")}
               value={query}
+              maxLength={80}
               onChange={(event) => setQuery(event.target.value)}
-              onKeyDown={(event) => {
-                if (event.key === "Enter") void loadSubs(query);
-              }}
             />
-          <UIButton variant="secondary" size="sm" onClick={() => void loadSubs(query)}>
+          <UIButton type="submit" variant="secondary" size="sm">
             {translate("admin.billingPage.search")}
           </UIButton>
-        </div>
+        </form>
 
-        {subs.length === 0 ? (
+        {subsError ? (
+          <p role="alert" className={themeSystem.flash("error")}>{subsError}</p>
+        ) : !subs ? (
+          <div role="status" aria-label={translate("admin.billingPage.loadingSubscriptions")} className="space-y-2">
+            {[0, 1, 2].map((row) => <div key={row} className="h-16 animate-pulse rounded-2xl border border-line bg-surface-muted" />)}
+          </div>
+        ) : subs.subscriptions.length === 0 ? (
           <p className="rounded-2xl border-2 border-dashed border-line bg-surface-muted p-6 text-center text-sm text-muted">
-            {translate("admin.billingPage.noFamiliesYet")}
+            {translate(filters.query
+              ? "admin.billingPage.noMatchingSubscriptions"
+              : filters.view === "pending" ? "admin.billingPage.noPendingRequests" : "admin.billingPage.noFamiliesYet")}
           </p>
         ) : (
           <div className="space-y-2">
-            {subs.map((sub) => (
+            {subs.subscriptions.map((sub) => (
               <div
                 key={sub.familyId}
                 className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-line bg-surface-muted p-4"
@@ -323,6 +390,7 @@ export const BillingPage: React.FC<{ embedded?: boolean }> = ({ embedded = false
                   <p className="text-xs text-muted">
                     {translate("admin.billingPage.learnersusedOfLearnerlimitValueValue2", { learnersUsed: sub.learnersUsed, learnerLimit: sub.learnerLimit, value: sub.learnerLimit === 1 ? translate("admin.billingPage.child") : translate("admin.billingPage.children"), value2: when(sub.renewsAt) })}
                   </p>
+                  {sub.wantsPlanName && <div className="mt-2"><RequestDetails subscription={sub} /></div>}
                 </div>
                 <div className="flex shrink-0 items-center gap-2">
                   {/*
@@ -367,6 +435,19 @@ export const BillingPage: React.FC<{ embedded?: boolean }> = ({ embedded = false
                 </div>
               </div>
             ))}
+          </div>
+        )}
+        {(filters.page > 1 || subs?.hasMore) && (
+          <div className="flex flex-wrap items-center justify-end gap-2">
+            <UIButton type="button" variant="secondary" size="sm" disabled={filters.page === 1}
+              onClick={() => setFilters((current) => ({ ...current, page: current.page - 1 }))}>
+              {translate("admin.familyBilling.previous")}
+            </UIButton>
+            <p className="koda-admin-label">{translate("admin.billingPage.pageNumber", { page: filters.page })}</p>
+            <UIButton type="button" variant="secondary" size="sm" disabled={!subs?.hasMore}
+              onClick={() => setFilters((current) => ({ ...current, page: current.page + 1 }))}>
+              {translate("admin.familyBilling.next")}
+            </UIButton>
           </div>
         )}
       </section>
@@ -541,9 +622,10 @@ export const BillingPage: React.FC<{ embedded?: boolean }> = ({ embedded = false
               answers it — so an operator granting something else is doing it
               on purpose rather than because the row did not say. */}
           {granting?.wantsPlanName && (
-            <p className="rounded-xl bg-indigo-50 p-3 text-sm text-indigo-900 dark:bg-indigo-950/40 dark:text-indigo-200">
-              {translate("admin.billingPage.thisFamilyAskedFor")}{" "}<strong>{granting.wantsPlanName}</strong>{translate("admin.billingPage.grantingItClearsTheRequest")}
-            </p>
+            <div className="space-y-2 rounded-xl bg-indigo-50 p-3 text-sm text-indigo-900 dark:bg-indigo-950/40 dark:text-indigo-200">
+              <p>{translate("admin.billingPage.thisFamilyAskedFor")}{" "}<strong>{granting.wantsPlanName}</strong>{translate("admin.billingPage.grantingItClearsTheRequest")}</p>
+              <RequestDetails subscription={granting} />
+            </div>
           )}
 
           <label className="block space-y-1.5">

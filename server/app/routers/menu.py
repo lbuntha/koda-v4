@@ -77,6 +77,8 @@ class MenuItemPatch(Model):
 @router.get("")
 async def get_menu(db: Db, p: CurrentPrincipal) -> MenuOut:
     rows = await menu_repo.for_family(db, p.family_id)
+    if p.family_id is None:
+        rows = [row for row in rows if row["itemId"] != "family-billing"]
 
     # An admin sees every entry, by definition: the operator of the service is
     # the one person who needs the whole map, and hiding a page from them just

@@ -31,6 +31,7 @@ export type LandingTab =
   | "profile"
   | "devices"
   | "settings"
+  | "family-billing"
   | "notifications";
 
 export interface Landing {
@@ -57,6 +58,7 @@ const TABS: Record<string, LandingTab> = {
   profile: "profile",
   devices: "devices",
   settings: "settings",
+  billing: "family-billing",
   // The reader's own list. A tap that cannot be placed more precisely still
   // has somewhere honest to go: the notification it came from is at the top of
   // it, with everything else Koda has said.
@@ -69,7 +71,7 @@ const TABS: Record<string, LandingTab> = {
  * Never throws and never returns nothing: a tap that cannot be understood is a
  * tap that opens Koda, which is what it did before this file existed.
  */
-export const landingFor = (path: string | undefined): Landing => {
+export const landingFor = (path: string | undefined, kind?: string): Landing => {
   if (!path || typeof path !== "string") return HOME;
 
   // A path, never a URL. The worker has already rejected other origins; taking
@@ -81,6 +83,9 @@ export const landingFor = (path: string | undefined): Landing => {
 
   const tab = TABS[first ?? ""];
   if (!tab) return HOME;
+  if (tab === "settings" && kind === "plan.request_decided") {
+    return { tab: "family-billing" };
+  }
   if (tab === "children" && second && LEARNER_ID.test(second)) {
     return { tab, learnerId: second };
   }
@@ -129,12 +134,12 @@ export const onNotificationClick = (handle: (landing: Landing) => void): (() => 
     const data = event.data as { type?: string; path?: string; kind?: string } | undefined;
     if (data?.type !== NOTIFICATION_CLICK) return;
     report(data.kind);
-    handle(landingFor(data.path));
+    handle(landingFor(data.path, data.kind));
   };
   const fromApp = (event: Event) => {
     const detail = (event as CustomEvent<{ path?: string; kind?: string }>).detail;
     report(detail?.kind);
-    handle(landingFor(detail?.path));
+    handle(landingFor(detail?.path, detail?.kind));
   };
 
   navigator.serviceWorker?.addEventListener("message", fromWorker);

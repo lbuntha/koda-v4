@@ -4,7 +4,6 @@ import { useTheme } from "../context/ThemeContext";
 import { playSound } from "../utils/audio";
 import { UIPageHeader, UISettingGroup, UISettingRow, UIToggle, UIArtIcon } from "./ui";
 import { YourLearning } from "./account/YourLearning";
-import { PlanCard } from "./account/PlanCard";
 import { MyAiKeysCard } from "./account/MyAiKeysCard";
 import { DevicesPage } from "./account/DevicesPage";
 import { NotificationsSettings } from "./account/NotificationsSettings";
@@ -37,8 +36,7 @@ interface SettingsPageProps {
 }
 
 /**
- * A family's own settings — what the app looks and sounds like, and what their
- * plan covers.
+ * A family's preferences for appearance, audio, notifications and devices.
  *
  * Everything here belongs to the person using Koda. What *runs* Koda — the XP
  * rates, the badges, the plans, the deployment switchboard — moved to its own
@@ -81,9 +79,6 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({
    */
   const ownLearnerId = session?.learnerId && can("learner:update") ? session.learnerId : null;
   const isDark = theme === "dark";
-  // Shown to whoever runs the family, not to a child: a seven-year-old has no
-  // use for a renewal date, and "not included" reads as a scolding.
-  const showsPlan = can("learner:create");
   // Content makers may pay for their own Studio AI with their own key.
   const showsAiKeys = can("content:write");
   /*
@@ -235,8 +230,6 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({
           <NotificationsSettings />
         </div>
       )}
-
-      {showsPlan && <PlanCard />}
 
       {showsAiKeys && <MyAiKeysCard />}
 

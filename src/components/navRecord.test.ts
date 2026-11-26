@@ -66,6 +66,12 @@ describe("splitting a menu into tabs and everywhere else", () => {
     expect(overflow.map((i) => i.id)).toEqual(["profile"]);
   });
 
+  it("makes Billing a direct tab when the account's menu includes it", () => {
+    const { primary, overflow } = splitTabs([item("home"), item("game"), item("family-billing"), item("settings")]);
+    expect(primary.map((i) => i.id)).toEqual(["home", "game", "family-billing", "settings"]);
+    expect(overflow).toEqual([]);
+  });
+
   it("keeps the leaderboard off the bar and reachable from Settings", () => {
     const { primary, overflow } = splitTabs([
       item("home"),

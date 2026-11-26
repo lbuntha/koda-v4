@@ -61,6 +61,8 @@ DEFAULT_MENU: list[dict] = [
      "requires": "role:manage", "order": 50},
     {"itemId": "children", "label": "Children", "icon": "art:menu-children", "badge": "Family",
      "requires": "learner:create", "order": 52},
+    {"itemId": "family-billing", "label": "Billing", "icon": "art:kit-card",
+     "requires": "family:update", "order": 53},
     # No Devices row. The device list is a section of Settings now — it is read
     # once when a tablet goes missing, not navigated to, and a permanent sidebar
     # row for it cost more attention than it was worth. `prune_orphans` deletes
@@ -71,8 +73,7 @@ DEFAULT_MENU: list[dict] = [
     # Two rows, and the split is by *whose decision it is* rather than by
     # seniority. Admin holds what one person decides for everybody — the XP
     # rates, the badges, the plans, the deployment's switches. Settings holds
-    # what belongs to the person looking at it: their screen, their sound, their
-    # plan. Both are tabbed, so neither grows a sidebar row when a tab is added.
+    # what belongs to the person looking at it: their screen and their sound.
     #
     # Staff only. `system:write` is a platform right no family role holds and no
     # grant can hand out, so an owner running their own family never sees this

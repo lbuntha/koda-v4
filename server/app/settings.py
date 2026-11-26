@@ -7,6 +7,7 @@ Everything the service needs to run is here and nowhere else: no module reads
 from functools import lru_cache
 from typing import Literal
 
+from pydantic import SecretStr
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -78,6 +79,9 @@ class Settings(BaseSettings):
     #: unreadable, and people add theirs again. Unset outside development means
     #: personal keys cannot be saved — never stored in the clear.
     ai_keys_secret: str | None = None
+
+    #: Server-only encryption secret for stored PayWay merchant credentials.
+    payway_credentials_secret: SecretStr | None = None
 
     #: Where mail goes. `console` logs it and sends nothing, which is what local
     #: work and the test suite want; `smtp` is a real server — Mailpit next door

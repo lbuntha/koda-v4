@@ -19,6 +19,8 @@ describe("where a tapped notification lands", () => {
     expect(landingFor("/")).toEqual({ tab: "home" });
     expect(landingFor("/devices")).toEqual({ tab: "devices" });
     expect(landingFor("/settings")).toEqual({ tab: "settings" });
+    expect(landingFor("/billing")).toEqual({ tab: "family-billing" });
+    expect(landingFor("/settings", "plan.request_decided")).toEqual({ tab: "family-billing" });
   });
 
   it("sends anything it does not recognise home", () => {

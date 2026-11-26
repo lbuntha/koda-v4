@@ -41,7 +41,7 @@ export const withCounts = <T extends string | null | undefined>(
 /**
  * The destinations the phone's tab bar carries, in the order it carries them.
  *
- * Three names, fixed, and short words, so none is cut off. These are the places
+ * The core names are fixed and short, so none is cut off. These are the places
  * a child goes every day: where they are, everything to learn — lessons, books
  * and writing live together under Learn — and the switches. Naming them means an operator adding
  * "Roles" to the menu can never push "Learn" off the bar — the tabs a
@@ -54,7 +54,7 @@ export const withCounts = <T extends string | null | undefined>(
  * The rail has no such limit and lists the record in full, which is the whole
  * reason it is still the layout for a screen with room for it.
  */
-export const MOBILE_TABS = ["home", "game", "settings"] as const;
+export const MOBILE_TABS = ["home", "game", "family-billing", "settings"] as const;
 
 /**
  * Entries that are now categories inside Learn rather than pages of their own.
@@ -164,6 +164,7 @@ export const useNavItems = (): NavItemConfig[] => {
     // Not presentation: an entry with nothing behind it leads to an empty page,
     // so it is dropped however the record words it.
     .filter((item) => !FOLDED_INTO_LEARN.has(item.id))
+    .filter((item) => item.id !== "family-billing" || (session?.familyId && known && can("family:update")))
     // Learn also holds Books and Write & Draw now, so it stays even with no lessons.
     .filter(allowed);
 };

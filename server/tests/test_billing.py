@@ -5,9 +5,11 @@ child and no AI, a paid one gets what it paid for, and a grant that has run out
 stops counting the moment it does — without anybody running a job at midnight.
 """
 
-from datetime import timedelta
+import json
+from datetime import date, datetime, timedelta
 
 import pytest
+from pydantic import SecretStr
 
 from app.models.common import now
 from app.plan_defaults import DEFAULT_PLANS, PLAN_FEATURES
@@ -15,7 +17,10 @@ from app.repos import plans as plans_repo
 from app.repos import platform_roles as platform_roles_repo
 from app.repos import subscriptions as subs_repo
 from app.role_defaults import DEFAULT_PLATFORM_ROLES
+from app.services import payway
 from app.services.entitlements import entitlements, has_feature
+from app.services.key_box import unseal
+from app.settings import settings
 
 
 def _shipped(plan_id: str) -> dict:
@@ -66,6 +71,196 @@ async def _family(client, signup_body, email="parent@example.com"):
     auth = {"Authorization": f"Bearer {tokens['accessToken']}"}
     me = (await client.get("/auth/me", headers=auth)).json()
     return auth, me["familyId"]
+
+
+@pytest.mark.asyncio
+async def test_payway_sandbox_checkout_verifies_before_granting_once(db, client, signup_body, monkeypatch):
+    await _seed_plans(db)
+    admin = await _operator(db, client)
+    parent, family_id = await _family(client, signup_body)
+    other, _ = await _family(client, signup_body, email="elsewhere@example.com")
+    monkeypatch.setattr(settings(), "payway_credentials_secret", SecretStr("separate-payway-test-secret-for-credentials"))
+    config = await client.put("/billing/payway/sandbox", headers=admin, json={
+        "merchantId": "demo",
+        "apiKey": "synthetic-test-key",
+        "expiresOn": (date.today() + timedelta(days=30)).isoformat(),
+    })
+    assert config.status_code == 200
+    calls = []
+    amount = "4.00"
+
+    def post(endpoint, body):
+        calls.append((endpoint, body))
+        if endpoint == "generate-qr":
+            assert body["payment_option"] == "abapay_khqr"
+            assert body["amount"] == "5.00"
+            return {
+                "status": {"code": "0"}, "amount": 5, "currency": "USD",
+                "qrImage": "data:image/png;base64,abcd",
+            }
+        return {
+            "status": {"code": "00", "tran_id": body["tran_id"]},
+            "data": {
+                "payment_status_code": 0, "payment_status": "APPROVED", "payment_currency": "USD",
+                "payment_amount": amount, "total_amount": amount,
+            },
+        }
+
+    monkeypatch.setattr(payway, "_post", post)
+    path = "/billing/checkout"
+    assert (await client.get(path, headers=parent)).json() == {"available": True, "checkout": None}
+    created = await client.post(path, headers=parent, json={"planId": "family"})
+    assert created.status_code == 200, created.text
+    checkout = created.json()
+    assert checkout["status"] == "pending"
+    assert checkout["qrImage"] is not None
+    assert "synthetic-test-key" not in created.text
+    assert (await client.post(path, headers=parent, json={"planId": "family"})).json() == checkout
+    assert len(calls) == 1
+    assert (await client.get("/billing/me", headers=parent)).json()["planId"] == "free"
+
+    ref = checkout["reference"]
+    check_path = f"{path}/{ref}/check"
+    assert (await client.post(check_path, headers=other)).status_code == 404
+    assert (await client.post(check_path, headers=parent)).status_code == 409
+    assert await db.subscriptions.find_one({"_id": family_id}) is None
+    assert (await client.get("/billing/payments", headers=parent)).json()["payments"] == []
+
+    amount = "5.00"
+    await db.billing_payments.update_one({"_id": ref}, {"$unset": {"lastCheckedAt": ""}})
+    checked = await client.post(check_path, headers=parent)
+    assert checked.status_code == 200, checked.text
+    assert checked.json()["status"] == "paid"
+    assert (await client.get("/billing/me", headers=parent)).json()["planId"] == "family"
+    period = (await db.subscriptions.find_one({"_id": family_id}))["currentPeriodEnd"]
+    assert (await client.post(check_path, headers=parent)).json()["status"] == "paid"
+    assert (await db.subscriptions.find_one({"_id": family_id}))["currentPeriodEnd"] == period
+    await db.billing_payments.update_one({"_id": ref}, {"$set": {"status": "pending", "open": True}})
+    assert (await client.post(check_path, headers=parent)).json()["status"] == "paid"
+    assert (await db.subscriptions.find_one({"_id": family_id}))["currentPeriodEnd"] == period
+    receipts = (await client.get("/billing/payments", headers=parent)).json()["payments"]
+    assert [payment["reference"] for payment in receipts] == [ref]
+    assert receipts[0]["sandbox"] is True
+
+
+@pytest.mark.asyncio
+async def test_payway_credentials_are_encrypted_and_write_only(db, client, signup_body, monkeypatch):
+    from cryptography.hazmat.primitives import serialization
+    from cryptography.hazmat.primitives.asymmetric import rsa
+
+    path = "/billing/payway/sandbox"
+    admin = await _operator(db, client)
+    parent, _ = await _family(client, signup_body)
+    secret = "separate-test-only-payway-storage-secret"
+    merchant_key = "fake-payway-key"
+    rsa_key = rsa.generate_private_key(public_exponent=65537, key_size=2048)
+    private_pem = rsa_key.private_bytes(
+        serialization.Encoding.PEM,
+        serialization.PrivateFormat.TraditionalOpenSSL,
+        serialization.NoEncryption(),
+    ).decode()
+    public_pem = rsa_key.public_key().public_bytes(
+        serialization.Encoding.PEM, serialization.PublicFormat.SubjectPublicKeyInfo
+    ).decode()
+    payload = {
+        "merchantId": "ecTEST",
+        "apiKey": merchant_key,
+        "expiresOn": (date.today() + timedelta(days=60)).isoformat(),
+        "rsaPublicKey": public_pem,
+        "rsaPrivateKey": private_pem,
+    }
+
+    monkeypatch.setattr(settings(), "payway_credentials_secret", None)
+    assert (await client.put(path, headers=admin, json=payload)).status_code == 503
+    assert await db.payment_credentials.count_documents({}) == 0
+    monkeypatch.setattr(settings(), "payway_credentials_secret", SecretStr(secret))
+    assert (await client.get(path, headers=parent)).status_code == 403
+    assert (await client.put(path, headers=parent, json=payload)).status_code == 403
+    assert (await client.put(path, headers=admin, json={**payload, "expiresOn": "2020-01-01"})).status_code == 400
+    invalid = await client.put(path, headers=admin, json={**payload, "merchantId": private_pem})
+    assert invalid.status_code == 400
+    assert "PRIVATE KEY" not in invalid.text
+    invalid_public = await client.put(path, headers=admin, json={**payload, "rsaPublicKey": merchant_key})
+    assert invalid_public.json()["error"]["code"] == "payway_invalid_rsa_public"
+    assert merchant_key not in invalid_public.text
+    invalid_private = await client.put(path, headers=admin, json={**payload, "rsaPrivateKey": public_pem})
+    assert invalid_private.json()["error"]["code"] == "payway_invalid_rsa_private"
+
+    result = await client.put(path, headers=admin, json={
+        **payload, "rsaPublicKey": public_pem.replace("\n", "\\n"),
+    })
+    assert result.status_code == 200
+    assert result.json()["merchantId"] == payload["merchantId"]
+    assert result.json()["configured"] is True
+    stored = await db.payment_credentials.find_one({"_id": "payway:sandbox"})
+    assert merchant_key not in str(stored)
+    assert "PRIVATE KEY" not in str(stored)
+    decrypted = unseal(stored["sealed"], secret=secret)
+    assert decrypted is not None
+    assert json.loads(decrypted) == {
+        "apiKey": merchant_key, "rsaPublicKey": public_pem.strip(), "rsaPrivateKey": private_pem.strip()
+    }
+    status = await client.get(path, headers=admin)
+    assert status.headers["Cache-Control"] == "no-store"
+    assert set(status.json()) == {"configured", "available", "merchantId", "expiresOn", "updatedAt"}
+    assert set(result.json()) == set(status.json())
+
+
+@pytest.mark.asyncio
+async def test_payment_history_is_paginated_and_scoped_to_the_family(db, client, signup_body):
+    from app.menu_defaults import DEFAULT_MENU
+    from app.repos import menu as menu_repo
+
+    billing_menu = next(row for row in DEFAULT_MENU if row["itemId"] == "family-billing")
+    await menu_repo.seed_default(db, billing_menu)
+    parent, family_id = await _family(client, signup_body)
+    other, other_id = await _family(client, signup_body, email="other@example.com")
+    assert (await client.get("/billing/payments", headers=parent)).json() == {
+        "payments": [], "hasMore": False,
+    }
+    parent_menu = (await client.get("/menu", headers=parent)).json()["items"]
+    assert "family-billing" in {item["id"] for item in parent_menu}
+
+    learner = (await client.post("/learners", headers=parent, json={"displayName": "Mia"})).json()
+    code = (await client.post(f"/learners/{learner['id']}/join-code", headers=parent)).json()
+    tokens = (await client.post("/auth/join", json={"code": code["code"], "deviceName": "Tablet"})).json()
+    child = {"Authorization": f"Bearer {tokens['accessToken']}"}
+    assert (await client.get("/billing/payments", headers=child)).status_code == 403
+    child_menu = (await client.get("/menu", headers=child)).json()["items"]
+    assert "family-billing" not in {item["id"] for item in child_menu}
+
+    latest = now()
+    own_payments = [
+        {
+            "_id": f"own-{index}",
+            "familyId": family_id,
+            "planName": "Family",
+            "currency": "USD",
+            "amountCents": 500,
+            "paidAt": latest - timedelta(days=index),
+            "status": "refunded" if index == 0 else "paid",
+        }
+        for index in range(13)
+    ]
+    await db.billing_payments.insert_many([
+        *own_payments,
+        {**own_payments[0], "_id": "other-paid", "familyId": other_id},
+        {**own_payments[0], "_id": "own-pending", "status": "pending"},
+    ])
+
+    first = (await client.get("/billing/payments", headers=parent)).json()
+    assert first["hasMore"] is True
+    assert [payment["reference"] for payment in first["payments"]] == [
+        f"own-{index}" for index in range(12)
+    ]
+    assert first["payments"][0]["status"] == "refunded"
+    assert first["payments"][0]["amountCents"] == 500
+    assert "familyId" not in first["payments"][0]
+    last = (await client.get("/billing/payments?page=2", headers=parent)).json()
+    assert last["hasMore"] is False
+    assert [payment["reference"] for payment in last["payments"]] == ["own-12"]
+    other_history = (await client.get("/billing/payments", headers=other)).json()
+    assert [payment["reference"] for payment in other_history["payments"]] == ["other-paid"]
 
 
 @pytest.mark.asyncio
@@ -533,12 +728,45 @@ async def test_an_operator_sees_the_ask_and_granting_it_clears_it(db, client, si
     admin = await _operator(db, client)
     auth, family_id = await _family(client, signup_body, email="wants@example.com")
 
-    await client.post("/billing/upgrade", headers=auth, json={"planId": "family"})
+    invite = await client.post("/family/invites", headers=auth, json={"role": "parent"})
+    parent_email = "second.parent@example.com"
+    joiner, _ = await _family(client, signup_body, email=parent_email)
+    joined = await client.post("/family/invites/redeem", headers=joiner, json={"code": invite.json()["code"]})
+    assert joined.status_code == 200
+    login = await client.post("/auth/login", json={"email": parent_email, "password": "correct horse battery"})
+    parent = {"Authorization": f"Bearer {login.json()['accessToken']}"}
+    await db.users.update_one({"email": parent_email}, {"$set": {"displayName": "Second Parent"}})
+    requested = await client.post("/billing/upgrade", headers=parent, json={"planId": "family"})
+    assert requested.status_code == 200
+
+    _, older_id = await _family(client, signup_body, email="older@example.com")
+    await db.upgrade_requests.insert_one({
+        "_id": older_id, "planId": "family", "requestedAt": now() - timedelta(days=1),
+    })
 
     listed = (await client.get("/billing/subscriptions", headers=admin)).json()["subscriptions"]
     row = next(item for item in listed if item["familyId"] == family_id)
     assert row["wantsPlanId"] == "family"
     assert row["wantsPlanName"] == "Family"
+    assert row["ownerEmail"] == "wants@example.com"
+    assert row["requestedByName"] == "Second Parent"
+    assert row["requestedByEmail"] == parent_email
+    assert datetime.fromisoformat(row["requestedAt"]) == datetime.fromisoformat(
+        requested.json()["request"]["requestedAt"]
+    )
+
+    first_pending = (await client.get("/billing/subscriptions?view=pending&limit=1", headers=admin)).json()
+    assert first_pending["hasMore"] is True
+    assert first_pending["subscriptions"][0]["familyId"] == older_id
+    second_pending = (
+        await client.get("/billing/subscriptions?view=pending&limit=1&page=2", headers=admin)
+    ).json()
+    assert second_pending["hasMore"] is False
+    assert second_pending["subscriptions"][0]["familyId"] == family_id
+    searched = (
+        await client.get("/billing/subscriptions?view=pending&query=second.parent", headers=admin)
+    ).json()
+    assert [item["familyId"] for item in searched["subscriptions"]] == [family_id]
 
     await client.put(
         f"/billing/subscriptions/{family_id}",
@@ -549,6 +777,8 @@ async def test_an_operator_sees_the_ask_and_granting_it_clears_it(db, client, si
     # Answered: the family is on the plan and nothing is still outstanding.
     assert (await client.get("/billing/me", headers=auth)).json()["planId"] == "family"
     assert (await client.get("/billing/upgrade", headers=auth)).json()["request"] is None
+    pending = (await client.get("/billing/subscriptions?view=pending", headers=admin)).json()
+    assert [item["familyId"] for item in pending["subscriptions"]] == [older_id]
 
 
 @pytest.mark.asyncio

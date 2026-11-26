@@ -135,6 +135,12 @@
      "requires": "system:write"
     },
     {
+     "id": "family-billing",
+     "label": "Billing",
+     "icon": "art:kit-card",
+     "requires": "family:update"
+    },
+    {
      "id": "settings",
      "label": "Settings",
      "icon": "settings"
