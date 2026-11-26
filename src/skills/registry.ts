@@ -15,6 +15,7 @@ const SKILL_IDS = [
   "counting", "addition", "subtraction", "multiplication", "division",
   "fractions", "observation", "bottle-sort", "color-sweeper", "cross-math",
   "dot-connect", "sudoku", "number-merge", "box-split", "measurement",
+  "science",
 ] as const;
 
 /*

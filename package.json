@@ -17,6 +17,7 @@
     "voice:observation": "node scripts/generate-voice.mjs --skill observation --provider openai --voice marin",
     "voice:bottle-sort": "node scripts/generate-voice.mjs --skill bottle-sort --provider openai --voice marin",
     "voice:number-merge": "node scripts/generate-voice.mjs --skill number-merge --provider openai --voice marin",
+    "voice:science": "node scripts/science-voice-lines.mjs && node scripts/generate-voice.mjs --skill science --provider openai --voice marin",
     "art:seed": "node scripts/generate-art-seed.mjs",
     "skills:seed": "node scripts/generate-skill-seed.mjs",
     "test": "vitest run",

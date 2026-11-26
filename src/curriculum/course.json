@@ -2141,6 +2141,70 @@
         "measurement/practice-thermometers",
         "measurement/practice-measure-stories"
       ]
+    },
+    {
+      "id": "u163",
+      "unitNumber": 163,
+      "title": "Unit 163: Wonder Lab — Living Things",
+      "description": "Living or not, what living things need, the five senses, and the parts of plants and animals.",
+      "icon": "science-living",
+      "lessons": [
+        "science/living-or-not",
+        "science/what-living-things-need",
+        "science/my-five-senses",
+        "science/parts-of-a-plant",
+        "science/animal-body-parts"
+      ]
+    },
+    {
+      "id": "u164",
+      "unitNumber": 164,
+      "title": "Unit 164: Wonder Lab — Growing Up",
+      "description": "Babies and their parents, how parents help, and the stages of growing up.",
+      "icon": "science-animal",
+      "lessons": [
+        "science/babies-and-parents",
+        "science/parents-help-babies",
+        "science/grow-and-change"
+      ]
+    },
+    {
+      "id": "u165",
+      "unitNumber": 165,
+      "title": "Unit 165: Wonder Lab — Sound and Light",
+      "description": "Sound is shaking, we need light to see, what makes light, and what light passes through.",
+      "icon": "science-light",
+      "lessons": [
+        "science/sound-is-shaking",
+        "science/we-need-light-to-see",
+        "science/what-makes-light",
+        "science/light-through-things"
+      ]
+    },
+    {
+      "id": "u166",
+      "unitNumber": 166,
+      "title": "Unit 166: Wonder Lab — Sky and Seasons",
+      "description": "The Sun, Moon and stars, the sky in order, and Cambodia's rainy and dry seasons.",
+      "icon": "science-sky",
+      "lessons": [
+        "science/sun-moon-and-stars",
+        "science/the-sky-in-order",
+        "science/rainy-and-dry-seasons"
+      ]
+    },
+    {
+      "id": "u167",
+      "unitNumber": 167,
+      "title": "Unit 167: Wonder Lab — Practice",
+      "description": "Mixed practice without help: living things, light, sound and sky, sorting, and putting in order.",
+      "icon": "science-practice",
+      "lessons": [
+        "science/practice-living-things",
+        "science/practice-light-sound-sky",
+        "science/practice-sorting",
+        "science/practice-in-order"
+      ]
     }
   ]
 }

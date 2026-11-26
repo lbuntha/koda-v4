@@ -1,0 +1,79 @@
+{
+  "id": "science",
+  "name": "Wonder Lab",
+  "version": "0.1.0",
+  "description": "Real science for primary school, starting with Grade 1: living things and what they need, the senses, plant and animal parts, babies and parents, sound as vibration, light and seeing, the Sun, Moon and stars, and Cambodia's rainy and dry seasons. Every lesson follows a published NGSS performance expectation where one exists, with examples from Cambodian everyday life. Wrong answers are real misconceptions, each with its own explanation.",
+  "category": "core",
+  "author": "Koda Learning Lab",
+  "iconName": "Search",
+  "tagline": "Look closely, ask why, and find out what is true.",
+  "thumbnail": "science-quest",
+  "status": "draft",
+  "audience": {
+    "ages": [
+      6,
+      7
+    ],
+    "category": "science"
+  },
+  "topics": [
+    "nature",
+    "animals",
+    "health"
+  ],
+  "teaches": [
+    "living-nonliving",
+    "living-needs",
+    "five-senses",
+    "plant-parts",
+    "animal-parts",
+    "young-like-parents",
+    "parent-care",
+    "life-stages",
+    "sound-vibration",
+    "light-to-see",
+    "light-sources",
+    "light-materials",
+    "sky-patterns",
+    "seasons-cambodia"
+  ],
+  "requires": [],
+  "features": [
+    {
+      "id": "audio_speech",
+      "name": "Spoken voice",
+      "description": "Reads the lesson question aloud for young children, and lets the speaker button read the question and its answers. Turn off for a silent lesson.",
+      "isEnabled": true,
+      "tag": "Audio"
+    },
+    {
+      "id": "sound_chimes",
+      "name": "Sound chimes",
+      "description": "Plays a short sound when a card is placed, and when an answer is right or wrong.",
+      "isEnabled": true,
+      "tag": "Audio"
+    },
+    {
+      "id": "haptic_feedback",
+      "name": "Haptic vibration",
+      "description": "Adds a small vibration when an answer is right or wrong.",
+      "isEnabled": true,
+      "tag": "Haptic"
+    }
+  ],
+  "settings": {
+    "speechRate": 0.95
+  },
+  "settingsSchema": [
+    {
+      "key": "speechRate",
+      "label": "Speech rate",
+      "help": "How fast Koda reads aloud.",
+      "type": "number",
+      "min": 0.5,
+      "max": 2,
+      "step": 0.05,
+      "unit": "x"
+    }
+  ]
+}

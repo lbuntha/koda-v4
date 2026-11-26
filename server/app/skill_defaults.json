@@ -29641,6 +29641,923 @@
     ]
   },
   {
+    "id": "science",
+    "name": "Wonder Lab",
+    "version": "0.1.0",
+    "description": "Real science for primary school, starting with Grade 1: living things and what they need, the senses, plant and animal parts, babies and parents, sound as vibration, light and seeing, the Sun, Moon and stars, and Cambodia's rainy and dry seasons. Every lesson follows a published NGSS performance expectation where one exists, with examples from Cambodian everyday life. Wrong answers are real misconceptions, each with its own explanation.",
+    "category": "core",
+    "author": "Koda Learning Lab",
+    "iconName": "Search",
+    "tagline": "Look closely, ask why, and find out what is true.",
+    "thumbnail": "science-quest",
+    "status": "draft",
+    "audience": {
+      "ages": [
+        6,
+        7
+      ],
+      "category": "science"
+    },
+    "topics": [
+      "nature",
+      "animals",
+      "health"
+    ],
+    "teaches": [
+      "living-nonliving",
+      "living-needs",
+      "five-senses",
+      "plant-parts",
+      "animal-parts",
+      "young-like-parents",
+      "parent-care",
+      "life-stages",
+      "sound-vibration",
+      "light-to-see",
+      "light-sources",
+      "light-materials",
+      "sky-patterns",
+      "seasons-cambodia"
+    ],
+    "requires": [],
+    "features": [
+      {
+        "id": "audio_speech",
+        "name": "Spoken voice",
+        "description": "Reads the lesson question aloud for young children, and lets the speaker button read the question and its answers. Turn off for a silent lesson.",
+        "isEnabled": true,
+        "tag": "Audio"
+      },
+      {
+        "id": "sound_chimes",
+        "name": "Sound chimes",
+        "description": "Plays a short sound when a card is placed, and when an answer is right or wrong.",
+        "isEnabled": true,
+        "tag": "Audio"
+      },
+      {
+        "id": "haptic_feedback",
+        "name": "Haptic vibration",
+        "description": "Adds a small vibration when an answer is right or wrong.",
+        "isEnabled": true,
+        "tag": "Haptic"
+      }
+    ],
+    "settings": {
+      "speechRate": 0.95
+    },
+    "settingsSchema": [
+      {
+        "key": "speechRate",
+        "label": "Speech rate",
+        "help": "How fast Koda reads aloud.",
+        "type": "number",
+        "min": 0.5,
+        "max": 2,
+        "step": 0.05,
+        "unit": "x"
+      }
+    ],
+    "lessons": [
+      {
+        "id": "living-or-not",
+        "title": "Living or Not Living?",
+        "concept": "What Makes Something Alive",
+        "conceptKey": "living-nonliving",
+        "requires": [],
+        "activity": "science/sort",
+        "params": {
+          "level": 1,
+          "question": {
+            "set": "living",
+            "questionsPerRound": 8
+          },
+          "play": {
+            "targetObjective": "Sort things into living and not living.",
+            "stepByStep": [
+              "Look at the picture.",
+              "Ask: does it eat or drink, grow, and have babies?",
+              "Tap Living or Not living."
+            ],
+            "kidTip": "Moving is not enough. A car moves, but it is not alive.",
+            "audioPrompt": "Is it living or not living? Tap the group it belongs to."
+          }
+        },
+        "difficulty": "Easy",
+        "icon": "science-living",
+        "iconName": "layers",
+        "iconTone": "emerald",
+        "pedagogyTip": "Children often call anything that moves \"alive\" and anything still \"not alive\". Sorting a car, a toy robot, a tree and a snail side by side breaks that rule of thumb and replaces it with the real one: living things feed, grow and reproduce.",
+        "standards": [],
+        "trajectoryLevel": "living-vs-nonliving",
+        "ageBand": [
+          6,
+          7
+        ],
+        "curricula": {
+          "KH": "G1"
+        }
+      },
+      {
+        "id": "what-living-things-need",
+        "title": "What Living Things Need",
+        "concept": "Food, Water, Air and Light",
+        "conceptKey": "living-needs",
+        "requires": [
+          "living-nonliving"
+        ],
+        "activity": "science/pick",
+        "params": {
+          "level": 2,
+          "question": {
+            "set": "needs",
+            "questionsPerRound": 5
+          },
+          "play": {
+            "targetObjective": "Say what plants and animals need to stay alive.",
+            "stepByStep": [
+              "Look at the picture.",
+              "Think: is it a plant or an animal?",
+              "Tap what it needs."
+            ],
+            "kidTip": "Plants make their own food with sunlight. Animals must eat.",
+            "audioPrompt": "What do living things need? Tap the answer."
+          }
+        },
+        "difficulty": "Easy",
+        "icon": "science-living",
+        "iconName": "search",
+        "iconTone": "emerald",
+        "pedagogyTip": "The two misconceptions worth meeting early: that plants eat food from the soil like animals do, and that fish do not need air because they live in water.",
+        "standards": [
+          "NGSS.K-LS1-1"
+        ],
+        "trajectoryLevel": "needs-of-living-things",
+        "ageBand": [
+          6,
+          7
+        ],
+        "curricula": {
+          "KH": "G1"
+        }
+      },
+      {
+        "id": "my-five-senses",
+        "title": "My Five Senses",
+        "concept": "Seeing, Hearing, Smelling, Tasting, Touching",
+        "conceptKey": "five-senses",
+        "requires": [],
+        "activity": "science/pick",
+        "params": {
+          "level": 3,
+          "question": {
+            "set": "senses",
+            "questionsPerRound": 5
+          },
+          "play": {
+            "targetObjective": "Match each sense to the body part that does it, and keep your senses safe.",
+            "stepByStep": [
+              "Look at the picture.",
+              "Think: do you see it, hear it, smell it, taste it or feel it?",
+              "Tap the body part."
+            ],
+            "kidTip": "Eyes see, ears hear, nose smells, tongue tastes, skin feels.",
+            "audioPrompt": "Which part of your body helps you? Tap it."
+          }
+        },
+        "difficulty": "Easy",
+        "icon": "science-senses",
+        "iconName": "search",
+        "iconTone": "pink",
+        "pedagogyTip": "Two questions are about safety, not naming: never look straight at the Sun, and tell a grown-up when you smell smoke. Senses are for noticing danger as well as for noticing the world.",
+        "standards": [],
+        "trajectoryLevel": "body-and-senses",
+        "ageBand": [
+          6,
+          7
+        ],
+        "curricula": {
+          "KH": "G1"
+        }
+      },
+      {
+        "id": "parts-of-a-plant",
+        "title": "Parts of a Plant",
+        "concept": "Roots, Stem, Leaves, Flower, Seed",
+        "conceptKey": "plant-parts",
+        "requires": [
+          "living-needs"
+        ],
+        "activity": "science/pick",
+        "params": {
+          "level": 4,
+          "question": {
+            "set": "plantparts",
+            "questionsPerRound": 5
+          },
+          "play": {
+            "targetObjective": "Name the parts of a plant and say what each one does.",
+            "stepByStep": [
+              "Read what the part does.",
+              "Look at the plants. Each shows one part in colour.",
+              "Tap the plant with the right part coloured."
+            ],
+            "kidTip": "Roots are under the ground. Leaves face the Sun.",
+            "audioPrompt": "Which part of the plant does this job? Tap it."
+          }
+        },
+        "difficulty": "Easy",
+        "icon": "science-plant",
+        "iconName": "search",
+        "iconTone": "emerald",
+        "pedagogyTip": "Every plant picture is the same plant, with only the named part in colour, so a child points at a part's place and job rather than guessing from a different drawing.",
+        "standards": [
+          "NGSS.1-LS1-1"
+        ],
+        "trajectoryLevel": "plant-structure-function",
+        "ageBand": [
+          6,
+          7
+        ],
+        "curricula": {
+          "KH": "G1"
+        }
+      },
+      {
+        "id": "animal-body-parts",
+        "title": "Animal Body Parts",
+        "concept": "How Bodies Help Animals Live",
+        "conceptKey": "animal-parts",
+        "requires": [
+          "living-nonliving"
+        ],
+        "activity": "science/pick",
+        "params": {
+          "level": 5,
+          "question": {
+            "set": "animalparts",
+            "questionsPerRound": 5
+          },
+          "play": {
+            "targetObjective": "Say how an animal's body parts help it move, eat and stay safe.",
+            "stepByStep": [
+              "Look at the animal.",
+              "Think about how it moves, eats or stays safe.",
+              "Tap the body part that helps."
+            ],
+            "kidTip": "Each part has a job. Wings fly, fins swim, shells protect.",
+            "audioPrompt": "What helps this animal? Tap the answer."
+          }
+        },
+        "difficulty": "Easy",
+        "icon": "science-animal",
+        "iconName": "search",
+        "iconTone": "indigo",
+        "pedagogyTip": "Wrong answers are other real body parts of the same animal, each with its own job, so a mistake teaches a second fact rather than nothing.",
+        "standards": [
+          "NGSS.1-LS1-1"
+        ],
+        "trajectoryLevel": "animal-structure-function",
+        "ageBand": [
+          6,
+          7
+        ],
+        "curricula": {
+          "KH": "G1"
+        }
+      },
+      {
+        "id": "babies-and-parents",
+        "title": "Babies and Their Parents",
+        "concept": "Young Are Like Their Parents",
+        "conceptKey": "young-like-parents",
+        "requires": [
+          "living-nonliving"
+        ],
+        "activity": "science/pick",
+        "params": {
+          "level": 6,
+          "question": {
+            "set": "young",
+            "questionsPerRound": 5
+          },
+          "play": {
+            "targetObjective": "Match young animals and plants to their parents, and notice they are alike but not identical.",
+            "stepByStep": [
+              "Look at the baby.",
+              "Think: what kind of animal or plant made it?",
+              "Tap what it grows into."
+            ],
+            "kidTip": "Babies grow up like their parents, but each one is a little different.",
+            "audioPrompt": "What does this baby grow into? Tap the answer."
+          }
+        },
+        "difficulty": "Easy",
+        "icon": "science-animal",
+        "iconName": "search",
+        "iconTone": "indigo",
+        "pedagogyTip": "Tadpoles and caterpillars look nothing like their parents, which is exactly why they belong here: the idea is \"the same kind\", not \"looks the same\".",
+        "standards": [
+          "NGSS.1-LS3-1"
+        ],
+        "trajectoryLevel": "inheritance-of-traits",
+        "ageBand": [
+          6,
+          7
+        ],
+        "curricula": {
+          "KH": "G1"
+        }
+      },
+      {
+        "id": "parents-help-babies",
+        "title": "Parents Help Their Babies",
+        "concept": "How Parents Keep Young Safe",
+        "conceptKey": "parent-care",
+        "requires": [
+          "young-like-parents"
+        ],
+        "activity": "science/pick",
+        "params": {
+          "level": 7,
+          "question": {
+            "set": "care",
+            "questionsPerRound": 5
+          },
+          "play": {
+            "targetObjective": "Say how animal parents feed, warm and protect their young.",
+            "stepByStep": [
+              "Look at the parent and baby.",
+              "Think: does the baby need food, warmth or safety?",
+              "Tap how the parent helps."
+            ],
+            "kidTip": "Babies cannot look after themselves yet. Parents feed, warm and protect them.",
+            "audioPrompt": "How does the parent help? Tap the answer."
+          }
+        },
+        "difficulty": "Easy",
+        "icon": "science-animal",
+        "iconName": "search",
+        "iconTone": "indigo",
+        "pedagogyTip": "The Siamese crocodile, a Cambodian animal, guards its nest. Children are surprised that a fierce animal is a careful parent.",
+        "standards": [
+          "NGSS.1-LS1-2"
+        ],
+        "trajectoryLevel": "parent-offspring-behavior",
+        "ageBand": [
+          6,
+          7
+        ],
+        "curricula": {
+          "KH": "G1"
+        }
+      },
+      {
+        "id": "grow-and-change",
+        "title": "Grow and Change",
+        "concept": "Life Goes in Stages",
+        "conceptKey": "life-stages",
+        "requires": [
+          "young-like-parents"
+        ],
+        "activity": "science/order",
+        "params": {
+          "level": 8,
+          "question": {
+            "set": "growth",
+            "questionsPerRound": 4
+          },
+          "play": {
+            "targetObjective": "Put the stages of a plant's or animal's life in order.",
+            "stepByStep": [
+              "Find the very first stage: a seed, an egg or a baby.",
+              "Tap it, then tap what comes next.",
+              "Tap a card again to take it back."
+            ],
+            "kidTip": "Every life starts small: a seed, an egg or a baby.",
+            "audioPrompt": "How does it grow? Put the pictures in order."
+          }
+        },
+        "difficulty": "Easy",
+        "icon": "science-plant",
+        "iconName": "footprints",
+        "iconTone": "purple",
+        "pedagogyTip": "Ordering stages is the bridge to Grade 3 life cycles. Rice is included because Cambodian children see its seasons every year.",
+        "standards": [
+          "NGSS.1-LS3-1"
+        ],
+        "trajectoryLevel": "life-stages",
+        "ageBand": [
+          6,
+          7
+        ],
+        "curricula": {
+          "KH": "G1"
+        }
+      },
+      {
+        "id": "sound-is-shaking",
+        "title": "Sound Is Shaking",
+        "concept": "Vibrations Make Sound",
+        "conceptKey": "sound-vibration",
+        "requires": [],
+        "activity": "science/pick",
+        "params": {
+          "level": 9,
+          "question": {
+            "set": "sound",
+            "questionsPerRound": 5
+          },
+          "play": {
+            "targetObjective": "Explain that sounds are made by things shaking, and that sound can make things shake.",
+            "stepByStep": [
+              "Look at the picture.",
+              "Think: what is shaking?",
+              "Tap the answer."
+            ],
+            "kidTip": "No shaking, no sound. Try it: hum with your hand on your throat.",
+            "audioPrompt": "What happens to the sound? Tap the answer."
+          }
+        },
+        "difficulty": "Easy",
+        "icon": "science-sound",
+        "iconName": "waves",
+        "iconTone": "cyan",
+        "pedagogyTip": "Each question is an experiment a child can do at home with a drum, a pot lid, rice grains or their own throat. Encourage them to try it.",
+        "standards": [
+          "NGSS.1-PS4-1"
+        ],
+        "trajectoryLevel": "sound-and-vibration",
+        "ageBand": [
+          6,
+          7
+        ],
+        "curricula": {
+          "KH": "G1"
+        }
+      },
+      {
+        "id": "we-need-light-to-see",
+        "title": "We Need Light to See",
+        "concept": "Light, Shadows and Mirrors",
+        "conceptKey": "light-to-see",
+        "requires": [],
+        "activity": "science/pick",
+        "params": {
+          "level": 10,
+          "question": {
+            "set": "see",
+            "questionsPerRound": 5
+          },
+          "play": {
+            "targetObjective": "Explain that we see only when there is light, and what shadows and mirrors do with light.",
+            "stepByStep": [
+              "Look at the picture.",
+              "Think: where is the light coming from?",
+              "Tap the answer."
+            ],
+            "kidTip": "With no light at all, no one can see.",
+            "audioPrompt": "What does light do? Tap the answer."
+          }
+        },
+        "difficulty": "Easy",
+        "icon": "science-light",
+        "iconName": "zap",
+        "iconTone": "cyan",
+        "pedagogyTip": "The Moon question matters: most young children believe the Moon makes its own light. It is lit by the Sun.",
+        "standards": [
+          "NGSS.1-PS4-2",
+          "NGSS.1-PS4-3"
+        ],
+        "trajectoryLevel": "light-and-sight",
+        "ageBand": [
+          6,
+          7
+        ],
+        "curricula": {
+          "KH": "G1"
+        }
+      },
+      {
+        "id": "what-makes-light",
+        "title": "What Makes Light?",
+        "concept": "Things That Shine on Their Own",
+        "conceptKey": "light-sources",
+        "requires": [
+          "light-to-see"
+        ],
+        "activity": "science/sort",
+        "params": {
+          "level": 11,
+          "question": {
+            "set": "lightsource",
+            "questionsPerRound": 8
+          },
+          "play": {
+            "targetObjective": "Sort things that make light from things that only reflect it.",
+            "stepByStep": [
+              "Look at the picture.",
+              "Ask: would it shine in a dark room by itself?",
+              "Tap the group."
+            ],
+            "kidTip": "Shiny is not the same as making light. A mirror only bounces light.",
+            "audioPrompt": "Does it make its own light? Tap the group."
+          }
+        },
+        "difficulty": "Easy",
+        "icon": "science-light",
+        "iconName": "layers",
+        "iconTone": "cyan",
+        "pedagogyTip": "The Moon, a mirror and a shiny spoon are the distractors on purpose: they look bright, but they only reflect light. The firefly is a real living thing that makes its own light.",
+        "standards": [
+          "NGSS.1-PS4-2"
+        ],
+        "trajectoryLevel": "light-and-sight",
+        "ageBand": [
+          6,
+          7
+        ],
+        "curricula": {
+          "KH": "G1"
+        }
+      },
+      {
+        "id": "light-through-things",
+        "title": "Does Light Go Through?",
+        "concept": "See-Through, Some Light, Blocks Light",
+        "conceptKey": "light-materials",
+        "requires": [
+          "light-to-see"
+        ],
+        "activity": "science/sort",
+        "params": {
+          "level": 12,
+          "question": {
+            "set": "lightpath",
+            "questionsPerRound": 8
+          },
+          "play": {
+            "targetObjective": "Sort materials by whether light passes through, partly passes, or is blocked.",
+            "stepByStep": [
+              "Look at the picture.",
+              "Imagine holding it up to a lamp.",
+              "Tap the group."
+            ],
+            "kidTip": "Clear things let light through. Thick things block it.",
+            "audioPrompt": "Does light go through it? Tap the group."
+          }
+        },
+        "difficulty": "Easy",
+        "icon": "science-light",
+        "iconName": "layers",
+        "iconTone": "cyan",
+        "pedagogyTip": "At home: hold paper, a plastic bag, a cup of water and a book up to a window and compare.",
+        "standards": [
+          "NGSS.1-PS4-3"
+        ],
+        "trajectoryLevel": "light-and-materials",
+        "ageBand": [
+          6,
+          7
+        ],
+        "curricula": {
+          "KH": "G1"
+        }
+      },
+      {
+        "id": "sun-moon-and-stars",
+        "title": "Sun, Moon and Stars",
+        "concept": "Patterns in the Sky",
+        "conceptKey": "sky-patterns",
+        "requires": [],
+        "activity": "science/pick",
+        "params": {
+          "level": 13,
+          "question": {
+            "set": "sky",
+            "questionsPerRound": 5
+          },
+          "play": {
+            "targetObjective": "Describe the daily path of the Sun, why stars hide by day, and how the Moon's shape changes.",
+            "stepByStep": [
+              "Look at the picture.",
+              "Think about what you see in the sky each day.",
+              "Tap the answer."
+            ],
+            "kidTip": "The Sun rises in the east and sets in the west.",
+            "audioPrompt": "What happens in the sky? Tap the answer."
+          }
+        },
+        "difficulty": "Easy",
+        "icon": "science-sky",
+        "iconName": "star",
+        "iconTone": "purple",
+        "pedagogyTip": "Stars do not leave in the daytime; sunlight outshines them. The Moon is often visible by day. Both are worth checking outside together.",
+        "standards": [
+          "NGSS.1-ESS1-1"
+        ],
+        "trajectoryLevel": "sky-patterns",
+        "ageBand": [
+          6,
+          7
+        ],
+        "curricula": {
+          "KH": "G1"
+        }
+      },
+      {
+        "id": "the-sky-in-order",
+        "title": "The Sky in Order",
+        "concept": "The Sun's Day, the Moon and Shadows",
+        "conceptKey": "sky-patterns",
+        "requires": [
+          "sky-patterns"
+        ],
+        "activity": "science/order",
+        "params": {
+          "level": 14,
+          "question": {
+            "set": "sky",
+            "questionsPerRound": 3
+          },
+          "play": {
+            "targetObjective": "Order the Sun's path through a day, the Moon growing, and a shadow from morning to evening.",
+            "stepByStep": [
+              "Find what happens first.",
+              "Tap it, then tap what comes next.",
+              "Tap a card again to take it back."
+            ],
+            "kidTip": "Morning comes first. The Sun starts low in the east.",
+            "audioPrompt": "What comes first? Put the pictures in order."
+          }
+        },
+        "difficulty": "Easy",
+        "icon": "science-sky",
+        "iconName": "footprints",
+        "iconTone": "purple",
+        "pedagogyTip": "The shadow sequence is real geometry: a low Sun casts a long shadow, a high Sun a short one, and the shadow always points away from the Sun.",
+        "standards": [
+          "NGSS.1-ESS1-1"
+        ],
+        "trajectoryLevel": "sky-patterns",
+        "ageBand": [
+          6,
+          7
+        ],
+        "curricula": {
+          "KH": "G1"
+        }
+      },
+      {
+        "id": "rainy-and-dry-seasons",
+        "title": "Rainy and Dry Seasons",
+        "concept": "Weather Through the Year in Cambodia",
+        "conceptKey": "seasons-cambodia",
+        "requires": [
+          "sky-patterns"
+        ],
+        "activity": "science/pick",
+        "params": {
+          "level": 15,
+          "question": {
+            "set": "seasons",
+            "questionsPerRound": 5
+          },
+          "play": {
+            "targetObjective": "Describe Cambodia's rainy and dry seasons, stay safe in storms, and notice daylight changes a little through the year.",
+            "stepByStep": [
+              "Look at the picture.",
+              "Think about the weather where you live.",
+              "Tap the answer."
+            ],
+            "kidTip": "Rainy season is about May to October. Dry season is about November to April.",
+            "audioPrompt": "What is the weather like? Tap the answer."
+          }
+        },
+        "difficulty": "Easy",
+        "icon": "science-sky",
+        "iconName": "star",
+        "iconTone": "purple",
+        "pedagogyTip": "Storm safety is taught as fact, not fear: inside a building is safest; tall trees and open water are not.",
+        "standards": [
+          "NGSS.K-ESS2-1",
+          "NGSS.1-ESS1-2"
+        ],
+        "trajectoryLevel": "weather-patterns",
+        "ageBand": [
+          6,
+          7
+        ],
+        "curricula": {
+          "KH": "G1"
+        }
+      },
+      {
+        "id": "practice-living-things",
+        "title": "Practice: Living Things",
+        "concept": "Practice Without Help",
+        "conceptKey": "living-needs",
+        "requires": [],
+        "activity": "science/pick",
+        "params": {
+          "level": 16,
+          "question": {
+            "practice": true,
+            "sets": [
+              "needs",
+              "senses",
+              "plantparts",
+              "animalparts",
+              "young",
+              "care"
+            ],
+            "questionsPerRound": 10
+          },
+          "play": {
+            "mode": "practice",
+            "tier": "master",
+            "difficultyColor": "violet",
+            "category": "Practice",
+            "shortDesc": "Plants, animals, senses and growing up, mixed together.",
+            "targetObjective": "No hints, no explanations, no voice. Just the questions.",
+            "stepByStep": [
+              "The science you have learned, mixed together.",
+              "Nothing is read aloud and there are no hints.",
+              "Answer each one, and see how many you get first time."
+            ],
+            "kidTip": "",
+            "audioPrompt": "",
+            "prompts": {}
+          }
+        },
+        "difficulty": "Medium",
+        "icon": "science-practice",
+        "iconName": "gem",
+        "iconTone": "emerald",
+        "pedagogyTip": "Practice is retrieval, not instruction, and it is open from the start: a child who already knows the science should not have to sit through the lesson to get at the questions. The help is removed on purpose: recalling something unaided is what makes it stick.",
+        "standards": [],
+        "trajectoryLevel": "practice",
+        "ageBand": [
+          6,
+          7
+        ],
+        "curricula": {
+          "KH": "G1"
+        }
+      },
+      {
+        "id": "practice-light-sound-sky",
+        "title": "Practice: Light, Sound and Sky",
+        "concept": "Practice Without Help",
+        "conceptKey": "light-to-see",
+        "requires": [],
+        "activity": "science/pick",
+        "params": {
+          "level": 17,
+          "question": {
+            "practice": true,
+            "sets": [
+              "sound",
+              "see",
+              "sky",
+              "seasons"
+            ],
+            "questionsPerRound": 10
+          },
+          "play": {
+            "mode": "practice",
+            "tier": "master",
+            "difficultyColor": "violet",
+            "category": "Practice",
+            "shortDesc": "Sound, light, the sky and the seasons, mixed together.",
+            "targetObjective": "No hints, no explanations, no voice. Just the questions.",
+            "stepByStep": [
+              "The science you have learned, mixed together.",
+              "Nothing is read aloud and there are no hints.",
+              "Answer each one, and see how many you get first time."
+            ],
+            "kidTip": "",
+            "audioPrompt": "",
+            "prompts": {}
+          }
+        },
+        "difficulty": "Medium",
+        "icon": "science-practice",
+        "iconName": "gem",
+        "iconTone": "cyan",
+        "pedagogyTip": "Practice is retrieval, not instruction, and it is open from the start: a child who already knows the science should not have to sit through the lesson to get at the questions. The help is removed on purpose: recalling something unaided is what makes it stick.",
+        "standards": [],
+        "trajectoryLevel": "practice",
+        "ageBand": [
+          6,
+          7
+        ],
+        "curricula": {
+          "KH": "G1"
+        }
+      },
+      {
+        "id": "practice-sorting",
+        "title": "Practice: Sort It",
+        "concept": "Practice Without Help",
+        "conceptKey": "living-nonliving",
+        "requires": [],
+        "activity": "science/sort",
+        "params": {
+          "level": 18,
+          "question": {
+            "practice": true,
+            "sets": [
+              "living",
+              "lightsource",
+              "lightpath"
+            ],
+            "questionsPerRound": 9
+          },
+          "play": {
+            "mode": "practice",
+            "tier": "master",
+            "difficultyColor": "violet",
+            "category": "Practice",
+            "shortDesc": "Living or not, makes light or not, and light through things.",
+            "targetObjective": "No hints, no explanations, no voice. Just the questions.",
+            "stepByStep": [
+              "The science you have learned, mixed together.",
+              "Nothing is read aloud and there are no hints.",
+              "Answer each one, and see how many you get first time."
+            ],
+            "kidTip": "",
+            "audioPrompt": "",
+            "prompts": {}
+          }
+        },
+        "difficulty": "Medium",
+        "icon": "science-practice",
+        "iconName": "gem",
+        "iconTone": "indigo",
+        "pedagogyTip": "Practice is retrieval, not instruction, and it is open from the start: a child who already knows the science should not have to sit through the lesson to get at the questions. The help is removed on purpose: recalling something unaided is what makes it stick.",
+        "standards": [],
+        "trajectoryLevel": "practice",
+        "ageBand": [
+          6,
+          7
+        ],
+        "curricula": {
+          "KH": "G1"
+        }
+      },
+      {
+        "id": "practice-in-order",
+        "title": "Practice: In Order",
+        "concept": "Practice Without Help",
+        "conceptKey": "life-stages",
+        "requires": [],
+        "activity": "science/order",
+        "params": {
+          "level": 19,
+          "question": {
+            "practice": true,
+            "sets": [
+              "growth",
+              "sky"
+            ],
+            "questionsPerRound": 8
+          },
+          "play": {
+            "mode": "practice",
+            "tier": "master",
+            "difficultyColor": "violet",
+            "category": "Practice",
+            "shortDesc": "Life stages and sky patterns, in order.",
+            "targetObjective": "No hints, no explanations, no voice. Just the questions.",
+            "stepByStep": [
+              "The science you have learned, mixed together.",
+              "Nothing is read aloud and there are no hints.",
+              "Answer each one, and see how many you get first time."
+            ],
+            "kidTip": "",
+            "audioPrompt": "",
+            "prompts": {}
+          }
+        },
+        "difficulty": "Medium",
+        "icon": "science-practice",
+        "iconName": "gem",
+        "iconTone": "purple",
+        "pedagogyTip": "Practice is retrieval, not instruction, and it is open from the start: a child who already knows the science should not have to sit through the lesson to get at the questions. The help is removed on purpose: recalling something unaided is what makes it stick.",
+        "standards": [],
+        "trajectoryLevel": "practice",
+        "ageBand": [
+          6,
+          7
+        ],
+        "curricula": {
+          "KH": "G1"
+        }
+      }
+    ]
+  },
+  {
     "id": "subtraction",
     "name": "Subtraction",
     "version": "1.0.0",

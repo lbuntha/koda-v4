@@ -1,0 +1,580 @@
+{
+  "listAnd": "{a} and {b}",
+  "title": {
+    "right": "Yes!",
+    "wrong": "Not quite"
+  },
+  "ui": {
+    "choices": "Answers",
+    "picture": "Picture for the question",
+    "sortInto": "Sort into {bin}",
+    "sorted": "{count} sorted",
+    "slot": "Step {n}",
+    "empty": "Empty",
+    "takeBack": "Take back {step}",
+    "place": "Put {step} next",
+    "cards": "Cards to put in order",
+    "line": "Your order"
+  },
+  "pick": {
+    "wrong": "Have another look, then try again.",
+    "needs": {
+      "dry-plant": {
+        "ask": "The leaves are dry and drooping. What does this plant need?",
+        "clue": "Think about what you give a plant every day.",
+        "why": "Plants need water. The roots drink it up from the soil.",
+        "c": { "water": "Water", "dark": "Darkness", "blanket": "A blanket" },
+        "no": { "dark": "Plants need light, not darkness, to grow." }
+      },
+      "plant-food": {
+        "ask": "What do plants need to make their own food?",
+        "clue": "Green leaves turn toward the sky. What are they catching?",
+        "why": "Green leaves use sunlight to make food for the plant.",
+        "c": { "sunlight": "Sunlight", "rice": "Rice", "milk": "Milk" },
+        "no": {
+          "rice": "Plants do not eat food like we do. They make their own.",
+          "milk": "Plants do not drink milk. They make their own food."
+        }
+      },
+      "fish-air": {
+        "ask": "A fish lives in water. Does a fish need air?",
+        "clue": "Do all animals breathe?",
+        "why": "Yes. A fish breathes with its gills. Gills take in the air that is mixed into the water.",
+        "c": { "yes": "Yes, it gets air from the water", "no": "No, fish never need air" },
+        "no": { "no": "All animals need air. A fish gets its air from the water." }
+      },
+      "no-food": {
+        "ask": "Which one does NOT need food?",
+        "clue": "Which one is not alive?",
+        "why": "A toy robot is not alive. Living things need food. Toys do not.",
+        "c": { "cat": "Cat", "hen": "Hen", "child": "Child", "robot": "Toy robot" },
+        "no": {
+          "cat": "A cat is alive, so it needs food.",
+          "hen": "A hen is alive, so it needs food.",
+          "child": "You are alive, so you need food!"
+        }
+      },
+      "rice-water": {
+        "ask": "Why do farmers keep water in rice fields?",
+        "clue": "Rice is a plant. What do plants need?",
+        "why": "Rice plants need lots of water to grow. They grow well in wet fields.",
+        "c": { "grow": "Rice plants need water to grow", "white": "Water makes rice white", "shade": "Water keeps the Sun away" },
+        "no": { "white": "Water does not change the colour of rice. The plants need it to grow." }
+      },
+      "puppy": {
+        "ask": "What does a puppy need to grow?",
+        "clue": "What do you need every day to grow?",
+        "why": "Animals need food, water and air to live and grow.",
+        "c": { "all": "Food, water and air", "sun": "Only sunlight", "toys": "Only toys" },
+        "no": { "sun": "Plants make food from sunlight. Animals must eat food." }
+      }
+    },
+    "senses": {
+      "hear": {
+        "ask": "The rooster crows. Which part helps you hear it?",
+        "clue": "Sounds go into the sides of your head.",
+        "why": "We hear sounds with our ears.",
+        "c": { "ear": "Ear", "eye": "Eye", "nose": "Nose" }
+      },
+      "smell": {
+        "ask": "You smell a durian. Which part helps you smell?",
+        "clue": "Which part do you hold when something smells bad?",
+        "why": "We smell with our nose.",
+        "c": { "nose": "Nose", "ear": "Ear", "hand": "Hand" }
+      },
+      "taste": {
+        "ask": "A green mango tastes sour. Which part tastes it?",
+        "clue": "It is inside your mouth.",
+        "why": "We taste with our tongue: sweet, sour, salty and bitter.",
+        "c": { "tongue": "Tongue", "eye": "Eye", "ear": "Ear" }
+      },
+      "see": {
+        "ask": "You see a rainbow. Which part helps you see?",
+        "clue": "You close them when you sleep.",
+        "why": "We see with our eyes.",
+        "c": { "eye": "Eye", "nose": "Nose", "tongue": "Tongue" }
+      },
+      "feel": {
+        "ask": "Ice feels cold. Which part feels it?",
+        "clue": "What do you touch things with?",
+        "why": "Our skin feels hot and cold, soft and rough.",
+        "c": { "hand": "Skin on your hand", "ear": "Ear", "eye": "Eye" }
+      },
+      "sun-safe": {
+        "ask": "Is it safe to look straight at the Sun?",
+        "clue": "Your eyes are precious. How do you keep them safe?",
+        "why": "No. The Sun is so bright it can hurt your eyes. Never look straight at it.",
+        "c": { "no": "No, it can hurt your eyes", "yes": "Yes, for a long time" },
+        "no": { "yes": "Looking at the Sun can hurt your eyes, even for a short time." }
+      },
+      "smoke": {
+        "ask": "You smell smoke at home. What should you do?",
+        "clue": "Smoke can mean fire. Who can help?",
+        "why": "Tell a grown-up at once. Your nose can warn you of danger.",
+        "c": { "tell": "Tell a grown-up at once", "sleep": "Go back to sleep" },
+        "no": { "sleep": "Smoke can mean a fire. Always tell a grown-up straight away." }
+      }
+    },
+    "plantparts": {
+      "water": {
+        "ask": "Which part takes in water from the soil?",
+        "clue": "Look under the ground.",
+        "why": "Roots grow down into the soil and soak up water.",
+        "c": { "root": "Roots", "leaf": "Leaves", "flower": "Flower" },
+        "no": { "leaf": "Leaves are up in the light. The water is in the soil." }
+      },
+      "hold": {
+        "ask": "Which part holds the plant up straight?",
+        "clue": "It is long, like a pole, between the roots and the leaves.",
+        "why": "The stem holds the plant up and carries water to the leaves.",
+        "c": { "stem": "Stem", "flower": "Flower", "leaf": "Leaf" }
+      },
+      "food": {
+        "ask": "Which part uses sunlight to make food?",
+        "clue": "It is green and flat, and faces the Sun.",
+        "why": "Green leaves use sunlight, air and water to make food for the plant.",
+        "c": { "leaf": "Leaves", "root": "Roots", "seed": "Seed" },
+        "no": { "root": "Roots are in the dark soil. Making food needs sunlight." }
+      },
+      "fruit": {
+        "ask": "Which part can grow into a fruit?",
+        "clue": "Mango trees have these before they have mangoes.",
+        "why": "A flower can grow into a fruit with seeds inside.",
+        "c": { "flower": "Flower", "root": "Roots", "leaf": "Leaf" }
+      },
+      "new-tree": {
+        "ask": "Which part of a mango can grow into a new mango tree?",
+        "clue": "It is big and hard, in the middle of the fruit.",
+        "why": "The seed can grow into a new plant.",
+        "c": { "seed": "Seed", "leaf": "Leaf", "root": "Roots" }
+      },
+      "lotus": {
+        "ask": "A lotus grows in a pond. Which part is down in the mud?",
+        "clue": "Which part always grows down?",
+        "why": "Lotus roots grow in the mud. The leaves and flower reach up to the light.",
+        "c": { "root": "Roots", "flower": "Flower", "leaf": "Leaves" }
+      }
+    },
+    "animalparts": {
+      "fish": {
+        "ask": "What helps a fish swim?",
+        "clue": "Watch a fish move. What swishes from side to side?",
+        "why": "A fish swims by moving its fins and tail.",
+        "c": { "fins": "Fins and tail", "gills": "Gills", "scales": "Scales" },
+        "no": { "gills": "Gills help a fish breathe, not swim.", "scales": "Scales cover the fish and keep it safe." }
+      },
+      "bird": {
+        "ask": "What helps a bird fly?",
+        "clue": "A bird flaps them up and down.",
+        "why": "Birds flap their wings to fly.",
+        "c": { "wings": "Wings", "beak": "Beak", "feet": "Feet" },
+        "no": { "beak": "A beak helps a bird eat. It does not help it fly." }
+      },
+      "turtle": {
+        "ask": "What keeps a turtle safe from danger?",
+        "clue": "A turtle can hide inside it.",
+        "why": "A turtle pulls its head and legs into its hard shell.",
+        "c": { "shell": "Its hard shell", "tail": "Its tail", "eyes": "Its eyes" }
+      },
+      "duck": {
+        "ask": "Why can a duck swim so well?",
+        "clue": "Look at the duck's feet.",
+        "why": "Skin between a duck's toes pushes the water, like a paddle.",
+        "c": { "webbed": "Webbed feet push the water", "beak": "It has a flat beak", "eyes": "It has two eyes" }
+      },
+      "elephant": {
+        "ask": "What does an elephant use to pick up food and drink water?",
+        "clue": "It is very long, at the front of its face.",
+        "why": "An elephant's trunk is its long nose. It grabs food and sucks up water.",
+        "c": { "trunk": "Trunk", "ears": "Ears", "tail": "Tail" }
+      },
+      "rabbit": {
+        "ask": "Why does a rabbit have big ears?",
+        "clue": "What do ears do?",
+        "why": "Big ears catch quiet sounds, so a rabbit can hear danger and run away.",
+        "c": { "hear": "To hear danger far away", "fly": "To fly", "swim": "To swim" }
+      }
+    },
+    "young": {
+      "tadpole": {
+        "ask": "This baby is a tadpole. What does it grow into?",
+        "clue": "It lives in a pond and grows legs.",
+        "why": "A tadpole grows legs, loses its tail and becomes a frog.",
+        "c": { "frog": "Frog", "fish": "Fish", "bird": "Bird" },
+        "no": { "fish": "A tadpole swims like a fish, but it grows legs and becomes a frog." }
+      },
+      "chick": {
+        "ask": "This baby is a chick. What does it grow into?",
+        "clue": "It hatches from a hen's egg.",
+        "why": "A chick grows into a hen or a rooster, like its parents.",
+        "c": { "hen": "Hen", "duck": "Duck", "cat": "Cat" },
+        "no": { "duck": "A baby duck is a duckling. A chick grows into a hen or a rooster." }
+      },
+      "caterpillar": {
+        "ask": "This baby is a caterpillar. What does it grow into?",
+        "clue": "It has bright wings when it is grown.",
+        "why": "A caterpillar makes a case called a chrysalis, then comes out as a butterfly.",
+        "c": { "butterfly": "Butterfly", "snail": "Snail", "bird": "Bird" }
+      },
+      "kittens": {
+        "ask": "Kittens and their mother. How do they look?",
+        "clue": "Look at the colours and spots.",
+        "why": "Babies look like their parents, but not exactly the same.",
+        "c": { "alike": "Alike, but not exactly the same", "same": "Exactly the same", "different": "Not alike at all" },
+        "no": { "same": "Look again. The kittens have different spots and colours." }
+      },
+      "mango-seed": {
+        "ask": "A mango seed is planted. What does it grow into?",
+        "clue": "A seed grows into the same kind of plant it came from.",
+        "why": "A mango seed grows into a mango tree.",
+        "c": { "mango": "Mango tree", "banana": "Banana tree", "coconut": "Coconut tree" }
+      },
+      "puppies": {
+        "ask": "Puppies from one family. Can they be different colours?",
+        "clue": "Look closely at the puppies.",
+        "why": "Yes. Puppies look like their parents, but they can have different colours and spots.",
+        "c": { "can": "Yes, they can be different", "never": "No, never" },
+        "no": { "never": "Look at the puppies. Brothers and sisters can be different colours." }
+      }
+    },
+    "care": {
+      "hen-eggs": {
+        "ask": "Why does a hen sit on her eggs?",
+        "clue": "Her body is warm.",
+        "why": "Eggs need to stay warm so the chicks inside can grow.",
+        "c": { "warm": "To keep them warm", "break": "To break them", "sleep": "Because she is tired" }
+      },
+      "bird-feed": {
+        "ask": "Baby birds open their beaks and call. What does the parent do?",
+        "clue": "Baby birds cannot fly to find food yet.",
+        "why": "The parent brings them food until they can find their own.",
+        "c": { "food": "Brings them food", "away": "Flies away for good", "sing": "Sings them to sleep" }
+      },
+      "cat-carry": {
+        "ask": "Why does a mother cat carry her kitten in her mouth?",
+        "clue": "Kittens are too small to walk far.",
+        "why": "She moves it to a safe place. She holds the loose skin on its neck gently.",
+        "c": { "safe": "To move it somewhere safe", "play": "To play a game", "clean": "To clean the floor" }
+      },
+      "baby-cry": {
+        "ask": "A baby cries. What do the parents do?",
+        "clue": "A baby cannot talk yet.",
+        "why": "Crying is how a baby says it is hungry, tired or hurting. Parents find out what it needs.",
+        "c": { "needs": "Find out what the baby needs", "leave": "Leave the baby alone" },
+        "no": { "leave": "A baby cannot look after itself. Crying is how it asks for help." }
+      },
+      "ducklings": {
+        "ask": "Why do ducklings follow their mother?",
+        "clue": "Where is it safest for a little duckling?",
+        "why": "Staying close keeps them safe, and they learn how to find food.",
+        "c": { "learn": "To stay safe and learn", "lost": "Because they are lost", "race": "To have a race" }
+      },
+      "crocodile": {
+        "ask": "A mother crocodile stays near her nest. Why?",
+        "clue": "Other animals like to eat eggs.",
+        "why": "She guards her eggs so other animals cannot eat them.",
+        "c": { "guard": "To guard her eggs", "more": "To lay more eggs", "sun": "To lie in the sun" }
+      }
+    },
+    "sound": {
+      "hum": {
+        "ask": "Put your hand on your throat and hum. What do you feel?",
+        "clue": "Try it now! Hum softly.",
+        "why": "A buzzing shake. Sound is made when something shakes fast. We call it a vibration.",
+        "c": { "shake": "A buzzing shake", "hot": "It gets hot", "nothing": "Nothing at all" }
+      },
+      "drum": {
+        "ask": "You hit a drum. What does the top of the drum do?",
+        "clue": "Sound comes from things that shake.",
+        "why": "The drum top shakes fast. The shaking makes the sound.",
+        "c": { "shakes": "It shakes", "melts": "It melts", "still": "It stays still" },
+        "no": { "still": "If it stayed still, there would be no sound. Sound comes from shaking." }
+      },
+      "bell": {
+        "ask": "A bell is ringing. You hold it tight. What happens?",
+        "clue": "Your hand stops the bell from shaking.",
+        "why": "The sound stops, because the bell cannot shake any more.",
+        "c": { "stops": "The sound stops", "louder": "It gets louder", "same": "Nothing changes" },
+        "no": { "same": "Holding the bell stops it shaking. No shaking, no sound." }
+      },
+      "rice": {
+        "ask": "Put rice grains on a drum, then hit the drum. What do the grains do?",
+        "clue": "The drum top shakes when you hit it.",
+        "why": "They jump! The shaking drum makes the rice move.",
+        "c": { "jump": "They jump", "grow": "They grow", "melt": "They melt" }
+      },
+      "harder": {
+        "ask": "You hit the drum harder. How does it sound?",
+        "clue": "A harder hit makes a bigger shake.",
+        "why": "Louder. A bigger shake makes a louder sound.",
+        "c": { "louder": "Louder", "quieter": "Quieter", "same": "The same" },
+        "no": { "quieter": "A harder hit makes the drum shake more, so it is louder." }
+      },
+      "string": {
+        "ask": "You pluck a guitar string. When does the sound stop?",
+        "clue": "Watch the string after you pluck it.",
+        "why": "The sound stops when the string stops shaking.",
+        "c": { "stops": "When the string stops shaking", "look": "When you look away", "never": "It never stops" },
+        "no": { "never": "The string slowly stops shaking, and then the sound stops." }
+      }
+    },
+    "see": {
+      "cave": {
+        "ask": "Deep in a cave with no light at all. Can you see your hand?",
+        "clue": "What do you need to see in a dark room?",
+        "why": "No. We can only see things when there is light.",
+        "c": { "no": "No, we need light to see", "yes": "Yes, if I look hard" },
+        "no": { "yes": "With no light at all, no one can see, even by looking hard." }
+      },
+      "moon": {
+        "ask": "Why does the Moon shine at night?",
+        "clue": "The Moon is a big ball of rock.",
+        "why": "The Sun shines on the Moon. The Moon does not make its own light.",
+        "c": { "sun": "Sunlight shines on it", "own": "It makes its own light", "lamp": "It is a big lamp" },
+        "no": {
+          "own": "The Moon is rock. It makes no light. It shines because the Sun lights it up.",
+          "lamp": "The Moon is a ball of rock, not a lamp. The Sun lights it up."
+        }
+      },
+      "shadow": {
+        "ask": "What makes a shadow?",
+        "clue": "Stand in the sun. Where does your shadow go?",
+        "why": "Something blocks the light, so a dark shape forms behind it.",
+        "c": { "block": "Something blocks the light", "water": "Water on the ground", "wind": "The wind" },
+        "no": { "water": "A shadow is not wet. It is where light cannot reach." }
+      },
+      "mirror": {
+        "ask": "You shine a torch at a mirror. What does the light do?",
+        "clue": "When you look in a mirror, you see yourself.",
+        "why": "It bounces back. Mirrors are smooth and shiny, so light bounces off them.",
+        "c": { "bounce": "It bounces back", "through": "It goes through", "gone": "It disappears" },
+        "no": { "through": "Light cannot pass through a mirror. It bounces off." }
+      },
+      "dark-room": {
+        "ask": "Your room is dark. How can you see your toys?",
+        "clue": "What do we need to see?",
+        "why": "Turn on a light. We need light to see.",
+        "c": { "light": "Turn on a light", "close": "Close my eyes", "quiet": "Be very quiet" }
+      },
+      "cat-dark": {
+        "ask": "Can a cat see when there is no light at all?",
+        "clue": "Do any eyes work with no light?",
+        "why": "No. Cats see well in dim light, but with no light at all, no one can see.",
+        "c": { "no": "No, cats need some light too", "yes": "Yes, perfectly" },
+        "no": { "yes": "Cats see well in dim light. But every eye needs some light to see." }
+      }
+    },
+    "sky": {
+      "rise": {
+        "ask": "Where does the Sun rise in the morning?",
+        "clue": "It rises on the same side every morning.",
+        "why": "The Sun rises in the east every morning.",
+        "c": { "east": "In the east", "west": "In the west" }
+      },
+      "set": {
+        "ask": "Where does the Sun set in the evening?",
+        "clue": "It sets on the other side from where it rose.",
+        "why": "The Sun sets in the west every evening.",
+        "c": { "west": "In the west", "east": "In the east" }
+      },
+      "high": {
+        "ask": "When is the Sun highest in the sky?",
+        "clue": "It climbs in the morning and goes down in the afternoon.",
+        "why": "Around midday, the Sun is at its highest.",
+        "c": { "midday": "Around midday", "morning": "Early morning", "evening": "In the evening" }
+      },
+      "stars": {
+        "ask": "Why can't we see stars in the daytime?",
+        "clue": "Can you see a torch in bright sunshine?",
+        "why": "The stars are still there. The bright Sun hides them.",
+        "c": { "bright": "The Sun is too bright", "away": "The stars go away", "sleep": "The stars sleep" },
+        "no": {
+          "away": "The stars are always there. The Sun's light is so bright we cannot see them.",
+          "sleep": "Stars do not sleep. The Sun's light is so bright we cannot see them."
+        }
+      },
+      "day-moon": {
+        "ask": "Can you sometimes see the Moon in the daytime?",
+        "clue": "Look up on a clear afternoon.",
+        "why": "Yes. The Moon is often in the sky during the day too.",
+        "c": { "yes": "Yes, sometimes", "no": "No, never" },
+        "no": { "no": "Look up on a clear day. You can often see a pale Moon." }
+      },
+      "short-shadow": {
+        "ask": "When is your shadow shortest?",
+        "clue": "Shadows are short when the Sun is high.",
+        "why": "Around midday. When the Sun is high, shadows are short. When it is low, they are long.",
+        "c": { "midday": "Around midday", "morning": "Early morning", "evening": "Late afternoon" }
+      },
+      "moon-shape": {
+        "ask": "Does the Moon look the same shape every night?",
+        "clue": "Look at the Moon for a few nights.",
+        "why": "No. Its shape seems to change each night, and the pattern repeats about every month.",
+        "c": { "changes": "No, its shape changes", "round": "Yes, it is always round" },
+        "no": { "round": "Watch for a few nights. The Moon goes from thin to round and back again." }
+      }
+    },
+    "seasons": {
+      "rainy": {
+        "ask": "In Cambodia, when is the rainy season?",
+        "clue": "It starts around the middle of the year.",
+        "why": "Cambodia's rainy season is about May to October. The dry season is about November to April.",
+        "c": { "may": "About May to October", "dec": "About December to February", "never": "There is none" }
+      },
+      "dry": {
+        "ask": "Which month is in Cambodia's dry season?",
+        "clue": "The dry season is about November to April.",
+        "why": "January is in the dry season. There is little rain.",
+        "c": { "jan": "January", "aug": "August", "sep": "September" }
+      },
+      "rice": {
+        "ask": "When do Cambodian farmers plant most of their rice?",
+        "clue": "Rice needs lots of water.",
+        "why": "When the rains come. Rice needs lots of water to grow.",
+        "c": { "rains": "When the rains come", "dry": "When the fields are dry and dusty" },
+        "no": { "dry": "Rice needs lots of water, so most rice is planted when the rains come." }
+      },
+      "storm": {
+        "ask": "Dark clouds and thunder are coming. Where should you go?",
+        "clue": "Where is safest from lightning?",
+        "why": "Go inside a building. That is the safest place in a storm.",
+        "c": { "inside": "Inside a building", "tree": "Under a tall tree", "river": "Into the river" },
+        "no": {
+          "tree": "Lightning often hits tall trees. Go inside a building.",
+          "river": "Water is dangerous in a storm. Go inside a building."
+        }
+      },
+      "long-day": {
+        "ask": "In Cambodia, which month has longer days?",
+        "clue": "The middle of the year has a little more daylight.",
+        "why": "June. In Cambodia, June days are more than an hour longer than December days.",
+        "c": { "june": "June", "december": "December" }
+      },
+      "cool": {
+        "ask": "What helps you stay cool on a hot, dry day?",
+        "clue": "The Sun warms everything it shines on.",
+        "why": "Shade blocks the Sun, and drinking water cools your body.",
+        "c": { "shade": "Shade and drinking water", "coat": "A thick coat" }
+      }
+    }
+  },
+  "sort": {
+    "living": {
+      "ask": "Is it living or not living?",
+      "rule": "Living things eat or drink, grow, and have babies.",
+      "bin": { "living": "Living", "not": "Not living" },
+      "item": { "dog": "Dog", "car": "Car", "tree": "Tree", "ball": "Ball", "fish": "Fish", "robot": "Toy robot", "flower": "Flower", "rock": "Rock", "snail": "Snail", "book": "Book", "rice": "Rice plant", "cup": "Cup" },
+      "why": {
+        "dog": "A dog eats, grows and has puppies. It is living.",
+        "car": "A car moves, but it does not eat, grow or have babies.",
+        "tree": "A tree drinks water, grows and makes seeds. It is living.",
+        "ball": "A ball can roll, but it does not grow or eat.",
+        "fish": "A fish eats, grows and lays eggs. It is living.",
+        "robot": "A toy robot moves, but it is not alive. It does not eat or grow.",
+        "flower": "A flower drinks water, grows and makes seeds. It is living.",
+        "rock": "A rock does not eat, drink or grow.",
+        "snail": "A snail eats leaves, grows and lays eggs. It is living.",
+        "book": "A book does not eat, drink or grow.",
+        "rice": "A rice plant drinks water, grows and makes new rice grains. It is living.",
+        "cup": "A cup does not eat, drink or grow."
+      }
+    },
+    "lightsource": {
+      "ask": "Does it make its own light?",
+      "rule": "Some things make light. Others only shine when light falls on them.",
+      "bin": { "makes": "Makes light", "none": "No light of its own" },
+      "item": { "sun": "Sun", "moon": "Moon", "lamp": "Lamp", "mirror": "Mirror", "candle": "Candle", "spoon": "Shiny spoon", "torch": "Torch", "book": "Book", "firefly": "Firefly", "rock": "Rock" },
+      "why": {
+        "sun": "The Sun makes its own light. It lights up the whole day.",
+        "moon": "The Moon makes no light. It shines because the Sun lights it up.",
+        "lamp": "A lamp makes light when it is switched on.",
+        "mirror": "A mirror bounces light, but it makes none.",
+        "candle": "A candle flame makes light.",
+        "spoon": "A shiny spoon bounces light. It does not make it.",
+        "torch": "A torch makes light when you switch it on.",
+        "book": "A book makes no light. We see it when light shines on it.",
+        "firefly": "A firefly makes its own light, to talk to other fireflies.",
+        "rock": "A rock makes no light. We see it when light shines on it."
+      }
+    },
+    "lightpath": {
+      "ask": "Does light go through it?",
+      "rule": "Clear things let light through. Some things let a little through. Others block it.",
+      "bin": { "clear": "See-through", "some": "Some light", "blocks": "Blocks light" },
+      "item": { "window": "Glass window", "paper": "Thin paper", "door": "Wooden door", "glass": "Glass of water", "cloth": "Thin cloth", "pot": "Metal pot", "bottle": "Clear bottle", "bag": "Cloudy plastic bag", "wall": "Brick wall", "book": "Book" },
+      "why": {
+        "window": "Light goes straight through clear glass. You can see through it.",
+        "paper": "Thin paper lets some light through, but you cannot see clearly through it.",
+        "door": "A wooden door blocks the light.",
+        "glass": "Clear water and glass let light through.",
+        "cloth": "Thin cloth lets some light through, but not all.",
+        "pot": "A metal pot blocks the light.",
+        "bottle": "A clear bottle lets light through.",
+        "bag": "A cloudy bag lets some light through, but you cannot see clearly.",
+        "wall": "A brick wall blocks all the light.",
+        "book": "A book blocks the light."
+      }
+    }
+  },
+  "order": {
+    "wrong": "Something is out of order. Tap a card to take it back.",
+    "growth": {
+      "mango": {
+        "ask": "How does a mango tree grow? Put it in order.",
+        "clue": "Every plant starts as a seed.",
+        "why": "A seed grows a sprout, then a young tree, then a big tree with fruit.",
+        "step": { "seed": "Seed", "sprout": "Sprout", "young": "Young tree", "fruit": "Tree with mangoes" }
+      },
+      "chicken": {
+        "ask": "How does a chicken grow? Put it in order.",
+        "clue": "What does a hen lay?",
+        "why": "An egg hatches into a chick, and the chick grows into a hen.",
+        "step": { "egg": "Egg", "chick": "Chick", "hen": "Hen" }
+      },
+      "frog": {
+        "ask": "How does a frog grow? Put it in order.",
+        "clue": "Frogs lay their eggs in water.",
+        "why": "Eggs hatch into tadpoles. Tadpoles grow legs and become froglets, then frogs.",
+        "step": { "eggs": "Eggs", "tadpole": "Tadpole", "froglet": "Froglet", "frog": "Frog" }
+      },
+      "butterfly": {
+        "ask": "How does a butterfly grow? Put it in order.",
+        "clue": "The caterpillar comes before the wings.",
+        "why": "An egg hatches into a caterpillar. It makes a chrysalis, and a butterfly comes out.",
+        "step": { "egg": "Egg", "caterpillar": "Caterpillar", "chrysalis": "Chrysalis", "butterfly": "Butterfly" }
+      },
+      "person": {
+        "ask": "How does a person grow? Put it in order.",
+        "clue": "Everyone starts as a baby.",
+        "why": "A baby grows into a child, and a child grows into a grown-up.",
+        "step": { "baby": "Baby", "child": "Child", "adult": "Grown-up" }
+      },
+      "rice": {
+        "ask": "How does rice grow? Put it in order.",
+        "clue": "Rice is green while it grows, and turns golden when it is ready.",
+        "why": "Young rice plants grow tall and green, turn golden, then farmers harvest the grain.",
+        "step": { "seedling": "Young rice plants", "green": "Tall green rice", "golden": "Golden rice", "harvest": "Harvest" }
+      }
+    },
+    "sky": {
+      "sun": {
+        "ask": "Put the Sun's day in order.",
+        "clue": "The day starts when the Sun comes up.",
+        "why": "The Sun rises, climbs high at midday, sets in the evening, and then it is night.",
+        "step": { "sunrise": "Sunrise", "midday": "Midday", "sunset": "Sunset", "night": "Night" }
+      },
+      "moon": {
+        "ask": "The Moon grows night by night. Put it in order.",
+        "clue": "It starts as a thin curve.",
+        "why": "A thin crescent grows to a half Moon, then a full Moon.",
+        "step": { "crescent": "Thin crescent", "half": "Half Moon", "full": "Full Moon" }
+      },
+      "shadow": {
+        "ask": "Put the tree's shadow in order, from morning to evening.",
+        "clue": "In the morning the Sun is low in the east.",
+        "why": "Morning shadows are long. At midday they are short. In the evening they are long again, on the other side.",
+        "step": { "morning": "Morning", "midday": "Midday", "evening": "Evening" }
+      }
+    }
+  }
+}

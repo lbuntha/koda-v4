@@ -24,6 +24,7 @@ export const SKILL_CATEGORY_ART: Record<
   fractions: { art: "from-rose-500 to-pink-500", solid: "bg-rose-600", label: "Fractions" },
   measurement: { art: "from-lime-500 to-emerald-500", solid: "bg-lime-600", label: "Measurement" },
   geometry: { art: "from-fuchsia-500 to-purple-500", solid: "bg-fuchsia-600", label: "Geometry" },
+  science: { art: "from-emerald-500 to-cyan-500", solid: "bg-emerald-600", label: "Science" },
 };
 
 export const skillArtFor = (category?: string) =>
